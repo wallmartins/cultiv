@@ -4,7 +4,7 @@ import { HeroSection } from "~/sections/HeroSection";
 import type { MarketingLocale } from "~/i18n/types";
 
 const BelowFoldSections = lazy(async () => {
-  const module = await import("~/components/BelowFoldSections");
+  const module = await import("./BelowFoldSections");
   return { default: module.BelowFoldSections };
 });
 
