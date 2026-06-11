@@ -1,4 +1,4 @@
-import type { ElementType, ReactNode } from "react";
+import type { ComponentPropsWithoutRef, ElementType, ReactNode } from "react";
 import { cn } from "../lib/cn.js";
 
 const variantClasses = {
@@ -23,7 +23,7 @@ const variantClasses = {
 
 export type TextVariant = keyof typeof variantClasses;
 
-export interface TextProps {
+export interface TextProps extends Omit<ComponentPropsWithoutRef<"p">, "className"> {
   readonly as?: ElementType;
   readonly variant?: TextVariant;
   readonly className?: string;
@@ -34,7 +34,12 @@ export function Text({
   as: Component = "p",
   variant = "body",
   className,
-  children
+  children,
+  ...rest
 }: TextProps) {
-  return <Component className={cn(variantClasses[variant], className)}>{children}</Component>;
+  return (
+    <Component className={cn(variantClasses[variant], className)} {...rest}>
+      {children}
+    </Component>
+  );
 }
