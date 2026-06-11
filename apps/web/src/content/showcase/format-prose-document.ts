@@ -1,5 +1,9 @@
 import type { MarketingContentTypeId } from "../content-types/catalog.js";
-import type { ShowcasePostDocument } from "./types.js";
+import type {
+  ResolvedShowcaseDocumentPreview,
+  ShowcasePostDocument,
+  ShowcasePostDocumentPreview
+} from "./types.js";
 import { formatProseForDisplay } from "./format-prose-for-display.js";
 import { SHOWCASE_CONTENT_PREVIEW_BLOCK_COUNT, sliceContentBlocksForPreview } from "./format-thread.js";
 
@@ -40,7 +44,7 @@ export function formatProseDocument(
 export function sliceDocumentForPreview(
   document: ShowcasePostDocument,
   limit = SHOWCASE_CONTENT_PREVIEW_BLOCK_COUNT
-): ShowcasePostDocument & { readonly hiddenParagraphCount: number } {
+): ShowcasePostDocumentPreview {
   const preview = sliceContentBlocksForPreview(document.paragraphs, limit);
 
   return {
@@ -48,6 +52,27 @@ export function sliceDocumentForPreview(
     paragraphs: preview.visible,
     titleFromMarkdown: document.titleFromMarkdown,
     hiddenParagraphCount: preview.hiddenCount
+  };
+}
+
+export function resolveDocumentForPreview(
+  document: ShowcasePostDocument,
+  truncate: boolean,
+  limit = SHOWCASE_CONTENT_PREVIEW_BLOCK_COUNT
+): ResolvedShowcaseDocumentPreview {
+  if (!truncate) {
+    return { document, hiddenParagraphCount: 0 };
+  }
+
+  const sliced = sliceDocumentForPreview(document, limit);
+
+  return {
+    document: {
+      title: sliced.title,
+      paragraphs: sliced.paragraphs,
+      titleFromMarkdown: sliced.titleFromMarkdown
+    },
+    hiddenParagraphCount: sliced.hiddenParagraphCount
   };
 }
 

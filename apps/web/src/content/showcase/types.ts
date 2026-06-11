@@ -7,6 +7,17 @@ export type ShowcasePostDocument = {
   readonly titleFromMarkdown: boolean;
 };
 
+/** Prose document after preview slicing, with a count of omitted paragraphs. */
+export type ShowcasePostDocumentPreview = ShowcasePostDocument & {
+  readonly hiddenParagraphCount: number;
+};
+
+/** Document body for rendering plus how many blocks were truncated away. */
+export type ResolvedShowcaseDocumentPreview = {
+  readonly document: ShowcasePostDocument;
+  readonly hiddenParagraphCount: number;
+};
+
 export type ShowcaseSampleGenerationMeta = {
   readonly themeId: ShowcaseThemeId;
   readonly contentTypeId: MarketingContentTypeId;

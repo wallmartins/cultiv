@@ -1,5 +1,5 @@
 import { SHOWCASE_CONTENT_PREVIEW_BLOCK_COUNT } from "~/content/showcase/format-thread";
-import { sliceDocumentForPreview } from "~/content/showcase/format-prose-document";
+import { resolveDocumentForPreview } from "~/content/showcase/format-prose-document";
 import type { ShowcasePostDocument, ShowcaseSample } from "~/content/showcase/types";
 import { ShowcaseBlogPostPreview } from "./ShowcaseBlogPostPreview";
 import { ShowcaseLinkedInPostPreview } from "./ShowcaseLinkedInPostPreview";
@@ -56,12 +56,10 @@ export function ShowcaseSampleOutput({
     return null;
   }
 
-  const previewDocument = truncate ? sliceDocumentForPreview(document) : document;
-  const hiddenParagraphCount = truncate
-    ? "hiddenParagraphCount" in previewDocument
-      ? previewDocument.hiddenParagraphCount
-      : 0
-    : 0;
+  const { document: previewDocument, hiddenParagraphCount } = resolveDocumentForPreview(
+    document,
+    truncate
+  );
   const resolvedMoreLabel =
     hiddenParagraphCount > 0 && moreBlocksLabel
       ? formatMoreBlocksLabel(moreBlocksLabel, hiddenParagraphCount)
