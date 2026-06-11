@@ -10,5 +10,4 @@ export const submitWaitlistAction = createServerFn({ method: "POST" })
     return handleWaitlistRequest(data, ip);
   });
 
-export { isWaitlistSuccess } from "./handle-waitlist-request";
 export type { WaitlistErrorBody, WaitlistSuccess } from "~/lib/services/waitlist/types";

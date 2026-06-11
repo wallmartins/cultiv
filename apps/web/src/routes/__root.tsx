@@ -1,5 +1,5 @@
 import { HeadContent, Scripts, createRootRoute } from "@tanstack/react-router";
-import { Analytics } from "@vercel/analytics/react";
+import { DeferredAnalytics } from "~/components/DeferredAnalytics";
 import type { ReactNode } from "react";
 import { DeferredLenisProvider } from "~/animations/deferred-lenis-provider";
 import { DefaultCatchBoundary } from "~/components/DefaultCatchBoundary";
@@ -34,7 +34,7 @@ function RootDocument({ children }: { readonly children: ReactNode }) {
       </head>
       <body>
         <DeferredLenisProvider>{children}</DeferredLenisProvider>
-        <Analytics />
+        <DeferredAnalytics />
         <Scripts />
       </body>
     </html>

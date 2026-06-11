@@ -1,12 +1,7 @@
-import { lazy, Suspense } from "react";
 import { GeoStructuredData } from "~/components/GeoStructuredData";
+import { ViewportBelowFoldSections } from "~/components/ViewportBelowFoldSections";
 import { HeroSection } from "~/sections/HeroSection";
 import type { MarketingLocale } from "~/i18n/types";
-
-const BelowFoldSections = lazy(async () => {
-  const module = await import("./BelowFoldSections");
-  return { default: module.BelowFoldSections };
-});
 
 export interface ProductShowcaseProps {
   readonly locale: MarketingLocale;
@@ -17,9 +12,7 @@ export function ProductShowcase({ locale }: ProductShowcaseProps) {
     <main>
       <GeoStructuredData locale={locale} />
       <HeroSection locale={locale} />
-      <Suspense fallback={null}>
-        <BelowFoldSections locale={locale} />
-      </Suspense>
+      <ViewportBelowFoldSections locale={locale} />
     </main>
   );
 }

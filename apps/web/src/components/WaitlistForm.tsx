@@ -3,7 +3,8 @@ import { Button, Text } from "@my-ai-orchestrator/ui";
 import { Link } from "@tanstack/react-router";
 import { getPrivacyPath } from "~/i18n/get-locale";
 import type { LocaleMessages, MarketingLocale } from "~/i18n/types";
-import { isWaitlistSuccess, submitWaitlistAction } from "~/lib/server/waitlist-action";
+import { submitWaitlistAction } from "~/lib/server/waitlist-action";
+import { isWaitlistSuccess } from "~/lib/services/waitlist/waitlist-result";
 
 export interface WaitlistFormProps {
   readonly locale: MarketingLocale;
