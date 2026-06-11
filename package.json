@@ -1,0 +1,95 @@
+{
+  "name": "my-ai-orchestrator",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Monorepo modular para backend, web, mobile e core de IA com Hono e Effect",
+  "type": "module",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "pnpm -r --if-present build",
+    "dev": "pnpm --filter @my-ai-orchestrator/backend dev",
+    "dev:web": "pnpm --filter @my-ai-orchestrator/web dev",
+    "showcase:generate": "tsx scripts/generate-showcase-sample.ts",
+    "showcase:voice-setup": "tsx scripts/showcase-voice-setup.ts",
+    "test": "vitest run",
+    "test:integration": "pnpm test:postgres",
+    "test:postgres": "node scripts/run-postgres-tests.mjs",
+    "smoke": "vitest run tests/governance/monorepo-governance.test.ts",
+    "guardrails:effect": "vitest run tests/governance/effect-hardening-governance.test.ts",
+    "test:coverage": "vitest run --coverage",
+    "test:watch": "vitest",
+    "lint": "pnpm -r --if-present lint",
+    "baseline:capture": "node scripts/capture-baseline.mjs",
+    "clean": "node --input-type=commonjs -e \"require('fs').rmSync('dist', { recursive: true, force: true })\"",
+    "prepublishOnly": "npm run build && npm run smoke && npm run test",
+    "server": "pnpm --filter @my-ai-orchestrator/backend dev"
+  },
+  "keywords": [
+    "ai",
+    "writing",
+    "orchestration",
+    "pipeline",
+    "llm",
+    "agent-agnostic"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^20.19.39",
+    "@vitest/coverage-v8": "^1.6.1",
+    "@my-ai-orchestrator/ai-adapters": "workspace:*",
+    "@my-ai-orchestrator/backend": "workspace:*",
+    "@my-ai-orchestrator/client-sdk": "workspace:*",
+    "@my-ai-orchestrator/contracts": "workspace:*",
+    "@my-ai-orchestrator/core": "workspace:*",
+    "@my-ai-orchestrator/database": "workspace:*",
+    "@my-ai-orchestrator/domain": "workspace:*",
+    "@my-ai-orchestrator/feature-flags": "workspace:*",
+    "@my-ai-orchestrator/orchestrator": "workspace:*",
+    "@my-ai-orchestrator/payments": "workspace:*",
+    "@my-ai-orchestrator/skills": "workspace:*",
+    "@my-ai-orchestrator/text-quality": "workspace:*",
+    "effect": "^3.21.2",
+    "tsup": "^8.0.0",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.0",
+    "vitest": "^1.0.0"
+  },
+  "dependencies": {
+    "@fastify/cors": "^11.2.0",
+    "@fastify/helmet": "^13.0.2",
+    "@fastify/swagger": "^9.7.0",
+    "@fastify/swagger-ui": "^5.2.6",
+    "ajv": "^8.20.0",
+    "better-sqlite3": "^12.9.0",
+    "dotenv": "^17.4.2",
+    "fastify": "^5.8.5",
+    "fastify-plugin": "^5.1.0",
+    "franc": "^6.2.0",
+    "yaml": "^2.3.0",
+    "zod": "^3.25.76"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

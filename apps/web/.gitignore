@@ -1,0 +1,5 @@
+.output
+.vercel
+.nitro
+node_modules
+.env
