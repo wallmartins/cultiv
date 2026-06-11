@@ -13,6 +13,7 @@
     "@my-ai-orchestrator/ui": "workspace:*",
     "@tanstack/react-router": "^1.170.15",
     "@tanstack/react-start": "^1.168.25",
+    "@vercel/analytics": "^2.0.1",
     "effect": "^3.21.2",
     "gsap": "^3.13.0",
     "lenis": "^1.3.4",

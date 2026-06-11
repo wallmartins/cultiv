@@ -1,4 +1,5 @@
 import { HeadContent, Scripts, createRootRoute } from "@tanstack/react-router";
+import { Analytics } from "@vercel/analytics/react";
 import type { ReactNode } from "react";
 import { LenisProvider } from "~/animations/lenis-provider";
 import { DefaultCatchBoundary } from "~/components/DefaultCatchBoundary";
@@ -37,6 +38,7 @@ function RootDocument({ children }: { readonly children: ReactNode }) {
       </head>
       <body>
         <LenisProvider>{children}</LenisProvider>
+        <Analytics />
         <Scripts />
       </body>
     </html>
