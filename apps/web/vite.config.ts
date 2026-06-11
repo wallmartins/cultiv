@@ -12,6 +12,25 @@ export default defineConfig({
   server: {
     port: 3000
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes("node_modules/gsap")) {
+            return "vendor-gsap";
+          }
+
+          if (id.includes("node_modules/lenis")) {
+            return "vendor-lenis";
+          }
+
+          if (id.includes("node_modules/effect")) {
+            return "vendor-effect";
+          }
+        }
+      }
+    }
+  },
   resolve: {
     alias: {
       "~": path.resolve(rootDir, "src")

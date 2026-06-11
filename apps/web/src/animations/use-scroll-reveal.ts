@@ -1,7 +1,6 @@
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useEffect, useRef } from "react";
-import { MOTION, registerGsapPlugins } from "./gsap-config";
+import { MOTION } from "./gsap-config";
+import { loadGsapRuntime } from "./gsap-runtime";
 import { prefersReducedMotion } from "./prefers-reduced-motion";
 
 export function useScrollReveal<T extends HTMLElement>() {
@@ -13,26 +12,38 @@ export function useScrollReveal<T extends HTMLElement>() {
       return;
     }
 
-    registerGsapPlugins(ScrollTrigger);
+    let cancelled = false;
+    let cleanup: (() => void) | undefined;
 
-    const context = gsap.context(() => {
-      gsap.fromTo(
-        element,
-        { autoAlpha: 0, y: MOTION.reveal.y },
-        {
-          autoAlpha: 1,
-          y: 0,
-          duration: MOTION.reveal.duration,
-          ease: MOTION.reveal.ease,
-          scrollTrigger: {
-            trigger: element,
-            start: "top 85%"
+    void loadGsapRuntime().then(({ gsap }) => {
+      if (cancelled) {
+        return;
+      }
+
+      const context = gsap.context(() => {
+        gsap.fromTo(
+          element,
+          { autoAlpha: 0, y: MOTION.reveal.y },
+          {
+            autoAlpha: 1,
+            y: 0,
+            duration: MOTION.reveal.duration,
+            ease: MOTION.reveal.ease,
+            scrollTrigger: {
+              trigger: element,
+              start: "top 85%"
+            }
           }
-        }
-      );
-    }, element);
+        );
+      }, element);
 
-    return () => context.revert();
+      cleanup = () => context.revert();
+    });
+
+    return () => {
+      cancelled = true;
+      cleanup?.();
+    };
   }, []);
 
   return ref;

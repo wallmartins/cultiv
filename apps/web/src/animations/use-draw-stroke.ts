@@ -1,7 +1,5 @@
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useEffect, useRef } from "react";
-import { registerGsapPlugins } from "./gsap-config";
+import { loadGsapRuntime } from "./gsap-runtime";
 import { prefersReducedMotion } from "./prefers-reduced-motion";
 
 export function useDrawStroke<T extends HTMLElement>() {
@@ -13,26 +11,38 @@ export function useDrawStroke<T extends HTMLElement>() {
       return;
     }
 
-    registerGsapPlugins(ScrollTrigger);
+    let cancelled = false;
+    let cleanup: (() => void) | undefined;
 
-    const paths = root.querySelectorAll<SVGPathElement>("[data-draw-stroke]");
-    const context = gsap.context(() => {
-      paths.forEach((path) => {
-        const length = path.getTotalLength();
-        gsap.set(path, { strokeDasharray: length, strokeDashoffset: length, opacity: 0.9 });
-        gsap.to(path, {
-          strokeDashoffset: 0,
-          duration: 1.6,
-          ease: "power2.out",
-          scrollTrigger: {
-            trigger: root,
-            start: "top 75%"
-          }
+    void loadGsapRuntime().then(({ gsap }) => {
+      if (cancelled) {
+        return;
+      }
+
+      const paths = root.querySelectorAll<SVGPathElement>("[data-draw-stroke]");
+      const context = gsap.context(() => {
+        paths.forEach((path) => {
+          const length = path.getTotalLength();
+          gsap.set(path, { strokeDasharray: length, strokeDashoffset: length, opacity: 0.9 });
+          gsap.to(path, {
+            strokeDashoffset: 0,
+            duration: 1.6,
+            ease: "power2.out",
+            scrollTrigger: {
+              trigger: root,
+              start: "top 75%"
+            }
+          });
         });
-      });
-    }, root);
+      }, root);
 
-    return () => context.revert();
+      cleanup = () => context.revert();
+    });
+
+    return () => {
+      cancelled = true;
+      cleanup?.();
+    };
   }, []);
 
   return ref;

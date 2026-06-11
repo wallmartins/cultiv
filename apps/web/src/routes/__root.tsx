@@ -1,11 +1,11 @@
 import { HeadContent, Scripts, createRootRoute } from "@tanstack/react-router";
 import { Analytics } from "@vercel/analytics/react";
 import type { ReactNode } from "react";
-import { LenisProvider } from "~/animations/lenis-provider";
+import { DeferredLenisProvider } from "~/animations/deferred-lenis-provider";
 import { DefaultCatchBoundary } from "~/components/DefaultCatchBoundary";
 import { NotFound } from "~/components/NotFound";
 import appCss from "~/styles/app.css?url";
-import { brandHeadLinks } from "~/brand/head-links";
+import { brandHeadLinks, googleFontsAsyncScript } from "~/brand/head-links";
 import { seo } from "~/utils/seo";
 
 export const Route = createRootRoute({
@@ -18,7 +18,8 @@ export const Route = createRootRoute({
         description: "Your authenticity, at scale."
       })
     ],
-    links: [...brandHeadLinks(), { rel: "stylesheet", href: appCss }]
+    links: [...brandHeadLinks(), { rel: "stylesheet", href: appCss }],
+    scripts: [{ type: "text/javascript", children: googleFontsAsyncScript }]
   }),
   errorComponent: DefaultCatchBoundary,
   notFoundComponent: NotFound,
@@ -32,7 +33,7 @@ function RootDocument({ children }: { readonly children: ReactNode }) {
         <HeadContent />
       </head>
       <body>
-        <LenisProvider>{children}</LenisProvider>
+        <DeferredLenisProvider>{children}</DeferredLenisProvider>
         <Analytics />
         <Scripts />
       </body>

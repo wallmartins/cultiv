@@ -1,7 +1,7 @@
-import { gsap } from "gsap";
 import { useEffect, useRef } from "react";
 import { cn } from "@my-ai-orchestrator/ui";
 import { MOTION } from "~/animations/gsap-config";
+import { loadGsapRuntime } from "~/animations/gsap-runtime";
 import { prefersReducedMotion } from "~/animations/prefers-reduced-motion";
 
 export interface LetterRevealProps {
@@ -19,19 +19,31 @@ export function LetterReveal({ text, className, as: Tag = "h1" }: LetterRevealPr
       return;
     }
 
-    const letters = container.querySelectorAll("[data-letter]");
-    gsap.fromTo(
-      letters,
-      { autoAlpha: 0, y: 24 },
-      {
-        autoAlpha: 1,
-        y: 0,
-        duration: MOTION.reveal.duration * 0.55,
-        ease: MOTION.reveal.ease,
-        stagger: 0.045,
-        delay: 0.15
+    let cancelled = false;
+
+    void loadGsapRuntime().then(({ gsap }) => {
+      if (cancelled) {
+        return;
       }
-    );
+
+      const letters = container.querySelectorAll("[data-letter]");
+      gsap.fromTo(
+        letters,
+        { autoAlpha: 0, y: 24 },
+        {
+          autoAlpha: 1,
+          y: 0,
+          duration: MOTION.reveal.duration * 0.55,
+          ease: MOTION.reveal.ease,
+          stagger: 0.045,
+          delay: 0.15
+        }
+      );
+    });
+
+    return () => {
+      cancelled = true;
+    };
   }, [text]);
 
   if (prefersReducedMotion()) {

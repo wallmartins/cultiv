@@ -3,7 +3,6 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useEffect, useState, type ReactNode } from "react";
 import { LenisContext } from "./lenis-context";
-import { registerGsapPlugins } from "./gsap-config";
 import { prefersReducedMotion } from "./prefers-reduced-motion";
 
 export interface LenisProviderProps {
@@ -18,7 +17,7 @@ export function LenisProvider({ children }: LenisProviderProps) {
       return;
     }
 
-    registerGsapPlugins(ScrollTrigger);
+    gsap.registerPlugin(ScrollTrigger);
 
     const instance = new Lenis({
       duration: 1.2,

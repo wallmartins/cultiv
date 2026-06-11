@@ -1,7 +1,5 @@
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useEffect, useRef } from "react";
-import { registerGsapPlugins } from "./gsap-config";
+import { loadGsapRuntime } from "./gsap-runtime";
 import { prefersReducedMotion } from "./prefers-reduced-motion";
 
 export function useHorizontalScrollPin<TSection extends HTMLElement, TTrack extends HTMLElement>() {
@@ -15,27 +13,39 @@ export function useHorizontalScrollPin<TSection extends HTMLElement, TTrack exte
       return;
     }
 
-    registerGsapPlugins(ScrollTrigger);
+    let cancelled = false;
+    let cleanup: (() => void) | undefined;
 
-    const context = gsap.context(() => {
-      const getScrollDistance = () => Math.max(track.scrollWidth - window.innerWidth, 0);
+    void loadGsapRuntime().then(({ gsap }) => {
+      if (cancelled) {
+        return;
+      }
 
-      gsap.to(track, {
-        x: () => -getScrollDistance(),
-        ease: "none",
-        scrollTrigger: {
-          trigger: section,
-          start: "top top",
-          end: () => `+=${getScrollDistance()}`,
-          pin: true,
-          scrub: 0.8,
-          invalidateOnRefresh: true,
-          anticipatePin: 1
-        }
-      });
-    }, section);
+      const context = gsap.context(() => {
+        const getScrollDistance = () => Math.max(track.scrollWidth - window.innerWidth, 0);
 
-    return () => context.revert();
+        gsap.to(track, {
+          x: () => -getScrollDistance(),
+          ease: "none",
+          scrollTrigger: {
+            trigger: section,
+            start: "top top",
+            end: () => `+=${getScrollDistance()}`,
+            pin: true,
+            scrub: 0.8,
+            invalidateOnRefresh: true,
+            anticipatePin: 1
+          }
+        });
+      }, section);
+
+      cleanup = () => context.revert();
+    });
+
+    return () => {
+      cancelled = true;
+      cleanup?.();
+    };
   }, []);
 
   return { sectionRef, trackRef };

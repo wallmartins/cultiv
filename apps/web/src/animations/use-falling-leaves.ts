@@ -1,6 +1,6 @@
-import { gsap } from "gsap";
 import { useEffect, type RefObject } from "react";
 import type { BotanicalLeafVariant } from "~/visual/illustrations/BotanicalLeaf";
+import { loadGsapRuntime, type GsapRuntime } from "./gsap-runtime";
 import { prefersReducedMotion } from "./prefers-reduced-motion";
 
 export type FallingLeavesDensity = "hero" | "sparse" | "whisper";
@@ -71,6 +71,7 @@ function presetSpawn(preset: LeafPreset): LeafSpawn {
 }
 
 function resetLeaf(
+  gsap: GsapRuntime["gsap"],
   leaf: HTMLElement,
   preset: LeafPreset,
   container: HTMLElement,
@@ -89,15 +90,16 @@ function resetLeaf(
 }
 
 function animateLeaf(
+  gsap: GsapRuntime["gsap"],
   leaf: HTMLElement,
   preset: LeafPreset,
   container: HTMLElement,
   delay: number,
   randomSpawn: boolean
-): gsap.core.Timeline {
+) {
   const timeline = gsap.timeline({ repeat: -1, delay });
 
-  timeline.call(() => resetLeaf(leaf, preset, container, randomSpawn));
+  timeline.call(() => resetLeaf(gsap, leaf, preset, container, randomSpawn));
   timeline.to(leaf, { opacity: preset.maxOpacity, duration: 0.9, ease: "power1.in" });
   timeline.to(leaf, {
     y: () => getFallTargetY(container),
@@ -128,17 +130,18 @@ export function useFallingLeaves(
 
     const presets = FALLING_LEAF_PRESETS[density];
     const randomSpawn = density === "hero";
-    let context: gsap.Context | undefined;
-    let resizeObserver: ResizeObserver | undefined;
     let cancelled = false;
+    let contextRevert: (() => void) | undefined;
+    let resizeObserver: ResizeObserver | undefined;
+    let frame = 0;
 
-    const mountAnimations = () => {
+    const mountAnimations = (gsap: GsapRuntime["gsap"]) => {
       if (cancelled || container.clientHeight < 80) {
         return;
       }
 
-      context?.revert();
-      context = gsap.context(() => {
+      contextRevert?.();
+      const context = gsap.context(() => {
         if (prefersReducedMotion()) {
           leaves.forEach((leaf, index) => {
             const preset = presets[index];
@@ -165,25 +168,33 @@ export function useFallingLeaves(
           }
 
           gsap.set(leaf, { opacity: 0 });
-          animateLeaf(leaf, preset, container, preset.delay, randomSpawn);
+          animateLeaf(gsap, leaf, preset, container, preset.delay, randomSpawn);
         });
       }, container);
+
+      contextRevert = () => context.revert();
     };
 
-    const frame = requestAnimationFrame(() => {
-      mountAnimations();
-    });
+    void loadGsapRuntime().then(({ gsap }) => {
+      if (cancelled) {
+        return;
+      }
 
-    resizeObserver = new ResizeObserver(() => {
-      mountAnimations();
+      frame = requestAnimationFrame(() => {
+        mountAnimations(gsap);
+      });
+
+      resizeObserver = new ResizeObserver(() => {
+        mountAnimations(gsap);
+      });
+      resizeObserver.observe(container);
     });
-    resizeObserver.observe(container);
 
     return () => {
       cancelled = true;
       cancelAnimationFrame(frame);
       resizeObserver?.disconnect();
-      context?.revert();
+      contextRevert?.();
     };
   }, [containerRef, density]);
 }

@@ -1,8 +1,6 @@
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useEffect, useRef } from "react";
 import { cn } from "@my-ai-orchestrator/ui";
-import { registerGsapPlugins } from "~/animations/gsap-config";
+import { loadGsapRuntime } from "~/animations/gsap-runtime";
 import { prefersReducedMotion } from "~/animations/prefers-reduced-motion";
 import { useBotanicalUpright } from "~/animations/use-botanical-upright";
 import { useDrawStroke } from "~/animations/use-draw-stroke";
@@ -29,36 +27,48 @@ export function TypeVine({ words, className }: TypeVineProps) {
       return;
     }
 
-    registerGsapPlugins(ScrollTrigger);
+    let cancelled = false;
+    let cleanup: (() => void) | undefined;
 
-    const items = root.querySelectorAll("[data-vine-word]");
-    const context = gsap.context(() => {
-      items.forEach((item, index) => {
-        const anchor = TYPOGRAPHIC_VINE_ANCHORS[index];
-        if (!anchor) {
-          return;
-        }
+    void loadGsapRuntime().then(({ gsap }) => {
+      if (cancelled) {
+        return;
+      }
 
-        gsap.fromTo(
-          item,
-          { scale: 0, autoAlpha: 0 },
-          {
-            scale: 1,
-            autoAlpha: 1,
-            duration: 0.6,
-            ease: "back.out(1.5)",
-            delay: 0.35 + index * 0.14,
-            transformOrigin: `${(anchor.x / TYPOGRAPHIC_VINE_VIEWBOX.width) * 100}% 100%`,
-            scrollTrigger: {
-              trigger: root,
-              start: "top 82%"
-            }
+      const items = root.querySelectorAll("[data-vine-word]");
+      const context = gsap.context(() => {
+        items.forEach((item, index) => {
+          const anchor = TYPOGRAPHIC_VINE_ANCHORS[index];
+          if (!anchor) {
+            return;
           }
-        );
-      });
-    }, root);
 
-    return () => context.revert();
+          gsap.fromTo(
+            item,
+            { scale: 0, autoAlpha: 0 },
+            {
+              scale: 1,
+              autoAlpha: 1,
+              duration: 0.6,
+              ease: "back.out(1.5)",
+              delay: 0.35 + index * 0.14,
+              transformOrigin: `${(anchor.x / TYPOGRAPHIC_VINE_VIEWBOX.width) * 100}% 100%`,
+              scrollTrigger: {
+                trigger: root,
+                start: "top 82%"
+              }
+            }
+          );
+        });
+      }, root);
+
+      cleanup = () => context.revert();
+    });
+
+    return () => {
+      cancelled = true;
+      cleanup?.();
+    };
   }, [words]);
 
   const { width, height } = TYPOGRAPHIC_VINE_VIEWBOX;

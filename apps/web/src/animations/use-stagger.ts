@@ -1,7 +1,6 @@
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useEffect, useRef } from "react";
-import { MOTION, registerGsapPlugins } from "./gsap-config";
+import { MOTION } from "./gsap-config";
+import { loadGsapRuntime } from "./gsap-runtime";
 import { prefersReducedMotion } from "./prefers-reduced-motion";
 
 export function useStaggerReveal<T extends HTMLElement>(selector: string) {
@@ -13,32 +12,44 @@ export function useStaggerReveal<T extends HTMLElement>(selector: string) {
       return;
     }
 
-    registerGsapPlugins(ScrollTrigger);
+    let cancelled = false;
+    let cleanup: (() => void) | undefined;
 
-    const items = container.querySelectorAll(selector);
-    if (items.length === 0) {
-      return;
-    }
+    void loadGsapRuntime().then(({ gsap }) => {
+      if (cancelled) {
+        return;
+      }
 
-    const context = gsap.context(() => {
-      gsap.fromTo(
-        items,
-        { autoAlpha: 0, y: MOTION.reveal.y },
-        {
-          autoAlpha: 1,
-          y: 0,
-          duration: MOTION.reveal.duration,
-          ease: MOTION.reveal.ease,
-          stagger: MOTION.stagger,
-          scrollTrigger: {
-            trigger: container,
-            start: "top 80%"
+      const items = container.querySelectorAll(selector);
+      if (items.length === 0) {
+        return;
+      }
+
+      const context = gsap.context(() => {
+        gsap.fromTo(
+          items,
+          { autoAlpha: 0, y: MOTION.reveal.y },
+          {
+            autoAlpha: 1,
+            y: 0,
+            duration: MOTION.reveal.duration,
+            ease: MOTION.reveal.ease,
+            stagger: MOTION.stagger,
+            scrollTrigger: {
+              trigger: container,
+              start: "top 80%"
+            }
           }
-        }
-      );
-    }, container);
+        );
+      }, container);
 
-    return () => context.revert();
+      cleanup = () => context.revert();
+    });
+
+    return () => {
+      cancelled = true;
+      cleanup?.();
+    };
   }, [selector]);
 
   return ref;

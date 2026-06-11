@@ -1,7 +1,5 @@
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useEffect, useRef } from "react";
-import { registerGsapPlugins } from "./gsap-config";
+import { loadGsapRuntime } from "./gsap-runtime";
 import { prefersReducedMotion } from "./prefers-reduced-motion";
 
 export function useBotanicalUpright<T extends HTMLElement>() {
@@ -13,29 +11,41 @@ export function useBotanicalUpright<T extends HTMLElement>() {
       return;
     }
 
-    registerGsapPlugins(ScrollTrigger);
+    let cancelled = false;
+    let cleanup: (() => void) | undefined;
 
-    const leaves = root.querySelectorAll<SVGElement>("[data-botanical-upright]");
-    const context = gsap.context(() => {
-      leaves.forEach((leaf) => {
-        gsap.fromTo(
-          leaf,
-          { rotate: -18, scaleY: 0.72, transformOrigin: "center bottom" },
-          {
-            rotate: 0,
-            scaleY: 1,
-            duration: 1.2,
-            ease: "power2.out",
-            scrollTrigger: {
-              trigger: root,
-              start: "top 70%"
+    void loadGsapRuntime().then(({ gsap }) => {
+      if (cancelled) {
+        return;
+      }
+
+      const leaves = root.querySelectorAll<SVGElement>("[data-botanical-upright]");
+      const context = gsap.context(() => {
+        leaves.forEach((leaf) => {
+          gsap.fromTo(
+            leaf,
+            { rotate: -18, scaleY: 0.72, transformOrigin: "center bottom" },
+            {
+              rotate: 0,
+              scaleY: 1,
+              duration: 1.2,
+              ease: "power2.out",
+              scrollTrigger: {
+                trigger: root,
+                start: "top 70%"
+              }
             }
-          }
-        );
-      });
-    }, root);
+          );
+        });
+      }, root);
 
-    return () => context.revert();
+      cleanup = () => context.revert();
+    });
+
+    return () => {
+      cancelled = true;
+      cleanup?.();
+    };
   }, []);
 
   return ref;
