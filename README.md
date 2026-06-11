@@ -93,7 +93,7 @@ Generation Request
 | `packages/contracts` | Shared API contracts |
 | `packages/client-sdk` | Typed client for web/mobile (phase 2) |
 
-**Stack:** TypeScript, [Hono](https://hono.dev/), [Effect](https://effect.website/), [Fastify](https://fastify.dev/) (legacy paths), PostgreSQL, [Zod](https://zod.dev/) validation.
+**Stack:** TypeScript, [Hono](https://hono.dev/), [Effect](https://effect.website/), PostgreSQL ([Kysely](https://kysely.dev/) + `pg`), [Zod](https://zod.dev/) validation.
 
 Run locally: `pnpm dev` (backend). Requires `DATABASE_URL` and related env — see `apps/backend/`.
 
@@ -169,7 +169,7 @@ Shared tokens and components for marketing and future app UI.
 | Layer | Technology |
 |-------|------------|
 | Runtime | Node.js 20+ |
-| HTTP | Hono (+ Fastify where legacy) |
+| HTTP | Hono |
 | Effects & errors | Effect-TS |
 | Database | PostgreSQL |
 | Validation | Zod |
