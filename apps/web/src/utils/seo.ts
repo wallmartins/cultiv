@@ -1,3 +1,4 @@
+import { BRAND_NAME } from "../brand/assets.js";
 import { OG_IMAGE_HEIGHT, OG_IMAGE_WIDTH } from "./og-image.js";
 
 export function seo({
@@ -6,7 +7,8 @@ export function seo({
   url,
   locale,
   image,
-  imageAlt
+  imageAlt,
+  siteName = BRAND_NAME
 }: {
   readonly title: string;
   readonly description?: string;
@@ -14,6 +16,7 @@ export function seo({
   readonly locale?: string;
   readonly image?: string;
   readonly imageAlt?: string;
+  readonly siteName?: string;
 }) {
   const ogLocale = locale === "pt" ? "pt_BR" : locale === "en" ? "en_US" : undefined;
   const twitterCard = image ? "summary_large_image" : "summary";
@@ -22,6 +25,7 @@ export function seo({
     { title },
     ...(description ? [{ name: "description", content: description }] : []),
     { name: "og:type", content: "website" },
+    { name: "og:site_name", content: siteName },
     { name: "og:title", content: title },
     ...(description ? [{ name: "og:description", content: description }] : []),
     ...(url ? [{ name: "og:url", content: url }] : []),
