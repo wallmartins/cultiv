@@ -1,4 +1,4 @@
-const DEFAULT_SITE_URL = "https://cultiv.app";
+const DEFAULT_SITE_URL = "https://www.cultiv.app";
 
 export function getSiteUrl(): string {
   const configured = process.env.SITE_URL ?? process.env.VERCEL_URL;

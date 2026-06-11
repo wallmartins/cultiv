@@ -141,6 +141,6 @@ Allow: /
 ${aiRules}
 
 Sitemap: ${siteUrl}/sitemap.xml
-Llms-txt: ${siteUrl}/llms.txt
+# LLM product documentation: ${siteUrl}/llms.txt
 `;
 }

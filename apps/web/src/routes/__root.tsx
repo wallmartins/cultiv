@@ -18,12 +18,7 @@ export const Route = createRootRoute({
         description: "Your authenticity, at scale."
       })
     ],
-    links: [
-      ...brandHeadLinks(),
-      { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      { rel: "stylesheet", href: appCss }
-    ]
+    links: [...brandHeadLinks(), { rel: "stylesheet", href: appCss }]
   }),
   errorComponent: DefaultCatchBoundary,
   notFoundComponent: NotFound,

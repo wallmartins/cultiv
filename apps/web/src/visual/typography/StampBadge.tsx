@@ -21,7 +21,14 @@ export function StampBadge({ label, value, className, invert }: StampBadgeProps)
         borderRadius: "48% 52% 54% 46% / 52% 48% 50% 50%"
       }}
     >
-      <span className="font-mono text-[0.625rem] uppercase tracking-editorial opacity-80">{label}</span>
+      <span
+        className={cn(
+          "font-mono text-[0.625rem] uppercase tracking-editorial",
+          invert ? "text-showcase-accent" : "text-golden/80"
+        )}
+      >
+        {label}
+      </span>
       <span className="font-mono text-sm font-medium">{value}</span>
     </div>
   );
