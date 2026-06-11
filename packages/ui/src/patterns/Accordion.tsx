@@ -29,20 +29,18 @@ export function Accordion({ items }: AccordionProps) {
               type="button"
               aria-expanded={isOpen}
               aria-controls={panelId}
-              className="group flex w-full items-start justify-between gap-6 py-6 text-left md:py-8"
+              className="group flex w-full items-center gap-4 py-6 text-left md:gap-6 md:py-8"
               onClick={() => setOpenId(isOpen ? null : item.id)}
             >
-              <div className="flex items-start gap-4 md:gap-6">
-                <Text as="span" variant="meta" className="pt-1 text-foreground">
-                  [{index}]
-                </Text>
-                <Text as="span" variant="h3" className="max-w-3xl text-base md:text-lg">
-                  {item.question}
-                </Text>
-              </div>
+              <Text as="span" variant="meta" className="shrink-0 text-foreground">
+                [{index}]
+              </Text>
+              <Text as="span" variant="h3" className="min-w-0 flex-1 text-base md:text-lg">
+                {item.question}
+              </Text>
               <span
                 aria-hidden
-                className="pt-1 font-body text-xl leading-none text-muted transition-transform duration-200 group-hover:text-foreground"
+                className="shrink-0 font-body text-xl leading-none text-muted transition-transform duration-200 group-hover:text-foreground"
               >
                 {isOpen ? "−" : "+"}
               </span>
@@ -51,9 +49,19 @@ export function Accordion({ items }: AccordionProps) {
               id={panelId}
               className={cn("overflow-hidden pb-6 md:pb-8", isOpen ? "block" : "hidden")}
             >
-              <Text as="div" variant="body" className="max-w-3xl pl-10 text-muted md:pl-14">
-                {item.answer}
-              </Text>
+              <div className="flex gap-4 md:gap-6">
+                <Text
+                  as="span"
+                  variant="meta"
+                  aria-hidden
+                  className="invisible shrink-0 select-none"
+                >
+                  [{index}]
+                </Text>
+                <Text as="div" variant="body" className="min-w-0 flex-1 text-muted">
+                  {item.answer}
+                </Text>
+              </div>
             </div>
           </section>
         );
