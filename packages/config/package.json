@@ -1,0 +1,15 @@
+{
+  "name": "@my-ai-orchestrator/config",
+  "private": true,
+  "type": "module",
+  "files": [
+    "eslint",
+    "prettier",
+    "tsconfig"
+  ],
+  "exports": {
+    "./tsconfig/base": "./tsconfig/base.json",
+    "./eslint/base": "./eslint/base.mjs",
+    "./prettier/base": "./prettier/base.cjs"
+  }
+}
