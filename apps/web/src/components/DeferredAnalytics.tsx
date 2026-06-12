@@ -2,14 +2,19 @@ import { useEffect, useState, type ComponentType } from "react";
 
 export function DeferredAnalytics() {
   const [Analytics, setAnalytics] = useState<ComponentType | null>(null);
+  const [SpeedInsights, setSpeedInsights] = useState<ComponentType | null>(null);
 
   useEffect(() => {
     let cancelled = false;
 
     const load = () => {
-      void import("@vercel/analytics/react").then((module) => {
+      void Promise.all([
+        import("@vercel/analytics/react"),
+        import("@vercel/speed-insights/react")
+      ]).then(([analyticsModule, speedInsightsModule]) => {
         if (!cancelled) {
-          setAnalytics(() => module.Analytics);
+          setAnalytics(() => analyticsModule.Analytics);
+          setSpeedInsights(() => speedInsightsModule.SpeedInsights);
         }
       });
     };
@@ -29,9 +34,10 @@ export function DeferredAnalytics() {
     };
   }, []);
 
-  if (!Analytics) {
-    return null;
-  }
-
-  return <Analytics />;
+  return (
+    <>
+      {Analytics ? <Analytics /> : null}
+      {SpeedInsights ? <SpeedInsights /> : null}
+    </>
+  );
 }
