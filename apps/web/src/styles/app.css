@@ -1,4 +1,5 @@
 @import "tailwindcss" source("../");
+@source "../../../packages/ui/src";
 @import "@my-ai-orchestrator/ui/styles/theme.css";
 
 @layer base {

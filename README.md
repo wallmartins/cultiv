@@ -95,7 +95,7 @@ Generation Request
 
 **Stack:** TypeScript, [Hono](https://hono.dev/), [Effect](https://effect.website/), PostgreSQL ([Kysely](https://kysely.dev/) + `pg`), [Zod](https://zod.dev/) validation.
 
-Run locally: `pnpm dev` (backend). Requires `DATABASE_URL` and related env — see `apps/backend/`.
+Run locally: `pnpm dev:backend` (backend). Requires `DATABASE_URL` and related env — see `apps/backend/`.
 
 ---
 
@@ -268,10 +268,19 @@ pnpm --filter @my-ai-orchestrator/web preview
 
 ```bash
 pnpm install
-# Configure DATABASE_URL and backend env in apps/backend
+cp .env.example .env
+# Set DATABASE_URL and provider keys (see .env.example)
 
-pnpm dev
+docker compose up -d postgres
+pnpm --filter @my-ai-orchestrator/backend migrate
+
+pnpm dev:backend
 ```
+
+- API: [http://localhost:3000](http://localhost:3000) (default `PORT=3000`)
+- Run `pnpm dev:web` on a different port if you need web and backend together (`PORT=3001` in `.env` for one of them).
+
+Showcase generation helpers (with backend running): `pnpm showcase:voice-setup`, `pnpm showcase:generate`.
 
 See `docs/live/plan/phase-2-implementation-plan.md` for the authenticated app architecture.
 
@@ -282,11 +291,14 @@ See `docs/live/plan/phase-2-implementation-plan.md` for the authenticated app ar
 | Command | Description |
 |---------|-------------|
 | `pnpm dev:web` | Marketing site dev server (port 3000) |
-| `pnpm dev` | Backend dev server |
+| `pnpm dev` / `pnpm dev:backend` | Backend dev server (port 3000 by default) |
 | `pnpm build` | Build all workspaces with a build script |
+| `pnpm build:web` | Build marketing site only (`apps/web`) |
 | `pnpm test` | Run Vitest suite |
+| `pnpm test:postgres` | PostgreSQL integration tests (`BACKEND_TEST_DATABASE_URL`) |
 | `pnpm lint` | Typecheck across workspaces |
 | `pnpm showcase:voice-setup` | Dev helper — voice profile token for showcase generation |
+| `pnpm showcase:generate` | Dev helper — generate showcase sample via backend |
 
 ---
 

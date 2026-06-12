@@ -2,9 +2,9 @@ import { BRAND_ICON_PATH, BRAND_OG_IMAGE_PATH } from "./assets.js";
 
 const GOOGLE_FONTS_BASE = "https://fonts.googleapis.com/css2";
 
-export const GOOGLE_FONTS_CRITICAL_STYLESHEET = `${GOOGLE_FONTS_BASE}?family=Inter:wght@400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&display=swap`;
+export const GOOGLE_FONTS_CRITICAL_STYLESHEET = `${GOOGLE_FONTS_BASE}?family=Caveat:wght@400;500;600&family=Inter:wght@400;500;600&display=swap`;
 
-export const GOOGLE_FONTS_DEFERRED_STYLESHEET = `${GOOGLE_FONTS_BASE}?family=Caveat:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap`;
+export const GOOGLE_FONTS_DEFERRED_STYLESHEET = `${GOOGLE_FONTS_BASE}?family=JetBrains+Mono:wght@400;500&family=Playfair+Display:ital,wght@0,400;1,400&display=swap`;
 
 export const googleFontsAsyncScript = `(function(){
   var critical=${JSON.stringify(GOOGLE_FONTS_CRITICAL_STYLESHEET)};

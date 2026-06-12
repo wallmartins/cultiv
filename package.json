@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "build": "pnpm --filter @my-ai-orchestrator/web build",
+    "build:web": "pnpm --filter @my-ai-orchestrator/web build",
     "dev:web": "pnpm --filter @my-ai-orchestrator/web dev",
     "lint": "pnpm -r --if-present lint"
   },

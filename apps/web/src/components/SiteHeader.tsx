@@ -1,4 +1,4 @@
-import { Container, cn } from "@my-ai-orchestrator/ui";
+import { ButtonLink, Container, cn } from "@my-ai-orchestrator/ui";
 import { useHeaderScrolled } from "~/animations/use-header-scrolled";
 import { Link } from "@tanstack/react-router";
 import { BrandMark } from "~/components/BrandMark";
@@ -41,6 +41,9 @@ export function SiteHeader({ locale }: SiteHeaderProps) {
               {messages.header.nav[item.key]}
             </a>
           ))}
+          <ButtonLink href="#waitlist" variant="primary" size="compact">
+            {messages.header.ctaWaitlist}
+          </ButtonLink>
           <LocaleToggle locale={locale} />
         </nav>
 

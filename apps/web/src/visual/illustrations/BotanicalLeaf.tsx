@@ -17,9 +17,9 @@ type LeafArt = {
 };
 
 /**
- * Ovate — egg-shaped, widest toward the base (typical deciduous leaf).
- * Lanceolate — long and narrow, widest in the basal third (willow-like).
- * Elliptical — narrow oval, widest near the middle (beech-like).
+ * Ovate, egg-shaped, widest toward the base (typical deciduous leaf).
+ * Lanceolate, long and narrow, widest in the basal third (willow-like).
+ * Elliptical, narrow oval, widest near the middle (beech-like).
  */
 const LEAF_ART: Record<BotanicalLeafVariant, LeafArt> = {
   ovate: {

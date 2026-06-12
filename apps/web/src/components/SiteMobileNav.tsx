@@ -1,6 +1,6 @@
 import { useEffect, useId, useState } from "react";
 import { createPortal } from "react-dom";
-import { Text, cn } from "@my-ai-orchestrator/ui";
+import { ButtonLink, Text, cn } from "@my-ai-orchestrator/ui";
 import { LocaleToggle, navItemClassName } from "~/components/LocaleToggle";
 import { marketingNavItems } from "~/navigation/marketing-nav-items";
 import type { LocaleMessages, MarketingLocale } from "~/i18n/types";
@@ -95,10 +95,13 @@ export function SiteMobileNav({ locale, messages }: SiteMobileNavProps) {
       : null;
 
   return (
-    <>
+    <div className="flex items-center gap-2 md:hidden">
+      <ButtonLink href="#waitlist" variant="primary" size="compact">
+        {messages.ctaWaitlist}
+      </ButtonLink>
       <button
         type="button"
-        className="flex size-10 items-center justify-center border border-foreground/20 md:hidden"
+        className="flex size-10 items-center justify-center border border-foreground/20"
         aria-expanded={open}
         aria-controls={panelId}
         aria-label={open ? messages.menuCloseLabel : messages.menuOpenLabel}
@@ -126,6 +129,6 @@ export function SiteMobileNav({ locale, messages }: SiteMobileNavProps) {
         </span>
       </button>
       {menuOverlay}
-    </>
+    </div>
   );
 }

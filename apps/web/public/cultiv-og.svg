@@ -20,7 +20,7 @@
       <circle cx="60" cy="31" r="4" fill="#d4a843"/>
       <text x="130" y="8" font-family="Georgia, 'Playfair Display', serif" font-size="52" font-weight="400" letter-spacing="-1" fill="#1e2f2a">Cultiv</text>
       <line x1="130" y1="22" x2="250" y2="22" stroke="#6b9080" stroke-width="1.2" opacity="0.28"/>
-      <text x="131" y="48" font-family="Inter, Arial, sans-serif" font-size="11" font-weight="500" fill="#5c6b66" letter-spacing="2.6">YOUR AUTHENTICITY, AT SCALE</text>
+      <text x="131" y="48" font-family="Inter, Arial, sans-serif" font-size="11" font-weight="500" fill="#5c6b66" letter-spacing="2.6">TEXT THAT SOUNDS LIKE YOU</text>
     </g>
   </g>
 </svg>

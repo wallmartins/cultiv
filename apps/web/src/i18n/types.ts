@@ -2,22 +2,10 @@ import type { MarketingContentTypeId } from "../content/content-types/catalog.js
 
 export type MarketingLocale = "pt" | "en";
 
-export type MethodStep = {
-  readonly index: string;
-  readonly title: string;
-  readonly body: string;
-};
-
 export type FaqItem = {
   readonly id: string;
   readonly question: string;
   readonly answer: string;
-};
-
-export type HeroSlogan = {
-  readonly prefix: string;
-  readonly keywords: readonly string[];
-  readonly suffix: string;
 };
 
 export type ContentTypeLabels = Record<
@@ -32,11 +20,11 @@ export type LocaleMessages = {
     readonly navLabel: string;
     readonly menuOpenLabel: string;
     readonly menuCloseLabel: string;
+    readonly ctaWaitlist: string;
     readonly nav: {
-      readonly about: string;
-      readonly formats: string;
-      readonly showcase: string;
-      readonly faq: string;
+      readonly problem: string;
+      readonly differentiators: string;
+      readonly useCases: string;
       readonly waitlist: string;
     };
   };
@@ -47,31 +35,128 @@ export type LocaleMessages = {
     readonly location: string;
   };
   readonly hero: {
-    readonly techLabel: string;
+    readonly headline: string;
+    readonly subheadline: string;
+    readonly ctaPrimary: string;
+    readonly ctaSecondary: string;
+  };
+  readonly problem: {
+    readonly eyebrow: string;
+    readonly title: string;
+    readonly perspectives: ReadonlyArray<{
+      readonly index: string;
+      readonly title: string;
+      readonly body: string;
+    }>;
+  };
+  readonly solutionBreath: {
     readonly handwrittenNote: string;
-    readonly slogan: HeroSlogan;
-    readonly scrollCue: string;
+    readonly subtitle: string;
+    readonly keywords: ReadonlyArray<{
+      readonly phrase: string;
+      readonly microcopy: string;
+    }>;
   };
-  readonly about: {
+  readonly differentiators: {
     readonly eyebrow: string;
     readonly title: string;
-    readonly highlight: string;
-    readonly intro: string;
-    readonly detail: string;
+    readonly chapters: ReadonlyArray<{
+      readonly index: string;
+      readonly title: string;
+      readonly body: string;
+    }>;
   };
-  readonly formats: {
+  readonly useCases: {
     readonly eyebrow: string;
     readonly title: string;
-    readonly description: string;
-    readonly note: string;
-    readonly stampLabel: string;
-    readonly stampValue: string;
-    readonly types: ContentTypeLabels;
+    readonly cases: ReadonlyArray<{
+      readonly badge: string;
+      readonly title: string;
+      readonly body: string;
+    }>;
+    readonly footnote: string;
   };
-  readonly method: {
+  readonly productFlow: {
     readonly eyebrow: string;
-    readonly steps: ReadonlyArray<MethodStep>;
+    readonly title: string;
+    readonly outputLabel: string;
+    readonly steps: ReadonlyArray<{
+      readonly index: string;
+      readonly title: string;
+      readonly body: string;
+    }>;
   };
+  readonly socialProof: {
+    readonly eyebrow: string;
+    readonly title: string;
+    readonly body: string;
+  };
+  readonly scenes: {
+    readonly genericOutput: {
+      readonly chatTitle: string;
+      readonly assistantName: string;
+      readonly recentRepliesLabel: string;
+      readonly repeatToneLabel: string;
+      readonly lines: readonly [string, string, string];
+    };
+    readonly fragilePrompt: {
+      readonly chatTitle: string;
+      readonly userAvatarLabel: string;
+      readonly userMessagePreview: string;
+      readonly newChatHint: string;
+      readonly composerLabel: string;
+      readonly sendLabel: string;
+      readonly fragments: readonly [string, string, string, string];
+    };
+    readonly teachVoice: {
+      readonly centerLabel: string;
+      readonly examples: ReadonlyArray<{
+        readonly title: string;
+        readonly meta: string;
+      }>;
+    };
+    readonly briefing: {
+      readonly label: string;
+      readonly format: string;
+      readonly objective: string;
+      readonly audience: string;
+      readonly formatTab: string;
+      readonly objectiveTab: string;
+      readonly audienceTab: string;
+      readonly angleTab: string;
+      readonly placeholder: string;
+      readonly previewAction: string;
+      readonly productLabel: string;
+      readonly breadcrumb: string;
+      readonly screenTitle: string;
+      readonly stepIndicator: string;
+      readonly draftSaved: string;
+      readonly angleHelper: string;
+      readonly voiceStatus: string;
+      readonly audienceChips: readonly string[];
+      readonly addAudienceLabel: string;
+    };
+    readonly previewConfidence: {
+      readonly label: string;
+      readonly productLabel: string;
+      readonly breadcrumb: string;
+      readonly screenTitle: string;
+      readonly stepIndicator: string;
+      readonly readyStatus: string;
+      readonly formatRecap: string;
+      readonly creditsAmount: string;
+      readonly creditsCaption: string;
+      readonly matchBadge: string;
+      readonly matchCaption: string;
+      readonly draftLabel: string;
+      readonly draftLines: readonly string[];
+      readonly toneAssurance: string;
+      readonly backAction: string;
+      readonly confirm: string;
+      readonly footnote: string;
+    };
+  };
+  readonly contentTypes: ContentTypeLabels;
   readonly faq: {
     readonly eyebrow: string;
     readonly title: string;
@@ -79,17 +164,11 @@ export type LocaleMessages = {
     readonly items: ReadonlyArray<FaqItem>;
   };
   readonly showcase: {
-    readonly eyebrow: string;
-    readonly title: string;
-    readonly description: string;
-    readonly scrollHint: string;
     readonly genericLabel: string;
     readonly voiceLabel: string;
     readonly stampLabel: string;
     readonly stampValue: string;
     readonly waveformScript: string;
-    readonly viewFullSample: string;
-    readonly closeModal: string;
     readonly threadMorePosts: string;
     readonly proseMoreBlocks: string;
     readonly linkedInAuthorName: string;
@@ -108,7 +187,6 @@ export type LocaleMessages = {
   };
   readonly geo: {
     readonly brand: string;
-    readonly citationLabel: string;
     readonly productDefinition: string;
     readonly keyFacts: ReadonlyArray<string>;
     readonly llms: {
@@ -134,8 +212,8 @@ export type LocaleMessages = {
         readonly formatsDetail: string;
         readonly urls: string;
         readonly contact: string;
-        readonly method: string;
-        readonly about: string;
+        readonly productFlow: string;
+        readonly overview: string;
         readonly showcase: string;
         readonly faq: string;
       };

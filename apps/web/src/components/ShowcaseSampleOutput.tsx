@@ -14,6 +14,7 @@ export interface ShowcaseSampleOutputProps {
   readonly moreBlocksLabel?: string;
   readonly linkedInAuthorName?: string;
   readonly linkedInAuthorMeta?: string;
+  readonly scrollableBody?: boolean;
 }
 
 function formatMoreBlocksLabel(template: string, count: number): string {
@@ -28,7 +29,8 @@ export function ShowcaseSampleOutput({
   truncate = true,
   moreBlocksLabel,
   linkedInAuthorName = "",
-  linkedInAuthorMeta = ""
+  linkedInAuthorMeta = "",
+  scrollableBody = false
 }: ShowcaseSampleOutputProps) {
   if (sampleId === "thread" && posts && posts.length > 0) {
     const hiddenCount =
@@ -85,6 +87,7 @@ export function ShowcaseSampleOutput({
         authorMeta={linkedInAuthorMeta}
         muted={muted}
         truncateParagraphs={truncate}
+        scrollableBody={scrollableBody}
         moreBlocksLabel={resolvedMoreLabel}
         hiddenParagraphCount={hiddenParagraphCount}
       />

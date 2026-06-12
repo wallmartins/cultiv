@@ -1,4 +1,4 @@
-import { Text } from "@my-ai-orchestrator/ui";
+import { ButtonLink, Text } from "@my-ai-orchestrator/ui";
 import { useSectionReveal } from "~/animations/use-section-reveal";
 import { useDrawStroke } from "~/animations/use-draw-stroke";
 import { useBotanicalUpright } from "~/animations/use-botanical-upright";
@@ -7,16 +7,14 @@ import type { MarketingLocale } from "~/i18n/types";
 import { FallingLeavesLayer } from "~/visual/FallingLeavesLayer";
 import { IllustrationFrame } from "~/visual/IllustrationFrame";
 import { BotanicalTree } from "~/visual/illustrations/BotanicalTree";
-import { HandwrittenNote } from "~/visual/typography/HandwrittenNote";
-import { HeroRotatingSlogan } from "~/visual/typography/HeroRotatingSlogan";
-import { LetterReveal } from "~/visual/typography/LetterReveal";
+import { WordReveal } from "~/visual/typography/WordReveal";
 
 export interface HeroSectionProps {
   readonly locale: MarketingLocale;
 }
 
 export function HeroSection({ locale }: HeroSectionProps) {
-  const { hero, header } = getLocaleMessages(locale);
+  const { hero } = getLocaleMessages(locale);
   const sectionRef = useSectionReveal("[data-hero-item]");
   const drawRef = useDrawStroke<HTMLDivElement>();
   const uprightRef = useBotanicalUpright<HTMLDivElement>();
@@ -48,37 +46,36 @@ export function HeroSection({ locale }: HeroSectionProps) {
         ref={sectionRef}
         className="relative z-10 mx-auto flex h-full w-full max-w-6xl items-center justify-center px-[var(--spacing-gutter)] lg:max-w-7xl"
       >
-        <div className="flex w-full max-w-5xl flex-col items-center text-center">
-          <span className="tech-chip mb-8 w-fit md:mb-10" data-hero-item>
-            {hero.techLabel}
-          </span>
-
-          <LetterReveal
-            text={header.brand}
+        <div className="flex w-full max-w-4xl flex-col items-center text-center">
+          <WordReveal
+            text={hero.headline}
             as="h1"
-            className="mx-auto w-full text-center font-display text-[clamp(3.25rem,11vw,8.5rem)] italic leading-[0.88] tracking-[-0.02em] text-foreground"
+            className="mx-auto w-full text-center font-handwritten text-[clamp(2.5rem,8vw,5.25rem)] font-medium leading-[1.02] tracking-handwritten text-foreground"
           />
-
-          <div data-hero-item className="mt-7 w-full md:mt-9">
-            <HandwrittenNote className="mx-auto max-w-lg text-center">{hero.handwrittenNote}</HandwrittenNote>
-          </div>
 
           <Text
             as="p"
             variant="body-lg"
             data-hero-item
-            className="mx-auto mt-5 max-w-xl text-center text-muted md:mt-6"
+            className="mx-auto mt-6 max-w-xl text-center text-muted md:mt-8"
           >
-            <HeroRotatingSlogan slogan={hero.slogan} />
+            {hero.subheadline}
           </Text>
 
-          <a
-            href="#about"
+          <div
             data-hero-item
-            className="motion-hover mt-12 font-body text-[0.6875rem] font-semibold uppercase tracking-editorial-wide text-moss hover:text-foreground md:mt-14"
+            className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center md:mt-12"
           >
-            {hero.scrollCue}
-          </a>
+            <ButtonLink href="#waitlist" variant="primary">
+              {hero.ctaPrimary}
+            </ButtonLink>
+            <a
+              href="#problema"
+              className="motion-hover font-body text-[0.6875rem] font-semibold uppercase tracking-editorial-wide text-moss hover:text-foreground"
+            >
+              {hero.ctaSecondary} →
+            </a>
+          </div>
         </div>
       </div>
     </section>

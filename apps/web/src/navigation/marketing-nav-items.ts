@@ -1,7 +1,6 @@
 export const marketingNavItems = [
-  { key: "about" as const, href: "#about" },
-  { key: "formats" as const, href: "#formats" },
-  { key: "showcase" as const, href: "#showcase" },
-  { key: "faq" as const, href: "#faq" },
+  { key: "problem" as const, href: "#problema" },
+  { key: "differentiators" as const, href: "#diferenciais" },
+  { key: "useCases" as const, href: "#casos-de-uso" },
   { key: "waitlist" as const, href: "#waitlist" }
 ] as const;

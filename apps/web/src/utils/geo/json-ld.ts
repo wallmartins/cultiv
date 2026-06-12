@@ -14,7 +14,7 @@ export function buildHomeJsonLdGraph(locale: MarketingLocale) {
   const siteUrl = getSiteUrl();
   const messages = getLocaleMessages(locale);
   const homeUrl = `${siteUrl}${getHomePath(locale)}`;
-  const contentTypes = getMarketingContentTypes(locale, messages.formats.types);
+  const contentTypes = getMarketingContentTypes(locale, messages.contentTypes);
 
   const ogImageUrl = getOgImageUrl(siteUrl);
   const brandIconUrl = getBrandIconUrl(siteUrl);

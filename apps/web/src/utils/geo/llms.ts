@@ -21,7 +21,7 @@ export function buildLlmsTxt(locale: MarketingLocale): string {
   const alternateLocale = locale === "pt" ? "en" : "pt";
   const alternateLlms = `${siteUrl}${llmsPath(alternateLocale, false)}`;
   const fullLlms = `${siteUrl}${llmsPath(locale, true)}`;
-  const contentTypes = getMarketingContentTypes(locale, messages.formats.types);
+  const contentTypes = getMarketingContentTypes(locale, messages.contentTypes);
 
   const lines = [
     `# ${llms.title}`,
@@ -58,17 +58,16 @@ export function buildLlmsTxt(locale: MarketingLocale): string {
 }
 
 export function buildLlmsFullTxt(locale: MarketingLocale): string {
-  const siteUrl = getSiteUrl();
   const messages = getLocaleMessages(locale);
   const { llms } = messages.geo;
   const summary = buildLlmsTxt(locale);
-  const contentTypes = getMarketingContentTypes(locale, messages.formats.types);
+  const contentTypes = getMarketingContentTypes(locale, messages.contentTypes);
 
-  const methodSection = formatSection(
-    llms.sections.method,
-    messages.method.steps.map(
-      (step) => `### ${step.index} — ${step.title}\n\n${step.body}`
-    )
+  const productFlowSection = formatSection(
+    llms.sections.productFlow,
+    messages.productFlow.steps.map((step) => {
+      return `### ${step.index}, ${step.title}\n\n${step.body}`;
+    })
   );
 
   const faqSection = formatSection(
@@ -76,10 +75,10 @@ export function buildLlmsFullTxt(locale: MarketingLocale): string {
     messages.faq.items.map((item) => `### ${item.question}\n\n${item.answer}`)
   );
 
-  const aboutSection = formatSection(llms.sections.about, [
-    messages.about.intro,
+  const overviewSection = formatSection(llms.sections.overview, [
+    messages.hero.subheadline,
     "",
-    messages.about.detail
+    messages.socialProof.body
   ]);
 
   const formatsDetail = formatSection(
@@ -91,7 +90,7 @@ export function buildLlmsFullTxt(locale: MarketingLocale): string {
   );
 
   const showcaseSection = formatSection(llms.sections.showcase, [
-    messages.showcase.description,
+    messages.differentiators.chapters[0].body,
     "",
     llms.showcaseNote
   ]);
@@ -103,9 +102,9 @@ export function buildLlmsFullTxt(locale: MarketingLocale): string {
     "",
     `# ${llms.fullTitle}`,
     "",
-    aboutSection.trimEnd(),
+    overviewSection.trimEnd(),
     "",
-    methodSection.trimEnd(),
+    productFlowSection.trimEnd(),
     "",
     formatsDetail.trimEnd(),
     "",

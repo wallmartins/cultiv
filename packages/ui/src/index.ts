@@ -4,6 +4,7 @@ export { spacingTokens } from "./tokens/spacing.js";
 
 export { Text, type TextProps, type TextVariant } from "./primitives/Text.js";
 export { Button, type ButtonProps } from "./primitives/Button.js";
+export { ButtonLink, type ButtonLinkProps } from "./primitives/ButtonLink.js";
 export { Container, type ContainerProps } from "./primitives/Container.js";
 export { Input, type InputProps } from "./primitives/Input.js";
 export { Grid, type GridProps } from "./primitives/Grid.js";

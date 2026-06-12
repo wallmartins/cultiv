@@ -1,3 +1,4 @@
+import { type WheelEvent } from "react";
 import { Text } from "@my-ai-orchestrator/ui";
 import type { ShowcasePostDocument } from "~/content/showcase/types";
 
@@ -7,8 +8,13 @@ export interface ShowcaseLinkedInPostPreviewProps {
   readonly authorMeta: string;
   readonly muted?: boolean;
   readonly truncateParagraphs?: boolean;
+  readonly scrollableBody?: boolean;
   readonly moreBlocksLabel?: string;
   readonly hiddenParagraphCount?: number;
+}
+
+function stopWheelPropagation(event: WheelEvent<HTMLElement>) {
+  event.stopPropagation();
 }
 
 export function ShowcaseLinkedInPostPreview({
@@ -17,6 +23,7 @@ export function ShowcaseLinkedInPostPreview({
   authorMeta,
   muted = false,
   truncateParagraphs = true,
+  scrollableBody = false,
   moreBlocksLabel,
   hiddenParagraphCount = 0
 }: ShowcaseLinkedInPostPreviewProps) {
@@ -25,8 +32,12 @@ export function ShowcaseLinkedInPostPreview({
   const showMarkdownTitle = document.titleFromMarkdown;
 
   return (
-    <article className="min-h-0 border border-showcase-foreground/15 bg-showcase-foreground/[0.03] p-4 md:min-h-[18rem] md:p-5">
-      <header className="mb-4 flex items-center gap-3">
+    <article
+      className={`flex min-h-0 flex-col border border-showcase-foreground/15 bg-showcase-foreground/[0.03] p-4 md:p-5 ${
+        truncateParagraphs ? "md:min-h-[18rem]" : ""
+      }`}
+    >
+      <header className="mb-4 flex shrink-0 items-center gap-3">
         <div
           className={`size-10 shrink-0 rounded-full border border-showcase-foreground/20 ${
             muted ? "bg-showcase-muted/20" : "bg-showcase-accent/25"
@@ -43,7 +54,14 @@ export function ShowcaseLinkedInPostPreview({
         </div>
       </header>
 
-      <div className="space-y-2">
+      <div
+        className={
+          scrollableBody
+            ? "showcase-output-scroll min-h-0 max-h-[min(40rem,78vh)] space-y-2 overflow-y-auto overscroll-contain pr-1"
+            : "space-y-2"
+        }
+        onWheel={scrollableBody ? stopWheelPropagation : undefined}
+      >
         {showMarkdownTitle ? (
           <Text as="p" variant="body-lg" className={`font-medium ${textClass}`}>
             {document.title}
@@ -59,13 +77,13 @@ export function ShowcaseLinkedInPostPreview({
             {paragraph}
           </Text>
         ))}
-      </div>
 
-      {hiddenParagraphCount > 0 && moreBlocksLabel ? (
-        <Text as="p" variant="caption" className="mt-3 text-showcase-muted">
-          {moreBlocksLabel}
-        </Text>
-      ) : null}
+        {hiddenParagraphCount > 0 && moreBlocksLabel ? (
+          <Text as="p" variant="caption" className="text-showcase-muted">
+            {moreBlocksLabel}
+          </Text>
+        ) : null}
+      </div>
     </article>
   );
 }
