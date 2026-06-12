@@ -3,10 +3,16 @@ import { MOTION } from "./gsap-config";
 import { loadGsapRuntime } from "./gsap-runtime";
 import { prefersReducedMotion } from "./prefers-reduced-motion";
 
-export function useSectionReveal<T extends HTMLDivElement = HTMLDivElement>(
-  selector = "[data-section-item]"
+export interface SectionRevealOptions {
+  readonly start?: string;
+}
+
+export function useSectionReveal<T extends HTMLElement = HTMLDivElement>(
+  selector = "[data-section-item]",
+  options?: SectionRevealOptions
 ) {
   const ref = useRef<T | null>(null);
+  const revealStart = options?.start ?? "top 72%";
 
   useEffect(() => {
     const section = ref.current;
@@ -36,7 +42,7 @@ export function useSectionReveal<T extends HTMLDivElement = HTMLDivElement>(
               stagger: MOTION.stagger,
               scrollTrigger: {
                 trigger: section,
-                start: "top 72%"
+                start: revealStart
               }
             }
           );
@@ -53,7 +59,7 @@ export function useSectionReveal<T extends HTMLDivElement = HTMLDivElement>(
             ease: MOTION.reveal.ease,
             scrollTrigger: {
               trigger: section,
-              start: "top 72%"
+              start: revealStart
             }
           }
         );
@@ -66,7 +72,7 @@ export function useSectionReveal<T extends HTMLDivElement = HTMLDivElement>(
       cancelled = true;
       cleanup?.();
     };
-  }, [selector]);
+  }, [selector, revealStart]);
 
   return ref;
 }

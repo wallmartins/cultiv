@@ -56,7 +56,7 @@ export function DifferentiatorsSection({ locale }: DifferentiatorsSectionProps) 
   const linkedInSample = getLinkedInShowcaseSample(locale);
   const isDesktop = useIsMdUp();
   const { sectionRef, stackRef } = useDifferentiatorChapters<HTMLElement>(isDesktop);
-  const mobileRevealRef = useSectionReveal("[data-section-item]");
+  const mobileRevealRef = useSectionReveal("[data-section-item]", { start: "top bottom" });
   const waveformRef = useDrawStroke<HTMLDivElement>();
 
   const chapters = differentiators.chapters;
@@ -70,9 +70,10 @@ export function DifferentiatorsSection({ locale }: DifferentiatorsSectionProps) 
     return (
       <section
         id="diferenciais"
-        className="editorial-rule bg-surface py-[var(--spacing-section-sm)] md:py-[var(--spacing-section)]"
+        ref={mobileRevealRef}
+        className="differentiators-section editorial-rule bg-surface py-[var(--spacing-section-sm)] md:py-[var(--spacing-section)]"
       >
-        <Container ref={mobileRevealRef} className="space-y-10">
+        <Container className="space-y-10">
           <div data-section-item>
             <SectionHeader
               eyebrow={differentiators.eyebrow}
