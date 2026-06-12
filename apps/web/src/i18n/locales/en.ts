@@ -100,7 +100,7 @@ export const en: LocaleMessages = {
   },
   useCases: {
     eyebrow: "Use cases",
-    title: "For people who publish in their own voice",
+    title: "For people who publish authentic content",
     cases: [
       {
         badge: "LinkedIn",
@@ -157,7 +157,7 @@ export const en: LocaleMessages = {
   },
   socialProof: {
     eyebrow: "Early cultivators",
-    title: "Anyone who publishes in their own voice has felt this problem.",
+    title: "Anyone who publishes with their own identity has felt this problem.",
     body:
       "We are building Cultiv with creators, founders, and authors who refuse to sound like anyone else."
   },
@@ -292,10 +292,10 @@ export const en: LocaleMessages = {
   geo: {
     brand: "Cultiv",
     productDefinition:
-      "Cultiv is an AI writing engine that learns the author's personal voice and generates text that sounds like them, not a generic assistant.",
+      "Cultiv is an AI writing engine that learns the author's writing identity and generates authentic text, not generic output.",
     keyFacts: [
       "Pre-launch product with a public waitlist",
-      "Focus on personal voice: users teach with real writing examples",
+      "Focus on authentic content: users teach with real writing examples",
       "Six content formats with dedicated pipelines",
       "Per-generation credit billing with preview before confirmation",
       "Available in Portuguese (Brazil) and English",
@@ -309,7 +309,7 @@ export const en: LocaleMessages = {
         "Cultiv learns how you write and generates text that feels personal, not generic. Visitors teach their voice with examples, pick a format, review a preview, and generate text aligned with their identity.",
       category: "BusinessApplication",
       audience:
-        "Creators, founders, and brands who publish in their own name and need scale without losing authenticity.",
+        "Creators, founders, and brands who publish original content and need scale without losing authenticity.",
       differentiatorLabel: "Differentiator",
       differentiator:
         "Same briefing: manual prompt in ChatGPT trying to mimic voice versus Cultiv with trained voice.",
@@ -377,7 +377,7 @@ export const en: LocaleMessages = {
         id: "what",
         question: "What is Cultiv?",
         answer:
-          "An AI writing engine that preserves your personal voice. You teach how you write; Cultiv generates text that sounds like you, not a generic prompt."
+          "An AI writing engine that preserves your writing identity. You teach with what you've already published; Cultiv generates authentic content, not generic output."
       },
       {
         id: "pricing",

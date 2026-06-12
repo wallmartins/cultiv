@@ -100,7 +100,7 @@ export const pt: LocaleMessages = {
   },
   useCases: {
     eyebrow: "Casos de uso",
-    title: "Para quem publica em voz própria",
+    title: "Para quem publica conteúdo autêntico",
     cases: [
       {
         badge: "LinkedIn",
@@ -157,7 +157,7 @@ export const pt: LocaleMessages = {
   },
   socialProof: {
     eyebrow: "Primeiros cultivadores",
-    title: "Quem publica em voz própria já sentiu o problema.",
+    title: "Quem publica com identidade própria já sentiu o problema.",
     body:
       "Estamos construindo Cultiv com criadores, founders e autores que não abrem mão de soar como eles mesmos."
   },
@@ -292,10 +292,10 @@ export const pt: LocaleMessages = {
   geo: {
     brand: "Cultiv",
     productDefinition:
-      "Cultiv é um motor de escrita com IA que aprende a voz pessoal do autor e gera textos que soam como ele, não como um assistente genérico.",
+      "Cultiv é um motor de escrita com IA que aprende a identidade de escrita do autor e gera textos autênticos, não genéricos.",
     keyFacts: [
       "Produto em pré-lançamento com lista de espera pública",
-      "Foco em voz pessoal: o usuário ensina com exemplos reais de escrita",
+      "Foco em conteúdo autêntico: o usuário ensina com exemplos reais de escrita",
       "Seis formatos de conteúdo com pipelines dedicados",
       "Cobrança por geração em créditos, com prévia antes de confirmar",
       "Disponível em português (Brasil) e inglês",
@@ -309,7 +309,7 @@ export const pt: LocaleMessages = {
         "Cultiv aprende como você escreve e gera textos que soam pessoais, não genéricos. O visitante ensina sua voz com exemplos, escolhe um formato, revisa uma prévia e gera texto alinhado à sua identidade.",
       category: "BusinessApplication",
       audience:
-        "Criadores, fundadores e marcas que publicam conteúdo em nome próprio e precisam de escala sem perder autenticidade.",
+        "Criadores, fundadores e marcas que publicam conteúdo original e precisam de escala sem perder autenticidade.",
       differentiatorLabel: "Diferencial",
       differentiator:
         "Mesmo briefing: prompt manual no ChatGPT tentando imitar a voz versus Cultiv com voz treinada.",
@@ -377,7 +377,7 @@ export const pt: LocaleMessages = {
         id: "what",
         question: "O que é o Cultiv?",
         answer:
-          "Um motor de escrita com IA que preserva a sua voz pessoal. Você ensina como escreve; Cultiv gera textos que soam como você, não como um prompt genérico."
+          "Um motor de escrita com IA que preserva a sua identidade na escrita. Você ensina com o que já publicou; Cultiv gera conteúdo autêntico, não genérico."
       },
       {
         id: "pricing",
