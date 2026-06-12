@@ -429,16 +429,6 @@
       line-height: 0.9;
     }
 
-    .solution-breath-beats__subtitle {
-      max-width: 16rem;
-      padding-top: 0.35rem;
-      font-family: var(--font-body);
-      font-size: 0.9375rem;
-      line-height: 1.55;
-      color: color-mix(in srgb, var(--color-showcase-foreground) 72%, transparent);
-      text-wrap: balance;
-    }
-
     .solution-breath-beats__moment {
       display: flex;
       min-height: 54svh;

@@ -32,7 +32,6 @@ export function SolutionBreathBeats({ brand, copy }: SolutionBreathBeatsProps) {
           >
             {brand}
           </p>
-          <p className="solution-breath-beats__subtitle">{copy.subtitle}</p>
         </div>
       </header>
 

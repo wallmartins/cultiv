@@ -4,6 +4,11 @@ import { prefersReducedMotion } from "./prefers-reduced-motion";
 
 const PIN_SELECTOR = ".solution-breath-scrolly__pin";
 const BRAND_SELECTOR = ".solution-breath-scrolly__brand";
+const DESKTOP_PIN_BUFFER_RATIO = 0.28;
+
+function getDesktopPinBuffer() {
+  return Math.max(window.innerHeight * DESKTOP_PIN_BUFFER_RATIO, 180);
+}
 
 export function useHorizontalScrollPin<TSection extends HTMLElement, TTrack extends HTMLElement>() {
   const sectionRef = useRef<TSection | null>(null);
@@ -49,8 +54,13 @@ export function useHorizontalScrollPin<TSection extends HTMLElement, TTrack exte
         return scrollDistance;
       };
 
+      const resolvePinSpan = () => {
+        measureScrollDistance();
+        return scrollDistance + getDesktopPinBuffer();
+      };
+
       const syncSectionHeight = () => {
-        section.style.height = `${scrollDistance}px`;
+        section.style.height = `${resolvePinSpan()}px`;
       };
 
       const refreshLayout = () => {
@@ -68,7 +78,7 @@ export function useHorizontalScrollPin<TSection extends HTMLElement, TTrack exte
           scrollTrigger: {
             trigger: section,
             start: "top top",
-            end: () => `+=${scrollDistance}`,
+            end: () => `+=${resolvePinSpan()}`,
             pin: true,
             pinSpacing: false,
             scrub: 0.8,
