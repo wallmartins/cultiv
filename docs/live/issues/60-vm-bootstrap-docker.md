@@ -24,7 +24,7 @@ Install all system dependencies on the Integrator VPS and configure Docker Compo
    - Update and upgrade: `apt update && apt upgrade -y`
     - Install: `docker.io`, `docker-compose-plugin`, `nginx`, `certbot`, `logrotate`, `ufw`, `unattended-upgrades`, `jq`, `bc`, `curl`, `rsync`
     - No `fail2ban` — SSH is not exposed to internet (Cloudflare Zero Trust)
-   - Add user `ubuntu` to `docker` group
+   - Add user `cultiv` to `docker` group
    - Docker: `systemctl enable docker`
 
 2. **Node.js environment**
@@ -46,7 +46,7 @@ Install all system dependencies on the Integrator VPS and configure Docker Compo
 
 4. **Directory structure**
    ```
-   /home/ubuntu/cultiv/
+   /home/cultiv/cultiv/
    ├── app/                    # code deploy
    ├── data/
    │   ├── postgres/          # PG volume
@@ -59,15 +59,15 @@ Install all system dependencies on the Integrator VPS and configure Docker Compo
    ```
 
 5. **Docker Compose**
-   - `docker-compose.yml` in `/home/ubuntu/cultiv/`
+   - `docker-compose.yml` in `/home/cultiv/cultiv/`
    - PostgreSQL 16 Alpine:
      - `POSTGRES_USER=cultiv`, `POSTGRES_PASSWORD` from env
-     - Bind mount: `/home/ubuntu/cultiv/data/postgres`
+     - Bind mount: `/home/cultiv/cultiv/data/postgres`
      - Port: `127.0.0.1:5432`
      - Healthcheck: `pg_isready`
    - Redis 7 Alpine:
      - Command: `redis-server --appendonly yes`
-     - Bind mount: `/home/ubuntu/cultiv/data/redis`
+     - Bind mount: `/home/cultiv/cultiv/data/redis`
      - Port: `127.0.0.1:6379`
      - Healthcheck: `redis-cli ping`
    - Both services: `restart: unless-stopped`
@@ -78,7 +78,7 @@ Install all system dependencies on the Integrator VPS and configure Docker Compo
    - `proxy_pass` to `127.0.0.1:3001`
    - Headers: `Host`, `X-Real-IP`, `X-Forwarded-For`, `X-Forwarded-Proto`, `CF-Connecting-IP`
    - Location `/health`: pass to backend, no caching
-   - Location `/metrics`: serve JSON file from `/home/ubuntu/cultiv/metrics/current.json`
+   - Location `/metrics`: serve JSON file from `/home/cultiv/cultiv/metrics/current.json`
    - Timeout: `proxy_read_timeout 300s`
 
 7. **cloudflared configuration**
@@ -88,7 +88,7 @@ Install all system dependencies on the Integrator VPS and configure Docker Compo
    - Service: `systemctl enable cloudflared`
 
 8. **logrotate configuration**
-   - `/etc/logrotate.d/cultiv`: rotate logs in `/home/ubuntu/cultiv/logs/`
+   - `/etc/logrotate.d/cultiv`: rotate logs in `/home/cultiv/cultiv/logs/`
    - Daily, 14 days retention, compress, `create` permissions
    - `/etc/logrotate.d/pm2`: rotate PM2 logs, `copytruncate`
 
@@ -122,5 +122,5 @@ Install all system dependencies on the Integrator VPS and configure Docker Compo
 - The bootstrap script should be idempotent (safe to run multiple times).
 - Document all passwords/secrets in a password manager (1Password, KeePass), never in the repo.
 - Test the script on a fresh VM if possible (or document clearly that it is designed for first-run).
-- **Cloudflare Zero Trust SSH** replaces traditional SSH access. You will no longer use `ssh ubuntu@<ip>` directly.
+- **Cloudflare Zero Trust SSH** replaces traditional SSH access. You will no longer use `ssh cultiv@<ip>` directly.
 - Keep a backup access method: Integrator hPanel provides emergency VNC/serial console access (password-based, slow but works if everything else fails).

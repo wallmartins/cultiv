@@ -34,16 +34,16 @@ docker exec cultiv-postgres psql -U cultiv -c "SELECT COUNT(*) as unpublished FR
 echo ""
 
 echo "=== Recent Errors ==="
-tail -n 20 ${CULTIV_ROOT:-/home/ubuntu/cultiv}/logs/api-err.log 2>/dev/null || echo "No error logs"
-tail -n 20 ${CULTIV_ROOT:-/home/ubuntu/cultiv}/logs/worker-err.log 2>/dev/null || echo "No worker error logs"
+tail -n 20 ${CULTIV_ROOT:-/home/cultiv/cultiv}/logs/api-err.log 2>/dev/null || echo "No error logs"
+tail -n 20 ${CULTIV_ROOT:-/home/cultiv/cultiv}/logs/worker-err.log 2>/dev/null || echo "No worker error logs"
 echo ""
 
 echo "=== Health Check Log ==="
-tail -n 5 ${CULTIV_ROOT:-/home/ubuntu/cultiv}/logs/health-check.log 2>/dev/null || echo "No health check logs"
+tail -n 5 ${CULTIV_ROOT:-/home/cultiv/cultiv}/logs/health-check.log 2>/dev/null || echo "No health check logs"
 echo ""
 
 echo "=== Metrics ==="
-cat ${CULTIV_ROOT:-/home/ubuntu/cultiv}/metrics/current.json 2>/dev/null || echo "No metrics available"
+cat ${CULTIV_ROOT:-/home/cultiv/cultiv}/metrics/current.json 2>/dev/null || echo "No metrics available"
 echo ""
 
 echo "=== End of Report ==="

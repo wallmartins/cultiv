@@ -25,7 +25,7 @@
 
 ### Step 1.1: Abrir o terminal da VPS
 
-A Integrator te enviou um email com **IP**, **usuário** (provavelmente `root` ou `ubuntu`), e **senha**.
+A Integrator te enviou um email com **IP**, **usuário** (provavelmente `root` ou `cultiv`), e **senha**.
 
 **Opção A — Terminal nativo (Linux/Mac):**
 
@@ -78,7 +78,7 @@ Isso vai demorar 2-3 minutos. Quando acabar, você volta para o prompt.
 Por segurança, não vamos rodar o projeto como `root`.
 
 ```bash
-# Criar usuário (pode ser 'ubuntu', 'cultiv', ou qualquer nome)
+# Criar usuário (padrão: 'cultiv')
 adduser cultiv
 
 # Vai perguntar senha e outras coisas. Escolha uma senha e aperte Enter para o resto
@@ -95,7 +95,7 @@ su - cultiv
 > **Nota:** Se você já criou o usuário `cultiv` e ele está no grupo sudo, pule este passo.
 > O importante é: o usuário que vai rodar o projeto deve estar no grupo `sudo`.
 
-**Saia do usuário ubuntu e volte para root:**
+**Saia do usuário cultiv e volte para root:**
 
 ```bash
 exit
@@ -185,11 +185,8 @@ scp integrator-scripts.zip root@123.456.789.0:/tmp/
 # Como root, na VPS
 chmod +x /home/cultiv/cultiv/scripts/bootstrap-vm.sh
 
-# Se seu usuário for 'cultiv' (ao invés de 'ubuntu'):
-CULTIV_USER=cultiv sudo -E /home/cultiv/cultiv/scripts/bootstrap-vm.sh
-
-# Se seu usuário for 'ubuntu' (padrão):
-sudo /home/ubuntu/cultiv/scripts/bootstrap-vm.sh
+# Rodar o bootstrap (o padrão já é 'cultiv'):
+sudo /home/cultiv/cultiv/scripts/bootstrap-vm.sh
 ```
 
 **Isso vai instalar:**
@@ -236,8 +233,8 @@ docker run hello-world
 ### Step 4.1: Autenticar cloudflared
 
 ```bash
-# Mude para o usuário ubuntu
-su - ubuntu
+# Mude para o usuário cultiv
+su - cultiv
 
 # Autenticar com Cloudflare
 cloudflared tunnel login
@@ -254,7 +251,7 @@ cloudflared tunnel login
 **De volta ao terminal, você verá:**
 
 ```
-Tunnel credentials written to /home/ubuntu/.cloudflared/cert.pem
+Tunnel credentials written to /home/cultiv/.cloudflared/cert.pem
 ```
 
 ### Step 4.2: Criar o tunnel
@@ -267,7 +264,7 @@ cloudflared tunnel create cultiv-backend
 **Anote o Tunnel ID** (algo como `12345678-abcd-1234-5678-1234567890ab`).
 
 ```
-Tunnel credentials written to /home/ubuntu/.cloudflared/12345678-abcd-....json
+Tunnel credentials written to /home/cultiv/.cloudflared/12345678-abcd-....json
 Tunnel ID: 12345678-abcd-1234-5678-1234567890ab
 ```
 
@@ -279,7 +276,7 @@ Tunnel ID: 12345678-abcd-1234-5678-1234567890ab
 
 cat > ~/.cloudflared/config.yml <<EOF
 tunnel: <tunnel-id>
-credentials-file: /home/ubuntu/.cloudflared/<tunnel-id>.json
+credentials-file: /home/cultiv/.cloudflared/<tunnel-id>.json
 
 ingress:
   - hostname: api.cultiv.app
@@ -295,7 +292,7 @@ EOF
 ```bash
 cat > ~/.cloudflared/config.yml <<EOF
 tunnel: 12345678-abcd-1234-5678-1234567890ab
-credentials-file: /home/ubuntu/.cloudflared/12345678-abcd-1234-5678-1234567890ab.json
+credentials-file: /home/cultiv/.cloudflared/12345678-abcd-1234-5678-1234567890ab.json
 
 ingress:
   - hostname: api.cultiv.app
@@ -368,7 +365,7 @@ sudo systemctl status cloudflared
 ### Step 5.3: Configurar rclone na VPS
 
 ```bash
-# Na VPS, como usuário ubuntu
+# Na VPS, como usuário cultiv
 rclone config
 ```
 
@@ -452,9 +449,9 @@ rclone delete r2:cultiv-backups/test.txt
 ### Step 6.1: Criar o diretório da aplicação
 
 ```bash
-# Na VPS, como usuário ubuntu
-mkdir -p /home/ubuntu/cultiv/app
-cd /home/ubuntu/cultiv/app
+# Na VPS, como usuário cultiv
+mkdir -p /home/cultiv/cultiv/app
+cd /home/cultiv/cultiv/app
 ```
 
 ### Step 6.2: Copiar o projeto do GitHub
@@ -465,17 +462,17 @@ git clone https://github.com/seu-usuario/content-lib.git .
 
 # Ou se você já tem o código local, pode usar SCP
 # No seu computador local:
-# scp -r /caminho/do/seu/projeto/* ubuntu@123.456.789.0:/home/ubuntu/cultiv/app/
+# scp -r /caminho/do/seu/projeto/* cultiv@123.456.789.0:/home/cultiv/cultiv/app/
 ```
 
 ### Step 6.3: Criar o arquivo .env
 
 ```bash
 # Copiar o template
-cp /home/ubuntu/cultiv/configs/.env.example /home/ubuntu/cultiv/app/.env
+cp /home/cultiv/cultiv/configs/.env.example /home/cultiv/cultiv/app/.env
 
 # Editar o .env
-nano /home/ubuntu/cultiv/app/.env
+nano /home/cultiv/cultiv/app/.env
 ```
 
 **No nano, você precisa preencher (pelo menos esses):**
@@ -515,7 +512,7 @@ CORS_ALLOWED_ORIGINS=https://www.cultiv.app,https://cultiv.app
 **Proteger o .env:**
 
 ```bash
-chmod 600 /home/ubuntu/cultiv/app/.env
+chmod 600 /home/cultiv/cultiv/app/.env
 ```
 
 ---
@@ -525,8 +522,8 @@ chmod 600 /home/ubuntu/cultiv/app/.env
 ### Step 7.1: Iniciar Docker containers
 
 ```bash
-# Na VPS, no diretório /home/ubuntu/cultiv
-cd /home/ubuntu/cultiv
+# Na VPS, no diretório /home/cultiv/cultiv
+cd /home/cultiv/cultiv
 
 # Iniciar PostgreSQL + Redis
 sudo docker compose up -d
@@ -559,8 +556,8 @@ sudo docker exec cultiv-redis redis-cli ping
 ### Step 8.1: Instalar dependências e buildar
 
 ```bash
-# Na VPS, no diretório /home/ubuntu/cultiv/app
-cd /home/ubuntu/cultiv/app
+# Na VPS, no diretório /home/cultiv/cultiv/app
+cd /home/cultiv/cultiv/app
 
 # Instalar dependências
 pnpm install --frozen-lockfile
@@ -584,7 +581,7 @@ pnpm --filter @my-ai-orchestrator/backend migrate
 
 ```bash
 # Copiar config do PM2
-cp /home/ubuntu/cultiv/configs/ecosystem.config.cjs /home/ubuntu/cultiv/app/ecosystem.config.cjs
+cp /home/cultiv/cultiv/configs/ecosystem.config.cjs /home/cultiv/cultiv/app/ecosystem.config.cjs
 ```
 
 ### Step 8.4: Iniciar com PM2
@@ -650,11 +647,11 @@ Se mostrar o cadeado verde (SSL) e o JSON, **parabéns, está no ar!**
 
 ### Step 10.1: Instalar o self-hosted runner
 
-Na VPS, como usuário ubuntu:
+Na VPS, como usuário cultiv:
 
 ```bash
 # Criar diretório para o runner
-mkdir -p /home/ubuntu/actions-runner && cd /home/ubuntu/actions-runner
+mkdir -p /home/cultiv/actions-runner && cd /home/cultiv/actions-runner
 
 # Download do runner (substitua pela versão mais recente)
 # Veja a versão mais recente em: https://github.com/actions/runner/releases
@@ -727,7 +724,7 @@ pm2 logs cultiv-api
 
 ```bash
 # Na VPS
-/home/ubuntu/cultiv/scripts/verify-cloudflare.sh
+/home/cultiv/cultiv/scripts/verify-cloudflare.sh
 ```
 
 Deve mostrar: **🎉 All Cloudflare checks passed!**
@@ -736,7 +733,7 @@ Deve mostrar: **🎉 All Cloudflare checks passed!**
 
 ```bash
 # Rodar backup manual
-/home/ubuntu/cultiv/scripts/backup.sh
+/home/cultiv/cultiv/scripts/backup.sh
 
 # Verificar se subiu para R2
 rclone ls r2:cultiv-backups
@@ -748,7 +745,7 @@ rclone ls r2:cultiv-backups
 
 ```bash
 # Verificar se o health check está rodando
-sudo tail -f /home/ubuntu/cultiv/logs/health-check.log
+sudo tail -f /home/cultiv/cultiv/logs/health-check.log
 
 # Deve mostrar checagens a cada 2 minutos
 ```
@@ -811,7 +808,7 @@ pm2 logs
 pnpm build:backend
 
 # Se falar de "env", verifique se o .env existe
-ls -la /home/ubuntu/cultiv/app/.env
+ls -la /home/cultiv/cultiv/app/.env
 ```
 
 ### Problema: rclone não conecta ao R2

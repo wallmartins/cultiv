@@ -8,7 +8,7 @@ set -euo pipefail
 # envia para Cloudflare R2 e notifica no Discord.
 # =============================================================================
 
-CULTIV_ROOT="${CULTIV_ROOT:-/home/ubuntu/cultiv}"
+CULTIV_ROOT="${CULTIV_ROOT:-/home/cultiv/cultiv}"
 BACKUP_DIR="${CULTIV_ROOT}/backups"
 R2_BUCKET="${R2_BUCKET_NAME:-cultiv-backups}"
 R2_ENDPOINT="${R2_ENDPOINT:-}"

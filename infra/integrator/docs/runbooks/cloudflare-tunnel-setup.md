@@ -42,7 +42,7 @@ cloudflared tunnel create cultiv-backend
 
 Output:
 ```
-Tunnel credentials written to /home/ubuntu/.cloudflared/<tunnel-id>.json
+Tunnel credentials written to /home/cultiv/.cloudflared/<tunnel-id>.json
 Tunnel ID: <tunnel-id>
 ```
 
@@ -50,11 +50,11 @@ Tunnel ID: <tunnel-id>
 
 ### Step 3: Create the config file
 
-Create `/home/ubuntu/.cloudflared/config.yml`:
+Create `/home/cultiv/.cloudflared/config.yml`:
 
 ```yaml
 tunnel: <tunnel-id>
-credentials-file: /home/ubuntu/.cloudflared/<tunnel-id>.json
+credentials-file: /home/cultiv/.cloudflared/<tunnel-id>.json
 
 ingress:
   # API — main backend
@@ -159,7 +159,7 @@ Add to `~/.ssh/config`:
 ```
 Host integrator-vps
     HostName ssh.cultiv.app
-    User ubuntu
+    User cultiv
     ProxyCommand /usr/local/bin/cloudflared access ssh --hostname %h
 ```
 

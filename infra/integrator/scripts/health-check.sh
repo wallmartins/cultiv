@@ -8,7 +8,7 @@ set -euo pipefail
 # disco, memória, outbox e jobs travados. Tenta auto-recuperar e alerta no Discord.
 # =============================================================================
 
-CULTIV_ROOT="${CULTIV_ROOT:-/home/ubuntu/cultiv}"
+CULTIV_ROOT="${CULTIV_ROOT:-/home/cultiv/cultiv}"
 LOG_FILE="${CULTIV_ROOT}/logs/health-check.log"
 WEBHOOK_URL="${DISCORD_WEBHOOK_URL:-}"
 API_URL="http://127.0.0.1:3001/health"

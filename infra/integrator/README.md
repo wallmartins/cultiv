@@ -50,21 +50,22 @@ infra/integrator/
 
 ### Configuração de Usuário
 
-Todos os scripts suportam um usuário personalizado via variável de ambiente `CULTIV_USER`:
+O usuário padrão é `cultiv` (definido via variável `CULTIV_USER`):
 
 ```bash
-# Padrão é 'ubuntu', mas pode ser qualquer usuário (ex: 'cultiv')
-export CULTIV_USER=cultiv
+# Padrão é 'cultiv' — não precisa configurar na maioria dos casos
+sudo ./bootstrap-vm.sh
 
-# Rodar bootstrap com usuário customizado
-sudo CULTIV_USER=cultiv ./bootstrap-vm.sh
+# Se precisar usar outro usuário (ex: 'ubuntu'):
+export CULTIV_USER=ubuntu
+sudo -E ./bootstrap-vm.sh
 
-# Ou definir no ~/.bashrc do usuário
+# Ou definir no ~/.bashrc
 export CULTIV_USER=cultiv
 export CULTIV_ROOT=/home/cultiv/cultiv
 ```
 
-**Importante:** Se você criou um usuário diferente de `ubuntu` (ex: `cultiv`), defina `CULTIV_USER` antes de rodar qualquer script.
+**Importante:** Se você criou um usuário diferente de `cultiv`, defina `CULTIV_USER` antes de rodar qualquer script.
 
 ### Phase 1: VPS Provisioning
 1. **Contratar VPS** no Integrator (VPS Linux Core, Ubuntu 26.04 LTS)
@@ -103,19 +104,19 @@ export CULTIV_ROOT=/home/cultiv/cultiv
 
 ```bash
 # Health check a cada 2 minutos
-*/2 * * * * /home/ubuntu/cultiv/scripts/health-check.sh
+*/2 * * * * /home/cultiv/cultiv/scripts/health-check.sh
 
 # Métricas a cada 1 minuto
-* * * * * /home/ubuntu/cultiv/scripts/metrics-collector.sh
+* * * * * /home/cultiv/cultiv/scripts/metrics-collector.sh
 
 # Backup diário às 03:00
-0 3 * * * /home/ubuntu/cultiv/scripts/backup.sh
+0 3 * * * /home/cultiv/cultiv/scripts/backup.sh
 
 # Verificação de backup semanal (domingo)
-0 4 * * 0 /home/ubuntu/cultiv/scripts/verify-backup.sh
+0 4 * * 0 /home/cultiv/cultiv/scripts/verify-backup.sh
 
 # Resumo de logs diário às 08:00
-0 8 * * * /home/ubuntu/cultiv/scripts/log-summary.sh
+0 8 * * * /home/cultiv/cultiv/scripts/log-summary.sh
 ```
 
 ## Comandos úteis

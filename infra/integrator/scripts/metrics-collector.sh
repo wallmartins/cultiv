@@ -5,10 +5,10 @@ set -euo pipefail
 # Cultiv — Metrics Collector
 # =============================================================================
 # Coleta métricas de sistema, banco, cache e processos a cada 1 minuto.
-# Salva JSON em /home/ubuntu/cultiv/metrics/current.json (servido via Nginx).
+# Salva JSON em /home/cultiv/cultiv/metrics/current.json (servido via Nginx).
 # =============================================================================
 
-METRICS_FILE="${CULTIV_ROOT:-/home/ubuntu/cultiv}/metrics/current.json"
+METRICS_FILE="${CULTIV_ROOT:-/home/cultiv/cultiv}/metrics/current.json"
 mkdir -p "$(dirname "$METRICS_FILE")"
 
 # CPU

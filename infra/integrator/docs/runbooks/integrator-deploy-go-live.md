@@ -84,7 +84,7 @@
 
 - [ ] Zero ports exposed: `nmap <vm-ip>` shows no open ports
 - [ ] Cloudflare Zero Trust SSH works
-- [ ] Direct SSH fails: `ssh ubuntu@<vm-ip>` connection refused
+- [ ] Direct SSH fails: `ssh cultiv@<vm-ip>` connection refused
 - [ ] Cloudflare WAF blocks suspicious requests
 - [ ] `CF-Connecting-IP` used for rate limiting
 - [ ] `.env` not readable by other users

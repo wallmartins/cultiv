@@ -1,20 +1,20 @@
 # Cultiv — VPS Cron Configuration
 # =============================================================================
-# Adicione estas linhas ao crontab do usuário ubuntu:
+# Adicione estas linhas ao crontab do usuário cultiv:
 #   crontab -e
 # =============================================================================
 
 # Health check a cada 2 minutos
-*/2 * * * * /home/ubuntu/cultiv/scripts/health-check.sh >> /home/ubuntu/cultiv/logs/health-check.log 2>&1
+*/2 * * * * /home/cultiv/cultiv/scripts/health-check.sh >> /home/cultiv/cultiv/logs/health-check.log 2>&1
 
 # Métricas a cada 1 minuto
-* * * * * /home/ubuntu/cultiv/scripts/metrics-collector.sh >> /home/ubuntu/cultiv/logs/metrics.log 2>&1
+* * * * * /home/cultiv/cultiv/scripts/metrics-collector.sh >> /home/cultiv/cultiv/logs/metrics.log 2>&1
 
 # Backup diário às 03:00 UTC
-0 3 * * * /home/ubuntu/cultiv/scripts/backup.sh >> /home/ubuntu/cultiv/logs/backup.log 2>&1
+0 3 * * * /home/cultiv/cultiv/scripts/backup.sh >> /home/cultiv/cultiv/logs/backup.log 2>&1
 
 # Verificação de backup semanal (domingo às 04:00)
-0 4 * * 0 /home/ubuntu/cultiv/scripts/verify-backup.sh >> /home/ubuntu/cultiv/logs/verify-backup.log 2>&1
+0 4 * * 0 /home/cultiv/cultiv/scripts/verify-backup.sh >> /home/cultiv/cultiv/logs/verify-backup.log 2>&1
 
 # Resumo de logs diário às 08:00 UTC
-0 8 * * * /home/ubuntu/cultiv/scripts/log-summary.sh >> /home/ubuntu/cultiv/logs/log-summary.log 2>&1
+0 8 * * * /home/cultiv/cultiv/scripts/log-summary.sh >> /home/cultiv/cultiv/logs/log-summary.log 2>&1

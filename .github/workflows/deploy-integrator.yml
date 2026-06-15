@@ -50,7 +50,7 @@ jobs:
       - name: Deploy
         run: |
           set -euo pipefail
-          cd ${CULTIV_ROOT:-/home/ubuntu/cultiv}/app
+          cd ${CULTIV_ROOT:-/home/cultiv/cultiv}/app
           # Backup do dist atual
           if [ -d apps/backend/dist ]; then
             mv apps/backend/dist "apps/backend/dist.bak.$(date +%F-%H%M)"

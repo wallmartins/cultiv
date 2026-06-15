@@ -23,7 +23,7 @@ Integrator VPS (Brazil, VPS Linux Core)
 ## Directory Structure
 
 ```
-/home/ubuntu/cultiv/
+/home/cultiv/cultiv/
 ├── app/                    # Application code
 │   ├── apps/backend/
 │   ├── packages/
@@ -64,7 +64,7 @@ Integrator VPS (Brazil, VPS Linux Core)
 ### Manual Deploy
 
 ```bash
-cd /home/ubuntu/cultiv/app
+cd /home/cultiv/cultiv/app
 pnpm install --frozen-lockfile
 pnpm build:backend
 pnpm --filter @my-ai-orchestrator/backend migrate

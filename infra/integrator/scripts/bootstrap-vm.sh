@@ -7,12 +7,13 @@ set -euo pipefail
 # Este script prepara uma VPS Ubuntu 26.04 LTS (Integrator, Hetzner, etc.) para hospedar
 # o backend Cultiv (PostgreSQL, Redis, Node.js, PM2, Nginx, cloudflared).
 # 
-# Uso: sudo CULTIV_USER=cultiv ./bootstrap-vm.sh
+# Uso: sudo ./bootstrap-vm.sh
 # Requer: Ubuntu 26.04 LTS, acesso root, conexão com internet
+# Para usar usuário diferente de 'cultiv': sudo CULTIV_USER=ubuntu ./bootstrap-vm.sh
 # =============================================================================
 
-# Usuário que vai rodar o projeto (pode ser ubuntu, cultiv, etc.)
-CULTIV_USER="${CULTIV_USER:-ubuntu}"
+# Usuário que vai rodar o projeto (padrão: cultiv)
+CULTIV_USER="${CULTIV_USER:-cultiv}"
 CULTIV_ROOT="/home/${CULTIV_USER}/cultiv"
 CULTIV_APP="${CULTIV_ROOT}/app"
 CULTIV_DATA="${CULTIV_ROOT}/data"
@@ -160,7 +161,7 @@ ${CULTIV_LOGS}/*.log {
     delaycompress
     missingok
     notifempty
-    create 0644 ubuntu ubuntu
+    create 0644 ${CULTIV_USER} ${CULTIV_USER}
     dateext
     dateformat -%Y%m%d-%s
     size 100M

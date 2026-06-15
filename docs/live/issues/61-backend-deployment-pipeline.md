@@ -21,7 +21,7 @@ Create a fully automated CI/CD pipeline that deploys the backend from GitHub to 
 ### Deliverables
 
 1. **PM2 ecosystem configuration**
-   - `ecosystem.config.cjs` in `/home/ubuntu/cultiv/app/`
+   - `ecosystem.config.cjs` in `/home/cultiv/cultiv/app/`
    - Process 1: `cultiv-api`
      - `script`: `apps/backend/dist/cli/main.js`
      - `instances`: 1, `exec_mode: 'fork'`
@@ -37,7 +37,7 @@ Create a fully automated CI/CD pipeline that deploys the backend from GitHub to 
    - Logs: `log_file`, `out_file`, `err_file` with rotation
 
 2. **Environment variables file**
-   - `.env` in `/home/ubuntu/cultiv/app/` (not committed to repo)
+   - `.env` in `/home/cultiv/cultiv/app/` (not committed to repo)
    - `NODE_ENV=production`
    - `HOST=127.0.0.1`, `PORT=3001`
    - `DATABASE_URL=postgresql://cultiv:<password>@127.0.0.1:5432/cultiv`

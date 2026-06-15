@@ -21,7 +21,7 @@ Implement automated health checks, metrics collection, alerting, and a lightweig
 ### Deliverables
 
 1. **Health check script**
-   - `scripts/health-check.sh` in `/home/ubuntu/cultiv/`
+   - `scripts/health-check.sh` in `/home/cultiv/cultiv/`
    - Checks every 2 minutes via cron:
      - API `/health` responds with 200
      - API `/ready` responds with `status: ready`
@@ -39,22 +39,22 @@ Implement automated health checks, metrics collection, alerting, and a lightweig
      - If Redis down: `docker restart cultiv-redis`
    - After auto-recovery, re-check. If still failing, send alert.
    - Alert format: Discord webhook with emoji and concise message
-   - Log all checks to `/home/ubuntu/cultiv/logs/health-check.log`
+   - Log all checks to `/home/cultiv/cultiv/logs/health-check.log`
 
 2. **Metrics collector script**
-   - `scripts/metrics-collector.sh` in `/home/ubuntu/cultiv/`
+   - `scripts/metrics-collector.sh` in `/home/cultiv/cultiv/`
    - Runs every 1 minute via cron
    - Collects:
      - System: CPU %, memory used/total, disk %
      - Database: PostgreSQL size, jobs count by status, outbox unpublished count
      - Cache: Redis key count
      - Processes: PM2 process status
-   - Writes JSON to `/home/ubuntu/cultiv/metrics/current.json`
+   - Writes JSON to `/home/cultiv/cultiv/metrics/current.json`
    - Nginx serves this file at `/metrics` (no auth for MVP; consider IP whitelist later)
    - JSON format: timestamp, system, database, cache, processes
 
 3. **Log summary script**
-   - `scripts/log-summary.sh` in `/home/ubuntu/cultiv/`
+   - `scripts/log-summary.sh` in `/home/cultiv/cultiv/`
    - Runs daily at 08:00 via cron
    - Counts errors and warnings in API/worker logs from previous day
    - Sends summary to Discord: "📊 Cultiv Daily Summary (YYYY-MM-DD): Errors: X, Warnings: Y"

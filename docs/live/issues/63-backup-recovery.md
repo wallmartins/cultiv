@@ -28,24 +28,24 @@ Implement automated daily backups of PostgreSQL and Redis to Cloudflare R2, with
    - rclone configured on VM with API key (for programmatic upload)
 
 2. **Backup script**
-   - `scripts/backup.sh` in `/home/ubuntu/cultiv/`
+   - `scripts/backup.sh` in `/home/cultiv/cultiv/`
    - Runs daily at 03:00 UTC via cron
    - Steps:
      1. Create timestamp: `DATE=$(date +%F-%H%M)`
-     2. PostgreSQL dump: `docker exec cultiv-postgres pg_dump -U cultiv cultiv | gzip > /home/ubuntu/cultiv/backups/db-$DATE.sql.gz`
-     3. Redis snapshot: `docker exec cultiv-redis redis-cli BGSAVE`, wait, then `docker cp cultiv-redis:/data/dump.rdb /home/ubuntu/cultiv/backups/redis-$DATE.rdb`
+     2. PostgreSQL dump: `docker exec cultiv-postgres pg_dump -U cultiv cultiv | gzip > /home/cultiv/cultiv/backups/db-$DATE.sql.gz`
+     3. Redis snapshot: `docker exec cultiv-redis redis-cli BGSAVE`, wait, then `docker cp cultiv-redis:/data/dump.rdb /home/cultiv/cultiv/backups/redis-$DATE.rdb`
      4. Upload to Object Storage:
-        - `rclone copy put ":s3:cultiv-backups" --file /home/ubuntu/cultiv/backups/db-$DATE.sql.gz`
-        - `rclone copy put ":s3:cultiv-backups" --file /home/ubuntu/cultiv/backups/redis-$DATE.rdb`
+        - `rclone copy put ":s3:cultiv-backups" --file /home/cultiv/cultiv/backups/db-$DATE.sql.gz`
+        - `rclone copy put ":s3:cultiv-backups" --file /home/cultiv/cultiv/backups/redis-$DATE.rdb`
      5. Verify upload: `rclone copy list ":s3:cultiv-backups" | grep $DATE`
      6. Local cleanup: delete files older than 7 days (`find ... -mtime +7 -delete`)
      7. Object Storage cleanup: delete objects older than 30 days (OCI lifecycle policy or manual script)
      8. Notify: Discord webhook "✅ Cultiv backup completed: $DATE"
-   - Log all output to `/home/ubuntu/cultiv/logs/backup.log`
+   - Log all output to `/home/cultiv/cultiv/logs/backup.log`
    - On failure: Discord alert "🚨 Cultiv backup failed: $DATE"
 
 3. **Backup verification script**
-   - `scripts/verify-backup.sh` in `/home/ubuntu/cultiv/`
+   - `scripts/verify-backup.sh` in `/home/cultiv/cultiv/`
    - Runs weekly (or monthly) to verify backup integrity
    - Downloads latest backup from Object Storage
    - Restores to a temporary Docker container (different port, e.g., 5433)

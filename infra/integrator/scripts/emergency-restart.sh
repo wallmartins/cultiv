@@ -33,11 +33,11 @@ if ! docker exec cultiv-redis redis-cli ping > /dev/null 2>&1; then
 fi
 
 # 5. Migrations (se necessário)
-cd ${CULTIV_ROOT:-/home/ubuntu/cultiv}/app
+cd ${CULTIV_ROOT:-/home/cultiv/cultiv}/app
 pnpm --filter @my-ai-orchestrator/backend migrate 2>/dev/null || true
 
 # 6. Iniciar PM2
-pm2 start ${CULTIV_ROOT:-/home/ubuntu/cultiv}/app/ecosystem.config.cjs
+pm2 start ${CULTIV_ROOT:-/home/cultiv/cultiv}/app/ecosystem.config.cjs
 
 # 7. Health check
 sleep 10

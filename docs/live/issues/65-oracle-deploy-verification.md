@@ -42,10 +42,10 @@ Perform end-to-end verification of the entire Integrator + Cloudflare deployment
    | 14 | End-to-end job enqueue | `POST /me/executions/run` → 202 | ⬜ |
    | 15 | Worker completes job | SSE or `GET /me/executions/:id` shows `done` | ⬜ |
    | 16 | Outbox relay works | `SELECT COUNT(*) FROM outbox_events WHERE published_at IS NULL` = 0 after job completes | ⬜ |
-   | 17 | Health check script active | `tail /home/ubuntu/cultiv/logs/health-check.log` shows recent run | ⬜ |
+   | 17 | Health check script active | `tail /home/cultiv/cultiv/logs/health-check.log` shows recent run | ⬜ |
    | 18 | Discord alerts work | Simulate failure, verify alert received | ⬜ |
    | 19 | UptimeRobot monitoring | Dashboard shows "Up" status | ⬜ |
-   | 20 | Backup completed | `ls /home/ubuntu/cultiv/backups/` shows recent file | ⬜ |
+   | 20 | Backup completed | `ls /home/cultiv/cultiv/backups/` shows recent file | ⬜ |
    | 21 | Backup uploaded to Object Storage | `rclone copy list ":s3:cultiv-backups"` shows recent object | ⬜ |
    | 22 | Deploy pipeline works | Push to `main`, verify GitHub Actions green | ⬜ |
    | 23 | Deploy notification received | Discord shows "✅ Deploy successful" | ⬜ |
@@ -55,7 +55,7 @@ Perform end-to-end verification of the entire Integrator + Cloudflare deployment
    | 27 | Rate limiting works | `curl` rapid-fire, verify 429 after limit | ⬜ |
    | 28 | Runbook documented | `docs/runbooks/integrator-deploy.md` exists and is accurate | ⬜ |
 | 29 | Cloudflare Zero Trust SSH works | Access VM via browser or `cloudflared` | ⬜ |
-| 30 | SSH direct access blocked | `ssh ubuntu@<vm-ip>` fails (connection refused/timeout) | ⬜ |
+| 30 | SSH direct access blocked | `ssh cultiv@<vm-ip>` fails (connection refused/timeout) | ⬜ |
 
 2. **Smoke test scenarios**
    - **Scenario A: Happy path**
@@ -96,7 +96,7 @@ Perform end-to-end verification of the entire Integrator + Cloudflare deployment
    - Verify Cloudflare Zero Trust SSH works and direct SSH fails
    - Verify Cloudflare WAF blocks suspicious requests
    - Verify `CF-Connecting-IP` is used for rate limiting (not `X-Forwarded-For` from untrusted sources)
-   - Verify `.env` is not readable by other users: `ls -la /home/ubuntu/cultiv/app/.env`
+   - Verify `.env` is not readable by other users: `ls -la /home/cultiv/cultiv/app/.env`
    - Verify secrets are not in logs: grep logs for API keys
 
 5. **Rollback plan**

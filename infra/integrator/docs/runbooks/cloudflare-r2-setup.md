@@ -120,7 +120,7 @@ R2_SECRET_ACCESS_KEY=yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy
 ### Step 2: Export to environment
 
 ```bash
-# Add to /home/ubuntu/.bashrc or /etc/environment
+# Add to /home/cultiv/.bashrc or /etc/environment
 export R2_BUCKET_NAME=cultiv-backups
 export R2_ENDPOINT=https://<account-id>.r2.cloudflarestorage.com
 export R2_ACCESS_KEY_ID=xxxxxxxxxxxxxxxxxxxxxxxx
@@ -132,12 +132,12 @@ Or create a systemd service file for `rclone` if needed.
 ### Step 3: Run backup manually
 
 ```bash
-/home/ubuntu/cultiv/scripts/backup.sh
+/home/cultiv/cultiv/scripts/backup.sh
 ```
 
 Check logs:
 ```bash
-tail -f /home/ubuntu/cultiv/logs/backup.log
+tail -f /home/cultiv/cultiv/logs/backup.log
 ```
 
 Verify in R2:

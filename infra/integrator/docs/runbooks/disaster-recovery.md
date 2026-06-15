@@ -17,10 +17,10 @@ This runbook covers disaster recovery scenarios for the Cultiv Integrator VPS de
 
 **Steps:**
 1. Stop API and Worker: `pm2 stop all`
-2. Identify last good backup: `ls -t /home/ubuntu/cultiv/backups/db-*.sql.gz | head -1`
+2. Identify last good backup: `ls -t /home/cultiv/cultiv/backups/db-*.sql.gz | head -1`
 3. Download from Cloudflare R2 if needed:
    ```bash
-   rclone copy ":s3:cultiv-backups/db-<latest>.sql.gz" /home/ubuntu/cultiv/backups/ \
+   rclone copy ":s3:cultiv-backups/db-<latest>.sql.gz" /home/cultiv/cultiv/backups/ \
      --s3-provider=Cloudflare \
      --s3-endpoint="${R2_ENDPOINT}" \
      --s3-env-auth
