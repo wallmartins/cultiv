@@ -23,6 +23,6 @@ describe("monorepo root package.json", () => {
 
   it("specifies node engine requirement", () => {
     expect(pkg.engines).toBeDefined();
-    expect(pkg.engines?.node).toMatch(/>=20/);
+    expect(pkg.engines?.node).toMatch(/>=22/);
   });
 });
