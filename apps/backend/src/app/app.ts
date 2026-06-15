@@ -11,7 +11,7 @@ import { registerBackendRoutes } from "./routes.js";
 import { createBackendHardening } from "../production/index.js";
 import { resolveTrustedClientIp } from "../production/trusted-client-ip.js";
 import type { BackendJobStoreServiceContract } from "../jobs/job-store.js";
-import { createBackendRuntimeBundle } from "../runtime/create-runtime-bundle.js";
+import { createBackendRuntimeBundle, type BackendRuntimeBundle } from "../runtime/create-runtime-bundle.js";
 import { createRedisRateLimitStore } from "../runtime/redis-rate-limit-store.js";
 import { getSharedRedisClient } from "../infra/redis-client.js";
 
@@ -20,6 +20,7 @@ export interface BackendAppOptions {
   readonly now?: () => Date;
   readonly logger?: AppLogger;
   readonly services: BackendProductServices;
+  readonly runtime?: BackendRuntimeBundle;
   readonly hardeningChecks?: Partial<{
     readonly auth: () => Effect.Effect<void, string>;
     readonly database: () => Effect.Effect<void, string>;
@@ -39,14 +40,16 @@ export function createBackendApp(config: BackendConfig, options: BackendAppOptio
       namespace: config.serviceName
     })
   );
-  const runtime = Effect.runSync(
+  const runtime = options.runtime ?? Effect.runSync(
     createBackendRuntimeBundle({
       config,
       services,
       now
     })
   );
-  runtime.start();
+  if (!options.runtime) {
+    runtime.start();
+  }
 
   const jobs = runtime.jobs;
   let onQueuedJob: ((job: import("../jobs/worker.js").BackendQueuedJob) => void) | undefined;

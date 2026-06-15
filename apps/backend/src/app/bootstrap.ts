@@ -4,6 +4,12 @@ import { createCoreLayer, LoggerService, RuntimeConfigService } from "@my-ai-orc
 import { createBackendApp } from "./app.js";
 import { bootstrapBackendConfig } from "../config/config.js";
 import { createBackendProductServices } from "../product.js";
+import { createBackendRuntimeBundle } from "../runtime/create-runtime-bundle.js";
+
+export interface BackendServerBundle {
+  readonly server: ReturnType<typeof serve>;
+  readonly cleanup: () => Promise<void>;
+}
 
 export function startBackendServer() {
   const config = bootstrapBackendConfig();
@@ -15,11 +21,21 @@ export function startBackendServer() {
       now: () => new Date(),
       logger
     });
+
+    const backendRuntime = yield* createBackendRuntimeBundle({
+      config,
+      services,
+      now: () => new Date()
+    });
+
     const app = createBackendApp(config, {
       startedAt: new Date(),
       logger,
-      services
+      services,
+      runtime: backendRuntime
     });
+
+    backendRuntime.start();
 
     const server = serve(
       {
@@ -35,7 +51,14 @@ export function startBackendServer() {
       }
     );
 
-    return server;
+    const cleanup = async () => {
+      logger.info("Shutting down backend server gracefully...");
+      server.close();
+      await backendRuntime.stop();
+      logger.info("Backend server shutdown complete");
+    };
+
+    return { server, cleanup } as BackendServerBundle;
   }).pipe(
     Effect.provide(
       createCoreLayer({

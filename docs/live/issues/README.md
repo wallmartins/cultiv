@@ -131,3 +131,22 @@ Vertical slices for [PRD](../prd/durable-async-runtime.md) · [ADR 0004](../../a
 | 57 | [Restart and multi-replica verification gate](./57-restart-multi-replica-verification-gate.md) | HITL | ready-for-agent | 53, 54, 55, 56 |
 
 **Suggested order:** 48 → (49 ∥ 50) → 51 → 52 → 53 → 54 → 55 → 56 → 57
+
+---
+
+## Integrator + Cloudflare Deploy
+
+Vertical slices for [PRD](../prd/integrator-cloudflare-deploy.md) · [ADR 0005](../../adr/0005-integrator-cloudflare-deploy.md) · [parent issue](../prd/issue-integrator-cloudflare-deploy.md) · [plan](../plan/integrator-cloudflare-deploy-implementation-plan.md)
+
+| # | Issue | Type | Status | Blocked by |
+|---|-------|------|--------|------------|
+| 58 | [VPS provisioning and home region](./58-oracle-vm-provisioning.md) | AFK | ready-for-agent | — |
+| 59 | [Cloudflare Tunnel and WAF setup](./59-cloudflare-tunnel-waf.md) | AFK | ready-for-agent | — |
+| 60 | [VM bootstrap and Docker Compose](./60-vm-bootstrap-docker.md) | AFK | ready-for-agent | 58 |
+| 61 | [Backend deployment pipeline](./61-backend-deployment-pipeline.md) | AFK | ready-for-agent | 60 |
+| 62 | [Monitoring and alerting](./62-monitoring-alerting.md) | AFK | ready-for-agent | 61 |
+| 63 | [Backup and disaster recovery](./63-backup-recovery.md) | AFK | ready-for-agent | 60 |
+| 64 | [Graceful shutdown implementation](./64-graceful-shutdown.md) | AFK | ready-for-agent | 61 |
+| 65 | [Deploy verification and go-live](./65-oracle-deploy-verification.md) | HITL | ready-for-agent | 62, 63, 64 |
+
+**Suggested order:** 58 → 59 → 60 → 61 → 62 → 63 → 64 → 65

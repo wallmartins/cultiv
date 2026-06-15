@@ -70,6 +70,28 @@ async function main() {
   });
 
   console.info("Backend execution worker started");
+
+  const gracefulShutdown = async (signal: string) => {
+    console.info(`${signal} received, shutting down worker gracefully...`);
+    const forceExit = setTimeout(() => {
+      console.warn("Worker shutdown timed out, forcing exit");
+      process.exit(1);
+    }, 15000);
+
+    try {
+      await worker.close();
+      await runtime.stop();
+      clearTimeout(forceExit);
+      console.info("Worker shutdown complete");
+      process.exit(0);
+    } catch (error) {
+      console.error("Worker shutdown failed:", error);
+      process.exit(1);
+    }
+  };
+
+  process.on("SIGTERM", () => void gracefulShutdown("SIGTERM"));
+  process.on("SIGINT", () => void gracefulShutdown("SIGINT"));
 }
 
 main().catch((error) => {
