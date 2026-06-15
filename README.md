@@ -4,9 +4,9 @@
 
 Cultiv is an AI writing engine that learns an author's personal voice and generates text that sounds like them — not a generic assistant. Visitors teach their voice with real writing samples, pick a content format (blog, LinkedIn, thread, newsletter, and more), review a preview, and generate aligned output at scale.
 
-This repository is a **pnpm monorepo** containing the public marketing site, the writing backend, shared domain packages, and the client SDK. The public product name is **Cultiv**; internal workspace packages use the `@my-ai-orchestrator/*` scope.
+This repository is a **pnpm monorepo** containing the marketing site, the authenticated workspace, the writing backend, shared domain packages, and the client SDK. The public product name is **Cultiv**; internal workspace packages use the `@my-ai-orchestrator/*` scope.
 
-**Status:** Pre-launch — [cultiv.app](https://cultiv.app) marketing surface with waitlist. Authenticated product (phase 2) is in active development.
+**Status:** Pre-launch — marketing surface and authenticated workspace are implemented in code; production deploy (Vercel + Railway) and final QA are pending.
 
 ---
 
@@ -17,8 +17,9 @@ This repository is a **pnpm monorepo** containing the public marketing site, the
 | **Voice Profile** | Durable model of tone, cadence, vocabulary, and constraints — learned from the author's samples |
 | **Content Type** | Kind of text (blog post, LinkedIn post, thread, newsletter, …) — each with its own pipeline |
 | **Generation Request** | User-facing request to generate text (briefing + voice inputs) without exposing internal pipeline structure |
-| **Marketing Surface** | Unauthenticated experience: editorial showcase + waitlist — separate from the authenticated app |
-| **Waitlist Submission** | Signup forwarded to Loops; does **not** create an application user or touch the product backend |
+| **Marketing Surface** | Unauthenticated experience: editorial showcase + waitlist |
+| **Authenticated Workspace** | Auth0-protected `/app` routes: generation, voice, history, settings |
+| **Waitlist Submission** | Signup forwarded to Loops; does **not** create an application user |
 
 Full domain language: [`CONTEXT.md`](./CONTEXT.md).
 
@@ -26,35 +27,40 @@ Full domain language: [`CONTEXT.md`](./CONTEXT.md).
 
 ## Architecture overview
 
-Development is split into two phases. Phase 1 (marketing) is largely complete; phase 2 (authenticated app) builds on the same design system and backend.
-
 ```
-┌──────────────────────────────────────────────────────────────────────────┐
-│  PHASE 1 — Marketing Surface (apps/web, deployed to Vercel)              │
-│  Editorial landing · showcase · FAQ · legal · waitlist → Loops             │
-│  No Auth0 · no product backend · Effect at service boundaries only       │
-└──────────────────────────────────────────────────────────────────────────┘
-                                    │
-                                    ▼
-┌──────────────────────────────────────────────────────────────────────────┐
-│  PHASE 2 — Authenticated app (planned: apps/web/routes/app/*)           │
-│  Auth0 · TanStack Query · client-sdk → backend Public API Surface        │
-│  Generation · voice training · execution history · billing                 │
-└──────────────────────────────────────────────────────────────────────────┘
-                                    │
-                                    ▼
-┌──────────────────────────────────────────────────────────────────────────┐
-│  WRITING ENGINE (apps/backend + packages/*)                              │
-│  Pipelines · voice derivation · quality lanes · credits · PostgreSQL       │
-└──────────────────────────────────────────────────────────────────────────┘
+                         ┌─────────────────────────────────┐
+                         │  Vercel — apps/web              │
+                         │  Marketing (/ , /en)            │
+                         │  Workspace (/app/*) + Auth0     │
+                         │  Waitlist → Loops (server-only)   │
+                         └────────────┬────────────────────┘
+                                      │ client-sdk (HTTPS)
+                                      ▼
+                         ┌─────────────────────────────────┐
+                         │  Railway — apps/backend           │
+                         │  api  → dist/cli/main.js        │
+                         │  worker → dist/cli/worker-main.js│
+                         └────────────┬────────────────────┘
+                                      │
+                    ┌─────────────────┴─────────────────┐
+                    ▼                                   ▼
+            ┌───────────────┐                   ┌───────────────┐
+            │  PostgreSQL   │                   │  Redis        │
+            │  system of    │                   │  jobs · SSE ·   │
+            │  record       │                   │  rate limits    │
+            └───────────────┘                   └───────────────┘
+
+         packages/* — domain, orchestrator, contracts, client-sdk, …
 ```
 
 ### Boundary rules
 
-- The **marketing site never calls the product backend** — governance enforced in `tests/governance/frontend-client-boundary.test.ts`.
-- **Waitlist** uses a server-only route (`POST /api/waitlist`) → Loops adapter. Secrets stay off the client.
-- **Phase 2** frontends consume the backend only through `@my-ai-orchestrator/client-sdk`, not raw HTTP to internal routes.
-- **Auth** (signup/signin) is Auth0 — not the client SDK.
+- **Marketing waitlist** never calls the product backend — Loops only (`POST /api/waitlist` or TanStack Start server fn). Enforced in `tests/governance/frontend-client-boundary.test.ts`.
+- **Authenticated workspace** consumes the backend only through `@my-ai-orchestrator/client-sdk`, not raw HTTP to internal routes.
+- **Auth** (login/signup) is Auth0 — not the client SDK.
+- **Production** uses durable async execution (`EXECUTION_MODE=async`): API enqueues jobs; a separate **worker** process drains the queue.
+
+Operational runbooks: [`docs/live/runbooks/production-go-live.md`](./docs/live/runbooks/production-go-live.md) · [`docs/live/runbooks/durable-async-runtime-hitl.md`](./docs/live/runbooks/durable-async-runtime-hitl.md).
 
 ---
 
@@ -81,7 +87,7 @@ Generation Request
 
 | Package / app | Role |
 |---------------|------|
-| `apps/backend` | Hono HTTP API, auth, Postgres persistence, job/sync execution |
+| `apps/backend` | Hono HTTP API, Auth0 JWT validation, Postgres persistence, BullMQ worker |
 | `packages/core` | Pipeline orchestration, runtime base |
 | `packages/domain` | Domain types and invariants |
 | `packages/orchestrator` | Step execution and pipeline wiring |
@@ -90,29 +96,69 @@ Generation Request
 | `packages/text-quality` | Candidate comparison and refinement |
 | `packages/database` | Schema and repository layer |
 | `packages/payments` | Credit budget, reservations, pricing envelopes |
-| `packages/contracts` | Shared API contracts |
-| `packages/client-sdk` | Typed client for web/mobile (phase 2) |
+| `packages/contracts` | Shared API contracts ([Effect Schema](https://effect.website/docs/schema/introduction/)) |
+| `packages/client-sdk` | Typed client for web (and future mobile) |
+| `packages/feature-flags` | Feature flag registry |
+| `packages/config` | Shared TS / ESLint / Prettier config |
 
-**Stack:** TypeScript, [Hono](https://hono.dev/), [Effect](https://effect.website/), PostgreSQL ([Kysely](https://kysely.dev/) + `pg`), [Zod](https://zod.dev/) validation.
+**Stack:** TypeScript, [Hono](https://hono.dev/), [Effect](https://effect.website/), PostgreSQL ([Kysely](https://kysely.dev/) + `pg`), [BullMQ](https://docs.bullmq.io/) + Redis.
 
-Run locally: `pnpm dev:backend` (backend). Requires `DATABASE_URL` and related env — see `apps/backend/`.
+**Production build:** esbuild → `apps/backend/dist/cli/{main,worker-main,migrate}.js` (`pnpm build:backend`).
+
+### Backend `src/` layout
+
+```
+apps/backend/src/
+├── cli/              # main.ts, worker-main.ts, migrate.ts
+├── app/              # bootstrap, routes wiring, production hardening
+├── routes/           # Hono route modules (*-routes.ts)
+├── config/           # env loading and validation
+├── http/             # HTTP helpers, errors, error-response
+├── jobs/             # worker, job-store, job-events (SSE)
+├── product/          # domain services (voice, billing, generation, …)
+├── execution/        # runtime, pipeline, quality lanes
+├── safety/           # input/output gates, voice field protection
+├── auth/             # Auth0 JWT, application users, operators
+├── infra/            # Postgres repos, migrations, Redis bootstrap
+├── runtime/          # durable job runtime, rate-limit store
+└── production/       # readiness, rate limiter, trusted client IP
+```
 
 ---
 
-## Marketing surface (web)
+## Web app (`apps/web`)
 
-Single-scroll **Product Showcase** with anchored sections, bilingual routes, and SEO/GEO metadata.
+TanStack Start app serving both the **marketing surface** and the **authenticated workspace** from one deploy.
 
 ### Routes
 
 | Route | Locale | Purpose |
 |-------|--------|---------|
-| `/` | pt-BR | Home + showcase + waitlist |
-| `/en` | en | English equivalent |
-| `/privacy`, `/terms` | pt | Legal |
-| `/en/privacy`, `/en/terms` | en | Legal |
-| `/llms.txt`, `/llms-full.txt` | pt/en | LLM-oriented product docs |
+| `/`, `/en` | pt / en | Home + showcase + waitlist |
+| `/privacy`, `/terms`, `/en/*` | pt / en | Legal |
+| `/llms.txt`, `/llms-full.txt` | pt / en | LLM-oriented product docs |
 | `/robots.txt`, `/sitemap.xml` | — | Crawlers |
+| `/login`, `/callback` | — | Auth0 |
+| `/app/generate` | — | Generation workspace |
+| `/app/history` | — | Execution history |
+| `/app/voice/*` | — | Voice profile & examples |
+| `/app/settings` | — | Account settings |
+| `/app/onboarding` | — | First-run onboarding |
+
+### Web `src/` layout
+
+```
+apps/web/src/
+├── routes/           # TanStack Router file routes (do not move)
+├── marketing/        # public site: sections, showcase content, SEO, motion
+├── app/              # authenticated UI: generation, voice, history, shell
+├── platform/         # client-sdk context, server handlers, shared UI primitives
+├── i18n/
+│   ├── marketing/    # landing copy (pt / en)
+│   └── app/          # workspace copy
+├── brand/            # logos, head links
+└── styles/
+```
 
 ### Waitlist flow
 
@@ -120,25 +166,16 @@ Single-scroll **Product Showcase** with anchored sections, bilingual routes, and
 Browser (WaitlistForm)
     → submitWaitlistAction (TanStack Start server fn)
     → Waitlist Service (Effect)
-    → Loops adapter (POST contacts/create)
-    → Loops audience + optional workflow email
+    → Loops adapter
 ```
 
-### Showcase content
-
-Curated **Showcase Samples** (blog, LinkedIn, thread) live in `apps/web/src/content/showcase/` — generic AI output vs voice-aligned output per locale. Content is typed catalogs, not embedded in JSX.
-
-### SEO & GEO
-
-- Per-route title, description, canonical, `hreflang`, Open Graph
-- JSON-LD: Organization, WebSite, SoftwareApplication, FAQPage
-- `llms.txt` / `llms-full.txt` for AI crawlers; explicit allowlist in `robots.txt`
+Showcase samples live in `apps/web/src/marketing/content/showcase/`.
 
 ---
 
 ## Design system (`packages/ui`)
 
-Shared tokens and components for marketing and future app UI.
+Shared tokens and components for marketing and workspace UI.
 
 | Layer | Contents |
 |-------|----------|
@@ -146,43 +183,22 @@ Shared tokens and components for marketing and future app UI.
 | **Primitives** | `Button`, `Text`, `Container`, `Input`, … |
 | **Patterns** | `SectionHeader`, `ComparisonCard`, `Accordion`, … |
 
-**Visual language (marketing):** editorial light theme, botanical illustrations, discrete motion. Typography: Playfair Display (display), Caveat (handwritten accents), Inter (body), JetBrains Mono (meta/labels). Palette centers on warm paper (`#f5f0e8`), rich soil foreground, moss, and golden highlights.
+**Visual language:** editorial light theme, botanical illustrations, discrete motion. Typography: Playfair Display, Caveat, Inter, JetBrains Mono.
 
 ---
 
 ## Tech stack
 
-### Marketing site (`apps/web`)
-
 | Layer | Technology |
 |-------|------------|
-| Framework | [TanStack Start](https://tanstack.com/start) + [TanStack Router](https://tanstack.com/router) |
-| UI | React 19, `packages/ui`, [Tailwind CSS](https://tailwindcss.com/) v4 |
-| Motion | [GSAP](https://gsap.com/) + [Lenis](https://lenis.darkroom.engineering/) smooth scroll; `prefers-reduced-motion` guards |
-| Server | [Nitro](https://nitro.build/) (Vercel preset in CI) |
-| Boundaries | [Effect](https://effect.website/) for waitlist service |
-| Email / waitlist | [Loops](https://loops.so) API |
-| Deploy | [Vercel](https://vercel.com) — root directory `apps/web` |
-
-### Backend & shared packages
-
-| Layer | Technology |
-|-------|------------|
-| Runtime | Node.js 20+ |
-| HTTP | Hono |
-| Effects & errors | Effect-TS |
-| Database | PostgreSQL |
-| Validation | Zod |
-| Tests | Vitest |
-| Monorepo | pnpm workspaces |
-
-### Planned (phase 2)
-
-| Layer | Technology |
-|-------|------------|
-| Auth | Auth0 Universal Login |
-| Client data | TanStack Query |
-| API access | `@my-ai-orchestrator/client-sdk` only |
+| **Monorepo** | pnpm 11 workspaces |
+| **Runtime** | Node.js ≥ 22.13 |
+| **Web** | TanStack Start + Router, React 19, Tailwind 4, Nitro, GSAP + Lenis |
+| **Backend** | Hono, Effect-TS, PostgreSQL, Redis, BullMQ |
+| **Contracts** | Effect Schema (`packages/contracts`) |
+| **Auth** | Auth0 (SPA + API JWT) |
+| **Tests** | Vitest (~582 unit tests; durable suite behind `pnpm test:durable`) |
+| **CI** | GitHub Actions — lint, build, test, durable-runtime job |
 
 ---
 
@@ -191,127 +207,119 @@ Shared tokens and components for marketing and future app UI.
 ```
 .
 ├── apps/
-│   ├── web/              # TanStack Start — marketing (+ future /app routes)
-│   ├── backend/          # Writing engine HTTP API
-│   └── mobile/           # Placeholder
+│   ├── web/                 # TanStack Start — marketing + /app workspace
+│   ├── backend/             # Writing engine API + worker
+│   └── mobile/              # Placeholder
 ├── packages/
-│   ├── ui/               # Design system
-│   ├── client-sdk/       # Typed backend client
-│   ├── core/             # Orchestration
-│   ├── domain/           # Domain model
-│   ├── orchestrator/     # Pipeline execution
-│   ├── skills/           # Writing skills
-│   ├── ai-adapters/      # LLM adapters
-│   ├── text-quality/     # Output quality
-│   ├── database/         # Persistence
-│   ├── payments/         # Credits & billing
-│   ├── contracts/        # API contracts
-│   └── …
-├── docs/live/            # PRD, plans, issues, ADRs
-├── tests/                # Unit, integration, governance
-└── CONTEXT.md            # Domain glossary
+│   ├── ui/                  # Design system
+│   ├── client-sdk/          # Typed backend client
+│   ├── contracts/           # API schemas & types
+│   ├── core/                # Orchestration
+│   ├── domain/              # Domain model
+│   ├── orchestrator/        # Pipeline execution
+│   ├── skills/              # Writing skills
+│   ├── ai-adapters/         # LLM adapters
+│   ├── text-quality/        # Output quality
+│   ├── database/            # Persistence abstractions
+│   ├── payments/            # Credits & billing
+│   ├── feature-flags/       # Feature flags
+│   └── config/              # Shared tooling config
+├── tests/                   # Unit, integration, governance
+├── docs/live/               # PRD, plans, issues, ADRs, runbooks
+├── scripts/                 # CI helpers, showcase, restructure tooling
+├── railway.toml             # Railway api service config
+├── railway.worker.toml      # Railway worker service config
+├── docker-compose.yml       # Local Postgres + Redis
+└── CONTEXT.md               # Domain glossary
 ```
 
 ---
 
 ## Prerequisites
 
-- [Node.js](https://nodejs.org/) 20+ (18+ minimum)
-- [pnpm](https://pnpm.io/) 9+
+- [Node.js](https://nodejs.org/) **≥ 22.13** (required by pnpm 11)
+- [pnpm](https://pnpm.io/) **11.3** (`corepack enable` or `npm i -g pnpm`)
 
 ---
 
-## Quick start — marketing site
+## Quick start
 
 ```bash
+git clone git@github.com:wallmartins/cultiv.git
+cd cultiv
 pnpm install
-cp apps/web/.env.example apps/web/.env
-# Set LOOPS_API_KEY, LOOPS_MAILING_LIST_ID (and SITE_URL for production builds)
 
+cp .env.example .env          # backend + shared secrets
+cp apps/web/.env.example apps/web/.env
+```
+
+### Marketing + workspace (web)
+
+```bash
 pnpm dev:web
 ```
 
 - Portuguese: [http://localhost:3000](http://localhost:3000)
 - English: [http://localhost:3000/en](http://localhost:3000/en)
+- Workspace (requires Auth0 + backend): [http://localhost:3000/app/generate](http://localhost:3000/app/generate)
 
-### Environment variables (`apps/web`)
+Set `VITE_API_BASE_URL=http://localhost:3001` in `apps/web/.env` when the backend runs locally.
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `LOOPS_API_KEY` | Waitlist | Loops API key — **server-only**, never `VITE_*` / `PUBLIC_*` |
-| `LOOPS_MAILING_LIST_ID` | Waitlist | Mailing list ID; contacts tagged with `userGroup` (`pt` / `en`) |
-| `SITE_URL` | Production | e.g. `https://cultiv.app` (no trailing slash) — canonical & OG URLs |
-
-Do not commit `.env`.
-
-### Build and preview
+### Backend — memory mode (fast dev)
 
 ```bash
-pnpm --filter @my-ai-orchestrator/web build
-pnpm --filter @my-ai-orchestrator/web preview
-```
-
----
-
-## Deploy — Vercel (marketing site)
-
-1. Import this repository in Vercel.
-2. **Root Directory:** `apps/web`.
-3. Environment variables for Production: `LOOPS_API_KEY`, `LOOPS_MAILING_LIST_ID`, `SITE_URL`.
-4. Point `cultiv.app` DNS to Vercel.
-
-`vercel.json` installs dependencies from the monorepo root (`cd ../.. && pnpm install`) so `packages/ui` resolves. Only the web app is deployed.
-
----
-
-## Quick start — backend (optional)
-
-### Memory mode (fast unit dev)
-
-```bash
-pnpm install
-cp .env.example .env
-# BACKEND_ALLOW_IN_MEMORY_RUNTIME=true in .env
-
+# In .env: BACKEND_ALLOW_IN_MEMORY_RUNTIME=true
 pnpm dev:backend
 ```
 
-### Durable async runtime (PostgreSQL + Redis)
+API default: [http://localhost:3001](http://localhost:3001).
+
+### Backend — durable runtime (PostgreSQL + Redis)
 
 ```bash
-pnpm install
-cp .env.example .env
-# Set DATABASE_URL, REDIS_URL, GEMINI_API_KEY
-# Remove or comment BACKEND_ALLOW_IN_MEMORY_RUNTIME
-# Set EXECUTION_MODE=async for queued executions
-
 docker compose up -d postgres redis
-pnpm --filter @my-ai-orchestrator/backend migrate
 
-# Terminal A — API (outbox relay; no in-process worker)
-pnpm dev:backend
+# In .env: DATABASE_URL, REDIS_URL, GEMINI_API_KEY (or other provider)
+# EXECUTION_MODE=async — do NOT set BACKEND_ALLOW_IN_MEMORY_RUNTIME=true
 
-# Terminal B — worker process
-pnpm --filter @my-ai-orchestrator/backend worker
+pnpm --filter @my-ai-orchestrator/backend migrate:dev   # dev
+pnpm dev:backend                                        # terminal A — API
+pnpm --filter @my-ai-orchestrator/backend worker        # terminal B — worker
 ```
 
-- API: [http://localhost:3001](http://localhost:3001) (default `PORT=3001` in `.env.example`)
-- Web dev stays on port 3000; set `VITE_API_BASE_URL=http://localhost:3001` in `apps/web/.env`.
-- **HITL checklist:** [`docs/live/runbooks/durable-async-runtime-hitl.md`](./docs/live/runbooks/durable-async-runtime-hitl.md)
-- **Automated smoke (§4):** `pnpm hitl:durable-smoke`
-- **Integration tests:** `pnpm test:durable` (requires `docker compose up -d postgres redis`)
+Smoke: `pnpm hitl:durable-smoke` · Integration: `pnpm test:durable`
 
-Legacy one-liner (postgres only):
+---
 
-```bash
-docker compose up -d postgres
-pnpm --filter @my-ai-orchestrator/backend migrate
-pnpm dev:backend
-```
+## Environment variables
 
-Showcase generation helpers (with backend running): `pnpm showcase:voice-setup`, `pnpm showcase:generate`.
+### Root `.env` (backend)
 
-See `docs/live/plan/phase-2-implementation-plan.md` for the authenticated app architecture.
+See [`.env.example`](./.env.example). Key production fields:
+
+| Variable | Notes |
+|----------|-------|
+| `DATABASE_URL` | PostgreSQL (required in production) |
+| `REDIS_URL` | Redis (required for async runtime) |
+| `EXECUTION_MODE` | `async` in production |
+| `AUTH_ISSUER_URL`, `AUTH_AUDIENCE`, `AUTH_JWKS_URL` | Auth0 API JWT validation |
+| `CORS_ALLOWED_ORIGINS` | e.g. `https://www.cultiv.app` |
+| `VOICE_DATA_PROTECTION_KEY` | ≥32 chars — encrypts voice examples at rest |
+| `GEMINI_API_KEY` | At least one LLM provider |
+
+### `apps/web/.env`
+
+See [`apps/web/.env.example`](./apps/web/.env.example).
+
+| Variable | Notes |
+|----------|-------|
+| `SITE_URL` | Canonical URL for SEO / OG |
+| `VITE_API_BASE_URL` | Backend public API |
+| `VITE_AUTH0_*` | Auth0 SPA client |
+| `REDIS_URL` | Waitlist rate limit (production on Vercel) |
+| `LOOPS_API_KEY`, `LOOPS_WAITLIST_ID` | Server-only — never `VITE_*` |
+
+Do not commit `.env` files.
 
 ---
 
@@ -319,16 +327,52 @@ See `docs/live/plan/phase-2-implementation-plan.md` for the authenticated app ar
 
 | Command | Description |
 |---------|-------------|
-| `pnpm dev:web` | Marketing site dev server (port 3000) |
-| `pnpm dev` / `pnpm dev:backend` | Backend dev server (port 3000 by default) |
+| `pnpm dev:web` | Web dev server (port 3000) |
+| `pnpm dev:backend` | Backend API dev (`tsx watch`, port 3001) |
 | `pnpm build` | Build all workspaces with a build script |
-| `pnpm build:web` | Build marketing site only (`apps/web`) |
-| `pnpm test` | Run Vitest suite |
+| `pnpm build:web` | Build web (`apps/web`) |
+| `pnpm build:backend` | Production esbuild bundle (`apps/backend/dist/`) |
+| `pnpm test` | Vitest suite (unit + governance; skips PG/Redis integration by default) |
 | `pnpm test:durable` | Durable runtime integration tests (PG + Redis) |
-| `pnpm hitl:durable-smoke` | Manual gate smoke — 202 survives API restart (issue 57 §4) |
-| `pnpm lint` | Typecheck across workspaces |
-| `pnpm showcase:voice-setup` | Dev helper — voice profile token for showcase generation |
+| `pnpm test:web` | Web + frontend-boundary tests |
+| `pnpm hitl:durable-smoke` | Manual smoke — async job survives API restart |
+| `pnpm lint` | `tsc --noEmit` across all workspaces |
+| `pnpm showcase:voice-setup` | Dev helper — voice profile token for showcase |
 | `pnpm showcase:generate` | Dev helper — generate showcase sample via backend |
+
+---
+
+## Deploy
+
+### Vercel (web)
+
+1. Import repo → **Root Directory:** `apps/web`
+2. **Node.js:** 22.x
+3. `vercel.json` installs from monorepo root:
+   `cd ../.. && npx -y pnpm@11.3.0 install --frozen-lockfile`
+4. Production env: `SITE_URL`, `VITE_*`, `REDIS_URL`, `LOOPS_*`, Auth0 vars
+
+### Railway (backend)
+
+One GitHub repo, monorepo root `/`. See [`railway.toml`](./railway.toml) and [`railway.worker.toml`](./railway.worker.toml).
+
+| Service | Config file | Start command |
+|---------|-------------|---------------|
+| `api` | `/railway.toml` (auto) | `pnpm --filter @my-ai-orchestrator/backend start` |
+| `worker` | `/railway.worker.toml` (set in service settings) | `pnpm --filter @my-ai-orchestrator/backend worker` |
+
+Plugins: **PostgreSQL** + **Redis**. Migrations run via `preDeployCommand` on `api`.
+
+Full checklist: [`docs/live/runbooks/production-go-live.md`](./docs/live/runbooks/production-go-live.md).
+
+---
+
+## CI
+
+GitHub Actions (`.github/workflows/ci.yml`):
+
+- **test** — `pnpm lint`, `pnpm build:backend`, `pnpm test`, `pnpm build:web` on Node 22
+- **durable-runtime** — `pnpm test:durable` with service containers (Postgres + Redis)
 
 ---
 
@@ -336,11 +380,11 @@ See `docs/live/plan/phase-2-implementation-plan.md` for the authenticated app ar
 
 | Resource | Description |
 |----------|-------------|
-| [`CONTEXT.md`](./CONTEXT.md) | Domain glossary and entity relationships |
-| [`docs/live/prd/`](./docs/live/prd/) | Product requirements (phase 1 & 2) |
-| [`docs/live/plan/`](./docs/live/plan/) | Implementation plans and decisions |
-| [`docs/live/issues/`](./docs/live/issues/) | Vertical implementation slices |
-| [`docs/progress-log.md`](./docs/progress-log.md) | Development progress log |
+| [`CONTEXT.md`](./CONTEXT.md) | Domain glossary |
+| [`docs/live/prd/`](./docs/live/prd/) | Product requirements |
+| [`docs/live/plan/`](./docs/live/plan/) | Implementation plans |
+| [`docs/live/runbooks/`](./docs/live/runbooks/) | Production & HITL runbooks |
+| [`docs/progress-log.md`](./docs/progress-log.md) | Development log |
 
 ---
 
@@ -348,8 +392,9 @@ See `docs/live/plan/phase-2-implementation-plan.md` for the authenticated app ar
 
 | Phase | Scope | Status |
 |-------|--------|--------|
-| **1 — Marketing Surface** | Landing, showcase, waitlist, legal, SEO, Vercel | Code complete; production deploy & QA pending |
-| **2 — Authenticated app** | Auth0, `/app`, generation, voice, billing via client-sdk | Planned |
+| **Marketing Surface** | Landing, showcase, waitlist, legal, SEO | Code complete |
+| **Authenticated Workspace** | Auth0, `/app`, generation, voice, history, billing | Implemented in repo; production hardening in progress |
+| **Go-live** | Vercel + Railway + Auth0 + Cloudflare + smoke tests | Pending |
 
 ---
 
