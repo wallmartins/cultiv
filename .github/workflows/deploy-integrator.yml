@@ -39,6 +39,8 @@ jobs:
   deploy:
     needs: build
     runs-on: [self-hosted, integrator]
+    env:
+      CULTIV_ROOT: ${{ vars.CULTIV_ROOT }}
     steps:
       - name: Download artifact
         uses: actions/download-artifact@v4
@@ -48,7 +50,7 @@ jobs:
       - name: Deploy
         run: |
           set -euo pipefail
-          cd /home/ubuntu/cultiv/app
+          cd ${CULTIV_ROOT:-/home/ubuntu/cultiv}/app
           # Backup do dist atual
           if [ -d apps/backend/dist ]; then
             mv apps/backend/dist "apps/backend/dist.bak.$(date +%F-%H%M)"

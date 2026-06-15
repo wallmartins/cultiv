@@ -48,6 +48,24 @@ infra/integrator/
 
 > **Nunca fez deploy antes?** Siga o guia detalhado passo a passo: [`first-deploy-step-by-step.md`](./docs/runbooks/first-deploy-step-by-step.md)
 
+### Configuração de Usuário
+
+Todos os scripts suportam um usuário personalizado via variável de ambiente `CULTIV_USER`:
+
+```bash
+# Padrão é 'ubuntu', mas pode ser qualquer usuário (ex: 'cultiv')
+export CULTIV_USER=cultiv
+
+# Rodar bootstrap com usuário customizado
+sudo CULTIV_USER=cultiv ./bootstrap-vm.sh
+
+# Ou definir no ~/.bashrc do usuário
+export CULTIV_USER=cultiv
+export CULTIV_ROOT=/home/cultiv/cultiv
+```
+
+**Importante:** Se você criou um usuário diferente de `ubuntu` (ex: `cultiv`), defina `CULTIV_USER` antes de rodar qualquer script.
+
 ### Phase 1: VPS Provisioning
 1. **Contratar VPS** no Integrator (VPS Linux Core, Ubuntu 26.04 LTS)
 2. **Acessar VPS** via SSH (console web da Integrator ou terminal)

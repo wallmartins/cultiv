@@ -9,7 +9,7 @@ set -euo pipefail
 # =============================================================================
 
 WEBHOOK_URL="${DISCORD_WEBHOOK_URL:-}"
-LOG_DIR="/home/ubuntu/cultiv/logs"
+LOG_DIR="${CULTIV_ROOT:-/home/ubuntu/cultiv}/logs"
 YESTERDAY=$(date -d "yesterday" +%F)
 
 ERROR_COUNT=$(grep -ci "error\|ERROR\|failed\|FAIL" "${LOG_DIR}/api-err.log" 2>/dev/null || echo 0)

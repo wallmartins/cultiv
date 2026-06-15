@@ -7,11 +7,13 @@ set -euo pipefail
 # Este script prepara uma VPS Ubuntu 26.04 LTS (Integrator, Hetzner, etc.) para hospedar
 # o backend Cultiv (PostgreSQL, Redis, Node.js, PM2, Nginx, cloudflared).
 # 
-# Uso: sudo ./bootstrap-vm.sh
+# Uso: sudo CULTIV_USER=cultiv ./bootstrap-vm.sh
 # Requer: Ubuntu 26.04 LTS, acesso root, conexão com internet
 # =============================================================================
 
-CULTIV_ROOT="/home/ubuntu/cultiv"
+# Usuário que vai rodar o projeto (pode ser ubuntu, cultiv, etc.)
+CULTIV_USER="${CULTIV_USER:-ubuntu}"
+CULTIV_ROOT="/home/${CULTIV_USER}/cultiv"
 CULTIV_APP="${CULTIV_ROOT}/app"
 CULTIV_DATA="${CULTIV_ROOT}/data"
 CULTIV_LOGS="${CULTIV_ROOT}/logs"
@@ -63,7 +65,7 @@ if ! command -v docker &> /dev/null; then
   apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
 fi
 
-usermod -aG docker ubuntu
+  usermod -aG docker "${CULTIV_USER}"
 systemctl enable docker
 systemctl start docker
 
@@ -144,7 +146,7 @@ mkdir -p \
   "${CULTIV_SCRIPTS}" \
   "${CULTIV_ROOT}/docs/runbooks"
 
-chown -R ubuntu:ubuntu "${CULTIV_ROOT}"
+  chown -R "${CULTIV_USER}:${CULTIV_USER}" "${CULTIV_ROOT}"
 
 # =============================================================================
 # 9. logrotate
@@ -164,7 +166,7 @@ ${CULTIV_LOGS}/*.log {
     size 100M
 }
 
-/home/ubuntu/.pm2/logs/*.log {
+/home/${CULTIV_USER}/.pm2/logs/*.log {
     daily
     rotate 7
     compress
@@ -172,7 +174,7 @@ ${CULTIV_LOGS}/*.log {
     missingok
     notifempty
     copytruncate
-    create 0644 ubuntu ubuntu
+    create 0644 ${CULTIV_USER} ${CULTIV_USER}
 }
 EOF
 
@@ -206,7 +208,7 @@ server {
     }
 
     location /metrics {
-        alias /home/ubuntu/cultiv/metrics/current.json;
+        alias ${CULTIV_ROOT}/metrics/current.json;
         add_header Content-Type application/json;
         access_log off;
     }
@@ -231,7 +233,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
       POSTGRES_DB: cultiv
     volumes:
-      - /home/ubuntu/cultiv/data/postgres:/var/lib/postgresql/data
+      - ${CULTIV_ROOT}/data/postgres:/var/lib/postgresql/data
     ports:
       - "127.0.0.1:5432:5432"
     restart: unless-stopped
@@ -246,7 +248,7 @@ services:
     container_name: cultiv-redis
     command: redis-server --appendonly yes
     volumes:
-      - /home/ubuntu/cultiv/data/redis:/data
+      - ${CULTIV_ROOT}/data/redis:/data
     ports:
       - "127.0.0.1:6379:6379"
     restart: unless-stopped
@@ -270,8 +272,8 @@ module.exports = {
   apps: [
     {
       name: 'cultiv-api',
-      script: '/home/ubuntu/cultiv/app/apps/backend/dist/cli/main.js',
-      cwd: '/home/ubuntu/cultiv/app',
+      script: '${CULTIV_ROOT}/app/apps/backend/dist/cli/main.js',
+      cwd: '${CULTIV_ROOT}/app',
       instances: 1,
       exec_mode: 'fork',
       env: {
@@ -288,9 +290,9 @@ module.exports = {
         RATE_LIMIT_MAX_REQUESTS: '60',
         RATE_LIMIT_WINDOW_MS: '60000'
       },
-      log_file: '/home/ubuntu/cultiv/logs/api-combined.log',
-      out_file: '/home/ubuntu/cultiv/logs/api-out.log',
-      err_file: '/home/ubuntu/cultiv/logs/api-err.log',
+      log_file: '${CULTIV_ROOT}/logs/api-combined.log',
+      out_file: '${CULTIV_ROOT}/logs/api-out.log',
+      err_file: '${CULTIV_ROOT}/logs/api-err.log',
       log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
       merge_logs: true,
       max_memory_restart: '512M',
@@ -301,17 +303,17 @@ module.exports = {
     },
     {
       name: 'cultiv-worker',
-      script: '/home/ubuntu/cultiv/app/apps/backend/dist/cli/worker-main.js',
-      cwd: '/home/ubuntu/cultiv/app',
+      script: '${CULTIV_ROOT}/app/apps/backend/dist/cli/worker-main.js',
+      cwd: '${CULTIV_ROOT}/app',
       instances: 1,
       exec_mode: 'fork',
       env: {
         NODE_ENV: 'production',
         EXECUTION_WORKER_CONCURRENCY: '2'
       },
-      log_file: '/home/ubuntu/cultiv/logs/worker-combined.log',
-      out_file: '/home/ubuntu/cultiv/logs/worker-out.log',
-      err_file: '/home/ubuntu/cultiv/logs/worker-err.log',
+      log_file: '${CULTIV_ROOT}/logs/worker-combined.log',
+      out_file: '${CULTIV_ROOT}/logs/worker-out.log',
+      err_file: '${CULTIV_ROOT}/logs/worker-err.log',
       max_memory_restart: '512M',
       restart_delay: 3000,
       kill_timeout: 5000
@@ -320,27 +322,27 @@ module.exports = {
 };
 EOF
 
-chown -R ubuntu:ubuntu "${CULTIV_APP}"
+chown -R "${CULTIV_USER}:${CULTIV_USER}" "${CULTIV_APP}"
 
 # =============================================================================
 # 13. Aliases úteis
 # =============================================================================
 log "Criando aliases..."
-cat >> /home/ubuntu/.bashrc <<'EOF'
+cat >> /home/${CULTIV_USER}/.bashrc <<EOF
 
 # Cultiv aliases
-alias logs-api='tail -f /home/ubuntu/cultiv/logs/api-out.log'
-alias logs-api-err='tail -f /home/ubuntu/cultiv/logs/api-err.log'
-alias logs-worker='tail -f /home/ubuntu/cultiv/logs/worker-out.log'
-alias logs-worker-err='tail -f /home/ubuntu/cultiv/logs/worker-err.log'
-alias logs-health='tail -f /home/ubuntu/cultiv/logs/health-check.log'
-alias logs-backup='tail -f /home/ubuntu/cultiv/logs/backup.log'
+alias logs-api='tail -f ${CULTIV_ROOT}/logs/api-out.log'
+alias logs-api-err='tail -f ${CULTIV_ROOT}/logs/api-err.log'
+alias logs-worker='tail -f ${CULTIV_ROOT}/logs/worker-out.log'
+alias logs-worker-err='tail -f ${CULTIV_ROOT}/logs/worker-err.log'
+alias logs-health='tail -f ${CULTIV_ROOT}/logs/health-check.log'
+alias logs-backup='tail -f ${CULTIV_ROOT}/logs/backup.log'
 alias logs-pm2='pm2 logs'
 alias status='pm2 status && docker ps'
-alias metrics='cat /home/ubuntu/cultiv/metrics/current.json'
+alias metrics='cat ${CULTIV_ROOT}/metrics/current.json'
 EOF
 
-chown ubuntu:ubuntu /home/ubuntu/.bashrc
+chown "${CULTIV_USER}:${CULTIV_USER}" /home/${CULTIV_USER}/.bashrc
 
 # =============================================================================
 # 14. Verificações finais

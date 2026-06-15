@@ -8,14 +8,16 @@
 
 ## O que você precisa ter antes de começar
 
-| Item | Onde conseguir | Status |
-|------|----------------|--------|
-| VPS Integrator ativa | Painel da Integrator | ✅ (já provisionou) |
-| Senha root da VPS | Email da Integrator ou painel | ⬜ Verifique seu email |
-| Cloudflare account | [dash.cloudflare.com](https://dash.cloudflare.com) | ⬜ Criar/verificar |
-| Domínio `cultiv.app` | Cloudflare (DNS) | ⬜ Verificar se está no Cloudflare |
-| Auth0 tenant configurado | [manage.auth0.com](https://manage.auth0.com) | ⬜ Verificar callback URL |
-| Projeto no GitHub | `github.com/seu-usuario/content-lib` | ✅ Já existe |
+
+| Item                     | Onde conseguir                                     | Status                            |
+| ------------------------ | -------------------------------------------------- | --------------------------------- |
+| VPS Integrator ativa     | Painel da Integrator                               | ✅ (já provisionou)                |
+| Senha root da VPS        | Email da Integrator ou painel                      | ⬜ Verifique seu email             |
+| Cloudflare account       | [dash.cloudflare.com](https://dash.cloudflare.com) | ⬜ Criar/verificar                 |
+| Domínio `cultiv.app`     | Cloudflare (DNS)                                   | ⬜ Verificar se está no Cloudflare |
+| Auth0 tenant configurado | [manage.auth0.com](https://manage.auth0.com)       | ⬜ Verificar callback URL          |
+| Projeto no GitHub        | `github.com/seu-usuario/content-lib`               | ✅ Já existe                       |
+
 
 ---
 
@@ -44,6 +46,7 @@ ssh root@123.456.789.0
 ```
 
 **Opção C — Windows (PuTTY):**
+
 1. Baixe [PuTTY](https://www.putty.org)
 2. Host Name: `123.456.789.0`
 3. Port: `22`
@@ -52,6 +55,7 @@ ssh root@123.456.789.0
 6. Login: `root`, senha: (sua senha)
 
 **Se você ver algo assim, deu certo:**
+
 ```
 root@vps-integrator:~#
 ```
@@ -74,25 +78,55 @@ Isso vai demorar 2-3 minutos. Quando acabar, você volta para o prompt.
 Por segurança, não vamos rodar o projeto como `root`.
 
 ```bash
-# Criar usuário ubuntu
-adduser ubuntu
+# Criar usuário (pode ser 'ubuntu', 'cultiv', ou qualquer nome)
+adduser cultiv
 
 # Vai perguntar senha e outras coisas. Escolha uma senha e aperte Enter para o resto
 # Depois, adicione ao grupo sudo
-usermod -aG sudo ubuntu
+usermod -aG sudo cultiv
 
-# Teste: troque para o usuário ubuntu
-su - ubuntu
+# Teste: troque para o usuário cultiv
+su - cultiv
 
 # Se você ver algo assim, deu certo:
-# ubuntu@vps-integrator:~$
+# cultiv@vps-integrator:~$
 ```
 
+> **Nota:** Se você já criou o usuário `cultiv` e ele está no grupo sudo, pule este passo.
+> O importante é: o usuário que vai rodar o projeto deve estar no grupo `sudo`.
+
 **Saia do usuário ubuntu e volte para root:**
+
 ```bash
 exit
 # Você volta a ver: root@vps-integrator:~#
 ```
+
+> **⚠️ Problema comum:** "Could not open lock file /var/lib/dpkg/lock-frontend — open (13: Permission denied)"
+>
+> **Causa:** Você está rodando `apt-get` sem `sudo`.
+>
+> **Solução:** Use `sudo` antes de TODOS os comandos administrativos:
+> ```bash
+> # ❌ ERRADO
+> apt-get update
+>
+> # ✅ CERTO
+> sudo apt-get update
+> ```
+>
+> **Se seu usuário não está no grupo sudo:**
+> ```bash
+> # Execute como root:
+> usermod -aG sudo cultiv   # ou seu nome de usuário
+> # Depois FAÇA LOGOUT e LOGIN novamente na VPS
+> ```
+>
+> **Se precisar de acesso root temporário:**
+> ```bash
+> sudo su -
+> # Agora você é root até digitar 'exit'
+> ```
 
 ### Step 2.3: Copiar os scripts do projeto
 
@@ -104,19 +138,19 @@ Agora precisamos colocar os scripts do projeto na VPS.
 # Ainda como root
 apt-get install -y git
 
-# Criar diretório do projeto
-mkdir -p /home/ubuntu/cultiv
+# Criar diretório do projeto (substitua 'cultiv' pelo seu usuário)
+mkdir -p /home/cultiv/cultiv
 
 # Clone do repositório (substitua pela URL do seu repo)
 git clone https://github.com/seu-usuario/content-lib.git /tmp/content-lib
 
 # Copiar scripts para o lugar certo
-cp -r /tmp/content-lib/infra/integrator/scripts/* /home/ubuntu/cultiv/scripts/
-cp -r /tmp/content-lib/infra/integrator/configs/* /home/ubuntu/cultiv/
-cp -r /tmp/content-lib/infra/integrator/docs /home/ubuntu/cultiv/
+cp -r /tmp/content-lib/infra/integrator/scripts/* /home/cultiv/cultiv/scripts/
+cp -r /tmp/content-lib/infra/integrator/configs/* /home/cultiv/cultiv/
+cp -r /tmp/content-lib/infra/integrator/docs /home/cultiv/cultiv/
 
-# Ajustar permissões
-chown -R ubuntu:ubuntu /home/ubuntu/cultiv
+# Ajustar permissões (substitua 'cultiv' pelo seu usuário)
+chown -R cultiv:cultiv /home/cultiv/cultiv
 ```
 
 **Opção B — Upload via SCP (se você tem o projeto local):**
@@ -134,11 +168,11 @@ scp integrator-scripts.zip root@123.456.789.0:/tmp/
 # Depois, na VPS, descompacte:
 # ssh root@123.456.789.0
 # cd /tmp && unzip integrator-scripts.zip
-# mkdir -p /home/ubuntu/cultiv/scripts /home/ubuntu/cultiv/configs /home/ubuntu/cultiv/docs
-# cp -r infra/integrator/scripts/* /home/ubuntu/cultiv/scripts/
-# cp -r infra/integrator/configs/* /home/ubuntu/cultiv/
-# cp -r infra/integrator/docs/* /home/ubuntu/cultiv/docs/
-# chown -R ubuntu:ubuntu /home/ubuntu/cultiv
+# mkdir -p /home/cultiv/cultiv/scripts /home/cultiv/cultiv/configs /home/cultiv/cultiv/docs
+# cp -r infra/integrator/scripts/* /home/cultiv/cultiv/scripts/
+# cp -r infra/integrator/configs/* /home/cultiv/cultiv/
+# cp -r infra/integrator/docs/* /home/cultiv/cultiv/docs/
+# chown -R cultiv:cultiv /home/cultiv/cultiv
 ```
 
 ---
@@ -149,11 +183,17 @@ scp integrator-scripts.zip root@123.456.789.0:/tmp/
 
 ```bash
 # Como root, na VPS
-chmod +x /home/ubuntu/cultiv/scripts/bootstrap-vm.sh
+chmod +x /home/cultiv/cultiv/scripts/bootstrap-vm.sh
+
+# Se seu usuário for 'cultiv' (ao invés de 'ubuntu'):
+CULTIV_USER=cultiv sudo -E /home/cultiv/cultiv/scripts/bootstrap-vm.sh
+
+# Se seu usuário for 'ubuntu' (padrão):
 sudo /home/ubuntu/cultiv/scripts/bootstrap-vm.sh
 ```
 
 **Isso vai instalar:**
+
 - Docker (PostgreSQL + Redis)
 - Node.js 22
 - pnpm (gerenciador de pacotes)
@@ -165,6 +205,7 @@ sudo /home/ubuntu/cultiv/scripts/bootstrap-vm.sh
 - logrotate (rotação de logs)
 
 **Isso leva 5-10 minutos.** Quando acabar, você verá:
+
 ```
 ========================================
   Bootstrap concluído!
@@ -203,6 +244,7 @@ cloudflared tunnel login
 ```
 
 **Isso vai:**
+
 1. Mostrar uma URL no terminal
 2. Copie a URL e abra no seu navegador
 3. Faça login com sua conta Cloudflare
@@ -210,6 +252,7 @@ cloudflared tunnel login
 5. Clique em "Authorize"
 
 **De volta ao terminal, você verá:**
+
 ```
 Tunnel credentials written to /home/ubuntu/.cloudflared/cert.pem
 ```
@@ -248,6 +291,7 @@ EOF
 ```
 
 **Exemplo real (com seu ID):**
+
 ```bash
 cat > ~/.cloudflared/config.yml <<EOF
 tunnel: 12345678-abcd-1234-5678-1234567890ab
@@ -271,6 +315,7 @@ cloudflared tunnel route dns cultiv-backend ssh.cultiv.app
 ```
 
 **Isso automaticamente cria** CNAMEs no Cloudflare DNS:
+
 - `api.cultiv.app` → `12345678-abcd-1234-5678-1234567890ab.cfargotunnel.com`
 - `ssh.cultiv.app` → `12345678-abcd-1234-5678-1234567890ab.cfargotunnel.com`
 
@@ -313,6 +358,7 @@ sudo systemctl status cloudflared
 6. Click **Create API Token**
 
 **Anote:**
+
 - Access Key ID: `xxxxxxxxxxxxxxxxxxxxxxxx`
 - Secret Access Key: `yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy`
 - Endpoint: `https://<account-id>.r2.cloudflarestorage.com`
@@ -327,6 +373,7 @@ rclone config
 ```
 
 **Responda interativamente:**
+
 ```
 No remotes found - make a new one
 n) New remote
@@ -466,6 +513,7 @@ CORS_ALLOWED_ORIGINS=https://www.cultiv.app,https://cultiv.app
 **Salvar no nano:** `Ctrl+O`, `Enter`, `Ctrl+X`
 
 **Proteger o .env:**
+
 ```bash
 chmod 600 /home/ubuntu/cultiv/app/.env
 ```
@@ -784,26 +832,28 @@ rclone config
 
 ## Checklist Final
 
-| # | Check | Status |
-|---|-------|--------|
-| 1 | VPS acessível via SSH | ⬜ |
-| 2 | Bootstrap rodou sem erros | ⬜ |
-| 3 | Docker rodando (PostgreSQL + Redis) | ⬜ |
-| 4 | Cloudflare Tunnel conectado | ⬜ |
-| 5 | `api.cultiv.app` responde via HTTPS | ⬜ |
-| 6 | `ssh.cultiv.app` funciona (Zero Trust) | ⬜ |
-| 7 | R2 bucket criado e rclone conectado | ⬜ |
-| 8 | `.env` configurado com todas as chaves | ⬜ |
-| 9 | Aplicação buildou sem erros | ⬜ |
-| 10 | Migrations aplicadas | ⬜ |
-| 11 | PM2 rodando (API + Worker) | ⬜ |
-| 12 | Health check local funciona | ⬜ |
-| 13 | Health check externo funciona (HTTPS) | ⬜ |
-| 14 | GitHub Actions runner registrado | ⬜ |
-| 15 | Deploy automático funciona | ⬜ |
-| 16 | Backup para R2 funciona | ⬜ |
-| 17 | `verify-cloudflare.sh` passa | ⬜ |
-| 18 | Zero ports expostos (`nmap` no IP) | ⬜ |
+
+| #   | Check                                  | Status |
+| --- | -------------------------------------- | ------ |
+| 1   | VPS acessível via SSH                  | ⬜      |
+| 2   | Bootstrap rodou sem erros              | ⬜      |
+| 3   | Docker rodando (PostgreSQL + Redis)    | ⬜      |
+| 4   | Cloudflare Tunnel conectado            | ⬜      |
+| 5   | `api.cultiv.app` responde via HTTPS    | ⬜      |
+| 6   | `ssh.cultiv.app` funciona (Zero Trust) | ⬜      |
+| 7   | R2 bucket criado e rclone conectado    | ⬜      |
+| 8   | `.env` configurado com todas as chaves | ⬜      |
+| 9   | Aplicação buildou sem erros            | ⬜      |
+| 10  | Migrations aplicadas                   | ⬜      |
+| 11  | PM2 rodando (API + Worker)             | ⬜      |
+| 12  | Health check local funciona            | ⬜      |
+| 13  | Health check externo funciona (HTTPS)  | ⬜      |
+| 14  | GitHub Actions runner registrado       | ⬜      |
+| 15  | Deploy automático funciona             | ⬜      |
+| 16  | Backup para R2 funciona                | ⬜      |
+| 17  | `verify-cloudflare.sh` passa           | ⬜      |
+| 18  | Zero ports expostos (`nmap` no IP)     | ⬜      |
+
 
 ---
 
@@ -820,3 +870,4 @@ Após completar este guia:
 ---
 
 > **Dica:** Se travar em algum passo, copie o erro exato e me envie. Não desista! 🚀
+

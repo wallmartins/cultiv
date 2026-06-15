@@ -8,7 +8,7 @@ set -euo pipefail
 # Salva JSON em /home/ubuntu/cultiv/metrics/current.json (servido via Nginx).
 # =============================================================================
 
-METRICS_FILE="/home/ubuntu/cultiv/metrics/current.json"
+METRICS_FILE="${CULTIV_ROOT:-/home/ubuntu/cultiv}/metrics/current.json"
 mkdir -p "$(dirname "$METRICS_FILE")"
 
 # CPU

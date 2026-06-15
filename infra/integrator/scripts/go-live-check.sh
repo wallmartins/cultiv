@@ -8,7 +8,7 @@ set -euo pipefail
 # Roda na VM ou localmente (via Cloudflare Tunnel).
 # =============================================================================
 
-CULTIV_ROOT="/home/ubuntu/cultiv"
+CULTIV_ROOT="${CULTIV_ROOT:-/home/ubuntu/cultiv}"
 API_URL="${API_URL:-https://api.cultiv.app}"
 CHECKS_PASSED=0
 CHECKS_FAILED=0

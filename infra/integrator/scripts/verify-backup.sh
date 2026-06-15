@@ -8,7 +8,7 @@ set -euo pipefail
 # Cria container temporário e restaura o backup.
 # =============================================================================
 
-CULTIV_ROOT="/home/ubuntu/cultiv"
+CULTIV_ROOT="${CULTIV_ROOT:-/home/ubuntu/cultiv}"
 BACKUP_DIR="${CULTIV_ROOT}/backups"
 WEBHOOK_URL="${DISCORD_WEBHOOK_URL:-}"
 

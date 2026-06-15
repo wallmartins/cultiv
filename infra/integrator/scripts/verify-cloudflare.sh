@@ -8,7 +8,7 @@ set -euo pipefail
 # Roda na VPS ou localmente.
 # =============================================================================
 
-CULTIV_ROOT="/home/ubuntu/cultiv"
+CULTIV_ROOT="${CULTIV_ROOT:-/home/ubuntu/cultiv}"
 WEBHOOK_URL="${DISCORD_WEBHOOK_URL:-}"
 CHECKS_PASSED=0
 CHECKS_FAILED=0
