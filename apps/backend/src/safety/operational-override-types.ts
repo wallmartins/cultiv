@@ -118,7 +118,7 @@ export interface PersistedOperationalOverrideGrant extends StoredOperationalOver
 export interface BackendOperationalOverrideDependencies {
   readonly database: import("@my-ai-orchestrator/database").DatabaseClient;
   readonly now: () => Date;
-  readonly safetyPolicy: import("../product/safety-policy-types.js").BackendSafetyPolicyServiceContract;
+  readonly safetyPolicy: import("../product/safety-policy/safety-policy-types.js").BackendSafetyPolicyServiceContract;
   readonly policyEvidence?: import("./policy-evidence-types.js").BackendPolicyEvidenceService;
   readonly redaction?: import("./redaction-types.js").BackendRedactionService;
 }

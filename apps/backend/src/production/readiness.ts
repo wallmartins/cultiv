@@ -80,6 +80,11 @@ export function resolveBlockedReason(checks: ReadinessResponse["checks"]): "conf
   return "database";
 }
 
+export function resolveBlockedReadinessMessage(checks: ReadinessResponse["checks"]): string {
+  const blockedCheck = [checks.config, checks.auth, checks.database].find((check) => check.status === "blocked");
+  return blockedCheck?.detail ?? "Service is not ready for traffic";
+}
+
 export function logReadinessTransition(
   logger: AppLogger | undefined,
   snapshot: ReadinessResponse,

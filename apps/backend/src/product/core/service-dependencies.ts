@@ -41,7 +41,7 @@ export interface BackendProductDependencies {
   readonly aiPolicy: BackendAIPolicyServiceContract;
   readonly experimentalAIPolicy?: BackendAIPolicyServiceContract;
   readonly safetyPolicy: BackendSafetyPolicyServiceContract;
-  readonly redaction: import("../safety/redaction-types.js").BackendRedactionService;
+  readonly redaction: import("../../safety/redaction-types.js").BackendRedactionService;
   readonly rawDatabase: DatabaseClient;
 }
 
@@ -53,7 +53,7 @@ export function createBackendProductDependencies(
   } = {}
 ): Effect.Effect<
   BackendProductDependencies,
-  FeatureFlagError | BackendAIPolicyBootstrapError | BackendSafetyPolicyBootstrapError | import("../infra/database-bootstrap.js").BackendDatabaseBootstrapError
+  FeatureFlagError | BackendAIPolicyBootstrapError | BackendSafetyPolicyBootstrapError | import("../../infra/database-bootstrap.js").BackendDatabaseBootstrapError
 > {
   return Effect.gen(function* () {
     const database = options.database ?? (yield* createBackendDatabaseClient(config));

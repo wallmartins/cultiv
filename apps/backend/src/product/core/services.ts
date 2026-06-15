@@ -35,7 +35,7 @@ export function createBackendProductServices(
   } = {}
 ): Effect.Effect<
   BackendProductServices,
-  FeatureFlagError | BackendAIPolicyBootstrapError | BackendSafetyPolicyBootstrapError | import("../infra/database-bootstrap.js").BackendDatabaseBootstrapError
+  FeatureFlagError | BackendAIPolicyBootstrapError | BackendSafetyPolicyBootstrapError | import("../../infra/database-bootstrap.js").BackendDatabaseBootstrapError
 > {
   return Effect.gen(function* () {
     const now = options.now ?? (() => new Date());

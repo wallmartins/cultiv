@@ -86,8 +86,14 @@ function getCategoryForCode(code: ApiErrorCode): ApiErrorCategory {
       return "conflict";
     case "rate_limited":
       return "rate_limit";
+    case "voice_training_consent_required":
+      return "authorization";
     case "service_unavailable":
     case "internal_error":
       return "internal";
+    default: {
+      const _exhaustive: never = code;
+      return _exhaustive;
+    }
   }
 }

@@ -5,7 +5,7 @@ import {
 } from "../http/errors.js";
 import type { ReadinessResponse } from "@my-ai-orchestrator/contracts";
 import { isProbeRoute, normalizeRateLimitPath } from "./probe.js";
-import { resolveBlockedReason } from "./readiness.js";
+import { resolveBlockedReason, resolveBlockedReadinessMessage } from "./readiness.js";
 import type { RateLimitStore } from "../runtime/redis-rate-limit-store.js";
 
 export interface RateLimiterState {
@@ -43,6 +43,7 @@ export function assertTrafficAllowed(
       return yield* Effect.fail(
         new BackendReadinessError({
           reason: resolveBlockedReason(readiness.checks),
+          message: resolveBlockedReadinessMessage(readiness.checks),
           checks: readiness.checks
         })
       );

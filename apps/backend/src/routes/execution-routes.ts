@@ -28,7 +28,7 @@ export interface ExecutionRouteOptions {
   readonly config: BackendConfig;
   readonly services: BackendProductServices;
   readonly execution: import("../execution.js").BackendExecutionService;
-  readonly jobs: import("./job-store.js").BackendJobStoreServiceContract;
+  readonly jobs: import("../jobs/job-store.js").BackendJobStoreServiceContract;
 }
 
 export function registerExecutionRoutes(app: Hono, options: ExecutionRouteOptions): void {

@@ -113,8 +113,8 @@ export interface BackendRedactionService {
    * Create a redaction-aware snapshot of observability events.
    */
   readonly redactObservabilitySnapshot: (
-    snapshot: import("../product/observability-types.js").BackendObservabilitySnapshot
-  ) => import("../product/observability-types.js").BackendObservabilitySnapshot;
+    snapshot: import("../product/core/observability-types.js").BackendObservabilitySnapshot
+  ) => import("../product/core/observability-types.js").BackendObservabilitySnapshot;
 }
 
 /**

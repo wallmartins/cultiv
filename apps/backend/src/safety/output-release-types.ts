@@ -56,5 +56,5 @@ export interface BackendOutputReleaseGateService {
 }
 
 export interface BackendOutputReleaseGateDependencies {
-  readonly safetyPolicy: import("../product/safety-policy-types.js").BackendSafetyPolicyServiceContract;
+  readonly safetyPolicy: import("../product/safety-policy/safety-policy-types.js").BackendSafetyPolicyServiceContract;
 }

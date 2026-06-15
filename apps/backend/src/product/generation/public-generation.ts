@@ -8,7 +8,7 @@ import { assertQuoteConsistency, toGenerationPricingSnapshot } from "../billing/
 import type { QualityMode } from "@my-ai-orchestrator/contracts";
 import { canUseQualityMode, hasActiveBillingSubscription } from "@my-ai-orchestrator/payments";
 import type { BillingPlanTier } from "../ai-policy/ai-policy-types.js";
-import type { BackendProductServices } from "../../execution/service-types.js";
+import type { BackendProductServices } from "../core/types.js";
 import type { BackendPublicGenerationRequest, BackendPublicGenerationService } from "./public-generation-types.js";
 
 export function createBackendPublicGenerationService(options: {
