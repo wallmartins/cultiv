@@ -1,0 +1,3 @@
+# ADR 0020: Env Files Only for Local Development with Explicit Config Validation
+
+The production backend will treat `.env` files as a local-development convenience only, while production configuration must come from platform-injected environment variables or a secret manager, and startup must validate required configuration explicitly. We chose this because production secret handling should not depend on local file conventions, while local and test execution still need a deliberate, repeatable config-loading path instead of accidentally relying on one specific entrypoint to import `dotenv/config`.

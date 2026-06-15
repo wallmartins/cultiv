@@ -1,0 +1,145 @@
+[
+  {
+    "id": "briefing-1",
+    "pipelineType": "long-form-blog",
+    "qualityMode": "balanced",
+    "briefing": {
+      "topic": "Como reduzir custo e latencia em pipelines de escrita com loops de refinamento",
+      "intent": "Explicar trade-offs tecnicos de arquitetura e operacao",
+      "audience": "Engenheiros de software e tech leads",
+      "tone": "analitico, honesto, sem hype",
+      "format": "article",
+      "minWords": 1100,
+      "maxWords": 1400,
+      "keyPoints": [
+        "Onde os loops de refinamento realmente trazem ganho",
+        "Quando o custo de chamadas LLM cresce sem retorno",
+        "Gating deterministic-first para reduzir chamadas",
+        "Como medir score, latencia e estabilidade sem autoengano"
+      ],
+      "outline": [
+        "Problema real em producao",
+        "Diagnostico com metricas",
+        "Mudancas de arquitetura",
+        "Resultados esperados e limites"
+      ],
+      "rules": [
+        "Usar exemplos concretos de engenharia",
+        "Evitar promessas absolutas"
+      ],
+      "forbiddenTerms": [
+        "thought leadership",
+        "game changer"
+      ]
+    }
+  },
+  {
+    "id": "briefing-2",
+    "pipelineType": "validation-post",
+    "qualityMode": "balanced",
+    "briefing": {
+      "topic": "O custo invisivel de tentar soar perfeito no LinkedIn tecnico",
+      "intent": "Provocar reflexao pratica com tom conversacional",
+      "audience": "Dev pleno e senior que publica conteudo tecnico",
+      "tone": "casual-br, direto, com observacao pessoal",
+      "format": "linkedin-post",
+      "minWords": 130,
+      "maxWords": 200,
+      "keyPoints": [
+        "Texto liso demais perde confianca",
+        "Micro-imperfeicoes aumentam autenticidade",
+        "Exemplo curto de ajuste de frase robotica"
+      ],
+      "rules": [
+        "Sem tom professoral",
+        "Fechar com pergunta aberta curta"
+      ],
+      "forbiddenTerms": [
+        "disruptivo",
+        "mindset"
+      ]
+    }
+  },
+  {
+    "id": "briefing-3",
+    "pipelineType": "architecture-post",
+    "qualityMode": "balanced",
+    "briefing": {
+      "topic": "Guia pratico de contracts de entrada e saida para skills de IA",
+      "intent": "Ensinar implementacao por etapas com foco em confiabilidade",
+      "audience": "Times de plataforma e backend",
+      "tone": "tecnico-explicativo, didatico",
+      "format": "blog-post",
+      "minWords": 550,
+      "maxWords": 750,
+      "keyPoints": [
+        "Por que parser + schema devem coexistir",
+        "Como rastrear violacoes no trace",
+        "Padrao de fallback quando parse falha",
+        "Teste de regressao para contracts"
+      ],
+      "outline": [
+        "Contexto",
+        "Design dos contracts",
+        "Fluxo de validacao",
+        "Checklist de testes"
+      ],
+      "forbiddenTerms": [
+        "best-in-class"
+      ]
+    }
+  },
+  {
+    "id": "briefing-4",
+    "pipelineType": "validation-post",
+    "qualityMode": "strict",
+    "briefing": {
+      "topic": "O que eu aprendi quebrando meu proprio pipeline de qualidade",
+      "intent": "Compartilhar aprendizagem com vulnerabilidade controlada",
+      "audience": "Criadores tecnicos independentes",
+      "tone": "thinking-out-loud, reflexivo",
+      "format": "linkedin-post",
+      "minWords": 260,
+      "maxWords": 360,
+      "keyPoints": [
+        "Erros de calibracao de score",
+        "Sinais falsos de melhora",
+        "Decisoes de rollback que evitaram retrabalho"
+      ],
+      "rules": [
+        "Trazer 1 momento de autocorrecao",
+        "Nao transformar em tutorial"
+      ]
+    }
+  },
+  {
+    "id": "briefing-5",
+    "pipelineType": "long-form-blog",
+    "qualityMode": "strict",
+    "briefing": {
+      "topic": "Por que boa parte dos textos de engenharia soa igual, mesmo com pessoas diferentes",
+      "intent": "Defender ponto de vista com autocrtica e exemplos",
+      "audience": "Leitores tecnicos que publicam analises",
+      "tone": "opinativo, autocritico",
+      "format": "article",
+      "minWords": 850,
+      "maxWords": 1050,
+      "keyPoints": [
+        "Templates mentais repetidos",
+        "Vicios de estrutura em textos tecnicos",
+        "Como usar memoria de voz sem overfit",
+        "Onde heuristica supera mais uma chamada de modelo"
+      ],
+      "outline": [
+        "Tese",
+        "Evidencias",
+        "Contra-argumento",
+        "Sintese final"
+      ],
+      "forbiddenTerms": [
+        "paradigma",
+        "revolucionario"
+      ]
+    }
+  }
+]

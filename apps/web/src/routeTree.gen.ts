@@ -13,15 +13,30 @@ import { Route as TermsRouteImport } from './routes/terms'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
 import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as LlmsDottxtRouteImport } from './routes/llms[.]txt'
 import { Route as LlmsFullDottxtRouteImport } from './routes/llms-full[.]txt'
+import { Route as CallbackRouteImport } from './routes/callback'
+import { Route as AppRouteImport } from './routes/app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as EnIndexRouteImport } from './routes/en/index'
+import { Route as AppIndexRouteImport } from './routes/app/index'
 import { Route as EnTermsRouteImport } from './routes/en/terms'
 import { Route as EnPrivacyRouteImport } from './routes/en/privacy'
 import { Route as EnLlmsDottxtRouteImport } from './routes/en/llms[.]txt'
 import { Route as EnLlmsFullDottxtRouteImport } from './routes/en/llms-full[.]txt'
+import { Route as AppSettingsRouteImport } from './routes/app/settings'
+import { Route as AppOnboardingRouteImport } from './routes/app/onboarding'
+import { Route as AppHistoryRouteImport } from './routes/app/history'
+import { Route as AppGenerateRouteImport } from './routes/app/generate'
 import { Route as ApiWaitlistRouteImport } from './routes/api/waitlist'
+import { Route as AppVoiceRouteRouteImport } from './routes/app/voice/route'
+import { Route as AppVoiceIndexRouteImport } from './routes/app/voice/index'
+import { Route as AppHistoryExecutionIdRouteImport } from './routes/app/history.$executionId'
+import { Route as AppGenerateExecutionIdRouteImport } from './routes/app/generate.$executionId'
+import { Route as AppVoiceExamplesIndexRouteImport } from './routes/app/voice/examples/index'
+import { Route as AppVoiceExamplesNewRouteImport } from './routes/app/voice/examples/new'
+import { Route as AppVoiceExamplesIdEditRouteImport } from './routes/app/voice/examples/$id/edit'
 
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
@@ -43,6 +58,11 @@ const PrivacyRoute = PrivacyRouteImport.update({
   path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LlmsDottxtRoute = LlmsDottxtRouteImport.update({
   id: '/llms.txt',
   path: '/llms.txt',
@@ -51,6 +71,16 @@ const LlmsDottxtRoute = LlmsDottxtRouteImport.update({
 const LlmsFullDottxtRoute = LlmsFullDottxtRouteImport.update({
   id: '/llms-full.txt',
   path: '/llms-full.txt',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CallbackRoute = CallbackRouteImport.update({
+  id: '/callback',
+  path: '/callback',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppRoute = AppRouteImport.update({
+  id: '/app',
+  path: '/app',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -62,6 +92,11 @@ const EnIndexRoute = EnIndexRouteImport.update({
   id: '/en/',
   path: '/en/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AppIndexRoute = AppIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppRoute,
 } as any)
 const EnTermsRoute = EnTermsRouteImport.update({
   id: '/en/terms',
@@ -83,110 +118,254 @@ const EnLlmsFullDottxtRoute = EnLlmsFullDottxtRouteImport.update({
   path: '/en/llms-full.txt',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppSettingsRoute = AppSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppOnboardingRoute = AppOnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppHistoryRoute = AppHistoryRouteImport.update({
+  id: '/history',
+  path: '/history',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppGenerateRoute = AppGenerateRouteImport.update({
+  id: '/generate',
+  path: '/generate',
+  getParentRoute: () => AppRoute,
+} as any)
 const ApiWaitlistRoute = ApiWaitlistRouteImport.update({
   id: '/api/waitlist',
   path: '/api/waitlist',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppVoiceRouteRoute = AppVoiceRouteRouteImport.update({
+  id: '/voice',
+  path: '/voice',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppVoiceIndexRoute = AppVoiceIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppVoiceRouteRoute,
+} as any)
+const AppHistoryExecutionIdRoute = AppHistoryExecutionIdRouteImport.update({
+  id: '/$executionId',
+  path: '/$executionId',
+  getParentRoute: () => AppHistoryRoute,
+} as any)
+const AppGenerateExecutionIdRoute = AppGenerateExecutionIdRouteImport.update({
+  id: '/$executionId',
+  path: '/$executionId',
+  getParentRoute: () => AppGenerateRoute,
+} as any)
+const AppVoiceExamplesIndexRoute = AppVoiceExamplesIndexRouteImport.update({
+  id: '/examples/',
+  path: '/examples/',
+  getParentRoute: () => AppVoiceRouteRoute,
+} as any)
+const AppVoiceExamplesNewRoute = AppVoiceExamplesNewRouteImport.update({
+  id: '/examples/new',
+  path: '/examples/new',
+  getParentRoute: () => AppVoiceRouteRoute,
+} as any)
+const AppVoiceExamplesIdEditRoute = AppVoiceExamplesIdEditRouteImport.update({
+  id: '/examples/$id/edit',
+  path: '/examples/$id/edit',
+  getParentRoute: () => AppVoiceRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/app': typeof AppRouteWithChildren
+  '/callback': typeof CallbackRoute
   '/llms-full.txt': typeof LlmsFullDottxtRoute
   '/llms.txt': typeof LlmsDottxtRoute
+  '/login': typeof LoginRoute
   '/privacy': typeof PrivacyRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
+  '/app/voice': typeof AppVoiceRouteRouteWithChildren
   '/api/waitlist': typeof ApiWaitlistRoute
+  '/app/generate': typeof AppGenerateRouteWithChildren
+  '/app/history': typeof AppHistoryRouteWithChildren
+  '/app/onboarding': typeof AppOnboardingRoute
+  '/app/settings': typeof AppSettingsRoute
   '/en/llms-full.txt': typeof EnLlmsFullDottxtRoute
   '/en/llms.txt': typeof EnLlmsDottxtRoute
   '/en/privacy': typeof EnPrivacyRoute
   '/en/terms': typeof EnTermsRoute
+  '/app/': typeof AppIndexRoute
   '/en/': typeof EnIndexRoute
+  '/app/generate/$executionId': typeof AppGenerateExecutionIdRoute
+  '/app/history/$executionId': typeof AppHistoryExecutionIdRoute
+  '/app/voice/': typeof AppVoiceIndexRoute
+  '/app/voice/examples/new': typeof AppVoiceExamplesNewRoute
+  '/app/voice/examples/': typeof AppVoiceExamplesIndexRoute
+  '/app/voice/examples/$id/edit': typeof AppVoiceExamplesIdEditRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/callback': typeof CallbackRoute
   '/llms-full.txt': typeof LlmsFullDottxtRoute
   '/llms.txt': typeof LlmsDottxtRoute
+  '/login': typeof LoginRoute
   '/privacy': typeof PrivacyRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/api/waitlist': typeof ApiWaitlistRoute
+  '/app/generate': typeof AppGenerateRouteWithChildren
+  '/app/history': typeof AppHistoryRouteWithChildren
+  '/app/onboarding': typeof AppOnboardingRoute
+  '/app/settings': typeof AppSettingsRoute
   '/en/llms-full.txt': typeof EnLlmsFullDottxtRoute
   '/en/llms.txt': typeof EnLlmsDottxtRoute
   '/en/privacy': typeof EnPrivacyRoute
   '/en/terms': typeof EnTermsRoute
+  '/app': typeof AppIndexRoute
   '/en': typeof EnIndexRoute
+  '/app/generate/$executionId': typeof AppGenerateExecutionIdRoute
+  '/app/history/$executionId': typeof AppHistoryExecutionIdRoute
+  '/app/voice': typeof AppVoiceIndexRoute
+  '/app/voice/examples/new': typeof AppVoiceExamplesNewRoute
+  '/app/voice/examples': typeof AppVoiceExamplesIndexRoute
+  '/app/voice/examples/$id/edit': typeof AppVoiceExamplesIdEditRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/app': typeof AppRouteWithChildren
+  '/callback': typeof CallbackRoute
   '/llms-full.txt': typeof LlmsFullDottxtRoute
   '/llms.txt': typeof LlmsDottxtRoute
+  '/login': typeof LoginRoute
   '/privacy': typeof PrivacyRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
+  '/app/voice': typeof AppVoiceRouteRouteWithChildren
   '/api/waitlist': typeof ApiWaitlistRoute
+  '/app/generate': typeof AppGenerateRouteWithChildren
+  '/app/history': typeof AppHistoryRouteWithChildren
+  '/app/onboarding': typeof AppOnboardingRoute
+  '/app/settings': typeof AppSettingsRoute
   '/en/llms-full.txt': typeof EnLlmsFullDottxtRoute
   '/en/llms.txt': typeof EnLlmsDottxtRoute
   '/en/privacy': typeof EnPrivacyRoute
   '/en/terms': typeof EnTermsRoute
+  '/app/': typeof AppIndexRoute
   '/en/': typeof EnIndexRoute
+  '/app/generate/$executionId': typeof AppGenerateExecutionIdRoute
+  '/app/history/$executionId': typeof AppHistoryExecutionIdRoute
+  '/app/voice/': typeof AppVoiceIndexRoute
+  '/app/voice/examples/new': typeof AppVoiceExamplesNewRoute
+  '/app/voice/examples/': typeof AppVoiceExamplesIndexRoute
+  '/app/voice/examples/$id/edit': typeof AppVoiceExamplesIdEditRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/app'
+    | '/callback'
     | '/llms-full.txt'
     | '/llms.txt'
+    | '/login'
     | '/privacy'
     | '/robots.txt'
     | '/sitemap.xml'
     | '/terms'
+    | '/app/voice'
     | '/api/waitlist'
+    | '/app/generate'
+    | '/app/history'
+    | '/app/onboarding'
+    | '/app/settings'
     | '/en/llms-full.txt'
     | '/en/llms.txt'
     | '/en/privacy'
     | '/en/terms'
+    | '/app/'
     | '/en/'
+    | '/app/generate/$executionId'
+    | '/app/history/$executionId'
+    | '/app/voice/'
+    | '/app/voice/examples/new'
+    | '/app/voice/examples/'
+    | '/app/voice/examples/$id/edit'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/callback'
     | '/llms-full.txt'
     | '/llms.txt'
+    | '/login'
     | '/privacy'
     | '/robots.txt'
     | '/sitemap.xml'
     | '/terms'
     | '/api/waitlist'
+    | '/app/generate'
+    | '/app/history'
+    | '/app/onboarding'
+    | '/app/settings'
     | '/en/llms-full.txt'
     | '/en/llms.txt'
     | '/en/privacy'
     | '/en/terms'
+    | '/app'
     | '/en'
+    | '/app/generate/$executionId'
+    | '/app/history/$executionId'
+    | '/app/voice'
+    | '/app/voice/examples/new'
+    | '/app/voice/examples'
+    | '/app/voice/examples/$id/edit'
   id:
     | '__root__'
     | '/'
+    | '/app'
+    | '/callback'
     | '/llms-full.txt'
     | '/llms.txt'
+    | '/login'
     | '/privacy'
     | '/robots.txt'
     | '/sitemap.xml'
     | '/terms'
+    | '/app/voice'
     | '/api/waitlist'
+    | '/app/generate'
+    | '/app/history'
+    | '/app/onboarding'
+    | '/app/settings'
     | '/en/llms-full.txt'
     | '/en/llms.txt'
     | '/en/privacy'
     | '/en/terms'
+    | '/app/'
     | '/en/'
+    | '/app/generate/$executionId'
+    | '/app/history/$executionId'
+    | '/app/voice/'
+    | '/app/voice/examples/new'
+    | '/app/voice/examples/'
+    | '/app/voice/examples/$id/edit'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AppRoute: typeof AppRouteWithChildren
+  CallbackRoute: typeof CallbackRoute
   LlmsFullDottxtRoute: typeof LlmsFullDottxtRoute
   LlmsDottxtRoute: typeof LlmsDottxtRoute
+  LoginRoute: typeof LoginRoute
   PrivacyRoute: typeof PrivacyRoute
   RobotsDottxtRoute: typeof RobotsDottxtRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
@@ -229,6 +408,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/llms.txt': {
       id: '/llms.txt'
       path: '/llms.txt'
@@ -241,6 +427,20 @@ declare module '@tanstack/react-router' {
       path: '/llms-full.txt'
       fullPath: '/llms-full.txt'
       preLoaderRoute: typeof LlmsFullDottxtRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/callback': {
+      id: '/callback'
+      path: '/callback'
+      fullPath: '/callback'
+      preLoaderRoute: typeof CallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app': {
+      id: '/app'
+      path: '/app'
+      fullPath: '/app'
+      preLoaderRoute: typeof AppRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -256,6 +456,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/en/'
       preLoaderRoute: typeof EnIndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/app/': {
+      id: '/app/'
+      path: '/'
+      fullPath: '/app/'
+      preLoaderRoute: typeof AppIndexRouteImport
+      parentRoute: typeof AppRoute
     }
     '/en/terms': {
       id: '/en/terms'
@@ -285,6 +492,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EnLlmsFullDottxtRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app/settings': {
+      id: '/app/settings'
+      path: '/settings'
+      fullPath: '/app/settings'
+      preLoaderRoute: typeof AppSettingsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/onboarding': {
+      id: '/app/onboarding'
+      path: '/onboarding'
+      fullPath: '/app/onboarding'
+      preLoaderRoute: typeof AppOnboardingRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/history': {
+      id: '/app/history'
+      path: '/history'
+      fullPath: '/app/history'
+      preLoaderRoute: typeof AppHistoryRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/generate': {
+      id: '/app/generate'
+      path: '/generate'
+      fullPath: '/app/generate'
+      preLoaderRoute: typeof AppGenerateRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/api/waitlist': {
       id: '/api/waitlist'
       path: '/api/waitlist'
@@ -292,13 +527,127 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiWaitlistRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app/voice': {
+      id: '/app/voice'
+      path: '/voice'
+      fullPath: '/app/voice'
+      preLoaderRoute: typeof AppVoiceRouteRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/voice/': {
+      id: '/app/voice/'
+      path: '/'
+      fullPath: '/app/voice/'
+      preLoaderRoute: typeof AppVoiceIndexRouteImport
+      parentRoute: typeof AppVoiceRouteRoute
+    }
+    '/app/history/$executionId': {
+      id: '/app/history/$executionId'
+      path: '/$executionId'
+      fullPath: '/app/history/$executionId'
+      preLoaderRoute: typeof AppHistoryExecutionIdRouteImport
+      parentRoute: typeof AppHistoryRoute
+    }
+    '/app/generate/$executionId': {
+      id: '/app/generate/$executionId'
+      path: '/$executionId'
+      fullPath: '/app/generate/$executionId'
+      preLoaderRoute: typeof AppGenerateExecutionIdRouteImport
+      parentRoute: typeof AppGenerateRoute
+    }
+    '/app/voice/examples/': {
+      id: '/app/voice/examples/'
+      path: '/examples'
+      fullPath: '/app/voice/examples/'
+      preLoaderRoute: typeof AppVoiceExamplesIndexRouteImport
+      parentRoute: typeof AppVoiceRouteRoute
+    }
+    '/app/voice/examples/new': {
+      id: '/app/voice/examples/new'
+      path: '/examples/new'
+      fullPath: '/app/voice/examples/new'
+      preLoaderRoute: typeof AppVoiceExamplesNewRouteImport
+      parentRoute: typeof AppVoiceRouteRoute
+    }
+    '/app/voice/examples/$id/edit': {
+      id: '/app/voice/examples/$id/edit'
+      path: '/examples/$id/edit'
+      fullPath: '/app/voice/examples/$id/edit'
+      preLoaderRoute: typeof AppVoiceExamplesIdEditRouteImport
+      parentRoute: typeof AppVoiceRouteRoute
+    }
   }
 }
 
+interface AppVoiceRouteRouteChildren {
+  AppVoiceIndexRoute: typeof AppVoiceIndexRoute
+  AppVoiceExamplesNewRoute: typeof AppVoiceExamplesNewRoute
+  AppVoiceExamplesIndexRoute: typeof AppVoiceExamplesIndexRoute
+  AppVoiceExamplesIdEditRoute: typeof AppVoiceExamplesIdEditRoute
+}
+
+const AppVoiceRouteRouteChildren: AppVoiceRouteRouteChildren = {
+  AppVoiceIndexRoute: AppVoiceIndexRoute,
+  AppVoiceExamplesNewRoute: AppVoiceExamplesNewRoute,
+  AppVoiceExamplesIndexRoute: AppVoiceExamplesIndexRoute,
+  AppVoiceExamplesIdEditRoute: AppVoiceExamplesIdEditRoute,
+}
+
+const AppVoiceRouteRouteWithChildren = AppVoiceRouteRoute._addFileChildren(
+  AppVoiceRouteRouteChildren,
+)
+
+interface AppGenerateRouteChildren {
+  AppGenerateExecutionIdRoute: typeof AppGenerateExecutionIdRoute
+}
+
+const AppGenerateRouteChildren: AppGenerateRouteChildren = {
+  AppGenerateExecutionIdRoute: AppGenerateExecutionIdRoute,
+}
+
+const AppGenerateRouteWithChildren = AppGenerateRoute._addFileChildren(
+  AppGenerateRouteChildren,
+)
+
+interface AppHistoryRouteChildren {
+  AppHistoryExecutionIdRoute: typeof AppHistoryExecutionIdRoute
+}
+
+const AppHistoryRouteChildren: AppHistoryRouteChildren = {
+  AppHistoryExecutionIdRoute: AppHistoryExecutionIdRoute,
+}
+
+const AppHistoryRouteWithChildren = AppHistoryRoute._addFileChildren(
+  AppHistoryRouteChildren,
+)
+
+interface AppRouteChildren {
+  AppVoiceRouteRoute: typeof AppVoiceRouteRouteWithChildren
+  AppGenerateRoute: typeof AppGenerateRouteWithChildren
+  AppHistoryRoute: typeof AppHistoryRouteWithChildren
+  AppOnboardingRoute: typeof AppOnboardingRoute
+  AppSettingsRoute: typeof AppSettingsRoute
+  AppIndexRoute: typeof AppIndexRoute
+}
+
+const AppRouteChildren: AppRouteChildren = {
+  AppVoiceRouteRoute: AppVoiceRouteRouteWithChildren,
+  AppGenerateRoute: AppGenerateRouteWithChildren,
+  AppHistoryRoute: AppHistoryRouteWithChildren,
+  AppOnboardingRoute: AppOnboardingRoute,
+  AppSettingsRoute: AppSettingsRoute,
+  AppIndexRoute: AppIndexRoute,
+}
+
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AppRoute: AppRouteWithChildren,
+  CallbackRoute: CallbackRoute,
   LlmsFullDottxtRoute: LlmsFullDottxtRoute,
   LlmsDottxtRoute: LlmsDottxtRoute,
+  LoginRoute: LoginRoute,
   PrivacyRoute: PrivacyRoute,
   RobotsDottxtRoute: RobotsDottxtRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,

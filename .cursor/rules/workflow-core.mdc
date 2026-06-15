@@ -1,0 +1,13 @@
+---
+description: Workflow and memory bank instructions
+alwaysApply: true
+---
+
+## Workflow
+- Follow PRD → ADR → Issues (files in `docs/`).
+- For simple tasks, generate only code and update logs.
+
+## Memory Bank
+- **Load all `.md` files from `docs/` at start of each conversation.**
+- Consult them before any code generation.
+- Update `progress-log.md` after completing a task.

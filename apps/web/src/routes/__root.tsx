@@ -1,12 +1,13 @@
 import { HeadContent, Scripts, createRootRoute } from "@tanstack/react-router";
-import { DeferredAnalytics } from "~/components/DeferredAnalytics";
+import { DeferredAnalytics } from "~/marketing/components/DeferredAnalytics";
 import type { ReactNode } from "react";
-import { DeferredLenisProvider } from "~/animations/deferred-lenis-provider";
-import { DefaultCatchBoundary } from "~/components/DefaultCatchBoundary";
-import { NotFound } from "~/components/NotFound";
+import { DeferredLenisProvider } from "~/marketing/animations/deferred-lenis-provider";
+import { ClientAuthProviders } from "~/app/auth/components/ClientAuthProviders";
+import { DefaultCatchBoundary } from "~/platform/components/DefaultCatchBoundary";
+import { NotFound } from "~/platform/components/NotFound";
 import appCss from "~/styles/app.css?url";
 import { brandHeadLinks, googleFontsAsyncScript } from "~/brand/head-links";
-import { seo } from "~/utils/seo";
+import { seo } from "~/marketing/seo/seo";
 
 export const Route = createRootRoute({
   head: () => ({
@@ -33,7 +34,9 @@ function RootDocument({ children }: { readonly children: ReactNode }) {
         <HeadContent />
       </head>
       <body>
-        <DeferredLenisProvider>{children}</DeferredLenisProvider>
+        <ClientAuthProviders>
+          <DeferredLenisProvider>{children}</DeferredLenisProvider>
+        </ClientAuthProviders>
         <DeferredAnalytics />
         <Scripts />
       </body>

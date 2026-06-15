@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { ProductShowcase } from "~/components/ProductShowcase";
-import { MarketingLayout } from "~/layouts/MarketingLayout";
-import { resolveHomePageHead } from "~/utils/resolve-page-head";
+import { ProductShowcase } from "~/marketing/components/ProductShowcase";
+import { MarketingLayout } from "~/marketing/layouts/MarketingLayout";
+import { resolveHomePageHead } from "~/marketing/seo/resolve-page-head";
 
 export const Route = createFileRoute("/en/")({
   head: () => resolveHomePageHead("en"),

@@ -266,19 +266,48 @@ pnpm --filter @my-ai-orchestrator/web preview
 
 ## Quick start — backend (optional)
 
+### Memory mode (fast unit dev)
+
 ```bash
 pnpm install
 cp .env.example .env
-# Set DATABASE_URL and provider keys (see .env.example)
-
-docker compose up -d postgres
-pnpm --filter @my-ai-orchestrator/backend migrate
+# BACKEND_ALLOW_IN_MEMORY_RUNTIME=true in .env
 
 pnpm dev:backend
 ```
 
-- API: [http://localhost:3000](http://localhost:3000) (default `PORT=3000`)
-- Run `pnpm dev:web` on a different port if you need web and backend together (`PORT=3001` in `.env` for one of them).
+### Durable async runtime (PostgreSQL + Redis)
+
+```bash
+pnpm install
+cp .env.example .env
+# Set DATABASE_URL, REDIS_URL, GEMINI_API_KEY
+# Remove or comment BACKEND_ALLOW_IN_MEMORY_RUNTIME
+# Set EXECUTION_MODE=async for queued executions
+
+docker compose up -d postgres redis
+pnpm --filter @my-ai-orchestrator/backend migrate
+
+# Terminal A — API (outbox relay; no in-process worker)
+pnpm dev:backend
+
+# Terminal B — worker process
+pnpm --filter @my-ai-orchestrator/backend worker
+```
+
+- API: [http://localhost:3001](http://localhost:3001) (default `PORT=3001` in `.env.example`)
+- Web dev stays on port 3000; set `VITE_API_BASE_URL=http://localhost:3001` in `apps/web/.env`.
+- **HITL checklist:** [`docs/live/runbooks/durable-async-runtime-hitl.md`](./docs/live/runbooks/durable-async-runtime-hitl.md)
+- **Automated smoke (§4):** `pnpm hitl:durable-smoke`
+- **Integration tests:** `pnpm test:durable` (requires `docker compose up -d postgres redis`)
+
+Legacy one-liner (postgres only):
+
+```bash
+docker compose up -d postgres
+pnpm --filter @my-ai-orchestrator/backend migrate
+pnpm dev:backend
+```
 
 Showcase generation helpers (with backend running): `pnpm showcase:voice-setup`, `pnpm showcase:generate`.
 
@@ -295,7 +324,8 @@ See `docs/live/plan/phase-2-implementation-plan.md` for the authenticated app ar
 | `pnpm build` | Build all workspaces with a build script |
 | `pnpm build:web` | Build marketing site only (`apps/web`) |
 | `pnpm test` | Run Vitest suite |
-| `pnpm test:postgres` | PostgreSQL integration tests (`BACKEND_TEST_DATABASE_URL`) |
+| `pnpm test:durable` | Durable runtime integration tests (PG + Redis) |
+| `pnpm hitl:durable-smoke` | Manual gate smoke — 202 survives API restart (issue 57 §4) |
 | `pnpm lint` | Typecheck across workspaces |
 | `pnpm showcase:voice-setup` | Dev helper — voice profile token for showcase generation |
 | `pnpm showcase:generate` | Dev helper — generate showcase sample via backend |

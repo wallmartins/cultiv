@@ -2,7 +2,31 @@ node_modules/
 package-lock.json
 dist/
 *.log
-.env
 .DS_Store
 coverage/
 .braddock/board/*.tmp
+
+# Secrets and local env (keep *.example)
+.env
+.env.local
+.env.*.local
+!.env.example
+!**/.env.example
+
+# pnpm store (never commit)
+.pnpm-store/
+
+# Build / deploy artifacts
+.output/
+.vercel/
+.nitro/
+apps/web/.output/
+apps/web/.vercel/
+apps/web/.nitro/
+
+# TanStack Router codegen cache
+.tanstack/
+
+# Local scratch and agent session state (not product source)
+.scratch/
+.agents/

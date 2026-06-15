@@ -1,0 +1,23 @@
+{
+  "name": "@my-ai-orchestrator/orchestrator",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json --noEmit",
+    "lint": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@my-ai-orchestrator/contracts": "workspace:*",
+    "@my-ai-orchestrator/core": "workspace:*",
+    "@my-ai-orchestrator/domain": "workspace:*",
+    "@my-ai-orchestrator/text-quality": "workspace:*",
+    "@my-ai-orchestrator/skills": "workspace:*",
+    "effect": "^3.16.12"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./package.json": "./package.json"
+  }
+}

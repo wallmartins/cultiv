@@ -1,0 +1,197 @@
+import { Effect } from "effect";
+import type {
+  ContentTypeCatalogItemView,
+  GenerationPreviewResponse,
+  QualityMode
+} from "@my-ai-orchestrator/contracts";
+import type { BackendConfig } from "../../config/config.js";
+import type { DatabaseClient } from "@my-ai-orchestrator/database";
+import type { BillingPlanTier, BillingServiceContract } from "@my-ai-orchestrator/payments";
+import { isQualityModeAllowed, resolveQualityModeBlockedReason } from "../billing/commercial-access.js";
+import { buildContentTypeCatalogView } from "../catalog/content-type-catalog.js";
+import { resolveCatalogContentTypeDefinitions } from "../catalog/resolve-catalog-content-types.js";
+import type { BackendAIPolicyServiceContract } from "../ai-policy/ai-policy-types.js";
+import type {
+  BackendApprovedGenerationPreviewRequest,
+  BackendGenerationPreviewRequest,
+  BackendGenerationPreviewService
+} from "./generation-preview-types.js";
+import { toGenerationPricingSnapshot } from "../billing/generation-pricing-snapshot.js";
+import { recommendGenerationPreviewQualityMode } from "./generation-preview-recommendation.js";
+import type { BackendPublicInputSafetyGatewayService } from "../../safety/public-input-safety-types.js";
+
+const QUALITY_MODES: readonly QualityMode[] = ["fast", "balanced", "strict"];
+
+export function createBackendGenerationPreviewService(options: {
+  readonly config: BackendConfig;
+  readonly database: DatabaseClient;
+  readonly billing: BillingServiceContract;
+  readonly aiPolicy: BackendAIPolicyServiceContract;
+  readonly inputSafety: BackendPublicInputSafetyGatewayService;
+}): BackendGenerationPreviewService {
+  return {
+    preview(args) {
+      return Effect.gen(function* () {
+        const sanitizedArgs: BackendApprovedGenerationPreviewRequest = yield* options.inputSafety.authorizePreviewInput(args);
+        const voiceProfile = yield* options.database.voiceProfiles.getByUser(sanitizedArgs.userId);
+
+        const entitlement =
+          options.billing.getEntitlement(sanitizedArgs.userId, options.config.billingPlanId) ?? null;
+        const currentBalance = entitlement?.wallet.availableCredits ?? 0;
+        const primaryLanguage = sanitizedArgs.language ?? voiceProfile?.primaryLanguage ?? options.config.defaultLanguage;
+        const orchestrationCatalog = options.aiPolicy.getActiveOrchestrationCatalog();
+        const contentTypes = buildContentTypeCatalogView(
+          resolveCatalogContentTypeDefinitions(orchestrationCatalog),
+          {
+            userLanguage: primaryLanguage,
+            subscriptionActive: entitlement?.status === "active"
+          }
+        );
+        const planTier = (entitlement?.tier ?? "free") as BillingPlanTier;
+        const selectedContentType = selectContentType(sanitizedArgs.contentType, contentTypes);
+        const qualityModePricing = yield* Effect.all(
+          QUALITY_MODES.map((mode) =>
+            options.aiPolicy.resolvePricingEnvelope({
+              planTier,
+              contentType: selectedContentType.id,
+              qualityMode: mode,
+              attachedPolicyVersion: options.config.aiPolicyAttachedVersion
+            })
+          )
+        );
+
+        const qualityModes = qualityModePricing.map((pricing) => {
+          const creditPrice = pricing.creditPrice;
+          const allowed = isQualityModeAllowed({
+            entitlement,
+            qualityMode: pricing.qualityMode,
+            creditPrice,
+            currentBalance
+          });
+          const blockedReason = allowed
+            ? undefined
+            : resolvePreviewQualityModeBlockedReason({
+                entitlement,
+                qualityMode: pricing.qualityMode,
+                creditPrice,
+                currentBalance
+              });
+
+          return {
+            id: pricing.qualityMode,
+            allowed,
+            creditPrice,
+            ...(blockedReason ? { blockedReason } : {})
+          };
+        });
+        const selectedQualityMode = selectQualityMode(sanitizedArgs.qualityMode, qualityModes);
+        const recommendation = recommendGenerationPreviewQualityMode({
+          contentType: selectedContentType,
+          briefing: sanitizedArgs.briefing,
+          hasVoiceProfile: voiceProfile !== null,
+          qualityModes
+        });
+        const pricingSnapshot = yield* options.aiPolicy.resolvePricingEnvelope({
+          planTier,
+          contentType: selectedContentType.id,
+          qualityMode: selectedQualityMode,
+          attachedPolicyVersion: options.config.aiPolicyAttachedVersion
+        });
+        const commercialPricingSnapshot = toGenerationPricingSnapshot(pricingSnapshot);
+
+        return {
+          pricingSnapshot: commercialPricingSnapshot,
+          currentBalance,
+          projectedBalanceAfterGeneration: roundCredits(currentBalance - pricingSnapshot.creditPrice),
+          recommendation: recommendation
+            ? {
+                qualityMode: recommendation.qualityMode,
+                reasonCodes: [...recommendation.reasonCodes],
+                explanation: recommendation.explanation
+              }
+            : undefined,
+          options: {
+            contentTypes: contentTypes.map((contentType) => ({
+              id: contentType.id,
+              label: contentType.label,
+              allowed: contentType.available,
+              ...(contentType.reasonCode
+                ? {
+                    blockedReason: !entitlement ? "plan_restriction" : contentType.reasonCode
+                  }
+                : {})
+            })),
+            qualityModes: qualityModes.map((mode) => ({
+              ...mode,
+              ...(recommendation && recommendation.qualityMode === mode.id
+                ? {
+                    recommended: true,
+                    recommendation: {
+                      reasonCodes: [...recommendation.reasonCodes],
+                      explanation: recommendation.explanation
+                    }
+                  }
+                : {})
+            }))
+          }
+        } satisfies GenerationPreviewResponse;
+      });
+    }
+  };
+}
+
+function selectContentType(
+  requestedContentType: string | undefined,
+  contentTypes: ReadonlyArray<ContentTypeCatalogItemView>
+): ContentTypeCatalogItemView {
+  return (
+    (requestedContentType ? contentTypes.find((contentType) => contentType.id === requestedContentType) : undefined) ??
+    contentTypes.find((contentType) => contentType.available) ??
+    contentTypes[0] ?? {
+      id: "unknown",
+      label: "Unknown",
+      available: false,
+      defaultLanguage: "pt-BR",
+      supportedLanguages: ["pt-BR"],
+      steps: [],
+      inputSchema: [],
+      briefingGuidance: {
+        objective: "No content type available.",
+        tips: [],
+        exampleBriefing: "",
+        commonMistakes: []
+      }
+    }
+  );
+}
+
+function selectQualityMode(
+  requestedQualityMode: QualityMode | undefined,
+  qualityModes: ReadonlyArray<{
+    readonly id: QualityMode;
+    readonly allowed: boolean;
+  }>
+): QualityMode {
+  if (requestedQualityMode) {
+    const requested = qualityModes.find((mode) => mode.id === requestedQualityMode);
+    if (requested?.allowed) {
+      return requested.id;
+    }
+  }
+
+  return (
+    qualityModes.find((mode) => mode.allowed)?.id ??
+    qualityModes[0]?.id ??
+    "balanced"
+  );
+}
+
+function roundCredits(value: number): number {
+  return Math.ceil(value * 10) / 10;
+}
+
+function resolvePreviewQualityModeBlockedReason(
+  args: Parameters<typeof resolveQualityModeBlockedReason>[0]
+): string {
+  return resolveQualityModeBlockedReason(args) ?? "plan_restriction";
+}

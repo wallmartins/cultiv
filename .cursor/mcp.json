@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "headroom": {
+      "command": "/home/wallacem/.local/venvs/headroom/bin/headroom",
+      "args": ["mcp", "serve"]
+    }
+  }
+}

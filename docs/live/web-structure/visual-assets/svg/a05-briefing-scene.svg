@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 320" role="img" aria-labelledby="a05-title">
+  <title id="a05-title">Briefing guiado</title>
+  <rect width="400" height="320" fill="#faf7f2"/>
+  <text x="24" y="40" font-family="'JetBrains Mono', monospace" font-size="10" fill="#6b9080" letter-spacing="0.18em">BRIEFING</text>
+  <g transform="translate(24 56)">
+    <text x="0" y="0" font-family="Inter, sans-serif" font-size="10" fill="#5c6b66" letter-spacing="0.14em">FORMATO</text>
+    <line x1="0" y1="28" x2="352" y2="28" stroke="#1e2f2a" stroke-width="1" opacity="0.25"/>
+    <text x="0" y="24" font-family="Inter, sans-serif" font-size="16" fill="#1e2f2a">LinkedIn</text>
+  </g>
+  <g transform="translate(24 108)">
+    <text x="0" y="0" font-family="Inter, sans-serif" font-size="10" fill="#5c6b66" letter-spacing="0.14em">OBJETIVO</text>
+    <line x1="0" y1="28" x2="352" y2="28" stroke="#1e2f2a" stroke-width="1" opacity="0.25"/>
+    <text x="0" y="24" font-family="Inter, sans-serif" font-size="14" fill="#5c6b66">Compartilhar aprendizado da semana&</text>
+  </g>
+  <g transform="translate(24 160)">
+    <text x="0" y="0" font-family="Inter, sans-serif" font-size="10" fill="#5c6b66" letter-spacing="0.14em">AUDI�NCIA</text>
+    <line x1="0" y1="28" x2="352" y2="28" stroke="#1e2f2a" stroke-width="1" opacity="0.25"/>
+    <text x="0" y="24" font-family="Inter, sans-serif" font-size="14" fill="#5c6b66">Founders e builders de produto</text>
+  </g>
+  <g transform="translate(24 212)">
+    <text x="0" y="0" font-family="Inter, sans-serif" font-size="10" fill="#5c6b66" letter-spacing="0.14em">�NGULO</text>
+    <line x1="0" y1="28" x2="352" y2="28" stroke="#d4a843" stroke-width="1.2"/>
+    <text x="0" y="24" font-family="Inter, sans-serif" font-size="14" fill="#1e2f2a">Li��o pr�tica, n�o motivacional</text>
+  </g>
+  <rect x="24" y="268" width="120" height="32" fill="none" stroke="#1e2f2a" stroke-width="1" opacity="0.35"/>
+  <text x="84" y="289" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="#5c6b66" letter-spacing="0.16em">VER PR�VIA</text>
+</svg>

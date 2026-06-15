@@ -1,0 +1,19 @@
+{
+  "name": "@my-ai-orchestrator/client-sdk",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json --noEmit",
+    "lint": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@my-ai-orchestrator/contracts": "workspace:*",
+    "effect": "^3.16.12"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./package.json": "./package.json"
+  }
+}

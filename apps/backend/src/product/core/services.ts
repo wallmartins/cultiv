@@ -1,0 +1,122 @@
+import { Effect } from "effect";
+import type { AppLogger } from "@my-ai-orchestrator/core";
+import type { BackendConfig } from "../../config/config.js";
+import { createBackendPersistence } from "../persistence/persistence.js";
+import type { BackendAIPolicyBootstrapError } from "../ai-policy/ai-policy-types.js";
+import type { BackendSafetyPolicyBootstrapError } from "../safety-policy/safety-policy-types.js";
+import { createBackendUsagePolicy } from "../usage/usage-policy.js";
+import { createBackendGenerationPreviewService } from "../generation/generation-preview.js";
+import { createBackendPublicInputSafetyGatewayService } from "../../safety/public-input-safety.js";
+import { createBackendOutputReleaseGateService } from "../../safety/output-release.js";
+import { createBackendVoiceConsentService } from "../../safety/voice-consent.js";
+import { createBackendPolicyEvidenceService } from "../../safety/policy-evidence.js";
+import { createBackendOperationalOverrideService } from "../../safety/operational-override.js";
+import { createBackendRedactionService } from "../../safety/redaction.js";
+import type { BackendProductServices } from "./types.js";
+import type { FeatureFlagError } from "@my-ai-orchestrator/feature-flags";
+import { createBackendProductDependencies } from "./service-dependencies.js";
+import { createBackendVoiceRebuildService } from "../voice/voice-rebuild-service.js";
+import { createBackendVoiceService } from "../voice/voice-service.js";
+import { createBackendObservabilityService } from "./observability.js";
+import { createBackendApplicationUserMemoryRepository } from "../../auth/application-user-memory.js";
+import { createBackendOperatorMemoryRepository } from "../../auth/operator-memory.js";
+import { createPostgresApplicationUserRepository } from "../../infra/postgres-repositories/postgres-application-user-repository.js";
+import { createPostgresOperatorRepository } from "../../infra/postgres-repositories/postgres-operator-repository.js";
+import { getPostgresDatabase } from "../../infra/postgres-client.js";
+import { getSharedRedisClient } from "../../infra/redis-client.js";
+import { createRedisTrafficLimitStore } from "../../runtime/redis-rate-limit-store.js";
+
+export function createBackendProductServices(
+  config: BackendConfig,
+  options: {
+    readonly now?: () => Date;
+    readonly logger?: AppLogger;
+    readonly database?: import("@my-ai-orchestrator/database").DatabaseClient;
+  } = {}
+): Effect.Effect<
+  BackendProductServices,
+  FeatureFlagError | BackendAIPolicyBootstrapError | BackendSafetyPolicyBootstrapError | import("../infra/database-bootstrap.js").BackendDatabaseBootstrapError
+> {
+  return Effect.gen(function* () {
+    const now = options.now ?? (() => new Date());
+    const dependencies = yield* createBackendProductDependencies(config, now, {
+      database: options.database
+    });
+    const redaction = dependencies.redaction;
+    const safeLogger = options.logger ? redaction.createRedactedLogger(options.logger) : undefined;
+    const observability = yield* createBackendObservabilityService(redaction);
+    const policyVersion = (yield* dependencies.safetyPolicy.getActivePolicy()).version;
+    const policyEvidence = createBackendPolicyEvidenceService({
+      database: dependencies.database,
+      policyVersion,
+      redaction
+    });
+    const operationalOverride = createBackendOperationalOverrideService({
+      database: dependencies.database,
+      now,
+      safetyPolicy: dependencies.safetyPolicy,
+      policyEvidence,
+      redaction
+    });
+    const voiceConsent = createBackendVoiceConsentService({ database: dependencies.database, now, policyEvidence });
+    const voiceRebuild = createBackendVoiceRebuildService(dependencies.database, now, observability, safeLogger, voiceConsent);
+    const postgresDatabase = config.databaseUrl
+      ? getPostgresDatabase(dependencies.rawDatabase)
+      : undefined;
+    const inputSafety = createBackendPublicInputSafetyGatewayService({
+      safetyPolicy: dependencies.safetyPolicy,
+      policyEvidence
+    });
+    const users = postgresDatabase
+      ? createPostgresApplicationUserRepository(postgresDatabase)
+      : createBackendApplicationUserMemoryRepository();
+    const operators = postgresDatabase
+      ? createPostgresOperatorRepository(postgresDatabase)
+      : createBackendOperatorMemoryRepository();
+
+    return {
+      ...dependencies,
+      observability,
+      persistence: createBackendPersistence(dependencies.database, now),
+      aiPolicy: dependencies.aiPolicy,
+      experimentalAIPolicy: dependencies.experimentalAIPolicy,
+      safetyPolicy: dependencies.safetyPolicy,
+      inputSafety,
+      outputSafety: createBackendOutputReleaseGateService({
+        safetyPolicy: dependencies.safetyPolicy,
+        policyEvidence
+      }),
+      usagePolicy: createBackendUsagePolicy({
+        billing: dependencies.billing,
+        featureFlagRegistry: dependencies.featureFlagRegistry,
+        config,
+        now,
+        incrementTraffic:
+          config.redisUrl && !config.allowInMemoryRuntime
+            ? (key) => {
+                const store = createRedisTrafficLimitStore(getSharedRedisClient(config));
+                return store.increment(key, 86_400_000);
+              }
+            : undefined
+      }),
+      generationPreview: createBackendGenerationPreviewService({
+        config,
+        database: dependencies.database,
+        billing: dependencies.billing,
+        aiPolicy: dependencies.aiPolicy,
+        inputSafety
+      }),
+      voiceRebuild,
+      voiceConsent,
+      voice: createBackendVoiceService(dependencies.database, voiceRebuild, now, observability, safeLogger, voiceConsent),
+      policyEvidence,
+      operationalOverride,
+      redaction,
+      users,
+      operators
+    };
+  }) as Effect.Effect<
+    BackendProductServices,
+    FeatureFlagError | BackendAIPolicyBootstrapError | BackendSafetyPolicyBootstrapError
+  >;
+}

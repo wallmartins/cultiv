@@ -1,0 +1,59 @@
+import { Cause, Context, Effect, Exit, Layer } from "effect";
+import type { ClientSdkConfig } from "./config.js";
+import { createContentTypesClient, type ContentTypesClient } from "./content-types.js";
+import type { ClientSdkError } from "./errors.js";
+import { createExecutionsClient, type ExecutionsClient } from "./executions.js";
+import { createPreviewClient, type PreviewClient } from "./preview.js";
+import { createHttpTransport, type HttpTransport } from "./transport.js";
+import { createVoiceClient, type VoiceClient } from "./voice.js";
+
+export interface ClientSdk {
+  readonly preview: PreviewClient;
+  readonly executions: ExecutionsClient;
+  readonly voice: VoiceClient;
+  readonly contentTypes: ContentTypesClient;
+  readonly transport: HttpTransport;
+  readonly toPromise: <A>(effect: Effect.Effect<A, ClientSdkError, never>) => Promise<A>;
+}
+
+export class ClientSdkService extends Context.Tag("ClientSdkService")<ClientSdkService, ClientSdk>() {}
+
+export class HttpTransportService extends Context.Tag("HttpTransportService")<HttpTransportService, HttpTransport>() {}
+
+export function createClientSdk(config: ClientSdkConfig): ClientSdk {
+  const transport = createHttpTransport(config);
+
+  return {
+    preview: createPreviewClient(transport),
+    executions: createExecutionsClient(config, transport),
+    voice: createVoiceClient(transport),
+    contentTypes: createContentTypesClient(transport),
+    transport,
+    toPromise(effect) {
+      return Effect.runPromiseExit(effect).then((exit) => {
+        if (Exit.isSuccess(exit)) {
+          return exit.value;
+        }
+
+        const failure = Cause.failureOption(exit.cause);
+        if (failure._tag === "Some") {
+          return Promise.reject(failure.value);
+        }
+
+        return Promise.reject(new Error(Cause.pretty(exit.cause)));
+      });
+    }
+  };
+}
+
+export function createClientSdkLayer(config: ClientSdkConfig) {
+  return Layer.succeed(ClientSdkService, createClientSdk(config));
+}
+
+export function createHttpTransportLayer(config: ClientSdkConfig) {
+  return Layer.succeed(HttpTransportService, createHttpTransport(config));
+}
+
+export function withClientSdk<T, E, R>(effect: Effect.Effect<T, E, R>, config: ClientSdkConfig): Effect.Effect<T, E, R> {
+  return effect.pipe(Effect.provide(createClientSdkLayer(config)));
+}

@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import type { MarketingLocale } from "~/i18n/types";
+import type { MarketingLocale } from "~/i18n/marketing/types";
 
 function toDocumentLang(locale: MarketingLocale): string {
   return locale === "pt" ? "pt-BR" : "en";

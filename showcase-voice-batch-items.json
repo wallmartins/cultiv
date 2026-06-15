@@ -1,0 +1,71 @@
+{
+  "items": [
+    {
+      "clientItemId": "ex-01-linkedin-pinned",
+      "input": {
+        "text": "Parei de tratar curso como plano de carreira. Aprendi mais ouvindo colegas em café do que em qualquer slide de tendências, e hoje escolho com mais critério o que merece meu tempo de estudo.",
+        "language": "pt-BR",
+        "channel": "linkedin",
+        "format": "post",
+        "explicitContentType": "linkedin-post",
+        "pinned": true,
+        "context": "Post curto, opinião direta, sem CTA forçado."
+      }
+    },
+    {
+      "clientItemId": "ex-02-linkedin-curation",
+      "input": {
+        "text": "Carreira, pra mim, virou curadoria: o que estudar, o que ignorar, e quando dizer não para mais um framework da semana.",
+        "language": "pt-BR",
+        "channel": "linkedin",
+        "format": "post",
+        "explicitContentType": "linkedin-post",
+        "context": "Segunda amostra LinkedIn, tom mais sintético."
+      }
+    },
+    {
+      "clientItemId": "ex-03-blog-pause",
+      "input": {
+        "text": "Parei de tratar descanso como prêmio depois do expediente. Quando entendi que pausa faz parte do trabalho, não é o oposto dele, minha semana ficou mais leve e mais previsível. Não foi sobre trabalhar menos; foi sobre parar de medir valor só pelo cansaço acumulado.",
+        "language": "pt-BR",
+        "channel": "blog",
+        "format": "article",
+        "explicitContentType": "long-form-blog",
+        "context": "Abertura reflexiva de artigo longo."
+      }
+    },
+    {
+      "clientItemId": "ex-04-thread-consistency",
+      "input": {
+        "text": "1/ Três anos publicando toda terça, mesmo quando não tinha ideia.\n2/ O segredo não foi volume; foi um formato pequeno que eu conseguia sustentar.\n3/ Consistência, pra mim, é gentileza com o leitor: ele sabe quando voltar.",
+        "language": "pt-BR",
+        "channel": "twitter",
+        "format": "thread",
+        "explicitContentType": "twitter-thread",
+        "context": "Thread curta, numeração explícita."
+      }
+    },
+    {
+      "clientItemId": "ex-05-newsletter-reflective",
+      "input": {
+        "text": "Esta semana percebi de novo que meus melhores textos não nascem de mais uma pesquisa, nascem de uma observação pequena que eu não deixei passar. Escrevo newsletters assim: contexto primeiro, opinião no meio, convite honesto no final, sem tom de vendas.",
+        "language": "pt-BR",
+        "channel": "newsletter",
+        "format": "email",
+        "explicitContentType": "newsletter",
+        "context": "Parágrafo mais longo, ritmo reflexivo."
+      }
+    },
+    {
+      "clientItemId": "ex-06-architecture-tradeoff",
+      "input": {
+        "text": "Quando explico uma decisão de arquitetura, eu começo pelo limite que nos forçou a escolher, não pelo diagrama bonito. Trade-off primeiro, solução depois. Mesmo em assunto técnico, continuo em primeira pessoa e evito tom de whitepaper.",
+        "language": "pt-BR",
+        "channel": "blog",
+        "format": "essay",
+        "explicitContentType": "architecture-post",
+        "context": "Tom técnico mas pessoal; diversifica cadência."
+      }
+    }
+  ]
+}

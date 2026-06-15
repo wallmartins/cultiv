@@ -1,0 +1,24 @@
+# Railway config for the **worker** service.
+# In Railway: Service Settings → Config File Path → `/railway.worker.toml`
+#
+# Shares the same monorepo build as `api` but runs the execution worker only.
+# Do not set healthcheckPath — this process has no HTTP listener.
+# Migrations run on the api service preDeployCommand, not here.
+
+[build]
+builder = "RAILPACK"
+buildCommand = "pnpm install --frozen-lockfile && pnpm build:backend"
+watchPatterns = [
+  "apps/backend/**",
+  "packages/**",
+  "pnpm-lock.yaml",
+  "pnpm-workspace.yaml",
+  "package.json",
+  "railway.toml",
+  "railway.worker.toml"
+]
+
+[deploy]
+startCommand = "pnpm --filter @my-ai-orchestrator/backend worker"
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 10

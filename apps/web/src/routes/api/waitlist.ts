@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { handleWaitlistRequest } from "~/lib/server/handle-waitlist-request";
-import { isWaitlistSuccess } from "~/lib/services/waitlist/waitlist-result";
+import { handleWaitlistRequest } from "~/platform/server/handle-waitlist-request";
+import { isWaitlistSuccess } from "~/platform/services/waitlist/waitlist-result";
 
 export const Route = createFileRoute("/api/waitlist")({
   server: {

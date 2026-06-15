@@ -1,0 +1,87 @@
+{
+  "capturedAt": "2026-05-07T20:14:27.675Z",
+  "adapter": null,
+  "model": null,
+  "source": {
+    "endpoint": "http://localhost:3000/run",
+    "fixture": "tests/fixtures/baseline-briefings.json",
+    "dryRun": true
+  },
+  "runs": [
+    {
+      "briefingId": "briefing-1",
+      "qualityMode": "fast",
+      "dryRun": true
+    },
+    {
+      "briefingId": "briefing-1",
+      "qualityMode": "balanced",
+      "dryRun": true
+    },
+    {
+      "briefingId": "briefing-1",
+      "qualityMode": "strict",
+      "dryRun": true
+    },
+    {
+      "briefingId": "briefing-2",
+      "qualityMode": "fast",
+      "dryRun": true
+    },
+    {
+      "briefingId": "briefing-2",
+      "qualityMode": "balanced",
+      "dryRun": true
+    },
+    {
+      "briefingId": "briefing-2",
+      "qualityMode": "strict",
+      "dryRun": true
+    },
+    {
+      "briefingId": "briefing-3",
+      "qualityMode": "fast",
+      "dryRun": true
+    },
+    {
+      "briefingId": "briefing-3",
+      "qualityMode": "balanced",
+      "dryRun": true
+    },
+    {
+      "briefingId": "briefing-3",
+      "qualityMode": "strict",
+      "dryRun": true
+    },
+    {
+      "briefingId": "briefing-4",
+      "qualityMode": "fast",
+      "dryRun": true
+    },
+    {
+      "briefingId": "briefing-4",
+      "qualityMode": "balanced",
+      "dryRun": true
+    },
+    {
+      "briefingId": "briefing-4",
+      "qualityMode": "strict",
+      "dryRun": true
+    },
+    {
+      "briefingId": "briefing-5",
+      "qualityMode": "fast",
+      "dryRun": true
+    },
+    {
+      "briefingId": "briefing-5",
+      "qualityMode": "balanced",
+      "dryRun": true
+    },
+    {
+      "briefingId": "briefing-5",
+      "qualityMode": "strict",
+      "dryRun": true
+    }
+  ]
+}

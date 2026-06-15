@@ -1,0 +1,148 @@
+import { buildOrchestrationPlan } from "@my-ai-orchestrator/orchestrator";
+import type {
+  BackendAIPolicyCatalogError,
+  BackendAIPolicyPricingError
+} from "../../http/errors.js";
+import { BackendAIPolicyCatalogError as BackendAIPolicyCatalogFailure } from "../../http/errors.js";
+import type {
+  BillingPlanTier,
+  ResolvedAIPolicyVersion,
+  ResolvedExecutionSnapshot,
+  ResolvedExecutionStep,
+  AIPolicyProviderModelAttempt,
+  ResolvedPricingEnvelope
+} from "./ai-policy-types.js";
+import { Effect } from "effect";
+
+export function resolveExecutionSnapshot(args: {
+  readonly policy: ResolvedAIPolicyVersion;
+  readonly pricingEnvelope: ResolvedPricingEnvelope;
+  readonly request: import("@my-ai-orchestrator/contracts").PipelineRequest;
+  readonly planTier: BillingPlanTier;
+  readonly executionMode: import("@my-ai-orchestrator/contracts").ExecutionMode;
+  readonly qualityMode: import("@my-ai-orchestrator/contracts").QualityMode;
+  readonly defaultLanguage: string;
+}): Effect.Effect<
+  ResolvedExecutionSnapshot,
+  BackendAIPolicyCatalogError | BackendAIPolicyPricingError
+> {
+  return Effect.gen(function* () {
+    const plan = buildOrchestrationPlan(args.request, {
+      catalog: args.policy.orchestrationCatalog,
+      executionMode: args.executionMode,
+      qualityMode: args.qualityMode,
+      defaultLanguage: args.defaultLanguage
+    });
+    const pipelinePolicy = args.policy.catalog[plan.pipelineType ?? inferPipelineType(plan.pipeline.name)];
+
+    if (!pipelinePolicy) {
+      return yield* Effect.fail(
+        new BackendAIPolicyCatalogFailure({
+          policyVersion: args.policy.version,
+          pipelineName: plan.pipeline.name,
+          message: `Pipeline "${plan.pipeline.name}" is not available in policy version "${args.policy.version}"`
+        })
+      );
+    }
+
+    const steps = pipelinePolicy.steps.map<ResolvedExecutionStep>((step) => ({
+      name: step.name,
+      skill: step.skill,
+      execution: step.execution,
+      routingProfile: step.routingProfile,
+      attempts: resolveStepAttempts(args.policy, step.routingProfile),
+      fallbackOn: resolveStepFallbackConditions(args.policy, step.routingProfile)
+    }));
+    const resolvedPlan = {
+      ...plan,
+      pipeline: {
+        ...plan.pipeline,
+        steps: plan.pipeline.steps.map((step, index) => {
+          const resolvedStep = steps[index];
+          return {
+            ...step,
+            config: {
+              ...(step.config ?? {}),
+              executionType: resolvedStep?.execution,
+              ...(resolvedStep?.routingProfile ? { routingProfile: resolvedStep.routingProfile } : {}),
+              ...(resolvedStep && resolvedStep.execution === "llm"
+                ? {
+                    resolvedProviderModelPlan: resolvedStep.attempts.map(cloneAttempt),
+                    routingConstraints: {
+                      fallbackOn: [...resolvedStep.fallbackOn]
+                    }
+                  }
+                : {})
+            }
+          };
+        })
+      }
+    };
+
+    return freezeResolvedExecutionSnapshot({
+      policyVersion: args.policy.version,
+      lifecycle: args.policy.lifecycle,
+      planTier: args.planTier,
+      request: args.request,
+      plan: resolvedPlan,
+      pricingEnvelope: args.pricingEnvelope,
+      steps
+    });
+  });
+}
+
+function resolveStepAttempts(
+  policy: ResolvedAIPolicyVersion,
+  routingProfile: string | undefined
+): readonly AIPolicyProviderModelAttempt[] {
+  if (!routingProfile) {
+    return [];
+  }
+
+  const profile = policy.routingProfiles[routingProfile];
+  return profile
+    ? [...profile.preferredAttempts, ...profile.fallbackAttempts].map(cloneAttempt)
+    : [];
+}
+
+function resolveStepFallbackConditions(
+  policy: ResolvedAIPolicyVersion,
+  routingProfile: string | undefined
+): ResolvedExecutionStep["fallbackOn"] {
+  if (!routingProfile) {
+    return [];
+  }
+
+  return [...(policy.routingProfiles[routingProfile]?.operationalConstraints.fallbackOn ?? [])];
+}
+
+function cloneAttempt(attempt: AIPolicyProviderModelAttempt): AIPolicyProviderModelAttempt {
+  return {
+    provider: attempt.provider,
+    model: attempt.model,
+    ...(typeof attempt.timeoutMs === "number" ? { timeoutMs: attempt.timeoutMs } : {})
+  };
+}
+
+function inferPipelineType(
+  pipelineName: string
+): import("@my-ai-orchestrator/contracts").PipelineType {
+  return pipelineName as import("@my-ai-orchestrator/contracts").PipelineType;
+}
+
+function freezeResolvedExecutionSnapshot(snapshot: ResolvedExecutionSnapshot): ResolvedExecutionSnapshot {
+  deepFreeze(snapshot);
+  return snapshot;
+}
+
+function deepFreeze(value: unknown): void {
+  if (value === null || typeof value !== "object" || Object.isFrozen(value)) {
+    return;
+  }
+
+  Object.freeze(value);
+
+  for (const nested of Object.values(value)) {
+    deepFreeze(nested);
+  }
+}

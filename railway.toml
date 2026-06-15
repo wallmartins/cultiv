@@ -1,0 +1,29 @@
+# Railway config for the **api** service (default config file at repo root).
+# Worker service: set Config File Path to `/railway.worker.toml` in Railway settings.
+#
+# Project layout (same GitHub monorepo, root `/`):
+#   Postgres plugin  → DATABASE_URL
+#   Redis plugin     → REDIS_URL
+#   api              → this file
+#   worker           → railway.worker.toml
+
+[build]
+builder = "RAILPACK"
+buildCommand = "pnpm install --frozen-lockfile && pnpm build:backend"
+watchPatterns = [
+  "apps/backend/**",
+  "packages/**",
+  "pnpm-lock.yaml",
+  "pnpm-workspace.yaml",
+  "package.json",
+  "railway.toml",
+  "railway.worker.toml"
+]
+
+[deploy]
+preDeployCommand = "pnpm --filter @my-ai-orchestrator/backend migrate"
+startCommand = "pnpm --filter @my-ai-orchestrator/backend start"
+healthcheckPath = "/health"
+healthcheckTimeout = 300
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 10

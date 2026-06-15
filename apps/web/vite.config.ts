@@ -4,11 +4,14 @@ import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import tailwindcss from "@tailwindcss/vite";
 import viteReact from "@vitejs/plugin-react";
 import { nitro } from "nitro/vite";
-import { defineConfig } from "vite";
+import { defineConfig, loadEnv } from "vite";
 
 const rootDir = path.dirname(fileURLToPath(import.meta.url));
 
-export default defineConfig({
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, rootDir, "");
+
+  return {
   server: {
     port: 3000
   },
@@ -43,5 +46,10 @@ export default defineConfig({
     }),
     viteReact(),
     nitro()
-  ]
+  ],
+  define: {
+    "import.meta.env.SITE_URL": JSON.stringify(env.SITE_URL ?? ""),
+    "import.meta.env.VITE_API_BASE_URL": JSON.stringify(env.VITE_API_BASE_URL ?? "")
+  }
+  };
 });

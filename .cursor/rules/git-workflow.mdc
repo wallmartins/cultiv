@@ -1,0 +1,19 @@
+---
+alwaysApply: false
+---
+## Branches
+- `feature/xxx` – new features
+- `fix/xxx` – bug fixes
+- `docs/xxx` – documentation
+- `chore/xxx` – maintenance
+
+## Commits
+Use conventional commits:
+- `feat:` new feature
+- `fix:` bug fix
+- `docs:` documentation
+- `refactor:` code change that neither fixes nor adds feature
+- `test:` add or update tests
+- `chore:` build process, tooling
+
+Keep commits atomic and small.

@@ -1,0 +1,51 @@
+[
+  {
+    "id": "linkedin-career-01",
+    "contentType": "linkedin-post",
+    "language": "pt-BR",
+    "expectedDomain": "non-technical",
+    "briefing": "Escreva sobre aprendizado informal e crescimento de carreira em conversas do dia a dia."
+  },
+  {
+    "id": "linkedin-tech-01",
+    "contentType": "linkedin-post",
+    "language": "pt-BR",
+    "expectedDomain": "technical",
+    "briefing": "Compartilhe lições de um deploy de microservices e tradeoffs de cache em produção."
+  },
+  {
+    "id": "thread-career-01",
+    "contentType": "twitter-thread",
+    "language": "pt-BR",
+    "expectedDomain": "non-technical",
+    "briefing": "Thread sobre rotina de escrita e consistência para criadores."
+  },
+  {
+    "id": "newsletter-growth-01",
+    "contentType": "newsletter",
+    "language": "pt-BR",
+    "expectedDomain": "non-technical",
+    "briefing": "Newsletter sobre comunicação clara e presença pessoal na liderança."
+  },
+  {
+    "id": "blog-mixed-01",
+    "contentType": "long-form-blog",
+    "language": "pt-BR",
+    "expectedDomain": "mixed",
+    "briefing": "Artigo sobre liderança de carreira e quando uma API interna ajuda o time."
+  },
+  {
+    "id": "architecture-01",
+    "contentType": "architecture-post",
+    "language": "pt-BR",
+    "expectedDomain": "technical",
+    "briefing": "Explique tradeoffs entre cache distribuído e consistência em um serviço crítico."
+  },
+  {
+    "id": "validation-01",
+    "contentType": "validation-post",
+    "language": "pt-BR",
+    "expectedDomain": "technical",
+    "briefing": "Valide uma decisão de arquitetura com evidências de latência e custo."
+  }
+]

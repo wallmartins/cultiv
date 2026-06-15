@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 360" role="img" aria-labelledby="a04-title">
+  <title id="a04-title">Ensine sua voz  exemplos orbitando</title>
+  <rect width="480" height="360" fill="#f5f0e8"/>
+  <circle cx="240" cy="180" r="56" fill="none" stroke="#d9cfc2" stroke-width="1" stroke-dasharray="4 6" opacity="0.6"/>
+  <circle cx="240" cy="180" r="8" fill="#6b9080" opacity="0.35"/>
+  <text x="240" y="184" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="8" fill="#6b9080">VOZ</text>
+  <g transform="translate(72 80)">
+    <rect width="160" height="72" fill="#faf7f2" stroke="#1e2f2a" stroke-width="1"/>
+    <text x="12" y="24" font-family="'JetBrains Mono', monospace" font-size="9" fill="#6b9080">[01]</text>
+    <text x="12" y="44" font-family="Inter, sans-serif" font-size="12" fill="#1e2f2a">post no LinkedIn</text>
+    <text x="12" y="60" font-family="Inter, sans-serif" font-size="10" fill="#5c6b66">tom observado</text>
+  </g>
+  <g transform="translate(248 56)" opacity="0.92">
+    <rect width="168" height="72" fill="#faf7f2" stroke="#1e2f2a" stroke-width="1"/>
+    <text x="12" y="24" font-family="'JetBrains Mono', monospace" font-size="9" fill="#6b9080">[02]</text>
+    <text x="12" y="44" font-family="Inter, sans-serif" font-size="12" fill="#1e2f2a">email para cliente</text>
+    <text x="12" y="60" font-family="Inter, sans-serif" font-size="10" fill="#5c6b66">cad�ncia, vocabul�rio</text>
+  </g>
+  <g transform="translate(120 228)" opacity="0.85">
+    <rect width="176" height="72" fill="#faf7f2" stroke="#1e2f2a" stroke-width="1"/>
+    <text x="12" y="24" font-family="'JetBrains Mono', monospace" font-size="9" fill="#6b9080">[03]</text>
+    <text x="12" y="44" font-family="Inter, sans-serif" font-size="12" fill="#1e2f2a">artigo do blog</text>
+    <text x="12" y="60" font-family="Inter, sans-serif" font-size="10" fill="#5c6b66">exemplos representativos</text>
+  </g>
+  <path d="M152 152 Q196 168 224 128" stroke="#6b9080" stroke-width="0.6" fill="none" opacity="0.35"/>
+  <path d="M296 128 Q260 160 240 180" stroke="#6b9080" stroke-width="0.6" fill="none" opacity="0.35"/>
+  <path d="M200 264 Q220 220 240 188" stroke="#6b9080" stroke-width="0.6" fill="none" opacity="0.35"/>
+</svg>

@@ -1,0 +1,104 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [20.x]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run linter
+        run: pnpm lint
+
+      - name: Build backend
+        run: pnpm build:backend
+
+      - name: Run unit and integration tests
+        run: pnpm test
+
+      - name: Run Effect guardrails
+        run: pnpm guardrails:effect
+
+      - name: Run web tests
+        run: pnpm test:web
+
+      - name: Build web
+        run: pnpm build:web
+
+  durable-runtime:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: contentlib
+          POSTGRES_PASSWORD: contentlib
+          POSTGRES_DB: contentlib
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U contentlib -d contentlib"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node.js 20.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run durable runtime integration tests
+        env:
+          RUN_DURABLE_RUNTIME_TESTS: "true"
+          BACKEND_TEST_DATABASE_URL: postgresql://contentlib:contentlib@localhost:5432/contentlib
+          REDIS_URL: redis://localhost:6379
+          BACKEND_ALLOW_IN_MEMORY_RUNTIME: "false"
+        run: pnpm test:durable
