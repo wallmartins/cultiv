@@ -270,38 +270,19 @@ Tunnel ID: 12345678-abcd-1234-5678-1234567890ab
 
 ### Step 4.3: Criar o arquivo de configuração
 
-```bash
-# Criar o arquivo de config
-# SUBSTITUA <tunnel-id> pelo ID anotado acima
-
-cat > ~/.cloudflared/config.yml <<EOF
-tunnel: <tunnel-id>
-credentials-file: /home/cultiv/.cloudflared/<tunnel-id>.json
-
-ingress:
-  - hostname: api.cultiv.app
-    service: http://127.0.0.1:80
-  - hostname: ssh.cultiv.app
-    service: ssh://127.0.0.1:22
-  - service: http_status:404
-EOF
-```
-
-**Exemplo real (com seu ID):**
+Substitua `<tunnel-id>` pelo ID anotado no passo anterior:
 
 ```bash
-cat > ~/.cloudflared/config.yml <<EOF
-tunnel: 12345678-abcd-1234-5678-1234567890ab
-credentials-file: /home/cultiv/.cloudflared/12345678-abcd-1234-5678-1234567890ab.json
-
-ingress:
-  - hostname: api.cultiv.app
-    service: http://127.0.0.1:80
-  - hostname: ssh.cultiv.app
-    service: ssh://127.0.0.1:22
-  - service: http_status:404
-EOF
+./infra/integrator/scripts/setup-tunnel-config.sh <tunnel-id>
 ```
+
+**Exemplo:**
+
+```bash
+./infra/integrator/scripts/setup-tunnel-config.sh fee1e25e-086f-4ff1-b17d-a75925d74ffc
+```
+
+O script cria `~/.cloudflared/config.yml` com o tunnel ID, caminho do credentials-file e regras de ingress.
 
 ### Step 4.4: Criar os DNS records
 
