@@ -2,7 +2,8 @@ packages:
   - "apps/*"
   - "packages/*"
 
+# pnpm v11: explicit postinstall script approvals (required on CI/Vercel).
 allowBuilds:
   browser-tabs-lock: true
   esbuild: true
-  msgpackr-extract: set this to true or false
+  msgpackr-extract: false

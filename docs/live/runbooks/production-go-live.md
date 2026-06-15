@@ -213,8 +213,9 @@ Document your WAF product and rules (see [durable HITL §2](./durable-async-runt
 2. Framework: TanStack Start (detected via `apps/web/vercel.json`)
 3. Install command (already in `vercel.json`): `cd ../.. && pnpm install --frozen-lockfile`
 4. Build command: `pnpm build` (runs inside `apps/web`)
-5. Production env vars (Phase 1 web table)
-6. Custom domain DNS (`cultiv.app` / `www`)
+5. `apps/web/vercel.json` install: `cd ../.. && npx -y pnpm@11.3.0 install --frozen-lockfile` (pnpm 11 + monorepo root); Root Directory **must** be `apps/web`
+6. Production env vars (Phase 1 web table)
+7. Custom domain DNS (`cultiv.app` / `www`)
 
 **Smoke tests**
 
