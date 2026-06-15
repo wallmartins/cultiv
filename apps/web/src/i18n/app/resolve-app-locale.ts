@@ -2,7 +2,7 @@ import { readStoredAppLocale } from "./locale-storage";
 import type { AppLocale } from "./types";
 
 export function resolveAppLocaleFromBrowser(): AppLocale {
-  if (typeof navigator === "undefined") {
+  if (typeof window === "undefined") {
     return "pt";
   }
 

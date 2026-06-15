@@ -1,6 +1,7 @@
-import { mkdtempSync, writeFileSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, unlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { join, resolve, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import {
   BackendConfigValidationError,
@@ -140,14 +141,37 @@ describe("backend config bootstrap", () => {
   it("falls back to the repository env file when the current working directory differs", () => {
     const directory = mkdtempSync(join(tmpdir(), "backend-config-cwd-"));
     const env: NodeJS.ProcessEnv = {};
+    const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
+    const repositoryEnvPath = join(repositoryRoot, ".env");
+    const hadRepositoryEnv = existsSync(repositoryEnvPath);
+    const previousRepositoryEnv = hadRepositoryEnv
+      ? readFileSync(repositoryEnvPath, "utf8")
+      : null;
+    const testGeminiKey = "repo-fallback-ci-test-key";
 
-    const loadedEnv = loadBackendEnvironment({
-      env,
-      cwd: directory,
-      mode: "local"
-    });
+    if (!hadRepositoryEnv) {
+      writeFileSync(repositoryEnvPath, `GEMINI_API_KEY=${testGeminiKey}\n`);
+    }
 
-    expect(loadedEnv.GEMINI_API_KEY).toBeTruthy();
+    try {
+      const loadedEnv = loadBackendEnvironment({
+        env,
+        cwd: directory,
+        mode: "local"
+      });
+
+      if (hadRepositoryEnv) {
+        expect(loadedEnv.GEMINI_API_KEY).toBeTruthy();
+      } else {
+        expect(loadedEnv.GEMINI_API_KEY).toBe(testGeminiKey);
+      }
+    } finally {
+      if (hadRepositoryEnv) {
+        writeFileSync(repositoryEnvPath, previousRepositoryEnv!);
+      } else if (existsSync(repositoryEnvPath)) {
+        unlinkSync(repositoryEnvPath);
+      }
+    }
   });
 
   it("normalizes blank optional config values so default policy loading still works", () => {
