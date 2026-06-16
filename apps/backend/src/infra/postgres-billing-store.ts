@@ -19,6 +19,21 @@ import { replaceBillingRepositoryContents } from "./billing-repository-sync.js";
 
 const BILLING_SNAPSHOT_ID = "default";
 
+let billingPersistQueue: Promise<void> = Promise.resolve();
+
+export function runBillingRepositoryPersistSerialized<T>(task: () => Promise<T>): Promise<T> {
+  const next = billingPersistQueue.catch(() => undefined).then(task);
+  billingPersistQueue = next.then(
+    () => undefined,
+    () => undefined
+  );
+  return next;
+}
+
+export function drainBillingRepositoryPersistQueue(): Promise<void> {
+  return billingPersistQueue.catch(() => undefined);
+}
+
 interface BillingSnapshotPayload {
   readonly plans?: ReadonlyArray<[string, unknown]>;
   readonly subscriptions?: ReadonlyArray<[string, unknown]>;
@@ -158,11 +173,23 @@ export function savePostgresBillingRepository(
 ): Effect.Effect<void, Error> {
   return Effect.tryPromise({
     try: () =>
-      db.transaction().execute(async (trx) => {
-        await clearBillingTables(trx);
-        await insertBillingRepository(trx, repository);
-      }),
+      runBillingRepositoryPersistSerialized(() =>
+        db.transaction().execute(async (trx) => {
+          await clearBillingTables(trx);
+          await insertBillingRepository(trx, repository);
+        })
+      ),
     catch: (error) => (error instanceof Error ? error : new Error(String(error)))
+  });
+}
+
+export function persistPostgresBillingRepositoryInTransaction(
+  trx: Transaction<DatabaseTables>,
+  repository: BillingRepository
+): Promise<void> {
+  return runBillingRepositoryPersistSerialized(async () => {
+    await clearBillingTables(trx);
+    await insertBillingRepository(trx, repository);
   });
 }
 

@@ -4,6 +4,7 @@ import { replaceBillingRepositoryContents } from "./billing-repository-sync.js";
 import {
   hasPostgresBillingTables,
   loadPostgresBillingRepository,
+  persistPostgresBillingRepositoryInTransaction,
   reloadPostgresBillingRepositoryInto,
   savePostgresBillingRepository
 } from "./postgres-billing-store.js";
@@ -153,7 +154,18 @@ export function saveBillingRepositoryInTransaction(
   repository: BillingRepository,
   updatedAt: string
 ): Effect.Effect<void, Error> {
-  return saveBillingRepository(trx, repository, updatedAt);
+  return Effect.gen(function* () {
+    const relationalEnabled = yield* hasPostgresBillingTables(trx);
+    if (relationalEnabled) {
+      yield* Effect.tryPromise({
+        try: () => persistPostgresBillingRepositoryInTransaction(trx, repository),
+        catch: (error) => (error instanceof Error ? error : new Error(String(error)))
+      });
+      return;
+    }
+
+    yield* saveBillingRepository(trx, repository, updatedAt);
+  });
 }
 
 export function insertOutboxEvent(
