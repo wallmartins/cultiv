@@ -1,10 +1,9 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { ExecutionHistoryScreen } from "~/app/history/screens/ExecutionHistoryScreen";
+import { createFileRoute, Outlet } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/app/history")({
-  component: HistoryPage
+  component: HistoryLayout
 });
 
-function HistoryPage() {
-  return <ExecutionHistoryScreen />;
+function HistoryLayout() {
+  return <Outlet />;
 }

@@ -32,6 +32,7 @@ import { Route as AppGenerateRouteImport } from './routes/app/generate'
 import { Route as ApiWaitlistRouteImport } from './routes/api/waitlist'
 import { Route as AppVoiceRouteRouteImport } from './routes/app/voice/route'
 import { Route as AppVoiceIndexRouteImport } from './routes/app/voice/index'
+import { Route as AppHistoryIndexRouteImport } from './routes/app/history.index'
 import { Route as AppHistoryExecutionIdRouteImport } from './routes/app/history.$executionId'
 import { Route as AppGenerateExecutionIdRouteImport } from './routes/app/generate.$executionId'
 import { Route as AppVoiceExamplesIndexRouteImport } from './routes/app/voice/examples/index'
@@ -153,6 +154,11 @@ const AppVoiceIndexRoute = AppVoiceIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AppVoiceRouteRoute,
 } as any)
+const AppHistoryIndexRoute = AppHistoryIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppHistoryRoute,
+} as any)
 const AppHistoryExecutionIdRoute = AppHistoryExecutionIdRouteImport.update({
   id: '/$executionId',
   path: '/$executionId',
@@ -204,6 +210,7 @@ export interface FileRoutesByFullPath {
   '/en/': typeof EnIndexRoute
   '/app/generate/$executionId': typeof AppGenerateExecutionIdRoute
   '/app/history/$executionId': typeof AppHistoryExecutionIdRoute
+  '/app/history/': typeof AppHistoryIndexRoute
   '/app/voice/': typeof AppVoiceIndexRoute
   '/app/voice/examples/new': typeof AppVoiceExamplesNewRoute
   '/app/voice/examples/': typeof AppVoiceExamplesIndexRoute
@@ -221,7 +228,6 @@ export interface FileRoutesByTo {
   '/terms': typeof TermsRoute
   '/api/waitlist': typeof ApiWaitlistRoute
   '/app/generate': typeof AppGenerateRouteWithChildren
-  '/app/history': typeof AppHistoryRouteWithChildren
   '/app/onboarding': typeof AppOnboardingRoute
   '/app/settings': typeof AppSettingsRoute
   '/en/llms-full.txt': typeof EnLlmsFullDottxtRoute
@@ -232,6 +238,7 @@ export interface FileRoutesByTo {
   '/en': typeof EnIndexRoute
   '/app/generate/$executionId': typeof AppGenerateExecutionIdRoute
   '/app/history/$executionId': typeof AppHistoryExecutionIdRoute
+  '/app/history': typeof AppHistoryIndexRoute
   '/app/voice': typeof AppVoiceIndexRoute
   '/app/voice/examples/new': typeof AppVoiceExamplesNewRoute
   '/app/voice/examples': typeof AppVoiceExamplesIndexRoute
@@ -263,6 +270,7 @@ export interface FileRoutesById {
   '/en/': typeof EnIndexRoute
   '/app/generate/$executionId': typeof AppGenerateExecutionIdRoute
   '/app/history/$executionId': typeof AppHistoryExecutionIdRoute
+  '/app/history/': typeof AppHistoryIndexRoute
   '/app/voice/': typeof AppVoiceIndexRoute
   '/app/voice/examples/new': typeof AppVoiceExamplesNewRoute
   '/app/voice/examples/': typeof AppVoiceExamplesIndexRoute
@@ -295,6 +303,7 @@ export interface FileRouteTypes {
     | '/en/'
     | '/app/generate/$executionId'
     | '/app/history/$executionId'
+    | '/app/history/'
     | '/app/voice/'
     | '/app/voice/examples/new'
     | '/app/voice/examples/'
@@ -312,7 +321,6 @@ export interface FileRouteTypes {
     | '/terms'
     | '/api/waitlist'
     | '/app/generate'
-    | '/app/history'
     | '/app/onboarding'
     | '/app/settings'
     | '/en/llms-full.txt'
@@ -323,6 +331,7 @@ export interface FileRouteTypes {
     | '/en'
     | '/app/generate/$executionId'
     | '/app/history/$executionId'
+    | '/app/history'
     | '/app/voice'
     | '/app/voice/examples/new'
     | '/app/voice/examples'
@@ -353,6 +362,7 @@ export interface FileRouteTypes {
     | '/en/'
     | '/app/generate/$executionId'
     | '/app/history/$executionId'
+    | '/app/history/'
     | '/app/voice/'
     | '/app/voice/examples/new'
     | '/app/voice/examples/'
@@ -541,6 +551,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppVoiceIndexRouteImport
       parentRoute: typeof AppVoiceRouteRoute
     }
+    '/app/history/': {
+      id: '/app/history/'
+      path: '/'
+      fullPath: '/app/history/'
+      preLoaderRoute: typeof AppHistoryIndexRouteImport
+      parentRoute: typeof AppHistoryRoute
+    }
     '/app/history/$executionId': {
       id: '/app/history/$executionId'
       path: '/$executionId'
@@ -611,10 +628,12 @@ const AppGenerateRouteWithChildren = AppGenerateRoute._addFileChildren(
 
 interface AppHistoryRouteChildren {
   AppHistoryExecutionIdRoute: typeof AppHistoryExecutionIdRoute
+  AppHistoryIndexRoute: typeof AppHistoryIndexRoute
 }
 
 const AppHistoryRouteChildren: AppHistoryRouteChildren = {
   AppHistoryExecutionIdRoute: AppHistoryExecutionIdRoute,
+  AppHistoryIndexRoute: AppHistoryIndexRoute,
 }
 
 const AppHistoryRouteWithChildren = AppHistoryRoute._addFileChildren(

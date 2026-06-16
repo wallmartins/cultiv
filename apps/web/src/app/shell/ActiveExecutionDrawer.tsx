@@ -78,7 +78,7 @@ export function ActiveExecutionDrawer() {
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="workspace-drawer-panel absolute inset-0 flex flex-col border-border-subtle/60 bg-surface/95 backdrop-blur-xl md:inset-auto md:top-0 md:right-0 md:bottom-0 md:w-full md:max-w-[32.5rem] md:border-l md:shadow-[var(--workspace-shadow-card)]"
+        className="workspace-drawer-panel absolute inset-0 flex max-h-dvh min-h-0 flex-col border-border-subtle/60 bg-surface/95 backdrop-blur-xl md:inset-auto md:top-0 md:right-0 md:bottom-0 md:h-dvh md:w-full md:max-w-[32.5rem] md:border-l md:shadow-[var(--workspace-shadow-card)]"
         onClick={(event) => event.stopPropagation()}
       >
         <div className="sticky top-0 z-10 flex items-center justify-between gap-4 border-b border-border-subtle/50 bg-surface/90 px-[var(--spacing-gutter)] py-4 backdrop-blur-md">
@@ -95,7 +95,7 @@ export function ActiveExecutionDrawer() {
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-[var(--spacing-gutter)] py-5">
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-[var(--spacing-gutter)] py-5">
         {!item ? (
           <ActiveExecutionList
             items={items}
@@ -129,7 +129,7 @@ export function ActiveExecutionDrawer() {
 
         {item && item.status === "done" && item.result ? (
           <div className="space-y-4">
-            <ExecutionResultView content={item.result.content} />
+            <ExecutionResultView content={item.result.content} embedInScrollParent />
             <div className="flex flex-wrap gap-2">
               <Button type="button" size="compact" onClick={() => void handleCopy()}>
                 {messages.shell.activeExecutions.copy}
