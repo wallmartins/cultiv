@@ -31,6 +31,36 @@ export function subscribeExecutionEvents(
   return subscriber;
 }
 
+export async function subscribeExecutionEventsReady(
+  redis: Redis,
+  executionId: string,
+  listener: (event: BackendJobEvent) => void
+): Promise<Redis> {
+  const subscriber = redis.duplicate();
+  const channel = executionEventChannel(executionId);
+
+  subscriber.on("error", () => undefined);
+  try {
+    await subscriber.subscribe(channel);
+  } catch {
+    // ignore closed connections during teardown
+  }
+
+  subscriber.on("message", (incomingChannel, message) => {
+    if (incomingChannel !== channel) {
+      return;
+    }
+
+    try {
+      listener(JSON.parse(message) as BackendJobEvent);
+    } catch {
+      return;
+    }
+  });
+
+  return subscriber;
+}
+
 export function closeExecutionEventSubscriber(
   subscriber: Redis,
   executionId?: string

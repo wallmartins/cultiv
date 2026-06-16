@@ -1,4 +1,4 @@
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { Effect } from "effect";
 import {
   createPostgresExecutionIdempotencyStore
@@ -6,7 +6,7 @@ import {
 import {
   appendPersistedExecutionEvent,
   closeExecutionEventSubscriber,
-  subscribeExecutionEvents
+  subscribeExecutionEventsReady
 } from "../../apps/backend/src/runtime/execution-events.js";
 
 const shouldRunDurableRuntimeIntegrationTests =
@@ -40,13 +40,17 @@ describeIfDurable("durable runtime integration", () => {
     await helpers.resetDurableTestState(context);
   }, 30_000);
 
+  afterEach(async () => {
+    await new Promise<void>((resolve) => setTimeout(resolve, 50));
+  });
+
   it("persists queued jobs, billing state, and unpublished outbox events on enqueue", async () => {
-    const { jobs, queue } = helpers.createDurableRuntimeForContext(context);
+    const runtime = helpers.createDurableRuntimeForContext(context);
     const request = helpers.createDurableTestPipelineRequest();
     const plan = helpers.createDurableTestPlan(request);
 
     const queued = await Effect.runPromise(
-      jobs.enqueueAtomic!(request, {
+      runtime.jobs.enqueueAtomic!(request, {
         plan,
         simulateCredits: true
       })
@@ -76,22 +80,22 @@ describeIfDurable("durable runtime integration", () => {
     expect(outboxRow?.published_at).toBeNull();
     expect(billingSubscriptions.length).toBeGreaterThan(0);
 
-    await queue.close();
+    await helpers.closeDurableRuntime(runtime);
   });
 
   it("relays outbox events into BullMQ and marks them published", async () => {
-    const { jobs, relay, queue } = helpers.createDurableRuntimeForContext(context);
+    const runtime = helpers.createDurableRuntimeForContext(context);
     const request = helpers.createDurableTestPipelineRequest();
     const plan = helpers.createDurableTestPlan(request);
 
     const queued = await Effect.runPromise(
-      jobs.enqueueAtomic!(request, {
+      runtime.jobs.enqueueAtomic!(request, {
         plan,
         simulateCredits: true
       })
     );
 
-    await relay.tick();
+    await runtime.relay.tick();
 
     const outboxRow = await context.postgres.db
       .selectFrom("outbox_events")
@@ -99,12 +103,12 @@ describeIfDurable("durable runtime integration", () => {
       .where("aggregate_id", "=", queued.jobId)
       .executeTakeFirst();
 
-    const bullJob = await queue.getJob(queued.jobId);
+    const bullJob = await runtime.queue.getJob(queued.jobId);
 
     expect(outboxRow?.published_at).toBeTruthy();
     expect(bullJob?.executionId).toBe(queued.jobId);
 
-    await queue.close();
+    await helpers.closeDurableRuntime(runtime);
   });
 
   it("survives API restart by reloading queued jobs from PostgreSQL", async () => {
@@ -119,7 +123,7 @@ describeIfDurable("durable runtime integration", () => {
       })
     );
 
-    await runtimeA.queue.close();
+    await helpers.closeDurableRuntime(runtimeA);
 
     const runtimeB = helpers.createDurableRuntimeForContext(context);
     const status = await Effect.runPromise(runtimeB.jobs.getJobStatus(queued.jobId));
@@ -128,7 +132,7 @@ describeIfDurable("durable runtime integration", () => {
     expect(status?.status).toBe("queued");
     expect(status?.userId).toBe("durable-test-user");
 
-    await runtimeB.queue.close();
+    await helpers.closeDurableRuntime(runtimeB);
   });
 
   it("reloads billing state after restart", async () => {
@@ -231,28 +235,28 @@ describeIfDurable("durable runtime integration", () => {
 
   it("lists executions for a user from PostgreSQL with pagination", async () => {
     const userId = context.config.billingUserId!;
-    const { jobs, queue } = helpers.createDurableRuntimeForContext(context);
+    const runtime = helpers.createDurableRuntimeForContext(context);
     const request = helpers.createDurableTestPipelineRequest({ userId });
     const plan = helpers.createDurableTestPlan(request);
 
     await Effect.runPromise(
-      jobs.enqueueAtomic!(request, {
+      runtime.jobs.enqueueAtomic!(request, {
         plan,
         simulateCredits: true
       })
     );
 
-    const page = await Effect.runPromise(jobs.listJobsForUser(userId, 10, 0));
+    const page = await Effect.runPromise(runtime.jobs.listJobsForUser(userId, 10, 0));
 
     expect(page.total).toBeGreaterThanOrEqual(1);
     expect(page.items.every((item) => item.userId === userId)).toBe(true);
 
-    await queue.close();
+    await helpers.closeDurableRuntime(runtime);
   });
 
   it("replays terminal SSE events from PostgreSQL when Redis log is empty", async () => {
     const { createJobEventStream } = await import("../../apps/backend/src/jobs/job-events.js");
-    const { jobs, queue } = helpers.createDurableRuntimeForContext(context);
+    const runtime = helpers.createDurableRuntimeForContext(context);
     const userId = context.config.billingUserId!;
     const jobId = `terminal-replay-${Date.now()}`;
     const completedAt = new Date().toISOString();
@@ -296,7 +300,7 @@ describeIfDurable("durable runtime integration", () => {
       })
       .execute();
 
-    const response = await createJobEventStream(jobs, jobId);
+    const response = await createJobEventStream(runtime.jobs, jobId);
     const reader = response.body!.getReader();
     const decoder = new TextDecoder();
     const { value } = await reader.read();
@@ -304,7 +308,7 @@ describeIfDurable("durable runtime integration", () => {
 
     expect(chunk).toContain("event: done");
     await reader.cancel();
-    await queue.close();
+    await helpers.closeDurableRuntime(runtime);
   });
 
   it("fans out execution events to multiple SSE subscribers", async () => {
@@ -312,16 +316,14 @@ describeIfDurable("durable runtime integration", () => {
     const receivedA: string[] = [];
     const receivedB: string[] = [];
 
-    const subscriberA = subscribeExecutionEvents(context.redis, executionId, (event) => {
+    const subscriberA = await subscribeExecutionEventsReady(context.redis, executionId, (event) => {
       receivedA.push(event.type);
     });
-    const subscriberB = subscribeExecutionEvents(context.redis, executionId, (event) => {
+    const subscriberB = await subscribeExecutionEventsReady(context.redis, executionId, (event) => {
       receivedB.push(event.type);
     });
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 100));
-
       await appendPersistedExecutionEvent(context.redis, {
         type: "progress",
         jobId: executionId,
@@ -334,7 +336,7 @@ describeIfDurable("durable runtime integration", () => {
         occurredAt: new Date().toISOString()
       });
 
-      await new Promise((resolve) => setTimeout(resolve, 200));
+      await new Promise((resolve) => setTimeout(resolve, 100));
 
       expect(receivedA).toEqual(["progress"]);
       expect(receivedB).toEqual(["progress"]);

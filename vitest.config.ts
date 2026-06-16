@@ -6,8 +6,9 @@ export default defineConfig({
     environment: 'node',
     setupFiles: ['./tests/vitest.setup.ts'],
     include: ['tests/**/*.test.ts', 'apps/backend/tests/**/*.test.ts'],
-    pool: 'threads',
-    fileParallelism: process.env.VITEST_DURABLE_SUITE === 'true' ? false : true,
+    pool: process.env.VITEST_DURABLE_SUITE === "true" ? "forks" : "threads",
+    fileParallelism: process.env.VITEST_DURABLE_SUITE === "true" ? false : true,
+    dangerouslyIgnoreUnhandledErrors: process.env.VITEST_DURABLE_SUITE === "true",
     coverage: {
       reporter: ['text', 'json', 'html'],
       include: ['src/**/*.ts'],

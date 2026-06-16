@@ -164,7 +164,7 @@ export async function openDurableTestContext(): Promise<DurableTestContext> {
 }
 
 export async function closeDurableTestContext(context: DurableTestContext | undefined): Promise<void> {
-  await new Promise<void>((resolve) => setImmediate(resolve));
+  await new Promise<void>((resolve) => setTimeout(resolve, 100));
 
   if (context?.redis) {
     context.redis.on("error", () => undefined);
@@ -221,6 +221,14 @@ export function createDurableRuntimeForContext(context: DurableTestContext) {
   });
 
   return { jobs, queue, relay, now };
+}
+
+export async function closeDurableRuntime(
+  runtime: ReturnType<typeof createDurableRuntimeForContext>
+): Promise<void> {
+  runtime.relay.stop();
+  await runtime.queue.close();
+  await new Promise<void>((resolve) => setTimeout(resolve, 50));
 }
 
 export async function reloadBillingRepository(context: DurableTestContext) {
