@@ -6,7 +6,9 @@ import {
   loadPostgresBillingRepository,
   persistPostgresBillingRepositoryInTransaction,
   reloadPostgresBillingRepositoryInto,
-  savePostgresBillingRepository
+  runBillingRepositoryPersistSerialized,
+  savePostgresBillingRepository,
+  writePostgresBillingRepository
 } from "./postgres-billing-store.js";
 import {
   createBillingRepository,
@@ -107,7 +109,7 @@ function loadBillingSnapshotRepository(
   });
 }
 
-export function saveBillingRepository(
+export function saveBillingRepositoryUnqueued(
   db: Kysely<DatabaseTables>,
   repository: BillingRepository,
   updatedAt: string
@@ -115,7 +117,10 @@ export function saveBillingRepository(
   return Effect.gen(function* () {
     const relationalEnabled = yield* hasPostgresBillingTables(db);
     if (relationalEnabled) {
-      yield* savePostgresBillingRepository(db, repository);
+      yield* Effect.tryPromise({
+        try: () => writePostgresBillingRepository(db, repository),
+        catch: (error) => (error instanceof Error ? error : new Error(String(error)))
+      });
       return;
     }
 
@@ -148,6 +153,20 @@ export function saveBillingRepository(
           .execute(),
       catch: (error) => (error instanceof Error ? error : new Error(String(error)))
     });
+  });
+}
+
+export function saveBillingRepository(
+  db: Kysely<DatabaseTables>,
+  repository: BillingRepository,
+  updatedAt: string
+): Effect.Effect<void, Error> {
+  return Effect.tryPromise({
+    try: () =>
+      runBillingRepositoryPersistSerialized(() =>
+        Effect.runPromise(saveBillingRepositoryUnqueued(db, repository, updatedAt))
+      ),
+    catch: (error) => (error instanceof Error ? error : new Error(String(error)))
   });
 }
 

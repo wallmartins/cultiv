@@ -25,7 +25,7 @@ import {
   saveBillingRepositoryInTransaction
 } from "../infra/durable-store.js";
 import { appendPersistedExecutionEvent, listPersistedExecutionEvents } from "./execution-events.js";
-import { subscribeExecutionEvents } from "./execution-events.js";
+import { closeExecutionEventSubscriber, subscribeExecutionEvents } from "./execution-events.js";
 import { persistContentType } from "../product/catalog/persistence-content-types.js";
 import {
   reserveBackendExecutionCredits
@@ -457,8 +457,7 @@ export function createDurableJobRuntime(options: DurableJobRuntimeOptions): Dura
       return Effect.sync(() => {
         const subscriber = subscribeExecutionEvents(options.redis, jobId, listener);
         return () => {
-          void subscriber.unsubscribe();
-          void subscriber.quit();
+          closeExecutionEventSubscriber(subscriber, jobId);
         };
       });
     }

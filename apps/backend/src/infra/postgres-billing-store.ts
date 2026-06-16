@@ -36,6 +36,21 @@ export function drainBillingRepositoryPersistQueue(): Promise<void> {
   return billingPersistQueue.catch(() => undefined);
 }
 
+export function scheduleBillingRepositoryPersist(task: () => Promise<void>): void {
+  billingPersistQueue = runBillingRepositoryPersistSerialized(task).then(
+    () => undefined,
+    () => undefined
+  );
+}
+
+async function persistPostgresBillingRepositoryNow(
+  executor: BillingDbExecutor,
+  repository: BillingRepository
+): Promise<void> {
+  await clearBillingTables(executor);
+  await insertBillingRepository(executor, repository);
+}
+
 interface BillingSnapshotPayload {
   readonly plans?: ReadonlyArray<[string, unknown]>;
   readonly subscriptions?: ReadonlyArray<[string, unknown]>;
@@ -169,18 +184,20 @@ export function loadPostgresBillingRepository(
   });
 }
 
+export async function writePostgresBillingRepository(
+  db: Kysely<DatabaseTables>,
+  repository: BillingRepository
+): Promise<void> {
+  await db.transaction().execute((trx) => persistPostgresBillingRepositoryNow(trx, repository));
+}
+
 export function savePostgresBillingRepository(
   db: Kysely<DatabaseTables>,
   repository: BillingRepository
 ): Effect.Effect<void, Error> {
   return Effect.tryPromise({
     try: () =>
-      runBillingRepositoryPersistSerialized(() =>
-        db.transaction().execute(async (trx) => {
-          await clearBillingTables(trx);
-          await insertBillingRepository(trx, repository);
-        })
-      ),
+      runBillingRepositoryPersistSerialized(() => writePostgresBillingRepository(db, repository)),
     catch: (error) => (error instanceof Error ? error : new Error(String(error)))
   });
 }
@@ -189,10 +206,7 @@ export function persistPostgresBillingRepositoryInTransaction(
   trx: BillingDbExecutor,
   repository: BillingRepository
 ): Promise<void> {
-  return runBillingRepositoryPersistSerialized(async () => {
-    await clearBillingTables(trx);
-    await insertBillingRepository(trx, repository);
-  });
+  return persistPostgresBillingRepositoryNow(trx, repository);
 }
 
 export function backfillBillingSnapshotIntoRelationalTables(

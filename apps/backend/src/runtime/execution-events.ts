@@ -14,7 +14,8 @@ export function subscribeExecutionEvents(
   const subscriber = redis.duplicate();
   const channel = executionEventChannel(executionId);
 
-  void subscriber.subscribe(channel);
+  subscriber.on("error", () => undefined);
+  void subscriber.subscribe(channel).catch(() => undefined);
   subscriber.on("message", (incomingChannel, message) => {
     if (incomingChannel !== channel) {
       return;
@@ -28,6 +29,20 @@ export function subscribeExecutionEvents(
   });
 
   return subscriber;
+}
+
+export function closeExecutionEventSubscriber(
+  subscriber: Redis,
+  executionId?: string
+): void {
+  subscriber.removeAllListeners("message");
+
+  if (executionId && subscriber.status === "ready") {
+    void subscriber.unsubscribe(executionEventChannel(executionId)).catch(() => undefined);
+  }
+
+  subscriber.on("error", () => undefined);
+  subscriber.disconnect();
 }
 
 export async function listPersistedExecutionEvents(

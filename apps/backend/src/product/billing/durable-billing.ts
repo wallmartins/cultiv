@@ -6,7 +6,8 @@ import {
   type BillingServiceContract
 } from "@my-ai-orchestrator/payments";
 import type { DatabaseTables } from "../../infra/postgres-tables.js";
-import { saveBillingRepository } from "../../infra/durable-store.js";
+import { saveBillingRepository, saveBillingRepositoryUnqueued } from "../../infra/durable-store.js";
+import { scheduleBillingRepositoryPersist } from "../../infra/postgres-billing-store.js";
 
 function logPersistFailure(error: unknown): void {
   const message = error instanceof Error ? error.message : String(error);
@@ -19,6 +20,7 @@ export function createPersistingBillingService(
   now: () => Date
 ): BillingServiceContract {
   const billing = createBillingService({ repository });
+  const persistUnqueued = () => saveBillingRepositoryUnqueued(postgres, repository, now().toISOString());
   const persist = () => saveBillingRepository(postgres, repository, now().toISOString());
   const persistSilently = () =>
     persist().pipe(
@@ -30,7 +32,7 @@ export function createPersistingBillingService(
     );
 
   const schedulePersist = (): void => {
-    void Effect.runPromise(persistSilently());
+    scheduleBillingRepositoryPersist(() => Effect.runPromise(persistUnqueued()));
   };
 
   return {

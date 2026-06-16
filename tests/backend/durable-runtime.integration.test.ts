@@ -5,6 +5,7 @@ import {
 } from "../../apps/backend/src/execution/idempotency-store.js";
 import {
   appendPersistedExecutionEvent,
+  closeExecutionEventSubscriber,
   subscribeExecutionEvents
 } from "../../apps/backend/src/runtime/execution-events.js";
 
@@ -307,40 +308,40 @@ describeIfDurable("durable runtime integration", () => {
   });
 
   it("fans out execution events to multiple SSE subscribers", async () => {
-    const executionId = "execution-sse-fanout";
-    const subscriberA = context.redis.duplicate();
-    const subscriberB = context.redis.duplicate();
+    const executionId = `execution-sse-fanout-${Date.now()}`;
     const receivedA: string[] = [];
     const receivedB: string[] = [];
 
-    subscribeExecutionEvents(subscriberA, executionId, (event) => {
+    const subscriberA = subscribeExecutionEvents(context.redis, executionId, (event) => {
       receivedA.push(event.type);
     });
-    subscribeExecutionEvents(subscriberB, executionId, (event) => {
+    const subscriberB = subscribeExecutionEvents(context.redis, executionId, (event) => {
       receivedB.push(event.type);
     });
 
-    await new Promise((resolve) => setTimeout(resolve, 100));
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 100));
 
-    await appendPersistedExecutionEvent(context.redis, {
-      type: "progress",
-      jobId: executionId,
-      payload: {
-        currentStep: "queued",
-        stepIndex: 0,
-        totalSteps: 2,
-        percent: 0
-      },
-      occurredAt: new Date().toISOString()
-    });
+      await appendPersistedExecutionEvent(context.redis, {
+        type: "progress",
+        jobId: executionId,
+        payload: {
+          currentStep: "queued",
+          stepIndex: 0,
+          totalSteps: 2,
+          percent: 0
+        },
+        occurredAt: new Date().toISOString()
+      });
 
-    await new Promise((resolve) => setTimeout(resolve, 200));
+      await new Promise((resolve) => setTimeout(resolve, 200));
 
-    expect(receivedA).toEqual(["progress"]);
-    expect(receivedB).toEqual(["progress"]);
-
-    await subscriberA.quit();
-    await subscriberB.quit();
+      expect(receivedA).toEqual(["progress"]);
+      expect(receivedB).toEqual(["progress"]);
+    } finally {
+      closeExecutionEventSubscriber(subscriberA, executionId);
+      closeExecutionEventSubscriber(subscriberB, executionId);
+    }
   });
 
   it("stores execution idempotency in PostgreSQL and rejects fingerprint conflicts", async () => {

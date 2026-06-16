@@ -139,6 +139,7 @@ export async function openDurableTestContext(): Promise<DurableTestContext> {
     maxRetriesPerRequest: null,
     lazyConnect: true
   });
+  redis.on("error", () => undefined);
   await redis.connect();
 
   const config = createDurableTestConfig(backendTestDatabaseUrl, durableTestRedisUrl);
@@ -163,16 +164,14 @@ export async function openDurableTestContext(): Promise<DurableTestContext> {
 }
 
 export async function closeDurableTestContext(context: DurableTestContext | undefined): Promise<void> {
-  resetSharedRedisClientForTests();
+  await new Promise<void>((resolve) => setImmediate(resolve));
 
   if (context?.redis) {
-    try {
-      await context.redis.quit();
-    } catch {
-      // ignore teardown errors
-    }
+    context.redis.on("error", () => undefined);
+    context.redis.disconnect();
   }
 
+  await resetSharedRedisClientForTests();
   await closePostgresTestDatabase(context?.postgres);
 }
 

@@ -13,17 +13,23 @@ export async function createJobEventStream(
   const terminalEvent = await resolveTerminalReplayEvent(jobs, jobId, initialEvents);
   const replayEvents = terminalEvent ? [...initialEvents, terminalEvent] : initialEvents;
   let unsubscribe = () => {};
+  let subscribeTask: Promise<void> = Promise.resolve();
   let heartbeat: ReturnType<typeof setInterval> | undefined;
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
       for (const event of replayEvents) {
         controller.enqueue(encoder.encode(formatSseEvent(event.type, event.payload, event.occurredAt)));
       }
-      unsubscribe = await runEffectOrThrow(
+
+      subscribeTask = runEffectOrThrow(
         jobs.subscribe(jobId, (event) => {
           controller.enqueue(encoder.encode(formatSseEvent(event.type, event.payload, event.occurredAt)));
         })
-      );
+      ).then((unsub) => {
+        unsubscribe = unsub;
+      });
+
+      await subscribeTask;
 
       heartbeat = setInterval(() => {
         try {
@@ -39,7 +45,8 @@ export async function createJobEventStream(
       if (heartbeat) {
         clearInterval(heartbeat);
       }
-      unsubscribe();
+
+      void subscribeTask.finally(() => unsubscribe());
     }
   });
 

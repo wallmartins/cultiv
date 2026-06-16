@@ -23,16 +23,37 @@ const testFiles = [
   "tests/backend/billing-postgres-persistence.test.ts"
 ];
 
-const child = spawn("pnpm", ["vitest", "run", ...testFiles, ...process.argv.slice(2)], {
-  stdio: "inherit",
-  env: process.env
-});
+const extraArgs = process.argv.slice(2);
 
-child.on("exit", (code, signal) => {
-  if (signal) {
-    process.kill(process.pid, signal);
-    return;
+function runVitestFile(testFile) {
+  return new Promise((resolve, reject) => {
+    const child = spawn("pnpm", ["vitest", "run", testFile, ...extraArgs], {
+      stdio: "inherit",
+      env: process.env
+    });
+
+    child.on("error", reject);
+    child.on("exit", (code, signal) => {
+      if (signal) {
+        reject(new Error(`vitest terminated by signal ${signal}`));
+        return;
+      }
+
+      if (code === 0) {
+        resolve();
+        return;
+      }
+
+      reject(new Error(`vitest exited with code ${code ?? 1}`));
+    });
+  });
+}
+
+try {
+  for (const testFile of testFiles) {
+    await runVitestFile(testFile);
   }
-
-  process.exit(code ?? 1);
-});
+} catch (error) {
+  console.error(error instanceof Error ? error.message : String(error));
+  process.exit(1);
+}
