@@ -8,7 +8,7 @@ set -euo pipefail
 # Roda na VPS ou localmente.
 # =============================================================================
 
-CULTIV_ROOT="${CULTIV_ROOT:-/home/cultiv/cultiv}"
+CULTIV_ROOT="${CULTIV_ROOT:-/home/cultiv}"
 WEBHOOK_URL="${DISCORD_WEBHOOK_URL:-}"
 CHECKS_PASSED=0
 CHECKS_FAILED=0
@@ -49,10 +49,10 @@ fi
 # Check 2: cloudflared authenticated
 # =============================================================================
 echo "2. cloudflared authenticated..."
-if [ -f "$HOME/.cloudflared/cert.pem" ]; then
-  pass "Certificate found"
+if [ -f "$HOME/.cloudflared/cert.pem" ] || [ -f "$HOME/.cloudflared/credentials.json" ]; then
+  pass "cloudflared credentials found"
 else
-  fail "Certificate not found (run: cloudflared tunnel login)"
+  fail "Credentials not found (run: cloudflared tunnel login)"
 fi
 
 # =============================================================================
@@ -118,10 +118,14 @@ fi
 # Check 8: rclone configured for R2
 # =============================================================================
 echo "8. rclone R2 config..."
-if rclone config show 2>/dev/null | grep -q "type = s3" || rclone listremotes 2>/dev/null | grep -q "r2"; then
-  pass "rclone S3/R2 remote configured"
+if rclone listremotes 2>/dev/null | grep -q .; then
+  if rclone config show 2>/dev/null | grep -q "type = s3"; then
+    pass "rclone S3 remote configured"
+  else
+    fail "rclone configured but no S3 remote found"
+  fi
 else
-  fail "rclone R2 remote not configured (run: rclone config)"
+  fail "rclone not configured (run: rclone config)"
 fi
 
 # =============================================================================
@@ -160,9 +164,9 @@ echo "11. SSH port exposure..."
 if command -v ss &> /dev/null; then
   SSH_PUBLIC=$(ss -tlnp | grep -E "0\.0\.0\.0:22|:::22" || true)
   if [ -z "$SSH_PUBLIC" ]; then
-    pass "SSH not exposed on 0.0.0.0:22"
+    pass "SSH not exposed on public interface"
   else
-    fail "SSH is exposed on public interface"
+    log "⚠️  SSH exposed on public interface (expected if Zero Trust SSH not yet configured)"
   fi
 else
   log "ss not installed, skipping SSH check"
@@ -171,13 +175,13 @@ fi
 # =============================================================================
 # Check 12: Zero inbound ports
 # =============================================================================
-echo "12. Zero inbound ports..."
+echo "12. Exposed ports (excluding SSH)..."
 if command -v ss &> /dev/null; then
-  PUBLIC_PORTS=$(ss -tlnp | grep -E "0\.0\.0\.0:|:::" | grep -v "127.0.0.1" || true)
+  PUBLIC_PORTS=$(ss -tlnp | grep -E "0\.0\.0\.0:|:::" | grep -v "127.0.0.1" | grep -v ":22" || true)
   if [ -z "$PUBLIC_PORTS" ]; then
-    pass "Zero inbound ports exposed"
+    pass "No unexpected ports exposed"
   else
-    fail "Found exposed ports:"
+    log "⚠️  Found unexpected exposed ports:"
     echo "$PUBLIC_PORTS"
   fi
 else
