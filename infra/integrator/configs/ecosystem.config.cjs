@@ -2,8 +2,8 @@ module.exports = {
   apps: [
     {
       name: 'cultiv-api',
-      script: '/home/cultiv/cultiv/app/apps/backend/dist/cli/main.js',
-      cwd: '/home/cultiv/cultiv/app',
+      script: '/home/cultiv/app/apps/backend/dist/cli/main.js',
+      cwd: '/home/cultiv/app',
       instances: 1,
       exec_mode: 'fork',
       env: {
@@ -20,9 +20,9 @@ module.exports = {
         RATE_LIMIT_MAX_REQUESTS: '60',
         RATE_LIMIT_WINDOW_MS: '60000'
       },
-      log_file: '/home/cultiv/cultiv/logs/api-combined.log',
-      out_file: '/home/cultiv/cultiv/logs/api-out.log',
-      err_file: '/home/cultiv/cultiv/logs/api-err.log',
+      log_file: '/home/cultiv/logs/api-combined.log',
+      out_file: '/home/cultiv/logs/api-out.log',
+      err_file: '/home/cultiv/logs/api-err.log',
       log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
       merge_logs: true,
       max_memory_restart: '512M',
@@ -33,17 +33,17 @@ module.exports = {
     },
     {
       name: 'cultiv-worker',
-      script: '/home/cultiv/cultiv/app/apps/backend/dist/cli/worker-main.js',
-      cwd: '/home/cultiv/cultiv/app',
+      script: '/home/cultiv/app/apps/backend/dist/cli/worker-main.js',
+      cwd: '/home/cultiv/app',
       instances: 1,
       exec_mode: 'fork',
       env: {
         NODE_ENV: 'production',
         EXECUTION_WORKER_CONCURRENCY: '2'
       },
-      log_file: '/home/cultiv/cultiv/logs/worker-combined.log',
-      out_file: '/home/cultiv/cultiv/logs/worker-out.log',
-      err_file: '/home/cultiv/cultiv/logs/worker-err.log',
+      log_file: '/home/cultiv/logs/worker-combined.log',
+      out_file: '/home/cultiv/logs/worker-out.log',
+      err_file: '/home/cultiv/logs/worker-err.log',
       max_memory_restart: '512M',
       restart_delay: 3000,
       kill_timeout: 5000
