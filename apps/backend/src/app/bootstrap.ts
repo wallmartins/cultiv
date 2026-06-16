@@ -40,7 +40,8 @@ export function startBackendServer() {
     const server = serve(
       {
         fetch: app.fetch,
-        port: config.port
+        port: config.port,
+        hostname: config.host
       },
       (info) => {
         logger.info("Backend HTTP server started", {
