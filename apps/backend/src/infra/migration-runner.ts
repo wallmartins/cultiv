@@ -52,6 +52,14 @@ export function baselineAppliedMigrations(
       catch: (error) => createPostgresBootstrapError("Failed to introspect database for migration baseline", error)
     });
 
+    if (!tables.has("kysely_migration")) {
+      yield* Effect.tryPromise({
+        try: () =>
+          sql`create table kysely_migration (name varchar(255) primary key, timestamp varchar(255) not null)`.execute(db),
+        catch: (error) => createPostgresBootstrapError("Failed to create kysely_migration table", error)
+      });
+    }
+
     const applied = yield* Effect.tryPromise({
       try: async () => {
         const result = await sql<{ name: string }>`select name from kysely_migration`.execute(db);

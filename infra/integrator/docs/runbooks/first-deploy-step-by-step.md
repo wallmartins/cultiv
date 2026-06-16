@@ -107,6 +107,7 @@ exit
 > **Causa:** Você está rodando `apt-get` sem `sudo`.
 >
 > **Solução:** Use `sudo` antes de TODOS os comandos administrativos:
+>
 > ```bash
 > # ❌ ERRADO
 > apt-get update
@@ -116,6 +117,7 @@ exit
 > ```
 >
 > **Se seu usuário não está no grupo sudo:**
+>
 > ```bash
 > # Execute como root:
 > usermod -aG sudo cultiv   # ou seu nome de usuário
@@ -123,6 +125,7 @@ exit
 > ```
 >
 > **Se precisar de acesso root temporário:**
+>
 > ```bash
 > sudo su -
 > # Agora você é root até digitar 'exit'
