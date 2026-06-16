@@ -183,10 +183,10 @@ EOF
 # 10. Nginx config
 # =============================================================================
 log "Configurando Nginx..."
-cat > /etc/nginx/sites-available/cultiv <<'EOF'
+cat > /etc/nginx/sites-available/cultiv <<EOF
 server {
     listen 127.0.0.1:80;
-    server_name localhost;
+    server_name _;
 
     real_ip_header CF-Connecting-IP;
     set_real_ip_from 127.0.0.1;
@@ -194,11 +194,11 @@ server {
     location / {
         proxy_pass http://127.0.0.1:3001;
         proxy_http_version 1.1;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_set_header CF-Connecting-IP $http_cf_connecting_ip;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+        proxy_set_header CF-Connecting-IP \$http_cf_connecting_ip;
         proxy_read_timeout 300s;
         proxy_connect_timeout 75s;
     }
