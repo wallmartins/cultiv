@@ -8,19 +8,21 @@ import {
 import type { DatabaseTables } from "../../infra/postgres-tables.js";
 import { saveBillingRepository } from "../../infra/durable-store.js";
 
+function logPersistFailure(error: unknown): void {
+  const message = error instanceof Error ? error.message : String(error);
+  console.error(`[billing] failed to persist repository: ${message}`);
+}
+
 export function createPersistingBillingService(
   postgres: Kysely<DatabaseTables>,
   repository: BillingRepository,
   now: () => Date
 ): BillingServiceContract {
   const billing = createBillingService({ repository });
-  const persist = () =>
-    saveBillingRepository(postgres, repository, now().toISOString()).pipe(
-      Effect.catchAll(() => Effect.void)
-    );
+  const persist = () => saveBillingRepository(postgres, repository, now().toISOString());
 
   const schedulePersist = () => {
-    void Effect.runPromise(persist());
+    void Effect.runPromise(persist()).catch(logPersistFailure);
   };
 
   return {

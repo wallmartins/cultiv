@@ -6,6 +6,8 @@ export default defineConfig({
     environment: 'node',
     setupFiles: ['./tests/vitest.setup.ts'],
     include: ['tests/**/*.test.ts', 'apps/backend/tests/**/*.test.ts'],
+    pool: 'threads',
+    fileParallelism: true,
     coverage: {
       reporter: ['text', 'json', 'html'],
       include: ['src/**/*.ts'],

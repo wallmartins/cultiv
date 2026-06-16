@@ -1,5 +1,12 @@
 import { Effect } from "effect";
 import { sql, type Kysely } from "kysely";
+import { replaceBillingRepositoryContents } from "./billing-repository-sync.js";
+import {
+  hasPostgresBillingTables,
+  loadPostgresBillingRepository,
+  reloadPostgresBillingRepositoryInto,
+  savePostgresBillingRepository
+} from "./postgres-billing-store.js";
 import {
   createBillingRepository,
   type BillingRepository
@@ -20,6 +27,53 @@ interface BillingSnapshotPayload {
 }
 
 export function loadBillingRepository(
+  db: Kysely<DatabaseTables>
+): Effect.Effect<BillingRepository, never> {
+  return Effect.gen(function* () {
+    const relationalEnabled = yield* hasPostgresBillingTables(db);
+    if (relationalEnabled) {
+      const relational = yield* loadPostgresBillingRepository(db).pipe(
+        Effect.catchAll(() => Effect.succeed(createBillingRepository()))
+      );
+      if (repositoryHasBillingData(relational)) {
+        return relational;
+      }
+    }
+
+    return yield* loadBillingSnapshotRepository(db);
+  });
+}
+
+function repositoryHasBillingData(repository: BillingRepository): boolean {
+  return (
+    repository.plans.size > 0 ||
+    repository.subscriptions.size > 0 ||
+    repository.ledger.length > 0 ||
+    repository.usage.length > 0
+  );
+}
+
+export { replaceBillingRepositoryContents } from "./billing-repository-sync.js";
+
+export function reloadBillingRepositoryInto(
+  db: Kysely<DatabaseTables>,
+  target: BillingRepository
+): Effect.Effect<void, never> {
+  return Effect.gen(function* () {
+    const relationalEnabled = yield* hasPostgresBillingTables(db);
+    if (relationalEnabled) {
+      yield* reloadPostgresBillingRepositoryInto(db, target).pipe(Effect.catchAll(() => Effect.void));
+      if (repositoryHasBillingData(target)) {
+        return;
+      }
+    }
+
+    const loaded = yield* loadBillingSnapshotRepository(db);
+    replaceBillingRepositoryContents(target, loaded);
+  });
+}
+
+function loadBillingSnapshotRepository(
   db: Kysely<DatabaseTables>
 ): Effect.Effect<BillingRepository, never> {
   return Effect.gen(function* () {
@@ -50,87 +104,47 @@ export function loadBillingRepository(
   });
 }
 
-export function replaceBillingRepositoryContents(
-  target: BillingRepository,
-  source: BillingRepository
-): void {
-  target.plans.clear();
-  for (const [key, value] of source.plans) {
-    target.plans.set(key, value);
-  }
-
-  target.subscriptions.clear();
-  for (const [key, value] of source.subscriptions) {
-    target.subscriptions.set(key, value);
-  }
-
-  target.usage.splice(0, target.usage.length, ...source.usage);
-  target.ledger.splice(0, target.ledger.length, ...source.ledger);
-
-  target.topUpPackages.clear();
-  for (const [key, value] of source.topUpPackages) {
-    target.topUpPackages.set(key, value);
-  }
-
-  target.reservations.clear();
-  for (const [key, value] of source.reservations) {
-    target.reservations.set(key, value);
-  }
-
-  target.cycleStates.clear();
-  for (const [key, value] of source.cycleStates) {
-    target.cycleStates.set(key, value);
-  }
-
-  target.idempotency.clear();
-  for (const [key, value] of source.idempotency) {
-    target.idempotency.set(key, value);
-  }
-}
-
-export function reloadBillingRepositoryInto(
-  db: Kysely<DatabaseTables>,
-  target: BillingRepository
-): Effect.Effect<void, never> {
-  return Effect.gen(function* () {
-    const loaded = yield* loadBillingRepository(db);
-    replaceBillingRepositoryContents(target, loaded);
-  });
-}
-
 export function saveBillingRepository(
   db: Kysely<DatabaseTables>,
   repository: BillingRepository,
   updatedAt: string
 ): Effect.Effect<void, Error> {
-  const payload: BillingSnapshotPayload = {
-    plans: Array.from(repository.plans.entries()),
-    subscriptions: Array.from(repository.subscriptions.entries()),
-    usage: [...repository.usage],
-    ledger: [...repository.ledger],
-    topUpPackages: Array.from(repository.topUpPackages.entries()),
-    reservations: Array.from(repository.reservations.entries()),
-    cycleStates: Array.from(repository.cycleStates.entries()),
-    idempotency: Array.from(repository.idempotency.entries())
-  };
+  return Effect.gen(function* () {
+    const relationalEnabled = yield* hasPostgresBillingTables(db);
+    if (relationalEnabled) {
+      yield* savePostgresBillingRepository(db, repository);
+      return;
+    }
 
-  return Effect.tryPromise({
-    try: () =>
-      db
-        .insertInto("billing_snapshots")
-        .values({
-          id: BILLING_SNAPSHOT_ID,
-          data: JSON.stringify(payload),
-          updated_at: updatedAt
-        })
-        .onConflict((oc) =>
-          oc.column("id").doUpdateSet({
+    const payload: BillingSnapshotPayload = {
+      plans: Array.from(repository.plans.entries()),
+      subscriptions: Array.from(repository.subscriptions.entries()),
+      usage: [...repository.usage],
+      ledger: [...repository.ledger],
+      topUpPackages: Array.from(repository.topUpPackages.entries()),
+      reservations: Array.from(repository.reservations.entries()),
+      cycleStates: Array.from(repository.cycleStates.entries()),
+      idempotency: Array.from(repository.idempotency.entries())
+    };
+
+    yield* Effect.tryPromise({
+      try: () =>
+        db
+          .insertInto("billing_snapshots")
+          .values({
+            id: BILLING_SNAPSHOT_ID,
             data: JSON.stringify(payload),
             updated_at: updatedAt
           })
-        )
-        .execute(),
-    catch: (error) => (error instanceof Error ? error : new Error(String(error)))
+          .onConflict((oc) =>
+            oc.column("id").doUpdateSet({
+              data: JSON.stringify(payload),
+              updated_at: updatedAt
+            })
+          )
+          .execute(),
+      catch: (error) => (error instanceof Error ? error : new Error(String(error)))
+    });
   });
 }
 

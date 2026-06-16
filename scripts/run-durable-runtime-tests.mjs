@@ -14,10 +14,14 @@ if (!process.env.REDIS_URL && !process.env.BACKEND_TEST_REDIS_URL) {
 }
 
 process.env.RUN_DURABLE_RUNTIME_TESTS = "true";
+process.env.RUN_POSTGRES_TESTS = "true";
 process.env.VITEST_DURABLE_SUITE = "true";
 process.env.BACKEND_ALLOW_IN_MEMORY_RUNTIME = "false";
 
-const testFiles = ["tests/backend/durable-runtime.integration.test.ts", "tests/backend/durable-runtime-guard.test.ts"];
+const testFiles = [
+  "tests/backend/durable-runtime.integration.test.ts",
+  "tests/backend/billing-postgres-persistence.test.ts"
+];
 
 const child = spawn("pnpm", ["vitest", "run", ...testFiles, ...process.argv.slice(2)], {
   stdio: "inherit",

@@ -81,6 +81,12 @@ export interface BackendJobStoreServiceContract {
   ) => Effect.Effect<JobCreatedResponse, never>;
   readonly getJobStatus: (jobId: string) => Effect.Effect<JobStatusResponse | undefined, never>;
   readonly listJobs: () => Effect.Effect<readonly JobStatusResponse[], never>;
+  readonly listJobsForUser: (
+    userId: string,
+    limit: number,
+    offset: number
+  ) => Effect.Effect<{ readonly items: readonly JobStatusResponse[]; readonly total: number }, never>;
+  readonly claimQueuedJob: (jobId: string) => Effect.Effect<boolean, never>;
   readonly updateJobProgress: (
     jobId: string,
     progress: JobProgress,
@@ -206,6 +212,41 @@ export function createBackendJobStoreService(): Effect.Effect<BackendJobStoreSer
         Ref.get(stateRef).pipe(
           Effect.map((state) => [...state.jobs.values()].map(snapshotJob).sort((left, right) => right.createdAt.localeCompare(left.createdAt)))
         ),
+      listJobsForUser: (userId, limit, offset) =>
+        Ref.get(stateRef).pipe(
+          Effect.map((state) => {
+            const items = [...state.jobs.values()]
+              .filter((job) => job.userId === userId)
+              .map(snapshotJob)
+              .sort((left, right) => right.createdAt.localeCompare(left.createdAt));
+            return {
+              items: items.slice(offset, offset + limit),
+              total: items.length
+            };
+          })
+        ),
+      claimQueuedJob: (jobId) =>
+        Effect.gen(function* () {
+          const state = yield* Ref.get(stateRef);
+          const job = state.jobs.get(jobId);
+          if (!job || job.status !== "queued") {
+            return false;
+          }
+
+          const nextJob: StoredJob = {
+            ...job,
+            status: "running",
+            updatedAt: new Date().toISOString()
+          };
+
+          yield* Ref.update(stateRef, (current) => {
+            const jobs = new Map(current.jobs);
+            jobs.set(jobId, nextJob);
+            return { ...current, jobs };
+          });
+
+          return true;
+        }),
       updateJobProgress: (jobId, progress, updatedAt = new Date().toISOString()) =>
         Effect.gen(function* () {
           const state = yield* Ref.get(stateRef);

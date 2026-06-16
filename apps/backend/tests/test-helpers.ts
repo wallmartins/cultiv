@@ -346,6 +346,8 @@ export function createTestApp(
       createQueuedJob: () => Effect.succeed({ jobId: "job-1", status: "queued" as const, contentType: "twitter-thread", createdAt: new Date().toISOString() }),
       getJobStatus: () => Effect.succeed(undefined),
       listJobs: () => Effect.succeed([]),
+      listJobsForUser: () => Effect.succeed({ items: [], total: 0 }),
+      claimQueuedJob: () => Effect.succeed(true),
       ...jobOverrides
     } as any,
     execution: {

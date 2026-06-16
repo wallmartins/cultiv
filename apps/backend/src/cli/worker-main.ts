@@ -30,6 +30,11 @@ async function main() {
   const providerTransport = createBackendProviderTransport(config);
   const postgres = getPostgresDatabase(services.rawDatabase);
   const worker = runtime.queue.createWorker(async ({ executionId }) => {
+    const claimed = await Effect.runPromise(runtime.jobs.claimQueuedJob(executionId));
+    if (!claimed) {
+      return;
+    }
+
     const payload = await Effect.runPromise(runtime.jobs.getRuntimePayload!(executionId));
     if (!payload?.plan) {
       return;
@@ -66,6 +71,27 @@ async function main() {
     console.error("Worker execution failed", {
       executionId: job?.id,
       reason: error.message
+    });
+
+    if (!job?.id) {
+      return;
+    }
+
+    const maxAttempts = job.opts.attempts ?? 3;
+    if (job.attemptsMade < maxAttempts) {
+      return;
+    }
+
+    void Effect.runPromise(
+      runtime.jobs.failJob(job.id, {
+        message: error.message,
+        step: null
+      })
+    ).catch((failError) => {
+      console.error("Failed to mark exhausted worker job as failed", {
+        executionId: job.id,
+        reason: failError instanceof Error ? failError.message : String(failError)
+      });
     });
   });
 

@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { Effect } from "effect";
+import { createBillingService } from "@my-ai-orchestrator/payments";
 import type { Kysely } from "kysely";
 import type { Redis } from "ioredis";
 import type {
@@ -20,6 +21,7 @@ import type { BackendJobEvent, BackendJobStoreServiceContract } from "../jobs/jo
 import type { DatabaseTables } from "../infra/postgres-tables.js";
 import {
   insertOutboxEvent,
+  reloadBillingRepositoryInto,
   saveBillingRepositoryInTransaction
 } from "../infra/durable-store.js";
 import { appendPersistedExecutionEvent, listPersistedExecutionEvents } from "./execution-events.js";
@@ -134,7 +136,6 @@ export function createDurableJobRuntime(options: DurableJobRuntimeOptions): Dura
       const userId =
         "userId" in request && typeof request.userId === "string" ? request.userId : "anonymous";
       const estimatedSteps = Math.max(1, input.plan.pipeline.steps.length);
-      let creditReservationId: string | undefined;
 
       const billingIdentity = resolveBackendBillingIdentity(
         request,
@@ -143,52 +144,51 @@ export function createDurableJobRuntime(options: DurableJobRuntimeOptions): Dura
         `generation:${input.plan.pipeline.name}:${input.plan.request.idempotencyKey ?? jobId}`
       );
 
-      if (!input.simulateCredits) {
-        const reservation = yield* reserveBackendExecutionCredits(
-          options.billing,
-          billingIdentity,
-          input.plan.request.qualityMode,
-          Math.max(0, input.plan.pipeline.steps.length - 1),
-          input.pricingEnvelope?.creditPrice,
-          {
-            pipelineName: input.plan.pipeline.name,
-            contentType: input.plan.contentType.id,
-            adapter: request.adapter ?? options.config.serviceName,
-            model: resolveUsagePolicyModel(
-              request,
-              input.plan.request.qualityMode ?? options.config.qualityMode
-            ),
-          }
-        ).pipe(
-          Effect.catchAll((error) =>
-            Effect.fail(
-              createExecutionFailure({
-                message: error.message,
-                reason: "unexpected_execution_failure"
-              })
-            )
-          )
-        );
-        creditReservationId = reservation.reservationId;
-      }
-
-      const runtime: ExecutionRuntimePayload = {
+      const runtimeBase = {
         userId,
         request,
         plan: input.plan,
         estimatedSteps,
         voice: input.voice,
         pricingEnvelope: input.pricingEnvelope,
-        simulateCredits: input.simulateCredits,
-        creditReservationId
-      };
+        simulateCredits: input.simulateCredits
+      } satisfies Omit<ExecutionRuntimePayload, "creditReservationId">;
 
       yield* Effect.tryPromise({
         try: () =>
           options.postgres.transaction().execute(async (trx) => {
-            if (creditReservationId) {
-              await Effect.runPromise(saveBillingRepositoryInTransaction(trx, options.billingRepository, createdAt));
+            let creditReservationId: string | undefined;
+
+            if (!input.simulateCredits) {
+              const txnBilling = createBillingService({ repository: options.billingRepository });
+              const reservation = await Effect.runPromise(
+                reserveBackendExecutionCredits(
+                  txnBilling,
+                  billingIdentity,
+                  input.plan.request.qualityMode,
+                  Math.max(0, input.plan.pipeline.steps.length - 1),
+                  input.pricingEnvelope?.creditPrice,
+                  {
+                    pipelineName: input.plan.pipeline.name,
+                    contentType: input.plan.contentType.id,
+                    adapter: request.adapter ?? options.config.serviceName,
+                    model: resolveUsagePolicyModel(
+                      request,
+                      input.plan.request.qualityMode ?? options.config.qualityMode
+                    )
+                  }
+                )
+              );
+              creditReservationId = reservation.reservationId;
+              await Effect.runPromise(
+                saveBillingRepositoryInTransaction(trx, options.billingRepository, createdAt)
+              );
             }
+
+            const runtime: ExecutionRuntimePayload = {
+              ...runtimeBase,
+              creditReservationId
+            };
 
             const queuedProgress: JobProgress = {
               currentStep: "queued",
@@ -253,7 +253,9 @@ export function createDurableJobRuntime(options: DurableJobRuntimeOptions): Dura
             message: error instanceof Error ? error.message : String(error),
             reason: "unexpected_execution_failure"
           })
-      });
+      }).pipe(
+        Effect.tapError(() => reloadBillingRepositoryInto(options.postgres, options.billingRepository))
+      );
 
       yield* persistContentType(options.database, input.plan, createdAt).pipe(Effect.catchAll(() => Effect.void));
 
@@ -353,15 +355,7 @@ export function createDurableJobRuntime(options: DurableJobRuntimeOptions): Dura
           estimatedSteps,
           createdAt
         } satisfies JobCreatedResponse;
-      }).pipe(Effect.catchAll(() =>
-        Effect.succeed({
-          jobId: randomUUID(),
-          status: "queued" as const,
-          contentType: "unknown",
-          estimatedSteps: 1,
-          createdAt: options.now().toISOString()
-        })
-      ));
+      });
     },
     getJobStatus(jobId) {
       return options.database.jobs.findById(jobId).pipe(
@@ -376,6 +370,40 @@ export function createDurableJobRuntime(options: DurableJobRuntimeOptions): Dura
             .sort((left, right) => right.createdAt.localeCompare(left.createdAt))
         )
       );
+    },
+    listJobsForUser(userId, limit, offset) {
+      return Effect.gen(function* () {
+        const [records, total] = yield* Effect.all([
+          options.database.jobs.listByUser(userId, limit, offset),
+          options.database.jobs.countByUser(userId)
+        ]);
+
+        return {
+          items: records.map((record) => toJobStatusResponse(record, readRuntimePayload(record))),
+          total
+        };
+      });
+    },
+    claimQueuedJob(jobId) {
+      return Effect.gen(function* () {
+        const record = yield* options.database.jobs.findById(jobId);
+        if (!record || record.status !== "queued") {
+          return false;
+        }
+
+        yield* options.database.jobs.recordProgress(
+          jobId,
+          record.progress ?? {
+            currentStep: "running",
+            stepIndex: 0,
+            totalSteps: 1,
+            percent: 0
+          },
+          options.now().toISOString()
+        );
+
+        return true;
+      }).pipe(Effect.catchAll(() => Effect.succeed(false)));
     },
     updateJobProgress(jobId, progress, updatedAt = options.now().toISOString()) {
       return Effect.gen(function* () {

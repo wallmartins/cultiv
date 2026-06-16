@@ -5,16 +5,18 @@ import type { BackendJobEvent, BackendJobStoreServiceContract } from "./job-stor
 export const SSE_HEARTBEAT_INTERVAL_MS = 25_000;
 
 export async function createJobEventStream(
-  jobs: Pick<BackendJobStoreServiceContract, "listJobEvents" | "subscribe">,
+  jobs: Pick<BackendJobStoreServiceContract, "listJobEvents" | "subscribe" | "getJobStatus">,
   jobId: string
 ): Promise<Response> {
   const encoder = new TextEncoder();
   const initialEvents = await runEffectOrThrow(jobs.listJobEvents(jobId));
+  const terminalEvent = await resolveTerminalReplayEvent(jobs, jobId, initialEvents);
+  const replayEvents = terminalEvent ? [...initialEvents, terminalEvent] : initialEvents;
   let unsubscribe = () => {};
   let heartbeat: ReturnType<typeof setInterval> | undefined;
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
-      for (const event of initialEvents) {
+      for (const event of replayEvents) {
         controller.enqueue(encoder.encode(formatSseEvent(event.type, event.payload, event.occurredAt)));
       }
       unsubscribe = await runEffectOrThrow(
@@ -49,6 +51,44 @@ export async function createJobEventStream(
       "x-accel-buffering": "no"
     }
   });
+}
+
+async function resolveTerminalReplayEvent(
+  jobs: Pick<BackendJobStoreServiceContract, "getJobStatus">,
+  jobId: string,
+  initialEvents: readonly BackendJobEvent[]
+): Promise<BackendJobEvent | undefined> {
+  const hasTerminal = initialEvents.some((event) => event.type === "done" || event.type === "error");
+  if (hasTerminal) {
+    return undefined;
+  }
+
+  const status = await runEffectOrThrow(jobs.getJobStatus(jobId));
+  if (!status) {
+    return undefined;
+  }
+
+  const occurredAt = status.completedAt ?? status.createdAt;
+
+  if (status.status === "done" && status.result) {
+    return {
+      type: "done",
+      jobId,
+      payload: status.result,
+      occurredAt
+    };
+  }
+
+  if (status.status === "failed" && status.error) {
+    return {
+      type: "error",
+      jobId,
+      payload: status.error,
+      occurredAt
+    };
+  }
+
+  return undefined;
 }
 
 export function formatSseEvent(type: BackendJobEvent["type"], payload: unknown, occurredAt: string): string {

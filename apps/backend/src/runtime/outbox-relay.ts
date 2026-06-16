@@ -29,6 +29,9 @@ export function createOutboxRelay(options: {
     running = true;
     try {
       const events = await Effect.runPromise(listUnpublishedOutboxEvents(options.db, 25));
+      if (events.length > 0) {
+        console.info("Outbox relay processing unpublished events", { count: events.length });
+      }
       for (const event of events) {
         if (event.eventType === "ExecutionEnqueued") {
           await options.queue.enqueue({ executionId: event.aggregateId });

@@ -1,5 +1,15 @@
 # Progress Log
 
+| 2026-06-16 | ci: job `CI gate` agrega resultados (skipped ok) — único required check para branch protection / Vercel |
+
+| 2026-06-16 | ci: path filters — só web pula build/test backend; só backend pula build web; shared/packages disparam ambos |
+
+| 2026-06-16 | ci: jobs paralelos (lint/test/build/durable), `test:ci` sem duplicar web, deploy VPS só após CI verde em main; deploy manual separado |
+
+| 2026-06-16 | feat(backend): runtime durável completo — enqueue atômico com billing na txn, paginação PG, claim worker, SSE terminal replay, waitlist só Redis, testes CI |
+
+| 2026-06-16 | feat(backend): billing relacional PostgreSQL (migration 0006) — load/save/backfill; `durable-store` prefere tabelas; testes de persistência |
+
 | 2026-06-16 | fix(backend): resolve billing entitlements from stored subscription, not BILLING_PLAN_ID env |
 
 | 2026-06-16 | UX preview: stale-while-revalidate — skeleton só na carga inicial; atualizações com opacidade suave |

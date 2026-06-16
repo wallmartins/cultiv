@@ -39,7 +39,7 @@ describeIfDurable("durable runtime integration", () => {
     await helpers.resetDurableTestState(context);
   }, 30_000);
 
-  it("persists queued jobs, billing snapshots, and unpublished outbox events on enqueue", async () => {
+  it("persists queued jobs, billing state, and unpublished outbox events on enqueue", async () => {
     const { jobs, queue } = helpers.createDurableRuntimeForContext(context);
     const request = helpers.createDurableTestPipelineRequest();
     const plan = helpers.createDurableTestPlan(request);
@@ -63,17 +63,17 @@ describeIfDurable("durable runtime integration", () => {
       .where("aggregate_id", "=", queued.jobId)
       .executeTakeFirst();
 
-    const billingRow = await context.postgres.db
-      .selectFrom("billing_snapshots")
+    const billingSubscriptions = await context.postgres.db
+      .selectFrom("billing_subscriptions")
       .selectAll()
-      .where("id", "=", "default")
-      .executeTakeFirst();
+      .where("user_id", "=", "durable-test-user")
+      .execute();
 
     expect(jobRow).toBeDefined();
     expect(jobRow?.user_id).toBe("durable-test-user");
     expect(outboxRow).toBeDefined();
     expect(outboxRow?.published_at).toBeNull();
-    expect(billingRow).toBeDefined();
+    expect(billingSubscriptions.length).toBeGreaterThan(0);
 
     await queue.close();
   });
@@ -130,7 +130,7 @@ describeIfDurable("durable runtime integration", () => {
     await runtimeB.queue.close();
   });
 
-  it("reloads billing snapshots after restart", async () => {
+  it("reloads billing state after restart", async () => {
     const userId = context.config.billingUserId!;
     const planId = context.config.billingPlanId!;
     const subscriptionId = `${userId}:${planId}:subscription`;
@@ -226,6 +226,84 @@ describeIfDurable("durable runtime integration", () => {
     );
 
     expect(capture.value.status).toBe("captured");
+  });
+
+  it("lists executions for a user from PostgreSQL with pagination", async () => {
+    const userId = context.config.billingUserId!;
+    const { jobs, queue } = helpers.createDurableRuntimeForContext(context);
+    const request = helpers.createDurableTestPipelineRequest({ userId });
+    const plan = helpers.createDurableTestPlan(request);
+
+    await Effect.runPromise(
+      jobs.enqueueAtomic!(request, {
+        plan,
+        simulateCredits: true
+      })
+    );
+
+    const page = await Effect.runPromise(jobs.listJobsForUser(userId, 10, 0));
+
+    expect(page.total).toBeGreaterThanOrEqual(1);
+    expect(page.items.every((item) => item.userId === userId)).toBe(true);
+
+    await queue.close();
+  });
+
+  it("replays terminal SSE events from PostgreSQL when Redis log is empty", async () => {
+    const { createJobEventStream } = await import("../../apps/backend/src/jobs/job-events.js");
+    const { jobs, queue } = helpers.createDurableRuntimeForContext(context);
+    const userId = context.config.billingUserId!;
+    const jobId = `terminal-replay-${Date.now()}`;
+    const completedAt = new Date().toISOString();
+
+    await context.postgres.db
+      .insertInto("jobs")
+      .values({
+        id: jobId,
+        user_id: userId,
+        data: JSON.stringify({
+          id: jobId,
+          status: "done",
+          executionMode: "async",
+          contentType: "validation-post",
+          createdAt: completedAt,
+          completedAt,
+          pipelineId: "validation-post",
+          version: 1,
+          progress: { currentStep: "completed", stepIndex: 1, totalSteps: 2, percent: 100 },
+          progressHistory: [],
+          result: { content: "done", metadata: { mode: "async" } },
+          error: null,
+          updatedAt: completedAt,
+          history: [
+            {
+              type: "created",
+              at: completedAt,
+              payload: {
+                runtime: {
+                  userId,
+                  request: helpers.createDurableTestPipelineRequest({ userId }),
+                  estimatedSteps: 2
+                }
+              }
+            }
+          ]
+        }),
+        version: 1,
+        created_at: completedAt,
+        updated_at: completedAt
+      })
+      .execute();
+
+    const response = await createJobEventStream(jobs, jobId);
+    const reader = response.body!.getReader();
+    const decoder = new TextDecoder();
+    const { value } = await reader.read();
+    const chunk = decoder.decode(value ?? new Uint8Array());
+
+    expect(chunk).toContain("event: done");
+    await reader.cancel();
+    await queue.close();
   });
 
   it("fans out execution events to multiple SSE subscribers", async () => {

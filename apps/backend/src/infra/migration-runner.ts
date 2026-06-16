@@ -37,7 +37,8 @@ const migrationTableMarkers = {
   "0002-add-application-users-and-operators": ["application_users", "operators"],
   "0003-add-audit-records": ["audit_records"],
   "0004-add-voice-training-consents": ["voice_training_consents"],
-  "0005-durable-runtime": ["billing_snapshots", "outbox_events", "execution_idempotency"]
+  "0005-durable-runtime": ["billing_snapshots", "outbox_events", "execution_idempotency"],
+  "0006-billing-relational": ["billing_plans", "billing_subscriptions"]
 } as const;
 
 export function baselineAppliedMigrations(
@@ -193,6 +194,14 @@ export const expectedDatabaseTables = [
   "audit_records",
   "voice_training_consents",
   "billing_snapshots",
+  "billing_plans",
+  "billing_subscriptions",
+  "billing_usage_records",
+  "billing_ledger_entries",
+  "billing_reservations",
+  "billing_cycle_states",
+  "billing_top_up_packages",
+  "billing_operation_idempotency",
   "outbox_events",
   "execution_idempotency"
 ] as const;

@@ -56,6 +56,15 @@ export function createJobRepository(stateRef: StateRef): JobRepository {
     list() {
       return Effect.succeed(Object.values(stateRef.current.jobs).map(cloneRecord));
     },
+    listByUser(_userId, limit, offset) {
+      const records = Object.values(stateRef.current.jobs)
+        .map(cloneRecord)
+        .sort((left, right) => right.createdAt.localeCompare(left.createdAt));
+      return Effect.succeed(records.slice(offset, offset + limit));
+    },
+    countByUser(_userId) {
+      return Effect.succeed(Object.keys(stateRef.current.jobs).length);
+    },
     remove(id) {
       if (!stateRef.current.jobs[id]) {
         return Effect.succeed(false);

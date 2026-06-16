@@ -114,6 +114,45 @@ export function createPostgresJobRepository(
       });
     },
 
+    listByUser(userId, limit, offset) {
+      return Effect.gen(function* () {
+        const rows = yield* Effect.tryPromise({
+          try: () =>
+            db
+              .selectFrom("jobs")
+              .selectAll()
+              .where("user_id", "=", userId)
+              .orderBy("created_at", "desc")
+              .limit(limit)
+              .offset(offset)
+              .execute(),
+          catch: () => [] as { id: string; data: unknown; version: number; created_at: string; updated_at: string }[]
+        }).pipe(
+          Effect.catchAll(() =>
+            Effect.succeed([] as { id: string; data: unknown; version: number; created_at: string; updated_at: string }[])
+          )
+        );
+
+        return rows.map(parseJob);
+      });
+    },
+
+    countByUser(userId) {
+      return Effect.gen(function* () {
+        const row = yield* Effect.tryPromise({
+          try: () =>
+            db
+              .selectFrom("jobs")
+              .select((eb) => eb.fn.countAll<number>().as("count"))
+              .where("user_id", "=", userId)
+              .executeTakeFirst(),
+          catch: () => ({ count: 0 })
+        }).pipe(Effect.catchAll(() => Effect.succeed({ count: 0 })));
+
+        return Number(row?.count ?? 0);
+      });
+    },
+
     remove(id) {
       return Effect.gen(function* () {
         const result = yield* Effect.tryPromise({
