@@ -89,9 +89,13 @@ export function registerExecutionRoutes(app: Hono, options: ExecutionRouteOption
   app.get("/me/executions", async (c) => {
     const actor = await resolvePublicActor(c, options.config, Routes.GetMeExecutions, options.services);
     const { limit, offset } = parsePageQuery(c);
-    const jobs = await runEffectOrThrow(options.jobs.listJobs());
-    const userJobs = jobs.filter((job) => job.userId === actor.userId);
-    const page = paginateExecutions(userJobs, limit, offset);
+    const pageResult = await runEffectOrThrow(options.jobs.listJobsForUser(actor.userId, limit, offset));
+    const page = {
+      items: pageResult.items,
+      total: pageResult.total,
+      limit,
+      offset
+    };
     const validated = await validateResponseBody(ExecutionsPageViewSchema, page satisfies ExecutionsPageView, "ExecutionsPageView");
     return c.json(validated);
   });
@@ -140,18 +144,6 @@ export function registerExecutionRoutes(app: Hono, options: ExecutionRouteOption
   });
 }
 
-function paginateExecutions(
-  jobs: readonly ExecutionStatusView[],
-  limit: number,
-  offset: number
-): ExecutionsPageView {
-  return {
-    items: jobs.slice(offset, offset + limit),
-    total: jobs.length,
-    limit,
-    offset
-  };
-}
 
 function parsePageQuery(c: import("hono").Context): { readonly limit: number; readonly offset: number } {
   const route = "GET /me/executions";

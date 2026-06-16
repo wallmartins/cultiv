@@ -122,6 +122,12 @@ export interface JobRepository {
   save: (record: JobRecord) => Effect.Effect<JobRecord, DatabaseJobNotFoundError>;
   findById: (id: string) => Effect.Effect<JobRecord | undefined>;
   list: () => Effect.Effect<readonly JobRecord[]>;
+  listByUser: (
+    userId: string,
+    limit: number,
+    offset: number
+  ) => Effect.Effect<readonly JobRecord[]>;
+  countByUser: (userId: string) => Effect.Effect<number>;
   remove: (id: string) => Effect.Effect<boolean>;
   appendHistory: (id: string, entry: DatabaseHistoryEntry) => Effect.Effect<JobRecord, DatabaseJobNotFoundError>;
   recordProgress: (id: string, progress: JobProgress, at?: string) => Effect.Effect<JobRecord, DatabaseJobNotFoundError>;

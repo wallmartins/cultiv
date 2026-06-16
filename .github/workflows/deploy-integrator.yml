@@ -1,33 +1,38 @@
-name: Deploy to Integrator VPS
+name: Deploy to Integrator VPS (manual)
+
+# Production deploys run from ci.yml (deploy-vps job) after lint + test + build + durable-runtime.
+# This workflow is a manual escape hatch only.
 
 on:
-  push:
-    branches: [main]
-
   workflow_dispatch:
+    inputs:
+      skip_ci_acknowledgement:
+        description: "I confirm CI is green on the target commit"
+        required: true
+        type: boolean
+        default: false
 
 jobs:
+  guard:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require explicit acknowledgement
+        if: inputs.skip_ci_acknowledgement != true
+        run: |
+          echo "Refuse manual deploy without skip_ci_acknowledgement."
+          echo "Prefer pushing to main and letting ci.yml deploy after tests pass."
+          exit 1
+
   build:
+    needs: guard
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      - uses: ./.github/actions/setup-monorepo
+      - run: pnpm build:backend
+      - uses: actions/upload-artifact@v4
         with:
-          version: 11.3.0
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-          cache: 'pnpm'
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-      - name: Build backend
-        run: pnpm build:backend
-      - name: Smoke tests
-        run: pnpm smoke
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: backend-dist
+          name: backend-dist-manual
           path: |
             apps/backend/dist
             apps/backend/policies
@@ -45,54 +50,27 @@ jobs:
       - name: Download artifact
         uses: actions/download-artifact@v4
         with:
-          name: backend-dist
+          name: backend-dist-manual
           path: /tmp/deploy-artifact
       - name: Deploy
+        shell: bash
         run: |
           set -euo pipefail
           cd ${CULTIV_ROOT:-/home/cultiv/cultiv}/app
-          # Backup do dist atual
           if [ -d apps/backend/dist ]; then
             mv apps/backend/dist "apps/backend/dist.bak.$(date +%F-%H%M)"
           fi
-          # Copiar novo dist
           cp -r /tmp/deploy-artifact/apps/backend/dist apps/backend/dist
           cp -r /tmp/deploy-artifact/apps/backend/policies apps/backend/policies
-          # Copiar packages dist
           for pkg in /tmp/deploy-artifact/packages/*/dist; do
-            pkg_name=$(basename $(dirname "$pkg"))
+            pkg_name=$(basename "$(dirname "$pkg")")
             mkdir -p "packages/$pkg_name/dist"
             cp -r "$pkg"/* "packages/$pkg_name/dist/" 2>/dev/null || true
           done
-          # Instalar dependências
           pnpm install --prod --frozen-lockfile
-          # Migrations
           pnpm --filter @my-ai-orchestrator/backend migrate
-          # Reload PM2
           pm2 reload ecosystem.config.cjs --only cultiv-api
           pm2 restart ecosystem.config.cjs --only cultiv-worker
-          # Health check
           sleep 5
           curl -f http://127.0.0.1:3001/health || exit 1
-          # Cleanup
-          pm2 flush 2>/dev/null || true
-          find apps/backend/dist.bak.* -maxdepth 0 -mtime +3 -exec rm -rf {} \; 2>/dev/null || true
           rm -rf /tmp/deploy-artifact
-        shell: bash
-      - name: Notify Discord
-        if: always()
-        env:
-          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
-        run: |
-          if [ -n "$DISCORD_WEBHOOK" ]; then
-            if [ "${{ job.status }}" == "success" ]; then
-              curl -s -X POST -H "Content-Type: application/json" \
-                -d "{\"content\": \"✅ Cultiv deploy successful: $(date)\"}" \
-                "$DISCORD_WEBHOOK" > /dev/null || true
-            else
-              curl -s -X POST -H "Content-Type: application/json" \
-                -d "{\"content\": \"🚨 Cultiv deploy FAILED: $(date)\"}" \
-                "$DISCORD_WEBHOOK" > /dev/null || true
-            fi
-          fi
-        shell: bash

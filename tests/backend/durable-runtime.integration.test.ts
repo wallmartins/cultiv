@@ -1,11 +1,12 @@
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { Effect } from "effect";
 import {
   createPostgresExecutionIdempotencyStore
 } from "../../apps/backend/src/execution/idempotency-store.js";
 import {
   appendPersistedExecutionEvent,
-  subscribeExecutionEvents
+  closeExecutionEventSubscriber,
+  subscribeExecutionEventsReady
 } from "../../apps/backend/src/runtime/execution-events.js";
 
 const shouldRunDurableRuntimeIntegrationTests =
@@ -39,13 +40,17 @@ describeIfDurable("durable runtime integration", () => {
     await helpers.resetDurableTestState(context);
   }, 30_000);
 
-  it("persists queued jobs, billing snapshots, and unpublished outbox events on enqueue", async () => {
-    const { jobs, queue } = helpers.createDurableRuntimeForContext(context);
+  afterEach(async () => {
+    await new Promise<void>((resolve) => setTimeout(resolve, 50));
+  });
+
+  it("persists queued jobs, billing state, and unpublished outbox events on enqueue", async () => {
+    const runtime = helpers.createDurableRuntimeForContext(context);
     const request = helpers.createDurableTestPipelineRequest();
     const plan = helpers.createDurableTestPlan(request);
 
     const queued = await Effect.runPromise(
-      jobs.enqueueAtomic!(request, {
+      runtime.jobs.enqueueAtomic!(request, {
         plan,
         simulateCredits: true
       })
@@ -63,34 +68,34 @@ describeIfDurable("durable runtime integration", () => {
       .where("aggregate_id", "=", queued.jobId)
       .executeTakeFirst();
 
-    const billingRow = await context.postgres.db
-      .selectFrom("billing_snapshots")
+    const billingSubscriptions = await context.postgres.db
+      .selectFrom("billing_subscriptions")
       .selectAll()
-      .where("id", "=", "default")
-      .executeTakeFirst();
+      .where("user_id", "=", "durable-test-user")
+      .execute();
 
     expect(jobRow).toBeDefined();
     expect(jobRow?.user_id).toBe("durable-test-user");
     expect(outboxRow).toBeDefined();
     expect(outboxRow?.published_at).toBeNull();
-    expect(billingRow).toBeDefined();
+    expect(billingSubscriptions.length).toBeGreaterThan(0);
 
-    await queue.close();
+    await helpers.closeDurableRuntime(runtime);
   });
 
   it("relays outbox events into BullMQ and marks them published", async () => {
-    const { jobs, relay, queue } = helpers.createDurableRuntimeForContext(context);
+    const runtime = helpers.createDurableRuntimeForContext(context);
     const request = helpers.createDurableTestPipelineRequest();
     const plan = helpers.createDurableTestPlan(request);
 
     const queued = await Effect.runPromise(
-      jobs.enqueueAtomic!(request, {
+      runtime.jobs.enqueueAtomic!(request, {
         plan,
         simulateCredits: true
       })
     );
 
-    await relay.tick();
+    await runtime.relay.tick();
 
     const outboxRow = await context.postgres.db
       .selectFrom("outbox_events")
@@ -98,12 +103,12 @@ describeIfDurable("durable runtime integration", () => {
       .where("aggregate_id", "=", queued.jobId)
       .executeTakeFirst();
 
-    const bullJob = await queue.getJob(queued.jobId);
+    const bullJob = await runtime.queue.getJob(queued.jobId);
 
     expect(outboxRow?.published_at).toBeTruthy();
     expect(bullJob?.executionId).toBe(queued.jobId);
 
-    await queue.close();
+    await helpers.closeDurableRuntime(runtime);
   });
 
   it("survives API restart by reloading queued jobs from PostgreSQL", async () => {
@@ -118,7 +123,7 @@ describeIfDurable("durable runtime integration", () => {
       })
     );
 
-    await runtimeA.queue.close();
+    await helpers.closeDurableRuntime(runtimeA);
 
     const runtimeB = helpers.createDurableRuntimeForContext(context);
     const status = await Effect.runPromise(runtimeB.jobs.getJobStatus(queued.jobId));
@@ -127,10 +132,10 @@ describeIfDurable("durable runtime integration", () => {
     expect(status?.status).toBe("queued");
     expect(status?.userId).toBe("durable-test-user");
 
-    await runtimeB.queue.close();
+    await helpers.closeDurableRuntime(runtimeB);
   });
 
-  it("reloads billing snapshots after restart", async () => {
+  it("reloads billing state after restart", async () => {
     const userId = context.config.billingUserId!;
     const planId = context.config.billingPlanId!;
     const subscriptionId = `${userId}:${planId}:subscription`;
@@ -228,41 +233,117 @@ describeIfDurable("durable runtime integration", () => {
     expect(capture.value.status).toBe("captured");
   });
 
+  it("lists executions for a user from PostgreSQL with pagination", async () => {
+    const userId = context.config.billingUserId!;
+    const runtime = helpers.createDurableRuntimeForContext(context);
+    const request = helpers.createDurableTestPipelineRequest({ userId });
+    const plan = helpers.createDurableTestPlan(request);
+
+    await Effect.runPromise(
+      runtime.jobs.enqueueAtomic!(request, {
+        plan,
+        simulateCredits: true
+      })
+    );
+
+    const page = await Effect.runPromise(runtime.jobs.listJobsForUser(userId, 10, 0));
+
+    expect(page.total).toBeGreaterThanOrEqual(1);
+    expect(page.items.every((item) => item.userId === userId)).toBe(true);
+
+    await helpers.closeDurableRuntime(runtime);
+  });
+
+  it("replays terminal SSE events from PostgreSQL when Redis log is empty", async () => {
+    const { createJobEventStream } = await import("../../apps/backend/src/jobs/job-events.js");
+    const runtime = helpers.createDurableRuntimeForContext(context);
+    const userId = context.config.billingUserId!;
+    const jobId = `terminal-replay-${Date.now()}`;
+    const completedAt = new Date().toISOString();
+
+    await context.postgres.db
+      .insertInto("jobs")
+      .values({
+        id: jobId,
+        user_id: userId,
+        data: JSON.stringify({
+          id: jobId,
+          status: "done",
+          executionMode: "async",
+          contentType: "validation-post",
+          createdAt: completedAt,
+          completedAt,
+          pipelineId: "validation-post",
+          version: 1,
+          progress: { currentStep: "completed", stepIndex: 1, totalSteps: 2, percent: 100 },
+          progressHistory: [],
+          result: { content: "done", metadata: { mode: "async" } },
+          error: null,
+          updatedAt: completedAt,
+          history: [
+            {
+              type: "created",
+              at: completedAt,
+              payload: {
+                runtime: {
+                  userId,
+                  request: helpers.createDurableTestPipelineRequest({ userId }),
+                  estimatedSteps: 2
+                }
+              }
+            }
+          ]
+        }),
+        version: 1,
+        created_at: completedAt,
+        updated_at: completedAt
+      })
+      .execute();
+
+    const response = await createJobEventStream(runtime.jobs, jobId);
+    const reader = response.body!.getReader();
+    const decoder = new TextDecoder();
+    const { value } = await reader.read();
+    const chunk = decoder.decode(value ?? new Uint8Array());
+
+    expect(chunk).toContain("event: done");
+    await reader.cancel();
+    await helpers.closeDurableRuntime(runtime);
+  });
+
   it("fans out execution events to multiple SSE subscribers", async () => {
-    const executionId = "execution-sse-fanout";
-    const subscriberA = context.redis.duplicate();
-    const subscriberB = context.redis.duplicate();
+    const executionId = `execution-sse-fanout-${Date.now()}`;
     const receivedA: string[] = [];
     const receivedB: string[] = [];
 
-    subscribeExecutionEvents(subscriberA, executionId, (event) => {
+    const subscriberA = await subscribeExecutionEventsReady(context.redis, executionId, (event) => {
       receivedA.push(event.type);
     });
-    subscribeExecutionEvents(subscriberB, executionId, (event) => {
+    const subscriberB = await subscribeExecutionEventsReady(context.redis, executionId, (event) => {
       receivedB.push(event.type);
     });
 
-    await new Promise((resolve) => setTimeout(resolve, 100));
+    try {
+      await appendPersistedExecutionEvent(context.redis, {
+        type: "progress",
+        jobId: executionId,
+        payload: {
+          currentStep: "queued",
+          stepIndex: 0,
+          totalSteps: 2,
+          percent: 0
+        },
+        occurredAt: new Date().toISOString()
+      });
 
-    await appendPersistedExecutionEvent(context.redis, {
-      type: "progress",
-      jobId: executionId,
-      payload: {
-        currentStep: "queued",
-        stepIndex: 0,
-        totalSteps: 2,
-        percent: 0
-      },
-      occurredAt: new Date().toISOString()
-    });
+      await new Promise((resolve) => setTimeout(resolve, 100));
 
-    await new Promise((resolve) => setTimeout(resolve, 200));
-
-    expect(receivedA).toEqual(["progress"]);
-    expect(receivedB).toEqual(["progress"]);
-
-    await subscriberA.quit();
-    await subscriberB.quit();
+      expect(receivedA).toEqual(["progress"]);
+      expect(receivedB).toEqual(["progress"]);
+    } finally {
+      closeExecutionEventSubscriber(subscriberA, executionId);
+      closeExecutionEventSubscriber(subscriberB, executionId);
+    }
   });
 
   it("stores execution idempotency in PostgreSQL and rejects fingerprint conflicts", async () => {

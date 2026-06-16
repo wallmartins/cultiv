@@ -22,11 +22,15 @@ export function getSharedRedisClient(config: BackendConfig): Redis {
   return sharedRedis;
 }
 
-export function resetSharedRedisClientForTests(): void {
-  if (sharedRedis) {
-    void sharedRedis.quit();
-    sharedRedis = undefined;
+export async function resetSharedRedisClientForTests(): Promise<void> {
+  if (!sharedRedis) {
+    return;
   }
+
+  const client = sharedRedis;
+  sharedRedis = undefined;
+  client.on("error", () => undefined);
+  client.disconnect();
 }
 
 export function executionEventChannel(executionId: string): string {

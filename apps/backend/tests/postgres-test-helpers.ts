@@ -8,6 +8,7 @@ import { up as migrate0002 } from "../src/infra/migrations/0002-add-application-
 import { up as migrate0003 } from "../src/infra/migrations/0003-add-audit-records.js";
 import { up as migrate0004 } from "../src/infra/migrations/0004-add-voice-training-consents.js";
 import { up as migrate0005 } from "../src/infra/migrations/0005-durable-runtime.js";
+import { up as migrate0006 } from "../src/infra/migrations/0006-billing-relational.js";
 
 declare const process: {
   readonly env: Record<string, string | undefined>;
@@ -90,7 +91,24 @@ export async function clearAuditRecords(db: Kysely<DatabaseTables>): Promise<voi
   await db.deleteFrom("audit_records").execute();
 }
 
+export async function clearBillingRelationalTables(db: Kysely<DatabaseTables>): Promise<void> {
+  const tables = await db.introspection.getTables({ withInternalKyselyTables: false });
+  if (!tables.some((table) => table.name === "billing_plans")) {
+    return;
+  }
+
+  await db.deleteFrom("billing_operation_idempotency").execute();
+  await db.deleteFrom("billing_reservations").execute();
+  await db.deleteFrom("billing_ledger_entries").execute();
+  await db.deleteFrom("billing_usage_records").execute();
+  await db.deleteFrom("billing_cycle_states").execute();
+  await db.deleteFrom("billing_top_up_packages").execute();
+  await db.deleteFrom("billing_subscriptions").execute();
+  await db.deleteFrom("billing_plans").execute();
+}
+
 export async function clearDurableRuntimeTables(db: Kysely<DatabaseTables>): Promise<void> {
+  await clearBillingRelationalTables(db);
   await db.deleteFrom("execution_idempotency").execute();
   await db.deleteFrom("outbox_events").execute();
   await db.deleteFrom("billing_snapshots").execute();
@@ -125,6 +143,10 @@ async function ensureTestSchema(db: Kysely<DatabaseTables>): Promise<void> {
 
     if (!existingTables.has("billing_snapshots")) {
       await migrate0005(db);
+    }
+
+    if (!existingTables.has("billing_plans")) {
+      await migrate0006(db);
     }
   } finally {
     await sql`select pg_advisory_unlock(94021431)`.execute(db);

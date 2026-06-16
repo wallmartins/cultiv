@@ -25,30 +25,26 @@ describe("Public Route Ownership Enforcement", () => {
     Effect.runSync(users.create({ id: "user-1", externalSubject: "auth0|test-user", status: "active" }));
     const services = createMinimalServices({ users });
     const app = createTestApp(config, services, {
-      listJobs: () => Effect.succeed([
-        {
-          jobId: "job-owner",
-          status: "queued" as const,
-          contentType: "twitter-thread",
-          progress: null,
-          result: null,
-          error: null,
-          createdAt: new Date().toISOString(),
-          completedAt: null,
-          userId: "user-1"
-        },
-        {
-          jobId: "job-other",
-          status: "queued" as const,
-          contentType: "twitter-thread",
-          progress: null,
-          result: null,
-          error: null,
-          createdAt: new Date().toISOString(),
-          completedAt: null,
-          userId: "other-user-id"
-        }
-      ])
+      listJobsForUser: (userId) =>
+        Effect.succeed({
+          items:
+            userId === "user-1"
+              ? [
+                  {
+                    jobId: "job-owner",
+                    status: "queued" as const,
+                    contentType: "twitter-thread",
+                    progress: null,
+                    result: null,
+                    error: null,
+                    createdAt: new Date().toISOString(),
+                    completedAt: null,
+                    userId: "user-1"
+                  }
+                ]
+              : [],
+          total: userId === "user-1" ? 1 : 0
+        })
     });
     const token = createBackendTestAccessToken({ userId: "auth0|test-user" });
 

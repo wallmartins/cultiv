@@ -19,25 +19,29 @@ export function seedUserBillingState(
     return Effect.void;
   }
 
-  billing.upsertSubscription({
-    id: `${userId}:${planId}:subscription`,
-    userId,
-    planId,
-    status: "active",
-    startedAt: now().toISOString()
-  });
+  return Effect.gen(function* () {
+    billing.upsertSubscription({
+      id: `${userId}:${planId}:subscription`,
+      userId,
+      planId,
+      status: "active",
+      startedAt: now().toISOString()
+    });
 
-  return billing
-    .startCycle({
+    yield* billing.startCycle({
       userId,
       planId,
       cycleId: `${userId}:${planId}:cycle:${config.version}`,
       idempotencyKey: `${config.serviceName}:${userId}:${planId}:cycle`
-    })
-    .pipe(Effect.catchAll(swallowWithDiagnostic({
-      operation: "Failed to seed billing cycle state",
-      context: { userId, planId }
-    })));
+    });
+  }).pipe(
+    Effect.catchAll(
+      swallowWithDiagnostic({
+        operation: "Failed to seed billing cycle state",
+        context: { userId, planId }
+      })
+    )
+  );
 }
 
 export function seedBillingState(

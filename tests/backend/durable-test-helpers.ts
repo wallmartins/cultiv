@@ -9,6 +9,7 @@ import type { BackendConfig } from "../../apps/backend/src/config/config.js";
 import { createPostgresDatabaseClient } from "../../apps/backend/src/infra/postgres-client.js";
 import { resetSharedRedisClientForTests } from "../../apps/backend/src/infra/redis-client.js";
 import { loadBillingRepository, saveBillingRepository } from "../../apps/backend/src/infra/durable-store.js";
+import { drainBillingRepositoryPersistQueue } from "../../apps/backend/src/infra/postgres-billing-store.js";
 import { createPersistingBillingService } from "../../apps/backend/src/product/billing/durable-billing.js";
 import { registerBackendBillingPlans, seedUserBillingState } from "../../apps/backend/src/product/billing/billing-bootstrap.js";
 import { createDurableJobRuntime } from "../../apps/backend/src/runtime/durable-job-runtime.js";
@@ -138,6 +139,7 @@ export async function openDurableTestContext(): Promise<DurableTestContext> {
     maxRetriesPerRequest: null,
     lazyConnect: true
   });
+  redis.on("error", () => undefined);
   await redis.connect();
 
   const config = createDurableTestConfig(backendTestDatabaseUrl, durableTestRedisUrl);
@@ -149,6 +151,7 @@ export async function openDurableTestContext(): Promise<DurableTestContext> {
   await Effect.runPromise(registerBackendBillingPlans(billing));
   await Effect.runPromise(seedUserBillingState(billing, config, config.billingUserId!, now));
   await Effect.runPromise(saveBillingRepository(postgres.db, billingRepository, now().toISOString()));
+  await drainBillingRepositoryPersistQueue();
 
   return {
     postgres,
@@ -161,16 +164,14 @@ export async function openDurableTestContext(): Promise<DurableTestContext> {
 }
 
 export async function closeDurableTestContext(context: DurableTestContext | undefined): Promise<void> {
-  resetSharedRedisClientForTests();
+  await new Promise<void>((resolve) => setTimeout(resolve, 100));
 
   if (context?.redis) {
-    try {
-      await context.redis.quit();
-    } catch {
-      // ignore teardown errors
-    }
+    context.redis.on("error", () => undefined);
+    context.redis.disconnect();
   }
 
+  await resetSharedRedisClientForTests();
   await closePostgresTestDatabase(context?.postgres);
 }
 
@@ -182,6 +183,10 @@ export async function resetDurableTestState(context: DurableTestContext): Promis
   await Effect.runPromise(
     seedUserBillingState(context.billing, context.config, context.config.billingUserId!, () => new Date())
   );
+  await Effect.runPromise(
+    saveBillingRepository(context.postgres.db, context.billingRepository, new Date().toISOString())
+  );
+  await drainBillingRepositoryPersistQueue();
 }
 
 function resetBillingRepositoryMaps(repository: BillingRepository): void {
@@ -216,6 +221,14 @@ export function createDurableRuntimeForContext(context: DurableTestContext) {
   });
 
   return { jobs, queue, relay, now };
+}
+
+export async function closeDurableRuntime(
+  runtime: ReturnType<typeof createDurableRuntimeForContext>
+): Promise<void> {
+  runtime.relay.stop();
+  await runtime.queue.close();
+  await new Promise<void>((resolve) => setTimeout(resolve, 50));
 }
 
 export async function reloadBillingRepository(context: DurableTestContext) {
