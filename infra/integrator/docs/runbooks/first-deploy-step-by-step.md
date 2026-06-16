@@ -816,24 +816,24 @@ rclone config
 
 | #   | Check                                  | Status |
 | --- | -------------------------------------- | ------ |
-| 1   | VPS acessível via SSH                  | ⬜      |
-| 2   | Bootstrap rodou sem erros              | ⬜      |
-| 3   | Docker rodando (PostgreSQL + Redis)    | ⬜      |
-| 4   | Cloudflare Tunnel conectado            | ⬜      |
-| 5   | `api.cultiv.app` responde via HTTPS    | ⬜      |
-| 6   | `ssh.cultiv.app` funciona (Zero Trust) | ⬜      |
-| 7   | R2 bucket criado e rclone conectado    | ⬜      |
-| 8   | `.env` configurado com todas as chaves | ⬜      |
-| 9   | Aplicação buildou sem erros            | ⬜      |
-| 10  | Migrations aplicadas                   | ⬜      |
-| 11  | PM2 rodando (API + Worker)             | ⬜      |
-| 12  | Health check local funciona            | ⬜      |
-| 13  | Health check externo funciona (HTTPS)  | ⬜      |
-| 14  | GitHub Actions runner registrado       | ⬜      |
-| 15  | Deploy automático funciona             | ⬜      |
-| 16  | Backup para R2 funciona                | ⬜      |
-| 17  | `verify-cloudflare.sh` passa           | ⬜      |
-| 18  | Zero ports expostos (`nmap` no IP)     | ⬜      |
+| 1   | VPS acessível via SSH                  | ✅      |
+| 2   | Bootstrap rodou sem erros              | ✅      |
+| 3   | Docker rodando (PostgreSQL + Redis)    | ✅      |
+| 4   | Cloudflare Tunnel conectado            | ✅      |
+| 5   | `api.cultiv.app` responde via HTTPS    | ✅      |
+| 6   | `ssh.cultiv.app` funciona (Zero Trust) | ✅      |
+| 7   | R2 bucket criado e rclone conectado    | ✅      |
+| 8   | `.env` configurado com todas as chaves | ✅      |
+| 9   | Aplicação buildou sem erros            | ✅      |
+| 10  | Migrations aplicadas                   | ✅      |
+| 11  | PM2 rodando (API + Worker)             | ✅      |
+| 12  | Health check local funciona            | ✅      |
+| 13  | Health check externo funciona (HTTPS)  | ✅      |
+| 14  | GitHub Actions runner registrado       | ✅      |
+| 15  | Deploy automático funciona             | ✅      |
+| 16  | Backup para R2 funciona                | ✅      |
+| 17  | `verify-cloudflare.sh` passa           | ✅      |
+| 18  | Zero ports expostos (`nmap` no IP)     | ✅      |
 
 
 ---
