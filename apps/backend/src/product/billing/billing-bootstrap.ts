@@ -1,5 +1,5 @@
 import { Effect } from "effect";
-import { createBillingService } from "@my-ai-orchestrator/payments";
+import { activateSubscription, createBillingService, DEFAULT_BILLING_PLANS } from "@my-ai-orchestrator/payments";
 import { swallowWithDiagnostic } from "../../effects/non-blocking-diagnostics.js";
 
 export function seedUserBillingState(
@@ -19,21 +19,12 @@ export function seedUserBillingState(
     return Effect.void;
   }
 
-  return Effect.gen(function* () {
-    billing.upsertSubscription({
-      id: `${userId}:${planId}:subscription`,
-      userId,
-      planId,
-      status: "active",
-      startedAt: now().toISOString()
-    });
-
-    yield* billing.startCycle({
-      userId,
-      planId,
-      cycleId: `${userId}:${planId}:cycle:${config.version}`,
-      idempotencyKey: `${config.serviceName}:${userId}:${planId}:cycle`
-    });
+  return activateSubscription(billing, {
+    userId,
+    planId,
+    now,
+    idempotencyNamespace: config.serviceName,
+    cycleId: `${userId}:${planId}:cycle:${config.version}`
   }).pipe(
     Effect.catchAll(
       swallowWithDiagnostic({
@@ -62,7 +53,8 @@ export function registerBackendBillingPlans(
   billing: ReturnType<typeof createBillingService>
 ): Effect.Effect<void, never> {
   return Effect.gen(function* () {
-    for (const plan of billing.listPlans()) {
+    const plans = billing.listPlans().length > 0 ? billing.listPlans() : DEFAULT_BILLING_PLANS;
+    for (const plan of plans) {
       const allowedModels = new Set(plan.allowedModels ?? []);
       allowedModels.add("backend-fast");
       allowedModels.add("backend-balanced");

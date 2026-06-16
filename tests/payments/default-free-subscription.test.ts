@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { Effect } from "effect";
 import {
+  activateSubscription,
   createBillingRepository,
   createBillingService,
   DEFAULT_BILLING_PLANS,
@@ -51,6 +52,33 @@ describe("default free subscription", () => {
     expect(billing.getPrimarySubscriptionPlanId("user_orphan")).toBe("missing-plan");
   });
 
+  it("opens a billing cycle for an active subscription that was created without startCycle", () => {
+    const billing = createBillingService({
+      repository: createBillingRepository({ plans: DEFAULT_BILLING_PLANS })
+    });
+
+    billing.upsertSubscription({
+      id: "user_orphan:pro:subscription",
+      userId: "user_orphan_pro",
+      planId: "pro",
+      status: "active",
+      startedAt: new Date("2026-06-12T00:00:00.000Z").toISOString()
+    });
+
+    const entitlement = Effect.runSync(
+      ensureDefaultFreeSubscription(billing, "user_orphan_pro", {
+        now: () => new Date("2026-06-12T00:00:00.000Z"),
+        idempotencyNamespace: "test"
+      })
+    );
+
+    expect(entitlement?.planId).toBe("pro");
+    expect(entitlement?.wallet.availableCredits).toBe(2500);
+    expect(entitlement?.activeCycleId).toBe("user_orphan_pro:pro:cycle:default");
+    expect(billing.listLedger("user_orphan_pro", "pro")).toHaveLength(1);
+    expect(billing.listLedger("user_orphan_pro", "pro")[0]?.entryType).toBe("grant_cycle");
+  });
+
   it("is idempotent for users who already have a subscription", () => {
     const billing = createBillingService({
       repository: createBillingRepository({ plans: DEFAULT_BILLING_PLANS })
@@ -73,5 +101,24 @@ describe("default free subscription", () => {
 
     expect(second.planId).toBe(first.planId);
     expect(second.wallet.availableCredits).toBe(40);
+  });
+
+  it("activates a paid plan with subscription and cycle in one step", () => {
+    const billing = createBillingService({
+      repository: createBillingRepository({ plans: DEFAULT_BILLING_PLANS })
+    });
+
+    const entitlement = Effect.runSync(
+      activateSubscription(billing, {
+        userId: "user_upgrade",
+        planId: "pro",
+        now: () => new Date("2026-06-12T00:00:00.000Z"),
+        idempotencyNamespace: "test"
+      })
+    );
+
+    expect(entitlement.planId).toBe("pro");
+    expect(entitlement.wallet.availableCredits).toBe(2500);
+    expect(billing.getPrimarySubscriptionPlanId("user_upgrade")).toBe("pro");
   });
 });
