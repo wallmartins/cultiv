@@ -49,7 +49,7 @@ fi
 # Check 2: cloudflared authenticated
 # =============================================================================
 echo "2. cloudflared authenticated..."
-if [ -f "$HOME/.cloudflared/cert.pem" ] || [ -f "$HOME/.cloudflared/credentials.json" ]; then
+if [ -f "$HOME/.cloudflared/cert.pem" ] || ls "$HOME/.cloudflared/"*.json &>/dev/null; then
   pass "cloudflared credentials found"
 else
   fail "Credentials not found (run: cloudflared tunnel login)"
