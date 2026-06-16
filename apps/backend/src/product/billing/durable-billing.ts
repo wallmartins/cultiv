@@ -29,7 +29,7 @@ export function createPersistingBillingService(
       )
     );
 
-  const schedulePersist = () => {
+  const schedulePersist = (): void => {
     void Effect.runPromise(persistSilently());
   };
 

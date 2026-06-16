@@ -149,6 +149,7 @@ export async function openDurableTestContext(): Promise<DurableTestContext> {
 
   await Effect.runPromise(registerBackendBillingPlans(billing));
   await Effect.runPromise(seedUserBillingState(billing, config, config.billingUserId!, now));
+  await Effect.runPromise(saveBillingRepository(postgres.db, billingRepository, now().toISOString()));
   await drainBillingRepositoryPersistQueue();
 
   return {
@@ -182,6 +183,9 @@ export async function resetDurableTestState(context: DurableTestContext): Promis
   await Effect.runPromise(registerBackendBillingPlans(context.billing));
   await Effect.runPromise(
     seedUserBillingState(context.billing, context.config, context.config.billingUserId!, () => new Date())
+  );
+  await Effect.runPromise(
+    saveBillingRepository(context.postgres.db, context.billingRepository, new Date().toISOString())
   );
   await drainBillingRepositoryPersistQueue();
 }

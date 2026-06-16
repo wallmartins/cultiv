@@ -1,6 +1,6 @@
 # Progress Log
 
-| 2026-06-16 | fix(backend): migration 0006 backfill usa executor existente — evita `transaction()` dentro de txn do Kysely Migrator |
+| 2026-06-16 | fix(tests): durable billing seed persiste sync + suite sem fileParallelism (mesmo PG) |
 
 | 2026-06-16 | fix(backend,ci): lint postgres-billing mappers + `Generated` ledger id + `BillingDbExecutor`; durable tests 13/13 local |
 
