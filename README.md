@@ -32,22 +32,22 @@ Full domain language: [`CONTEXT.md`](./CONTEXT.md).
                          │  Vercel — apps/web              │
                          │  Marketing (/ , /en)            │
                          │  Workspace (/app/*) + Auth0     │
-                         │  Waitlist → Loops (server-only)   │
+                         │  Waitlist → Loops (server-only) │
                          └────────────┬────────────────────┘
                                       │ client-sdk (HTTPS)
                                       ▼
-                         ┌─────────────────────────────────┐
-                         │  Railway — apps/backend           │
-                         │  api  → dist/cli/main.js        │
+                         ┌──────────────────────────────────┐
+                         │  Railway — apps/backend          │
+                         │  api  → dist/cli/main.js         │
                          │  worker → dist/cli/worker-main.js│
-                         └────────────┬────────────────────┘
+                         └────────────┬─────────────────────┘
                                       │
                     ┌─────────────────┴─────────────────┐
                     ▼                                   ▼
             ┌───────────────┐                   ┌───────────────┐
             │  PostgreSQL   │                   │  Redis        │
-            │  system of    │                   │  jobs · SSE ·   │
-            │  record       │                   │  rate limits    │
+            │  system of    │                   │  jobs · SSE · │
+            │  record       │                   │  rate limits  │
             └───────────────┘                   └───────────────┘
 
          packages/* — domain, orchestrator, contracts, client-sdk, …
