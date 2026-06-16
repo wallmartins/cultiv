@@ -40,7 +40,7 @@ describeIfDurable("durable runtime integration", () => {
   }, 30_000);
 
   it("persists queued jobs, billing snapshots, and unpublished outbox events on enqueue", async () => {
-    const { jobs } = helpers.createDurableRuntimeForContext(context);
+    const { jobs, queue } = helpers.createDurableRuntimeForContext(context);
     const request = helpers.createDurableTestPipelineRequest();
     const plan = helpers.createDurableTestPlan(request);
 
@@ -74,6 +74,8 @@ describeIfDurable("durable runtime integration", () => {
     expect(outboxRow).toBeDefined();
     expect(outboxRow?.published_at).toBeNull();
     expect(billingRow).toBeDefined();
+
+    await queue.close();
   });
 
   it("relays outbox events into BullMQ and marks them published", async () => {
