@@ -158,10 +158,43 @@ export type AppVoiceMessages = {
     readonly low: string;
     readonly none: string;
   };
+  readonly confidenceDescriptions: {
+    readonly low: string;
+    readonly medium: string;
+    readonly high: string;
+  };
+  readonly toneLabels: {
+    readonly informal: string;
+    readonly formal: string;
+  };
+  readonly cadenceLabels: {
+    readonly direct: string;
+    readonly balanced: string;
+    readonly measured: string;
+  };
   readonly adaptationMode: string;
+  readonly adaptationModeLabels: {
+    readonly conservative: string;
+    readonly standard: string;
+  };
+  readonly adaptationModeDescriptions: {
+    readonly conservative: string;
+    readonly standard: string;
+  };
   readonly diagnostics: string;
+  readonly reasonCodeMessages: {
+    readonly insufficient_examples: string;
+    readonly insufficient_diversity: string;
+    readonly language_conflict: string;
+  };
+  readonly diagnosticsHealthy: {
+    readonly highMultiFormat: string;
+    readonly high: string;
+    readonly default: string;
+  };
   readonly coverage: string;
-  readonly bestCovered: string;
+  readonly coverageMissingFormats: string;
+  readonly coverageComplete: string;
   readonly underrepresented: string;
   readonly examplesTitle: string;
   readonly examplesEmpty: string;

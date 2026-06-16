@@ -1,5 +1,7 @@
 # Progress Log
 
+| 2026-06-16 | UX tela de voz: redirect pós-salvar para `/app/voice`, copy rica de confiança/diagnósticos (i18n), cobertura por formatos faltantes + parabéns, remoção de botões duplicados na seção de cobertura |
+
 | 2026-06-14 | `--encrypt-plaintext` no `rotate-voice-key` para criptografar exemplos legados em claro |
 
 | 2026-06-14 | Voice key rotation: `VOICE_DATA_PROTECTION_KEY_PREVIOUS`, CLI `rotate-voice-key`, runbook §7 |

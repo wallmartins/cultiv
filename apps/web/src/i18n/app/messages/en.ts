@@ -176,11 +176,52 @@ export const appMessagesEn: AppMessages = {
       low: "Low",
       none: "—"
     },
+    confidenceDescriptions: {
+      low: "Profile forming: {tone} tone with {cadence}. More varied examples help the AI reproduce your voice more reliably in generations.",
+      medium:
+        "Solid profile: {tone} tone with {cadence}. Your voice already shows up in generations, but examples in other formats can still refine it.",
+      high: "Mature profile: {tone} tone with {cadence}. Signals are consistent across samples — the AI can adapt your voice confidently in new content."
+    },
+    toneLabels: {
+      informal: "informal and reader-close",
+      formal: "formal and objective"
+    },
+    cadenceLabels: {
+      direct: "short, direct sentences",
+      balanced: "a balanced pace between brevity and detail",
+      measured: "longer, more elaborate sentences"
+    },
     adaptationMode: "Adaptation mode",
+    adaptationModeLabels: {
+      conservative: "Conservative",
+      standard: "Standard"
+    },
+    adaptationModeDescriptions: {
+      conservative:
+        "The AI stays close to your examples and avoids extrapolating when the sample base is still limited.",
+      standard:
+        "The AI applies your voice more freely while preserving tone and cadence in the formats you request."
+    },
     diagnostics: "Diagnostics",
+    reasonCodeMessages: {
+      insufficient_examples:
+        "There are not enough examples yet to build a strong, predictable voice. Each new sample brings the profile closer to your real style.",
+      insufficient_diversity:
+        "There is enough base material, but more format and context diversity is needed to stabilize your voice in generations.",
+      language_conflict:
+        "Examples mix languages, which reduces consistency. Prefer one primary language or keep texts separated by language."
+    },
+    diagnosticsHealthy: {
+      highMultiFormat:
+        "Your voice is well represented across more than one content type. The profile is ready for firmer adaptations.",
+      high: "Your voice is well represented and ready for firmer adaptations in generations.",
+      default: "The current profile is usable, but it can become more representative with new examples."
+    },
     coverage: "Format coverage",
-    bestCovered: "Best covered",
-    underrepresented: "Underrepresented",
+    coverageMissingFormats: "Examples still missing in these formats:",
+    coverageComplete:
+      "You have covered every recommended format. Great work — your voice is well distributed across the content types Cultiv supports.",
+    underrepresented: "Formats with few examples:",
     examplesTitle: "Examples",
     examplesEmpty: "No examples yet.",
     examplesEmptyAction: "Add example",

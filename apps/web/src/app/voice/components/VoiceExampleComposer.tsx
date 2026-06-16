@@ -140,6 +140,7 @@ export function VoiceExampleComposer({ mode, initialExample, onSaved }: VoiceExa
           nextErrors[rejected.clientItemId] = rejected.message;
         }
         setBatchErrors(nextErrors);
+        return;
       }
 
       onSaved?.();

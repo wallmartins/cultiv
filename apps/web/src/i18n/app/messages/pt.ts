@@ -176,11 +176,52 @@ export const appMessagesPt: AppMessages = {
       low: "Baixa",
       none: "—"
     },
+    confidenceDescriptions: {
+      low: "Perfil em formação: tom {tone}, com {cadence}. Com mais exemplos variados, a IA reproduz sua voz com mais segurança nas gerações.",
+      medium:
+        "Perfil sólido: tom {tone}, com {cadence}. A voz já aparece nas gerações, mas exemplos em outros formatos ainda podem refiná-la.",
+      high: "Perfil maduro: tom {tone}, com {cadence}. Há sinais consistentes entre os textos — a IA pode adaptar sua voz com confiança em novos conteúdos."
+    },
+    toneLabels: {
+      informal: "informal e próximo do leitor",
+      formal: "formal e objetivo"
+    },
+    cadenceLabels: {
+      direct: "frases curtas e diretas",
+      balanced: "ritmo equilibrado entre concisão e detalhe",
+      measured: "frases mais longas e elaboradas"
+    },
     adaptationMode: "Modo de adaptação",
+    adaptationModeLabels: {
+      conservative: "Conservador",
+      standard: "Padrão"
+    },
+    adaptationModeDescriptions: {
+      conservative:
+        "A IA prefere manter-se próxima dos exemplos e evita extrapolar quando a base ainda é limitada.",
+      standard:
+        "A IA aplica sua voz com mais liberdade, preservando tom e cadência nos formatos que você pedir."
+    },
     diagnostics: "Diagnósticos",
+    reasonCodeMessages: {
+      insufficient_examples:
+        "Ainda faltam exemplos suficientes para consolidar uma voz forte e previsível. Cada texto novo aproxima o perfil do seu estilo real.",
+      insufficient_diversity:
+        "Já existe base suficiente, mas ainda falta diversidade de formatos e contextos para estabilizar a voz nas gerações.",
+      language_conflict:
+        "Os exemplos misturam idiomas, o que reduz a consistência. Priorize um idioma principal ou separe textos por idioma."
+    },
+    diagnosticsHealthy: {
+      highMultiFormat:
+        "Sua voz está bem representada e cobre mais de um tipo de conteúdo. O perfil está pronto para adaptações firmes.",
+      high: "Sua voz está bem representada e pronta para adaptações mais firmes nas gerações.",
+      default: "O perfil atual já é utilizável, mas ainda pode ficar mais representativo com novos exemplos."
+    },
     coverage: "Cobertura por formato",
-    bestCovered: "Melhor cobertos",
-    underrepresented: "Sub-representados",
+    coverageMissingFormats: "Ainda faltam exemplos nestes formatos:",
+    coverageComplete:
+      "Você cobriu todos os formatos recomendados. Parabéns — sua voz está bem distribuída entre os tipos de conteúdo que o Cultiv apoia.",
+    underrepresented: "Formatos com poucos exemplos:",
     examplesTitle: "Exemplos",
     examplesEmpty: "Nenhum exemplo ainda.",
     examplesEmptyAction: "Adicionar exemplo",

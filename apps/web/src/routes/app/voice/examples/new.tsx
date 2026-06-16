@@ -19,7 +19,7 @@ function NewVoiceExamplePage() {
       </Text>
       <VoiceExampleComposer
         mode="create"
-        onSaved={() => void navigate({ to: "/app/voice/examples" })}
+        onSaved={() => void navigate({ to: "/app/voice" })}
       />
     </Container>
   );
