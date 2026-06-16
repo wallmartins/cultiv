@@ -18,6 +18,7 @@ import { executeSyncRun } from "./runtime.js";
 import { stableStringify } from "./quality/quality.js";
 import { createQueuedRun } from "./queued-run.js";
 import { validateTrustedExecutionSnapshot } from "./pipeline/trusted-snapshot.js";
+import { resolveUsagePolicyModel } from "../product/usage/resolve-usage-policy-model.js";
 import { createBackendProviderTransport } from "./pipeline/provider-transport.js";
 import { resolveExecutionIdempotencyStore } from "./idempotency-store.js";
 import type {
@@ -143,7 +144,10 @@ export function createBackendExecutionService(options: BackendExecutionOptions):
           qualityMode: prepared.plan.request.qualityMode,
           userId: "userId" in prepared.plan.request && typeof prepared.plan.request.userId === "string" ? prepared.plan.request.userId : options.config.billingUserId ?? options.config.serviceName,
           planId: options.config.billingPlanId ?? "free",
-          model: prepared.request.model ?? `${options.config.serviceName}-${options.config.qualityMode}`,
+          model: resolveUsagePolicyModel(
+            prepared.request,
+            prepared.plan.request.qualityMode ?? options.config.qualityMode
+          ),
           adapter: prepared.request.adapter ?? options.config.serviceName
         });
       }

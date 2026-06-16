@@ -6,7 +6,8 @@ import {
   backendAppTestStartedAt,
   createBackendAppTestApp,
   createBackendAppTestConfig,
-  createBackendAppTestServices
+  createBackendAppTestServices,
+  seedExecutionVoiceState
 } from "./backend-app.fixtures.js";
 
 describe("backend free tier quality modes", () => {
@@ -84,5 +85,54 @@ describe("backend free tier quality modes", () => {
     expect(entitlement?.planId).toBe("free");
     expect(entitlement?.status).toBe("active");
     expect(entitlement?.wallet.availableCredits).toBe(50);
+  });
+
+  it("allows fast generation on free plan when server default quality mode is balanced", async () => {
+    const config = createBackendAppTestConfig({
+      serviceName: "cultiv",
+      qualityMode: "balanced",
+      billingPlanId: "free",
+      executionMode: "sync"
+    });
+    const services = createBackendAppTestServices(config);
+    const userId = "user_cultiv_fast";
+
+    services.billing.upsertSubscription({
+      id: `sub_${userId}`,
+      userId,
+      planId: "free",
+      status: "active",
+      startedAt: backendAppTestStartedAt.toISOString()
+    });
+
+    await Effect.runPromise(
+      services.billing.startCycle({
+        userId,
+        planId: "free",
+        cycleId: `${userId}:free:cycle:test`,
+        idempotencyKey: `test:${userId}:free:cycle`
+      })
+    );
+
+    seedExecutionVoiceState(services, userId);
+    const app = createBackendAppTestApp(config, services);
+
+    const response = await app.request("/me/executions/run", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        authorization: createBackendTestAuthorizationHeader({ userId })
+      },
+      body: JSON.stringify({
+        contentType: "linkedin-post",
+        qualityMode: "fast",
+        briefing: {
+          topic: "Monorepo trade-offs",
+          audience: "Senior engineers"
+        }
+      })
+    });
+
+    expect(response.status).toBe(200);
   });
 });

@@ -40,7 +40,7 @@ export function resolveBackendBillingIdentity(
 
   return {
     userId: requestUserId ?? config.billingUserId ?? config.serviceName,
-    planId: config.billingPlanId ?? "pro",
+    planId: config.billingPlanId ?? "free",
     generationCycleId: request.idempotencyKey ?? fallbackCycleId
   };
 }

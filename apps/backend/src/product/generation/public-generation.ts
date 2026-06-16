@@ -7,6 +7,7 @@ import type { BackendExecutionService } from "../../execution/service-types.js";
 import { assertQuoteConsistency, toGenerationPricingSnapshot } from "../billing/generation-pricing-snapshot.js";
 import type { QualityMode } from "@my-ai-orchestrator/contracts";
 import { canUseQualityMode, hasActiveBillingSubscription } from "@my-ai-orchestrator/payments";
+import { resolveUsagePolicyModel } from "../usage/resolve-usage-policy-model.js";
 import type { BillingPlanTier } from "../ai-policy/ai-policy-types.js";
 import type { BackendProductServices } from "../core/types.js";
 import type { BackendPublicGenerationRequest, BackendPublicGenerationService } from "./public-generation-types.js";
@@ -62,7 +63,10 @@ export function createBackendPublicGenerationService(options: {
           qualityMode: executionSnapshot.plan.request.qualityMode,
           userId: request.userId,
           planId: options.config.billingPlanId ?? "free",
-          model: internalRequest.model ?? `${options.config.serviceName}-${options.config.qualityMode}`,
+          model: resolveUsagePolicyModel(
+            internalRequest,
+            executionSnapshot.plan.request.qualityMode ?? options.config.qualityMode
+          ),
           adapter: internalRequest.adapter ?? options.config.serviceName
         });
 

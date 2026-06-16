@@ -30,6 +30,7 @@ import {
   ensureBackendBillingSubscription
 } from "../execution/billing.js";
 import { resolveBackendBillingIdentity } from "../execution/billing.js";
+import { resolveUsagePolicyModel } from "../product/usage/resolve-usage-policy-model.js";
 import { createExecutionFailure } from "../execution/pipeline/execution-failure.js";
 import { BackendExecutionFailedError } from "../http/errors.js";
 
@@ -154,7 +155,10 @@ export function createDurableJobRuntime(options: DurableJobRuntimeOptions): Dura
             pipelineName: input.plan.pipeline.name,
             contentType: input.plan.contentType.id,
             adapter: request.adapter ?? options.config.serviceName,
-            model: request.model ?? `${options.config.serviceName}-${options.config.qualityMode}`
+            model: resolveUsagePolicyModel(
+              request,
+              input.plan.request.qualityMode ?? options.config.qualityMode
+            ),
           }
         ).pipe(
           Effect.catchAll((error) =>
