@@ -1,5 +1,7 @@
 # Progress Log
 
+| 2026-06-16 | feat(payments): `activateSubscription` + `ensureBillingCycleInitialized` no JIT; CLI `pnpm billing:activate` |
+
 | 2026-06-16 | fix(tests): teardown BullMQ/SSE Redis no durable CI + `dangerouslyIgnoreUnhandledErrors` na suite |
 
 | 2026-06-16 | fix(backend,ci): lint postgres-billing mappers + `Generated` ledger id + `BillingDbExecutor`; durable tests 13/13 local |

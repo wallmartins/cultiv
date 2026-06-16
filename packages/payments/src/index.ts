@@ -914,64 +914,141 @@ export function createSubscriptionId(userId: string, planId: string): string {
 
 export const DEFAULT_FREE_PLAN_ID = "free";
 
-export function ensureDefaultFreeSubscription(
+export interface BillingActivationOptions {
+  readonly now: () => Date;
+  readonly idempotencyNamespace?: string;
+}
+
+export interface ActivateSubscriptionRequest extends BillingActivationOptions {
+  readonly userId: string;
+  readonly planId: string;
+  readonly status?: BillingSubscription["status"];
+  readonly startedAt?: string;
+  readonly cycleId?: string;
+}
+
+function defaultBillingCycleId(userId: string, planId: string): string {
+  return `${userId}:${planId}:cycle:default`;
+}
+
+function defaultBillingCycleIdempotencyKey(
+  userId: string,
+  planId: string,
+  namespace: string
+): string {
+  return `${namespace}:${userId}:${planId}:default-cycle`;
+}
+
+export function ensureBillingCycleInitialized(
   billing: BillingServiceContract,
   userId: string,
-  options: {
-    readonly now: () => Date;
-    readonly idempotencyNamespace?: string;
-  }
+  planId: string,
+  options: BillingActivationOptions
 ): Effect.Effect<
   BillingEntitlement | undefined,
   BillingPlanNotFoundError | BillingEntitlementNotFoundError | BillingOperationConflictError
 > {
   return Effect.gen(function* () {
-    const existing = billing.getEntitlement(userId);
-    if (existing) {
-      return existing;
-    }
-
-    const assignedPlanId = billing.getPrimarySubscriptionPlanId(userId);
-    if (assignedPlanId) {
+    const plan = billing.listPlans().find((candidate) => candidate.id === planId);
+    if (!plan) {
       return undefined;
     }
 
-    const plan = billing.listPlans().find((candidate) => candidate.id === DEFAULT_FREE_PLAN_ID);
+    const entitlement = billing.getEntitlement(userId, planId);
+    if (!entitlement) {
+      return undefined;
+    }
+
+    if (entitlement.status !== "active") {
+      return entitlement;
+    }
+
+    if (entitlement.activeCycleId !== null) {
+      return entitlement;
+    }
+
+    const namespace = options.idempotencyNamespace ?? "billing";
+    yield* billing.startCycle({
+      userId,
+      planId,
+      cycleId: defaultBillingCycleId(userId, planId),
+      idempotencyKey: defaultBillingCycleIdempotencyKey(userId, planId, namespace)
+    });
+
+    return billing.getEntitlement(userId, planId);
+  });
+}
+
+export function activateSubscription(
+  billing: BillingServiceContract,
+  request: ActivateSubscriptionRequest
+): Effect.Effect<
+  BillingEntitlement,
+  BillingPlanNotFoundError | BillingEntitlementNotFoundError | BillingOperationConflictError
+> {
+  return Effect.gen(function* () {
+    const plan = billing.listPlans().find((candidate) => candidate.id === request.planId);
     if (!plan) {
       return yield* Effect.fail(
         new BillingPlanNotFoundError({
-          planId: DEFAULT_FREE_PLAN_ID
+          planId: request.planId
         })
       );
     }
 
     billing.upsertSubscription({
-      id: createSubscriptionId(userId, DEFAULT_FREE_PLAN_ID),
-      userId,
-      planId: DEFAULT_FREE_PLAN_ID,
-      status: "active",
-      startedAt: options.now().toISOString()
+      id: createSubscriptionId(request.userId, request.planId),
+      userId: request.userId,
+      planId: request.planId,
+      status: request.status ?? "active",
+      startedAt: request.startedAt ?? request.now().toISOString()
     });
 
-    const namespace = options.idempotencyNamespace ?? "billing";
-    yield* billing.startCycle({
-      userId,
-      planId: DEFAULT_FREE_PLAN_ID,
-      cycleId: `${userId}:${DEFAULT_FREE_PLAN_ID}:cycle:default`,
-      idempotencyKey: `${namespace}:${userId}:${DEFAULT_FREE_PLAN_ID}:default-cycle`
-    });
+    const namespace = request.idempotencyNamespace ?? "billing";
+    const entitlementBefore = billing.getEntitlement(request.userId, request.planId);
+    if (entitlementBefore?.activeCycleId == null) {
+      yield* billing.startCycle({
+        userId: request.userId,
+        planId: request.planId,
+        cycleId: request.cycleId ?? defaultBillingCycleId(request.userId, request.planId),
+        idempotencyKey: defaultBillingCycleIdempotencyKey(request.userId, request.planId, namespace)
+      });
+    }
 
-    const entitlement = billing.getEntitlement(userId, DEFAULT_FREE_PLAN_ID);
+    const entitlement = billing.getEntitlement(request.userId, request.planId);
     if (!entitlement) {
       return yield* Effect.fail(
         new BillingEntitlementNotFoundError({
-          userId,
-          planId: DEFAULT_FREE_PLAN_ID
+          userId: request.userId,
+          planId: request.planId
         })
       );
     }
 
     return entitlement;
+  });
+}
+
+export function ensureDefaultFreeSubscription(
+  billing: BillingServiceContract,
+  userId: string,
+  options: BillingActivationOptions
+): Effect.Effect<
+  BillingEntitlement | undefined,
+  BillingPlanNotFoundError | BillingEntitlementNotFoundError | BillingOperationConflictError
+> {
+  return Effect.gen(function* () {
+    const assignedPlanId = billing.getPrimarySubscriptionPlanId(userId);
+    if (assignedPlanId) {
+      return yield* ensureBillingCycleInitialized(billing, userId, assignedPlanId, options);
+    }
+
+    return yield* activateSubscription(billing, {
+      userId,
+      planId: DEFAULT_FREE_PLAN_ID,
+      now: options.now,
+      idempotencyNamespace: options.idempotencyNamespace
+    });
   });
 }
 
