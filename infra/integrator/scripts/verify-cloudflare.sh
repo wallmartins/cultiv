@@ -64,9 +64,15 @@ fi
 # Check 3: tunnel config exists
 # =============================================================================
 echo "3. Tunnel config..."
+TUNNEL_CONFIG=""
 if [ -f "${CLOUDFLARED_DIR}/config.yml" ]; then
-  pass "Config file exists"
-  if grep -q "api.cultiv.app" "${CLOUDFLARED_DIR}/config.yml" 2>/dev/null; then
+  TUNNEL_CONFIG="${CLOUDFLARED_DIR}/config.yml"
+elif [ -f "/etc/cloudflared/config.yml" ]; then
+  TUNNEL_CONFIG="/etc/cloudflared/config.yml"
+fi
+if [ -n "$TUNNEL_CONFIG" ]; then
+  pass "Config file exists: ${TUNNEL_CONFIG}"
+  if grep -q "api.cultiv.app" "$TUNNEL_CONFIG" 2>/dev/null; then
     pass "api.cultiv.app configured in tunnel"
   else
     fail "api.cultiv.app not in tunnel config"
