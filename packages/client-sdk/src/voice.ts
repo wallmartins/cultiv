@@ -194,7 +194,7 @@ export function createVoiceClient(transport: HttpTransport): VoiceClient {
         const response = yield* transport.send({
           method: "POST",
           path: "/me/voice-profile/example-batches",
-          body: input.expiresAt ? { expiresAt: input.expiresAt } : undefined,
+          body: input.expiresAt ? { expiresAt: input.expiresAt } : {},
           signal: input.signal,
           idempotencyKey: createIdempotencyKey()
         });
