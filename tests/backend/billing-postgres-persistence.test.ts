@@ -132,6 +132,52 @@ describeIfPostgres("billing postgres persistence", () => {
     expect(backfilledAgain).toBe(false);
   });
 
+  it("backfills inside an existing transaction (migration context)", async () => {
+    await clearDurableRuntimeTables(postgres.db);
+
+    const repository = createBillingRepository();
+    repository.subscriptions.set("user-migration:free:subscription", {
+      id: "user-migration:free:subscription",
+      userId: "user-migration",
+      planId: "free",
+      status: "active",
+      startedAt: "2026-06-14T12:00:00.000Z"
+    });
+
+    const snapshotPayload = {
+      plans: Array.from(repository.plans.entries()),
+      subscriptions: Array.from(repository.subscriptions.entries()),
+      usage: [...repository.usage],
+      ledger: [...repository.ledger],
+      topUpPackages: Array.from(repository.topUpPackages.entries()),
+      reservations: Array.from(repository.reservations.entries()),
+      cycleStates: Array.from(repository.cycleStates.entries()),
+      idempotency: Array.from(repository.idempotency.entries())
+    };
+
+    await postgres.db
+      .insertInto("billing_snapshots")
+      .values({
+        id: "default",
+        data: JSON.stringify(snapshotPayload),
+        updated_at: "2026-06-14T12:00:00.000Z"
+      })
+      .execute();
+
+    await postgres.db.transaction().execute(async (trx) => {
+      const backfilled = await Effect.runPromise(backfillBillingSnapshotIntoRelationalTables(trx));
+      expect(backfilled).toBe(true);
+    });
+
+    const subscriptionRows = await postgres.db
+      .selectFrom("billing_subscriptions")
+      .selectAll()
+      .where("user_id", "=", "user-migration")
+      .execute();
+
+    expect(subscriptionRows).toHaveLength(1);
+  });
+
   it("prefers relational billing tables when both snapshot and relational data exist", async () => {
     await clearDurableRuntimeTables(postgres.db);
 

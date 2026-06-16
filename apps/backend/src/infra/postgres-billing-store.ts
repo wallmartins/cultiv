@@ -196,7 +196,7 @@ export function persistPostgresBillingRepositoryInTransaction(
 }
 
 export function backfillBillingSnapshotIntoRelationalTables(
-  db: Kysely<DatabaseTables>
+  db: BillingDbExecutor
 ): Effect.Effect<boolean, Error> {
   return Effect.gen(function* () {
     const snapshotRow = yield* Effect.tryPromise({
@@ -237,7 +237,10 @@ export function backfillBillingSnapshotIntoRelationalTables(
       repository.idempotency.set(key, value as BillingOperationResult<unknown>);
     }
 
-    yield* savePostgresBillingRepository(db, repository);
+    yield* Effect.tryPromise({
+      try: () => persistPostgresBillingRepositoryInTransaction(db, repository),
+      catch: (error) => (error instanceof Error ? error : new Error(String(error)))
+    });
     return true;
   });
 }
