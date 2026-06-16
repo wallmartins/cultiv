@@ -55,7 +55,7 @@ export function baselineAppliedMigrations(
     if (!tables.has("kysely_migration")) {
       yield* Effect.tryPromise({
         try: () =>
-          sql`create table kysely_migration (name varchar(255) primary key, timestamp varchar(255) not null)`.execute(db),
+          sql`create table if not exists kysely_migration (name varchar(255) primary key, timestamp varchar(255) not null)`.execute(db),
         catch: (error) => createPostgresBootstrapError("Failed to create kysely_migration table", error)
       });
     }
