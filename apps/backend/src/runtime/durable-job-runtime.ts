@@ -355,7 +355,7 @@ export function createDurableJobRuntime(options: DurableJobRuntimeOptions): Dura
           estimatedSteps,
           createdAt
         } satisfies JobCreatedResponse;
-      });
+      }).pipe(Effect.orDie);
     },
     getJobStatus(jobId) {
       return options.database.jobs.findById(jobId).pipe(

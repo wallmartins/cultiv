@@ -1,5 +1,5 @@
 import { Effect } from "effect";
-import { sql, type Kysely } from "kysely";
+import { sql, type Kysely, type Transaction } from "kysely";
 import { replaceBillingRepositoryContents } from "./billing-repository-sync.js";
 import {
   hasPostgresBillingTables,
@@ -15,6 +15,8 @@ import {
 import type { DatabaseTables } from "./postgres-tables.js";
 
 const BILLING_SNAPSHOT_ID = "default";
+
+type BillingDbExecutor = Kysely<DatabaseTables> | Transaction<DatabaseTables>;
 
 interface BillingSnapshotPayload {
   readonly plans: ReadonlyArray<[string, unknown]>;
@@ -150,7 +152,7 @@ export function saveBillingRepository(
 }
 
 export function saveBillingRepositoryInTransaction(
-  trx: Kysely<DatabaseTables>,
+  trx: BillingDbExecutor,
   repository: BillingRepository,
   updatedAt: string
 ): Effect.Effect<void, Error> {

@@ -1,5 +1,7 @@
 # Progress Log
 
+| 2026-06-16 | fix(backend,ci): lint postgres-billing mappers + `Generated` ledger id + `BillingDbExecutor`; durable tests 13/13 local |
+
 | 2026-06-16 | ci: job `CI gate` agrega resultados (skipped ok) — único required check para branch protection / Vercel |
 
 | 2026-06-16 | ci: path filters — só web pula build/test backend; só backend pula build web; shared/packages disparam ambos |

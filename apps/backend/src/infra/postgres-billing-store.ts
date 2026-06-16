@@ -19,6 +19,8 @@ import { replaceBillingRepositoryContents } from "./billing-repository-sync.js";
 
 const BILLING_SNAPSHOT_ID = "default";
 
+type BillingDbExecutor = Kysely<DatabaseTables> | Transaction<DatabaseTables>;
+
 let billingPersistQueue: Promise<void> = Promise.resolve();
 
 export function runBillingRepositoryPersistSerialized<T>(task: () => Promise<T>): Promise<T> {
@@ -84,7 +86,7 @@ export function loadPostgresBillingRepository(
               startedAt: row.started_at,
               ...(row.renewed_at ? { renewedAt: row.renewed_at } : {}),
               ...(row.expires_at ? { expiresAt: row.expires_at } : {})
-            }) satisfies BillingSubscription
+            }) as BillingSubscription
         ),
         usage: usage.map(
           (row) =>
@@ -98,7 +100,7 @@ export function loadPostgresBillingRepository(
               credits: row.credits,
               createdAt: row.created_at,
               metadata: (row.metadata ?? {}) as Record<string, unknown>
-            }) satisfies BillingUsageRecord
+            }) as BillingUsageRecord
         ),
         ledger: ledger.map(
           (row) =>
@@ -113,7 +115,7 @@ export function loadPostgresBillingRepository(
               idempotencyKey: row.idempotency_key,
               metadata: (row.metadata ?? {}) as Record<string, unknown>,
               createdAt: row.created_at
-            }) satisfies BillingLedgerEntry
+            }) as BillingLedgerEntry
         ),
         reservations: reservations.map(
           (row) =>
@@ -130,7 +132,7 @@ export function loadPostgresBillingRepository(
               metadata: (row.metadata ?? {}) as Record<string, unknown>,
               createdAt: row.created_at,
               updatedAt: row.updated_at
-            }) satisfies BillingGenerationReservation
+            }) as BillingGenerationReservation
         ),
         cycleStates: cycleStates.map(
           (row) =>
@@ -143,7 +145,7 @@ export function loadPostgresBillingRepository(
               rolloverCredits: row.rollover_credits,
               grantedCredits: row.granted_credits,
               expiredCredits: row.expired_credits
-            }) satisfies BillingCycleState
+            }) as BillingCycleState
         ),
         topUpPackages: topUpPackages.map(
           (row) =>
@@ -153,7 +155,7 @@ export function loadPostgresBillingRepository(
               priceCents: row.price_cents,
               currency: row.currency,
               ...(row.description ? { description: row.description } : {})
-            }) satisfies BillingTopUpPackage
+            }) as BillingTopUpPackage
         )
       });
 
@@ -184,7 +186,7 @@ export function savePostgresBillingRepository(
 }
 
 export function persistPostgresBillingRepositoryInTransaction(
-  trx: Transaction<DatabaseTables>,
+  trx: BillingDbExecutor,
   repository: BillingRepository
 ): Promise<void> {
   return runBillingRepositoryPersistSerialized(async () => {
@@ -250,7 +252,7 @@ export function reloadPostgresBillingRepositoryInto(
   });
 }
 
-async function clearBillingTables(trx: Transaction<DatabaseTables>): Promise<void> {
+async function clearBillingTables(trx: BillingDbExecutor): Promise<void> {
   await trx.deleteFrom("billing_operation_idempotency").execute();
   await trx.deleteFrom("billing_reservations").execute();
   await trx.deleteFrom("billing_ledger_entries").execute();
@@ -262,7 +264,7 @@ async function clearBillingTables(trx: Transaction<DatabaseTables>): Promise<voi
 }
 
 async function insertBillingRepository(
-  trx: Transaction<DatabaseTables>,
+  trx: BillingDbExecutor,
   repository: BillingRepository
 ): Promise<void> {
   if (repository.plans.size > 0) {

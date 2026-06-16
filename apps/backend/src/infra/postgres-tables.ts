@@ -1,3 +1,5 @@
+import type { Generated } from "kysely";
+
 export interface JobsTable {
   id: string;
   user_id: string | null;
@@ -142,7 +144,7 @@ export interface BillingUsageRecordsTable {
 }
 
 export interface BillingLedgerEntriesTable {
-  id: number;
+  id: Generated<number>;
   subscription_id: string;
   account_id: string;
   entry_type: string;

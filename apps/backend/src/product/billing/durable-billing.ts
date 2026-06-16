@@ -20,14 +20,22 @@ export function createPersistingBillingService(
 ): BillingServiceContract {
   const billing = createBillingService({ repository });
   const persist = () => saveBillingRepository(postgres, repository, now().toISOString());
+  const persistSilently = () =>
+    persist().pipe(
+      Effect.catchAll((error) =>
+        Effect.sync(() => {
+          logPersistFailure(error);
+        })
+      )
+    );
 
   const schedulePersist = () => {
-    void Effect.runPromise(persist()).catch(logPersistFailure);
+    void Effect.runPromise(persistSilently());
   };
 
   return {
     registerPlan(plan) {
-      return billing.registerPlan(plan).pipe(Effect.tap(() => persist()));
+      return billing.registerPlan(plan).pipe(Effect.tap(() => persistSilently()));
     },
     upsertSubscription(subscription) {
       const result = billing.upsertSubscription(subscription);
@@ -42,20 +50,20 @@ export function createPersistingBillingService(
     getEntitlement: billing.getEntitlement.bind(billing),
     getWallet: billing.getWallet.bind(billing),
     consumeCredits(userId, planId, amount, kind) {
-      return billing.consumeCredits(userId, planId, amount, kind).pipe(Effect.tap(() => persist()));
+      return billing.consumeCredits(userId, planId, amount, kind).pipe(Effect.tap(() => persistSilently()));
     },
     quoteDebitForMode: billing.quoteDebitForMode.bind(billing),
     startCycle(request) {
-      return billing.startCycle(request).pipe(Effect.tap(() => persist()));
+      return billing.startCycle(request).pipe(Effect.tap(() => persistSilently()));
     },
     reserveGenerationCredits(request) {
-      return billing.reserveGenerationCredits(request).pipe(Effect.tap(() => persist()));
+      return billing.reserveGenerationCredits(request).pipe(Effect.tap(() => persistSilently()));
     },
     captureReservedCredits(request) {
-      return billing.captureReservedCredits(request).pipe(Effect.tap(() => persist()));
+      return billing.captureReservedCredits(request).pipe(Effect.tap(() => persistSilently()));
     },
     releaseReservedCredits(request) {
-      return billing.releaseReservedCredits(request).pipe(Effect.tap(() => persist()));
+      return billing.releaseReservedCredits(request).pipe(Effect.tap(() => persistSilently()));
     },
     registerTopUpPackage(pkg) {
       const result = billing.registerTopUpPackage(pkg);
@@ -64,7 +72,7 @@ export function createPersistingBillingService(
     },
     listTopUpPackages: billing.listTopUpPackages.bind(billing),
     purchaseTopUp(request) {
-      return billing.purchaseTopUp(request).pipe(Effect.tap(() => persist()));
+      return billing.purchaseTopUp(request).pipe(Effect.tap(() => persistSilently()));
     },
     charge: billing.charge.bind(billing),
     listPlans: billing.listPlans.bind(billing),
