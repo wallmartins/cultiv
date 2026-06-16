@@ -12,6 +12,8 @@
     "worker": "node dist/cli/worker-main.js",
     "migrate": "node dist/cli/migrate.js",
     "migrate:dev": "tsx src/cli/migrate.ts",
+    "billing:activate": "node dist/cli/billing-activate.js",
+    "billing:activate:dev": "tsx src/cli/billing-activate.ts",
     "rotate-voice-key": "node dist/cli/rotate-voice-protection-key.js",
     "rotate-voice-key:dev": "tsx src/cli/rotate-voice-protection-key.ts",
     "rotate-voice-key:dry-run": "node dist/cli/rotate-voice-protection-key.js --dry-run"

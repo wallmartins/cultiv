@@ -13,7 +13,7 @@
     "server": "pnpm --filter @my-ai-orchestrator/backend dev",
     "showcase:generate": "tsx scripts/generate-showcase-sample.ts",
     "showcase:voice-setup": "tsx scripts/showcase-voice-setup.ts",
-    "billing:activate": "tsx scripts/billing-activate.ts",
+    "billing:activate": "pnpm --filter @my-ai-orchestrator/backend billing:activate",
     "test": "vitest run",
     "test:ci": "vitest run --exclude '**/durable-runtime.integration.test.ts' --exclude '**/billing-postgres-persistence.test.ts'",
     "test:ci:backend": "vitest run --exclude '**/durable-runtime.integration.test.ts' --exclude '**/billing-postgres-persistence.test.ts' --exclude 'tests/web/**' --exclude 'tests/governance/frontend-client-boundary.test.ts'",

@@ -1,18 +1,14 @@
-#!/usr/bin/env tsx
 import { Effect } from "effect";
 import { activateSubscription } from "@my-ai-orchestrator/payments";
-import { bootstrapBackendConfig } from "../apps/backend/src/config/config.js";
-import { registerBackendBillingPlans } from "../apps/backend/src/product/billing/billing-bootstrap.js";
-import { createBackendProductServices } from "../apps/backend/src/product/core/services.js";
+import { bootstrapBackendConfig } from "../config/config.js";
+import { registerBackendBillingPlans } from "../product/billing/billing-bootstrap.js";
+import { createBackendProductServices } from "../product/core/services.js";
 
 const usage = `Usage:
-  pnpm billing:activate --user-id <application-user-uuid> [--plan-id pro|free]
+  pnpm --filter @my-ai-orchestrator/backend billing:activate -- --user-id <uuid> [--plan-id pro|free]
 
 Activates a billing subscription and opens the credit cycle when missing.
-Writes durable billing state to PostgreSQL when DATABASE_URL is configured.
-
-Examples:
-  pnpm billing:activate --user-id 5f71cc94-a4c5-42e0-8ca0-aab818ca57da --plan-id pro
+Requires DATABASE_URL and a built backend (node dist/cli/billing-activate.js).
 `;
 
 function readFlag(flag: string): string | undefined {

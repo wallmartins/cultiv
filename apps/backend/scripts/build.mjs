@@ -24,7 +24,8 @@ await esbuild.build({
     "src/cli/main.ts",
     "src/cli/worker-main.ts",
     "src/cli/migrate.ts",
-    "src/cli/rotate-voice-protection-key.ts"
+    "src/cli/rotate-voice-protection-key.ts",
+    "src/cli/billing-activate.ts"
   ],
   outdir: "dist",
   outbase: "src",
