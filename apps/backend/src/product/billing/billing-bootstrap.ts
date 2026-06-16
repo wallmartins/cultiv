@@ -5,6 +5,7 @@ import { swallowWithDiagnostic } from "../../effects/non-blocking-diagnostics.js
 export function seedUserBillingState(
   billing: ReturnType<typeof createBillingService>,
   config: {
+    /** Dev bootstrap only — not used to resolve per-request entitlements. */
     readonly billingPlanId?: string;
     readonly serviceName: string;
     readonly version: string;

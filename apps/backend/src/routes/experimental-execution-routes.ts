@@ -16,6 +16,7 @@ import {
 } from "../http/errors.js";
 import type { BackendProductServices } from "../product.js";
 import { readJsonBody, runEffectOrThrow, validateResponseBody } from "../http/http.js";
+import { resolveStoredUserPlanTier } from "../product/billing/resolve-user-billing.js";
 import { Routes, Roles } from "../app/route-definitions.js";
 
 export interface ExperimentalExecutionRouteOptions {
@@ -48,8 +49,7 @@ export function registerExperimentalExecutionRoutes(
       });
     }
 
-    const planTier =
-      options.services.billing.getEntitlement(actor.userId, options.config.billingPlanId)?.tier ?? "free";
+    const planTier = resolveStoredUserPlanTier(options.services.billing, actor.userId);
     const executionSnapshot = await runEffectOrThrow(
       experimentalAIPolicy.resolveExecutionSnapshot({
         request,

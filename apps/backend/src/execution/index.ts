@@ -3,6 +3,7 @@ import type {
   PipelineRequest,
   } from "@my-ai-orchestrator/contracts";
 import { resolveBackendBillingIdentity } from "./billing.js";
+import { resolveStoredUserPlanId } from "../product/billing/resolve-user-billing.js";
 import {
   buildOrchestrationPlan,
   createJobCoordinator
@@ -137,13 +138,18 @@ export function createBackendExecutionService(options: BackendExecutionOptions):
       });
 
       if (!skipAuthorization) {
+        const executionUserId =
+          "userId" in prepared.plan.request && typeof prepared.plan.request.userId === "string"
+            ? prepared.plan.request.userId
+            : options.config.billingUserId ?? options.config.serviceName;
+
         yield* options.services.usagePolicy.authorize({
           request: prepared.request,
           plan: prepared.plan,
           executionMode: strategy.mode,
           qualityMode: prepared.plan.request.qualityMode,
-          userId: "userId" in prepared.plan.request && typeof prepared.plan.request.userId === "string" ? prepared.plan.request.userId : options.config.billingUserId ?? options.config.serviceName,
-          planId: options.config.billingPlanId ?? "free",
+          userId: executionUserId,
+          planId: resolveStoredUserPlanId(options.services.billing, executionUserId),
           model: resolveUsagePolicyModel(
             prepared.request,
             prepared.plan.request.qualityMode ?? options.config.qualityMode
@@ -155,6 +161,7 @@ export function createBackendExecutionService(options: BackendExecutionOptions):
       const effectiveVoice = yield* options.services.voice.resolveEffectiveVoice(
         resolveBackendBillingIdentity(
           prepared.request,
+          options.services.billing,
           options.config,
           `generation:${prepared.plan.pipeline.name}:${prepared.plan.request.idempotencyKey ?? "anonymous"}`
         ).userId,

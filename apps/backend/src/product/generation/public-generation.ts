@@ -8,7 +8,7 @@ import { assertQuoteConsistency, toGenerationPricingSnapshot } from "../billing/
 import type { QualityMode } from "@my-ai-orchestrator/contracts";
 import { canUseQualityMode, hasActiveBillingSubscription } from "@my-ai-orchestrator/payments";
 import { resolveUsagePolicyModel } from "../usage/resolve-usage-policy-model.js";
-import type { BillingPlanTier } from "../ai-policy/ai-policy-types.js";
+import { resolveStoredUserEntitlement, resolveStoredUserPlanId, resolveStoredUserPlanTier } from "../billing/resolve-user-billing.js";
 import type { BackendProductServices } from "../core/types.js";
 import type { BackendPublicGenerationRequest, BackendPublicGenerationService } from "./public-generation-types.js";
 
@@ -27,7 +27,7 @@ export function createBackendPublicGenerationService(options: {
           ...request,
           ...sanitizedRequest
         }, options.services);
-        const planTier = resolvePlanTier(request.userId, options.config, options.services);
+        const planTier = resolveStoredUserPlanTier(options.services.billing, request.userId);
         const executionSnapshot = yield* options.services.aiPolicy.resolveExecutionSnapshot({
           request: internalRequest,
           planTier,
@@ -43,7 +43,6 @@ export function createBackendPublicGenerationService(options: {
         });
 
         yield* assertPublicGenerationAccess({
-          config: options.config,
           services: options.services,
           request,
           pricing: executionSnapshot.pricingEnvelope
@@ -62,7 +61,7 @@ export function createBackendPublicGenerationService(options: {
           executionMode: strategy.mode,
           qualityMode: executionSnapshot.plan.request.qualityMode,
           userId: request.userId,
-          planId: options.config.billingPlanId ?? "free",
+          planId: resolveStoredUserPlanId(options.services.billing, request.userId),
           model: resolveUsagePolicyModel(
             internalRequest,
             executionSnapshot.plan.request.qualityMode ?? options.config.qualityMode
@@ -107,16 +106,7 @@ function toInternalPipelineRequest(
   });
 }
 
-function resolvePlanTier(
-  userId: string,
-  config: BackendConfig,
-  services: BackendProductServices
-): BillingPlanTier {
-  return (services.billing.getEntitlement(userId, config.billingPlanId)?.tier ?? "free") as BillingPlanTier;
-}
-
 function assertPublicGenerationAccess(args: {
-  readonly config: BackendConfig;
   readonly services: BackendProductServices;
   readonly request: BackendPublicGenerationRequest;
   readonly pricing: {
@@ -125,16 +115,12 @@ function assertPublicGenerationAccess(args: {
     readonly creditPrice: number;
   };
 }): Effect.Effect<void, BackendUsageAuthorizationError> {
-  if (!args.config.billingPlanId) {
-    return Effect.void;
-  }
-
-  const entitlement = args.services.billing.getEntitlement(args.request.userId, args.config.billingPlanId) ?? null;
+  const entitlement = resolveStoredUserEntitlement(args.services.billing, args.request.userId) ?? null;
   if (entitlement === null) {
     return Effect.fail(
       new BackendUsageAuthorizationError({
         userId: args.request.userId,
-        planId: args.config.billingPlanId ?? "free",
+        planId: resolveStoredUserPlanId(args.services.billing, args.request.userId),
         reason: "plan_restriction",
         message: `Generation requires an active subscription before it can run`
       })

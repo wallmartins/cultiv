@@ -10,6 +10,7 @@ import type {
   BillingPlanTier,
   ResolvedPricingEnvelope
 } from "../ai-policy/ai-policy-types.js";
+import { resolveStoredUserPlanTier } from "./resolve-user-billing.js";
 
 interface GenerationQuoteSeed {
   readonly policyVersion: string;
@@ -48,7 +49,7 @@ export function resolveExecutionPricingSnapshot(args: {
     qualityMode: args.config.qualityMode,
     defaultLanguage: args.config.defaultLanguage
   });
-  const planTier = (args.billing.getEntitlement(args.userId, args.config.billingPlanId)?.tier ?? "free") as BillingPlanTier;
+  const planTier = resolveStoredUserPlanTier(args.billing, args.userId);
 
   return Effect.map(
     args.aiPolicy.resolvePricingEnvelope({

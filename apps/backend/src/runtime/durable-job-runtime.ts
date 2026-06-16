@@ -26,8 +26,7 @@ import { appendPersistedExecutionEvent, listPersistedExecutionEvents } from "./e
 import { subscribeExecutionEvents } from "./execution-events.js";
 import { persistContentType } from "../product/catalog/persistence-content-types.js";
 import {
-  reserveBackendExecutionCredits,
-  ensureBackendBillingSubscription
+  reserveBackendExecutionCredits
 } from "../execution/billing.js";
 import { resolveBackendBillingIdentity } from "../execution/billing.js";
 import { resolveUsagePolicyModel } from "../product/usage/resolve-usage-policy-model.js";
@@ -139,12 +138,12 @@ export function createDurableJobRuntime(options: DurableJobRuntimeOptions): Dura
 
       const billingIdentity = resolveBackendBillingIdentity(
         request,
+        options.billing,
         options.config,
         `generation:${input.plan.pipeline.name}:${input.plan.request.idempotencyKey ?? jobId}`
       );
 
-      if (!input.simulateCredits && options.config.billingPlanId) {
-        ensureBackendBillingSubscription(options.billing, billingIdentity, options.now);
+      if (!input.simulateCredits) {
         const reservation = yield* reserveBackendExecutionCredits(
           options.billing,
           billingIdentity,

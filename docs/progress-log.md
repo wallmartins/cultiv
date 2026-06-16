@@ -1,5 +1,7 @@
 # Progress Log
 
+| 2026-06-16 | fix(backend): resolve billing entitlements from stored subscription, not BILLING_PLAN_ID env |
+
 | 2026-06-16 | UX preview: stale-while-revalidate — skeleton só na carga inicial; atualizações com opacidade suave |
 
 | 2026-06-16 | feat(web+backend): preview comercial leve (formato/idioma/modo) vs recomendação completa sob demanda (`includeRecommendation`) |

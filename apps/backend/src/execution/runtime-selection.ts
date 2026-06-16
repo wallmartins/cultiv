@@ -15,6 +15,7 @@ export function resolveRuntimeSelectionContext(options: ExecutePipelineOptions):
   return Effect.gen(function* () {
   const billingIdentity = resolveBackendBillingIdentity(
     options.request,
+    options.services.billing,
     options.config,
     `generation:${options.plan.pipeline.name}:${options.request.idempotencyKey ?? "anonymous"}`
   );
@@ -26,11 +27,11 @@ export function resolveRuntimeSelectionContext(options: ExecutePipelineOptions):
   });
   const controls = createExecutionControls(selection.qualityMode, options.plan.pipeline.steps.length);
   const attempts = buildQualityAttempts(selection.qualityMode, controls.maxIterations ?? 1);
-  const billingEnabled = !options.simulateCredits && Boolean(options.config.billingPlanId);
+  const billingEnabled = !options.simulateCredits;
   const billing = options.services.billing;
   const pricingEnvelope = options.pricingEnvelope ?? (billingEnabled
     ? yield* options.services.aiPolicy.resolvePricingEnvelope({
-        planTier: (billing.getEntitlement(billingIdentity.userId, billingIdentity.planId)?.tier ?? "free"),
+        planTier: (billing.getEntitlement(billingIdentity.userId)?.tier ?? "free"),
         contentType: options.plan.contentType.id,
         qualityMode: selection.qualityMode,
         attachedPolicyVersion: options.config.aiPolicyAttachedVersion
@@ -40,7 +41,7 @@ export function resolveRuntimeSelectionContext(options: ExecutePipelineOptions):
     ? estimateDebitForAttempts(billing, selection.qualityMode, attempts.length, pricingEnvelope?.creditPrice)
     : 0;
   const planEntitlement = billingEnabled
-    ? billing.getEntitlement(billingIdentity.userId, billingIdentity.planId) ?? null
+    ? billing.getEntitlement(billingIdentity.userId) ?? null
     : null;
   const refinementFlagEnabled = options.services.featureFlags.isEnabled("content.language.refinement", {
     environment: options.config.environment,

@@ -8,6 +8,7 @@ import type { BackendConfig } from "../../config/config.js";
 import type { DatabaseClient } from "@my-ai-orchestrator/database";
 import type { BillingPlanTier, BillingServiceContract } from "@my-ai-orchestrator/payments";
 import { isQualityModeAllowed, resolveQualityModeBlockedReason } from "../billing/commercial-access.js";
+import { resolveStoredUserEntitlement } from "../billing/resolve-user-billing.js";
 import { buildContentTypeCatalogView } from "../catalog/content-type-catalog.js";
 import { resolveCatalogContentTypeDefinitions } from "../catalog/resolve-catalog-content-types.js";
 import type { BackendAIPolicyServiceContract } from "../ai-policy/ai-policy-types.js";
@@ -35,8 +36,7 @@ export function createBackendGenerationPreviewService(options: {
         const sanitizedArgs: BackendApprovedGenerationPreviewRequest = yield* options.inputSafety.authorizePreviewInput(args);
         const voiceProfile = yield* options.database.voiceProfiles.getByUser(sanitizedArgs.userId);
 
-        const entitlement =
-          options.billing.getEntitlement(sanitizedArgs.userId, options.config.billingPlanId) ?? null;
+        const entitlement = resolveStoredUserEntitlement(options.billing, sanitizedArgs.userId) ?? null;
         const currentBalance = entitlement?.wallet.availableCredits ?? 0;
         const primaryLanguage = sanitizedArgs.language ?? voiceProfile?.primaryLanguage ?? options.config.defaultLanguage;
         const orchestrationCatalog = options.aiPolicy.getActiveOrchestrationCatalog();

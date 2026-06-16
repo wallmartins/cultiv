@@ -15,13 +15,27 @@ import {
 import { createExecutionApp } from "./backend-app-executions.shared.js";
 
 describe("backend app execution quotes and telemetry", () => {
-  it("rejects /me generation when preview pricing is blocked by plan restriction", async () => {
+  it("rejects /me generation when the stored subscription does not allow the quality mode", async () => {
     const config = createBackendAppTestConfig({
-      billingPlanId: "missing-plan",
       billingUserId: "user_1",
       executionMode: "sync"
     });
     const services = createBackendAppTestServices(config);
+    services.billing.upsertSubscription({
+      id: "sub_user_1_free",
+      userId: "user_1",
+      planId: "free",
+      status: "active",
+      startedAt: backendAppTestStartedAt.toISOString()
+    });
+    await Effect.runPromise(
+      services.billing.startCycle({
+        userId: "user_1",
+        planId: "free",
+        cycleId: "user_1:free:cycle:test",
+        idempotencyKey: "test:user_1:free:cycle"
+      })
+    );
     seedExecutionVoiceState(services, "user_1");
     const app = createBackendAppTestApp(config, services);
     const previewPayload = {
@@ -41,8 +55,10 @@ describe("backend app execution quotes and telemetry", () => {
 
     expect(previewResponse.status).toBe(200);
     const preview = await Effect.runPromise(decodeGenerationPreviewResponse(await previewResponse.json()));
-    expect(preview.options.contentTypes.find((contentType) => contentType.id === "architecture-post")?.blockedReason).toBe("plan_restriction");
-    expect(preview.options.qualityModes.find((mode) => mode.id === "balanced")?.blockedReason).toBe("plan_restriction");
+    expect(preview.options.contentTypes.find((contentType) => contentType.id === "architecture-post")?.allowed).toBe(true);
+    expect(preview.options.qualityModes.find((mode) => mode.id === "balanced")?.blockedReason).toBe(
+      "quality_mode_plan_restriction"
+    );
 
     const executionResponse = await app.request("/me/executions/run", {
       method: "POST",
@@ -59,7 +75,7 @@ describe("backend app execution quotes and telemetry", () => {
     const error = await Effect.runPromise(decodeApiErrorResponse(await executionResponse.json()));
     expect(error.code).toBe("usage_restricted");
     expect(error.category).toBe("authorization");
-    expect(error.details?.reason).toBe("plan_restriction");
+    expect(error.details?.reason).toBe("quality_mode_plan_restriction");
   });
 
   it("accepts a matching quote and rejects a stale quote on the /me execution surface", async () => {

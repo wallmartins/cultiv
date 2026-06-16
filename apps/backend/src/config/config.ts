@@ -41,6 +41,7 @@ export interface BackendConfig extends RuntimeConfig, BackendAuthConfig {
   readonly port: number;
   readonly version: string;
   readonly billingUserId?: string;
+  /** Dev-only bootstrap: seeds billing for `billingUserId` at startup. Runtime entitlements always come from the DB. */
   readonly billingPlanId?: string;
   readonly aiPolicyManifestPath?: string;
   readonly aiPolicyAttachedVersion?: string;

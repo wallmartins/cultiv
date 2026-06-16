@@ -17,10 +17,11 @@ export function resolveUsagePolicyContext(options: {
 }) {
   const billingIdentity = resolveBackendBillingIdentity(
     options.request.request,
+    options.billing,
     options.config,
     options.request.plan.executionPlan.id
   );
-  const entitlement = options.billing.getEntitlement(billingIdentity.userId, billingIdentity.planId) ?? null;
+  const entitlement = options.billing.getEntitlement(billingIdentity.userId) ?? null;
   const executionMode = resolveExecutionModeFlag(options.featureFlagRegistry);
   const refinementFlagEnabled = resolveContentRefinementFlag(options.featureFlagRegistry, {
     environment: options.config.environment,

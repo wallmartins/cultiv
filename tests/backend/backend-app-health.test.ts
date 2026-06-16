@@ -11,6 +11,7 @@ import {
   createBackendAppTestApp,
   createBackendAppTestConfig,
   createBackendAppTestServices,
+  seedBillingSubscription,
   seedExecutionVoiceState,
   backendAppTestNow
 } from "./backend-app.fixtures.js";
@@ -70,6 +71,7 @@ describe("backend app health and pipeline contracts", () => {
   it("validates requests and returns queued executions through shared contracts", async () => {
     const config = createBackendAppTestConfig({ executionMode: "async", billingUserId: "health-user" });
     const services = createBackendAppTestServices(config);
+    seedBillingSubscription(services, "health-user");
     seedExecutionVoiceState(services, "health-user");
     const app = createBackendAppTestApp(config, services);
 

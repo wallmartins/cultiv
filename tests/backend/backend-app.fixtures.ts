@@ -88,6 +88,29 @@ export function seedExecutionVoiceState(
   );
 }
 
+export function seedBillingSubscription(
+  services: ReturnType<typeof createBackendAppTestServices>,
+  userId: string,
+  planId: "free" | "pro" = "pro"
+) {
+  services.billing.upsertSubscription({
+    id: `${userId}:${planId}:subscription`,
+    userId,
+    planId,
+    status: "active",
+    startedAt: backendAppTestStartedAt.toISOString()
+  });
+
+  Effect.runPromise(
+    services.billing.startCycle({
+      userId,
+      planId,
+      cycleId: `${userId}:${planId}:cycle:test`,
+      idempotencyKey: `test:${userId}:${planId}:cycle`
+    })
+  );
+}
+
 export function createBackendAppTestApp(
   config: BackendConfig,
   services: NonNullable<Parameters<typeof createBackendApp>[1]>["services"]

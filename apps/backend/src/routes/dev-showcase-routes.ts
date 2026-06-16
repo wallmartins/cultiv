@@ -28,11 +28,14 @@ export function registerDevShowcaseRoutes(app: Hono, options: DevShowcaseRouteOp
       seedUserBillingState(options.services.billing, options.config, actor.userId, options.now)
     );
 
-    const entitlement = options.services.billing.getEntitlement(actor.userId, options.config.billingPlanId);
+    const entitlement = options.services.billing.getEntitlement(
+      actor.userId,
+      options.config.billingPlanId
+    );
 
     return c.json({
       userId: actor.userId,
-      planId: options.config.billingPlanId ?? null,
+      planId: options.config.billingPlanId ?? entitlement?.planId ?? null,
       active: entitlement?.canGenerate ?? false,
       availableCredits: entitlement?.wallet.availableCredits ?? 0
     });

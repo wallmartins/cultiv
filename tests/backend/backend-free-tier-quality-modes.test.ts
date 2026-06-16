@@ -66,6 +66,50 @@ describe("backend free tier quality modes", () => {
     expect(decoded.pricingSnapshot.qualityMode).toBe("fast");
   });
 
+  it("uses the pro subscription stored in billing without BILLING_PLAN_ID in config", async () => {
+    const config = createBackendAppTestConfig({ billingUserId: "user_pro_db" });
+    const services = createBackendAppTestServices(config);
+
+    services.billing.upsertSubscription({
+      id: "sub_user_pro_db",
+      userId: "user_pro_db",
+      planId: "pro",
+      status: "active",
+      startedAt: backendAppTestStartedAt.toISOString()
+    });
+
+    await Effect.runPromise(
+      services.billing.startCycle({
+        userId: "user_pro_db",
+        planId: "pro",
+        cycleId: "user_pro_db:pro:cycle:test",
+        idempotencyKey: "test:user_pro_db:pro:cycle"
+      })
+    );
+
+    const app = createBackendAppTestApp(config, services);
+    const previewResponse = await app.request("/api/generation-preview", {
+      method: "POST",
+      headers: {
+        authorization: createBackendTestAuthorizationHeader({ userId: "user_pro_db" }),
+        "content-type": "application/json"
+      },
+      body: JSON.stringify({
+        contentType: "linkedin-post",
+        qualityMode: "strict",
+        briefing: {
+          topic: "Billing from database",
+          audience: "Platform engineers"
+        }
+      })
+    });
+
+    expect(previewResponse.status).toBe(200);
+    const decoded = await Effect.runPromise(decodeGenerationPreviewResponse(await previewResponse.json()));
+    expect(decoded.options.qualityModes.find((mode) => mode.id === "strict")?.allowed).toBe(true);
+    expect(decoded.options.qualityModes.find((mode) => mode.id === "balanced")?.allowed).toBe(true);
+  });
+
   it("provisions a free subscription on the first authenticated catalog request", async () => {
     const config = createBackendAppTestConfig();
     const services = createBackendAppTestServices(config);

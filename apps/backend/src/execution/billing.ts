@@ -17,6 +17,7 @@ import type {
   BillingSubscriptionInactiveError
 } from "@my-ai-orchestrator/payments";
 import type { BackendConfig } from "../config/config.js";
+import { resolveStoredUserPlanId } from "../product/billing/resolve-user-billing.js";
 
 export interface BackendBillingIdentity {
   readonly userId: string;
@@ -32,15 +33,17 @@ export function createBackendBillingService(): BillingServiceContract {
 
 export function resolveBackendBillingIdentity(
   request: PipelineRequest,
+  billing: BillingServiceContract,
   config: BackendConfig,
   fallbackCycleId: string
 ): BackendBillingIdentity {
   const requestRecord = request as Record<string, unknown>;
   const requestUserId = typeof requestRecord.userId === "string" ? requestRecord.userId : undefined;
+  const userId = requestUserId ?? config.billingUserId ?? config.serviceName;
 
   return {
-    userId: requestUserId ?? config.billingUserId ?? config.serviceName,
-    planId: config.billingPlanId ?? "free",
+    userId,
+    planId: resolveStoredUserPlanId(billing, userId),
     generationCycleId: request.idempotencyKey ?? fallbackCycleId
   };
 }
