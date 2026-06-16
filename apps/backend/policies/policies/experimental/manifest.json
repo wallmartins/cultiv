@@ -1,0 +1,11 @@
+{
+  "activeVersion": "2026-05-24-exp",
+  "versions": [
+    {
+      "version": "2026-05-24-exp",
+      "lifecycle": "active",
+      "catalogPath": "./2026-05-24-exp/catalog.json",
+      "pricingPath": "./2026-05-24-exp/pricing.json"
+    }
+  ]
+}
