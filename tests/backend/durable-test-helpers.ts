@@ -182,6 +182,13 @@ export async function resetDurableTestState(context: DurableTestContext): Promis
   await Effect.runPromise(
     seedUserBillingState(context.billing, context.config, context.config.billingUserId!, () => new Date())
   );
+  await Effect.runPromise(
+    saveBillingRepository(
+      context.postgres.db,
+      context.billingRepository,
+      new Date().toISOString()
+    )
+  );
 }
 
 function resetBillingRepositoryMaps(repository: BillingRepository): void {

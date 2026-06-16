@@ -210,10 +210,12 @@ describeIfPostgres("billing postgres persistence", () => {
     const billing = createPersistingBillingService(postgres.db, repository, now);
 
     await Effect.runPromise(registerBackendBillingPlans(billing));
-    ensureDefaultFreeSubscription(billing, "user-jit-free", {
-      cycleId: "user-jit-free:free:cycle:jit",
-      idempotencyKey: "jit:user-jit-free:free"
-    });
+    await Effect.runPromise(
+      ensureDefaultFreeSubscription(billing, "user-jit-free", {
+        now,
+        idempotencyNamespace: "jit"
+      })
+    );
 
     await Effect.runPromise(saveBillingRepository(postgres.db, repository, now().toISOString()));
 
