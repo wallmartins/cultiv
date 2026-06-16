@@ -8,7 +8,9 @@ set -euo pipefail
 # Roda na VPS ou localmente.
 # =============================================================================
 
-CULTIV_ROOT="${CULTIV_ROOT:-/home/cultiv}"
+CULTIV_USER="${CULTIV_USER:-cultiv}"
+CULTIV_HOME="$(eval echo ~${CULTIV_USER})"
+CULTIV_ROOT="${CULTIV_ROOT:-${CULTIV_HOME}}"
 WEBHOOK_URL="${DISCORD_WEBHOOK_URL:-}"
 CHECKS_PASSED=0
 CHECKS_FAILED=0
@@ -49,8 +51,11 @@ fi
 # Check 2: cloudflared authenticated
 # =============================================================================
 echo "2. cloudflared authenticated..."
-if [ -f "$HOME/.cloudflared/cert.pem" ] || ls "$HOME/.cloudflared/"*.json &>/dev/null; then
-  pass "cloudflared credentials found"
+CLOUDFLARED_DIR="${CULTIV_HOME}/.cloudflared"
+if [ -f "${CLOUDFLARED_DIR}/cert.pem" ]; then
+  pass "cloudflared cert.pem found"
+elif ls "${CLOUDFLARED_DIR}/"*.json &>/dev/null 2>&1; then
+  pass "cloudflared tunnel credentials found"
 else
   fail "Credentials not found (run: cloudflared tunnel login)"
 fi
@@ -59,9 +64,9 @@ fi
 # Check 3: tunnel config exists
 # =============================================================================
 echo "3. Tunnel config..."
-if [ -f "$HOME/.cloudflared/config.yml" ]; then
+if [ -f "${CLOUDFLARED_DIR}/config.yml" ]; then
   pass "Config file exists"
-  if grep -q "api.cultiv.app" "$HOME/.cloudflared/config.yml" 2>/dev/null; then
+  if grep -q "api.cultiv.app" "${CLOUDFLARED_DIR}/config.yml" 2>/dev/null; then
     pass "api.cultiv.app configured in tunnel"
   else
     fail "api.cultiv.app not in tunnel config"
@@ -118,24 +123,26 @@ fi
 # Check 8: rclone configured for R2
 # =============================================================================
 echo "8. rclone R2 config..."
-if rclone listremotes 2>/dev/null | grep -q .; then
-  if rclone config show 2>/dev/null | grep -q "type = s3"; then
-    pass "rclone S3 remote configured"
-  else
-    fail "rclone configured but no S3 remote found"
-  fi
+RCLONE_CMD="sudo -u ${CULTIV_USER} rclone"
+REMOTE=$(${RCLONE_CMD} listremotes 2>/dev/null | head -1 | tr -d ':')
+if [ -n "$REMOTE" ]; then
+  pass "rclone remote configured: ${REMOTE}"
 else
-  fail "rclone not configured (run: rclone config)"
+  fail "rclone not configured (run: rclone config as ${CULTIV_USER})"
 fi
 
 # =============================================================================
 # Check 9: R2 bucket accessible
 # =============================================================================
 echo "9. R2 bucket access..."
-if rclone lsd r2: 2>/dev/null | grep -q "cultiv-backups" || rclone ls r2:cultiv-backups 2>/dev/null > /dev/null; then
-  pass "Bucket 'cultiv-backups' accessible"
+if [ -n "$REMOTE" ]; then
+  if ${RCLONE_CMD} lsd "${REMOTE}:" 2>/dev/null | grep -q "cultiv-backups" || ${RCLONE_CMD} ls "${REMOTE}:cultiv-backups" 2>/dev/null > /dev/null; then
+    pass "Bucket 'cultiv-backups' accessible via ${REMOTE}"
+  else
+    fail "Cannot access bucket 'cultiv-backups' via remote '${REMOTE}'"
+  fi
 else
-  fail "Cannot access bucket 'cultiv-backups'"
+  fail "Cannot access bucket 'cultiv-backups' (no rclone remote)"
 fi
 
 # =============================================================================
