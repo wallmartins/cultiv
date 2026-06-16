@@ -112,4 +112,40 @@ describe("backend generation preview", () => {
     expect(recommended?.id).toBe("fast");
     expect(recommended?.recommendation?.reasonCodes).toContain("allowed_option_guard");
   });
+
+  it("skips recommendation when includeRecommendation is false", async () => {
+    const config = createBackendAppTestConfig({ billingUserId: "user_3" });
+    const services = createBackendAppTestServices(config);
+
+    services.billing.upsertSubscription({
+      id: "sub_user_3_pro",
+      userId: "user_3",
+      planId: "pro",
+      status: "active",
+      startedAt: backendAppTestStartedAt.toISOString()
+    });
+
+    const app = createBackendAppTestApp(config, services);
+    const response = await app.request("/api/generation-preview", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        contentType: "newsletter",
+        qualityMode: "strict",
+        includeRecommendation: false,
+        briefing: {
+          topic: "AI policy rollout",
+          audience: "backend engineers"
+        }
+      })
+    });
+
+    expect(response.status).toBe(200);
+
+    const decoded = await Effect.runPromise(decodeGenerationPreviewResponse(await response.json()));
+
+    expect(decoded.recommendation).toBeUndefined();
+    expect(decoded.options.qualityModes.every((mode) => !mode.recommended)).toBe(true);
+    expect(decoded.pricingSnapshot.quoteId).toMatch(/^quote_[a-f0-9]{64}$/);
+  });
 });

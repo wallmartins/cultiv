@@ -25,7 +25,7 @@ function fetchCreditBalance(client: ClientSdk): Promise<number> {
   }
 
   const promise = client
-    .toPromise(client.preview.get({}))
+    .toPromise(client.preview.get({ includeRecommendation: false }))
     .then((preview) => {
       setCachedCreditBalance(preview.currentBalance);
       setCreditBalanceInFlight(null);

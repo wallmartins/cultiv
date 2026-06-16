@@ -85,12 +85,15 @@ export function createBackendGenerationPreviewService(options: {
           };
         });
         const selectedQualityMode = selectQualityMode(sanitizedArgs.qualityMode, qualityModes);
-        const recommendation = recommendGenerationPreviewQualityMode({
-          contentType: selectedContentType,
-          briefing: sanitizedArgs.briefing,
-          hasVoiceProfile: voiceProfile !== null,
-          qualityModes
-        });
+        const includeRecommendation = sanitizedArgs.includeRecommendation !== false;
+        const recommendation = includeRecommendation
+          ? recommendGenerationPreviewQualityMode({
+              contentType: selectedContentType,
+              briefing: sanitizedArgs.briefing,
+              hasVoiceProfile: voiceProfile !== null,
+              qualityModes
+            })
+          : null;
         const pricingSnapshot = yield* options.aiPolicy.resolvePricingEnvelope({
           planTier,
           contentType: selectedContentType.id,

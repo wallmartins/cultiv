@@ -1,32 +1,57 @@
 import type { GenerationPreviewRequest, GenerationPreviewResponse } from "@my-ai-orchestrator/contracts";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useDebouncedValue } from "~/hooks/use-debounced-value";
 import { useClientSdk } from "~/platform/runtime/client-sdk-context";
 import { setCachedCreditBalance } from "~/platform/credits/credit-balance-cache";
 
 export type GenerationPreviewStatus = "idle" | "loading" | "ready" | "error";
 
-export function useGenerationPreview(request: GenerationPreviewRequest | null) {
+const COMMERCIAL_DEBOUNCE_MS = 400;
+
+export type CommercialPreviewRequest = {
+  readonly contentType: string;
+  readonly language: string;
+  readonly qualityMode: GenerationPreviewRequest["qualityMode"];
+};
+
+async function fetchPreview(
+  client: ReturnType<typeof useClientSdk>,
+  request: GenerationPreviewRequest,
+  signal?: AbortSignal
+): Promise<GenerationPreviewResponse> {
+  return client.toPromise(client.preview.get({ ...request, signal }));
+}
+
+export function useCommercialGenerationPreview(request: CommercialPreviewRequest | null) {
   const client = useClientSdk();
-  const debouncedRequest = useDebouncedValue(request, 500);
+  const debouncedRequest = useDebouncedValue(request, COMMERCIAL_DEBOUNCE_MS);
   const [status, setStatus] = useState<GenerationPreviewStatus>("idle");
   const [preview, setPreview] = useState<GenerationPreviewResponse | null>(null);
   const [error, setError] = useState<unknown>(null);
 
   useEffect(() => {
-    if (!debouncedRequest?.contentType) {
+    if (!debouncedRequest?.contentType || !debouncedRequest.language) {
       setStatus("idle");
       setPreview(null);
       setError(null);
       return;
     }
 
+    const controller = new AbortController();
     let cancelled = false;
     setStatus("loading");
     setError(null);
 
-    void client
-      .toPromise(client.preview.get(debouncedRequest))
+    void fetchPreview(
+      client,
+      {
+        contentType: debouncedRequest.contentType,
+        language: debouncedRequest.language,
+        qualityMode: debouncedRequest.qualityMode,
+        includeRecommendation: false
+      },
+      controller.signal
+    )
       .then((response) => {
         if (!cancelled) {
           setPreview(response);
@@ -35,7 +60,7 @@ export function useGenerationPreview(request: GenerationPreviewRequest | null) {
         }
       })
       .catch((nextError: unknown) => {
-        if (!cancelled) {
+        if (!cancelled && !controller.signal.aborted) {
           setError(nextError);
           setStatus("error");
         }
@@ -43,8 +68,70 @@ export function useGenerationPreview(request: GenerationPreviewRequest | null) {
 
     return () => {
       cancelled = true;
+      controller.abort();
     };
   }, [client, debouncedRequest]);
 
-  return { status, preview, error };
+  return { status, preview, error, isRefreshing: status === "loading" && preview !== null };
+}
+
+export function useFullGenerationPreview(
+  request: GenerationPreviewRequest | null,
+  refreshKey: number
+) {
+  const client = useClientSdk();
+  const [status, setStatus] = useState<GenerationPreviewStatus>("idle");
+  const [preview, setPreview] = useState<GenerationPreviewResponse | null>(null);
+  const [error, setError] = useState<unknown>(null);
+  const fetchedContextKeyRef = useRef<string | null>(null);
+  const requestContextKey = request ? stablePreviewContextKey(request) : null;
+
+  useEffect(() => {
+    if (!request || refreshKey === 0) {
+      setStatus("idle");
+      setPreview(null);
+      setError(null);
+      return;
+    }
+
+    const controller = new AbortController();
+    let cancelled = false;
+    setStatus("loading");
+    setError(null);
+
+    void fetchPreview(client, { ...request, includeRecommendation: true }, controller.signal)
+      .then((response) => {
+        if (!cancelled) {
+          setPreview(response);
+          setStatus("ready");
+          fetchedContextKeyRef.current = requestContextKey;
+        }
+      })
+      .catch((nextError: unknown) => {
+        if (!cancelled && !controller.signal.aborted) {
+          setError(nextError);
+          setStatus("error");
+        }
+      });
+
+    return () => {
+      cancelled = true;
+      controller.abort();
+    };
+  }, [client, refreshKey, request, requestContextKey]);
+
+  const isStale =
+    preview !== null &&
+    requestContextKey !== null &&
+    fetchedContextKeyRef.current !== null &&
+    fetchedContextKeyRef.current !== requestContextKey;
+
+  return { status, preview, error, isStale, isRefreshing: status === "loading" && preview !== null };
+}
+
+function stablePreviewContextKey(request: GenerationPreviewRequest): string {
+  return JSON.stringify({
+    briefing: request.briefing ?? null,
+    importedContext: request.importedContext ?? null
+  });
 }

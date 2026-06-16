@@ -12,7 +12,8 @@ export const GenerationPreviewRequestSchema = Schema.Struct({
   briefing: Schema.optional(PreviewBriefingSchema),
   importedContext: Schema.optional(Schema.String),
   language: Schema.optional(Schema.String),
-  qualityMode: Schema.optional(QualityModeSchema)
+  qualityMode: Schema.optional(QualityModeSchema),
+  includeRecommendation: Schema.optional(Schema.Boolean)
 });
 export type GenerationPreviewRequest = typeof GenerationPreviewRequestSchema.Type;
 

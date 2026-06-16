@@ -21,7 +21,10 @@ import { useActiveExecutions } from "~/platform/active-executions/active-executi
 import { setCachedCreditBalance } from "~/platform/credits/credit-balance-cache";
 import { consumeGeneratePrefill } from "~/app/generation/lib/generate-prefill";
 import { useContentTypes } from "~/app/generation/lib/use-content-types";
-import { useGenerationPreview } from "~/app/generation/lib/use-generation-preview";
+import {
+  useCommercialGenerationPreview,
+  useFullGenerationPreview
+} from "~/app/generation/lib/use-generation-preview";
 import { isVoiceStepSkipped } from "~/app/onboarding/lib/onboarding-flags";
 import { formatSdkError } from "~/platform/sdk/format-sdk-error";
 import { useClientSdk } from "~/platform/runtime/client-sdk-context";
@@ -76,6 +79,7 @@ export function GenerationScreen() {
   const [importedOpen, setImportedOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [fullRefreshKey, setFullRefreshKey] = useState(0);
 
   const selectedType = useMemo(
     () => catalog?.items.find((item) => item.id === contentTypeId) ?? null,
@@ -111,8 +115,24 @@ export function GenerationScreen() {
     }
   }
 
-  const previewRequest = useMemo(() => {
-    if (!selectedType || !language || !isBriefingComplete(selectedType.inputSchema, briefing)) {
+  const commercialRequest = useMemo(() => {
+    if (!contentTypeId || !language) {
+      return null;
+    }
+
+    return {
+      contentType: contentTypeId,
+      language,
+      qualityMode
+    };
+  }, [contentTypeId, language, qualityMode]);
+
+  const briefingComplete = selectedType
+    ? isBriefingComplete(selectedType.inputSchema, briefing)
+    : false;
+
+  const fullPreviewRequest = useMemo(() => {
+    if (!selectedType || !language || !briefingComplete) {
       return null;
     }
 
@@ -123,11 +143,33 @@ export function GenerationScreen() {
       qualityMode,
       importedContext: importedContext.trim() ? importedContext : undefined
     };
-  }, [briefing, contentTypeId, importedContext, language, qualityMode, selectedType]);
+  }, [briefing, briefingComplete, contentTypeId, importedContext, language, qualityMode, selectedType]);
 
-  const { status: previewStatus, preview, error: previewError } = useGenerationPreview(previewRequest);
+  useEffect(() => {
+    if (!briefingComplete) {
+      setFullRefreshKey(0);
+      return;
+    }
 
-  const qualityModeOptions = preview?.options.qualityModes ?? [];
+    setFullRefreshKey((key) => (key === 0 ? 1 : key));
+  }, [briefingComplete]);
+
+  const {
+    status: commercialStatus,
+    preview: commercialPreview,
+    error: commercialError,
+    isRefreshing: commercialRefreshing
+  } = useCommercialGenerationPreview(commercialRequest);
+  const {
+    status: fullStatus,
+    preview: fullPreview,
+    error: fullError,
+    isStale: recommendationStale,
+    isRefreshing: fullRefreshing
+  } = useFullGenerationPreview(fullPreviewRequest, fullRefreshKey);
+
+  const qualityModeOptions = commercialPreview?.options.qualityModes ?? [];
+  const qualityModeDisplayOptions = fullPreview?.options.qualityModes ?? qualityModeOptions;
   const catalogAllowedModes = catalog?.commercial?.allowedQualityModes;
 
   function isModeAllowedForUser(mode: QualityMode): boolean {
@@ -173,16 +215,22 @@ export function GenerationScreen() {
     }
   }, [qualityMode, qualityModeOptions, selectedModeAllowed]);
 
-  const briefingComplete = selectedType
-    ? isBriefingComplete(selectedType.inputSchema, briefing)
-    : false;
   const importedTooLarge = importedContext.length > IMPORTED_CONTEXT_MAX;
-  const currentBalance = preview?.currentBalance ?? null;
-  const creditPrice = preview?.pricingSnapshot.creditPrice ?? null;
+  const currentBalance = commercialPreview?.currentBalance ?? null;
+  const creditPrice = commercialPreview?.pricingSnapshot.creditPrice ?? null;
   const noCredits = currentBalance !== null && creditPrice !== null && currentBalance < creditPrice;
+  const previewRecommendation =
+    fullPreview?.recommendation && !recommendationStale ? fullPreview.recommendation : undefined;
 
   async function handleGenerate() {
-    if (!selectedType || !preview || !briefingComplete || importedTooLarge || noCredits || !selectedModeAllowed) {
+    if (
+      !selectedType ||
+      !commercialPreview ||
+      !briefingComplete ||
+      importedTooLarge ||
+      noCredits ||
+      !selectedModeAllowed
+    ) {
       return;
     }
 
@@ -196,8 +244,8 @@ export function GenerationScreen() {
           briefing,
           language,
           qualityMode,
-          quoteId: preview.pricingSnapshot.quoteId,
-          previewRecommendation: preview.recommendation,
+          quoteId: commercialPreview.pricingSnapshot.quoteId,
+          previewRecommendation,
           importedContext: importedContext.trim() ? importedContext : undefined
         })
       );
@@ -209,7 +257,7 @@ export function GenerationScreen() {
         qualityMode
       });
       openDrawer(queued.jobId);
-      setCachedCreditBalance(preview.projectedBalanceAfterGeneration);
+      setCachedCreditBalance(commercialPreview.projectedBalanceAfterGeneration);
     } catch (error) {
       setSubmitError(formatSdkError(error, messages).message);
     } finally {
@@ -217,9 +265,13 @@ export function GenerationScreen() {
     }
   }
 
-  const previewErrorMessage = previewError
-    ? formatSdkError(previewError, messages).message
+  const commercialErrorMessage = commercialError
+    ? formatSdkError(commercialError, messages).message
     : null;
+  const fullErrorMessage = fullError ? formatSdkError(fullError, messages).message : null;
+  const commercialInitialLoad = commercialStatus === "loading" && !commercialPreview;
+  const showCommercialCalculating =
+    commercialStatus === "idle" && commercialRequest !== null && !commercialPreview;
 
   const showReminder = isVoiceStepSkipped(user?.sub);
 
@@ -386,7 +438,7 @@ export function GenerationScreen() {
                     value={qualityMode}
                     onChange={(mode) => setQualityMode(mode as QualityMode)}
                     options={QUALITY_MODES.map((mode) => {
-                      const option = qualityModeOptions.find((candidate) => candidate.id === mode);
+                      const option = qualityModeDisplayOptions.find((candidate) => candidate.id === mode);
                       const allowed = isModeAllowedForUser(mode);
                       const blockedReason =
                         option?.blockedReason ?? (!allowed ? "quality_mode_plan_restriction" : undefined);
@@ -419,36 +471,74 @@ export function GenerationScreen() {
                 <Text as="h2" variant="label" className="block">
                   {messages.generate.previewTitle}
                 </Text>
-                {previewStatus === "loading" ? (
+                {commercialInitialLoad ? (
                   <AppSkeleton className="h-16 w-full" />
                 ) : null}
-                {preview ? (
-                  <div className="space-y-2">
+                {commercialPreview ? (
+                  <div
+                    className={`space-y-2 transition-opacity duration-300 ease-out ${
+                      commercialRefreshing ? "opacity-55" : "opacity-100"
+                    }`}
+                  >
                     <Text variant="meta">
-                      {messages.generate.previewPrice.replace("{price}", String(preview.pricingSnapshot.creditPrice))}
+                      {messages.generate.previewPrice.replace(
+                        "{price}",
+                        String(commercialPreview.pricingSnapshot.creditPrice)
+                      )}
                     </Text>
                     <Text variant="meta">
                       {messages.generate.previewBalance
-                        .replace("{current}", String(preview.currentBalance))
-                        .replace("{projected}", String(preview.projectedBalanceAfterGeneration))}
+                        .replace("{current}", String(commercialPreview.currentBalance))
+                        .replace("{projected}", String(commercialPreview.projectedBalanceAfterGeneration))}
                     </Text>
-                    {preview.recommendation ? (
+                  </div>
+                ) : null}
+                {fullStatus === "loading" && !fullPreview && briefingComplete ? (
+                  <AppSkeleton className="h-10 w-full" />
+                ) : null}
+                {fullPreview && (previewRecommendation || recommendationStale) ? (
+                  <div
+                    className={`space-y-2 transition-opacity duration-300 ease-out ${
+                      fullRefreshing ? "opacity-55" : "opacity-100"
+                    }`}
+                  >
+                    {previewRecommendation ? (
                       <Text variant="meta" className="text-muted-foreground">
-                        {getPreviewRecommendationExplanation(locale, preview.recommendation, {
+                        {getPreviewRecommendationExplanation(locale, previewRecommendation, {
                           fast: messages.qualityModes.fast,
                           balanced: messages.qualityModes.balanced,
                           strict: messages.qualityModes.strict
                         })}
                       </Text>
                     ) : null}
+                    {recommendationStale ? (
+                      <Text variant="meta" className="text-muted-foreground">
+                        {messages.generate.previewRecommendationStale}
+                      </Text>
+                    ) : null}
                   </div>
                 ) : null}
-                {previewStatus === "error" && previewErrorMessage ? (
+                {briefingComplete ? (
+                  <button
+                    type="button"
+                    className="text-sm font-medium text-moss underline-offset-2 hover:underline disabled:opacity-50"
+                    disabled={fullStatus === "loading"}
+                    onClick={() => setFullRefreshKey((key) => key + 1)}
+                  >
+                    {messages.generate.previewRefreshRecommendation}
+                  </button>
+                ) : null}
+                {commercialStatus === "error" && commercialErrorMessage ? (
                   <Text variant="meta" className="text-red-700">
-                    {previewErrorMessage}
+                    {commercialErrorMessage}
                   </Text>
                 ) : null}
-                {previewStatus === "idle" && briefingComplete ? (
+                {fullStatus === "error" && fullErrorMessage ? (
+                  <Text variant="meta" className="text-red-700">
+                    {fullErrorMessage}
+                  </Text>
+                ) : null}
+                {showCommercialCalculating ? (
                   <Text variant="meta" className="text-muted-foreground">
                     {messages.generate.calculating}
                   </Text>
@@ -467,8 +557,8 @@ export function GenerationScreen() {
                     !briefingComplete ||
                     importedTooLarge ||
                     submitting ||
-                    previewStatus === "loading" ||
-                    !preview ||
+                    commercialStatus === "loading" ||
+                    !commercialPreview ||
                     noCredits ||
                     !selectedModeAllowed
                   }

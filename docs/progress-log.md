@@ -1,5 +1,11 @@
 # Progress Log
 
+| 2026-06-16 | UX preview: stale-while-revalidate — skeleton só na carga inicial; atualizações com opacidade suave |
+
+| 2026-06-16 | feat(web+backend): preview comercial leve (formato/idioma/modo) vs recomendação completa sob demanda (`includeRecommendation`) |
+
+| 2026-06-16 | fix(web): histórico com Outlet + index route; drawer com scroll no texto gerado |
+
 | 2026-06-16 | fix: usage policy model check uses request quality mode (`backend-fast`) not server default (`cultiv-balanced`) |
 
 | 2026-06-16 | UX tela de voz: redirect pós-salvar para `/app/voice`, copy rica de confiança/diagnósticos (i18n), cobertura por formatos faltantes + parabéns, remoção de botões duplicados na seção de cobertura |
