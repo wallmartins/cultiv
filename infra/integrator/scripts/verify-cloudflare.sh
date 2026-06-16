@@ -169,7 +169,7 @@ fi
 # =============================================================================
 echo "11. SSH port exposure..."
 if command -v ss &> /dev/null; then
-  SSH_PUBLIC=$(ss -tlnp | grep -E "0\.0\.0\.0:22|:::22" || true)
+  SSH_PUBLIC=$(ss -tlnp | awk '$4 ~ /^0\.0\.0\.0:22$/ || $4 ~ /^:::22$/ {print $4}')
   if [ -z "$SSH_PUBLIC" ]; then
     pass "SSH not exposed on public interface"
   else
@@ -184,7 +184,7 @@ fi
 # =============================================================================
 echo "12. Exposed ports (excluding SSH)..."
 if command -v ss &> /dev/null; then
-  PUBLIC_PORTS=$(ss -tlnp | grep -E "0\.0\.0\.0:|:::" | grep -v "127.0.0.1" | grep -v ":22" || true)
+  PUBLIC_PORTS=$(ss -tlnp | awk '$4 ~ /^0\.0\.0\.0:[0-9]/ && $4 !~ /:22$/ {print $4, $NF}')
   if [ -z "$PUBLIC_PORTS" ]; then
     pass "No unexpected ports exposed"
   else
