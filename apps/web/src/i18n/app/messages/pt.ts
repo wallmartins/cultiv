@@ -316,7 +316,12 @@ export const appMessagesPt: AppMessages = {
       rebuilding: "Atualizando o raciocínio inferido a partir dos exemplos mais recentes.",
       failedKeepLast:
         "A última extração falhou, mas o raciocínio anterior continua válido. Adicione exemplos ou tente atualizar de novo.",
-      coreTitle: "Assinatura central",
+      coreTitle: "Como penso",
+      developmentTitle: "Como desenvolvo um texto",
+      developmentSubtitle: "Caminho argumentativo, postura epistêmica e movimentos típicos inferidos dos seus exemplos.",
+      developmentImmature: "Com pelo menos três exemplos ativos, este espelho fica mais estável.",
+      epistemicPosture: "Postura epistêmica",
+      typicalMoves: "Movimentos típicos",
       certaintyLevel: "Nível de certeza",
       judgmentFrequency: "Frequência de julgamento",
       conclusionPace: "Ritmo de conclusão",
@@ -358,7 +363,12 @@ export const appMessagesPt: AppMessages = {
           contextual: "Contextual",
           provocative: "Provocativa"
         },
-        technicalDensity: { low: "Baixa", medium: "Média", high: "Alta" }
+        technicalDensity: { low: "Baixa", medium: "Média", high: "Alta" },
+        epistemicPosture: {
+          exploratory: "Exploratória",
+          investigative: "Investigativa",
+          advocacy_mixed: "Mista com defesa"
+        }
       }
     },
     consent: {

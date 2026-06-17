@@ -1,4 +1,4 @@
-import { Effect } from "effect";
+import { Effect, Either } from "effect";
 import type { AppLogger } from "@my-ai-orchestrator/core";
 import type { AIAdapterServiceContract } from "@my-ai-orchestrator/ai-adapters";
 import type { DatabaseClient, VoiceExampleRecord } from "@my-ai-orchestrator/database";
@@ -16,6 +16,14 @@ import {
   resolveNextProfileVersion
 } from "./voice-rebuild-derivation.js";
 import { extractReasoningSignature } from "./reasoning-extraction.js";
+import { extractArgumentDevelopmentSignature } from "./argument-development-extraction.js";
+import { evaluateVoiceSignatureDivergence } from "./voice-signature-divergence.js";
+import { reconcileVoiceSignatures } from "./voice-signature-reconciliation.js";
+import type {
+  ArgumentDevelopmentExtractionResult,
+  ArgumentDevelopmentSignature,
+  ReasoningExtractionResult
+} from "@my-ai-orchestrator/contracts";
 import type { BackendVoiceRebuildService } from "./voice-rebuild-types.js";
 import type { BackendObservabilityService } from "../core/observability-types.js";
 import type { BackendVoiceConsentService } from "../../safety/voice-consent-types.js";
@@ -180,8 +188,13 @@ function processUserRebuild(
         environment: dependencies.config?.environment
       }) ?? false;
 
-    let reasoning = undefined;
+    let reasoning: ReasoningExtractionResult | undefined;
+    let development: ArgumentDevelopmentSignature | undefined;
     let reasoningExtractionFailed = false;
+    let developmentExtractionFailed = false;
+    let reconciliationFailed = false;
+
+    const activeExamples = allExamples.filter((example) => example.state === "active");
 
     if (
       reasoningEnabled
@@ -196,29 +209,114 @@ function processUserRebuild(
         : [];
 
       if (attempts.length > 0) {
-        const extraction = yield* extractReasoningSignature({
+        const reasoningEffect = extractReasoningSignature({
           examples: allExamples,
           attempts,
           aiAdapters: dependencies.aiAdapters,
           providerTransport: dependencies.providerTransport
         }).pipe(Effect.either);
 
-        if (extraction._tag === "Right") {
-          reasoning = extraction.right;
+        const developmentEffect =
+          activeExamples.length >= 2
+            ? extractArgumentDevelopmentSignature({
+                examples: allExamples,
+                attempts,
+                aiAdapters: dependencies.aiAdapters,
+                providerTransport: dependencies.providerTransport
+              }).pipe(Effect.either)
+            : Effect.succeed(
+                Either.right<ArgumentDevelopmentExtractionResult | undefined>(undefined)
+              );
+
+        const [reasoningResult, developmentResult] = yield* Effect.all([
+          reasoningEffect,
+          developmentEffect
+        ]);
+
+        if (reasoningResult._tag === "Right") {
+          reasoning = reasoningResult.right;
           logger?.info("Reasoning extraction succeeded", {
             userId,
-            formatExpressionCount: Object.keys(extraction.right.formatExpressions).length
+            formatExpressionCount: Object.keys(reasoningResult.right.formatExpressions).length
           });
         } else {
           reasoningExtractionFailed = true;
           logger?.warn("Reasoning extraction failed; keeping previous reasoning snapshot", {
             userId,
-            reason: extraction.left.message
+            reason: reasoningResult.left.message
           });
           yield* observability.recordVoiceReasoningExtractionFailed({
             userId,
-            reason: extraction.left.message
+            reason: reasoningResult.left.message
           });
+        }
+
+        if (activeExamples.length >= 2) {
+          if (developmentResult._tag === "Right" && developmentResult.right !== undefined) {
+            development = developmentResult.right.development;
+            logger?.info("Argument development extraction succeeded", {
+              userId,
+              epistemicPosture: developmentResult.right.development.epistemicPosture
+            });
+          } else if (developmentResult._tag === "Left") {
+            developmentExtractionFailed = true;
+            logger?.warn("Argument development extraction failed; keeping previous development snapshot", {
+              userId,
+              reason: developmentResult.left.message
+            });
+            yield* observability.recordVoiceDevelopmentExtractionFailed({
+              userId,
+              reason: developmentResult.left.message
+            });
+          }
+        }
+
+        if (
+          reasoning
+          && development
+          && !reasoningExtractionFailed
+          && !developmentExtractionFailed
+        ) {
+          const divergence = evaluateVoiceSignatureDivergence({ reasoning, development });
+          if (divergence.hasConflict) {
+            const reconciled = yield* reconcileVoiceSignatures({
+              examples: allExamples,
+              reasoning,
+              development,
+              attempts,
+              aiAdapters: dependencies.aiAdapters,
+              providerTransport: dependencies.providerTransport
+            }).pipe(Effect.either);
+
+            if (reconciled._tag === "Right") {
+              reasoning = {
+                core: reconciled.right.core,
+                formatExpressions: reconciled.right.formatExpressions
+              };
+              development = reconciled.right.development;
+              yield* observability.recordVoiceSignatureReconciliationInvoked({
+                userId,
+                reasons: divergence.reasons
+              });
+            } else {
+              reconciliationFailed = true;
+              reasoning = undefined;
+              development = undefined;
+              logger?.warn("Voice signature reconciliation failed; keeping previous profile snapshots", {
+                userId,
+                reason: reconciled.left.message
+              });
+              yield* observability.recordVoiceSignatureReconciliationFailed({
+                userId,
+                reason: reconciled.left.message,
+                reasons: divergence.reasons
+              });
+            }
+          } else {
+            yield* observability.recordVoiceSignatureReconciliationSkipped({
+              userId
+            });
+          }
         }
       } else if (attempts.length === 0) {
         reasoningExtractionFailed = true;
@@ -235,7 +333,10 @@ function processUserRebuild(
       allExamples,
       previousProfile,
       reasoning,
-      reasoningExtractionFailed
+      development,
+      reasoningExtractionFailed,
+      developmentExtractionFailed,
+      reconciliationFailed
     });
 
     yield* database.voiceProfiles.put(derivedState.profile).pipe(Effect.orDie);

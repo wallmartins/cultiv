@@ -20,5 +20,19 @@
   "badCandidates": [
     "Esta abordagem revolucionária vai transformar completamente sua carreira para sempre.",
     "1. Problema obviamente. 2. Solução 3. Lucro garantido."
+  ],
+  "argumentDevelopmentSignature": {
+    "developmentProse": "Grounds claims in lived scenes, tests ideas against examples, and names insight only after the reader has context.",
+    "moveLabels": ["scene", "test", "insight"],
+    "transitionTendencies": [
+      { "from": "scene", "to": "test", "frequency": "common" },
+      { "from": "test", "to": "insight", "frequency": "occasional" }
+    ],
+    "epistemicPosture": "investigative",
+    "structuralAntiPatterns": ["rhetorical_inflation", "numbered_proof_list"]
+  },
+  "developmentBadCandidates": [
+    "Esta abordagem revolucionária vai transformar tudo. Portanto você deve adotar já.",
+    "Esta abordagem revolucionária vai transformar tudo. Você deve adotar já sem contexto."
   ]
 }

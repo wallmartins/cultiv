@@ -39,13 +39,22 @@ export function mergeVoiceProfile(base: VoiceProfile, hints: Partial<VoiceProfil
 function resolveReasoningFields(
   hints: Partial<VoiceProfile>,
   base?: VoiceProfile
-): Pick<VoiceProfile, "coreReasoningSignature" | "formatExpressionProfile" | "derivedAntiPatterns"> {
+): Pick<
+  VoiceProfile,
+  | "coreReasoningSignature"
+  | "argumentDevelopmentSignature"
+  | "formatExpressionProfile"
+  | "derivedAntiPatterns"
+> {
   const coreReasoningSignature = hints.coreReasoningSignature ?? base?.coreReasoningSignature;
+  const argumentDevelopmentSignature =
+    hints.argumentDevelopmentSignature ?? base?.argumentDevelopmentSignature;
   const formatExpressionProfile = hints.formatExpressionProfile ?? base?.formatExpressionProfile;
   const derivedAntiPatterns = hints.derivedAntiPatterns ?? base?.derivedAntiPatterns;
 
   return {
     ...(coreReasoningSignature ? { coreReasoningSignature } : {}),
+    ...(argumentDevelopmentSignature ? { argumentDevelopmentSignature } : {}),
     ...(formatExpressionProfile ? { formatExpressionProfile } : {}),
     ...(derivedAntiPatterns?.length ? { derivedAntiPatterns } : {})
   };

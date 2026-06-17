@@ -19,5 +19,19 @@
   "badCandidates": [
     "Você deve implementar esta rotina imediatamente para ter sucesso, obviamente.",
     "O certo é sempre seguir este playbook sem exceção."
+  ],
+  "argumentDevelopmentSignature": {
+    "developmentProse": "Describes situations and comparisons without prescribing what the reader should do.",
+    "moveLabels": ["situation", "comparison", "open_question"],
+    "transitionTendencies": [
+      { "from": "situation", "to": "comparison", "frequency": "common" },
+      { "from": "comparison", "to": "open_question", "frequency": "occasional" }
+    ],
+    "epistemicPosture": "exploratory",
+    "structuralAntiPatterns": ["prescriptive_coaching", "advocacy_arc"]
+  },
+  "developmentBadCandidates": [
+    "Você deve implementar esta rotina imediatamente. O certo é seguir sem exceção.",
+    "Portanto a conclusão é clara: todo mundo deve adotar este playbook agora."
   ]
 }

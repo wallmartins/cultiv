@@ -7,15 +7,10 @@ import {
 } from "@my-ai-orchestrator/contracts";
 import type { BackendProviderTransport } from "../../execution/pipeline/provider-transport.js";
 import type { AIPolicyProviderModelAttempt } from "../ai-policy/ai-policy-types.js";
+import { ReasoningExtractionError } from "./voice-extraction-errors.js";
+import { parseJsonFromLlmResponse } from "./voice-extraction-json.js";
 
-export class ReasoningExtractionError extends Error {
-  readonly _tag = "ReasoningExtractionError";
-
-  constructor(message: string) {
-    super(message);
-    this.name = "ReasoningExtractionError";
-  }
-}
+export { ReasoningExtractionError } from "./voice-extraction-errors.js";
 
 const decodeReasoningExtraction = Schema.decodeUnknown(ReasoningExtractionResultSchema);
 
@@ -112,7 +107,7 @@ export function extractReasoningSignature(args: {
         );
 
         if (completion._tag === "Left") {
-          lastError = new ReasoningExtractionError(completion.left.message);
+          lastError = new ReasoningExtractionError({ message: completion.left.message });
           break;
         }
 
@@ -135,7 +130,7 @@ export function extractReasoningSignature(args: {
       }
     }
 
-    return yield* Effect.fail(lastError ?? new ReasoningExtractionError("Reasoning extraction failed"));
+    return yield* Effect.fail(lastError ?? new ReasoningExtractionError({ message: "Reasoning extraction failed" }));
   });
 }
 
@@ -143,28 +138,20 @@ function parseExtractionResponse(
   content: string
 ): Effect.Effect<ReasoningExtractionResult, ReasoningExtractionError> {
   return Effect.gen(function* () {
-    const jsonText = extractJsonObject(content);
-    const decoded = yield* decodeReasoningExtraction(JSON.parse(jsonText)).pipe(
+    const parsed = yield* parseJsonFromLlmResponse(content).pipe(
+      Effect.mapError((message) => new ReasoningExtractionError({ message }))
+    );
+    const decoded = yield* decodeReasoningExtraction(parsed).pipe(
       Effect.mapError(
         (error) =>
-          new ReasoningExtractionError(
-            error instanceof Error ? error.message : "Invalid reasoning extraction schema"
-          )
+          new ReasoningExtractionError({
+            message: error instanceof Error ? error.message : "Invalid reasoning extraction schema"
+          })
       )
     );
 
     return normalizeExtractionResult(decoded);
-  }).pipe(
-    Effect.catchAll((error: unknown) =>
-      Effect.fail(
-        error instanceof ReasoningExtractionError
-          ? error
-          : new ReasoningExtractionError(
-              error instanceof Error ? error.message : "Failed to parse reasoning extraction JSON"
-            )
-      )
-    )
-  );
+  });
 }
 
 function normalizeExtractionResult(result: ReasoningExtractionResult): ReasoningExtractionResult {
@@ -359,25 +346,6 @@ export function isReasoningNarrativeLikelyPortuguese(result: ReasoningExtraction
   return narratives.every(isLikelyPortugueseText);
 }
 
-function extractJsonObject(content: string): string {
-  const trimmed = content.trim();
-  if (trimmed.startsWith("{")) {
-    return trimmed;
-  }
-
-  const fenceMatch = trimmed.match(/```(?:json)?\s*([\s\S]*?)```/i);
-  if (fenceMatch?.[1]) {
-    return fenceMatch[1].trim();
-  }
-
-  const start = trimmed.indexOf("{");
-  const end = trimmed.lastIndexOf("}");
-  if (start >= 0 && end > start) {
-    return trimmed.slice(start, end + 1);
-  }
-
-  return trimmed;
-}
 
 export const TEST_REASONING_EXTRACTION_FIXTURE: ReasoningExtractionResult = {
   core: {

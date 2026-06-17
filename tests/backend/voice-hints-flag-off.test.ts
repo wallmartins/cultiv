@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import { buildVoiceHints } from "../../apps/backend/src/product/voice/voice-hints.js";
 import type { CoreReasoningSignature } from "@my-ai-orchestrator/contracts";
 
+import { TEST_ARGUMENT_DEVELOPMENT_EXTRACTION_FIXTURE } from "../../apps/backend/src/product/voice/argument-development-extraction.js";
+
 const core: CoreReasoningSignature = {
   narrativeProse: "Observes before concluding.",
   certaintyLevel: "moderate",
@@ -23,6 +25,7 @@ describe("buildVoiceHints reasoning flag", () => {
     styleMarkers: [],
     primaryLanguage: "pt-BR",
     coreReasoningSignature: core,
+    argumentDevelopmentSignature: TEST_ARGUMENT_DEVELOPMENT_EXTRACTION_FIXTURE.development,
     formatExpressionProfiles: {
       "linkedin-post": {
         contentType: "linkedin-post",
@@ -40,6 +43,7 @@ describe("buildVoiceHints reasoning flag", () => {
     });
 
     expect(hints.coreReasoningSignature).toBeUndefined();
+    expect(hints.argumentDevelopmentSignature).toBeUndefined();
     expect(hints.derivedAntiPatterns).toBeUndefined();
     expect(hints.antiPatterns).not.toContain("generic linkedin tone");
     expect(hints.antiPatterns).toContain("surface anti-pattern");
@@ -51,6 +55,7 @@ describe("buildVoiceHints reasoning flag", () => {
     });
 
     expect(hints.coreReasoningSignature).toEqual(core);
+    expect(hints.argumentDevelopmentSignature).toEqual(TEST_ARGUMENT_DEVELOPMENT_EXTRACTION_FIXTURE.development);
     expect(hints.derivedAntiPatterns).toEqual(core.derivedAntiPatterns);
     expect(hints.antiPatterns).toContain("generic linkedin tone");
   });

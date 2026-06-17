@@ -1,0 +1,45 @@
+{
+  "id": "corpus-investigative-architect",
+  "examples": [
+    {
+      "id": "ex-1",
+      "userId": "user-1",
+      "text": "Antes de escolher microsserviços, mapeio restrições de operação e custo de observabilidade.",
+      "language": "pt-BR",
+      "state": "active",
+      "classificationLabels": [],
+      "antiPatternsExplicit": [],
+      "pinned": false,
+      "pendingProfileImpact": false,
+      "effectiveContentTypeHints": ["blog-post"],
+      "createdAt": "2026-01-01T00:00:00.000Z",
+      "updatedAt": "2026-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "ex-2",
+      "userId": "user-1",
+      "text": "Só recomendo event sourcing quando o time aceita o custo operacional e o modelo de domínio justifica.",
+      "language": "pt-BR",
+      "state": "active",
+      "classificationLabels": [],
+      "antiPatternsExplicit": [],
+      "pinned": false,
+      "pendingProfileImpact": false,
+      "effectiveContentTypeHints": ["blog-post"],
+      "createdAt": "2026-01-02T00:00:00.000Z",
+      "updatedAt": "2026-01-02T00:00:00.000Z"
+    }
+  ],
+  "expected": {
+    "development": {
+      "developmentProse": "O autor nomeia restrições, compara tradeoffs e só então emite uma recomendação medida.",
+      "moveLabels": ["restricao", "tradeoff", "recomendacao"],
+      "transitionTendencies": [
+        { "from": "restricao", "to": "tradeoff", "frequency": "common" },
+        { "from": "tradeoff", "to": "recomendacao", "frequency": "occasional" }
+      ],
+      "epistemicPosture": "investigative",
+      "structuralAntiPatterns": ["afirmacao_vaga", "prescricao_absoluta"]
+    }
+  }
+}

@@ -5,6 +5,7 @@ import type { BackendConfig } from "../../apps/backend";
 import { createBackendProductServices } from "../../apps/backend";
 import { deriveVoiceRebuildState } from "../../apps/backend/src/product/voice/voice-rebuild-derivation.js";
 import { TEST_REASONING_EXTRACTION_FIXTURE } from "../../apps/backend/src/product/voice/reasoning-extraction.js";
+import { TEST_ARGUMENT_DEVELOPMENT_EXTRACTION_FIXTURE } from "../../apps/backend/src/product/voice/argument-development-extraction.js";
 import type { CoreReasoningSignature } from "@my-ai-orchestrator/contracts";
 
 const config: BackendConfig = {
@@ -66,6 +67,9 @@ describe("voice rebuild reasoning", () => {
     const profile = toVoiceProfileDomain(stored!);
     expect(profile.coreReasoningSignature?.certaintyLevel).toBe(
       TEST_REASONING_EXTRACTION_FIXTURE.core.certaintyLevel
+    );
+    expect(profile.argumentDevelopmentSignature?.epistemicPosture).toBe(
+      TEST_ARGUMENT_DEVELOPMENT_EXTRACTION_FIXTURE.development.epistemicPosture
     );
     expect(profile.formatExpressionProfiles?.["linkedin-post"]).toBeDefined();
 
@@ -146,5 +150,41 @@ describe("voice rebuild reasoning", () => {
     expect(derived.diagnostics.pendingRebuild.status).toBe("failed");
     expect(derived.diagnostics.pendingRebuild.reasonCode).toBe("reasoning_extraction_failed");
     expect(derived.diagnostics.reasonCodes).toContain("reasoning_extraction_failed");
+  });
+
+  it("keeps previous development when reconciliation fails", () => {
+    const previousDevelopment = TEST_ARGUMENT_DEVELOPMENT_EXTRACTION_FIXTURE.development;
+
+    const derived = deriveVoiceRebuildState({
+      userId: "user_reasoning",
+      version: 3,
+      timestamp: "2026-06-16T12:00:00.000Z",
+      allExamples: [],
+      previousProfile: {
+        id: "voice-profile:user_reasoning",
+        userId: "user_reasoning",
+        version: 2,
+        snapshotId: "snapshot-2",
+        confidence: "high",
+        adaptationMode: "standard",
+        primaryLanguage: "pt-BR",
+        tone: "informal",
+        cadence: "direct",
+        lexicon: [],
+        constraints: ["preserve_author_voice"],
+        styleMarkers: [],
+        rules: [],
+        antiPatterns: [],
+        coreReasoningSignature: previousCore,
+        argumentDevelopmentSignature: previousDevelopment,
+        createdAt: "2026-06-16T11:00:00.000Z",
+        updatedAt: "2026-06-16T11:00:00.000Z"
+      },
+      reconciliationFailed: true
+    });
+
+    expect(derived.profile.argumentDevelopmentSignature).toEqual(previousDevelopment);
+    expect(derived.profile.coreReasoningSignature).toEqual(previousCore);
+    expect(derived.diagnostics.pendingRebuild.reasonCode).toBe("voice_signature_reconciliation_failed");
   });
 });

@@ -169,3 +169,24 @@ Vertical slices for [PRD](../prd/author-reasoning-signature.md) · [ADR 0006](..
 | 73 | [Reasoning regression and policy](./73-reasoning-regression-policy.md) | HITL | ready-for-agent | 67, 71 |
 
 **Suggested order:** 66 → 67 → 68 → (69 ∥ 70 ∥ 72) → 71 → 73
+
+---
+
+## Argument Development Signature
+
+Vertical slices for [PRD](../prd/argument-development-signature.md) · [ADR 0007](../../adr/0007-argument-development-signature.md) · [plan](../plan/argument-development-signature-implementation-plan.md) · [parent issue](../prd/issue-argument-development-signature.md)
+
+**Prerequisite:** Author Reasoning Signature (issues 66–73).
+
+| # | Issue | Type | Status | Blocked by |
+|---|-------|------|--------|------------|
+| 74 | [Argument development contracts and persistence](./74-argument-development-contracts-persistence.md) | AFK | ready-for-agent | 66 |
+| 75 | [Parallel argument development extraction](./75-parallel-argument-development-extraction.md) | AFK | ready-for-agent | 67, 74 |
+| 76 | [Voice signature divergence and reconciliation](./76-voice-signature-divergence-reconciliation.md) | AFK | ready-for-agent | 75 |
+| 77 | [Development voice hints and resolution](./77-development-voice-hints-resolution.md) | AFK | ready-for-agent | 74, 76 |
+| 78 | [Step-scoped development prompts](./78-step-scoped-development-prompts.md) | AFK | ready-for-agent | 77 |
+| 79 | [Argument development drift and critic](./79-argument-development-drift-critic.md) | AFK | ready-for-agent | 77 |
+| 80 | [Voice judge development policy](./80-voice-judge-development-policy.md) | AFK | ready-for-agent | 71, 79 |
+| 81 | [Voice development presentation](./81-voice-development-presentation.md) | AFK | ready-for-agent | 74, 76 |
+
+**Suggested order:** 74 → 75 → 76 → 77 → (78 ∥ 79 ∥ 81) → 80

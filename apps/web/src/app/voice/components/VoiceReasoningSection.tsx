@@ -96,6 +96,14 @@ interface VoiceReasoningMirrorProps {
   readonly dialAccessibleLabel: string;
 }
 
+function formatMoveLabel(move: string): string {
+  return move
+    .split(/[_-]+/)
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
 export function VoiceReasoningMirror({
   messages,
   reasoning,
@@ -103,8 +111,10 @@ export function VoiceReasoningMirror({
   dialSubline,
   dialAccessibleLabel
 }: VoiceReasoningMirrorProps) {
+  const development = reasoning.development;
+
   return (
-    <section className="space-y-6">
+    <section className="space-y-8">
       <div>
         <Text as="h2" variant="h2" className="mb-2">
           {messages.title}
@@ -114,12 +124,17 @@ export function VoiceReasoningMirror({
         </Text>
       </div>
 
-      <VoiceMirrorHero
-        level={confidenceLevel}
-        dialSubline={dialSubline}
-        dialAccessibleLabel={dialAccessibleLabel}
-        bodyCopy={reasoning.core.narrativeProse}
-      />
+      <div className="space-y-4">
+        <Text variant="label" className="block text-muted-foreground">
+          {messages.coreTitle}
+        </Text>
+        <VoiceMirrorHero
+          level={confidenceLevel}
+          dialSubline={dialSubline}
+          dialAccessibleLabel={dialAccessibleLabel}
+          bodyCopy={reasoning.core.narrativeProse}
+        />
+      </div>
 
       <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
         <VoiceTraitChip
@@ -143,6 +158,37 @@ export function VoiceReasoningMirror({
           value={messages.enums.authoritySource[reasoning.core.authoritySource]}
         />
       </div>
+
+      {development ? (
+        <div className="space-y-4 border-t border-border-subtle/60 pt-8">
+          <div>
+            <Text variant="label" className="mb-2 block text-muted-foreground">
+              {messages.developmentTitle}
+            </Text>
+            <Text variant="meta" className="mb-4 w-full text-muted-foreground">
+              {messages.developmentSubtitle}
+            </Text>
+            <Text variant="body-lg" className="w-full whitespace-pre-wrap leading-relaxed text-foreground">
+              {development.developmentProse}
+            </Text>
+            {reasoning.developmentImmature ? (
+              <Text variant="meta" className="mt-3 w-full text-muted-foreground">
+                {messages.developmentImmature}
+              </Text>
+            ) : null}
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            <VoiceTraitChip
+              label={messages.epistemicPosture}
+              value={messages.enums.epistemicPosture[development.epistemicPosture]}
+            />
+            {development.moveLabels.map((move) => (
+              <VoiceTraitChip key={move} label={messages.typicalMoves} value={formatMoveLabel(move)} />
+            ))}
+          </div>
+        </div>
+      ) : null}
     </section>
   );
 }

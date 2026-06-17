@@ -1,5 +1,10 @@
 # Progress Log
 
+| 2026-06-17 | fix(voice): ADS review fixes — shared extraction JSON/errors, development drift heuristic, divergence rules, judge trigger logging, appliedSignals wiring, regression corpus, golden fixtures, reconciliation flow tests, `pnpm eval:development` |
+| 2026-06-17 | feat(voice): Argument Development Signature issues 74–81 — contracts, parallel extraction, divergence/reconciliation, prompts, drift/critic, judge policy, dashboard hero |
+| 2026-06-17 | docs: issues 74–81 Argument Development Signature (épicos A–H); parent issue + README indexados |
+| 2026-06-17 | docs: PRD + plan Argument Development Signature (ADR 0007) — épicos 74–81, parallel extraction, conditional reconciliation, development drift, judge policy, dashboard hero |
+| 2026-06-17 | docs: ADR 0007 Argument Development Signature — parallel extraction, conditional reconciliation, step-scoped injection, development drift in all quality modes, judge reinforcement rules, dashboard two-block hero |
 | 2026-06-17 | fix(web): restore moss uppercase meta styling on voice confidence dial center label |
 | 2026-06-17 | fix(web): show only Cultiv growth subline inside voice confidence dial |
 | 2026-06-17 | fix(voice): enforce pt-BR narrativeProse in reasoning extraction with stronger prompts, retry, and test fixture |

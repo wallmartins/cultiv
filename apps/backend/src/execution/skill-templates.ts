@@ -52,6 +52,7 @@ function buildSystemTemplate(): string {
     "{{voiceExamples}}",
     "",
     "{{authorReasoningSection}}",
+    "{{authorDevelopmentSection}}",
     "== TOPIC, AUDIENCE, AND DOMAIN ==",
     "Generation domain: {{generationDomain}}",
     "{{domainPolicy}}",

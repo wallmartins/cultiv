@@ -17,6 +17,7 @@ import type { FeatureFlagError } from "@my-ai-orchestrator/feature-flags";
 import { createBackendProductDependencies } from "./service-dependencies.js";
 import { createBackendVoiceRebuildService } from "../voice/voice-rebuild-service.js";
 import { createBackendProviderTransport } from "../../execution/pipeline/provider-transport.js";
+import type { BackendProviderTransport } from "../../execution/pipeline/provider-transport.js";
 import { createBackendVoiceService } from "../voice/voice-service.js";
 import { createBackendObservabilityService } from "./observability.js";
 import { createBackendApplicationUserMemoryRepository } from "../../auth/application-user-memory.js";
@@ -33,6 +34,7 @@ export function createBackendProductServices(
     readonly now?: () => Date;
     readonly logger?: AppLogger;
     readonly database?: import("@my-ai-orchestrator/database").DatabaseClient;
+    readonly providerTransport?: BackendProviderTransport;
   } = {}
 ): Effect.Effect<
   BackendProductServices,
@@ -68,7 +70,7 @@ export function createBackendProductServices(
       voiceConsent,
       {
         aiAdapters: dependencies.aiAdapters,
-        providerTransport: createBackendProviderTransport(config),
+        providerTransport: options.providerTransport ?? createBackendProviderTransport(config),
         featureFlags: dependencies.featureFlags,
         aiPolicy: dependencies.aiPolicy,
         config

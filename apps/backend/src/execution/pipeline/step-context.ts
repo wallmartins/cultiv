@@ -6,6 +6,10 @@ import {
   formatVoiceExamples
 } from "../skill-inputs.js";
 import { formatAuthorReasoningBlock, formatAuthorReasoningSection } from "./reasoning-prompt.js";
+import {
+  formatArgumentDevelopmentBlock,
+  formatArgumentDevelopmentSection
+} from "./development-prompt.js";
 
 export interface StepVoiceContext {
   readonly voiceExamples: string;
@@ -16,6 +20,8 @@ export interface StepVoiceContext {
   readonly voiceConstraints: string;
   readonly authorReasoningSection: string;
   readonly authorReasoning: string;
+  readonly authorDevelopmentSection: string;
+  readonly authorDevelopment: string;
 }
 
 export function buildStepVoiceContext(
@@ -38,6 +44,21 @@ export function buildStepVoiceContext(
     voiceProfile?.coreReasoningSignature,
     voiceProfile?.formatExpressionProfile
   );
+  const authorDevelopment = formatArgumentDevelopmentBlock(
+    stepName,
+    voiceProfile?.argumentDevelopmentSignature
+  );
+  const authorDevelopmentSection = formatArgumentDevelopmentSection(
+    stepName,
+    voiceProfile?.argumentDevelopmentSignature
+  );
+
+  const baseVoiceContext = {
+    authorReasoning,
+    authorReasoningSection,
+    authorDevelopment,
+    authorDevelopmentSection
+  };
 
   switch (stepName) {
     case "hook":
@@ -48,8 +69,7 @@ export function buildStepVoiceContext(
         styleMarkers: formatSignalList(styleMarkers, "- (none specified)"),
         voiceRules: formatSignalList(voiceRules, "- (none specified)"),
         voiceConstraints: formatSignalList(voiceConstraints, "- (none specified)"),
-        authorReasoning,
-        authorReasoningSection
+        ...baseVoiceContext
       };
     case "outline":
     case "structure":
@@ -61,8 +81,7 @@ export function buildStepVoiceContext(
         styleMarkers: formatSignalList(styleMarkers, "- (none specified)"),
         voiceRules: formatSignalList(voiceRules, "- (none specified)"),
         voiceConstraints: formatSignalList(voiceConstraints, "- (none specified)"),
-        authorReasoning,
-        authorReasoningSection
+        ...baseVoiceContext
       };
     case "draft":
     case "expand":
@@ -73,8 +92,7 @@ export function buildStepVoiceContext(
         styleMarkers: formatSignalList(styleMarkers, "- (none specified)"),
         voiceRules: formatSignalList(voiceRules, "- (none specified)"),
         voiceConstraints: formatSignalList(voiceConstraints, "- (none specified)"),
-        authorReasoning,
-        authorReasoningSection
+        ...baseVoiceContext
       };
     case "refine":
       return {
@@ -84,8 +102,7 @@ export function buildStepVoiceContext(
         styleMarkers: formatSignalList(styleMarkers, "- (none specified)"),
         voiceRules: formatSignalList(voiceRules, "- (none specified)"),
         voiceConstraints: formatSignalList(voiceConstraints, "- (none specified)"),
-        authorReasoning,
-        authorReasoningSection
+        ...baseVoiceContext
       };
     case "tighten":
     case "analyze":
@@ -96,8 +113,7 @@ export function buildStepVoiceContext(
         styleMarkers: formatSignalList(styleMarkers, "- (none specified)"),
         voiceRules: formatSignalList(voiceRules, "- (none specified)"),
         voiceConstraints: formatSignalList(voiceConstraints, "- (none specified)"),
-        authorReasoning,
-        authorReasoningSection
+        ...baseVoiceContext
       };
     default:
       return {
@@ -107,8 +123,7 @@ export function buildStepVoiceContext(
         styleMarkers: formatSignalList(styleMarkers, "- (none specified)"),
         voiceRules: formatSignalList(voiceRules, "- (none specified)"),
         voiceConstraints: formatSignalList(voiceConstraints, "- (none specified)"),
-        authorReasoning,
-        authorReasoningSection
+        ...baseVoiceContext
       };
   }
 }

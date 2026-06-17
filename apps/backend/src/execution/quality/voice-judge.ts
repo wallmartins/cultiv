@@ -5,7 +5,7 @@ import type { CandidateText, VoiceProfile } from "@my-ai-orchestrator/text-quali
 import type { BackendObservabilityService } from "../../product/core/observability-types.js";
 import type { BackendProviderTransport } from "../pipeline/provider-transport.js";
 import type { AIPolicyProviderModelAttempt } from "../../product/ai-policy/ai-policy-types.js";
-import { selectVoiceJudgeCandidates, shouldInvokeVoiceJudge, explainVoiceJudgeSkip } from "./voice-judge-policy.js";
+import { selectVoiceJudgeCandidates, shouldInvokeVoiceJudge, explainVoiceJudgeSkip, resolveVoiceJudgeTrigger } from "./voice-judge-policy.js";
 import { logVoiceJudgeEvent } from "./voice-judge-logging.js";
 
 const VoiceJudgeResultSchema = Schema.Struct({
@@ -24,7 +24,7 @@ export interface VoiceJudgeInput {
   readonly pipelineName?: string;
 }
 
-export { shouldInvokeVoiceJudge, selectVoiceJudgeCandidates, explainVoiceJudgeSkip };
+export { shouldInvokeVoiceJudge, selectVoiceJudgeCandidates, explainVoiceJudgeSkip, resolveVoiceJudgeTrigger };
 
 export function evaluateWithVoiceJudge(
   input: VoiceJudgeInput
@@ -35,7 +35,15 @@ export function evaluateWithVoiceJudge(
     }
 
     const core = input.voiceProfile.coreReasoningSignature;
+    const development = input.voiceProfile.argumentDevelopmentSignature;
     const examples = input.voiceProfile.examples.slice(0, 2).join("\n\n---\n\n");
+    const developmentBlock = development
+      ? [
+          `Argument development:\n${development.developmentProse}`,
+          `Epistemic posture: ${development.epistemicPosture}`,
+          `Typical moves: ${development.moveLabels.join(", ")}`
+        ].join("\n")
+      : undefined;
 
     for (const attempt of input.attempts) {
       logVoiceJudgeEvent("attempt_started", {
@@ -55,7 +63,7 @@ export function evaluateWithVoiceJudge(
                 role: "system",
                 content: [
                   "You are a voice fidelity judge.",
-                  "Score the candidate from 0 to 100 for reasoning alignment with the author signature.",
+                  "Score the candidate from 0 to 100 for voice fidelity against the author reasoning and development signatures.",
                   "Respond with JSON only: {\"score\": number, \"rationale\": string}"
                 ].join("\n")
               },
@@ -64,6 +72,7 @@ export function evaluateWithVoiceJudge(
                 content: [
                   `Author reasoning:\n${core.narrativeProse}`,
                   `Certainty: ${core.certaintyLevel}; Judgment: ${core.judgmentFrequency}; Conclusion pace: ${core.conclusionPace}`,
+                  ...(developmentBlock ? [developmentBlock] : []),
                   `Examples:\n${examples.slice(0, 600)}`,
                   `Candidate:\n${input.candidate.refinedDraft.slice(0, 2500)}`
                 ].join("\n\n")
@@ -218,11 +227,17 @@ export function runVoiceJudgePass(args: {
     }
 
     const finalists = selectVoiceJudgeCandidates(args.candidates);
+    const triggerReason = resolveVoiceJudgeTrigger({
+      qualityMode: args.qualityMode,
+      candidates: args.candidates
+    });
     logVoiceJudgeEvent("started", {
       pipelineName: args.pipelineName,
       qualityMode: args.qualityMode,
       finalistCount: finalists.length,
-      attemptProviders: args.attempts.map((attempt) => attempt.provider)
+      attemptProviders: args.attempts.map((attempt) => attempt.provider),
+      triggerReason,
+      hasArgumentDevelopmentSignature: Boolean(args.voiceProfile.argumentDevelopmentSignature)
     });
 
     const judgeScores: Record<string, number> = {};

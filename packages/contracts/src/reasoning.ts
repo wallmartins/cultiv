@@ -63,13 +63,65 @@ export const ReasoningExtractionResultSchema = Schema.Struct({
 });
 export type ReasoningExtractionResult = typeof ReasoningExtractionResultSchema.Type;
 
+export const TransitionFrequencySchema = Schema.Literal("rare", "occasional", "common", "dominant");
+export type TransitionFrequency = typeof TransitionFrequencySchema.Type;
+
+export const TransitionTendencySchema = Schema.Struct({
+  from: Schema.String,
+  to: Schema.String,
+  frequency: TransitionFrequencySchema
+});
+export type TransitionTendency = typeof TransitionTendencySchema.Type;
+
+export const EpistemicPostureSchema = Schema.Literal(
+  "exploratory",
+  "investigative",
+  "advocacy_mixed"
+);
+export type EpistemicPosture = typeof EpistemicPostureSchema.Type;
+
+export const ArgumentDevelopmentSignatureSchema = Schema.Struct({
+  developmentProse: Schema.String,
+  moveLabels: Schema.Array(Schema.String),
+  transitionTendencies: Schema.Array(TransitionTendencySchema),
+  epistemicPosture: EpistemicPostureSchema,
+  structuralAntiPatterns: Schema.Array(Schema.String)
+});
+export type ArgumentDevelopmentSignature = typeof ArgumentDevelopmentSignatureSchema.Type;
+
+export const ArgumentDevelopmentExtractionResultSchema = Schema.Struct({
+  development: ArgumentDevelopmentSignatureSchema
+});
+export type ArgumentDevelopmentExtractionResult = typeof ArgumentDevelopmentExtractionResultSchema.Type;
+
+export const UnifiedVoiceSignatureSchema = Schema.Struct({
+  core: CoreReasoningSignatureSchema,
+  development: ArgumentDevelopmentSignatureSchema,
+  formatExpressions: Schema.Record({ key: Schema.String, value: FormatExpressionProfileSchema })
+});
+export type UnifiedVoiceSignature = typeof UnifiedVoiceSignatureSchema.Type;
+
 export const VoiceReasoningPresentationViewSchema = Schema.Struct({
   core: CoreReasoningSignatureSchema,
   formatExpressions: Schema.Array(FormatExpressionProfileSchema),
-  reasoningVersion: Schema.optional(Schema.Number)
+  reasoningVersion: Schema.optional(Schema.Number),
+  development: Schema.optional(ArgumentDevelopmentSignatureSchema),
+  developmentImmature: Schema.optional(Schema.Boolean)
 });
 export type VoiceReasoningPresentationView = typeof VoiceReasoningPresentationViewSchema.Type;
 
+export const decodeArgumentDevelopmentSignature = createSchemaDecoder(
+  "ArgumentDevelopmentSignature",
+  ArgumentDevelopmentSignatureSchema
+);
+export const decodeArgumentDevelopmentExtractionResult = createSchemaDecoder(
+  "ArgumentDevelopmentExtractionResult",
+  ArgumentDevelopmentExtractionResultSchema
+);
+export const decodeUnifiedVoiceSignature = createSchemaDecoder(
+  "UnifiedVoiceSignature",
+  UnifiedVoiceSignatureSchema
+);
 export const decodeCoreReasoningSignature = createSchemaDecoder(
   "CoreReasoningSignature",
   CoreReasoningSignatureSchema

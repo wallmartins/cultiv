@@ -5,6 +5,7 @@ import { countWords, resolveOutputWordTarget } from "../format/output-length.js"
 import {
   collectReasoningFindings
 } from "./reasoning-critic.js";
+import { collectDevelopmentFindings } from "./development-critic.js";
 import { containsEmDash } from "./em-dash.js";
 import { evaluateLexicalQuality } from "./lexical-quality.js";
 
@@ -92,6 +93,12 @@ export function criticizeText(
   if (voiceProfile?.coreReasoningSignature) {
     findings.push(
       ...collectReasoningFindings(voiceProfile.coreReasoningSignature, text, options?.stepName)
+    );
+  }
+
+  if (voiceProfile?.argumentDevelopmentSignature) {
+    findings.push(
+      ...collectDevelopmentFindings(voiceProfile.argumentDevelopmentSignature, text, options?.stepName)
     );
   }
 

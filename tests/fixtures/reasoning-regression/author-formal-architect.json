@@ -19,5 +19,19 @@
   "badCandidates": [
     "Obviamente microsserviços são sempre a escolha certa para qualquer produto.",
     "Todo mundo deve adotar Kubernetes imediatamente, obviamente."
+  ],
+  "argumentDevelopmentSignature": {
+    "developmentProse": "Frames decisions through explicit tradeoffs, names constraints, and lands on a measured recommendation.",
+    "moveLabels": ["constraint", "tradeoff", "recommendation"],
+    "transitionTendencies": [
+      { "from": "constraint", "to": "tradeoff", "frequency": "common" },
+      { "from": "tradeoff", "to": "recommendation", "frequency": "occasional" }
+    ],
+    "epistemicPosture": "investigative",
+    "structuralAntiPatterns": ["hand_wavy_claim", "absolute_prescription"]
+  },
+  "developmentBadCandidates": [
+    "Obviamente microsserviços são sempre a escolha certa. Você deve adotar já.",
+    "Você deve adotar Kubernetes imediatamente, sem tradeoffs."
   ]
 }

@@ -80,13 +80,18 @@ export function toVoiceProfileScreenView(
       byLanguage: { ...diagnostics.materialBase.byLanguage }
     },
     ...(options?.includeReasoning && profile.coreReasoningSignature
-      ? { reasoning: toVoiceReasoningPresentationView(profile) }
+      ? {
+          reasoning: toVoiceReasoningPresentationView(profile, {
+            activeExamples: diagnostics.materialBase.activeExamples
+          })
+        }
       : {})
   };
 }
 
 export function toVoiceReasoningPresentationView(
-  profile: DerivedVoiceProfile
+  profile: DerivedVoiceProfile,
+  options?: { readonly activeExamples?: number }
 ): VoiceReasoningPresentationView | undefined {
   if (!profile.coreReasoningSignature) {
     return undefined;
@@ -99,7 +104,23 @@ export function toVoiceReasoningPresentationView(
   return {
     core: { ...profile.coreReasoningSignature, derivedAntiPatterns: [...profile.coreReasoningSignature.derivedAntiPatterns] },
     formatExpressions,
-    reasoningVersion: profile.version
+    reasoningVersion: profile.version,
+    ...(profile.argumentDevelopmentSignature
+      ? {
+          development: {
+            ...profile.argumentDevelopmentSignature,
+            moveLabels: [...profile.argumentDevelopmentSignature.moveLabels],
+            structuralAntiPatterns: [...profile.argumentDevelopmentSignature.structuralAntiPatterns],
+            transitionTendencies: profile.argumentDevelopmentSignature.transitionTendencies.map((tendency) => ({
+              ...tendency
+            }))
+          },
+          developmentImmature:
+            typeof options?.activeExamples === "number"
+            && options.activeExamples >= 2
+            && options.activeExamples < 3
+        }
+      : {})
   };
 }
 

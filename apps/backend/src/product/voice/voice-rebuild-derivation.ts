@@ -1,6 +1,6 @@
 import type { VoiceExampleRecord } from "@my-ai-orchestrator/database";
 import { isTechLexiconTerm } from "@my-ai-orchestrator/text-quality";
-import type { ReasonCode, ReasoningExtractionResult, VoiceProfileConfidence } from "@my-ai-orchestrator/contracts";
+import type { ReasonCode, ReasoningExtractionResult, VoiceProfileConfidence, ArgumentDevelopmentSignature } from "@my-ai-orchestrator/contracts";
 import {
   nextActionCodesForReason,
   type DerivedVoiceProfile,
@@ -20,7 +20,10 @@ export function deriveVoiceRebuildState(args: {
   readonly allExamples: readonly VoiceExampleRecord[];
   readonly previousProfile?: DerivedVoiceProfile;
   readonly reasoning?: ReasoningExtractionResult;
+  readonly development?: ArgumentDevelopmentSignature;
   readonly reasoningExtractionFailed?: boolean;
+  readonly developmentExtractionFailed?: boolean;
+  readonly reconciliationFailed?: boolean;
 }): VoiceRebuildDerivation {
   const activeExamples = args.allExamples.filter((example) => example.state === "active");
   const materialBase = buildVoiceMaterialBase(args.allExamples);
@@ -28,6 +31,12 @@ export function deriveVoiceRebuildState(args: {
   const reasonCodes = [...deriveReasonCodes(activeExamples)];
   if (args.reasoningExtractionFailed) {
     reasonCodes.push("reasoning_extraction_failed");
+  }
+  if (args.developmentExtractionFailed) {
+    reasonCodes.push("development_extraction_failed");
+  }
+  if (args.reconciliationFailed) {
+    reasonCodes.push("voice_signature_reconciliation_failed");
   }
   const nextActionCodes = unique(
     reasonCodes.flatMap((reasonCode) => nextActionCodesForReason(reasonCode))
@@ -52,6 +61,8 @@ export function deriveVoiceRebuildState(args: {
     antiPatterns: resolveAntiPatterns(activeExamples),
     coreReasoningSignature:
       args.reasoning?.core ?? args.previousProfile?.coreReasoningSignature,
+    argumentDevelopmentSignature:
+      args.development ?? args.previousProfile?.argumentDevelopmentSignature,
     formatExpressionProfiles:
       args.reasoning?.formatExpressions ?? args.previousProfile?.formatExpressionProfiles,
     createdAt: args.timestamp,
@@ -68,16 +79,29 @@ export function deriveVoiceRebuildState(args: {
     nextActionCodes,
     bestCoveredContentTypes: coverage.bestCovered,
     underrepresentedContentTypes: coverage.underrepresented,
-    pendingRebuild: args.reasoningExtractionFailed
-      ? {
-          status: "failed",
-          reasonCode: "reasoning_extraction_failed",
-          nextActionCodes: nextActionCodesForReason("reasoning_extraction_failed")
-        }
-      : {
-          status: "idle",
-          nextActionCodes: []
-        },
+    pendingRebuild:
+      args.reasoningExtractionFailed
+      || args.developmentExtractionFailed
+      || args.reconciliationFailed
+        ? {
+            status: "failed",
+            reasonCode: args.reconciliationFailed
+              ? "voice_signature_reconciliation_failed"
+              : args.developmentExtractionFailed
+                ? "development_extraction_failed"
+                : "reasoning_extraction_failed",
+            nextActionCodes: nextActionCodesForReason(
+              args.reconciliationFailed
+                ? "voice_signature_reconciliation_failed"
+                : args.developmentExtractionFailed
+                  ? "development_extraction_failed"
+                  : "reasoning_extraction_failed"
+            )
+          }
+        : {
+            status: "idle",
+            nextActionCodes: []
+          },
     materialBase,
     createdAt: args.timestamp,
     updatedAt: args.timestamp
@@ -197,6 +221,14 @@ function buildDiagnosticsSummary(
   reasonCodes: readonly ReasonCode[],
   wellCoveredContentTypes: number
 ): string {
+  if (reasonCodes.includes("voice_signature_reconciliation_failed")) {
+    return "Não foi possível harmonizar o perfil inferido agora. O último snapshot válido continua ativo.";
+  }
+
+  if (reasonCodes.includes("development_extraction_failed")) {
+    return "Não foi possível atualizar como você desenvolve textos agora. O último snapshot válido continua ativo.";
+  }
+
   if (reasonCodes.includes("reasoning_extraction_failed")) {
     return "Não foi possível atualizar o raciocínio inferido agora. O último snapshot válido continua ativo.";
   }

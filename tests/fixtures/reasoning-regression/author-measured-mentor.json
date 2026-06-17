@@ -19,5 +19,19 @@
   "badCandidates": [
     "Sempre faça assim e nunca questione este padrão.",
     "Eu sei a única forma correta e você deve seguir sempre."
+  ],
+  "argumentDevelopmentSignature": {
+    "developmentProse": "Guides through questions and shared experience, acknowledging limits before offering a takeaway.",
+    "moveLabels": ["question", "experience", "takeaway"],
+    "transitionTendencies": [
+      { "from": "question", "to": "experience", "frequency": "common" },
+      { "from": "experience", "to": "takeaway", "frequency": "occasional" }
+    ],
+    "epistemicPosture": "exploratory",
+    "structuralAntiPatterns": ["absolute_claim", "guru_positioning"]
+  },
+  "developmentBadCandidates": [
+    "Sempre faça assim. Você deve seguir este padrão sem questionar.",
+    "Eu sei a única forma correta. O certo é fazer assim sempre."
   ]
 }

@@ -2,9 +2,17 @@ import { Effect } from "effect";
 import { describe, expect, it } from "vitest";
 import { resolveStructuredStepTemplate } from "../../apps/backend/src/execution/skill-templates.js";
 import { formatAuthorReasoningBlock, formatAuthorReasoningSection } from "../../apps/backend/src/execution/pipeline/reasoning-prompt.js";
+import {
+  formatArgumentDevelopmentBlock,
+  formatArgumentDevelopmentSection
+} from "../../apps/backend/src/execution/pipeline/development-prompt.js";
 import { resolveTemplate } from "@my-ai-orchestrator/skills";
 import { COGNITIVE_PRESET_RULE_MARKERS } from "../../apps/backend/src/product/voice/voice-presets.js";
-import type { CoreReasoningSignature, FormatExpressionProfile } from "@my-ai-orchestrator/contracts";
+import type {
+  ArgumentDevelopmentSignature,
+  CoreReasoningSignature,
+  FormatExpressionProfile
+} from "@my-ai-orchestrator/contracts";
 
 const core: CoreReasoningSignature = {
   narrativeProse:
@@ -23,6 +31,15 @@ const formatExpression: FormatExpressionProfile = {
   register: "conversational",
   openingStyle: "direct",
   technicalDensity: "low"
+};
+
+const development: ArgumentDevelopmentSignature = {
+  developmentProse:
+    "The author opens from lived experience, tolerates doubt, and tests ideas before landing on a conclusion.",
+  moveLabels: ["lived_experience", "doubt", "experimentation"],
+  transitionTendencies: [{ from: "lived_experience", to: "doubt", frequency: "common" }],
+  epistemicPosture: "exploratory",
+  structuralAntiPatterns: ["premature_thesis"]
 };
 
 const templateLocals = {
@@ -58,7 +75,7 @@ const templateLocals = {
   stepLabel: "Step"
 };
 
-async function renderSystemPrompt(stepName: string, reasoningEnabled: boolean) {
+async function renderSystemPrompt(stepName: string, reasoningEnabled: boolean, developmentEnabled = false) {
   const template = resolveStructuredStepTemplate(stepName);
   return Effect.runPromise(
     resolveTemplate(template.system, {
@@ -74,6 +91,12 @@ async function renderSystemPrompt(stepName: string, reasoningEnabled: boolean) {
           : "",
         authorReasoningSection: reasoningEnabled
           ? formatAuthorReasoningSection(stepName, core, formatExpression)
+          : "",
+        authorDevelopment: developmentEnabled
+          ? formatArgumentDevelopmentBlock(stepName, development)
+          : "",
+        authorDevelopmentSection: developmentEnabled
+          ? formatArgumentDevelopmentSection(stepName, development)
           : ""
       }
     })
@@ -115,5 +138,12 @@ describe("reasoning prompt snapshots", () => {
     for (const marker of COGNITIVE_PRESET_RULE_MARKERS) {
       expect(reasoningBlock.toLowerCase()).not.toContain(marker);
     }
+  });
+
+  it("includes a separate development section on draft when enabled", async () => {
+    const prompt = await renderSystemPrompt("draft", true, true);
+    expect(prompt).toContain("== AUTHOR REASONING ==");
+    expect(prompt).toContain("== ARGUMENT DEVELOPMENT ==");
+    expect(prompt).toContain(development.developmentProse);
   });
 });

@@ -24,6 +24,7 @@
     "test:durable": "node scripts/run-durable-runtime-tests.mjs",
     "hitl:durable-smoke": "tsx scripts/hitl-durable-smoke.ts",
     "eval:reasoning": "tsx scripts/eval-reasoning.ts",
+    "eval:development": "tsx scripts/eval-development.ts",
     "smoke": "vitest run tests/governance/monorepo-governance.test.ts",
     "guardrails:effect": "vitest run tests/governance/effect-hardening-governance.test.ts",
     "test:coverage": "vitest run --coverage",
