@@ -1,5 +1,9 @@
 # Progress Log
 
+| 2026-06-17 | pause(payment-gateway): Tasks 1–6 done on `feat/payment-gateway`; resume at Task 7 (Stripe adapter) |
+| 2026-06-17 | feat(backend): PostgreSQL billing gateway store — checkout intents, catalog lookup, customer/subscription upserts, event dedup |
+| 2026-06-17 | feat(backend): billing gateway PostgreSQL tables — migration 0010, five tables, dev catalog seed |
+| 2026-06-17 | feat(payments): currency-based gateway router — BRL→asaas, USD→stripe (`resolveGatewayForCurrency`) |
 | 2026-06-17 | docs: payment gateway implementation plan (18 tasks, phases 1a–1c) |
 | 2026-06-17 | docs: payment gateway design spec (Stripe + Asaas hybrid) — checkout, webhooks, BRL/USD routing, security model |
 | 2026-06-17 | fix(web,voice): localize moveLabels — pt dictionary + key normalization; extraction prompt requires moveLabels in output language |

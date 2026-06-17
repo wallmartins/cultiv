@@ -12,6 +12,35 @@
 
 ---
 
+## Progress checkpoint (2026-06-17 — paused)
+
+**Branch:** `feat/payment-gateway` (7 commits ahead of `main` docs-only baseline)
+
+| Task | Status | Commit |
+|------|--------|--------|
+| 1 Gateway types and errors | ✅ | `ccfce5a` |
+| 2 Gateway router | ✅ | `1732e73` |
+| 3 Extend BillingGatewayAdapter | ✅ | `a534037` |
+| 4 PostgreSQL migration | ✅ | `6c6747b` |
+| 5 Postgres gateway store | ✅ | `ad4838f` |
+| 6 Contracts checkout API | ✅ | `43a649e` |
+| — Type fix (BillingGatewayError in service contract) | ✅ | `6adc2d3` |
+| 7 Stripe adapter | ⏸️ not started (interrupted) | — |
+| 8–18 | ⏳ pending | — |
+
+**Resume at:** Task 7 — `packages/payments/src/gateway/stripe-adapter.ts`
+
+**Done so far:**
+- `packages/payments/src/gateway/{types,router,manual-adapter}.ts`
+- `packages/contracts/src/billing-checkout.ts`
+- `apps/backend/src/infra/migrations/0010-billing-gateway.ts`
+- `apps/backend/src/infra/postgres-billing-gateway-store.ts`
+- `tests/payments/gateway-router.test.ts`, `tests/backend/billing-gateway-store.test.ts`
+
+**Not yet:** Stripe/Asaas real adapters, webhook dispatch, backend routes, web UI.
+
+---
+
 ## File map
 
 | File | Responsibility |
