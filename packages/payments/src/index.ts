@@ -1286,3 +1286,5 @@ function isSameUtcDay(isoDate: string, referenceDate: Date): boolean {
 function clone<T>(value: T): T {
   return JSON.parse(JSON.stringify(value)) as T;
 }
+
+export { dispatchGatewayWebhookEvent } from "./gateway/webhook-dispatch.js";

@@ -1,0 +1,113 @@
+import { describe, expect, it } from "vitest";
+import { Effect } from "effect";
+import {
+  createBillingRepository,
+  createBillingService,
+  createStripeGateway,
+  defineBillingPlan
+} from "../../packages/payments/src/index.js";
+import { dispatchGatewayWebhookEvent } from "../../packages/payments/src/gateway/webhook-dispatch.js";
+
+describe("dispatchGatewayWebhookEvent", () => {
+  it("activates pro subscription on checkout.completed", async () => {
+    const fixedNow = new Date("2026-06-17T12:00:00.000Z");
+    const service = createBillingService({
+      gateway: createStripeGateway(),
+      clock: { now: () => fixedNow },
+      repository: createBillingRepository({
+        plans: [
+          Effect.runSync(
+            defineBillingPlan({
+              id: "pro",
+              tier: "pro",
+              name: "Pro",
+              monthlyCredits: 2500,
+              features: [{ key: "execution.sync_mode", enabled: true }]
+            })
+          )
+        ]
+      })
+    });
+
+    await Effect.runPromise(
+      dispatchGatewayWebhookEvent(
+        service,
+        {
+          eventId: "evt_1",
+          gateway: "stripe",
+          type: "checkout.completed",
+          userId: "user_1",
+          amount: 49,
+          currency: "USD",
+          internalRef: "pro",
+          productKind: "subscription"
+        },
+        { now: () => fixedNow, idempotencyNamespace: "test" }
+      )
+    );
+
+    const entitlement = service.getEntitlement("user_1", "pro");
+    expect(entitlement?.status).toBe("active");
+    expect(entitlement?.wallet.availableCredits).toBe(2500);
+  });
+
+  it("starts a new cycle on subscription.renewed", async () => {
+    const fixedNow = new Date("2026-06-17T12:00:00.000Z");
+    const service = createBillingService({
+      gateway: createStripeGateway(),
+      clock: { now: () => fixedNow },
+      repository: createBillingRepository({
+        plans: [
+          Effect.runSync(
+            defineBillingPlan({
+              id: "pro",
+              tier: "pro",
+              name: "Pro",
+              monthlyCredits: 2500,
+              features: [{ key: "execution.sync_mode", enabled: true }]
+            })
+          )
+        ],
+        subscriptions: [
+          {
+            id: "user_1:pro:subscription",
+            userId: "user_1",
+            planId: "pro",
+            status: "active",
+            startedAt: fixedNow.toISOString()
+          }
+        ]
+      })
+    });
+
+    await Effect.runPromise(
+      service.startCycle({
+        userId: "user_1",
+        planId: "pro",
+        cycleId: "user_1:pro:cycle:initial",
+        idempotencyKey: "initial-cycle"
+      })
+    );
+
+    const before = service.getEntitlement("user_1", "pro")?.wallet.availableCredits;
+
+    await Effect.runPromise(
+      dispatchGatewayWebhookEvent(
+        service,
+        {
+          eventId: "evt_renewal",
+          gateway: "stripe",
+          type: "subscription.renewed",
+          userId: "user_1",
+          amount: 49,
+          currency: "USD",
+          internalRef: "pro"
+        },
+        { now: () => fixedNow, idempotencyNamespace: "test" }
+      )
+    );
+
+    const after = service.getEntitlement("user_1", "pro")?.wallet.availableCredits;
+    expect(after).toBeGreaterThan(before ?? 0);
+  });
+});
