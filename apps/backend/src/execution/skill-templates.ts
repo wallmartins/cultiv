@@ -51,6 +51,7 @@ function buildSystemTemplate(): string {
     "Voice examples (study these closely; match rhythm, sentence length, phrasing, and level of personal presence):",
     "{{voiceExamples}}",
     "",
+    "{{authorReasoningSection}}",
     "== TOPIC, AUDIENCE, AND DOMAIN ==",
     "Generation domain: {{generationDomain}}",
     "{{domainPolicy}}",

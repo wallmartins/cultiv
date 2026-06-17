@@ -35,6 +35,7 @@ export {
   createOpenAIAdapter,
   createAnthropicAdapter,
   createGeminiAdapter,
+  createGroqAdapter,
   createDeepSeekAdapter,
   createOllamaAdapter,
   registerDefaultAIProviders

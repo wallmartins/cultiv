@@ -31,7 +31,8 @@ export function runQualityLane(
     const critic = criticizeText(draft, context.voiceProfile, context.request, {
       domain: context.generationContext?.domain,
       hookText,
-      lexicalQualityV2: context.lexicalQualityV2
+      lexicalQualityV2: context.lexicalQualityV2,
+      stepName: "draft"
     });
 
     yield* emitLaneProgress(onProgress, lane.laneId, "fidelity", 45, `Checking fidelity for ${lane.laneId}`);
@@ -40,7 +41,7 @@ export function runQualityLane(
     });
 
     yield* emitLaneProgress(onProgress, lane.laneId, "drift", 60, `Checking voice drift for ${lane.laneId}`);
-    const drift = evaluateVoiceDrift(context.voiceProfile, draft, context.request);
+    const drift = evaluateVoiceDrift(context.voiceProfile, draft, context.request, "draft");
 
     yield* emitLaneProgress(onProgress, lane.laneId, "humanize", 75, `Humanizing candidate for ${lane.laneId}`);
     const humanizedDraft = humanizeText(draft, context.voiceProfile);

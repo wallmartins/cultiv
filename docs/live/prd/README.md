@@ -7,6 +7,7 @@ Product Requirements Documents for active Cultiv work.
 | [Cultiv Marketing Surface — Phase 1](./cultiv-marketing-surface-phase-1.md) | `ready-for-agent` | [phase-1-implementation-plan.md](../plan/phase-1-implementation-plan.md) · [issues](../issues/README.md) |
 | [Cultiv Product Showcase Restructure — Phase 1.2](./cultiv-product-showcase-restructure.md) | `ready-for-agent` | [product-showcase-restructure-implementation-plan.md](../plan/product-showcase-restructure-implementation-plan.md) · [issue](./issue-product-showcase-restructure.md) |
 | [Text Generation Lexical Quality](./text-generation-lexical-quality.md) | `ready-for-agent` | [text-generation-lexical-quality-implementation-plan.md](../plan/text-generation-lexical-quality-implementation-plan.md) · [issue](./issue-text-generation-lexical-quality.md) |
+| [Author Reasoning Signature](./author-reasoning-signature.md) | `ready-for-agent` | [author-reasoning-signature-implementation-plan.md](../plan/author-reasoning-signature-implementation-plan.md) · [issue](./issue-author-reasoning-signature.md) |
 | [Cultiv Authenticated Workspace — Web v2](./cultiv-authenticated-workspace-web-v2.md) | `ready-for-agent` | [phase-2-implementation-plan.md](../plan/phase-2-implementation-plan.md) · [web-v2-screen-specs.md](../plan/web-v2-screen-specs.md) |
 | [Workspace Visual Refresh](./workspace-visual-refresh.md) | `ready-for-agent` | [workspace-visual-refresh-implementation-plan.md](../plan/workspace-visual-refresh-implementation-plan.md) · [issue](./issue-workspace-visual-refresh.md) |
 | [Durable Async Runtime](./durable-async-runtime.md) | `ready-for-agent` | [durable-async-runtime-implementation-plan.md](../plan/durable-async-runtime-implementation-plan.md) · [issue](./issue-durable-async-runtime.md) |
@@ -46,3 +47,6 @@ Child slices: [`48`–`57`](../issues/README.md#durable-async-runtime) in `docs/
 | Issue | Status | Parent PRD |
 |-------|--------|------------|
 | [Text Generation Lexical Quality](./issue-text-generation-lexical-quality.md) | `ready-for-agent` | [Lexical Quality PRD](./text-generation-lexical-quality.md) |
+| [Author Reasoning Signature](./issue-author-reasoning-signature.md) | `ready-for-agent` | [Author Reasoning Signature PRD](./author-reasoning-signature.md) |
+
+Child slices: [`66`–`73`](../issues/README.md#author-reasoning-signature) in `docs/live/issues/`.

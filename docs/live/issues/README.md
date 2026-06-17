@@ -150,3 +150,22 @@ Vertical slices for [PRD](../prd/integrator-cloudflare-deploy.md) · [ADR 0005](
 | 65 | [Deploy verification and go-live](./65-oracle-deploy-verification.md) | HITL | ready-for-agent | 62, 63, 64 |
 
 **Suggested order:** 58 → 59 → 60 → 61 → 62 → 63 → 64 → 65
+
+---
+
+## Author Reasoning Signature
+
+Vertical slices for [PRD](../prd/author-reasoning-signature.md) · [ADR 0006](../../adr/0006-author-reasoning-signature.md) · [plan](../plan/author-reasoning-signature-implementation-plan.md) · [parent issue](../prd/issue-author-reasoning-signature.md)
+
+| # | Issue | Type | Status | Blocked by |
+|---|-------|------|--------|------------|
+| 66 | [Reasoning contracts and persistence](./66-reasoning-contracts-persistence.md) | AFK | ready-for-agent | — |
+| 67 | [Reasoning extraction on rebuild](./67-reasoning-extraction-rebuild.md) | AFK | ready-for-agent | 66 |
+| 68 | [Format-only presets and voice resolution](./68-format-only-presets-voice-resolution.md) | AFK | ready-for-agent | 66, 67 |
+| 69 | [Step-scoped reasoning prompts](./69-step-scoped-reasoning-prompts.md) | AFK | ready-for-agent | 68 |
+| 70 | [Reasoning drift and critic](./70-reasoning-drift-critic.md) | AFK | ready-for-agent | 68 |
+| 71 | [Voice Judge and Groq adapter](./71-voice-judge-groq.md) | AFK | ready-for-agent | 70 |
+| 72 | [Voice Reasoning Presentation](./72-voice-reasoning-presentation.md) | AFK | ready-for-agent | 66, 67 |
+| 73 | [Reasoning regression and policy](./73-reasoning-regression-policy.md) | HITL | ready-for-agent | 67, 71 |
+
+**Suggested order:** 66 → 67 → 68 → (69 ∥ 70 ∥ 72) → 71 → 73

@@ -1,6 +1,13 @@
 # Progress Log
 
-| 2026-06-16 | fix(backend): `billing:activate` como CLI compilado (`node dist/`) para VPS prod |
+| 2026-06-16 | fix(voice): review follow-ups — flag-off anti-pattern gating, extraction failure diagnostics, judge observability, critic dedup, explicit reasoningEvaluationEnabled, quality-voice-judge orchestration, VoiceReasoningSection tests |
+| 2026-06-16 | feat(voice): issues 66–73 Author Reasoning Signature — contracts, extraction on rebuild, format-only presets, step-scoped prompts, reasoning drift/critic, Groq voice judge, dashboard presentation, regression corpus (7 personas / 37 briefings), `pnpm eval:reasoning`, P0 drift/prompt fixes, golden extraction corpora, deploy/subprocessor docs; flag `voice.reasoningSignatureV1` |
+
+| 2026-06-16 | docs: issues 66–73 Author Reasoning Signature (épicos A–H); README e plan indexados |
+
+| 2026-06-16 | docs: PRD + plan Author Reasoning Signature (ADR 0006); epics A–H; READMEs live atualizados |
+
+| 2026-06-16 | docs: ADR 0006 author reasoning signature; kickoff renomeado para `improve-voice-kickoff.md`; CONTEXT.md com glossário de raciocínio autoral |
 
 | 2026-06-16 | feat(payments): `activateSubscription` + `ensureBillingCycleInitialized` no JIT; CLI `pnpm billing:activate` |
 

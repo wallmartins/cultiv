@@ -47,7 +47,14 @@ export function buildEffectiveVoiceMetadata(args: {
     appliedSignals: {
       styleMarkers: args.voiceHints.styleMarkers ?? [],
       rules: args.voiceHints.rules ?? [],
-      antiPatterns: args.voiceHints.antiPatterns ?? []
+      antiPatterns: args.voiceHints.antiPatterns ?? [],
+      ...(args.voiceHints.coreReasoningSignature
+        ? {
+            reasoningApplied: true,
+            certaintyLevel: args.voiceHints.coreReasoningSignature.certaintyLevel,
+            conclusionPace: args.voiceHints.coreReasoningSignature.conclusionPace
+          }
+        : {})
     },
     pendingProfileRebuild: {
       status: args.diagnostics.pendingRebuild.status,

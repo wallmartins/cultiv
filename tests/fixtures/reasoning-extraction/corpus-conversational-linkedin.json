@@ -1,0 +1,73 @@
+{
+  "id": "corpus-conversational-linkedin",
+  "examples": [
+    {
+      "id": "ex-1",
+      "userId": "user-1",
+      "text": "Notei que times pequenos aprendem mais quando expõem o retrabalho cedo.",
+      "language": "pt-BR",
+      "state": "active",
+      "classificationLabels": [],
+      "antiPatternsExplicit": [],
+      "pinned": false,
+      "pendingProfileImpact": false,
+      "effectiveContentTypeHints": ["linkedin-post"],
+      "evaluation": {
+        "systemWeight": 1,
+        "attentionLevel": "medium",
+        "attentionReasonCodes": [],
+        "contributionCode": "useful_for_linkedin",
+        "contributionPreview": "",
+        "userPinned": false
+      },
+      "createdAt": "2026-01-01T00:00:00.000Z",
+      "updatedAt": "2026-01-01T00:00:00.000Z",
+      "version": 1,
+      "explicitContentType": "linkedin-post"
+    },
+    {
+      "id": "ex-2",
+      "userId": "user-1",
+      "text": "Outro post curto, com eu no centro e sem prescrever uma rotina universal.",
+      "language": "pt-BR",
+      "state": "active",
+      "classificationLabels": [],
+      "antiPatternsExplicit": [],
+      "pinned": false,
+      "pendingProfileImpact": false,
+      "effectiveContentTypeHints": ["linkedin-post"],
+      "evaluation": {
+        "systemWeight": 1,
+        "attentionLevel": "medium",
+        "attentionReasonCodes": [],
+        "contributionCode": "useful_for_linkedin",
+        "contributionPreview": "",
+        "userPinned": false
+      },
+      "createdAt": "2026-01-02T00:00:00.000Z",
+      "updatedAt": "2026-01-02T00:00:00.000Z",
+      "version": 1,
+      "explicitContentType": "linkedin-post"
+    }
+  ],
+  "expected": {
+    "core": {
+      "narrativeProse": "Opens with a concrete observation and keeps the narrator present without universal prescriptions.",
+      "certaintyLevel": "moderate",
+      "judgmentFrequency": "low",
+      "conclusionPace": "slow",
+      "readerRelationship": "peer",
+      "authoritySource": "personal_observation",
+      "derivedAntiPatterns": ["generic linkedin tone"]
+    },
+    "formatExpressions": {
+      "linkedin-post": {
+        "contentType": "linkedin-post",
+        "narrativeProse": "LinkedIn posts stay conversational with short paragraphs.",
+        "register": "conversational",
+        "openingStyle": "direct",
+        "technicalDensity": "low"
+      }
+    }
+  }
+}

@@ -232,6 +232,38 @@ export type AppVoiceMessages = {
     readonly cancel: string;
     readonly accept: string;
   };
+  readonly reasoning: {
+    readonly title: string;
+    readonly subtitle: string;
+    readonly rebuilding: string;
+    readonly failedKeepLast: string;
+    readonly coreTitle: string;
+    readonly certaintyLevel: string;
+    readonly judgmentFrequency: string;
+    readonly conclusionPace: string;
+    readonly readerRelationship: string;
+    readonly authoritySource: string;
+    readonly register: string;
+    readonly openingStyle: string;
+    readonly technicalDensity: string;
+    readonly antiPatternsTitle: string;
+    readonly noAntiPatterns: string;
+    readonly partialFormats: string;
+    readonly refineHint: string;
+    readonly enums: {
+      readonly certaintyLevel: Record<"low" | "moderate" | "high", string>;
+      readonly judgmentFrequency: Record<"low" | "moderate" | "high", string>;
+      readonly conclusionPace: Record<"slow" | "moderate" | "fast", string>;
+      readonly readerRelationship: Record<"peer" | "mentor" | "observer" | "collaborator" | "guide", string>;
+      readonly authoritySource: Record<
+        "personal_observation" | "lived_experience" | "data" | "reference" | "practice",
+        string
+      >;
+      readonly register: Record<"formal" | "informal" | "technical" | "conversational", string>;
+      readonly openingStyle: Record<"direct" | "contextual" | "provocative", string>;
+      readonly technicalDensity: Record<"low" | "medium" | "high", string>;
+    };
+  };
 };
 
 export type AppOnboardingMessages = {

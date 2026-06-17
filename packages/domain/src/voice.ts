@@ -1,6 +1,8 @@
 import type {
   AttentionLevel,
   ContributionCode,
+  CoreReasoningSignature,
+  FormatExpressionProfile,
   NextActionCode,
   ReasonCode,
   VoiceAdaptationMode,
@@ -98,6 +100,8 @@ export interface DerivedVoiceProfile extends Entity<string> {
   readonly styleMarkers: readonly string[];
   readonly rules: readonly string[];
   readonly antiPatterns: readonly string[];
+  readonly coreReasoningSignature?: CoreReasoningSignature;
+  readonly formatExpressionProfiles?: Readonly<Record<string, FormatExpressionProfile>>;
   readonly createdAt: string;
   readonly updatedAt: string;
 }
@@ -129,6 +133,9 @@ export interface VoiceProfileSnapshot extends Entity<string> {
     readonly styleMarkers: readonly string[];
     readonly rules: readonly string[];
     readonly antiPatterns: readonly string[];
+    readonly reasoningApplied?: boolean;
+    readonly certaintyLevel?: CoreReasoningSignature["certaintyLevel"];
+    readonly conclusionPace?: CoreReasoningSignature["conclusionPace"];
   };
   readonly resolutionContext: Readonly<Record<string, unknown>>;
   readonly createdAt: string;

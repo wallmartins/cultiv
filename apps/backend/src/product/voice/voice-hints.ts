@@ -1,5 +1,10 @@
 import type { VoiceExampleRecord } from "@my-ai-orchestrator/database";
-import type { VoiceAdaptationMode, VoiceProfileConfidence } from "@my-ai-orchestrator/contracts";
+import type {
+  CoreReasoningSignature,
+  FormatExpressionProfile,
+  VoiceAdaptationMode,
+  VoiceProfileConfidence
+} from "@my-ai-orchestrator/contracts";
 import type { DomainProfile, VoiceProfile } from "@my-ai-orchestrator/text-quality";
 import { filterTechLexiconTerms, isTechLexiconTerm } from "@my-ai-orchestrator/text-quality";
 import { normalizeLanguage, unique } from "./voice-utils.js";
@@ -16,6 +21,8 @@ export function buildVoiceHints(
     readonly rules: readonly string[];
     readonly styleMarkers: readonly string[];
     readonly primaryLanguage: string;
+    readonly coreReasoningSignature?: CoreReasoningSignature;
+    readonly formatExpressionProfiles?: Readonly<Record<string, FormatExpressionProfile>>;
   },
   matchingExamples: readonly VoiceExampleRecord[],
   pinnedMatchingExamples: readonly VoiceExampleRecord[],
@@ -25,47 +32,46 @@ export function buildVoiceHints(
   },
   confidence: VoiceProfileConfidence,
   adaptationMode: VoiceAdaptationMode,
-  domainProfile?: DomainProfile
+  domainProfile?: DomainProfile,
+  options?: { readonly reasoningSignatureEnabled?: boolean }
 ): Partial<VoiceProfile> {
   const preset = resolveContentTypeVoicePreset(context.contentType);
+  const reasoningSignatureEnabled = options?.reasoningSignatureEnabled === true;
   const languageMismatch =
     typeof context.requestedLanguage === "string"
     && context.requestedLanguage.trim().length > 0
     && normalizeLanguage(context.requestedLanguage) !== normalizeLanguage(profile.primaryLanguage);
 
   const styleMarkers = unique([
-    ...pickSignals(profile.styleMarkers, preset.styleMarkers, 3),
-    ...pickSignals(
-      pinnedMatchingExamples.flatMap((example) => deriveExampleStyleMarkers(example.text)),
-      preset.styleMarkers,
-      pinnedMatchingExamples.length > 0 ? 2 : 1
-    )
+    ...profile.styleMarkers.slice(0, confidence === "low" ? 3 : 6),
+    ...pinnedMatchingExamples.flatMap((example) => deriveExampleStyleMarkers(example.text)).slice(0, 2)
   ]);
   const rules = unique([
-    ...pickSignals(profile.rules, preset.rules, confidence === "low" ? 3 : 6),
+    ...profile.rules.slice(0, confidence === "low" ? 3 : 6),
     ...(languageMismatch ? ["preserve_target_language"] : [])
   ]);
+  const derivedAntiPatterns = reasoningSignatureEnabled
+    ? (profile.coreReasoningSignature?.derivedAntiPatterns ?? [])
+    : [];
   const antiPatterns = unique([
-    ...pickSignals(profile.antiPatterns, preset.antiPatterns, confidence === "low" ? 3 : 6),
+    ...profile.antiPatterns.slice(0, confidence === "low" ? 3 : 6),
+    ...derivedAntiPatterns,
     ...(domainProfile?.domain === "non-technical" ? ["forced tech metaphors unrelated to the topic"] : []),
     ...(languageMismatch ? ["language drift"] : [])
   ]);
   const explicitFromExamples = unique(
     matchingExamples.flatMap((example) => example.antiPatternsExplicit ?? [])
   );
-  const antiPatternsExplicit = explicitFromExamples.length > 0
-    ? explicitFromExamples
-    : [...preset.antiPatterns];
+  const antiPatternsExplicit = explicitFromExamples;
   const examples = unique([
     ...pinnedMatchingExamples.map((example) => example.text.trim()),
     ...matchingExamples.filter((example) => !example.pinned).map((example) => example.text.trim())
   ]).slice(0, confidence === "low" ? 3 : 6);
 
   const profileLexicon = unique(profile.lexicon);
-  const shouldSkipPresetLexicon = profileLexicon.length >= 3;
   const lexicon = filterLexiconForDomain(
     unique([
-      ...pickSignals(profileLexicon, shouldSkipPresetLexicon ? [] : preset.lexicon, confidence === "low" ? 4 : 6),
+      ...profileLexicon.slice(0, confidence === "low" ? 4 : 8),
       ...extractLexicon(matchingExamples, confidence === "low" ? 6 : 12)
     ]).slice(0, confidence === "low" ? 4 : 8),
     domainProfile
@@ -75,9 +81,11 @@ export function buildVoiceHints(
     matchingExamples.flatMap((example) => example.classificationLabels ?? [])
   );
 
+  const formatExpressionProfile = profile.formatExpressionProfiles?.[context.contentType];
+
   return {
-    tone: preset.tone ?? profile.tone,
-    cadence: preset.cadence ?? profile.cadence,
+    tone: profile.tone,
+    cadence: profile.cadence,
     description: profile.description,
     lexicon,
     constraints: unique([
@@ -91,7 +99,14 @@ export function buildVoiceHints(
     antiPatternsExplicit,
     rules,
     styleMarkers,
-    userLabels
+    userLabels,
+    ...(reasoningSignatureEnabled && profile.coreReasoningSignature
+      ? {
+          coreReasoningSignature: profile.coreReasoningSignature,
+          formatExpressionProfile,
+          derivedAntiPatterns: derivedAntiPatterns
+        }
+      : {})
   };
 }
 
@@ -126,20 +141,6 @@ export function selectExamplesForContentType(
 
       return right.updatedAt.localeCompare(left.updatedAt);
     });
-}
-
-export function pickSignals(
-  profileSignals: readonly string[],
-  presetSignals: readonly string[],
-  limit: number
-): readonly string[] {
-  const preferred = profileSignals.filter((signal) => {
-    const lower = signal.toLowerCase();
-    return presetSignals.some((preset) => lower.includes(preset.toLowerCase()) || preset.toLowerCase().includes(lower));
-  });
-
-  const merged = unique([...preferred, ...profileSignals, ...presetSignals]);
-  return merged.slice(0, Math.max(1, limit));
 }
 
 export function deriveExampleStyleMarkers(text: string): readonly string[] {

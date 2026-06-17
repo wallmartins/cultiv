@@ -252,6 +252,57 @@ export const appMessagesPt: AppMessages = {
       languageRequired: "Selecione um idioma",
       saving: "Salvando…"
     },
+    reasoning: {
+      title: "Raciocínio autoral",
+      subtitle: "Como a IA infere a forma como você observa, argumenta e conclui — com base nos seus exemplos.",
+      rebuilding: "Atualizando o raciocínio inferido a partir dos exemplos mais recentes.",
+      failedKeepLast:
+        "A última extração falhou, mas o raciocínio anterior continua válido. Adicione exemplos ou tente atualizar de novo.",
+      coreTitle: "Assinatura central",
+      certaintyLevel: "Nível de certeza",
+      judgmentFrequency: "Frequência de julgamento",
+      conclusionPace: "Ritmo de conclusão",
+      readerRelationship: "Relação com o leitor",
+      authoritySource: "Fonte de autoridade",
+      register: "Registro",
+      openingStyle: "Abertura",
+      technicalDensity: "Densidade técnica",
+      antiPatternsTitle: "Padrões que você evita",
+      noAntiPatterns: "Nenhum padrão derivado ainda.",
+      partialFormats: "Ainda não há expressão por formato suficiente (mínimo de 2 exemplos por formato).",
+      refineHint: "Para refinar, adicione mais exemplos — não é possível editar estes campos manualmente.",
+      enums: {
+        certaintyLevel: { low: "Baixa", moderate: "Moderada", high: "Alta" },
+        judgmentFrequency: { low: "Baixa", moderate: "Moderada", high: "Alta" },
+        conclusionPace: { slow: "Lento", moderate: "Moderado", fast: "Rápido" },
+        readerRelationship: {
+          peer: "Par",
+          mentor: "Mentor",
+          observer: "Observador",
+          collaborator: "Colaborador",
+          guide: "Guia"
+        },
+        authoritySource: {
+          personal_observation: "Observação pessoal",
+          lived_experience: "Experiência vivida",
+          data: "Dados",
+          reference: "Referência",
+          practice: "Prática"
+        },
+        register: {
+          formal: "Formal",
+          informal: "Informal",
+          technical: "Técnico",
+          conversational: "Conversacional"
+        },
+        openingStyle: {
+          direct: "Direta",
+          contextual: "Contextual",
+          provocative: "Provocativa"
+        },
+        technicalDensity: { low: "Baixa", medium: "Média", high: "Alta" }
+      }
+    },
     consent: {
       title: "Uso dos seus exemplos de voz",
       body: "Para aprender sua escrita, o Cultiv armazena e processa os textos que você enviar. Você pode revogar isso depois em Configurações.",

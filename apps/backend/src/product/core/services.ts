@@ -16,6 +16,7 @@ import type { BackendProductServices } from "./types.js";
 import type { FeatureFlagError } from "@my-ai-orchestrator/feature-flags";
 import { createBackendProductDependencies } from "./service-dependencies.js";
 import { createBackendVoiceRebuildService } from "../voice/voice-rebuild-service.js";
+import { createBackendProviderTransport } from "../../execution/pipeline/provider-transport.js";
 import { createBackendVoiceService } from "../voice/voice-service.js";
 import { createBackendObservabilityService } from "./observability.js";
 import { createBackendApplicationUserMemoryRepository } from "../../auth/application-user-memory.js";
@@ -59,7 +60,20 @@ export function createBackendProductServices(
       redaction
     });
     const voiceConsent = createBackendVoiceConsentService({ database: dependencies.database, now, policyEvidence });
-    const voiceRebuild = createBackendVoiceRebuildService(dependencies.database, now, observability, safeLogger, voiceConsent);
+    const voiceRebuild = createBackendVoiceRebuildService(
+      dependencies.database,
+      now,
+      observability,
+      safeLogger,
+      voiceConsent,
+      {
+        aiAdapters: dependencies.aiAdapters,
+        providerTransport: createBackendProviderTransport(config),
+        featureFlags: dependencies.featureFlags,
+        aiPolicy: dependencies.aiPolicy,
+        config
+      }
+    );
     const postgresDatabase = config.databaseUrl
       ? getPostgresDatabase(dependencies.rawDatabase)
       : undefined;
@@ -108,7 +122,18 @@ export function createBackendProductServices(
       }),
       voiceRebuild,
       voiceConsent,
-      voice: createBackendVoiceService(dependencies.database, voiceRebuild, now, observability, safeLogger, voiceConsent),
+      voice: createBackendVoiceService(
+        dependencies.database,
+        voiceRebuild,
+        now,
+        observability,
+        safeLogger,
+        voiceConsent,
+        {
+          featureFlags: dependencies.featureFlags,
+          config
+        }
+      ),
       policyEvidence,
       operationalOverride,
       redaction,

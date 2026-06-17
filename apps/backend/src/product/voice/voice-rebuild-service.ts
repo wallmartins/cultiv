@@ -1,18 +1,25 @@
 import { Effect } from "effect";
 import type { AppLogger } from "@my-ai-orchestrator/core";
+import type { AIAdapterServiceContract } from "@my-ai-orchestrator/ai-adapters";
 import type { DatabaseClient, VoiceExampleRecord } from "@my-ai-orchestrator/database";
+import type { FeatureFlagServiceContract } from "@my-ai-orchestrator/feature-flags";
+import { toVoiceProfileDomain } from "@my-ai-orchestrator/database";
 import {
   nextActionCodesForReason,
   type VoiceProfileDiagnostics
 } from "@my-ai-orchestrator/domain";
+import type { BackendConfig } from "../../config/config.js";
+import type { BackendProviderTransport } from "../../execution/pipeline/provider-transport.js";
 import {
   buildVoiceMaterialBase,
   deriveVoiceRebuildState,
   resolveNextProfileVersion
 } from "./voice-rebuild-derivation.js";
+import { extractReasoningSignature } from "./reasoning-extraction.js";
 import type { BackendVoiceRebuildService } from "./voice-rebuild-types.js";
 import type { BackendObservabilityService } from "../core/observability-types.js";
 import type { BackendVoiceConsentService } from "../../safety/voice-consent-types.js";
+import type { BackendAIPolicyServiceContract } from "../ai-policy/ai-policy-types.js";
 
 interface RebuildQueueState {
   running: boolean;
@@ -20,12 +27,21 @@ interface RebuildQueueState {
   activePromise?: Promise<void>;
 }
 
+export interface BackendVoiceRebuildDependencies {
+  readonly aiAdapters?: AIAdapterServiceContract;
+  readonly providerTransport?: BackendProviderTransport;
+  readonly featureFlags?: FeatureFlagServiceContract;
+  readonly aiPolicy?: BackendAIPolicyServiceContract;
+  readonly config?: BackendConfig;
+}
+
 export function createBackendVoiceRebuildService(
   database: DatabaseClient,
   now: () => Date,
   observability: BackendObservabilityService,
   logger?: AppLogger,
-  voiceConsent?: BackendVoiceConsentService
+  voiceConsent?: BackendVoiceConsentService,
+  dependencies: BackendVoiceRebuildDependencies = {}
 ): BackendVoiceRebuildService {
   const states = new Map<string, RebuildQueueState>();
 
@@ -53,7 +69,9 @@ export function createBackendVoiceRebuildService(
       try {
         while (state.queued) {
           state.queued = false;
-          await Effect.runPromise(processUserRebuild(database, userId, now, observability, logger, voiceConsent));
+          await Effect.runPromise(
+            processUserRebuild(database, userId, now, observability, logger, voiceConsent, dependencies)
+          );
 
           if (state.queued) {
             await Effect.runPromise(markRebuildQueued(database, userId, now));
@@ -67,7 +85,12 @@ export function createBackendVoiceRebuildService(
           startRunner(userId, state);
         }
       }
-    })().catch(() => undefined);
+    })().catch((error: unknown) => {
+        logger?.error("Voice profile rebuild runner failed", {
+          userId,
+          reason: error instanceof Error ? error.message : "unknown_error"
+        });
+      });
   };
 
   const waitForIdle = async (userId?: string): Promise<void> => {
@@ -91,29 +114,29 @@ export function createBackendVoiceRebuildService(
     }
   };
 
-    return {
-      schedule(userId) {
-        return Effect.sync(() => {
-          const state = ensureState(userId);
-          state.queued = true;
+  return {
+    schedule(userId) {
+      return Effect.sync(() => {
+        const state = ensureState(userId);
+        state.queued = true;
 
-          Effect.runSync(
-            observability.recordVoiceRebuildQueued({
-              userId,
-              queuedAt: now().toISOString()
-            })
-          );
-          logger?.info("Queued voice profile rebuild", {
-            userId
-          });
-
-          void Effect.runPromise(markRebuildQueued(database, userId, now)).catch(() => undefined);
-          startRunner(userId, state);
+        Effect.runSync(
+          observability.recordVoiceRebuildQueued({
+            userId,
+            queuedAt: now().toISOString()
+          })
+        );
+        logger?.info("Queued voice profile rebuild", {
+          userId
         });
-      },
-      drain(userId) {
-        return Effect.promise(() => waitForIdle(userId));
-      }
+
+        void Effect.runPromise(markRebuildQueued(database, userId, now)).catch(() => undefined);
+        startRunner(userId, state);
+      });
+    },
+    drain(userId) {
+      return Effect.promise(() => waitForIdle(userId));
+    }
   };
 }
 
@@ -123,7 +146,8 @@ function processUserRebuild(
   now: () => Date,
   observability: BackendObservabilityService,
   logger?: AppLogger,
-  voiceConsent?: BackendVoiceConsentService
+  voiceConsent?: BackendVoiceConsentService,
+  dependencies: BackendVoiceRebuildDependencies = {}
 ) {
   return Effect.gen(function* () {
     if (voiceConsent) {
@@ -149,11 +173,69 @@ function processUserRebuild(
       startedAt: timestamp
     });
     const nextVersion = resolveNextProfileVersion(currentProfile, currentDiagnostics);
+    const previousProfile = currentProfile ? toVoiceProfileDomain(currentProfile) : undefined;
+    const reasoningEnabled =
+      dependencies.featureFlags?.isEnabled("voice.reasoningSignatureV1", {
+        userId,
+        environment: dependencies.config?.environment
+      }) ?? false;
+
+    let reasoning = undefined;
+    let reasoningExtractionFailed = false;
+
+    if (
+      reasoningEnabled
+      && dependencies.aiAdapters
+      && dependencies.providerTransport
+      && dependencies.aiPolicy
+    ) {
+      const policy = yield* dependencies.aiPolicy.getActivePolicy();
+      const routingProfile = policy.routingProfiles["voice-extraction-llm"];
+      const attempts = routingProfile
+        ? [...routingProfile.preferredAttempts, ...routingProfile.fallbackAttempts]
+        : [];
+
+      if (attempts.length > 0) {
+        const extraction = yield* extractReasoningSignature({
+          examples: allExamples,
+          attempts,
+          aiAdapters: dependencies.aiAdapters,
+          providerTransport: dependencies.providerTransport
+        }).pipe(Effect.either);
+
+        if (extraction._tag === "Right") {
+          reasoning = extraction.right;
+          logger?.info("Reasoning extraction succeeded", {
+            userId,
+            formatExpressionCount: Object.keys(extraction.right.formatExpressions).length
+          });
+        } else {
+          reasoningExtractionFailed = true;
+          logger?.warn("Reasoning extraction failed; keeping previous reasoning snapshot", {
+            userId,
+            reason: extraction.left.message
+          });
+          yield* observability.recordVoiceReasoningExtractionFailed({
+            userId,
+            reason: extraction.left.message
+          });
+        }
+      } else if (attempts.length === 0) {
+        reasoningExtractionFailed = true;
+        logger?.warn("Reasoning extraction skipped; voice-extraction-llm routing profile has no attempts", {
+          userId
+        });
+      }
+    }
+
     const derivedState = deriveVoiceRebuildState({
       userId,
       version: nextVersion,
       timestamp,
-      allExamples
+      allExamples,
+      previousProfile,
+      reasoning,
+      reasoningExtractionFailed
     });
 
     yield* database.voiceProfiles.put(derivedState.profile).pipe(Effect.orDie);

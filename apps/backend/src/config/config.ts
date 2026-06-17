@@ -48,6 +48,7 @@ export interface BackendConfig extends RuntimeConfig, BackendAuthConfig {
   readonly experimentalAIPolicyManifestPath?: string;
   readonly safetyPolicyManifestPath?: string;
   readonly experimentalDebugEnabled?: boolean;
+  readonly reasoningSignatureV1Enabled?: boolean;
   readonly aiPolicyReloadIntervalMs?: number;
   readonly readinessCacheTtlMs?: number;
   readonly corsAllowedOrigins?: readonly string[];
@@ -69,6 +70,8 @@ export interface BackendConfig extends RuntimeConfig, BackendAuthConfig {
   readonly geminiBaseUrl?: string;
   readonly deepSeekApiKey?: string;
   readonly deepSeekBaseUrl?: string;
+  readonly groqApiKey?: string;
+  readonly groqBaseUrl?: string;
   readonly ollamaBaseUrl?: string;
 }
 
@@ -110,6 +113,7 @@ export function readBackendConfig(envVars: NodeJS.ProcessEnv = process.env): Bac
     experimentalAIPolicyManifestPath: readOptionalString(envVars.EXPERIMENTAL_AI_POLICY_MANIFEST_PATH),
     safetyPolicyManifestPath: readOptionalString(envVars.SAFETY_POLICY_MANIFEST_PATH),
     experimentalDebugEnabled: envVars.EXPERIMENTAL_DEBUG_ENABLED === "true",
+    reasoningSignatureV1Enabled: envVars.VOICE_REASONING_SIGNATURE_V1 === "true",
     aiPolicyReloadIntervalMs: readPositiveInteger(envVars.AI_POLICY_RELOAD_INTERVAL_MS),
     readinessCacheTtlMs: readPositiveInteger(envVars.READINESS_CACHE_TTL_MS),
     corsAllowedOrigins: readCsvList(envVars.CORS_ALLOWED_ORIGINS),
@@ -131,6 +135,8 @@ export function readBackendConfig(envVars: NodeJS.ProcessEnv = process.env): Bac
     geminiBaseUrl: readOptionalString(envVars.GEMINI_BASE_URL),
     deepSeekApiKey: readOptionalString(envVars.DEEPSEEK_API_KEY),
     deepSeekBaseUrl: readOptionalString(envVars.DEEPSEEK_BASE_URL),
+    groqApiKey: readOptionalString(envVars.GROQ_API_KEY),
+    groqBaseUrl: readOptionalString(envVars.GROQ_BASE_URL),
     ollamaBaseUrl: readOptionalString(envVars.OLLAMA_BASE_URL)
   };
 }

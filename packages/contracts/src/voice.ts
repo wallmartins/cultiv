@@ -1,5 +1,6 @@
 import { Schema } from "effect";
 import { createSchemaDecoder } from "./shared.js";
+import { VoiceReasoningPresentationViewSchema } from "./reasoning.js";
 
 export const VoiceProfileConfidenceSchema = Schema.Literal("low", "medium", "high");
 export type VoiceProfileConfidence = typeof VoiceProfileConfidenceSchema.Type;
@@ -23,6 +24,7 @@ export const ReasonCodeSchema = Schema.Literal(
   "feature_flag_disabled",
   "rebuild_failed",
   "rebuild_in_progress",
+  "reasoning_extraction_failed",
   "language_conflict",
   "too_many_pinned_examples",
   "invalid_example_payload",
@@ -73,7 +75,10 @@ export type VoiceCoverage = typeof VoiceCoverageSchema.Type;
 export const VoiceSignalSummarySchema = Schema.Struct({
   styleMarkers: Schema.Array(Schema.String),
   rules: Schema.Array(Schema.String),
-  antiPatterns: Schema.Array(Schema.String)
+  antiPatterns: Schema.Array(Schema.String),
+  reasoningApplied: Schema.optional(Schema.Boolean),
+  certaintyLevel: Schema.optional(Schema.Literal("low", "moderate", "high")),
+  conclusionPace: Schema.optional(Schema.Literal("slow", "moderate", "fast"))
 });
 export type VoiceSignalSummary = typeof VoiceSignalSummarySchema.Type;
 
@@ -133,7 +138,8 @@ export type VoiceProfileDiagnosticsView = typeof VoiceProfileDiagnosticsViewSche
 export const VoiceProfileScreenViewSchema = Schema.Struct({
   profile: VoiceProfileViewSchema,
   diagnostics: VoiceProfileDiagnosticsViewSchema,
-  materialBase: VoiceMaterialBaseBreakdownSchema
+  materialBase: VoiceMaterialBaseBreakdownSchema,
+  reasoning: Schema.optional(VoiceReasoningPresentationViewSchema)
 });
 export type VoiceProfileScreenView = typeof VoiceProfileScreenViewSchema.Type;
 

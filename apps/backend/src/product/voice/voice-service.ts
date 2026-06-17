@@ -1,6 +1,8 @@
 import { Effect } from "effect";
 import type { AppLogger } from "@my-ai-orchestrator/core";
 import type { DatabaseClient } from "@my-ai-orchestrator/database";
+import type { FeatureFlagServiceContract } from "@my-ai-orchestrator/feature-flags";
+import type { BackendConfig } from "../../config/config.js";
 import type { BackendVoiceService } from "./voice-types.js";
 import type { BackendVoiceRebuildService } from "./voice-rebuild-types.js";
 import type { BackendObservabilityService } from "../core/observability-types.js";
@@ -16,7 +18,11 @@ export function createBackendVoiceService(
   now: () => Date,
   observability: BackendObservabilityService,
   logger?: AppLogger,
-  voiceConsent?: BackendVoiceConsentService
+  voiceConsent?: BackendVoiceConsentService,
+  options?: {
+    readonly featureFlags?: FeatureFlagServiceContract;
+    readonly config?: BackendConfig;
+  }
 ): BackendVoiceService {
   const lifecycle = createVoiceLifecycleOperations(database, voiceRebuild, now, logger, voiceConsent);
   const batches = createVoiceBatchOperations(database, voiceRebuild, now, observability, logger, voiceConsent);
@@ -45,12 +51,28 @@ export function createBackendVoiceService(
             ...profile,
             version: profile.profileVersion
           },
-          diagnostics
+          diagnostics,
+          {
+            includeReasoning:
+              options?.featureFlags?.isEnabled("voice.reasoningSignatureV1", {
+                userId,
+                environment: options?.config?.environment
+              }) ?? false
+          }
         );
       });
     },
     resolveEffectiveVoice(userId, context) {
-      return resolveEffectiveVoiceResolution(database, userId, context, now, observability, logger, voiceConsent);
+      return resolveEffectiveVoiceResolution(
+        database,
+        userId,
+        context,
+        now,
+        observability,
+        logger,
+        voiceConsent,
+        options
+      );
     },
     ...lifecycle,
     ...batches

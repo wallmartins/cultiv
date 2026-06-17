@@ -54,7 +54,8 @@ export function runTextQualityPipeline(
             driftScore: candidate.drift.score,
             strategy: lane.strategy,
             qualityProfile,
-            lexicalPenalty: candidate.lexicalPenalty
+            lexicalPenalty: candidate.lexicalPenalty,
+            reasoningEvaluationEnabled: request.reasoningEvaluationEnabled === true
           });
 
           return {

@@ -1,8 +1,25 @@
 import type { PipelineRequest } from "@my-ai-orchestrator/contracts";
 import type { VoiceDriftResult, VoiceProfile } from "../types.js";
 import { countWords, resolveOutputWordTarget } from "../format/output-length.js";
+import { evaluateReasoningDrift } from "./reasoning-drift.js";
 
-export function evaluateVoiceDrift(profile: VoiceProfile, candidate: string, request?: PipelineRequest): VoiceDriftResult {
+export function evaluateVoiceDrift(profile: VoiceProfile, candidate: string, request?: PipelineRequest, stepName?: string): VoiceDriftResult {
+  const surface = scoreSurfaceDrift(profile, candidate, request);
+
+  if (!profile.coreReasoningSignature) {
+    return surface;
+  }
+
+  const reasoning = evaluateReasoningDrift(profile.coreReasoningSignature, candidate, stepName);
+  const score = Math.round(surface.score * 0.55 + reasoning.score * 0.45);
+
+  return {
+    score,
+    notes: [...surface.notes, ...reasoning.notes]
+  };
+}
+
+function scoreSurfaceDrift(profile: VoiceProfile, candidate: string, request?: PipelineRequest): VoiceDriftResult {
   const score = scoreDrift(profile, candidate, request);
   const notes: string[] = [];
 

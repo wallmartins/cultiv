@@ -16,9 +16,57 @@ _Avoid_: Client pipeline, user-defined flow
 The kind of text being generated, such as blog post, LinkedIn post, thread, or newsletter.
 _Avoid_: Format, template
 
+**Content Type Format Preset**:
+Platform and structure constraints applied per **Content Type** during voice resolution, such as word targets, paragraph shape, and channel conventions.
+_Avoid_: Style preset, voice preset, cognitive baseline
+
 **Voice Profile**:
-The user's durable writing voice, including tone, cadence, vocabulary, and constraints.
+The user's durable writing voice at the surface layer: tone, cadence, vocabulary, and lexical constraints.
 _Avoid_: Style preset, persona
+
+**Reasoning Signature**:
+The author's durable patterns of observation, argument construction, certainty, judgment, and conclusion — distinct from surface **Voice Profile** markers.
+_Avoid_: Cognitive fingerprint, persona traits, narrative preset
+
+**Core Reasoning Signature**:
+The author-global **Reasoning Signature** derived from all active **Voice Examples**, capturing how the author thinks regardless of channel.
+_Avoid_: Global persona, default voice, base tone
+
+**Format Expression Profile**:
+Per-**Content Type** register and expression traits — such as formality, technical density, and platform tone — derived from that format's examples and layered on top of the **Core Reasoning Signature** without changing the author's reasoning mode.
+_Avoid_: Format voice preset, channel persona, per-format cognitive profile
+
+**Derived Anti-Patterns**:
+Voice-related patterns the author consistently avoids, inferred automatically from **Voice Examples** during **Core Reasoning Signature** extraction.
+_Avoid_: Blocklist, banned phrases, negative style preset
+
+**Reasoning Signature Representation**:
+The hybrid persisted form of a **Reasoning Signature**: narrative prose for prompt guidance plus reduced enums for drift and critic checks.
+_Avoid_: Voice attribute schema, personality model, cognitive JSON
+
+**Step-Scoped Reasoning Injection**:
+The rule that **Core Reasoning Signature** and **Format Expression Profile** enter LLM steps at different depths — full narrative on structural steps, guardrail enums on refinement steps, and voice examples scoped by step as today.
+_Avoid_: One-size prompt block, uniform voice injection
+
+**Voice Judge**:
+A conditional LLM evaluation pass that scores finalist candidates against the **Core Reasoning Signature** and author examples, using a separate provider from generation to reduce self-judge bias.
+_Avoid_: Second draft, rewrite pass, quality LLM step
+
+**Voice Judge Routing Profile**:
+The versioned AI policy rule that selects the judge provider and model independently from content-generation routing profiles.
+_Avoid_: Shared generation profile, judge adapter hack
+
+**Voice Profile Rebuild**:
+The offline recalculation of the **Derived Voice Profile**, **Core Reasoning Signature**, and **Format Expression Profile** from all active **Voice Examples**, triggered when examples are created, updated, or batch-committed — not during generation.
+_Avoid_: Runtime inference, per-generation profile refresh
+
+**Voice Reasoning Presentation**:
+The read-only summary on the **Voice Dashboard** that shows the inferred **Core Reasoning Signature**, per-format **Format Expression Profile**, and **Derived Anti-Patterns** in human language without manual editing in Fase 1.
+_Avoid_: Style settings, persona editor, cognitive profile form
+
+**Reasoning Extraction**:
+The single structured LLM call inside **Voice Profile Rebuild** that infers the **Core Reasoning Signature**, per-format **Format Expression Profile**, and **Derived Anti-Patterns** from all active examples in one pass, using the primary generation provider family rather than the **Voice Judge** provider.
+_Avoid_: Per-example extraction, per-format rebuild calls, runtime reasoning inference
 
 **Derived Voice Profile**:
 The persisted voice projection recalculated from the user's examples and anti-pattern inputs, used by the writing pipeline as the current source of truth for voice alignment.
@@ -465,7 +513,18 @@ _Avoid_: AI Writing Engine, content-lib, my-ai-orchestrator
 - A **Pipeline** is composed of one or more ordered steps.
 - A **Generation Request** does not define a **Pipeline** directly; the product resolves the internal **Pipeline** from product rules and catalog policy.
 - A **Content Type** selects or constrains which **Pipeline** is used.
-- A **Voice Example** contributes to the user's **Derived Voice Profile**.
+- A **Content Type Format Preset** may supply format constraints during voice resolution, but must not inject cognitive or narrative patterns when the author has a derived voice.
+- **Core Reasoning Signature** is derived from all active **Voice Examples** during profile rebuild.
+- **Step-Scoped Reasoning Injection** applies **Core Reasoning Signature** and **Format Expression Profile** to every LLM step, with full narrative on structural steps (`hook`, `outline`, `structure`, `draft`, `expand`) and enum guardrails on refinement steps (`refine`, `tighten`).
+- **Reasoning Extraction** uses the primary provider via a dedicated extraction routing profile; **Voice Judge** uses **Voice Judge Routing Profile** (Groq preferred) and must not share the generation provider by default.
+- **Voice Judge** runs on finalist candidates when reasoning drift is borderline, top candidates tie, or **Quality Mode** is `strict`.
+- **Voice Profile Rebuild** runs when **Voice Examples** change, coalesces rapid updates per user, and keeps the previous profile active while rebuild is in progress.
+- **Reasoning Extraction** uses one structured LLM call per rebuild; on failure, the last valid profile remains active and heuristics-only derivation is not promoted without a successful extraction.
+- **Voice Reasoning Presentation** is read-only in Fase 1; authors refine inference by adding or improving **Voice Examples**, not by editing derived reasoning fields directly.
+- Dynamic example retrieval remains out of Fase 1 scope until per-format example volume routinely exceeds prompt budget.
+- A **Voice Example** contributes to the user's **Derived Voice Profile** and **Reasoning Signature**.
+- **Reasoning Signature** is derived from **Voice Examples** during profile rebuild and consumed alongside the **Derived Voice Profile** at generation time.
+- **Reasoning Signature Representation** uses narrative prose for prompt guidance and reduced enums for measurable drift checks; dynamic example retrieval is a later enhancement when per-format example volume exceeds prompt budget.
 - A **Voice Example** may be consumed in raw form by explicitly authorized pipeline stages when voice fidelity requires it, but the main generation step still consumes the **Derived Voice Profile** as its voice source of truth.
 - A **Derived Voice Profile** is recalculated from the user's examples and then resolved before generating **Candidates**.
 - Revoking **Voice Training Consent** must stop future derivation and also remove or permanently disable stored **Voice Example** material for future voice derivation until the user provides new examples.
@@ -486,7 +545,7 @@ _Avoid_: AI Writing Engine, content-lib, my-ai-orchestrator
 - **Imported Context** should launch with a restricted baseline and evolve to richer formats only through explicit policy expansion.
 - Web v2 exposes **Imported Context** through a collapsed optional **Imported Context Field** on the **Generation Screen**; launch support is bounded plain-text paste only, with no file-upload path.
 - The **Account Settings Screen** includes read-only identity details, **App Locale** preference, **Voice Training Consent** review and revocation, and logout.
-- `/app/voice` is a **Voice Dashboard** in web v2, not a redirect-only wrapper; it surfaces profile confidence, diagnostics, and CTAs into example management.
+- `/app/voice` is a **Voice Dashboard** in web v2, not a redirect-only wrapper; it surfaces profile confidence, diagnostics, **Voice Reasoning Presentation**, and CTAs into example management.
 - The **Generation Screen** content-type selector lists every catalog **Content Type** and disables unavailable options with plan or policy reasons instead of hiding them.
 - A **Sanitized Generation Input** is the only user-derived payload that may cross into generation after policy checks.
 - A **Step Scope** constrains each step to a minimal read/write contract instead of exposing the full pipeline state.
@@ -628,6 +687,7 @@ _Avoid_: AI Writing Engine, content-lib, my-ai-orchestrator
 ## Flagged ambiguities
 
 - "style" was used to mean both a temporary prompt hint and the durable **Voice Profile**. In this repository, the durable term is **Voice Profile**.
+- "voice preset" was used to mean both **Content Type Format Preset** and authorial reasoning rules. In this repository, format presets carry structure only; **Reasoning Signature** is author-derived and separate from **Content Type**.
 - "job" was used to mean both a persisted execution and any background action. In this repository, **Job** means the persisted execution instance.
 - "flow" was used to mean both a product pipeline and an operational path. In this repository, **Pipeline** is the product workflow and **Sync Run** / **Async Run** are the execution paths.
 - "public API" was used to mean both the backend HTTP surface and the frontend SDK. In this repository, **Public API Surface** means the backend HTTP surface and **Client Integration Surface** means the `client-sdk`.

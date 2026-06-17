@@ -19,6 +19,7 @@ import { filterLexiconForDomain } from "../../product/voice/voice-hints.js";
 import { resolveGenerationRuntimeContext } from "../pipeline/generation-runtime.js";
 import { resolveBriefingText } from "./quality-briefing.js";
 import { buildRuntimeQualityLanes, laneCountForQualityMode } from "./quality-lanes.js";
+import { applyVoiceJudgeToQualityResult } from "./quality-voice-judge-orchestration.js";
 import {
   createRuntimeMetadataRequest,
   resolveSanitizedGenerationInput,
@@ -49,6 +50,13 @@ export function executeQualitySelectionAttempt(
     userId: options.billingIdentity.userId,
     environment: options.config.environment
   });
+  const reasoningSignatureEnabled = options.services.featureFlags.isEnabled("voice.reasoningSignatureV1", {
+    contentType: options.plan.contentType.id,
+    pipelineType: options.plan.contentType.id as PipelineType,
+    qualityMode: options.qualityMode,
+    userId: options.billingIdentity.userId,
+    environment: options.config.environment
+  });
   const voiceHints = options.voice?.voiceHints
     ? {
         ...options.voice.voiceHints,
@@ -65,6 +73,7 @@ export function executeQualitySelectionAttempt(
       voiceHints,
       generationContext,
       lexicalQualityV2,
+      reasoningEvaluationEnabled: reasoningSignatureEnabled,
       lanes: runtimeLanes,
       now: options.now
     }).pipe(
@@ -110,11 +119,43 @@ export function executeQualitySelectionAttempt(
       )
     );
 
-    const selectedRun = candidateRuns.get(qualityResult.bestCandidate.laneId);
+    let bestCandidate = qualityResult.bestCandidate;
+    let output = qualityResult.output;
+
+    if (reasoningSignatureEnabled) {
+      const policy = yield* options.services.aiPolicy.getActivePolicy();
+      const routingProfile = policy.routingProfiles["voice-judge-llm"];
+      const attempts = routingProfile
+        ? [...routingProfile.preferredAttempts, ...routingProfile.fallbackAttempts]
+        : [];
+
+      const judged = yield* applyVoiceJudgeToQualityResult({
+        pipelineName: options.plan.pipeline.name,
+        request: options.request,
+        qualityMode: options.qualityMode,
+        reasoningSignatureEnabled,
+        briefing,
+        generationContext,
+        lexicalQualityV2,
+        candidates: qualityResult.candidates,
+        bestCandidate: qualityResult.bestCandidate,
+        output: qualityResult.output,
+        voiceProfile: qualityResult.voiceProfile,
+        attempts,
+        aiAdapters: options.services.aiAdapters,
+        providerTransport: options.providerTransport,
+        observability: options.services.observability
+      });
+
+      bestCandidate = judged.bestCandidate;
+      output = judged.output;
+    }
+
+    const selectedRun = candidateRuns.get(bestCandidate.laneId);
     if (!selectedRun) {
       return yield* Effect.fail(
         createExecutionFailure({
-          message: `Quality candidate "${qualityResult.bestCandidate.laneId}" was selected but no execution result was captured`,
+          message: `Quality candidate "${bestCandidate.laneId}" was selected but no execution result was captured`,
           reason: "quality_candidate_missing"
         })
       );
@@ -124,7 +165,7 @@ export function executeQualitySelectionAttempt(
       yield* options.memory.write(
         `run:${options.plan.pipeline.name}:${options.request.idempotencyKey ?? options.plan.request.contentTypeId}`,
         {
-          content: qualityResult.output,
+          content: output,
           adapter: selectedRun.adapter,
           model: selectedRun.model,
           qualityMode: options.qualityMode,
@@ -136,14 +177,14 @@ export function executeQualitySelectionAttempt(
     const aggregateMetrics = aggregateCandidateMetrics(candidateRuns.values());
 
     return {
-      content: qualityResult.output,
+      content: output,
       trace: selectedRun.trace,
       adapter: selectedRun.adapter,
       model: selectedRun.model,
       attemptsUsed: aggregateMetrics.attemptsUsed,
       metrics: aggregateMetrics.metrics,
       providerAttempts: aggregateMetrics.providerAttempts,
-      score: qualityResult.bestCandidate.score.finalScore
+      score: bestCandidate.score.finalScore
     };
   }).pipe(Effect.provide(createTextQualityLiveLayer()));
 }

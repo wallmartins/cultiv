@@ -1,7 +1,8 @@
 import { Effect } from "effect";
-import type { AppLogger } from "@my-ai-orchestrator/core";
 import type { DatabaseClient } from "@my-ai-orchestrator/database";
+import type { FeatureFlagServiceContract } from "@my-ai-orchestrator/feature-flags";
 import type { VoiceProfileSnapshot } from "@my-ai-orchestrator/domain";
+import type { BackendConfig } from "../../config/config.js";
 import type { BackendObservabilityService } from "../core/observability-types.js";
 import type { BackendVoiceConsentService } from "../../safety/voice-consent-types.js";
 import type { EffectiveVoiceContext, EffectiveVoiceResolution } from "./voice-types.js";
@@ -12,6 +13,7 @@ import {
   resolveFallbackReasonCode
 } from "./voice-resolution-helpers.js";
 import { buildVoiceHints, selectExamplesForContentType } from "./voice-hints.js";
+import { toVoiceProfileDomain } from "@my-ai-orchestrator/database";
 
 export function resolveEffectiveVoice(
   database: DatabaseClient,
@@ -19,8 +21,12 @@ export function resolveEffectiveVoice(
   context: EffectiveVoiceContext,
   now: () => Date,
   observability: BackendObservabilityService,
-  logger?: AppLogger,
-  voiceConsent?: BackendVoiceConsentService
+  logger?: import("@my-ai-orchestrator/core").AppLogger,
+  voiceConsent?: BackendVoiceConsentService,
+  options?: {
+    readonly featureFlags?: FeatureFlagServiceContract;
+    readonly config?: BackendConfig;
+  }
 ): Effect.Effect<EffectiveVoiceResolution | undefined> {
   return Effect.gen(function* () {
     if (voiceConsent) {
@@ -32,13 +38,14 @@ export function resolveEffectiveVoice(
       }
     }
 
-    const profile = yield* database.voiceProfiles.getByUser(userId);
+    const profileRecord = yield* database.voiceProfiles.getByUser(userId);
     const diagnostics = yield* database.voiceProfileDiagnostics.getByUser(userId);
 
-    if (!profile || !diagnostics) {
+    if (!profileRecord || !diagnostics) {
       return undefined;
     }
 
+    const profile = toVoiceProfileDomain(profileRecord);
     const examples = yield* database.voiceExamples.listByUser(userId);
     const activeExamples = examples.filter((example) => example.state === "active");
     const matchingExamples = selectExamplesForContentType(activeExamples, context.contentType);
@@ -52,10 +59,31 @@ export function resolveEffectiveVoice(
       context.requestedLanguage,
       profile.primaryLanguage
     );
-    const voiceHints = buildVoiceHints(profile, matchingExamples, pinnedMatchingExamples, context, confidence, adaptationMode);
-    const snapshotId = buildVoiceProfileSnapshotId(userId, profile.profileVersion, context.contentType, now());
-    const metadata = buildEffectiveVoiceMetadata({
+    const reasoningSignatureEnabled =
+      options?.featureFlags?.isEnabled("voice.reasoningSignatureV1", {
+        userId,
+        contentType: context.contentType,
+        environment: options?.config?.environment
+      }) ?? false;
+    const voiceHints = buildVoiceHints(
       profile,
+      matchingExamples,
+      pinnedMatchingExamples,
+      context,
+      confidence,
+      adaptationMode,
+      undefined,
+      { reasoningSignatureEnabled }
+    );
+    const snapshotId = buildVoiceProfileSnapshotId(userId, profile.version, context.contentType, now());
+    const metadata = buildEffectiveVoiceMetadata({
+      profile: {
+        profileVersion: profile.version,
+        snapshotId: profile.snapshotId,
+        confidence: profile.confidence,
+        adaptationMode: profile.adaptationMode,
+        primaryLanguage: profile.primaryLanguage
+      },
       diagnostics,
       context,
       confidence,
@@ -69,21 +97,29 @@ export function resolveEffectiveVoice(
       id: snapshotId,
       userId,
       sourceProfileId: profile.id,
-      sourceProfileVersion: profile.profileVersion,
+      sourceProfileVersion: profile.version,
       contentType: context.contentType,
       confidence,
       adaptationMode,
       appliedSignals: {
         styleMarkers: voiceHints.styleMarkers ?? [],
         rules: voiceHints.rules ?? [],
-        antiPatterns: voiceHints.antiPatterns ?? []
+        antiPatterns: voiceHints.antiPatterns ?? [],
+        ...(reasoningSignatureEnabled && voiceHints.coreReasoningSignature
+          ? {
+              reasoningApplied: true,
+              certaintyLevel: voiceHints.coreReasoningSignature.certaintyLevel,
+              conclusionPace: voiceHints.coreReasoningSignature.conclusionPace
+            }
+          : {})
       },
       resolutionContext: {
         contentType: context.contentType,
         requestedLanguage: context.requestedLanguage,
         voiceProfileConfidence: confidence,
         voiceAdaptationMode: adaptationMode,
-        usedFallbackVoiceProfile
+        usedFallbackVoiceProfile,
+        reasoningSignatureEnabled
       },
       createdAt: now().toISOString()
     } satisfies VoiceProfileSnapshot).pipe(Effect.orDie);
@@ -92,7 +128,7 @@ export function resolveEffectiveVoice(
       snapshotId,
       contentType: context.contentType,
       requestedLanguage: context.requestedLanguage,
-      voiceProfileVersionUsed: profile.profileVersion
+      voiceProfileVersionUsed: profile.version
     });
     logger?.info("Persisted execution voice snapshot", {
       userId,

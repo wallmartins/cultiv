@@ -1,0 +1,23 @@
+{
+  "id": "author-fast-concluder",
+  "coreReasoningSignature": {
+    "narrativeProse": "States the thesis early, supports it quickly with one or two examples, and closes without long digressions.",
+    "certaintyLevel": "high",
+    "judgmentFrequency": "moderate",
+    "conclusionPace": "fast",
+    "readerRelationship": "guide",
+    "authoritySource": "data",
+    "derivedAntiPatterns": ["slow narrative warmup", "excessive hedging"]
+  },
+  "briefings": [
+    "Defenda que métricas de ativação valem mais que vanity metrics em SaaS B2B.",
+    "Resuma por que testes A/B pequenos falham em bases estreitas.",
+    "Explique em poucas linhas o valor de cohort analysis semanal.",
+    "Mostre como priorizar backlog com impacto estimado.",
+    "Conclua se freemium faz sentido para ferramentas de nicho."
+  ],
+  "badCandidates": [
+    "Talvez, em alguns casos, dependendo do contexto, possivelmente métricas importem.",
+    "Antes de concluir, vamos percorrer dez analogias históricas sem chegar ao ponto."
+  ]
+}

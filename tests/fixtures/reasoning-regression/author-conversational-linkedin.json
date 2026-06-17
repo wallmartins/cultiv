@@ -1,0 +1,23 @@
+{
+  "id": "author-conversational-linkedin",
+  "coreReasoningSignature": {
+    "narrativeProse": "Opens with a concrete observation, keeps the narrator present, and avoids prescribing universal rules.",
+    "certaintyLevel": "moderate",
+    "judgmentFrequency": "low",
+    "conclusionPace": "slow",
+    "readerRelationship": "peer",
+    "authoritySource": "personal_observation",
+    "derivedAntiPatterns": ["generic linkedin tone", "the problem", "the solution"]
+  },
+  "briefings": [
+    "Escreva sobre aprender com retrabalho em times pequenos.",
+    "Comente o custo de prometer prazo antes de entender o escopo.",
+    "Fale de como documentação mínima ajuda onboarding.",
+    "Reflita sobre priorizar impacto vs perfeccionismo técnico.",
+    "Conte uma lição sobre feedback de usuários em features internas."
+  ],
+  "badCandidates": [
+    "Todo mundo precisa seguir este framework de produtividade agora, obviamente.",
+    "Você deve mudar sua rotina imediatamente, obviamente, sem hesitar."
+  ]
+}

@@ -5,6 +5,7 @@ import {
   formatSignalList,
   formatVoiceExamples
 } from "../skill-inputs.js";
+import { formatAuthorReasoningBlock, formatAuthorReasoningSection } from "./reasoning-prompt.js";
 
 export interface StepVoiceContext {
   readonly voiceExamples: string;
@@ -13,6 +14,8 @@ export interface StepVoiceContext {
   readonly styleMarkers: string;
   readonly voiceRules: string;
   readonly voiceConstraints: string;
+  readonly authorReasoningSection: string;
+  readonly authorReasoning: string;
 }
 
 export function buildStepVoiceContext(
@@ -25,6 +28,16 @@ export function buildStepVoiceContext(
   const voiceRules = voiceProfile?.rules ?? [];
   const voiceConstraints = voiceProfile?.constraints ?? [];
   const lexicon = voiceProfile?.lexicon ?? [];
+  const authorReasoning = formatAuthorReasoningBlock(
+    stepName,
+    voiceProfile?.coreReasoningSignature,
+    voiceProfile?.formatExpressionProfile
+  );
+  const authorReasoningSection = formatAuthorReasoningSection(
+    stepName,
+    voiceProfile?.coreReasoningSignature,
+    voiceProfile?.formatExpressionProfile
+  );
 
   switch (stepName) {
     case "hook":
@@ -34,7 +47,9 @@ export function buildStepVoiceContext(
         antiPatterns: formatSignalList(antiPatterns, "- (none specified)"),
         styleMarkers: formatSignalList(styleMarkers, "- (none specified)"),
         voiceRules: formatSignalList(voiceRules, "- (none specified)"),
-        voiceConstraints: formatSignalList(voiceConstraints, "- (none specified)")
+        voiceConstraints: formatSignalList(voiceConstraints, "- (none specified)"),
+        authorReasoning,
+        authorReasoningSection
       };
     case "outline":
     case "structure":
@@ -45,7 +60,9 @@ export function buildStepVoiceContext(
         antiPatterns: formatSignalList(antiPatterns, "- (none specified)"),
         styleMarkers: formatSignalList(styleMarkers, "- (none specified)"),
         voiceRules: formatSignalList(voiceRules, "- (none specified)"),
-        voiceConstraints: formatSignalList(voiceConstraints, "- (none specified)")
+        voiceConstraints: formatSignalList(voiceConstraints, "- (none specified)"),
+        authorReasoning,
+        authorReasoningSection
       };
     case "draft":
     case "expand":
@@ -55,7 +72,9 @@ export function buildStepVoiceContext(
         antiPatterns: formatSignalList(antiPatterns, "- (none specified)"),
         styleMarkers: formatSignalList(styleMarkers, "- (none specified)"),
         voiceRules: formatSignalList(voiceRules, "- (none specified)"),
-        voiceConstraints: formatSignalList(voiceConstraints, "- (none specified)")
+        voiceConstraints: formatSignalList(voiceConstraints, "- (none specified)"),
+        authorReasoning,
+        authorReasoningSection
       };
     case "refine":
       return {
@@ -64,7 +83,9 @@ export function buildStepVoiceContext(
         antiPatterns: formatSignalList(antiPatterns, "- (none specified)"),
         styleMarkers: formatSignalList(styleMarkers, "- (none specified)"),
         voiceRules: formatSignalList(voiceRules, "- (none specified)"),
-        voiceConstraints: formatSignalList(voiceConstraints, "- (none specified)")
+        voiceConstraints: formatSignalList(voiceConstraints, "- (none specified)"),
+        authorReasoning,
+        authorReasoningSection
       };
     case "tighten":
     case "analyze":
@@ -74,7 +95,9 @@ export function buildStepVoiceContext(
         antiPatterns: formatSignalList(antiPatterns, "- (none specified)"),
         styleMarkers: formatSignalList(styleMarkers, "- (none specified)"),
         voiceRules: formatSignalList(voiceRules, "- (none specified)"),
-        voiceConstraints: formatSignalList(voiceConstraints, "- (none specified)")
+        voiceConstraints: formatSignalList(voiceConstraints, "- (none specified)"),
+        authorReasoning,
+        authorReasoningSection
       };
     default:
       return {
@@ -83,7 +106,9 @@ export function buildStepVoiceContext(
         antiPatterns: formatSignalList(antiPatterns, "- (none specified)"),
         styleMarkers: formatSignalList(styleMarkers, "- (none specified)"),
         voiceRules: formatSignalList(voiceRules, "- (none specified)"),
-        voiceConstraints: formatSignalList(voiceConstraints, "- (none specified)")
+        voiceConstraints: formatSignalList(voiceConstraints, "- (none specified)"),
+        authorReasoning,
+        authorReasoningSection
       };
   }
 }

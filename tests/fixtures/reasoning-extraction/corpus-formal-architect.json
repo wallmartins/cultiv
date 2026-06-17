@@ -1,0 +1,73 @@
+{
+  "id": "corpus-formal-architect",
+  "examples": [
+    {
+      "id": "ex-1",
+      "userId": "user-1",
+      "text": "Antes de escolher microsserviços, mapeio limites de contexto e custo operacional do time.",
+      "language": "pt-BR",
+      "state": "active",
+      "classificationLabels": [],
+      "antiPatternsExplicit": [],
+      "pinned": false,
+      "pendingProfileImpact": false,
+      "effectiveContentTypeHints": ["technical-article"],
+      "evaluation": {
+        "systemWeight": 1,
+        "attentionLevel": "medium",
+        "attentionReasonCodes": [],
+        "contributionCode": "useful_for_technical",
+        "contributionPreview": "",
+        "userPinned": false
+      },
+      "createdAt": "2026-01-01T00:00:00.000Z",
+      "updatedAt": "2026-01-01T00:00:00.000Z",
+      "version": 1,
+      "explicitContentType": "technical-article"
+    },
+    {
+      "id": "ex-2",
+      "userId": "user-1",
+      "text": "Documento tradeoffs com critérios mensuráveis em vez de slogans de arquitetura.",
+      "language": "pt-BR",
+      "state": "active",
+      "classificationLabels": [],
+      "antiPatternsExplicit": [],
+      "pinned": false,
+      "pendingProfileImpact": false,
+      "effectiveContentTypeHints": ["technical-article"],
+      "evaluation": {
+        "systemWeight": 1,
+        "attentionLevel": "medium",
+        "attentionReasonCodes": [],
+        "contributionCode": "useful_for_technical",
+        "contributionPreview": "",
+        "userPinned": false
+      },
+      "createdAt": "2026-01-02T00:00:00.000Z",
+      "updatedAt": "2026-01-02T00:00:00.000Z",
+      "version": 1,
+      "explicitContentType": "technical-article"
+    }
+  ],
+  "expected": {
+    "core": {
+      "narrativeProse": "Builds arguments through explicit tradeoffs, technical constraints, and implementation realities.",
+      "certaintyLevel": "moderate",
+      "judgmentFrequency": "moderate",
+      "conclusionPace": "moderate",
+      "readerRelationship": "peer",
+      "authoritySource": "practice",
+      "derivedAntiPatterns": ["hand-wavy wording"]
+    },
+    "formatExpressions": {
+      "technical-article": {
+        "contentType": "technical-article",
+        "narrativeProse": "Technical articles stay formal with explicit criteria and measured claims.",
+        "register": "formal",
+        "openingStyle": "contextual",
+        "technicalDensity": "high"
+      }
+    }
+  }
+}

@@ -8,6 +8,7 @@ export interface CandidateScoreInput {
   readonly strategy: QualityLaneStrategy;
   readonly qualityProfile?: ContentTypeQualityProfile;
   readonly lexicalPenalty?: number;
+  readonly reasoningEvaluationEnabled?: boolean;
 }
 
 export function scoreCandidate(input: CandidateScoreInput): CandidateScoreBreakdown {
@@ -16,10 +17,11 @@ export function scoreCandidate(input: CandidateScoreInput): CandidateScoreBreakd
   const driftPenalty = 100 - clamp(input.driftScore);
   const strategyBonus = strategyBonusFor(input.strategy);
   const profile = input.qualityProfile;
+  const reasoningEnabled = input.reasoningEvaluationEnabled === true;
 
-  const criticWeight = profile?.criticWeight ?? 0.3;
-  const fidelityWeight = profile?.fidelityWeight ?? 0.4;
-  const driftWeight = profile?.driftWeight ?? 0.25;
+  const criticWeight = profile?.criticWeight ?? (reasoningEnabled ? 0.25 : 0.3);
+  const fidelityWeight = profile?.fidelityWeight ?? (reasoningEnabled ? 0.3 : 0.4);
+  const driftWeight = profile?.driftWeight ?? (reasoningEnabled ? 0.4 : 0.25);
 
   const finalScore = Math.max(
     0,

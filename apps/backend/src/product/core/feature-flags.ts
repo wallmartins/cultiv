@@ -18,6 +18,14 @@ export function resolveBackendFeatureFlags(config: BackendConfig): readonly Feat
       };
     }
 
+    if (flag.key === "voice.reasoningSignatureV1") {
+      return {
+        ...flag,
+        enabled: config.reasoningSignatureV1Enabled === true,
+        defaultVariant: config.reasoningSignatureV1Enabled === true ? "on" : "off"
+      };
+    }
+
     return flag;
   });
 
