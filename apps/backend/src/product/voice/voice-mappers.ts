@@ -4,6 +4,7 @@ import type {
   ContributionCode,
   DevelopmentTraitProfile,
   TraitKey,
+  TraitRecord,
   VoiceExampleBatchCommitResultView,
   VoiceExampleBatchView,
   VoiceExampleListItemView,
@@ -13,6 +14,7 @@ import type {
   VoiceProfileView,
   VoiceReasoningPresentationView
 } from "@my-ai-orchestrator/contracts";
+import { TRAIT_KEYS } from "@my-ai-orchestrator/contracts";
 import type {
   DerivedVoiceProfile,
   VoiceExample,
@@ -145,17 +147,28 @@ export function toVoiceReasoningPresentationView(
   };
 }
 
+function cloneDevelopmentTraitProfile(traitProfile: DevelopmentTraitProfile): DevelopmentTraitProfile {
+  const records = TRAIT_KEYS.reduce<Record<TraitKey, TraitRecord>>((acc, key) => {
+    const record = traitProfile.records[key];
+    acc[key] = {
+      ...record,
+      evidenceExampleIds: [...record.evidenceExampleIds]
+    };
+    return acc;
+  }, {} as Record<TraitKey, TraitRecord>);
+
+  return {
+    traits: { ...traitProfile.traits },
+    records
+  };
+}
+
 function overlayTraitConfirmations(
   traitProfile: DevelopmentTraitProfile,
   confirmations?: VoiceProfileDiagnostics["traitConfirmations"]
 ): DevelopmentTraitProfile {
   if (!confirmations) {
-    return {
-      traits: { ...traitProfile.traits },
-      records: Object.fromEntries(
-        Object.entries(traitProfile.records).map(([key, record]) => [key, { ...record, evidenceExampleIds: [...record.evidenceExampleIds] }])
-      ) as DevelopmentTraitProfile["records"]
-    };
+    return cloneDevelopmentTraitProfile(traitProfile);
   }
 
   const confirmationResponses = Object.fromEntries(

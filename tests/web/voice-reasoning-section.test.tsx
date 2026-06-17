@@ -85,6 +85,7 @@ describe("VoiceReasoningMirror", () => {
   it("renders mirror prose and anti-patterns in detail items", () => {
     const html = renderToStaticMarkup(
       <VoiceReasoningMirror
+        locale="pt"
         messages={messages}
         reasoning={reasoning}
         confidenceLevel="high"
@@ -101,7 +102,8 @@ describe("VoiceReasoningMirror", () => {
     expect(html).toContain(messages.developmentImmature);
     expect(html).toContain(messages.developmentTraits.labels.openingMode);
     expect(html).toContain(messages.developmentTraits.enums.openingMode.observation);
-    expect(html).toContain("—");
+    expect(html).toContain(messages.typicalMoves);
+    expect(html).toContain("Experiência vivida");
 
     const detailHtml = renderToStaticMarkup(
       <>

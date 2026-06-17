@@ -4,6 +4,7 @@ import { VoiceDevelopmentTraitsStrip } from "~/app/voice/components/VoiceDevelop
 import { VoiceMirrorHero } from "~/app/voice/components/VoiceMirrorHero";
 import type { VoiceConfidenceLevel } from "~/app/voice/components/VoiceConfidenceRing";
 import type { DevelopmentTraitProfile, TraitKey, VoiceReasoningPresentationView } from "@my-ai-orchestrator/contracts";
+import { getMoveLabel } from "~/i18n/app/move-labels";
 import type { AppLocale, AppMessages } from "~/i18n/app/types";
 import type { AppDisclosureItem } from "~/platform/ui/AppDisclosure";
 import { getContentTypeLabel } from "~/i18n/app/content-types";
@@ -128,6 +129,7 @@ export function buildReasoningDetailItems({
 }
 
 interface VoiceReasoningMirrorProps {
+  readonly locale: AppLocale;
   readonly messages: AppMessages["voice"]["reasoning"];
   readonly reasoning: VoiceReasoningPresentationView;
   readonly confidenceLevel: VoiceConfidenceLevel;
@@ -136,15 +138,8 @@ interface VoiceReasoningMirrorProps {
   readonly onAuthorityLinkClick?: () => void;
 }
 
-function formatMoveLabel(move: string): string {
-  return move
-    .split(/[_-]+/)
-    .filter(Boolean)
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(" ");
-}
-
 export function VoiceReasoningMirror({
+  locale,
   messages,
   reasoning,
   confidenceLevel,
@@ -226,10 +221,25 @@ export function VoiceReasoningMirror({
               label={messages.epistemicPosture}
               value={messages.enums.epistemicPosture[development.epistemicPosture]}
             />
-            {development.moveLabels.map((move) => (
-              <VoiceTraitChip key={move} label={messages.typicalMoves} value={formatMoveLabel(move)} />
-            ))}
           </div>
+
+          {development.moveLabels.length > 0 ? (
+            <div className="rounded-[var(--workspace-radius-sm)] border border-border-subtle/60 bg-surface-elevated/40 px-3 py-3">
+              <Text variant="meta" className="mb-2 block text-xs text-muted-foreground">
+                {messages.typicalMoves}
+              </Text>
+              <ul className="flex flex-wrap gap-2">
+                {development.moveLabels.map((move) => (
+                  <li
+                    key={move}
+                    className="rounded-full bg-moss/10 px-3 py-1 text-sm font-medium text-foreground"
+                  >
+                    {getMoveLabel(locale, move)}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
 
           {traitProfile ? (
             <VoiceDevelopmentTraitsStrip

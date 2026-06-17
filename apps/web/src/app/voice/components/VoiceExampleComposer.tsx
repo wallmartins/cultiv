@@ -12,6 +12,7 @@ import { saveVoiceExamples, type VoiceComposerSlot } from "~/app/voice/lib/route
 import { VOICE_EXAMPLE_FORMATS } from "~/app/voice/lib/voice-example-formats";
 import { useClientSdk } from "~/platform/runtime/client-sdk-context";
 import { AppSelect } from "~/platform/ui/AppSelect";
+import { lenisScrollRegionProps } from "~/platform/ui/lenis-scroll-region";
 
 type SlotState = {
   readonly id: string;
@@ -184,6 +185,7 @@ export function VoiceExampleComposer({ mode, initialExample, onSaved }: VoiceExa
               </label>
               <textarea
                 className="mt-2 min-h-32 w-full border border-foreground bg-transparent px-4 py-3"
+                {...lenisScrollRegionProps}
                 value={slot.text}
                 onChange={(event) => updateSlot(slot.id, { text: event.target.value })}
               />
@@ -247,6 +249,7 @@ export function VoiceExampleComposer({ mode, initialExample, onSaved }: VoiceExa
                   </label>
                   <textarea
                     className="mt-2 min-h-20 w-full border border-foreground bg-transparent px-4 py-3"
+                    {...lenisScrollRegionProps}
                     value={slot.context}
                     onChange={(event) => updateSlot(slot.id, { context: event.target.value })}
                   />

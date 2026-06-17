@@ -238,6 +238,7 @@ export function VoiceDashboard() {
       {profile.reasoning ? (
         <div ref={authorityAnchorRef}>
           <VoiceReasoningMirror
+            locale={locale}
             messages={voiceMessages.reasoning}
             reasoning={profile.reasoning}
             confidenceLevel={confidenceLevel}
