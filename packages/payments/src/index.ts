@@ -65,6 +65,7 @@ export type {
   GatewayWebhookEventType
 } from "./gateway/types.js";
 export { resolveGatewayForCurrency } from "./gateway/router.js";
+export { createStripeGatewayAdapter, mapStripeEvent } from "./gateway/stripe-adapter.js";
 
 export interface BillingFeatureAllowance {
   readonly key: string;

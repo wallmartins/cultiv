@@ -1,0 +1,23 @@
+{
+  "id": "evt_test_checkout_completed",
+  "object": "event",
+  "api_version": "2024-11-20.acacia",
+  "created": 1710000000,
+  "type": "checkout.session.completed",
+  "data": {
+    "object": {
+      "id": "cs_test_session",
+      "object": "checkout.session",
+      "amount_total": 4900,
+      "currency": "usd",
+      "customer": "cus_test_customer",
+      "subscription": "sub_test_subscription",
+      "metadata": {
+        "application_user_id": "user_test_1",
+        "checkout_intent_id": "chk_test_intent",
+        "internal_ref": "pro",
+        "product_kind": "subscription"
+      }
+    }
+  }
+}

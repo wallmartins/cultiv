@@ -10,7 +10,8 @@
   },
   "dependencies": {
     "@my-ai-orchestrator/contracts": "workspace:*",
-    "effect": "^3.16.12"
+    "effect": "^3.16.12",
+    "stripe": "^22.2.1"
   },
   "exports": {
     ".": "./src/index.ts",
