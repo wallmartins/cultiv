@@ -9,6 +9,7 @@ import { up as migrate0003 } from "../src/infra/migrations/0003-add-audit-record
 import { up as migrate0004 } from "../src/infra/migrations/0004-add-voice-training-consents.js";
 import { up as migrate0005 } from "../src/infra/migrations/0005-durable-runtime.js";
 import { up as migrate0006 } from "../src/infra/migrations/0006-billing-relational.js";
+import { up as migrate0010 } from "../src/infra/migrations/0010-billing-gateway.js";
 
 declare const process: {
   readonly env: Record<string, string | undefined>;
@@ -147,6 +148,10 @@ async function ensureTestSchema(db: Kysely<DatabaseTables>): Promise<void> {
 
     if (!existingTables.has("billing_plans")) {
       await migrate0006(db);
+    }
+
+    if (!existingTables.has("billing_gateway_catalog")) {
+      await migrate0010(db);
     }
   } finally {
     await sql`select pg_advisory_unlock(94021431)`.execute(db);
