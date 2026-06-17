@@ -4,7 +4,14 @@ import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import type { ReasoningExtractionResult } from "@my-ai-orchestrator/contracts";
 import type { VoiceExampleRecord } from "@my-ai-orchestrator/database";
-import { TEST_REASONING_EXTRACTION_FIXTURE, extractReasoningSignature, resolvePrimaryExampleLanguage } from "../../apps/backend/src/product/voice/reasoning-extraction.js";
+import {
+  TEST_REASONING_EXTRACTION_FIXTURE,
+  TEST_REASONING_EXTRACTION_FIXTURE_PT,
+  buildReasoningExtractionMessages,
+  extractReasoningSignature,
+  isReasoningNarrativeLikelyPortuguese,
+  resolvePrimaryExampleLanguage
+} from "../../apps/backend/src/product/voice/reasoning-extraction.js";
 import { createAIAdapterRegistry, createAIAdapterService, registerDefaultAIProviders } from "@my-ai-orchestrator/ai-adapters";
 import type { BackendProviderTransport } from "../../apps/backend/src/execution/pipeline/provider-transport.js";
 
@@ -108,6 +115,23 @@ describe("reasoning extraction", () => {
 
     expect(result.core.certaintyLevel).toBe(TEST_REASONING_EXTRACTION_FIXTURE.core.certaintyLevel);
     expect(result.formatExpressions["linkedin-post"]).toBeDefined();
+  });
+
+  it("builds Portuguese extraction prompts for pt-BR examples", () => {
+    const messages = buildReasoningExtractionMessages([
+      { language: "pt-BR", state: "active", text: "Exemplo em português." } as VoiceExampleRecord,
+      { language: "pt-BR", state: "active", text: "Outro exemplo em português." } as VoiceExampleRecord
+    ]);
+
+    expect(messages.system).toContain("Brazilian Portuguese");
+    expect(messages.system).toContain("pt-BR");
+    expect(messages.user).toContain("language: pt-BR");
+    expect(messages.user).toContain("Brazilian Portuguese");
+  });
+
+  it("detects English reasoning narratives that should be retried for pt-BR", () => {
+    expect(isReasoningNarrativeLikelyPortuguese(TEST_REASONING_EXTRACTION_FIXTURE)).toBe(false);
+    expect(isReasoningNarrativeLikelyPortuguese(TEST_REASONING_EXTRACTION_FIXTURE_PT)).toBe(true);
   });
 
   it.each(loadGoldenCorpora())("produces schema-valid extraction for $id", async (corpus) => {
