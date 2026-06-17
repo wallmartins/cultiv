@@ -24,7 +24,6 @@ import type {
   ArgumentDevelopmentSignature,
   ReasoningExtractionResult
 } from "@my-ai-orchestrator/contracts";
-import type { ArgumentDevelopmentExtractionError } from "./argument-development-extraction.js";
 import type { BackendVoiceRebuildService } from "./voice-rebuild-types.js";
 import type { BackendObservabilityService } from "../core/observability-types.js";
 import type { BackendVoiceConsentService } from "../../safety/voice-consent-types.js";
@@ -226,9 +225,7 @@ function processUserRebuild(
                 providerTransport: dependencies.providerTransport
               }).pipe(Effect.either)
             : Effect.succeed(
-                Either.right<ArgumentDevelopmentExtractionError, ArgumentDevelopmentExtractionResult | undefined>(
-                  undefined
-                )
+                Either.right<ArgumentDevelopmentExtractionResult | undefined>(undefined)
               );
 
         const [reasoningResult, developmentResult] = yield* Effect.all([
@@ -255,7 +252,7 @@ function processUserRebuild(
         }
 
         if (activeExamples.length >= 2) {
-          if (developmentResult._tag === "Right" && developmentResult.right) {
+          if (developmentResult._tag === "Right" && developmentResult.right !== undefined) {
             development = developmentResult.right.development;
             logger?.info("Argument development extraction succeeded", {
               userId,
