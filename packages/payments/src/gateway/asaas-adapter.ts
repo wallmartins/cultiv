@@ -256,9 +256,22 @@ export function createAsaasGatewayAdapter(options: AsaasGatewayAdapterOptions): 
           if (signature !== options.webhookToken) {
             throw new Error("invalid asaas webhook token");
           }
-          const body = payload as AsaasWebhookPayload & {
-            readonly metadata?: { readonly application_user_id?: string; readonly internal_ref?: string; readonly product_kind?: string };
-          };
+          const body =
+            typeof payload === "string"
+              ? (JSON.parse(payload) as AsaasWebhookPayload & {
+                  readonly metadata?: {
+                    readonly application_user_id?: string;
+                    readonly internal_ref?: string;
+                    readonly product_kind?: string;
+                  };
+                })
+              : (payload as AsaasWebhookPayload & {
+                  readonly metadata?: {
+                    readonly application_user_id?: string;
+                    readonly internal_ref?: string;
+                    readonly product_kind?: string;
+                  };
+                });
           const mapped = mapAsaasWebhookEvent(body, {
             userId: body.metadata?.application_user_id,
             internalRef: body.metadata?.internal_ref,

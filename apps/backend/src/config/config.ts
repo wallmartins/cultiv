@@ -73,6 +73,13 @@ export interface BackendConfig extends RuntimeConfig, BackendAuthConfig {
   readonly groqApiKey?: string;
   readonly groqBaseUrl?: string;
   readonly ollamaBaseUrl?: string;
+  readonly stripeSecretKey?: string;
+  readonly stripeWebhookSecret?: string;
+  readonly asaasApiKey?: string;
+  readonly asaasWebhookToken?: string;
+  readonly asaasBaseUrl?: string;
+  readonly billingCheckoutSuccessUrl?: string;
+  readonly billingCheckoutCancelUrl?: string;
 }
 
 export interface LoadBackendEnvironmentOptions {
@@ -137,7 +144,14 @@ export function readBackendConfig(envVars: NodeJS.ProcessEnv = process.env): Bac
     deepSeekBaseUrl: readOptionalString(envVars.DEEPSEEK_BASE_URL),
     groqApiKey: readOptionalString(envVars.GROQ_API_KEY),
     groqBaseUrl: readOptionalString(envVars.GROQ_BASE_URL),
-    ollamaBaseUrl: readOptionalString(envVars.OLLAMA_BASE_URL)
+    ollamaBaseUrl: readOptionalString(envVars.OLLAMA_BASE_URL),
+    stripeSecretKey: readOptionalString(envVars.STRIPE_SECRET_KEY),
+    stripeWebhookSecret: readOptionalString(envVars.STRIPE_WEBHOOK_SECRET),
+    asaasApiKey: readOptionalString(envVars.ASAAS_API_KEY),
+    asaasWebhookToken: readOptionalString(envVars.ASAAS_WEBHOOK_TOKEN),
+    asaasBaseUrl: readOptionalString(envVars.ASAAS_BASE_URL),
+    billingCheckoutSuccessUrl: readOptionalString(envVars.BILLING_CHECKOUT_SUCCESS_URL),
+    billingCheckoutCancelUrl: readOptionalString(envVars.BILLING_CHECKOUT_CANCEL_URL)
   };
 }
 

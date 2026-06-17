@@ -1,5 +1,7 @@
 # Progress Log
 
+| 2026-06-17 | feat(backend): billing checkout + webhook routes, gateway services, Stripe/Asaas config |
+| 2026-06-17 | feat(payments): Stripe + Asaas adapters, webhook dispatch (tasks 7–9) |
 | 2026-06-17 | pause(payment-gateway): Tasks 1–6 done on `feat/payment-gateway`; resume at Task 7 (Stripe adapter) |
 | 2026-06-17 | feat(backend): PostgreSQL billing gateway store — checkout intents, catalog lookup, customer/subscription upserts, event dedup |
 | 2026-06-17 | feat(backend): billing gateway PostgreSQL tables — migration 0010, five tables, dev catalog seed |

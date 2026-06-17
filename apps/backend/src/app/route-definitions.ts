@@ -23,6 +23,9 @@ export const Routes = {
   PostMeVoiceProfileBatchItems: "POST /me/voice-profile/example-batches/:batchId/items",
   PostMeVoiceProfileBatchCommit: "POST /me/voice-profile/example-batches/:batchId/commit",
 
+  PostMeBillingCheckout: "POST /me/billing/checkout",
+  GetMeBillingEntitlement: "GET /me/billing/entitlement",
+
   PostApiGenerationPreview: "POST /api/generation-preview",
 
   GetInternalPolicies: "GET /api/internal/policies",
