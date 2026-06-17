@@ -92,18 +92,16 @@ interface VoiceReasoningMirrorProps {
   readonly messages: AppMessages["voice"]["reasoning"];
   readonly reasoning: VoiceReasoningPresentationView;
   readonly confidenceLevel: VoiceConfidenceLevel;
-  readonly confidenceLabel: string;
-  readonly dialEyebrow: string;
   readonly dialSubline: string;
+  readonly dialAccessibleLabel: string;
 }
 
 export function VoiceReasoningMirror({
   messages,
   reasoning,
   confidenceLevel,
-  confidenceLabel,
-  dialEyebrow,
-  dialSubline
+  dialSubline,
+  dialAccessibleLabel
 }: VoiceReasoningMirrorProps) {
   return (
     <section className="space-y-6">
@@ -118,9 +116,8 @@ export function VoiceReasoningMirror({
 
       <VoiceMirrorHero
         level={confidenceLevel}
-        confidenceLabel={confidenceLabel}
-        dialEyebrow={dialEyebrow}
         dialSubline={dialSubline}
+        dialAccessibleLabel={dialAccessibleLabel}
         bodyCopy={reasoning.core.narrativeProse}
       />
 

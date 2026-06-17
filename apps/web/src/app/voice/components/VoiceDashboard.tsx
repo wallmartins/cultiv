@@ -15,6 +15,7 @@ import {
   getMissingVoiceFormats,
   getUnderrepresentedVoiceFormats,
   getVoiceAdaptationModeCopy,
+  getVoiceConfidenceDialAccessibleLabel,
   getVoiceConfidenceDialSubline,
   getVoiceConfidencePanelMessage,
   getVoiceDiagnosticsText,
@@ -93,6 +94,11 @@ export function VoiceDashboard() {
   const rebuildStatus = profile.diagnostics.pendingRebuild.status;
   const confidenceLevel = toVoiceConfidenceLevel(profile.profile.confidence);
   const dialSubline = getVoiceConfidenceDialSubline(profile.profile.confidence, voiceMessages);
+  const dialAccessibleLabel = getVoiceConfidenceDialAccessibleLabel(
+    confidenceLabel,
+    dialSubline,
+    voiceMessages
+  );
   const mirrorBodyCopy = getVoiceConfidencePanelMessage(profile.profile, voiceMessages, {
     detailed: true
   });
@@ -202,9 +208,8 @@ export function VoiceDashboard() {
           messages={voiceMessages.reasoning}
           reasoning={profile.reasoning}
           confidenceLevel={confidenceLevel}
-          confidenceLabel={confidenceLabel}
-          dialEyebrow={voiceMessages.confidenceDialEyebrow}
           dialSubline={dialSubline}
+          dialAccessibleLabel={dialAccessibleLabel}
         />
       ) : (
         <section className="space-y-6">
@@ -218,9 +223,8 @@ export function VoiceDashboard() {
           </div>
           <VoiceMirrorHero
             level={confidenceLevel}
-            confidenceLabel={confidenceLabel}
-            dialEyebrow={voiceMessages.confidenceDialEyebrow}
             dialSubline={dialSubline}
+            dialAccessibleLabel={dialAccessibleLabel}
             bodyCopy={mirrorBodyCopy}
           />
         </section>

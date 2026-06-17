@@ -65,6 +65,14 @@ export function getVoiceConfidenceDialSubline(
   return messages.confidenceDialSubline.none;
 }
 
+export function getVoiceConfidenceDialAccessibleLabel(
+  confidenceLabel: string,
+  subline: string,
+  messages: AppVoiceMessages
+): string {
+  return `${messages.confidenceDialEyebrow}: ${confidenceLabel}. ${subline}`;
+}
+
 export function getVoiceConfidencePanelMessage(
   profile: VoiceProfileView,
   messages: AppVoiceMessages,

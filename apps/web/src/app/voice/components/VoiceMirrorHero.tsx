@@ -4,17 +4,15 @@ import type { VoiceConfidenceLevel } from "~/app/voice/components/VoiceConfidenc
 
 export interface VoiceMirrorHeroProps {
   readonly level: VoiceConfidenceLevel;
-  readonly confidenceLabel: string;
-  readonly dialEyebrow: string;
   readonly dialSubline: string;
+  readonly dialAccessibleLabel: string;
   readonly bodyCopy: string;
 }
 
 export function VoiceMirrorHero({
   level,
-  confidenceLabel,
-  dialEyebrow,
   dialSubline,
+  dialAccessibleLabel,
   bodyCopy
 }: VoiceMirrorHeroProps) {
   return (
@@ -25,9 +23,8 @@ export function VoiceMirrorHero({
       <div className="shrink-0 pr-3 sm:pr-6">
         <VoiceConfidenceDial
           level={level}
-          confidenceLabel={confidenceLabel}
-          eyebrow={dialEyebrow}
-          subline={dialSubline}
+          centerLabel={dialSubline}
+          accessibleLabel={dialAccessibleLabel}
         />
       </div>
     </div>

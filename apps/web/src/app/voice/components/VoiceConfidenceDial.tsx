@@ -1,4 +1,4 @@
-import { cn, Text } from "@my-ai-orchestrator/ui";
+import { cn } from "@my-ai-orchestrator/ui";
 import { useEffect, useId, useState } from "react";
 import {
   voiceConfidenceProgressByLevel,
@@ -13,9 +13,8 @@ const CIRCUMFERENCE = 2 * Math.PI * DIAL_RADIUS;
 
 export interface VoiceConfidenceDialProps {
   readonly level: VoiceConfidenceLevel;
-  readonly confidenceLabel: string;
-  readonly eyebrow: string;
-  readonly subline: string;
+  readonly centerLabel: string;
+  readonly accessibleLabel: string;
   readonly className?: string;
 }
 
@@ -30,9 +29,8 @@ function progressToPoint(progress: number): { readonly cx: number; readonly cy: 
 
 export function VoiceConfidenceDial({
   level,
-  confidenceLabel,
-  eyebrow,
-  subline,
+  centerLabel,
+  accessibleLabel,
   className
 }: VoiceConfidenceDialProps) {
   const gradientId = useId();
@@ -40,7 +38,6 @@ export function VoiceConfidenceDial({
   const [animatedProgress, setAnimatedProgress] = useState(0);
   const strokeOffset = CIRCUMFERENCE * (1 - animatedProgress);
   const dot = progressToPoint(animatedProgress);
-  const accessibleLabel = `${eyebrow}: ${confidenceLabel}. ${subline}`;
 
   useEffect(() => {
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -137,22 +134,10 @@ export function VoiceConfidenceDial({
           </linearGradient>
         </defs>
       </svg>
-      <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center px-5 text-center">
-        <Text
-          variant="label"
-          className="mb-1 block text-[0.625rem] tracking-editorial-wide text-muted"
-        >
-          {eyebrow}
-        </Text>
-        <Text as="span" variant="body" className="text-lg font-semibold leading-tight text-foreground sm:text-xl">
-          {confidenceLabel}
-        </Text>
-        <Text
-          variant="meta"
-          className="mt-1 block text-[0.625rem] uppercase tracking-editorial-wide text-moss"
-        >
-          {subline}
-        </Text>
+      <div className="pointer-events-none absolute inset-0 flex items-center justify-center px-6 text-center">
+        <span className="max-w-[5.5rem] font-body text-sm font-bold leading-snug tracking-tight text-foreground capitalize text-balance sm:max-w-[6.25rem] sm:text-[0.9375rem]">
+          {centerLabel}
+        </span>
       </div>
     </div>
   );

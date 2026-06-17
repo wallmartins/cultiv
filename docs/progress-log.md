@@ -1,5 +1,6 @@
 # Progress Log
 
+| 2026-06-17 | fix(web): show only Cultiv growth subline inside voice confidence dial |
 | 2026-06-17 | fix(voice): enforce pt-BR narrativeProse in reasoning extraction with stronger prompts, retry, and test fixture |
 | 2026-06-17 | feat(web): Voice mirror hero with confidence dial and Cultiv growth sublines |
 | 2026-06-16 | fix(web): Voice Dashboard polish — inline confidence status, full-width next step strip, reasoning extraction in example language |

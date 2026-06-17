@@ -31,9 +31,8 @@ describe("VoiceReasoningMirror", () => {
         messages={messages}
         reasoning={reasoning}
         confidenceLevel="high"
-        confidenceLabel="Alta"
-        dialEyebrow="Confiança"
         dialSubline="raízes firmes"
+        dialAccessibleLabel="Confiança: Alta. raízes firmes"
       />
     );
 
