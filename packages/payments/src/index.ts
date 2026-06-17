@@ -260,8 +260,9 @@ export interface BillingServiceContract {
     | BillingEntitlementNotFoundError
     | BillingTopUpPackageNotFoundError
     | BillingOperationConflictError
+    | BillingGatewayError
   >;
-  readonly charge: (request: BillingGatewayChargeRequest) => Effect.Effect<BillingGatewayChargeResult>;
+  readonly charge: (request: BillingGatewayChargeRequest) => Effect.Effect<BillingGatewayChargeResult, BillingGatewayError>;
   readonly listPlans: () => readonly BillingPlanDefinition[];
   readonly getPrimarySubscriptionPlanId: (userId: string) => string | undefined;
   readonly listUsage: (userId?: string) => readonly BillingUsageRecord[];
