@@ -54,6 +54,12 @@ export function buildEffectiveVoiceMetadata(args: {
             certaintyLevel: args.voiceHints.coreReasoningSignature.certaintyLevel,
             conclusionPace: args.voiceHints.coreReasoningSignature.conclusionPace
           }
+        : {}),
+      ...(args.voiceHints.argumentDevelopmentSignature
+        ? {
+            developmentApplied: true,
+            epistemicPosture: args.voiceHints.argumentDevelopmentSignature.epistemicPosture
+          }
         : {})
     },
     pendingProfileRebuild: {

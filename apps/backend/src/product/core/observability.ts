@@ -22,7 +22,11 @@ const emptyCounters: Record<BackendObservabilityEventKind, number> = {
   voice_refresh_event: 0,
   voice_judge_invoked: 0,
   voice_judge_fallback: 0,
-  voice_reasoning_extraction_failed: 0
+  voice_reasoning_extraction_failed: 0,
+  voice_development_extraction_failed: 0,
+  voice_signature_reconciliation_invoked: 0,
+  voice_signature_reconciliation_skipped: 0,
+  voice_signature_reconciliation_failed: 0
 };
 
 export function createBackendObservabilityService(
@@ -73,6 +77,13 @@ export function createBackendObservabilityService(
       recordVoiceJudgeInvoked: (details) => record("voice_judge_invoked", details),
       recordVoiceJudgeFallback: (details) => record("voice_judge_fallback", details),
       recordVoiceReasoningExtractionFailed: (details) => record("voice_reasoning_extraction_failed", details),
+      recordVoiceDevelopmentExtractionFailed: (details) => record("voice_development_extraction_failed", details),
+      recordVoiceSignatureReconciliationInvoked: (details) =>
+        record("voice_signature_reconciliation_invoked", details),
+      recordVoiceSignatureReconciliationSkipped: (details) =>
+        record("voice_signature_reconciliation_skipped", details),
+      recordVoiceSignatureReconciliationFailed: (details) =>
+        record("voice_signature_reconciliation_failed", details),
       snapshot
     };
   });

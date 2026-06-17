@@ -6,6 +6,7 @@ import { AppDisclosureGroup } from "~/platform/ui/AppDisclosure";
 import { AppSkeleton } from "~/platform/ui/AppSkeleton";
 import { toVoiceConfidenceLevel } from "~/app/voice/components/VoiceConfidenceRing";
 import { VoiceMirrorHero } from "~/app/voice/components/VoiceMirrorHero";
+import { VoiceRebuildStatusBanner } from "~/app/voice/components/VoiceRebuildStatusBanner";
 import { VoiceNextStepPanel } from "~/app/voice/components/VoiceNextStepPanel";
 import {
   buildReasoningDetailItems,
@@ -189,19 +190,11 @@ export function VoiceDashboard() {
         </Link>
       </div>
 
-      {rebuildStatus === "in_progress" ? (
-        <AppCard padding="compact" className="border-golden/40 bg-golden/10">
-          <Text variant="body">{voiceMessages.updatingBanner}</Text>
-        </AppCard>
-      ) : null}
-
-      {rebuildStatus === "failed" ? (
-        <AppCard padding="compact" className="border-red-700/30 bg-red-700/10">
-          <Text variant="body" className="text-red-800">
-            {voiceMessages.rebuildFailed}
-          </Text>
-        </AppCard>
-      ) : null}
+      <VoiceRebuildStatusBanner
+        status={rebuildStatus}
+        updatingMessage={voiceMessages.updatingBanner}
+        failedMessage={voiceMessages.rebuildFailed}
+      />
 
       {profile.reasoning ? (
         <VoiceReasoningMirror

@@ -10,7 +10,11 @@ export type BackendObservabilityEventKind =
   | "voice_refresh_event"
   | "voice_judge_invoked"
   | "voice_judge_fallback"
-  | "voice_reasoning_extraction_failed";
+  | "voice_reasoning_extraction_failed"
+  | "voice_development_extraction_failed"
+  | "voice_signature_reconciliation_invoked"
+  | "voice_signature_reconciliation_skipped"
+  | "voice_signature_reconciliation_failed";
 
 export interface BackendObservabilityEvent {
   readonly kind: BackendObservabilityEventKind;
@@ -34,5 +38,9 @@ export interface BackendObservabilityService {
   readonly recordVoiceJudgeInvoked: (details: Readonly<Record<string, unknown>>) => Effect.Effect<void, never>;
   readonly recordVoiceJudgeFallback: (details: Readonly<Record<string, unknown>>) => Effect.Effect<void, never>;
   readonly recordVoiceReasoningExtractionFailed: (details: Readonly<Record<string, unknown>>) => Effect.Effect<void, never>;
+  readonly recordVoiceDevelopmentExtractionFailed: (details: Readonly<Record<string, unknown>>) => Effect.Effect<void, never>;
+  readonly recordVoiceSignatureReconciliationInvoked: (details: Readonly<Record<string, unknown>>) => Effect.Effect<void, never>;
+  readonly recordVoiceSignatureReconciliationSkipped: (details: Readonly<Record<string, unknown>>) => Effect.Effect<void, never>;
+  readonly recordVoiceSignatureReconciliationFailed: (details: Readonly<Record<string, unknown>>) => Effect.Effect<void, never>;
   readonly snapshot: () => Effect.Effect<BackendObservabilitySnapshot, never>;
 }

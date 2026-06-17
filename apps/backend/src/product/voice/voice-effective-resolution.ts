@@ -111,6 +111,12 @@ export function resolveEffectiveVoice(
               certaintyLevel: voiceHints.coreReasoningSignature.certaintyLevel,
               conclusionPace: voiceHints.coreReasoningSignature.conclusionPace
             }
+          : {}),
+        ...(reasoningSignatureEnabled && voiceHints.argumentDevelopmentSignature
+          ? {
+              developmentApplied: true,
+              epistemicPosture: voiceHints.argumentDevelopmentSignature.epistemicPosture
+            }
           : {})
       },
       resolutionContext: {

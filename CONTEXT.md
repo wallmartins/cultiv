@@ -32,6 +32,26 @@ _Avoid_: Cognitive fingerprint, persona traits, narrative preset
 The author-global **Reasoning Signature** derived from all active **Voice Examples**, capturing how the author thinks regardless of channel.
 _Avoid_: Global persona, default voice, base tone
 
+**Argument Development Signature**:
+The author-global hybrid profile of how the author develops a text — typical argumentative moves, transition tendencies, epistemic posture while writing, and structural anti-patterns — inferred from **Voice Examples** without imposing a fixed phase template.
+_Avoid_: Outline template, narrative preset, fixed story structure
+
+**Argument Development Signature Representation**:
+The persisted form of an **Argument Development Signature**: rich development prose, an inferred repertoire of move labels, soft transition tendencies, a reduced epistemic-posture enum, and structural anti-patterns for evaluation.
+_Avoid_: Content outline schema, beat sheet, rigid funnel stages
+
+**Argument Development Extraction**:
+The structured LLM call inside **Voice Profile Rebuild** that infers the **Argument Development Signature** from all active **Voice Examples** in parallel with **Reasoning Extraction**, without reading the draft **Core Reasoning Signature** output.
+_Avoid_: Sequential anchored extraction, outline generation, per-example development calls
+
+**Voice Signature Divergence Check**:
+The deterministic, non-LLM check after parallel **Reasoning Extraction** and **Argument Development Extraction** that decides whether **Voice Signature Reconciliation** is needed — comparing epistemic posture to **Core Reasoning Signature** enums, detecting prose collapse between layers, and flagging structural anti-patterns incompatible with Core traits.
+_Avoid_: LLM conflict classifier, user-facing mismatch score, generation gate
+
+**Voice Signature Reconciliation**:
+The offline harmonization step after parallel **Reasoning Extraction** and **Argument Development Extraction** that produces one coherent author-facing profile across **Core Reasoning Signature**, **Argument Development Signature**, and **Format Expression Profile** before persistence — resolving internal contradictions without surfacing conflict states to the author or blocking generation. A reconciliation LLM call runs only when a deterministic divergence check finds conflict between the parallel drafts; otherwise the drafts are persisted as-is.
+_Avoid_: User-visible conflict card, dual profile, generation gate, unconditional third extraction call
+
 **Format Expression Profile**:
 Per-**Content Type** register and expression traits — such as formality, technical density, and platform tone — derived from that format's examples and layered on top of the **Core Reasoning Signature** without changing the author's reasoning mode.
 _Avoid_: Format voice preset, channel persona, per-format cognitive profile
@@ -45,28 +65,32 @@ The hybrid persisted form of a **Reasoning Signature**: narrative prose for prom
 _Avoid_: Voice attribute schema, personality model, cognitive JSON
 
 **Step-Scoped Reasoning Injection**:
-The rule that **Core Reasoning Signature** and **Format Expression Profile** enter LLM steps at different depths — full narrative on structural steps, guardrail enums on refinement steps, and voice examples scoped by step as today.
-_Avoid_: One-size prompt block, uniform voice injection
+The rule that **Core Reasoning Signature**, **Argument Development Signature**, and **Format Expression Profile** enter LLM steps at different depths — full narrative on structural steps, guardrail enums and anti-patterns on refinement steps, and voice examples scoped by step as today. **Argument Development Signature** is injected in a separate `== ARGUMENT DEVELOPMENT ==` prompt block parallel to `== AUTHOR REASONING ==`.
+_Avoid_: One-size prompt block, uniform voice injection, merged author block that collapses layers
+
+**Argument Development Drift**:
+Heuristic evaluation of how closely a candidate follows the reconciled **Argument Development Signature** — including epistemic posture, typical moves, and structural anti-patterns — applied in every **Quality Mode** during candidate scoring, not only when **Voice Judge** runs.
+_Avoid_: Judge-only development check, format drift, surface marker drift
 
 **Voice Judge**:
-A conditional LLM evaluation pass that scores finalist candidates against the **Core Reasoning Signature** and author examples, using a separate provider from generation to reduce self-judge bias.
-_Avoid_: Second draft, rewrite pass, quality LLM step
+A conditional LLM evaluation pass that scores finalist candidates against the reconciled **Core Reasoning Signature**, **Argument Development Signature**, and author examples, using a separate provider from generation to reduce self-judge bias. It never replaces heuristic **Argument Development Drift** in `fast` or `balanced`.
+_Avoid_: Second draft, rewrite pass, quality LLM step, sole development enforcement layer
 
 **Voice Judge Routing Profile**:
 The versioned AI policy rule that selects the judge provider and model independently from content-generation routing profiles.
 _Avoid_: Shared generation profile, judge adapter hack
 
 **Voice Profile Rebuild**:
-The offline recalculation of the **Derived Voice Profile**, **Core Reasoning Signature**, and **Format Expression Profile** from all active **Voice Examples**, triggered when examples are created, updated, or batch-committed — not during generation.
+The offline recalculation of the **Derived Voice Profile**, **Core Reasoning Signature**, **Argument Development Signature**, and **Format Expression Profile** from all active **Voice Examples**, triggered when examples are created, updated, or batch-committed — not during generation.
 _Avoid_: Runtime inference, per-generation profile refresh
 
 **Voice Reasoning Presentation**:
-The hero read-only mirror on the **Voice Dashboard** that shows the inferred **Core Reasoning Signature** in readable prose and sentence-case trait chips first, with per-format **Format Expression Profile** and **Derived Anti-Patterns** tucked into **Voice Dashboard Detail Layer** sections—not equal-weight cards or diagnostic label styling.
-_Avoid_: Style settings, persona editor, cognitive profile form, uppercase mono trait labels
+The hero read-only mirror on the **Voice Dashboard** that shows the reconciled **Core Reasoning Signature** first (“how I think”) and the reconciled **Argument Development Signature** second (“how I develop a text”) in readable prose and sentence-case trait chips, with per-format **Format Expression Profile** and derived anti-patterns tucked into **Voice Dashboard Detail Layer** sections—not equal-weight cards, diagnostic label styling, or internal extraction conflict states.
+_Avoid_: Style settings, persona editor, cognitive profile form, uppercase mono trait labels, mismatch warnings, single merged narrative that hides development
 
 **Reasoning Extraction**:
-The single structured LLM call inside **Voice Profile Rebuild** that infers the **Core Reasoning Signature**, per-format **Format Expression Profile**, and **Derived Anti-Patterns** from all active examples in one pass, using the primary generation provider family rather than the **Voice Judge** provider.
-_Avoid_: Per-example extraction, per-format rebuild calls, runtime reasoning inference
+The structured LLM call inside **Voice Profile Rebuild** that infers the draft **Core Reasoning Signature**, per-format **Format Expression Profile**, and **Derived Anti-Patterns** from all active examples, using the primary generation provider family rather than the **Voice Judge** provider; its output is reconciled before persistence.
+_Avoid_: Per-example extraction, per-format rebuild calls, runtime reasoning inference, author-visible draft state
 
 **Derived Voice Profile**:
 The persisted voice projection recalculated from the user's examples and anti-pattern inputs, used by the writing pipeline as the current source of truth for voice alignment.
@@ -523,9 +547,15 @@ _Avoid_: AI Writing Engine, content-lib, my-ai-orchestrator
 - A **Content Type** selects or constrains which **Pipeline** is used.
 - A **Content Type Format Preset** may supply format constraints during voice resolution, but must not inject cognitive or narrative patterns when the author has a derived voice.
 - **Core Reasoning Signature** is derived from all active **Voice Examples** during profile rebuild.
+- **Argument Development Signature** is derived from the same **Voice Examples** during profile rebuild and sits between **Core Reasoning Signature** (who the author is as a thinker) and **Format Expression Profile** (how the author sounds on a channel).
+- **Argument Development Signature** must be inferred from examples; Cultiv must not impose a fixed argumentative phase template on the author.
+- **Reasoning Extraction** and **Argument Development Extraction** run in parallel during **Voice Profile Rebuild**; **Voice Signature Reconciliation** harmonizes their drafts before persistence only when a divergence check detects conflict, so the author sees one coherent profile.
+- **Voice Signature Reconciliation** must not block generation or expose internal contradiction states to the author in Fase 1.
+- **Argument Development Signature**, **Argument Development Extraction**, **Voice Signature Divergence Check**, **Voice Signature Reconciliation**, and **Argument Development Drift** ship under the same `voice.reasoningSignatureV1` feature flag as **Core Reasoning Signature** — not a separate product toggle in v1.
+- **Argument Development Extraction** runs when at least two active **Voice Examples** exist; the resulting signature is treated as immature until at least three active examples are available, aligned with **Voice Confidence** signals on the **Voice Dashboard**.
 - **Step-Scoped Reasoning Injection** applies **Core Reasoning Signature** and **Format Expression Profile** to every LLM step, with full narrative on structural steps (`hook`, `outline`, `structure`, `draft`, `expand`) and enum guardrails on refinement steps (`refine`, `tighten`).
 - **Reasoning Extraction** uses the primary provider via a dedicated extraction routing profile; **Voice Judge** uses **Voice Judge Routing Profile** (Groq preferred) and must not share the generation provider by default.
-- **Voice Judge** runs on finalist candidates when reasoning drift is borderline, top candidates tie, or **Quality Mode** is `strict`.
+- **Voice Judge** runs on finalist candidates when **Quality Mode** is `strict`, or in `balanced` when reasoning drift is borderline, **Argument Development Drift** is borderline, or top candidates tie; it never runs in `fast`. **Argument Development Drift** and reasoning drift heuristics run in every **Quality Mode**, including when the judge does not run.
 - **Voice Profile Rebuild** runs when **Voice Examples** change, coalesces rapid updates per user, and keeps the previous profile active while rebuild is in progress.
 - **Reasoning Extraction** uses one structured LLM call per rebuild; on failure, the last valid profile remains active and heuristics-only derivation is not promoted without a successful extraction.
 - **Voice Reasoning Presentation** is read-only in Fase 1; authors refine inference by adding or improving **Voice Examples**, not by editing derived reasoning fields directly.

@@ -364,6 +364,37 @@ describe("text-quality package", () => {
     expect(profile.coreReasoningSignature).toEqual(coreReasoningSignature);
     expect(profile.derivedAntiPatterns).toEqual(["generic advice"]);
   });
+
+  it("preserves argumentDevelopmentSignature from voice hints", async () => {
+    const argumentDevelopmentSignature = {
+      developmentProse: "Abre pela experiência vivida e tolera dúvida antes de concluir.",
+      moveLabels: ["experiencia_vivida", "duvida"],
+      transitionTendencies: [{ from: "experiencia_vivida", to: "duvida", frequency: "common" as const }],
+      epistemicPosture: "exploratory" as const,
+      structuralAntiPatterns: ["tese_prematura"]
+    };
+
+    const profile = await Effect.runPromise(
+      resolveVoiceProfile({
+        userId: "user-1",
+        briefing: "Briefing",
+        request: {
+          pipeline: {
+            name: "linkedin-post",
+            steps: [{ name: "draft", skill: "draft" }]
+          },
+          inputs: { briefing: "Briefing" }
+        },
+        voiceHints: {
+          tone: "personal",
+          cadence: "direct",
+          argumentDevelopmentSignature
+        }
+      })
+    );
+
+    expect(profile.argumentDevelopmentSignature).toEqual(argumentDevelopmentSignature);
+  });
 });
 
 function repeatWords(word: string, count: number): string {

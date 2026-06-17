@@ -2,6 +2,10 @@ import { Effect } from "effect";
 import { AIAdapterTransportError, type AIProviderRequest } from "@my-ai-orchestrator/ai-adapters";
 import type { BackendConfig } from "../../config/config.js";
 import { TEST_REASONING_EXTRACTION_FIXTURE, TEST_REASONING_EXTRACTION_FIXTURE_PT } from "../../product/voice/reasoning-extraction.js";
+import {
+  TEST_ARGUMENT_DEVELOPMENT_EXTRACTION_FIXTURE,
+  TEST_ARGUMENT_DEVELOPMENT_EXTRACTION_FIXTURE_PT
+} from "../../product/voice/argument-development-extraction.js";
 
 export interface BackendProviderTransport {
   readonly complete: (providerRequest: AIProviderRequest) => Effect.Effect<unknown, AIAdapterTransportError>;
@@ -242,6 +246,29 @@ function renderTestResponse(providerRequest: AIProviderRequest): string {
     }
 
     return JSON.stringify(TEST_REASONING_EXTRACTION_FIXTURE);
+  }
+
+  if (providerRequest.metadata?.purpose === "argument-development-extraction") {
+    const body = providerRequest.body as Record<string, unknown>;
+    const messages = Array.isArray(body.messages)
+      ? (body.messages as ReadonlyArray<Record<string, unknown>>)
+      : [];
+    const systemMessage = messages.find((message) => message.role === "system");
+    const systemContent = typeof systemMessage?.content === "string" ? systemMessage.content : "";
+
+    if (systemContent.includes("Brazilian Portuguese") || systemContent.includes("pt-BR")) {
+      return JSON.stringify(TEST_ARGUMENT_DEVELOPMENT_EXTRACTION_FIXTURE_PT);
+    }
+
+    return JSON.stringify(TEST_ARGUMENT_DEVELOPMENT_EXTRACTION_FIXTURE);
+  }
+
+  if (providerRequest.metadata?.purpose === "voice-signature-reconciliation") {
+    return JSON.stringify({
+      core: TEST_REASONING_EXTRACTION_FIXTURE_PT.core,
+      development: TEST_ARGUMENT_DEVELOPMENT_EXTRACTION_FIXTURE_PT.development,
+      formatExpressions: TEST_REASONING_EXTRACTION_FIXTURE_PT.formatExpressions
+    });
   }
 
   if (providerRequest.metadata?.purpose === "voice-judge") {

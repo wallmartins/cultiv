@@ -314,7 +314,13 @@ export const appMessagesEn: AppMessages = {
       rebuilding: "Updating inferred reasoning from your latest examples.",
       failedKeepLast:
         "The latest extraction failed, but your previous reasoning snapshot remains active. Add examples or try updating again.",
-      coreTitle: "Core signature",
+      coreTitle: "How I think",
+      developmentTitle: "How I develop a text",
+      developmentSubtitle:
+        "Argumentative path, epistemic posture, and typical moves inferred from your examples.",
+      developmentImmature: "With at least three active examples, this mirror becomes more stable.",
+      epistemicPosture: "Epistemic posture",
+      typicalMoves: "Typical moves",
       certaintyLevel: "Certainty level",
       judgmentFrequency: "Judgment frequency",
       conclusionPace: "Conclusion pace",
@@ -356,7 +362,12 @@ export const appMessagesEn: AppMessages = {
           contextual: "Contextual",
           provocative: "Provocative"
         },
-        technicalDensity: { low: "Low", medium: "Medium", high: "High" }
+        technicalDensity: { low: "Low", medium: "Medium", high: "High" },
+        epistemicPosture: {
+          exploratory: "Exploratory",
+          investigative: "Investigative",
+          advocacy_mixed: "Mixed with advocacy"
+        }
       }
     },
     consent: {

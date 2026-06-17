@@ -18,6 +18,14 @@ const reasoning: VoiceReasoningPresentationView = {
     authoritySource: "personal_observation",
     derivedAntiPatterns: ["generic linkedin tone"]
   },
+  development: {
+    developmentProse: "Parte da experiência vivida e tolera dúvida antes de concluir.",
+    moveLabels: ["experiencia_vivida", "duvida"],
+    transitionTendencies: [{ from: "experiencia_vivida", to: "duvida", frequency: "common" }],
+    epistemicPosture: "exploratory",
+    structuralAntiPatterns: ["tese_prematura"]
+  },
+  developmentImmature: true,
   formatExpressions: [],
   reasoningVersion: 2
 };
@@ -37,7 +45,11 @@ describe("VoiceReasoningMirror", () => {
     );
 
     expect(html).toContain(messages.title);
+    expect(html).toContain(messages.coreTitle);
     expect(html).toContain(reasoning.core.narrativeProse);
+    expect(html).toContain(messages.developmentTitle);
+    expect(html).toContain(reasoning.development?.developmentProse);
+    expect(html).toContain(messages.developmentImmature);
 
     const detailHtml = renderToStaticMarkup(
       <>

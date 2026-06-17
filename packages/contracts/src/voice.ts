@@ -1,6 +1,6 @@
 import { Schema } from "effect";
 import { createSchemaDecoder } from "./shared.js";
-import { VoiceReasoningPresentationViewSchema } from "./reasoning.js";
+import { EpistemicPostureSchema, VoiceReasoningPresentationViewSchema } from "./reasoning.js";
 
 export const VoiceProfileConfidenceSchema = Schema.Literal("low", "medium", "high");
 export type VoiceProfileConfidence = typeof VoiceProfileConfidenceSchema.Type;
@@ -25,6 +25,8 @@ export const ReasonCodeSchema = Schema.Literal(
   "rebuild_failed",
   "rebuild_in_progress",
   "reasoning_extraction_failed",
+  "development_extraction_failed",
+  "voice_signature_reconciliation_failed",
   "language_conflict",
   "too_many_pinned_examples",
   "invalid_example_payload",
@@ -78,7 +80,9 @@ export const VoiceSignalSummarySchema = Schema.Struct({
   antiPatterns: Schema.Array(Schema.String),
   reasoningApplied: Schema.optional(Schema.Boolean),
   certaintyLevel: Schema.optional(Schema.Literal("low", "moderate", "high")),
-  conclusionPace: Schema.optional(Schema.Literal("slow", "moderate", "fast"))
+  conclusionPace: Schema.optional(Schema.Literal("slow", "moderate", "fast")),
+  developmentApplied: Schema.optional(Schema.Boolean),
+  epistemicPosture: Schema.optional(EpistemicPostureSchema)
 });
 export type VoiceSignalSummary = typeof VoiceSignalSummarySchema.Type;
 

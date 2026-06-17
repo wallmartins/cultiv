@@ -2,20 +2,37 @@ import type { PipelineRequest } from "@my-ai-orchestrator/contracts";
 import type { VoiceDriftResult, VoiceProfile } from "../types.js";
 import { countWords, resolveOutputWordTarget } from "../format/output-length.js";
 import { evaluateReasoningDrift } from "./reasoning-drift.js";
+import { evaluateArgumentDevelopmentDrift } from "./development-drift.js";
 
 export function evaluateVoiceDrift(profile: VoiceProfile, candidate: string, request?: PipelineRequest, stepName?: string): VoiceDriftResult {
   const surface = scoreSurfaceDrift(profile, candidate, request);
 
-  if (!profile.coreReasoningSignature) {
+  if (!profile.coreReasoningSignature && !profile.argumentDevelopmentSignature) {
     return surface;
   }
 
-  const reasoning = evaluateReasoningDrift(profile.coreReasoningSignature, candidate, stepName);
-  const score = Math.round(surface.score * 0.55 + reasoning.score * 0.45);
+  const reasoning = profile.coreReasoningSignature
+    ? evaluateReasoningDrift(profile.coreReasoningSignature, candidate, stepName)
+    : { score: 100, notes: [] as string[] };
+  const development = profile.argumentDevelopmentSignature
+    ? evaluateArgumentDevelopmentDrift(profile.argumentDevelopmentSignature, candidate, stepName)
+    : { score: 100, notes: [] as string[] };
+
+  let score: number;
+  if (profile.coreReasoningSignature && profile.argumentDevelopmentSignature) {
+    score = Math.round(surface.score * 0.4 + reasoning.score * 0.3 + development.score * 0.3);
+  } else if (profile.coreReasoningSignature) {
+    score = Math.round(surface.score * 0.55 + reasoning.score * 0.45);
+  } else {
+    score = Math.round(surface.score * 0.55 + development.score * 0.45);
+  }
 
   return {
     score,
-    notes: [...surface.notes, ...reasoning.notes]
+    notes: [...surface.notes, ...reasoning.notes, ...development.notes],
+    surfaceScore: surface.score,
+    reasoningScore: reasoning.score,
+    developmentScore: development.score
   };
 }
 

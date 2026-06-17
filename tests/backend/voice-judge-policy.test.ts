@@ -25,7 +25,11 @@ const voiceProfile: VoiceProfile = {
   }
 };
 
-function candidate(laneId: string, driftScore: number, finalScore: number): CandidateText {
+function candidate(
+  laneId: string,
+  drift: { score: number; reasoningScore?: number; developmentScore?: number },
+  finalScore: number
+): CandidateText {
   return {
     laneId,
     draft: "draft",
@@ -33,11 +37,11 @@ function candidate(laneId: string, driftScore: number, finalScore: number): Cand
     refinedDraft: "refined",
     critic: { findings: [], score: 80 },
     fidelity: { passed: true, score: 80, notes: [] },
-    drift: { score: driftScore, notes: [] },
+    drift: { score: drift.score, notes: [], ...drift },
     score: {
       criticScore: 80,
       fidelityScore: 80,
-      driftScore: driftScore,
+      driftScore: drift.score,
       strategyBonus: 0,
       finalScore
     }
@@ -51,7 +55,7 @@ describe("voice judge policy", () => {
         qualityMode: "fast",
         reasoningSignatureEnabled: true,
         voiceProfile,
-        candidates: [candidate("a", 70, 80)]
+        candidates: [candidate("a", { score: 70 }, 80)]
       })
     ).toBe(false);
   });
@@ -62,7 +66,7 @@ describe("voice judge policy", () => {
         qualityMode: "strict",
         reasoningSignatureEnabled: true,
         voiceProfile,
-        candidates: [candidate("a", 90, 90)]
+        candidates: [candidate("a", { score: 90 }, 90)]
       })
     ).toBe(true);
   });
@@ -73,7 +77,7 @@ describe("voice judge policy", () => {
         qualityMode: "strict",
         reasoningSignatureEnabled: false,
         voiceProfile,
-        candidates: [candidate("a", 70, 80)]
+        candidates: [candidate("a", { score: 70 }, 80)]
       })
     ).toBe(false);
   });
@@ -84,7 +88,7 @@ describe("voice judge policy", () => {
         qualityMode: "balanced",
         reasoningSignatureEnabled: true,
         voiceProfile,
-        candidates: [candidate("a", 70, 82)]
+        candidates: [candidate("a", { score: 70 }, 82)]
       })
     ).toBe(true);
   });
@@ -95,7 +99,18 @@ describe("voice judge policy", () => {
         qualityMode: "balanced",
         reasoningSignatureEnabled: true,
         voiceProfile,
-        candidates: [candidate("a", 90, 81), candidate("b", 88, 80)]
+        candidates: [candidate("a", { score: 90 }, 81), candidate("b", { score: 88 }, 80)]
+      })
+    ).toBe(true);
+  });
+
+  it("invokes judge on borderline development drift in balanced mode", () => {
+    expect(
+      shouldInvokeVoiceJudge({
+        qualityMode: "balanced",
+        reasoningSignatureEnabled: true,
+        voiceProfile,
+        candidates: [candidate("a", { score: 92, reasoningScore: 92, developmentScore: 70 }, 82)]
       })
     ).toBe(true);
   });
@@ -106,7 +121,7 @@ describe("voice judge policy", () => {
         qualityMode: "balanced",
         reasoningSignatureEnabled: true,
         voiceProfile,
-        candidates: [candidate("a", 92, 90), candidate("b", 50, 70)]
+        candidates: [candidate("a", { score: 92 }, 90), candidate("b", { score: 50 }, 70)]
       })
     ).toBe(false);
   });

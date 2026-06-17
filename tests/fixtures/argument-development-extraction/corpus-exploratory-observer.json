@@ -1,0 +1,45 @@
+{
+  "id": "corpus-exploratory-observer",
+  "examples": [
+    {
+      "id": "ex-1",
+      "userId": "user-1",
+      "text": "Começo observando o contexto antes de tirar qualquer conclusão no LinkedIn.",
+      "language": "pt-BR",
+      "state": "active",
+      "classificationLabels": [],
+      "antiPatternsExplicit": [],
+      "pinned": false,
+      "pendingProfileImpact": false,
+      "effectiveContentTypeHints": ["linkedin-post"],
+      "createdAt": "2026-01-01T00:00:00.000Z",
+      "updatedAt": "2026-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "ex-2",
+      "userId": "user-1",
+      "text": "Quando ainda tenho dúvida, deixo isso explícito antes de fechar o raciocínio.",
+      "language": "pt-BR",
+      "state": "active",
+      "classificationLabels": [],
+      "antiPatternsExplicit": [],
+      "pinned": false,
+      "pendingProfileImpact": false,
+      "effectiveContentTypeHints": ["linkedin-post"],
+      "createdAt": "2026-01-02T00:00:00.000Z",
+      "updatedAt": "2026-01-02T00:00:00.000Z"
+    }
+  ],
+  "expected": {
+    "development": {
+      "developmentProse": "O autor parte da observação concreta, tolera ambiguidade e só então fecha o raciocínio.",
+      "moveLabels": ["observacao", "ambiguidade", "conclusao_tardia"],
+      "transitionTendencies": [
+        { "from": "observacao", "to": "ambiguidade", "frequency": "common" },
+        { "from": "ambiguidade", "to": "conclusao_tardia", "frequency": "occasional" }
+      ],
+      "epistemicPosture": "exploratory",
+      "structuralAntiPatterns": ["tese_prematura", "arco_advocacia"]
+    }
+  }
+}

@@ -287,6 +287,11 @@ export type AppVoiceMessages = {
     readonly rebuilding: string;
     readonly failedKeepLast: string;
     readonly coreTitle: string;
+    readonly developmentTitle: string;
+    readonly developmentSubtitle: string;
+    readonly developmentImmature: string;
+    readonly epistemicPosture: string;
+    readonly typicalMoves: string;
     readonly certaintyLevel: string;
     readonly judgmentFrequency: string;
     readonly conclusionPace: string;
@@ -311,6 +316,7 @@ export type AppVoiceMessages = {
       readonly register: Record<"formal" | "informal" | "technical" | "conversational", string>;
       readonly openingStyle: Record<"direct" | "contextual" | "provocative", string>;
       readonly technicalDensity: Record<"low" | "medium" | "high", string>;
+      readonly epistemicPosture: Record<"exploratory" | "investigative" | "advocacy_mixed", string>;
     };
   };
 };

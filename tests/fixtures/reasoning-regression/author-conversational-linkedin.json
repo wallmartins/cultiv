@@ -19,5 +19,19 @@
   "badCandidates": [
     "Todo mundo precisa seguir este framework de produtividade agora, obviamente.",
     "Você deve mudar sua rotina imediatamente, obviamente, sem hesitar."
+  ],
+  "argumentDevelopmentSignature": {
+    "developmentProse": "Starts from a concrete moment, keeps the narrator present, and resists closing with a universal rule.",
+    "moveLabels": ["moment", "reflection", "open_end"],
+    "transitionTendencies": [
+      { "from": "moment", "to": "reflection", "frequency": "common" },
+      { "from": "reflection", "to": "open_end", "frequency": "occasional" }
+    ],
+    "epistemicPosture": "exploratory",
+    "structuralAntiPatterns": ["premature_thesis", "framework_prescription"]
+  },
+  "developmentBadCandidates": [
+    "Portanto todo mundo deve seguir este framework agora, obviamente.",
+    "Você deve mudar sua rotina imediatamente. O certo é fazer assim sempre."
   ]
 }

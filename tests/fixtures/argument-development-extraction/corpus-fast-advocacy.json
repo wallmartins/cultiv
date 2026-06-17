@@ -1,0 +1,45 @@
+{
+  "id": "corpus-fast-advocacy",
+  "examples": [
+    {
+      "id": "ex-1",
+      "userId": "user-1",
+      "text": "Métricas de ativação valem mais que vanity metrics em SaaS B2B — eis por quê.",
+      "language": "pt-BR",
+      "state": "active",
+      "classificationLabels": [],
+      "antiPatternsExplicit": [],
+      "pinned": false,
+      "pendingProfileImpact": false,
+      "effectiveContentTypeHints": ["newsletter"],
+      "createdAt": "2026-01-01T00:00:00.000Z",
+      "updatedAt": "2026-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "ex-2",
+      "userId": "user-1",
+      "text": "Conclusão primeiro: cohort semanal bate snapshot mensal para detectar regressões.",
+      "language": "pt-BR",
+      "state": "active",
+      "classificationLabels": [],
+      "antiPatternsExplicit": [],
+      "pinned": false,
+      "pendingProfileImpact": false,
+      "effectiveContentTypeHints": ["newsletter"],
+      "createdAt": "2026-01-02T00:00:00.000Z",
+      "updatedAt": "2026-01-02T00:00:00.000Z"
+    }
+  ],
+  "expected": {
+    "development": {
+      "developmentProse": "O autor abre com a tese, sustenta com evidência curta e fecha sem digressões longas.",
+      "moveLabels": ["tese", "evidencia", "fechamento"],
+      "transitionTendencies": [
+        { "from": "tese", "to": "evidencia", "frequency": "dominant" },
+        { "from": "evidencia", "to": "fechamento", "frequency": "common" }
+      ],
+      "epistemicPosture": "advocacy_mixed",
+      "structuralAntiPatterns": ["aquecimento_lento", "hedging_excessivo"]
+    }
+  }
+}

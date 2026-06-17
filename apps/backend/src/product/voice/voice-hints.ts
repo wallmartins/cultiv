@@ -1,5 +1,6 @@
 import type { VoiceExampleRecord } from "@my-ai-orchestrator/database";
 import type {
+  ArgumentDevelopmentSignature,
   CoreReasoningSignature,
   FormatExpressionProfile,
   VoiceAdaptationMode,
@@ -22,6 +23,7 @@ export function buildVoiceHints(
     readonly styleMarkers: readonly string[];
     readonly primaryLanguage: string;
     readonly coreReasoningSignature?: CoreReasoningSignature;
+    readonly argumentDevelopmentSignature?: ArgumentDevelopmentSignature;
     readonly formatExpressionProfiles?: Readonly<Record<string, FormatExpressionProfile>>;
   },
   matchingExamples: readonly VoiceExampleRecord[],
@@ -104,7 +106,10 @@ export function buildVoiceHints(
       ? {
           coreReasoningSignature: profile.coreReasoningSignature,
           formatExpressionProfile,
-          derivedAntiPatterns: derivedAntiPatterns
+          derivedAntiPatterns: derivedAntiPatterns,
+          ...(profile.argumentDevelopmentSignature
+            ? { argumentDevelopmentSignature: profile.argumentDevelopmentSignature }
+            : {})
         }
       : {})
   };

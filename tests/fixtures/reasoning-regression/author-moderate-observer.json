@@ -20,5 +20,19 @@
   "badCandidates": [
     "Obviamente todo mundo sempre deveria fazer assim sem exceção.",
     "Você deve concluir agora, obviamente, sem mais contexto."
+  ],
+  "argumentDevelopmentSignature": {
+    "developmentProse": "Opens from observation, tolerates ambiguity, and delays the thesis until context is established.",
+    "moveLabels": ["observation", "ambiguity", "delayed_conclusion"],
+    "transitionTendencies": [
+      { "from": "observation", "to": "ambiguity", "frequency": "common" },
+      { "from": "ambiguity", "to": "delayed_conclusion", "frequency": "occasional" }
+    ],
+    "epistemicPosture": "exploratory",
+    "structuralAntiPatterns": ["premature_thesis", "advocacy_arc"]
+  },
+  "developmentBadCandidates": [
+    "Portanto a conclusão é clara: você deve sempre fazer assim sem hesitar.",
+    "Você deve seguir este caminho sem hesitar. A única forma é fazer assim."
   ]
 }
