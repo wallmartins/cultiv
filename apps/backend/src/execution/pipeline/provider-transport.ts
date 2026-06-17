@@ -1,7 +1,7 @@
 import { Effect } from "effect";
 import { AIAdapterTransportError, type AIProviderRequest } from "@my-ai-orchestrator/ai-adapters";
 import type { BackendConfig } from "../../config/config.js";
-import { TEST_REASONING_EXTRACTION_FIXTURE } from "../../product/voice/reasoning-extraction.js";
+import { TEST_REASONING_EXTRACTION_FIXTURE, TEST_REASONING_EXTRACTION_FIXTURE_PT } from "../../product/voice/reasoning-extraction.js";
 
 export interface BackendProviderTransport {
   readonly complete: (providerRequest: AIProviderRequest) => Effect.Effect<unknown, AIAdapterTransportError>;
@@ -230,6 +230,17 @@ function stripTrailingSlash(value: string): string {
 
 function renderTestResponse(providerRequest: AIProviderRequest): string {
   if (providerRequest.metadata?.purpose === "reasoning-extraction") {
+    const body = providerRequest.body as Record<string, unknown>;
+    const messages = Array.isArray(body.messages)
+      ? (body.messages as ReadonlyArray<Record<string, unknown>>)
+      : [];
+    const systemMessage = messages.find((message) => message.role === "system");
+    const systemContent = typeof systemMessage?.content === "string" ? systemMessage.content : "";
+
+    if (systemContent.includes("Brazilian Portuguese") || systemContent.includes("pt-BR")) {
+      return JSON.stringify(TEST_REASONING_EXTRACTION_FIXTURE_PT);
+    }
+
     return JSON.stringify(TEST_REASONING_EXTRACTION_FIXTURE);
   }
 

@@ -329,6 +329,41 @@ describe("text-quality package", () => {
     expect(architectureProfile.cadence).toBe("measured");
     expect(architectureProfile.rules).toContain("Derive consequences from lived examples");
   });
+
+  it("preserves coreReasoningSignature from voice hints", async () => {
+    const coreReasoningSignature = {
+      narrativeProse: "Observa antes de concluir.",
+      certaintyLevel: "moderate" as const,
+      judgmentFrequency: "low" as const,
+      conclusionPace: "slow" as const,
+      readerRelationship: "peer" as const,
+      authoritySource: "personal_observation" as const,
+      derivedAntiPatterns: ["generic advice"]
+    };
+
+    const profile = await Effect.runPromise(
+      resolveVoiceProfile({
+        userId: "user-1",
+        briefing: "Briefing",
+        request: {
+          pipeline: {
+            name: "linkedin-post",
+            steps: [{ name: "draft", skill: "draft" }]
+          },
+          inputs: { briefing: "Briefing" }
+        },
+        voiceHints: {
+          tone: "personal",
+          cadence: "direct",
+          coreReasoningSignature,
+          derivedAntiPatterns: ["generic advice"]
+        }
+      })
+    );
+
+    expect(profile.coreReasoningSignature).toEqual(coreReasoningSignature);
+    expect(profile.derivedAntiPatterns).toEqual(["generic advice"]);
+  });
 });
 
 function repeatWords(word: string, count: number): string {

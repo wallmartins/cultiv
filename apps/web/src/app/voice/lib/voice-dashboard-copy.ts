@@ -1,4 +1,5 @@
 import type {
+  NextActionCode,
   VoiceAdaptationMode,
   VoiceMaterialBaseBreakdown,
   VoiceProfileConfidence,
@@ -33,6 +34,55 @@ export function getVoiceConfidenceDescription(
   const template = messages.confidenceDescriptions[profile.confidence];
 
   return template.replace("{tone}", tone).replace("{cadence}", cadence);
+}
+
+export function getVoiceConfidenceContext(
+  confidence: VoiceProfileConfidence,
+  messages: AppVoiceMessages
+): string {
+  if (confidence === "high" || confidence === "medium" || confidence === "low") {
+    return messages.confidenceContext[confidence];
+  }
+
+  return messages.confidenceContext.none;
+}
+
+export function getVoiceConfidenceAdaptationLine(
+  mode: VoiceAdaptationMode,
+  messages: AppVoiceMessages
+): string {
+  return messages.confidenceAdaptationLines[mode];
+}
+
+export function getVoiceConfidenceDialSubline(
+  confidence: VoiceProfileConfidence,
+  messages: AppVoiceMessages
+): string {
+  if (confidence === "high" || confidence === "medium" || confidence === "low") {
+    return messages.confidenceDialSubline[confidence];
+  }
+
+  return messages.confidenceDialSubline.none;
+}
+
+export function getVoiceConfidenceDialAccessibleLabel(
+  confidenceLabel: string,
+  subline: string,
+  messages: AppVoiceMessages
+): string {
+  return `${messages.confidenceDialEyebrow}: ${confidenceLabel}. ${subline}`;
+}
+
+export function getVoiceConfidencePanelMessage(
+  profile: VoiceProfileView,
+  messages: AppVoiceMessages,
+  options: { readonly detailed: boolean }
+): string {
+  if (options.detailed) {
+    return getVoiceConfidenceDescription(profile, messages);
+  }
+
+  return getVoiceConfidenceContext(profile.confidence, messages);
 }
 
 const diagnosticsReasonPriority = [
@@ -87,4 +137,72 @@ export function getUnderrepresentedVoiceFormats(
   return diagnostics.underrepresentedContentTypes
     .map((item) => item.contentType)
     .filter((contentType) => knownFormats.has(contentType));
+}
+
+export type VoiceNextStepHref = "/app/generate" | "/app/voice/examples" | "/app/voice/examples/new";
+
+export interface VoiceNextStepView {
+  readonly message: string;
+  readonly cta: string;
+  readonly href: VoiceNextStepHref;
+  readonly disabled?: boolean;
+}
+
+function voiceNextStepForCode(
+  code: NextActionCode,
+  messages: AppVoiceMessages
+): VoiceNextStepView {
+  const message = messages.nextStep.messages[code];
+  const cta = messages.nextStep.ctas[code];
+
+  switch (code) {
+    case "add_more_examples":
+    case "add_examples_from_other_content_types":
+    case "retry_batch_commit":
+      return { message, cta, href: "/app/voice/examples/new" };
+    case "review_conflicting_examples":
+    case "remove_pinned_example":
+      return { message, cta, href: "/app/voice/examples" };
+    case "wait_for_profile_update":
+      return { message, cta, href: "/app/generate", disabled: true };
+    case "upgrade_plan":
+      return {
+        message,
+        cta: messages.upgradeSoon,
+        href: "/app/generate",
+        disabled: true
+      };
+    default: {
+      const exhaustive: never = code;
+      return exhaustive;
+    }
+  }
+}
+
+export function resolveVoiceNextStep(
+  nextActionCodes: readonly NextActionCode[],
+  messages: AppVoiceMessages
+): VoiceNextStepView {
+  const code = nextActionCodes[0];
+
+  if (!code) {
+    return {
+      message: messages.nextStep.matureMessage,
+      cta: messages.nextStep.generateCta,
+      href: "/app/generate"
+    };
+  }
+
+  return voiceNextStepForCode(code, messages);
+}
+
+export function resolveVoiceNextStepFromDiagnostics(
+  diagnostics: VoiceProfileDiagnosticsView,
+  messages: AppVoiceMessages
+): VoiceNextStepView {
+  if (diagnostics.pendingRebuild.status === "in_progress") {
+    return voiceNextStepForCode("wait_for_profile_update", messages);
+  }
+
+  return resolveVoiceNextStep(diagnostics.nextActionCodes, messages);
 }

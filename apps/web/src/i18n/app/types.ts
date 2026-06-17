@@ -154,7 +154,21 @@ export type AppVoiceMessages = {
   readonly dashboardEmpty: string;
   readonly dashboardEmptyAction: string;
   readonly confidence: string;
+  readonly confidencePanelTitle: string;
+  readonly confidenceDialEyebrow: string;
+  readonly confidenceDialSubline: {
+    readonly high: string;
+    readonly medium: string;
+    readonly low: string;
+    readonly none: string;
+  };
   readonly confidenceLabels: {
+    readonly high: string;
+    readonly medium: string;
+    readonly low: string;
+    readonly none: string;
+  };
+  readonly confidenceContext: {
     readonly high: string;
     readonly medium: string;
     readonly low: string;
@@ -183,6 +197,10 @@ export type AppVoiceMessages = {
     readonly conservative: string;
     readonly standard: string;
   };
+  readonly confidenceAdaptationLines: {
+    readonly conservative: string;
+    readonly standard: string;
+  };
   readonly diagnostics: string;
   readonly reasonCodeMessages: {
     readonly insufficient_examples: string;
@@ -207,6 +225,37 @@ export type AppVoiceMessages = {
   readonly updatingBanner: string;
   readonly rebuildFailed: string;
   readonly upgradeSoon: string;
+  readonly manageExamples: string;
+  readonly mirrorFallbackTitle: string;
+  readonly mirrorFallbackSubtitle: string;
+  readonly detailLayers: {
+    readonly formats: string;
+    readonly antiPatterns: string;
+    readonly profileHealth: string;
+  };
+  readonly nextStep: {
+    readonly eyebrow: string;
+    readonly matureMessage: string;
+    readonly generateCta: string;
+    readonly messages: {
+      readonly add_more_examples: string;
+      readonly add_examples_from_other_content_types: string;
+      readonly review_conflicting_examples: string;
+      readonly remove_pinned_example: string;
+      readonly retry_batch_commit: string;
+      readonly wait_for_profile_update: string;
+      readonly upgrade_plan: string;
+    };
+    readonly ctas: {
+      readonly add_more_examples: string;
+      readonly add_examples_from_other_content_types: string;
+      readonly review_conflicting_examples: string;
+      readonly remove_pinned_example: string;
+      readonly retry_batch_commit: string;
+      readonly wait_for_profile_update: string;
+      readonly upgrade_plan: string;
+    };
+  };
   readonly composer: {
     readonly addSlot: string;
     readonly save: string;

@@ -13,7 +13,8 @@ export function createVoiceProfile(userId: string, hints: Partial<VoiceProfile> 
     antiPatternsExplicit: hints.antiPatternsExplicit ?? [],
     rules: hints.rules ?? [],
     styleMarkers: hints.styleMarkers ?? [],
-    userLabels: hints.userLabels ?? []
+    userLabels: hints.userLabels ?? [],
+    ...resolveReasoningFields(hints)
   };
 }
 
@@ -30,7 +31,23 @@ export function mergeVoiceProfile(base: VoiceProfile, hints: Partial<VoiceProfil
     antiPatternsExplicit: uniqueStrings([...(base.antiPatternsExplicit ?? []), ...(hints.antiPatternsExplicit ?? [])]),
     rules: uniqueStrings([...(base.rules ?? []), ...(hints.rules ?? [])]),
     styleMarkers: uniqueStrings([...(base.styleMarkers ?? []), ...(hints.styleMarkers ?? [])]),
-    userLabels: uniqueStrings([...(base.userLabels ?? []), ...(hints.userLabels ?? [])])
+    userLabels: uniqueStrings([...(base.userLabels ?? []), ...(hints.userLabels ?? [])]),
+    ...resolveReasoningFields(hints, base)
+  };
+}
+
+function resolveReasoningFields(
+  hints: Partial<VoiceProfile>,
+  base?: VoiceProfile
+): Pick<VoiceProfile, "coreReasoningSignature" | "formatExpressionProfile" | "derivedAntiPatterns"> {
+  const coreReasoningSignature = hints.coreReasoningSignature ?? base?.coreReasoningSignature;
+  const formatExpressionProfile = hints.formatExpressionProfile ?? base?.formatExpressionProfile;
+  const derivedAntiPatterns = hints.derivedAntiPatterns ?? base?.derivedAntiPatterns;
+
+  return {
+    ...(coreReasoningSignature ? { coreReasoningSignature } : {}),
+    ...(formatExpressionProfile ? { formatExpressionProfile } : {}),
+    ...(derivedAntiPatterns?.length ? { derivedAntiPatterns } : {})
   };
 }
 

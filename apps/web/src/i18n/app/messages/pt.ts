@@ -167,16 +167,68 @@ export const appMessagesPt: AppMessages = {
   },
   voice: {
     dashboardTitle: "Voz",
-    dashboardSubtitle: "Perfil, diagnósticos e exemplos da sua escrita.",
+    dashboardSubtitle: "Como o Cultiv lê sua escrita e o que cultivar em seguida.",
     dashboardEmpty:
       "Você ainda não tem um perfil de voz. Adicione textos seus para a IA aprender como você escreve.",
     dashboardEmptyAction: "Adicionar primeiro exemplo",
+    manageExamples: "Gerenciar exemplos",
+    mirrorFallbackTitle: "Sua voz hoje",
+    mirrorFallbackSubtitle:
+      "Com mais exemplos, o Cultiv passa a descrever também como você pensa e argumenta.",
+    detailLayers: {
+      formats: "Por formato",
+      antiPatterns: "O que evitar",
+      profileHealth: "Saúde do perfil"
+    },
+    nextStep: {
+      eyebrow: "Próximo passo",
+      matureMessage:
+        "Sua voz está bem representada. O próximo passo natural é gerar conteúdo com ela.",
+      generateCta: "Gerar conteúdo",
+      messages: {
+        add_more_examples:
+          "Mais exemplos deixam sua voz mais previsível e consistente nas gerações.",
+        add_examples_from_other_content_types:
+          "Um exemplo em outro formato ajuda o Cultiv a te ler em mais contextos.",
+        review_conflicting_examples:
+          "Alguns exemplos puxam sua voz em direções diferentes. Vale revisar o conjunto.",
+        remove_pinned_example:
+          "Há exemplos fixados demais para o tamanho atual da base. Considere liberar um fixado.",
+        retry_batch_commit: "A última gravação em lote não concluiu. Tente enviar os exemplos de novo.",
+        wait_for_profile_update: "Estamos recalculando sua voz com base nos exemplos mais recentes.",
+        upgrade_plan: "Seu plano atual limita quantos exemplos entram no perfil."
+      },
+      ctas: {
+        add_more_examples: "Adicionar exemplo",
+        add_examples_from_other_content_types: "Adicionar outro formato",
+        review_conflicting_examples: "Revisar exemplos",
+        remove_pinned_example: "Ver exemplos",
+        retry_batch_commit: "Tentar novamente",
+        wait_for_profile_update: "Recalculando…",
+        upgrade_plan: "Em breve"
+      }
+    },
     confidence: "Confiança",
+    confidencePanelTitle: "Confiança na sua voz",
+    confidenceDialEyebrow: "Confiança",
+    confidenceDialSubline: {
+      high: "raízes firmes",
+      medium: "ganhando corpo",
+      low: "germinando",
+      none: "semeando"
+    },
     confidenceLabels: {
       high: "Alta",
       medium: "Média",
       low: "Baixa",
       none: "—"
+    },
+    confidenceContext: {
+      low: "Perfil em formação — cada novo exemplo aproxima o Cultiv do seu estilo real.",
+      medium:
+        "Sua voz já aparece nas gerações; exemplos em outros formatos ainda podem refiná-la.",
+      high: "Sua base de exemplos é sólida. O Cultiv já adapta sua voz com segurança nas gerações.",
+      none: "Adicione exemplos para o Cultiv começar a ler sua voz."
     },
     confidenceDescriptions: {
       low: "Perfil em formação: tom {tone}, com {cadence}. Com mais exemplos variados, a IA reproduz sua voz com mais segurança nas gerações.",
@@ -203,6 +255,12 @@ export const appMessagesPt: AppMessages = {
         "A IA prefere manter-se próxima dos exemplos e evita extrapolar quando a base ainda é limitada.",
       standard:
         "A IA aplica sua voz com mais liberdade, preservando tom e cadência nos formatos que você pedir."
+    },
+    confidenceAdaptationLines: {
+      conservative:
+        "Adaptação conservadora: o Cultiv prefere ficar bem próximo dos seus exemplos.",
+      standard:
+        "Adaptação equilibrada entre fidelidade aos exemplos e flexibilidade nos formatos."
     },
     diagnostics: "Diagnósticos",
     reasonCodeMessages: {
@@ -253,8 +311,8 @@ export const appMessagesPt: AppMessages = {
       saving: "Salvando…"
     },
     reasoning: {
-      title: "Raciocínio autoral",
-      subtitle: "Como a IA infere a forma como você observa, argumenta e conclui — com base nos seus exemplos.",
+      title: "Como o Cultiv te lê",
+      subtitle: "Padrões de observação, argumento e conclusão inferidos dos seus exemplos.",
       rebuilding: "Atualizando o raciocínio inferido a partir dos exemplos mais recentes.",
       failedKeepLast:
         "A última extração falhou, mas o raciocínio anterior continua válido. Adicione exemplos ou tente atualizar de novo.",
