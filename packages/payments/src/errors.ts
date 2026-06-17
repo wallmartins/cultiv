@@ -37,3 +37,25 @@ export class BillingOperationConflictError extends Data.TaggedError("BillingOper
   readonly idempotencyKey: string;
   readonly message: string;
 }> {}
+
+export class BillingGatewayError extends Data.TaggedError("BillingGatewayError")<{
+  readonly gateway: string;
+  readonly message: string;
+  readonly cause?: unknown;
+}> {}
+
+export class BillingGatewayWebhookVerificationError extends Data.TaggedError(
+  "BillingGatewayWebhookVerificationError"
+)<{
+  readonly gateway: string;
+  readonly message: string;
+}> {}
+
+export class BillingCheckoutCatalogNotFoundError extends Data.TaggedError(
+  "BillingCheckoutCatalogNotFoundError"
+)<{
+  readonly productKind: string;
+  readonly internalRef: string;
+  readonly currency: string;
+  readonly billingPeriod: string;
+}> {}

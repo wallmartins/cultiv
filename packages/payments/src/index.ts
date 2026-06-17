@@ -11,7 +11,10 @@ import type {
   QualityMode
 } from "@my-ai-orchestrator/contracts";
 import {
+  BillingCheckoutCatalogNotFoundError,
   BillingEntitlementNotFoundError,
+  BillingGatewayError,
+  BillingGatewayWebhookVerificationError,
   BillingInsufficientCreditsError,
   BillingOperationConflictError,
   BillingPlanInvalidError,
@@ -22,7 +25,10 @@ import {
 } from "./errors.js";
 
 export {
+  BillingCheckoutCatalogNotFoundError,
   BillingEntitlementNotFoundError,
+  BillingGatewayError,
+  BillingGatewayWebhookVerificationError,
   BillingInsufficientCreditsError,
   BillingOperationConflictError,
   BillingPlanInvalidError,
@@ -40,8 +46,18 @@ export {
   resolveMinimumPlanTierForQualityMode
 } from "./quality-mode-entitlements.js";
 import type { BillingPlanStatus, BillingPlanTier } from "./quality-mode-entitlements.js";
+import type { BillingGatewayName } from "./gateway/types.js";
 export type BillingUsageKind = "generation" | "refinement" | "chat" | "inference";
-export type BillingGatewayName = "stripe" | "asaas" | "manual" | (string & {});
+export type {
+  BillingCheckoutPeriod,
+  BillingCurrency,
+  BillingGatewayName,
+  BillingProductKind,
+  CheckoutSessionRequest,
+  CheckoutSessionResult,
+  GatewayWebhookEvent,
+  GatewayWebhookEventType
+} from "./gateway/types.js";
 
 export interface BillingFeatureAllowance {
   readonly key: string;
