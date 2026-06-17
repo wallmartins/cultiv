@@ -1,6 +1,7 @@
 import { Effect } from "effect";
 import { AIAdapterTransportError, type AIProviderRequest } from "@my-ai-orchestrator/ai-adapters";
 import type { BackendConfig } from "../../config/config.js";
+import { TEST_REASONING_EXTRACTION_FIXTURE } from "../../product/voice/reasoning-extraction.js";
 
 export interface BackendProviderTransport {
   readonly complete: (providerRequest: AIProviderRequest) => Effect.Effect<unknown, AIAdapterTransportError>;
@@ -117,6 +118,10 @@ function resolveProviderEndpoint(config: BackendConfig, providerRequest: AIProvi
     return `${stripTrailingSlash(config.deepSeekBaseUrl ?? "https://api.deepseek.com/v1")}/chat/completions`;
   }
 
+  if (providerRequest.provider === "groq") {
+    return `${stripTrailingSlash(config.groqBaseUrl ?? "https://api.groq.com/openai/v1")}/chat/completions`;
+  }
+
   if (providerRequest.provider === "ollama") {
     return `${stripTrailingSlash(config.ollamaBaseUrl ?? "http://127.0.0.1:11434")}/api/generate`;
   }
@@ -189,6 +194,21 @@ function resolveProviderHeaders(
     };
   }
 
+  if (providerRequest.provider === "groq") {
+    const apiKey = config.groqApiKey;
+    if (!apiKey) {
+      throw new AIAdapterTransportError({
+        provider: providerRequest.provider,
+        message: 'Groq transport requires "GROQ_API_KEY"'
+      });
+    }
+
+    return {
+      ...providerRequest.headers,
+      authorization: `Bearer ${apiKey}`
+    };
+  }
+
   return {
     ...providerRequest.headers
   };
@@ -209,6 +229,17 @@ function stripTrailingSlash(value: string): string {
 }
 
 function renderTestResponse(providerRequest: AIProviderRequest): string {
+  if (providerRequest.metadata?.purpose === "reasoning-extraction") {
+    return JSON.stringify(TEST_REASONING_EXTRACTION_FIXTURE);
+  }
+
+  if (providerRequest.metadata?.purpose === "voice-judge") {
+    return JSON.stringify({
+      score: 82,
+      rationale: "Candidate matches the author's observational reasoning and moderate certainty."
+    });
+  }
+
   const bodyMessages = Array.isArray((providerRequest.body as Record<string, unknown>).messages)
     ? ((providerRequest.body as Record<string, unknown>).messages as Array<Record<string, unknown>>)
     : [];

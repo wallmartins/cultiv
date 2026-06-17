@@ -1,0 +1,23 @@
+{
+  "id": "author-low-judgment-newsletter",
+  "coreReasoningSignature": {
+    "narrativeProse": "Describes situations without telling the reader what to do, preferring questions and open comparisons over prescriptions.",
+    "certaintyLevel": "low",
+    "judgmentFrequency": "low",
+    "conclusionPace": "slow",
+    "readerRelationship": "observer",
+    "authoritySource": "personal_observation",
+    "derivedAntiPatterns": ["prescriptive coaching tone", "you should", "you must"]
+  },
+  "briefings": [
+    "Newsletter sobre como times lidam com incerteza de roadmap.",
+    "Reflexão sobre ritmo de escrita pessoal vs demanda de conteúdo.",
+    "Observações sobre reuniões que viram status theater.",
+    "Notas sobre aprendizado em público sem performar expertise.",
+    "Comentário sobre mudanças pequenas que alteram cultura de time."
+  ],
+  "badCandidates": [
+    "Você deve implementar esta rotina imediatamente para ter sucesso, obviamente.",
+    "O certo é sempre seguir este playbook sem exceção."
+  ]
+}

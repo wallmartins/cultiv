@@ -1,0 +1,24 @@
+{
+  "id": "author-high-confidence-twelve",
+  "coreReasoningSignature": {
+    "narrativeProse": "Combines observational openings with measured claims, letting examples carry the argument before naming the insight.",
+    "certaintyLevel": "moderate",
+    "judgmentFrequency": "low",
+    "conclusionPace": "slow",
+    "readerRelationship": "peer",
+    "authoritySource": "lived_experience",
+    "derivedAntiPatterns": ["generic ai phrasing", "numbered thesis proof list", "rhetorical inflation"]
+  },
+  "briefings": [
+    "Post de LinkedIn sobre aprender liderança técnica sem virar gatekeeper.",
+    "Newsletter sobre como revisar PRs sem sufocar autonomia do time.",
+    "Thread curta sobre dívida técnica em produtos early-stage.",
+    "Artigo longo sobre comunicação entre engenharia e produto.",
+    "Post de validação com evidências de entrevistas com usuários.",
+    "Texto de arquitetura sobre limites de um serviço de billing."
+  ],
+  "badCandidates": [
+    "Esta abordagem revolucionária vai transformar completamente sua carreira para sempre.",
+    "1. Problema obviamente. 2. Solução 3. Lucro garantido."
+  ]
+}

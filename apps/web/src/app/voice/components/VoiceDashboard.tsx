@@ -11,6 +11,7 @@ import {
   getVoiceConfidenceDescription,
   getVoiceDiagnosticsText
 } from "~/app/voice/lib/voice-dashboard-copy";
+import { VoiceReasoningSection } from "~/app/voice/components/VoiceReasoningSection";
 import { useAppLocale } from "~/i18n/app/use-app-locale";
 import { getContentTypeLabel } from "~/i18n/app/content-types";
 import { isSdkResourceNotFound } from "~/platform/sdk/is-sdk-resource-not-found";
@@ -172,6 +173,15 @@ export function VoiceDashboard() {
           </>
         )}
       </AppCard>
+
+      {profile.reasoning ? (
+        <VoiceReasoningSection
+          locale={locale}
+          messages={messages.voice.reasoning}
+          reasoning={profile.reasoning}
+          diagnostics={profile.diagnostics}
+        />
+      ) : null}
 
       <div className="flex flex-wrap gap-3">
         <Link to="/app/voice/examples">

@@ -7,7 +7,9 @@ import type { OrchestrationPlan } from "@my-ai-orchestrator/orchestrator";
 import type { BackendVoiceService } from "../../product/voice/voice-types.js";
 import type { EffectiveVoiceResolution } from "../../product/voice/voice-types.js";
 import type { BackendProviderTransport } from "./provider-transport.js";
+import type { BackendAIPolicyServiceContract } from "../../product/ai-policy/ai-policy-types.js";
 import type { BackendPolicyEvidenceService } from "../../safety/policy-evidence-types.js";
+import type { BackendObservabilityService } from "../../product/core/observability-types.js";
 
 export interface ExecutePipelineOptions {
   readonly plan: OrchestrationPlan;
@@ -23,8 +25,10 @@ export interface ExecutePipelineOptions {
   readonly includeTrace: boolean;
   readonly services: {
     readonly aiAdapters: AIAdapterServiceContract;
+    readonly aiPolicy: BackendAIPolicyServiceContract;
     readonly voice: BackendVoiceService;
     readonly featureFlags: FeatureFlagServiceContract;
+    readonly observability: BackendObservabilityService;
     readonly policyEvidence?: BackendPolicyEvidenceService;
   };
   readonly providerTransport: BackendProviderTransport;

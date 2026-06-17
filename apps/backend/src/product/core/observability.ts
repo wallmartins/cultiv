@@ -19,7 +19,10 @@ const emptyCounters: Record<BackendObservabilityEventKind, number> = {
   voice_rebuild_failed: 0,
   voice_batch_committed: 0,
   voice_snapshot_persisted: 0,
-  voice_refresh_event: 0
+  voice_refresh_event: 0,
+  voice_judge_invoked: 0,
+  voice_judge_fallback: 0,
+  voice_reasoning_extraction_failed: 0
 };
 
 export function createBackendObservabilityService(
@@ -67,6 +70,9 @@ export function createBackendObservabilityService(
       recordVoiceBatchCommitted: (details) => record("voice_batch_committed", details),
       recordVoiceSnapshotPersisted: (details) => record("voice_snapshot_persisted", details),
       recordVoiceRefreshEvent: (details) => record("voice_refresh_event", details),
+      recordVoiceJudgeInvoked: (details) => record("voice_judge_invoked", details),
+      recordVoiceJudgeFallback: (details) => record("voice_judge_fallback", details),
+      recordVoiceReasoningExtractionFailed: (details) => record("voice_reasoning_extraction_failed", details),
       snapshot
     };
   });

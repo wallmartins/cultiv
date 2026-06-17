@@ -104,6 +104,14 @@ export const DEFAULT_FEATURE_FLAGS: readonly FeatureFlagDefinition[] = [
     variants: ["on", "off"]
   },
   {
+    key: "voice.reasoningSignatureV1",
+    scope: "content",
+    enabled: false,
+    description: "Author reasoning signature extraction, injection, and evaluation",
+    defaultVariant: "off",
+    variants: ["off", "on"]
+  },
+  {
     key: "rollout.beta.access",
     scope: "rollout",
     enabled: false,

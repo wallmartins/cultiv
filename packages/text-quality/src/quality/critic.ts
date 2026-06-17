@@ -2,6 +2,9 @@ import type { PipelineRequest } from "@my-ai-orchestrator/contracts";
 import type { DomainProfile } from "../domain/domain-classifier.js";
 import type { CriticFinding, CriticResult, VoiceProfile } from "../types.js";
 import { countWords, resolveOutputWordTarget } from "../format/output-length.js";
+import {
+  collectReasoningFindings
+} from "./reasoning-critic.js";
 import { containsEmDash } from "./em-dash.js";
 import { evaluateLexicalQuality } from "./lexical-quality.js";
 
@@ -9,6 +12,7 @@ export interface CriticEvaluationOptions {
   readonly domain?: DomainProfile;
   readonly hookText?: string;
   readonly lexicalQualityV2?: boolean;
+  readonly stepName?: string;
 }
 
 export function criticizeText(
@@ -83,6 +87,12 @@ export function criticizeText(
       severity: "high",
       message: "Text talks about the writing process instead of being the final content"
     });
+  }
+
+  if (voiceProfile?.coreReasoningSignature) {
+    findings.push(
+      ...collectReasoningFindings(voiceProfile.coreReasoningSignature, text, options?.stepName)
+    );
   }
 
   if (containsEmDash(text)) {

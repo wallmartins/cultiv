@@ -1,0 +1,57 @@
+import { describe, expect, it } from "vitest";
+import { buildVoiceHints } from "../../apps/backend/src/product/voice/voice-hints.js";
+import type { CoreReasoningSignature } from "@my-ai-orchestrator/contracts";
+
+const core: CoreReasoningSignature = {
+  narrativeProse: "Observes before concluding.",
+  certaintyLevel: "moderate",
+  judgmentFrequency: "low",
+  conclusionPace: "slow",
+  readerRelationship: "peer",
+  authoritySource: "personal_observation",
+  derivedAntiPatterns: ["generic linkedin tone", "numbered thesis proof list"]
+};
+
+describe("buildVoiceHints reasoning flag", () => {
+  const profile = {
+    tone: "informal",
+    cadence: "direct",
+    lexicon: [],
+    constraints: [],
+    antiPatterns: ["surface anti-pattern"],
+    rules: [],
+    styleMarkers: [],
+    primaryLanguage: "pt-BR",
+    coreReasoningSignature: core,
+    formatExpressionProfiles: {
+      "linkedin-post": {
+        contentType: "linkedin-post",
+        narrativeProse: "Short paragraphs.",
+        register: "conversational",
+        openingStyle: "direct",
+        technicalDensity: "low"
+      }
+    }
+  };
+
+  it("does not expose reasoning fields or derived anti-patterns when flag is off", () => {
+    const hints = buildVoiceHints(profile, [], [], { contentType: "linkedin-post" }, "high", "standard", undefined, {
+      reasoningSignatureEnabled: false
+    });
+
+    expect(hints.coreReasoningSignature).toBeUndefined();
+    expect(hints.derivedAntiPatterns).toBeUndefined();
+    expect(hints.antiPatterns).not.toContain("generic linkedin tone");
+    expect(hints.antiPatterns).toContain("surface anti-pattern");
+  });
+
+  it("exposes reasoning fields and derived anti-patterns when flag is on", () => {
+    const hints = buildVoiceHints(profile, [], [], { contentType: "linkedin-post" }, "high", "standard", undefined, {
+      reasoningSignatureEnabled: true
+    });
+
+    expect(hints.coreReasoningSignature).toEqual(core);
+    expect(hints.derivedAntiPatterns).toEqual(core.derivedAntiPatterns);
+    expect(hints.antiPatterns).toContain("generic linkedin tone");
+  });
+});

@@ -85,6 +85,9 @@ pnpm hitl:durable-smoke   # requires Docker PG+Redis + GEMINI_API_KEY
 | `CORS_ALLOWED_ORIGINS` | `https://www.cultiv.app` (comma-separated) | **Required** — no default in prod |
 | `VOICE_DATA_PROTECTION_KEY` | ≥32 random chars | **Required** — encrypts voice examples at rest |
 | `GEMINI_API_KEY` (or other provider) | secret | At least one generation provider |
+| `GROQ_API_KEY` | secret | Optional — preferred provider for **Voice Judge** (`voice-judge-llm`); falls back to primary provider |
+| `GROQ_BASE_URL` | `https://api.groq.com/openai/v1` | Optional override for Groq OpenAI-compatible API |
+| `VOICE_REASONING_SIGNATURE_V1` | `false` (default) | Set `true` to enable reasoning extraction, prompts, drift blend, and judge |
 | `SERVICE_NAME` | `backend` | |
 | `APP_VERSION` | release tag / semver | |
 | `BACKEND_TRUST_PROXY` | `true` (default when unset in prod) | Trust `X-Forwarded-For` behind Railway/CF |

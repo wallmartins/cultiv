@@ -252,6 +252,57 @@ export const appMessagesEn: AppMessages = {
       languageRequired: "Select a language",
       saving: "Saving…"
     },
+    reasoning: {
+      title: "Author reasoning",
+      subtitle: "How the AI infers how you observe, argue, and conclude — from your examples.",
+      rebuilding: "Updating inferred reasoning from your latest examples.",
+      failedKeepLast:
+        "The latest extraction failed, but your previous reasoning snapshot remains active. Add examples or try updating again.",
+      coreTitle: "Core signature",
+      certaintyLevel: "Certainty level",
+      judgmentFrequency: "Judgment frequency",
+      conclusionPace: "Conclusion pace",
+      readerRelationship: "Reader relationship",
+      authoritySource: "Authority source",
+      register: "Register",
+      openingStyle: "Opening style",
+      technicalDensity: "Technical density",
+      antiPatternsTitle: "Patterns you avoid",
+      noAntiPatterns: "No derived patterns yet.",
+      partialFormats: "No per-format expression yet (minimum 2 examples per format).",
+      refineHint: "To refine this, add more examples — these fields cannot be edited manually.",
+      enums: {
+        certaintyLevel: { low: "Low", moderate: "Moderate", high: "High" },
+        judgmentFrequency: { low: "Low", moderate: "Moderate", high: "High" },
+        conclusionPace: { slow: "Slow", moderate: "Moderate", fast: "Fast" },
+        readerRelationship: {
+          peer: "Peer",
+          mentor: "Mentor",
+          observer: "Observer",
+          collaborator: "Collaborator",
+          guide: "Guide"
+        },
+        authoritySource: {
+          personal_observation: "Personal observation",
+          lived_experience: "Lived experience",
+          data: "Data",
+          reference: "Reference",
+          practice: "Practice"
+        },
+        register: {
+          formal: "Formal",
+          informal: "Informal",
+          technical: "Technical",
+          conversational: "Conversational"
+        },
+        openingStyle: {
+          direct: "Direct",
+          contextual: "Contextual",
+          provocative: "Provocative"
+        },
+        technicalDensity: { low: "Low", medium: "Medium", high: "High" }
+      }
+    },
     consent: {
       title: "Use of your voice examples",
       body: "To learn how you write, Cultiv stores and processes the text you submit. You can revoke this later in Settings.",

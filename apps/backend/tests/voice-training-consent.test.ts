@@ -224,7 +224,7 @@ describe("Voice training consent-gated ingestion", () => {
 
     expect(effective).toBeDefined();
     expect(effective?.metadata.voiceProfileVersionUsed).toBe(2);
-    expect(effective?.voiceHints.tone).toBe("personal");
+    expect(effective?.voiceHints.tone).toBe("informal");
     expect(effective?.metadata.voiceProfileSnapshotId).toMatch(/^voice-profile-snapshot:user_6:/);
   });
 

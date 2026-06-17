@@ -142,6 +142,8 @@ export function createBackendSkillDefinition(
             generationDomain: domain ? resolveGenerationDomainLabel(domain.domain) : "briefing-based",
             cadence: voiceProfile?.cadence ?? "natural",
             voiceExamples: stepVoice.voiceExamples,
+            authorReasoning: stepVoice.authorReasoning,
+            authorReasoningSection: stepVoice.authorReasoningSection,
             retryInstruction: refinement.retryInstruction,
             tone: refinement.tone,
             languageCode: refinement.languageCode,

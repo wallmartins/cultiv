@@ -38,7 +38,8 @@ const migrationTableMarkers = {
   "0003-add-audit-records": ["audit_records"],
   "0004-add-voice-training-consents": ["voice_training_consents"],
   "0005-durable-runtime": ["billing_snapshots", "outbox_events", "execution_idempotency"],
-  "0006-billing-relational": ["billing_plans", "billing_subscriptions"]
+  "0006-billing-relational": ["billing_plans", "billing_subscriptions"],
+  "0007-voice-reasoning-fields": ["voice_profiles"]
 } as const;
 
 export function baselineAppliedMigrations(

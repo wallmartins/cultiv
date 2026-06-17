@@ -1,6 +1,6 @@
 import type { VoiceExampleRecord } from "@my-ai-orchestrator/database";
 import { isTechLexiconTerm } from "@my-ai-orchestrator/text-quality";
-import type { ReasonCode, VoiceProfileConfidence } from "@my-ai-orchestrator/contracts";
+import type { ReasonCode, ReasoningExtractionResult, VoiceProfileConfidence } from "@my-ai-orchestrator/contracts";
 import {
   nextActionCodesForReason,
   type DerivedVoiceProfile,
@@ -18,11 +18,17 @@ export function deriveVoiceRebuildState(args: {
   readonly version: number;
   readonly timestamp: string;
   readonly allExamples: readonly VoiceExampleRecord[];
+  readonly previousProfile?: DerivedVoiceProfile;
+  readonly reasoning?: ReasoningExtractionResult;
+  readonly reasoningExtractionFailed?: boolean;
 }): VoiceRebuildDerivation {
   const activeExamples = args.allExamples.filter((example) => example.state === "active");
   const materialBase = buildVoiceMaterialBase(args.allExamples);
   const confidence = deriveConfidence(activeExamples);
-  const reasonCodes = deriveReasonCodes(activeExamples);
+  const reasonCodes = [...deriveReasonCodes(activeExamples)];
+  if (args.reasoningExtractionFailed) {
+    reasonCodes.push("reasoning_extraction_failed");
+  }
   const nextActionCodes = unique(
     reasonCodes.flatMap((reasonCode) => nextActionCodesForReason(reasonCode))
   );
@@ -44,6 +50,10 @@ export function deriveVoiceRebuildState(args: {
     styleMarkers: resolveStyleMarkers(activeExamples),
     rules: resolveRules(activeExamples, confidence),
     antiPatterns: resolveAntiPatterns(activeExamples),
+    coreReasoningSignature:
+      args.reasoning?.core ?? args.previousProfile?.coreReasoningSignature,
+    formatExpressionProfiles:
+      args.reasoning?.formatExpressions ?? args.previousProfile?.formatExpressionProfiles,
     createdAt: args.timestamp,
     updatedAt: args.timestamp
   };
@@ -58,10 +68,16 @@ export function deriveVoiceRebuildState(args: {
     nextActionCodes,
     bestCoveredContentTypes: coverage.bestCovered,
     underrepresentedContentTypes: coverage.underrepresented,
-    pendingRebuild: {
-      status: "idle",
-      nextActionCodes: []
-    },
+    pendingRebuild: args.reasoningExtractionFailed
+      ? {
+          status: "failed",
+          reasonCode: "reasoning_extraction_failed",
+          nextActionCodes: nextActionCodesForReason("reasoning_extraction_failed")
+        }
+      : {
+          status: "idle",
+          nextActionCodes: []
+        },
     materialBase,
     createdAt: args.timestamp,
     updatedAt: args.timestamp
@@ -181,6 +197,10 @@ function buildDiagnosticsSummary(
   reasonCodes: readonly ReasonCode[],
   wellCoveredContentTypes: number
 ): string {
+  if (reasonCodes.includes("reasoning_extraction_failed")) {
+    return "Não foi possível atualizar o raciocínio inferido agora. O último snapshot válido continua ativo.";
+  }
+
   if (reasonCodes.includes("insufficient_examples")) {
     return "Ainda faltam exemplos suficientes para consolidar uma voz forte e previsível.";
   }

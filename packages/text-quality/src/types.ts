@@ -1,5 +1,9 @@
 import type { Effect } from "effect";
 import type { PipelineRequest } from "@my-ai-orchestrator/contracts";
+import type {
+  CoreReasoningSignature,
+  FormatExpressionProfile
+} from "@my-ai-orchestrator/contracts";
 import type { GenerationContext } from "./domain/generation-context.js";
 
 export type VoiceProfile = {
@@ -15,6 +19,9 @@ export type VoiceProfile = {
   readonly rules: readonly string[];
   readonly styleMarkers: readonly string[];
   readonly userLabels: readonly string[];
+  readonly coreReasoningSignature?: CoreReasoningSignature;
+  readonly formatExpressionProfile?: FormatExpressionProfile;
+  readonly derivedAntiPatterns?: readonly string[];
 };
 
 export type QualityLaneStrategy = "conservative" | "balanced" | "creative";
@@ -54,6 +61,7 @@ export interface TextQualityRequest {
   readonly voiceHints?: Partial<VoiceProfile>;
   readonly generationContext?: GenerationContext;
   readonly lexicalQualityV2?: boolean;
+  readonly reasoningEvaluationEnabled?: boolean;
   readonly onLaneProgress?: (progress: LaneProgress) => Effect.Effect<void>;
 }
 
@@ -65,7 +73,15 @@ export interface VoiceProfileResolutionInput {
 }
 
 export interface CriticFinding {
-  readonly type: "generic" | "performative" | "cliche" | "redundant" | "llmish";
+  readonly type:
+    | "generic"
+    | "performative"
+    | "cliche"
+    | "redundant"
+    | "llmish"
+    | "premature_conclusion"
+    | "excess_certainty"
+    | "rhetorical_inflation";
   readonly severity: "low" | "medium" | "high";
   readonly message: string;
 }
@@ -90,6 +106,7 @@ export interface CandidateScoreBreakdown {
   readonly criticScore: number;
   readonly fidelityScore: number;
   readonly driftScore: number;
+  readonly reasoningDriftScore?: number;
   readonly strategyBonus: number;
   readonly finalScore: number;
 }

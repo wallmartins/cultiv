@@ -10,6 +10,7 @@ Planejamento consolidado da implementação web do **Cultiv**, produzido nas ses
 | [phase-1-implementation-plan.md](./phase-1-implementation-plan.md) | Plano detalhado — Marketing Surface (validação) |
 | [product-showcase-restructure-implementation-plan.md](./product-showcase-restructure-implementation-plan.md) | Plano — reestruturação da Product Showcase (problema → fluxo, Chromia × orgânico) |
 | [text-generation-lexical-quality-implementation-plan.md](./text-generation-lexical-quality-implementation-plan.md) | Plano — qualidade lexical e domínio temático na geração de textos |
+| [author-reasoning-signature-implementation-plan.md](./author-reasoning-signature-implementation-plan.md) | Plano — raciocínio autoral, extração no rebuild, judge Groq (ADR 0006) |
 | [text-generation-lexical-quality-tracker.md](./text-generation-lexical-quality-tracker.md) | Tracker — issues 17–26, baseline de métricas, rollout |
 | [phase-2-implementation-plan.md](./phase-2-implementation-plan.md) | Plano detalhado — App autenticado (produto) |
 | [plan-tier-quality-modes-implementation-plan.md](./plan-tier-quality-modes-implementation-plan.md) | Plano — modos por tier, formatos abertos, assinatura free no JIT (ADR 0002) |
@@ -17,6 +18,8 @@ Planejamento consolidado da implementação web do **Cultiv**, produzido nas ses
 | [durable-async-runtime-implementation-plan.md](./durable-async-runtime-implementation-plan.md) | Plano — runtime async durável, PG + Redis + outbox, zero estado em RAM (ADR 0004) |
 | [web-v2-platform-structure.md](./web-v2-platform-structure.md) | Estrutura consolidada web v2 — rotas, telas, componentes, SDK (grill 2026-06) |
 | [web-v2-screen-specs.md](./web-v2-screen-specs.md) | Especificação por tela — wireframes, estados, campos, i18n, erros |
+| [PRD Author Reasoning Signature](../prd/author-reasoning-signature.md) | Fidelidade de raciocínio autoral (ADR 0006) |
+| [Issues Author Reasoning Signature](../prd/issue-author-reasoning-signature.md) | Vertical slices 66–73 |
 | [PRD fase 1](../prd/cultiv-marketing-surface-phase-1.md) | Product Requirements Document — Marketing Surface |
 | [PRD Web v2](../prd/cultiv-authenticated-workspace-web-v2.md) | Product Requirements Document — Authenticated Workspace |
 | [Issues Web v2](../issues/README.md#authenticated-workspace--web-v2) | Vertical slices 27–34 |

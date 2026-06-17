@@ -8,7 +8,8 @@ import type {
   VoiceExamplesPageView,
   VoiceProfileDiagnosticsView,
   VoiceProfileScreenView,
-  VoiceProfileView
+  VoiceProfileView,
+  VoiceReasoningPresentationView
 } from "@my-ai-orchestrator/contracts";
 import type {
   DerivedVoiceProfile,
@@ -66,7 +67,8 @@ export function toVoiceProfileDiagnosticsView(
 
 export function toVoiceProfileScreenView(
   profile: DerivedVoiceProfile,
-  diagnostics: VoiceProfileDiagnostics
+  diagnostics: VoiceProfileDiagnostics,
+  options?: { readonly includeReasoning?: boolean }
 ): VoiceProfileScreenView {
   return {
     profile: toVoiceProfileView(profile),
@@ -76,7 +78,28 @@ export function toVoiceProfileScreenView(
       byClassification: { ...diagnostics.materialBase.byClassification },
       byContentType: { ...diagnostics.materialBase.byContentType },
       byLanguage: { ...diagnostics.materialBase.byLanguage }
-    }
+    },
+    ...(options?.includeReasoning && profile.coreReasoningSignature
+      ? { reasoning: toVoiceReasoningPresentationView(profile) }
+      : {})
+  };
+}
+
+export function toVoiceReasoningPresentationView(
+  profile: DerivedVoiceProfile
+): VoiceReasoningPresentationView | undefined {
+  if (!profile.coreReasoningSignature) {
+    return undefined;
+  }
+
+  const formatExpressions = Object.values(profile.formatExpressionProfiles ?? {}).map(
+    (expression) => ({ ...expression })
+  );
+
+  return {
+    core: { ...profile.coreReasoningSignature, derivedAntiPatterns: [...profile.coreReasoningSignature.derivedAntiPatterns] },
+    formatExpressions,
+    reasoningVersion: profile.version
   };
 }
 

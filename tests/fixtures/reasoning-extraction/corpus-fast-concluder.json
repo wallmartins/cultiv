@@ -1,0 +1,73 @@
+{
+  "id": "corpus-fast-concluder",
+  "examples": [
+    {
+      "id": "ex-1",
+      "userId": "user-1",
+      "text": "Métricas de ativação valem mais que vanity metrics em SaaS B2B — eis por quê.",
+      "language": "pt-BR",
+      "state": "active",
+      "classificationLabels": [],
+      "antiPatternsExplicit": [],
+      "pinned": false,
+      "pendingProfileImpact": false,
+      "effectiveContentTypeHints": ["newsletter"],
+      "evaluation": {
+        "systemWeight": 1,
+        "attentionLevel": "medium",
+        "attentionReasonCodes": [],
+        "contributionCode": "useful_for_newsletter",
+        "contributionPreview": "",
+        "userPinned": false
+      },
+      "createdAt": "2026-01-01T00:00:00.000Z",
+      "updatedAt": "2026-01-01T00:00:00.000Z",
+      "version": 1,
+      "explicitContentType": "newsletter"
+    },
+    {
+      "id": "ex-2",
+      "userId": "user-1",
+      "text": "Conclusão primeiro: cohort semanal bate snapshot mensal para detectar regressões.",
+      "language": "pt-BR",
+      "state": "active",
+      "classificationLabels": [],
+      "antiPatternsExplicit": [],
+      "pinned": false,
+      "pendingProfileImpact": false,
+      "effectiveContentTypeHints": ["newsletter"],
+      "evaluation": {
+        "systemWeight": 1,
+        "attentionLevel": "medium",
+        "attentionReasonCodes": [],
+        "contributionCode": "useful_for_newsletter",
+        "contributionPreview": "",
+        "userPinned": false
+      },
+      "createdAt": "2026-01-02T00:00:00.000Z",
+      "updatedAt": "2026-01-02T00:00:00.000Z",
+      "version": 1,
+      "explicitContentType": "newsletter"
+    }
+  ],
+  "expected": {
+    "core": {
+      "narrativeProse": "States the thesis early, supports it quickly, and closes without long digressions.",
+      "certaintyLevel": "high",
+      "judgmentFrequency": "moderate",
+      "conclusionPace": "fast",
+      "readerRelationship": "guide",
+      "authoritySource": "data",
+      "derivedAntiPatterns": ["excessive hedging"]
+    },
+    "formatExpressions": {
+      "newsletter": {
+        "contentType": "newsletter",
+        "narrativeProse": "Newsletter sections lead with the takeaway and keep supporting detail tight.",
+        "register": "informal",
+        "openingStyle": "direct",
+        "technicalDensity": "medium"
+      }
+    }
+  }
+}
