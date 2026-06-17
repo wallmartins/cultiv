@@ -67,7 +67,7 @@ export function extractReasoningSignature(args: {
 }): Effect.Effect<ReasoningExtractionResult, ReasoningExtractionError> {
   return Effect.gen(function* () {
     const grouped = groupExamplesByContentType(args.examples);
-    const promptPayload = buildExtractionPrompt(grouped);
+    const promptPayload = buildExtractionPrompt(grouped, args.examples);
 
     let lastError: ReasoningExtractionError | undefined;
 
@@ -165,10 +165,11 @@ function normalizeExtractionResult(result: ReasoningExtractionResult): Reasoning
 }
 
 function buildExtractionPrompt(
-  grouped: Readonly<Record<string, readonly VoiceExampleRecord[]>>
+  grouped: Readonly<Record<string, readonly VoiceExampleRecord[]>>,
+  examples: readonly VoiceExampleRecord[]
 ): string {
-  const sections = Object.entries(grouped).map(([contentType, examples]) => {
-    const exampleBlocks = examples
+  const sections = Object.entries(grouped).map(([contentType, groupedExamples]) => {
+    const exampleBlocks = groupedExamples
       .map((example, index) => `Example ${index + 1}:\n${example.text.trim()}`)
       .join("\n\n");
 
@@ -180,9 +181,59 @@ function buildExtractionPrompt(
     "Return JSON only matching the agreed schema.",
     "Infer a single global core reasoning signature and per-content-type format expression profiles.",
     "Do not copy example text verbatim into narrative prose.",
+    resolveReasoningLanguageInstruction(examples),
     "",
     ...sections
   ].join("\n");
+}
+
+export function normalizeExampleLanguage(language: string): string {
+  const lower = language.trim().toLowerCase();
+  if (lower.startsWith("pt")) {
+    return "pt";
+  }
+  if (lower.startsWith("en")) {
+    return "en";
+  }
+
+  return lower.split("-")[0] ?? lower;
+}
+
+export function resolvePrimaryExampleLanguage(
+  examples: readonly VoiceExampleRecord[]
+): string | undefined {
+  const counts = new Map<string, number>();
+
+  for (const example of examples.filter((item) => item.state === "active")) {
+    const language = normalizeExampleLanguage(example.language);
+    counts.set(language, (counts.get(language) ?? 0) + 1);
+  }
+
+  let primary: string | undefined;
+  let highestCount = 0;
+
+  for (const [language, count] of counts) {
+    if (count > highestCount) {
+      primary = language;
+      highestCount = count;
+    }
+  }
+
+  return primary;
+}
+
+function resolveReasoningLanguageInstruction(examples: readonly VoiceExampleRecord[]): string {
+  const primaryLanguage = resolvePrimaryExampleLanguage(examples);
+
+  if (primaryLanguage === "pt") {
+    return "Write every narrativeProse field and every derivedAntiPatterns string in Brazilian Portuguese.";
+  }
+
+  if (primaryLanguage === "en") {
+    return "Write every narrativeProse field and every derivedAntiPatterns string in English.";
+  }
+
+  return "Write every narrativeProse field and every derivedAntiPatterns string in the same language as the majority of examples.";
 }
 
 function extractJsonObject(content: string): string {
@@ -208,6 +259,7 @@ function extractJsonObject(content: string): string {
 const REASONING_EXTRACTION_SYSTEM_PROMPT = [
   "You extract an author's reasoning signature from writing examples.",
   "Respond with JSON only — no markdown fences or commentary.",
+  "All narrativeProse fields and derivedAntiPatterns strings must use the language requested in the user message.",
   "Schema:",
   "{",
   '  "core": {',

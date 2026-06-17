@@ -4,8 +4,9 @@ import { useEffect, useState } from "react";
 import { AppCard } from "~/platform/ui/AppCard";
 import { AppDisclosureGroup } from "~/platform/ui/AppDisclosure";
 import { AppSkeleton } from "~/platform/ui/AppSkeleton";
-import { toVoiceConfidenceLevel, VoiceConfidenceRing } from "~/app/voice/components/VoiceConfidenceRing";
-import { VoiceNextStepCard } from "~/app/voice/components/VoiceNextStepCard";
+import { toVoiceConfidenceLevel } from "~/app/voice/components/VoiceConfidenceRing";
+import { VoiceNextStepPanel } from "~/app/voice/components/VoiceNextStepPanel";
+import { VoiceProfileStatusPanel } from "~/app/voice/components/VoiceProfileStatusPanel";
 import {
   buildReasoningDetailItems,
   VoiceReasoningMirror
@@ -14,7 +15,8 @@ import {
   getMissingVoiceFormats,
   getUnderrepresentedVoiceFormats,
   getVoiceAdaptationModeCopy,
-  getVoiceConfidenceDescription,
+  getVoiceConfidenceAdaptationLine,
+  getVoiceConfidencePanelMessage,
   getVoiceDiagnosticsText,
   resolveVoiceNextStepFromDiagnostics
 } from "~/app/voice/lib/voice-dashboard-copy";
@@ -83,13 +85,24 @@ export function VoiceDashboard() {
   const confidenceLabel =
     voiceMessages.confidenceLabels[profile.profile.confidence] ??
     voiceMessages.confidenceLabels.none;
-  const confidenceDescription = getVoiceConfidenceDescription(profile.profile, voiceMessages);
   const adaptationMode = getVoiceAdaptationModeCopy(profile.profile.adaptationMode, voiceMessages);
   const missingFormats = getMissingVoiceFormats(profile.materialBase);
   const underrepresentedFormats = getUnderrepresentedVoiceFormats(profile.diagnostics);
   const coverageComplete = missingFormats.length === 0 && underrepresentedFormats.length === 0;
   const nextStep = resolveVoiceNextStepFromDiagnostics(profile.diagnostics, voiceMessages);
   const rebuildStatus = profile.diagnostics.pendingRebuild.status;
+  const confidenceLevel = toVoiceConfidenceLevel(profile.profile.confidence);
+  const profileStatus = (
+    <VoiceProfileStatusPanel
+      level={confidenceLevel}
+      confidenceLabel={confidenceLabel}
+      panelTitle={voiceMessages.confidencePanelTitle}
+      contextCopy={getVoiceConfidencePanelMessage(profile.profile, voiceMessages, {
+        detailed: !profile.reasoning
+      })}
+      adaptationLine={getVoiceConfidenceAdaptationLine(profile.profile.adaptationMode, voiceMessages)}
+    />
+  );
 
   const healthLayer = (
     <div className="space-y-4">
@@ -100,7 +113,7 @@ export function VoiceDashboard() {
         <Text variant="body" className="mb-1 font-medium text-foreground">
           {adaptationMode.label}
         </Text>
-        <Text variant="meta" className="max-w-prose text-muted-foreground">
+        <Text variant="meta" className="w-full text-muted-foreground">
           {adaptationMode.description}
         </Text>
       </div>
@@ -108,7 +121,7 @@ export function VoiceDashboard() {
         <Text variant="label" className="mb-2 block">
           {voiceMessages.diagnostics}
         </Text>
-        <Text variant="body" className="max-w-prose text-muted-foreground">
+        <Text variant="body" className="w-full text-muted-foreground">
           {getVoiceDiagnosticsText(
             profile.diagnostics,
             profile.profile.confidence,
@@ -121,13 +134,13 @@ export function VoiceDashboard() {
           {voiceMessages.coverage}
         </Text>
         {coverageComplete ? (
-          <Text variant="body" className="text-muted-foreground">
+          <Text variant="body" className="w-full text-muted-foreground">
             {voiceMessages.coverageComplete}
           </Text>
         ) : (
           <div className="space-y-2">
             {missingFormats.length > 0 ? (
-              <Text variant="body" className="text-muted-foreground">
+              <Text variant="body" className="w-full text-muted-foreground">
                 {voiceMessages.coverageMissingFormats}{" "}
                 {missingFormats
                   .map((format) => getContentTypeLabel(locale, format, format))
@@ -135,7 +148,7 @@ export function VoiceDashboard() {
               </Text>
             ) : null}
             {underrepresentedFormats.length > 0 ? (
-              <Text variant="body" className="text-muted-foreground">
+              <Text variant="body" className="w-full text-muted-foreground">
                 {voiceMessages.underrepresented}{" "}
                 {underrepresentedFormats
                   .map((format) => getContentTypeLabel(locale, format, format))
@@ -155,7 +168,7 @@ export function VoiceDashboard() {
           <Text as="h1" variant="h1" className="mb-2">
             {voiceMessages.dashboardTitle}
           </Text>
-          <Text variant="meta" className="max-w-prose text-muted-foreground">
+          <Text variant="meta" className="text-muted-foreground">
             {voiceMessages.dashboardSubtitle}
           </Text>
         </div>
@@ -180,34 +193,23 @@ export function VoiceDashboard() {
         </AppCard>
       ) : null}
 
-      <AppCard padding="compact" className="bg-surface-elevated/80">
-        <div className="flex flex-wrap items-center gap-4">
-          <VoiceConfidenceRing
-            size="compact"
-            level={toVoiceConfidenceLevel(profile.profile.confidence)}
-            label={confidenceLabel}
-          />
-          <Text variant="meta" className="text-muted-foreground">
-            {voiceMessages.adaptationModeLabels[profile.profile.adaptationMode]}
-          </Text>
-        </div>
-      </AppCard>
-
       {profile.reasoning ? (
-        <VoiceReasoningMirror messages={voiceMessages.reasoning} reasoning={profile.reasoning} />
+        <VoiceReasoningMirror
+          messages={voiceMessages.reasoning}
+          reasoning={profile.reasoning}
+          status={profileStatus}
+        />
       ) : (
-        <section className="space-y-3">
+        <section className="space-y-6">
           <div>
             <Text as="h2" variant="h2" className="mb-2">
               {voiceMessages.mirrorFallbackTitle}
             </Text>
-            <Text variant="meta" className="max-w-prose text-muted-foreground">
+            <Text variant="meta" className="w-full text-muted-foreground">
               {voiceMessages.mirrorFallbackSubtitle}
             </Text>
           </div>
-          <Text variant="body-lg" className="max-w-prose leading-relaxed text-foreground">
-            {confidenceDescription}
-          </Text>
+          {profileStatus}
         </section>
       )}
 
@@ -229,12 +231,12 @@ export function VoiceDashboard() {
       />
 
       {profile.reasoning ? (
-        <Text variant="meta" className="max-w-prose text-muted-foreground">
+        <Text variant="meta" className="w-full text-muted-foreground">
           {voiceMessages.reasoning.refineHint}
         </Text>
       ) : null}
 
-      <VoiceNextStepCard eyebrow={voiceMessages.nextStep.eyebrow} step={nextStep} />
+      <VoiceNextStepPanel eyebrow={voiceMessages.nextStep.eyebrow} step={nextStep} />
     </div>
   );
 }

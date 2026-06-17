@@ -154,7 +154,14 @@ export type AppVoiceMessages = {
   readonly dashboardEmpty: string;
   readonly dashboardEmptyAction: string;
   readonly confidence: string;
+  readonly confidencePanelTitle: string;
   readonly confidenceLabels: {
+    readonly high: string;
+    readonly medium: string;
+    readonly low: string;
+    readonly none: string;
+  };
+  readonly confidenceContext: {
     readonly high: string;
     readonly medium: string;
     readonly low: string;
@@ -180,6 +187,10 @@ export type AppVoiceMessages = {
     readonly standard: string;
   };
   readonly adaptationModeDescriptions: {
+    readonly conservative: string;
+    readonly standard: string;
+  };
+  readonly confidenceAdaptationLines: {
     readonly conservative: string;
     readonly standard: string;
   };

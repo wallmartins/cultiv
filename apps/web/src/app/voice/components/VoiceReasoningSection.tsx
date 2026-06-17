@@ -1,4 +1,5 @@
 import { Text } from "@my-ai-orchestrator/ui";
+import type { ReactNode } from "react";
 import type { AppDisclosureItem } from "~/platform/ui/AppDisclosure";
 import { VoiceTraitChip } from "~/app/voice/components/VoiceTraitChip";
 import { getContentTypeLabel } from "~/i18n/app/content-types";
@@ -36,7 +37,7 @@ export function buildReasoningDetailItems({
                 <Text variant="label" className="mb-2 block">
                   {getContentTypeLabel(locale, expression.contentType, expression.contentType)}
                 </Text>
-                <Text variant="body" className="mb-3 max-w-prose text-muted-foreground">
+                <Text variant="body" className="mb-3 w-full text-muted-foreground">
                   {expression.narrativeProse}
                 </Text>
                 <div className="flex flex-wrap gap-2">
@@ -57,7 +58,7 @@ export function buildReasoningDetailItems({
             ))}
           </div>
         ) : (
-          <Text variant="body" className="text-muted-foreground">
+          <Text variant="body" className="w-full text-muted-foreground">
             {reasoningMessages.partialFormats}
           </Text>
         )
@@ -71,14 +72,14 @@ export function buildReasoningDetailItems({
           <ul className="list-disc space-y-2 pl-5">
             {reasoning.core.derivedAntiPatterns.map((pattern) => (
               <li key={pattern}>
-                <Text variant="body" className="text-foreground">
+                <Text variant="body" className="w-full text-foreground">
                   {pattern}
                 </Text>
               </li>
             ))}
           </ul>
         ) : (
-          <Text variant="body" className="text-muted-foreground">
+          <Text variant="body" className="w-full text-muted-foreground">
             {reasoningMessages.noAntiPatterns}
           </Text>
         )
@@ -89,21 +90,24 @@ export function buildReasoningDetailItems({
 interface VoiceReasoningMirrorProps {
   readonly messages: AppMessages["voice"]["reasoning"];
   readonly reasoning: VoiceReasoningPresentationView;
+  readonly status?: ReactNode;
 }
 
-export function VoiceReasoningMirror({ messages, reasoning }: VoiceReasoningMirrorProps) {
+export function VoiceReasoningMirror({ messages, reasoning, status }: VoiceReasoningMirrorProps) {
   return (
-    <section className="space-y-4">
+    <section className="space-y-6">
       <div>
         <Text as="h2" variant="h2" className="mb-2">
           {messages.title}
         </Text>
-        <Text variant="meta" className="max-w-prose text-muted-foreground">
+        <Text variant="meta" className="w-full text-muted-foreground">
           {messages.subtitle}
         </Text>
       </div>
 
-      <Text variant="body-lg" className="max-w-prose whitespace-pre-wrap leading-relaxed text-foreground">
+      {status}
+
+      <Text variant="body-lg" className="w-full whitespace-pre-wrap leading-relaxed text-foreground">
         {reasoning.core.narrativeProse}
       </Text>
 

@@ -36,6 +36,36 @@ export function getVoiceConfidenceDescription(
   return template.replace("{tone}", tone).replace("{cadence}", cadence);
 }
 
+export function getVoiceConfidenceContext(
+  confidence: VoiceProfileConfidence,
+  messages: AppVoiceMessages
+): string {
+  if (confidence === "high" || confidence === "medium" || confidence === "low") {
+    return messages.confidenceContext[confidence];
+  }
+
+  return messages.confidenceContext.none;
+}
+
+export function getVoiceConfidenceAdaptationLine(
+  mode: VoiceAdaptationMode,
+  messages: AppVoiceMessages
+): string {
+  return messages.confidenceAdaptationLines[mode];
+}
+
+export function getVoiceConfidencePanelMessage(
+  profile: VoiceProfileView,
+  messages: AppVoiceMessages,
+  options: { readonly detailed: boolean }
+): string {
+  if (options.detailed) {
+    return getVoiceConfidenceDescription(profile, messages);
+  }
+
+  return getVoiceConfidenceContext(profile.confidence, messages);
+}
+
 const diagnosticsReasonPriority = [
   "insufficient_examples",
   "language_conflict",

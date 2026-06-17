@@ -15,12 +15,21 @@ export interface VoiceConfidenceRingProps {
   readonly label: string;
   readonly description?: string;
   readonly className?: string;
-  readonly size?: "default" | "compact";
+  readonly size?: "default" | "compact" | "panel";
+  readonly hideLabel?: boolean;
+  readonly centerLabel?: string;
 }
 
 const ringSizeClasses = {
   default: "size-28",
-  compact: "size-16"
+  compact: "size-16",
+  panel: "size-24 sm:size-28"
+} as const;
+
+const centerLabelClasses = {
+  default: "text-base",
+  compact: "text-xs",
+  panel: "text-sm sm:text-base"
 } as const;
 
 export function VoiceConfidenceRing({
@@ -28,13 +37,17 @@ export function VoiceConfidenceRing({
   label,
   description,
   className,
-  size = "default"
+  size = "default",
+  hideLabel = false,
+  centerLabel
 }: VoiceConfidenceRingProps) {
   const labelId = useId();
   const gradientId = useId();
   const targetProgress = progressByLevel[level];
   const circumference = 2 * Math.PI * 42;
   const [animatedOffset, setAnimatedOffset] = useState(circumference);
+  const showExternalLabel = !hideLabel && !centerLabel;
+  const accessibleLabel = centerLabel ? `${centerLabel}. ${label}` : label;
 
   useEffect(() => {
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -50,9 +63,21 @@ export function VoiceConfidenceRing({
   }, [circumference, targetProgress]);
 
   return (
-    <div className={cn("flex items-center gap-5", size === "compact" && "gap-3", className)}>
-      <div className={cn("relative shrink-0", ringSizeClasses[size])} aria-labelledby={labelId}>
-        <svg viewBox="0 0 100 100" className="size-full -rotate-90" role="img" aria-hidden>
+    <div
+      className={cn(
+        "flex items-center gap-5",
+        size === "compact" && "gap-3",
+        centerLabel && "shrink-0",
+        className
+      )}
+    >
+      <div
+        className={cn("relative shrink-0", ringSizeClasses[size])}
+        aria-labelledby={showExternalLabel ? labelId : undefined}
+        aria-label={!showExternalLabel ? accessibleLabel : undefined}
+        role={!showExternalLabel ? "img" : undefined}
+      >
+        <svg viewBox="0 0 100 100" className="size-full -rotate-90" aria-hidden>
           <circle
             cx="50"
             cy="50"
@@ -82,22 +107,34 @@ export function VoiceConfidenceRing({
             </linearGradient>
           </defs>
         </svg>
-      </div>
-      <div className="min-w-0">
-        <Text
-          id={labelId}
-          as="p"
-          variant={size === "compact" ? "body" : "h2"}
-          className={cn("mb-1", size === "compact" && "font-semibold")}
-        >
-          {label}
-        </Text>
-        {description ? (
-          <Text variant="meta" className="text-muted-foreground">
-            {description}
-          </Text>
+        {centerLabel ? (
+          <span
+            className={cn(
+              "absolute inset-0 flex items-center justify-center font-body font-semibold leading-none text-foreground",
+              centerLabelClasses[size]
+            )}
+          >
+            {centerLabel}
+          </span>
         ) : null}
       </div>
+      {showExternalLabel ? (
+        <div className="min-w-0">
+          <Text
+            id={labelId}
+            as="p"
+            variant={size === "compact" ? "body" : "h2"}
+            className={cn("mb-1", size === "compact" && "font-semibold")}
+          >
+            {label}
+          </Text>
+          {description ? (
+            <Text variant="meta" className="text-muted-foreground">
+              {description}
+            </Text>
+          ) : null}
+        </div>
+      ) : null}
     </div>
   );
 }

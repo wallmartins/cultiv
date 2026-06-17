@@ -209,11 +209,19 @@ export const appMessagesPt: AppMessages = {
       }
     },
     confidence: "Confiança",
+    confidencePanelTitle: "Confiança na sua voz",
     confidenceLabels: {
       high: "Alta",
       medium: "Média",
       low: "Baixa",
       none: "—"
+    },
+    confidenceContext: {
+      low: "Perfil em formação — cada novo exemplo aproxima o Cultiv do seu estilo real.",
+      medium:
+        "Sua voz já aparece nas gerações; exemplos em outros formatos ainda podem refiná-la.",
+      high: "Sua base de exemplos é sólida. O Cultiv já adapta sua voz com segurança nas gerações.",
+      none: "Adicione exemplos para o Cultiv começar a ler sua voz."
     },
     confidenceDescriptions: {
       low: "Perfil em formação: tom {tone}, com {cadence}. Com mais exemplos variados, a IA reproduz sua voz com mais segurança nas gerações.",
@@ -240,6 +248,12 @@ export const appMessagesPt: AppMessages = {
         "A IA prefere manter-se próxima dos exemplos e evita extrapolar quando a base ainda é limitada.",
       standard:
         "A IA aplica sua voz com mais liberdade, preservando tom e cadência nos formatos que você pedir."
+    },
+    confidenceAdaptationLines: {
+      conservative:
+        "Adaptação conservadora: o Cultiv prefere ficar bem próximo dos seus exemplos.",
+      standard:
+        "Adaptação equilibrada entre fidelidade aos exemplos e flexibilidade nos formatos."
     },
     diagnostics: "Diagnósticos",
     reasonCodeMessages: {

@@ -4,7 +4,7 @@ import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import type { ReasoningExtractionResult } from "@my-ai-orchestrator/contracts";
 import type { VoiceExampleRecord } from "@my-ai-orchestrator/database";
-import { TEST_REASONING_EXTRACTION_FIXTURE, extractReasoningSignature } from "../../apps/backend/src/product/voice/reasoning-extraction.js";
+import { TEST_REASONING_EXTRACTION_FIXTURE, extractReasoningSignature, resolvePrimaryExampleLanguage } from "../../apps/backend/src/product/voice/reasoning-extraction.js";
 import { createAIAdapterRegistry, createAIAdapterService, registerDefaultAIProviders } from "@my-ai-orchestrator/ai-adapters";
 import type { BackendProviderTransport } from "../../apps/backend/src/execution/pipeline/provider-transport.js";
 
@@ -126,5 +126,15 @@ describe("reasoning extraction", () => {
     expect(result.core.certaintyLevel).toBe(corpus.expected.core.certaintyLevel);
     expect(result.core.conclusionPace).toBe(corpus.expected.core.conclusionPace);
     expect(Object.keys(result.formatExpressions).length).toBeGreaterThan(0);
+  });
+
+  it("resolves the dominant active example language for extraction copy", () => {
+    expect(
+      resolvePrimaryExampleLanguage([
+        { language: "pt-BR", state: "active" } as VoiceExampleRecord,
+        { language: "pt-BR", state: "active" } as VoiceExampleRecord,
+        { language: "en-US", state: "active" } as VoiceExampleRecord
+      ])
+    ).toBe("pt");
   });
 });
