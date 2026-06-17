@@ -10,6 +10,7 @@ import type { BackendProviderTransport } from "../pipeline/provider-transport.js
 import type { PipelineRequest } from "@my-ai-orchestrator/contracts";
 import { createRuntimeMetadataRequest } from "../pipeline/sanitized-generation-input.js";
 import { runVoiceJudgePass } from "./voice-judge.js";
+import { logVoiceJudgeEvent } from "./voice-judge-logging.js";
 
 export function applyVoiceJudgeToQualityResult(args: {
   readonly pipelineName: string;
@@ -33,7 +34,20 @@ export function applyVoiceJudgeToQualityResult(args: {
 }, import("../../http/errors.js").BackendExecutionFailedError> {
   return Effect.gen(function* () {
     if (!args.reasoningSignatureEnabled || args.attempts.length === 0) {
+      if (!args.reasoningSignatureEnabled) {
+        logVoiceJudgeEvent("skipped", {
+          pipelineName: args.pipelineName,
+          qualityMode: args.qualityMode,
+          reason: "reasoning_signature_flag_disabled"
+        });
+      }
+
       if (args.reasoningSignatureEnabled && args.attempts.length === 0) {
+        logVoiceJudgeEvent("skipped", {
+          pipelineName: args.pipelineName,
+          qualityMode: args.qualityMode,
+          reason: "no_routing_attempts"
+        });
         yield* args.observability?.recordVoiceJudgeFallback({
           pipelineName: args.pipelineName,
           reason: "no_routing_attempts"

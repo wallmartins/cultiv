@@ -5,7 +5,8 @@ import type { CandidateText, VoiceProfile } from "@my-ai-orchestrator/text-quali
 import type { BackendObservabilityService } from "../../product/core/observability-types.js";
 import type { BackendProviderTransport } from "../pipeline/provider-transport.js";
 import type { AIPolicyProviderModelAttempt } from "../../product/ai-policy/ai-policy-types.js";
-import { selectVoiceJudgeCandidates, shouldInvokeVoiceJudge } from "./voice-judge-policy.js";
+import { selectVoiceJudgeCandidates, shouldInvokeVoiceJudge, explainVoiceJudgeSkip } from "./voice-judge-policy.js";
+import { logVoiceJudgeEvent } from "./voice-judge-logging.js";
 
 const VoiceJudgeResultSchema = Schema.Struct({
   score: Schema.Number,
@@ -23,7 +24,7 @@ export interface VoiceJudgeInput {
   readonly pipelineName?: string;
 }
 
-export { shouldInvokeVoiceJudge, selectVoiceJudgeCandidates };
+export { shouldInvokeVoiceJudge, selectVoiceJudgeCandidates, explainVoiceJudgeSkip };
 
 export function evaluateWithVoiceJudge(
   input: VoiceJudgeInput
@@ -37,6 +38,13 @@ export function evaluateWithVoiceJudge(
     const examples = input.voiceProfile.examples.slice(0, 2).join("\n\n---\n\n");
 
     for (const attempt of input.attempts) {
+      logVoiceJudgeEvent("attempt_started", {
+        pipelineName: input.pipelineName,
+        laneId: input.candidate.laneId,
+        provider: attempt.provider,
+        model: attempt.model
+      });
+
       const completion = yield* Effect.either(
         input.aiAdapters.complete({
           request: {
@@ -74,11 +82,25 @@ export function evaluateWithVoiceJudge(
       );
 
       if (completion._tag === "Left") {
+        logVoiceJudgeEvent("attempt_failed", {
+          pipelineName: input.pipelineName,
+          laneId: input.candidate.laneId,
+          provider: attempt.provider,
+          model: attempt.model,
+          reason: completion.left instanceof Error ? completion.left.message : String(completion.left)
+        });
         continue;
       }
 
       const parsed = yield* parseJudgeResponse(completion.right.response.text);
       if (parsed) {
+        logVoiceJudgeEvent("invoked", {
+          pipelineName: input.pipelineName,
+          laneId: input.candidate.laneId,
+          provider: attempt.provider,
+          model: attempt.model,
+          score: parsed.score
+        });
         yield* input.observability?.recordVoiceJudgeInvoked({
           pipelineName: input.pipelineName,
           laneId: input.candidate.laneId,
@@ -88,7 +110,20 @@ export function evaluateWithVoiceJudge(
         }) ?? Effect.void;
         return parsed.score;
       }
+
+      logVoiceJudgeEvent("attempt_parse_failed", {
+        pipelineName: input.pipelineName,
+        laneId: input.candidate.laneId,
+        provider: attempt.provider,
+        model: attempt.model
+      });
     }
+
+    logVoiceJudgeEvent("fallback", {
+      pipelineName: input.pipelineName,
+      laneId: input.candidate.laneId,
+      reason: "provider_or_parse_failure"
+    });
 
     yield* input.observability?.recordVoiceJudgeFallback({
       pipelineName: input.pipelineName,
@@ -165,18 +200,31 @@ export function runVoiceJudgePass(args: {
   readonly pipelineName?: string;
 }): Effect.Effect<readonly CandidateText[]> {
   return Effect.gen(function* () {
-    if (
-      !shouldInvokeVoiceJudge({
+    const skipReason = explainVoiceJudgeSkip({
+      qualityMode: args.qualityMode,
+      reasoningSignatureEnabled: args.reasoningSignatureEnabled,
+      voiceProfile: args.voiceProfile,
+      candidates: args.candidates
+    });
+
+    if (skipReason) {
+      logVoiceJudgeEvent("skipped", {
+        pipelineName: args.pipelineName,
         qualityMode: args.qualityMode,
-        reasoningSignatureEnabled: args.reasoningSignatureEnabled,
-        voiceProfile: args.voiceProfile,
-        candidates: args.candidates
-      })
-    ) {
+        reason: skipReason,
+        hasCoreReasoningSignature: Boolean(args.voiceProfile.coreReasoningSignature)
+      });
       return args.candidates;
     }
 
     const finalists = selectVoiceJudgeCandidates(args.candidates);
+    logVoiceJudgeEvent("started", {
+      pipelineName: args.pipelineName,
+      qualityMode: args.qualityMode,
+      finalistCount: finalists.length,
+      attemptProviders: args.attempts.map((attempt) => attempt.provider)
+    });
+
     const judgeScores: Record<string, number> = {};
 
     for (const candidate of finalists) {

@@ -61,20 +61,29 @@ Integrator VPS (Brazil, VPS Linux Core)
 
 ## Deployment
 
-### Manual Deploy
+### Manual deploy (git pull on VPS)
+
+`git pull` updates **source only**. The worker runs the bundled file `apps/backend/dist/cli/worker-main.js`, so you must rebuild after every pull:
 
 ```bash
-cd /home/cultiv/cultiv/app
-pnpm install --frozen-lockfile
-pnpm build:backend
-pnpm --filter @my-ai-orchestrator/backend migrate
-pm2 reload ecosystem.config.cjs --only cultiv-api
-pm2 restart ecosystem.config.cjs --only cultiv-worker
+cd /home/cultiv/app   # or /home/cultiv/cultiv/app depending on your layout
+git pull
+bash infra/integrator/scripts/manual-build-deploy.sh
 ```
 
-### Automated Deploy (GitHub Actions)
+Verify the voice-judge fix (or any backend change) reached the running worker:
 
-Push to `main` → GitHub Actions self-hosted runner → Build → Deploy → Health check
+```bash
+grep -q resolveReasoningFields apps/backend/dist/cli/worker-main.js && echo "bundle ok"
+```
+
+### Automated deploy (GitHub Actions)
+
+Push to `main` → CI builds artifact → self-hosted runner runs `infra/integrator/scripts/deploy-app.sh`.
+
+The script auto-detects the app directory (`/home/cultiv/app` or `/home/cultiv/cultiv/app`). Override with repo variable `CULTIV_APP=/home/cultiv/app` if needed.
+
+**Common failure:** CI deployed to `/home/cultiv/cultiv/app` while PM2 runs `/home/cultiv/app` — the site keeps serving old bundles until paths align.
 
 ## Monitoring
 

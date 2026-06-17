@@ -1,5 +1,8 @@
 const { readFileSync, existsSync } = require("fs");
-const { resolve } = require("path");
+const { resolve, join } = require("path");
+
+const APP_ROOT = resolve(__dirname);
+const LOG_ROOT = process.env.CULTIV_LOG_ROOT || resolve(APP_ROOT, "..", "logs");
 
 function loadDotenvFile(filePath) {
   if (!existsSync(filePath)) return {};
@@ -39,14 +42,14 @@ module.exports = {
   apps: [
     {
       name: "cultiv-api",
-      script: "/home/cultiv/app/apps/backend/dist/cli/main.js",
-      cwd: "/home/cultiv/app",
+      script: join(APP_ROOT, "apps/backend/dist/cli/main.js"),
+      cwd: APP_ROOT,
       instances: 1,
       exec_mode: "fork",
       env: apiEnv,
-      log_file: "/home/cultiv/logs/api-combined.log",
-      out_file: "/home/cultiv/logs/api-out.log",
-      err_file: "/home/cultiv/logs/api-err.log",
+      log_file: join(LOG_ROOT, "api-combined.log"),
+      out_file: join(LOG_ROOT, "api-out.log"),
+      err_file: join(LOG_ROOT, "api-err.log"),
       log_date_format: "YYYY-MM-DD HH:mm:ss Z",
       merge_logs: true,
       max_memory_restart: "512M",
@@ -57,8 +60,8 @@ module.exports = {
     },
     {
       name: "cultiv-worker",
-      script: "/home/cultiv/app/apps/backend/dist/cli/worker-main.js",
-      cwd: "/home/cultiv/app",
+      script: join(APP_ROOT, "apps/backend/dist/cli/worker-main.js"),
+      cwd: APP_ROOT,
       instances: 1,
       exec_mode: "fork",
       env: {
@@ -66,9 +69,9 @@ module.exports = {
         EXECUTION_WORKER_CONCURRENCY: "2",
         ...dotenv,
       },
-      log_file: "/home/cultiv/logs/worker-combined.log",
-      out_file: "/home/cultiv/logs/worker-out.log",
-      err_file: "/home/cultiv/logs/worker-err.log",
+      log_file: join(LOG_ROOT, "worker-combined.log"),
+      out_file: join(LOG_ROOT, "worker-out.log"),
+      err_file: join(LOG_ROOT, "worker-err.log"),
       max_memory_restart: "512M",
       restart_delay: 3000,
       kill_timeout: 5000,

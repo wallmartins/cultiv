@@ -1,26 +1,30 @@
 import type { QualityMode } from "@my-ai-orchestrator/contracts";
 import type { CandidateText, VoiceProfile } from "@my-ai-orchestrator/text-quality";
 
-export function shouldInvokeVoiceJudge(args: {
+export function explainVoiceJudgeSkip(args: {
   readonly qualityMode: QualityMode;
   readonly reasoningSignatureEnabled: boolean;
   readonly voiceProfile: VoiceProfile;
   readonly candidates: readonly CandidateText[];
-}): boolean {
-  if (!args.reasoningSignatureEnabled || !args.voiceProfile.coreReasoningSignature) {
-    return false;
+}): string | undefined {
+  if (!args.reasoningSignatureEnabled) {
+    return "reasoning_signature_flag_disabled";
+  }
+
+  if (!args.voiceProfile.coreReasoningSignature) {
+    return "missing_core_reasoning_signature";
   }
 
   if (args.qualityMode === "fast") {
-    return false;
+    return "quality_mode_fast";
   }
 
   if (args.candidates.length === 0) {
-    return false;
+    return "no_candidates";
   }
 
   if (args.qualityMode === "strict") {
-    return true;
+    return undefined;
   }
 
   const ranked = [...args.candidates].sort((left, right) => right.score.finalScore - left.score.finalScore);
@@ -28,7 +32,7 @@ export function shouldInvokeVoiceJudge(args: {
   const runnerUp = ranked[1];
 
   if (!top) {
-    return false;
+    return "no_ranked_candidate";
   }
 
   const borderline = top.drift.score >= 60 && top.drift.score <= 80;
@@ -36,7 +40,20 @@ export function shouldInvokeVoiceJudge(args: {
     runnerUp !== undefined
     && Math.abs(top.score.finalScore - runnerUp.score.finalScore) <= 2;
 
-  return borderline || tied;
+  if (borderline || tied) {
+    return undefined;
+  }
+
+  return "balanced_policy_not_triggered";
+}
+
+export function shouldInvokeVoiceJudge(args: {
+  readonly qualityMode: QualityMode;
+  readonly reasoningSignatureEnabled: boolean;
+  readonly voiceProfile: VoiceProfile;
+  readonly candidates: readonly CandidateText[];
+}): boolean {
+  return explainVoiceJudgeSkip(args) === undefined;
 }
 
 export function selectVoiceJudgeCandidates(

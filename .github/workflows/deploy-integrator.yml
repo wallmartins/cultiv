@@ -46,7 +46,9 @@ jobs:
     runs-on: [self-hosted, integrator]
     env:
       CULTIV_ROOT: ${{ vars.CULTIV_ROOT }}
+      CULTIV_APP: ${{ vars.CULTIV_APP }}
     steps:
+      - uses: actions/checkout@v4
       - name: Download artifact
         uses: actions/download-artifact@v4
         with:
@@ -56,21 +58,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          cd ${CULTIV_ROOT:-/home/cultiv/cultiv}/app
-          if [ -d apps/backend/dist ]; then
-            mv apps/backend/dist "apps/backend/dist.bak.$(date +%F-%H%M)"
-          fi
-          cp -r /tmp/deploy-artifact/apps/backend/dist apps/backend/dist
-          cp -r /tmp/deploy-artifact/apps/backend/policies apps/backend/policies
-          for pkg in /tmp/deploy-artifact/packages/*/dist; do
-            pkg_name=$(basename "$(dirname "$pkg")")
-            mkdir -p "packages/$pkg_name/dist"
-            cp -r "$pkg"/* "packages/$pkg_name/dist/" 2>/dev/null || true
-          done
-          pnpm install --prod --frozen-lockfile
-          pnpm --filter @my-ai-orchestrator/backend migrate
-          pm2 reload ecosystem.config.cjs --only cultiv-api
-          pm2 restart ecosystem.config.cjs --only cultiv-worker
-          sleep 5
-          curl -f http://127.0.0.1:3001/health || exit 1
+          export ARTIFACT_DIR=/tmp/deploy-artifact
+          export CULTIV_ROOT="${CULTIV_ROOT:-}"
+          export CULTIV_APP="${CULTIV_APP:-}"
+          bash infra/integrator/scripts/deploy-app.sh
           rm -rf /tmp/deploy-artifact
