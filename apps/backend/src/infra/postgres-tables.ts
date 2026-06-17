@@ -196,6 +196,56 @@ export interface BillingOperationIdempotencyTable {
   result: unknown;
 }
 
+export interface BillingGatewayCatalogTable {
+  id: string;
+  product_kind: string;
+  internal_ref: string;
+  currency: string;
+  gateway: string;
+  billing_period: string;
+  external_product_id: string;
+  external_price_id: string;
+  active: boolean;
+  created_at: string;
+}
+
+export interface BillingGatewayCustomersTable {
+  user_id: string;
+  gateway: string;
+  external_customer_id: string;
+  created_at: string;
+}
+
+export interface BillingGatewaySubscriptionsTable {
+  subscription_id: string;
+  gateway: string;
+  external_subscription_id: string;
+  status: string;
+  currency: string;
+  updated_at: string;
+}
+
+export interface BillingCheckoutIntentsTable {
+  id: string;
+  user_id: string;
+  product_kind: string;
+  internal_ref: string;
+  currency: string;
+  gateway: string;
+  status: string;
+  external_session_id: string | null;
+  created_at: string;
+  completed_at: string | null;
+}
+
+export interface BillingGatewayEventsTable {
+  event_id: string;
+  gateway: string;
+  event_type: string;
+  processed_at: string;
+  payload_hash: string | null;
+}
+
 export interface OutboxEventsTable {
   id: string;
   aggregate_type: string;
@@ -238,6 +288,11 @@ export interface DatabaseTables {
   billing_cycle_states: BillingCycleStatesTable;
   billing_top_up_packages: BillingTopUpPackagesTable;
   billing_operation_idempotency: BillingOperationIdempotencyTable;
+  billing_gateway_catalog: BillingGatewayCatalogTable;
+  billing_gateway_customers: BillingGatewayCustomersTable;
+  billing_gateway_subscriptions: BillingGatewaySubscriptionsTable;
+  billing_checkout_intents: BillingCheckoutIntentsTable;
+  billing_gateway_events: BillingGatewayEventsTable;
   outbox_events: OutboxEventsTable;
   execution_idempotency: ExecutionIdempotencyTable;
 }
