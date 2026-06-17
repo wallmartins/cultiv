@@ -74,6 +74,8 @@ describe("argument development extraction prompts", () => {
     expect(development.user).not.toContain("certaintyLevel");
     expect(development.user).not.toContain(reasoning.user.match(/Analyze the author's reasoning/)?.[0] ?? "");
     expect(development.user).toContain("how the author develops texts");
+    expect(development.user).toContain("moveLabels MUST be written in Brazilian Portuguese");
+    expect(development.system).toContain("moveLabels MUST be written in Brazilian Portuguese");
   });
 
   it.each(loadGoldenCorpora())("parses golden corpus $id", async (fixture) => {

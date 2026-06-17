@@ -11,6 +11,7 @@ const MOVE_LABELS: Record<AppLocale, Readonly<Record<string, string>>> = {
     conclusion: "Conclusão",
     conclusao: "Conclusão",
     observation: "Observação",
+    observacao: "Observação",
     ambiguity: "Ambiguidade",
     ambiguidade: "Ambiguidade",
     delayed_conclusion: "Conclusão tardia",
@@ -19,12 +20,63 @@ const MOVE_LABELS: Record<AppLocale, Readonly<Record<string, string>>> = {
     reflection: "Reflexão",
     reflexao: "Reflexão",
     open_end: "Fechamento aberto",
+    open_ending: "Fechamento aberto",
     thesis: "Tese",
     tese: "Tese",
     evidence: "Evidência",
     evidencia: "Evidência",
     close: "Fechamento",
-    fechamento: "Fechamento"
+    fechamento: "Fechamento",
+    constraint: "Restrição",
+    restricao: "Restrição",
+    tradeoff: "Trade-off",
+    trade_off: "Trade-off",
+    recommendation: "Recomendação",
+    recomendacao: "Recomendação",
+    situation: "Situação",
+    situacao: "Situação",
+    comparison: "Comparação",
+    comparacao: "Comparação",
+    open_question: "Pergunta aberta",
+    pergunta_aberta: "Pergunta aberta",
+    scene: "Cena",
+    cena: "Cena",
+    test: "Teste",
+    teste: "Teste",
+    insight: "Percepção",
+    percepcao: "Percepção",
+    question: "Pergunta",
+    pergunta: "Pergunta",
+    experience: "Experiência",
+    experiencia: "Experiência",
+    takeaway: "Aprendizado prático",
+    aprendizado: "Aprendizado prático",
+    anecdotal_hook: "Gancho anecdótico",
+    gancho_anedotico: "Gancho anecdótico",
+    problem_redefinition: "Redefinição do problema",
+    redefinicao_do_problema: "Redefinição do problema",
+    deconstruction_of_assumptions: "Desconstrução de pressupostos",
+    desconstrucao_de_pressupostos: "Desconstrução de pressupostos",
+    pragmatic_trade_off_analysis: "Análise pragmática de trade-offs",
+    analise_pragmatica_de_trade_offs: "Análise pragmática de trade-offs",
+    heuristic_proposal: "Proposta heurística",
+    proposta_heuristica: "Proposta heurística",
+    call_to_reflection: "Chamado à reflexão",
+    chamado_a_reflexao: "Chamado à reflexão",
+    counterexample: "Contraexemplo",
+    contraexemplo: "Contraexemplo",
+    analogy: "Analogia",
+    analogia: "Analogia",
+    self_questioning: "Autoquestionamento",
+    autoquestionamento: "Autoquestionamento",
+    personal_narrative: "Narrativa pessoal",
+    narrativa_pessoal: "Narrativa pessoal",
+    concrete_example: "Exemplo concreto",
+    exemplo_concreto: "Exemplo concreto",
+    general_observation: "Observação geral",
+    observacao_geral: "Observação geral",
+    thesis_statement: "Afirmação de tese",
+    afirmacao_de_tese: "Afirmação de tese"
   },
   en: {
     lived_experience: "Lived experience",
@@ -36,6 +88,7 @@ const MOVE_LABELS: Record<AppLocale, Readonly<Record<string, string>>> = {
     conclusion: "Conclusion",
     conclusao: "Conclusion",
     observation: "Observation",
+    observacao: "Observation",
     ambiguity: "Ambiguity",
     ambiguidade: "Ambiguity",
     delayed_conclusion: "Delayed conclusion",
@@ -44,24 +97,83 @@ const MOVE_LABELS: Record<AppLocale, Readonly<Record<string, string>>> = {
     reflection: "Reflection",
     reflexao: "Reflection",
     open_end: "Open ending",
+    open_ending: "Open ending",
     thesis: "Thesis",
     tese: "Thesis",
     evidence: "Evidence",
     evidencia: "Evidence",
     close: "Closing",
-    fechamento: "Closing"
+    fechamento: "Closing",
+    constraint: "Constraint",
+    restricao: "Constraint",
+    tradeoff: "Trade-off",
+    trade_off: "Trade-off",
+    recommendation: "Recommendation",
+    recomendacao: "Recommendation",
+    situation: "Situation",
+    situacao: "Situation",
+    comparison: "Comparison",
+    comparacao: "Comparison",
+    open_question: "Open question",
+    pergunta_aberta: "Open question",
+    scene: "Scene",
+    cena: "Scene",
+    test: "Test",
+    teste: "Test",
+    insight: "Insight",
+    percepcao: "Insight",
+    question: "Question",
+    pergunta: "Question",
+    experience: "Experience",
+    experiencia: "Experience",
+    takeaway: "Takeaway",
+    aprendizado: "Takeaway",
+    anecdotal_hook: "Anecdotal hook",
+    gancho_anedotico: "Anecdotal hook",
+    problem_redefinition: "Problem redefinition",
+    redefinicao_do_problema: "Problem redefinition",
+    deconstruction_of_assumptions: "Deconstruction of assumptions",
+    desconstrucao_de_pressupostos: "Deconstruction of assumptions",
+    pragmatic_trade_off_analysis: "Pragmatic trade-off analysis",
+    analise_pragmatica_de_trade_offs: "Pragmatic trade-off analysis",
+    heuristic_proposal: "Heuristic proposal",
+    proposta_heuristica: "Heuristic proposal",
+    call_to_reflection: "Call to reflection",
+    chamado_a_reflexao: "Call to reflection",
+    counterexample: "Counterexample",
+    contraexemplo: "Counterexample",
+    analogy: "Analogy",
+    analogia: "Analogy",
+    self_questioning: "Self-questioning",
+    autoquestionamento: "Self-questioning",
+    personal_narrative: "Personal narrative",
+    narrativa_pessoal: "Personal narrative",
+    concrete_example: "Concrete example",
+    exemplo_concreto: "Concrete example",
+    general_observation: "General observation",
+    observacao_geral: "General observation",
+    thesis_statement: "Thesis statement",
+    afirmacao_de_tese: "Thesis statement"
   }
 };
 
-function formatMoveFallback(move: string): string {
+function normalizeMoveKey(move: string): string {
   return move
-    .split(/[_-]+/)
+    .trim()
+    .toLowerCase()
+    .replace(/[\s-]+/g, "_")
+    .replace(/_+/g, "_");
+}
+
+function formatMoveFallback(move: string): string {
+  return normalizeMoveKey(move)
+    .split("_")
     .filter(Boolean)
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join(" ");
 }
 
 export function getMoveLabel(locale: AppLocale, move: string): string {
-  const normalized = move.trim().toLowerCase();
-  return MOVE_LABELS[locale][normalized] ?? MOVE_LABELS[locale][move] ?? formatMoveFallback(move);
+  const normalized = normalizeMoveKey(move);
+  return MOVE_LABELS[locale][normalized] ?? formatMoveFallback(move);
 }
