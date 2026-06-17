@@ -34,5 +34,14 @@
   "developmentBadCandidates": [
     "Portanto a conclusão é clara: você deve sempre fazer assim sem hesitar.",
     "Você deve seguir este caminho sem hesitar. A única forma é fazer assim."
-  ]
+  ],
+  "expectedTraits": {
+    "openingMode": "observation",
+    "perspectiveShiftDensity": "moderate",
+    "usesCounterexamples": "occasional",
+    "selfQuestioning": "high",
+    "insightTiming": "late",
+    "usesAnalogies": "rare",
+    "closingMode": "mixed"
+  }
 }

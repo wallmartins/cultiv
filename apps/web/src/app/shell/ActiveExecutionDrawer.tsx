@@ -8,6 +8,7 @@ import { ProgressSteps } from "~/app/execution/components/ProgressSteps";
 import { useAppLocale } from "~/i18n/app/use-app-locale";
 import { useActiveExecutions } from "~/platform/active-executions/active-execution-store";
 import { storeGeneratePrefill } from "~/app/generation/lib/generate-prefill";
+import { lenisScrollRegionClassName, lenisScrollRegionProps } from "~/platform/ui/lenis-scroll-region";
 
 export function ActiveExecutionDrawer() {
   const { locale, messages } = useAppLocale();
@@ -95,7 +96,10 @@ export function ActiveExecutionDrawer() {
           </button>
         </div>
 
-        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-[var(--spacing-gutter)] py-5">
+        <div
+          className={`min-h-0 flex-1 overflow-y-auto px-[var(--spacing-gutter)] py-5 ${lenisScrollRegionClassName}`}
+          {...lenisScrollRegionProps}
+        >
         {!item ? (
           <ActiveExecutionList
             items={items}

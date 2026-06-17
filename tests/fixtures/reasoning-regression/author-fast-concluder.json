@@ -33,5 +33,14 @@
   "developmentBadCandidates": [
     "Talvez, em alguns casos, dependendo do contexto, ainda não dá para concluir nada.",
     "Antes de chegar ao ponto, vamos percorrer dez analogias sem fechar a ideia."
-  ]
+  ],
+  "expectedTraits": {
+    "openingMode": "thesis",
+    "perspectiveShiftDensity": "low",
+    "usesCounterexamples": "rare",
+    "selfQuestioning": "low",
+    "insightTiming": "early",
+    "usesAnalogies": "occasional",
+    "closingMode": "conclusion"
+  }
 }

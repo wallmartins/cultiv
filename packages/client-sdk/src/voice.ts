@@ -7,7 +7,11 @@ import {
   decodeVoiceExampleUpdateInput,
   decodeVoiceExamplesPageView,
   decodeVoiceProfileScreenView,
+  decodeVoiceProfileDiagnosticsView,
   decodeVoiceTrainingConsentStatusView,
+  decodeTraitConfirmationInput,
+  type TraitConfirmationInput,
+  type VoiceProfileDiagnosticsView,
   type VoiceExampleBatchCommitResultView,
   type VoiceExampleBatchView,
   type VoiceExampleCreateInput,
@@ -65,10 +69,17 @@ export interface VoiceCommitBatchInput {
   readonly signal?: AbortSignal;
 }
 
+export interface VoiceTraitConfirmationInput extends TraitConfirmationInput {
+  readonly signal?: AbortSignal;
+}
+
 export interface VoiceClient {
   readonly getConsentStatus: (input?: VoiceConsentInput) => Effect.Effect<VoiceTrainingConsentStatusView, ClientSdkError>;
   readonly grantConsent: (input?: VoiceConsentInput) => Effect.Effect<VoiceTrainingConsentStatusView, ClientSdkError>;
   readonly getProfile: (input?: VoiceGetProfileInput) => Effect.Effect<VoiceProfileScreenView, ClientSdkError>;
+  readonly recordTraitConfirmation: (
+    input: VoiceTraitConfirmationInput
+  ) => Effect.Effect<VoiceProfileDiagnosticsView, ClientSdkError>;
   readonly listExamples: (input?: VoiceListExamplesInput) => Effect.Effect<VoiceExamplesPageView, ClientSdkError>;
   readonly createExample: (input: VoiceCreateExampleInput) => Effect.Effect<VoiceExampleListItemView, ClientSdkError>;
   readonly updateExample: (input: VoiceUpdateExampleInput) => Effect.Effect<VoiceExampleListItemView, ClientSdkError>;
@@ -120,6 +131,34 @@ export function createVoiceClient(transport: HttpTransport): VoiceClient {
         });
 
         return yield* decodeOkResponseEffect(response, "voice profile", decodeVoiceProfileScreenView);
+      });
+    },
+
+    recordTraitConfirmation(input) {
+      return Effect.gen(function* () {
+        const { signal, ...request } = input;
+        const validated = yield* decodeTraitConfirmationInput(request).pipe(
+          Effect.mapError(
+            (error) =>
+              new ClientSdkInvalidRequestError({
+                message: error.message,
+                request
+              })
+          )
+        );
+
+        const response = yield* transport.send({
+          method: "POST",
+          path: "/me/voice-profile/trait-confirmations",
+          body: validated,
+          signal
+        });
+
+        return yield* decodeOkResponseEffect(
+          response,
+          "voice trait confirmation",
+          decodeVoiceProfileDiagnosticsView
+        );
       });
     },
 

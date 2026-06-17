@@ -10,6 +10,7 @@ import type { BackendVoiceConsentService } from "../../safety/voice-consent-type
 import { createVoiceBatchOperations } from "./voice-batches.js";
 import { createVoiceLifecycleOperations } from "./voice-lifecycle.js";
 import { resolveEffectiveVoice as resolveEffectiveVoiceResolution } from "./voice-effective-resolution.js";
+import { recordTraitConfirmation } from "./trait-confirmation.js";
 import { toVoiceProfileScreenView } from "./voice-mappers.js";
 
 export function createBackendVoiceService(
@@ -61,6 +62,9 @@ export function createBackendVoiceService(
           }
         );
       });
+    },
+    recordTraitConfirmation(userId, input) {
+      return recordTraitConfirmation(database, userId, input, now, observability);
     },
     resolveEffectiveVoice(userId, context) {
       return resolveEffectiveVoiceResolution(

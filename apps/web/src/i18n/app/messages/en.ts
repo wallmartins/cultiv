@@ -321,6 +321,51 @@ export const appMessagesEn: AppMessages = {
       developmentImmature: "With at least three active examples, this mirror becomes more stable.",
       epistemicPosture: "Epistemic posture",
       typicalMoves: "Typical moves",
+      developmentTraits: {
+        labels: {
+          openingMode: "Opening",
+          perspectiveShiftDensity: "Perspective shifts",
+          usesCounterexamples: "Counterexamples",
+          selfQuestioning: "Self-questioning",
+          insightTiming: "Insight timing",
+          usesAnalogies: "Analogies",
+          closingMode: "Closing"
+        },
+        unknownGap: "Not enough signal yet from your current examples.",
+        authorityLinkLabel: "Validation (how I think)",
+        authorityLinkAction: "See authority source in How I think",
+        evidenceTitle: "Trait evidence",
+        gapsTitle: "Gaps",
+        gapsBody: "Some traits still lack enough signal in active examples.",
+        noEvidence: "No example-linked evidence yet.",
+        exampleFallback: "Example",
+        exampleUnavailable: "Open example management to see the full excerpt.",
+        manageExamplesLink: "Manage examples",
+        evidenceHeading: (label, value) => `Evidence — ${label}${value ? `: ${value}` : ""}`,
+        exampleLabel: (contentType) => `Example (${contentType})`,
+        enums: {
+          openingMode: { observation: "Observation", thesis: "Thesis", mixed: "Mixed" },
+          density: { low: "Low", moderate: "Moderate", high: "High" },
+          frequency: { rare: "Rare", occasional: "Occasional", common: "Common", dominant: "Dominant" },
+          insightTiming: { early: "Early", moderate: "Moderate", late: "Late" },
+          closingMode: { conclusion: "Conclusion", open_question: "Open question", mixed: "Mixed" }
+        }
+      },
+      traitConfirmation: {
+        title: "Does this match how you write?",
+        yes: "Yes",
+        no: "No",
+        unsure: "Not sure",
+        prompts: {
+          openingMode: "You often open texts from concrete observation.",
+          perspectiveShiftDensity: "You shift perspective about this often while developing a text.",
+          usesCounterexamples: "You use counterexamples about this often.",
+          selfQuestioning: "You often question your own hypothesis while writing.",
+          insightTiming: "Your insight tends to land late in the text arc.",
+          usesAnalogies: "You reason through analogies about this often.",
+          closingMode: "You often close with an open question."
+        }
+      },
       certaintyLevel: "Certainty level",
       judgmentFrequency: "Judgment frequency",
       conclusionPace: "Conclusion pace",

@@ -40,7 +40,8 @@ const migrationTableMarkers = {
   "0005-durable-runtime": ["billing_snapshots", "outbox_events", "execution_idempotency"],
   "0006-billing-relational": ["billing_plans", "billing_subscriptions"],
   "0007-voice-reasoning-fields": ["voice_profiles"],
-  "0008-argument-development-signature": ["voice_profiles"]
+  "0008-argument-development-signature": ["voice_profiles"],
+  "0009-development-trait-profile": ["voice_profiles"]
 } as const;
 
 export function baselineAppliedMigrations(

@@ -37,6 +37,17 @@ import { AppSkeleton } from "~/platform/ui/AppSkeleton";
 const IMPORTED_CONTEXT_MAX = 8000;
 const QUALITY_MODES: readonly QualityMode[] = ["fast", "balanced", "strict"];
 
+const INITIAL_GENERATION_FORM = {
+  contentTypeId: "",
+  briefing: {} as Record<string, unknown>,
+  language: "",
+  qualityMode: "fast" as QualityMode,
+  importedContext: "",
+  importedOpen: false,
+  submitError: null as string | null,
+  fullRefreshKey: 0
+};
+
 function getBlockedReason(
   reasonCode: string | undefined,
   messages: ReturnType<typeof useAppLocale>["messages"]
@@ -85,6 +96,17 @@ export function GenerationScreen() {
     () => catalog?.items.find((item) => item.id === contentTypeId) ?? null,
     [catalog?.items, contentTypeId]
   );
+
+  function resetGenerationForm() {
+    setContentTypeId(INITIAL_GENERATION_FORM.contentTypeId);
+    setBriefing(INITIAL_GENERATION_FORM.briefing);
+    setLanguage(INITIAL_GENERATION_FORM.language);
+    setQualityMode(INITIAL_GENERATION_FORM.qualityMode);
+    setImportedContext(INITIAL_GENERATION_FORM.importedContext);
+    setImportedOpen(INITIAL_GENERATION_FORM.importedOpen);
+    setSubmitError(INITIAL_GENERATION_FORM.submitError);
+    setFullRefreshKey(INITIAL_GENERATION_FORM.fullRefreshKey);
+  }
 
   useEffect(() => {
     const prefill = consumeGeneratePrefill();
@@ -258,6 +280,7 @@ export function GenerationScreen() {
       });
       openDrawer(queued.jobId);
       setCachedCreditBalance(commercialPreview.projectedBalanceAfterGeneration);
+      resetGenerationForm();
     } catch (error) {
       setSubmitError(formatSdkError(error, messages).message);
     } finally {

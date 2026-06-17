@@ -1,8 +1,10 @@
 import { Text } from "@my-ai-orchestrator/ui";
 import { VoiceTraitChip } from "~/app/voice/components/VoiceTraitChip";
+import { VoiceDevelopmentTraitsStrip } from "~/app/voice/components/VoiceDevelopmentTraitsStrip";
 import { VoiceMirrorHero } from "~/app/voice/components/VoiceMirrorHero";
 import type { VoiceConfidenceLevel } from "~/app/voice/components/VoiceConfidenceRing";
-import type { VoiceReasoningPresentationView } from "@my-ai-orchestrator/contracts";
+import type { DevelopmentTraitProfile, TraitKey, VoiceReasoningPresentationView } from "@my-ai-orchestrator/contracts";
+import { getMoveLabel } from "~/i18n/app/move-labels";
 import type { AppLocale, AppMessages } from "~/i18n/app/types";
 import type { AppDisclosureItem } from "~/platform/ui/AppDisclosure";
 import { getContentTypeLabel } from "~/i18n/app/content-types";
@@ -11,16 +13,23 @@ interface VoiceReasoningLayersProps {
   readonly locale: AppLocale;
   readonly messages: AppMessages["voice"];
   readonly reasoning: VoiceReasoningPresentationView;
+  readonly exampleExcerpts?: Readonly<Partial<Record<string, { readonly previewText: string; readonly contentType: string }>>>;
 }
 
 export function buildReasoningDetailItems({
   locale,
   messages,
-  reasoning
+  reasoning,
+  exampleExcerpts
 }: VoiceReasoningLayersProps): ReadonlyArray<AppDisclosureItem> {
   const reasoningMessages = messages.reasoning;
   const formatCount = reasoning.formatExpressions.length;
   const antiPatternCount = reasoning.core.derivedAntiPatterns.length;
+  const traitProfile = reasoning.traitProfile;
+  const evidenceCount = traitProfile
+    ? countTraitsWithEvidence(traitProfile)
+    : 0;
+  const gapCount = traitProfile ? countUnknownTraits(traitProfile) : 0;
 
   return [
     {
@@ -64,6 +73,37 @@ export function buildReasoningDetailItems({
           </Text>
         )
     },
+    ...(traitProfile
+      ? [
+          {
+            id: "trait-evidence",
+            title: reasoningMessages.developmentTraits.evidenceTitle,
+            count: evidenceCount > 0 ? evidenceCount : undefined,
+            children: (
+              <TraitEvidenceDisclosure
+                locale={locale}
+                messages={reasoningMessages}
+                traitProfile={traitProfile}
+                exampleExcerpts={exampleExcerpts}
+              />
+            )
+          },
+          ...(gapCount > 0
+            ? [
+                {
+                  id: "trait-gaps",
+                  title: reasoningMessages.developmentTraits.gapsTitle,
+                  count: gapCount,
+                  children: (
+                    <Text variant="body" className="w-full text-muted-foreground">
+                      {reasoningMessages.developmentTraits.gapsBody}
+                    </Text>
+                  )
+                }
+              ]
+            : [])
+        ]
+      : []),
     {
       id: "anti-patterns",
       title: messages.detailLayers.antiPatterns,
@@ -89,29 +129,26 @@ export function buildReasoningDetailItems({
 }
 
 interface VoiceReasoningMirrorProps {
+  readonly locale: AppLocale;
   readonly messages: AppMessages["voice"]["reasoning"];
   readonly reasoning: VoiceReasoningPresentationView;
   readonly confidenceLevel: VoiceConfidenceLevel;
   readonly dialSubline: string;
   readonly dialAccessibleLabel: string;
-}
-
-function formatMoveLabel(move: string): string {
-  return move
-    .split(/[_-]+/)
-    .filter(Boolean)
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(" ");
+  readonly onAuthorityLinkClick?: () => void;
 }
 
 export function VoiceReasoningMirror({
+  locale,
   messages,
   reasoning,
   confidenceLevel,
   dialSubline,
-  dialAccessibleLabel
+  dialAccessibleLabel,
+  onAuthorityLinkClick
 }: VoiceReasoningMirrorProps) {
   const development = reasoning.development;
+  const traitProfile = reasoning.traitProfile ?? development?.traitProfile;
 
   return (
     <section className="space-y-8">
@@ -156,6 +193,7 @@ export function VoiceReasoningMirror({
         <VoiceTraitChip
           label={messages.authoritySource}
           value={messages.enums.authoritySource[reasoning.core.authoritySource]}
+          id="voice-core-authority"
         />
       </div>
 
@@ -183,12 +221,113 @@ export function VoiceReasoningMirror({
               label={messages.epistemicPosture}
               value={messages.enums.epistemicPosture[development.epistemicPosture]}
             />
-            {development.moveLabels.map((move) => (
-              <VoiceTraitChip key={move} label={messages.typicalMoves} value={formatMoveLabel(move)} />
-            ))}
           </div>
+
+          {development.moveLabels.length > 0 ? (
+            <div className="rounded-[var(--workspace-radius-sm)] border border-border-subtle/60 bg-surface-elevated/40 px-3 py-3">
+              <Text variant="meta" className="mb-2 block text-xs text-muted-foreground">
+                {messages.typicalMoves}
+              </Text>
+              <ul className="flex flex-wrap gap-2">
+                {development.moveLabels.map((move) => (
+                  <li
+                    key={move}
+                    className="rounded-full bg-moss/10 px-3 py-1 text-sm font-medium text-foreground"
+                  >
+                    {getMoveLabel(locale, move)}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+
+          {traitProfile ? (
+            <VoiceDevelopmentTraitsStrip
+              messages={messages}
+              traitProfile={traitProfile}
+              developmentImmature={reasoning.developmentImmature}
+              onAuthorityLinkClick={onAuthorityLinkClick}
+            />
+          ) : null}
         </div>
       ) : null}
     </section>
   );
+}
+
+function TraitEvidenceDisclosure({
+  locale,
+  messages,
+  traitProfile,
+  exampleExcerpts
+}: {
+  readonly locale: AppLocale;
+  readonly messages: AppMessages["voice"]["reasoning"];
+  readonly traitProfile: DevelopmentTraitProfile;
+  readonly exampleExcerpts?: Readonly<Partial<Record<string, { readonly previewText: string; readonly contentType: string }>>>;
+}) {
+  const traitMessages = messages.developmentTraits;
+  const traitsWithEvidence = (Object.keys(traitProfile.records) as TraitKey[]).filter(
+    (key) => (traitProfile.records[key]?.evidenceExampleIds.length ?? 0) > 0
+  );
+
+  if (traitsWithEvidence.length === 0) {
+    return (
+      <Text variant="body" className="w-full text-muted-foreground">
+        {traitMessages.noEvidence}
+      </Text>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      {traitsWithEvidence.map((traitKey) => {
+        const record = traitProfile.records[traitKey]!;
+        return (
+          <div
+            key={traitKey}
+            className="rounded-[var(--workspace-radius-sm)] border border-border-subtle/60 bg-surface-elevated/60 p-4"
+          >
+            <Text variant="label" className="mb-3 block">
+              {traitMessages.evidenceHeading(traitMessages.labels[traitKey], record.value)}
+            </Text>
+            <div className="space-y-3">
+              {record.evidenceExampleIds.map((exampleId) => {
+                const excerpt = exampleExcerpts?.[exampleId];
+                return (
+                  <div key={exampleId}>
+                    <Text variant="meta" className="mb-1 block text-muted-foreground">
+                      {excerpt
+                        ? traitMessages.exampleLabel(
+                            getContentTypeLabel(locale, excerpt.contentType, excerpt.contentType)
+                          )
+                        : traitMessages.exampleFallback}
+                    </Text>
+                    <Text variant="body" className="w-full text-foreground">
+                      {excerpt?.previewText ? `"${excerpt.previewText}"` : traitMessages.exampleUnavailable}
+                    </Text>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })}
+      <a href="/app/voice/examples" className="text-sm font-medium text-moss underline-offset-2 hover:underline">
+        {traitMessages.manageExamplesLink}
+      </a>
+    </div>
+  );
+}
+
+function countTraitsWithEvidence(traitProfile: DevelopmentTraitProfile): number {
+  return (Object.keys(traitProfile.records) as TraitKey[]).filter(
+    (key) => (traitProfile.records[key]?.evidenceExampleIds.length ?? 0) > 0
+  ).length;
+}
+
+function countUnknownTraits(traitProfile: DevelopmentTraitProfile): number {
+  return (Object.keys(traitProfile.records) as TraitKey[]).filter(
+    (key) => traitProfile.records[key]?.status === "unknown"
+  ).length;
 }

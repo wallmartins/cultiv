@@ -1,5 +1,6 @@
 import { cn, Text } from "@my-ai-orchestrator/ui";
 import type { ReactNode, TextareaHTMLAttributes, InputHTMLAttributes } from "react";
+import { lenisScrollRegionProps } from "./lenis-scroll-region";
 
 type BaseFieldProps = {
   readonly label: string;
@@ -36,6 +37,7 @@ export function AppField(props: AppFieldProps) {
         <textarea
           id={fieldId}
           className={cn(controlClassName, "min-h-32 resize-y")}
+          {...lenisScrollRegionProps}
           {...(rest as TextareaHTMLAttributes<HTMLTextAreaElement>)}
         />
       ) : (

@@ -14,7 +14,9 @@ export type BackendObservabilityEventKind =
   | "voice_development_extraction_failed"
   | "voice_signature_reconciliation_invoked"
   | "voice_signature_reconciliation_skipped"
-  | "voice_signature_reconciliation_failed";
+  | "voice_signature_reconciliation_failed"
+  | "trait_confidence_computed"
+  | "trait_confirmation_recorded";
 
 export interface BackendObservabilityEvent {
   readonly kind: BackendObservabilityEventKind;
@@ -42,5 +44,7 @@ export interface BackendObservabilityService {
   readonly recordVoiceSignatureReconciliationInvoked: (details: Readonly<Record<string, unknown>>) => Effect.Effect<void, never>;
   readonly recordVoiceSignatureReconciliationSkipped: (details: Readonly<Record<string, unknown>>) => Effect.Effect<void, never>;
   readonly recordVoiceSignatureReconciliationFailed: (details: Readonly<Record<string, unknown>>) => Effect.Effect<void, never>;
+  readonly recordTraitConfidenceComputed: (details: Readonly<Record<string, unknown>>) => Effect.Effect<void, never>;
+  readonly recordTraitConfirmationRecorded: (details: Readonly<Record<string, unknown>>) => Effect.Effect<void, never>;
   readonly snapshot: () => Effect.Effect<BackendObservabilitySnapshot, never>;
 }

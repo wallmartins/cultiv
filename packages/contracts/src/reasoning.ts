@@ -80,17 +80,128 @@ export const EpistemicPostureSchema = Schema.Literal(
 );
 export type EpistemicPosture = typeof EpistemicPostureSchema.Type;
 
+export const TraitFrequencySchema = Schema.Literal("rare", "occasional", "common", "dominant");
+export type TraitFrequency = typeof TraitFrequencySchema.Type;
+
+export const OpeningModeSchema = Schema.Literal("observation", "thesis", "mixed");
+export type OpeningMode = typeof OpeningModeSchema.Type;
+
+export const PerspectiveShiftDensitySchema = Schema.Literal("low", "moderate", "high");
+export type PerspectiveShiftDensity = typeof PerspectiveShiftDensitySchema.Type;
+
+export const SelfQuestioningLevelSchema = Schema.Literal("low", "moderate", "high");
+export type SelfQuestioningLevel = typeof SelfQuestioningLevelSchema.Type;
+
+export const InsightTimingSchema = Schema.Literal("early", "moderate", "late");
+export type InsightTiming = typeof InsightTimingSchema.Type;
+
+export const ClosingModeSchema = Schema.Literal("conclusion", "open_question", "mixed");
+export type ClosingMode = typeof ClosingModeSchema.Type;
+
+export const TRAIT_KEYS = [
+  "openingMode",
+  "perspectiveShiftDensity",
+  "usesCounterexamples",
+  "selfQuestioning",
+  "insightTiming",
+  "usesAnalogies",
+  "closingMode"
+] as const;
+
+export const TraitKeySchema = Schema.Literal(
+  "openingMode",
+  "perspectiveShiftDensity",
+  "usesCounterexamples",
+  "selfQuestioning",
+  "insightTiming",
+  "usesAnalogies",
+  "closingMode"
+);
+export type TraitKey = typeof TraitKeySchema.Type;
+
+export const TraitConfidenceSchema = Schema.Literal("low", "medium", "high");
+export type TraitConfidence = typeof TraitConfidenceSchema.Type;
+
+export const TraitStatusSchema = Schema.Literal("inferred", "confirmed", "disputed", "unknown");
+export type TraitStatus = typeof TraitStatusSchema.Type;
+
+export const TraitValueSchema = Schema.Union(
+  OpeningModeSchema,
+  PerspectiveShiftDensitySchema,
+  TraitFrequencySchema,
+  SelfQuestioningLevelSchema,
+  InsightTimingSchema,
+  ClosingModeSchema
+);
+export type TraitValue = typeof TraitValueSchema.Type;
+
+export const DevelopmentTraitsSchema = Schema.Struct({
+  openingMode: Schema.optional(OpeningModeSchema),
+  perspectiveShiftDensity: Schema.optional(PerspectiveShiftDensitySchema),
+  usesCounterexamples: Schema.optional(TraitFrequencySchema),
+  selfQuestioning: Schema.optional(SelfQuestioningLevelSchema),
+  insightTiming: Schema.optional(InsightTimingSchema),
+  usesAnalogies: Schema.optional(TraitFrequencySchema),
+  closingMode: Schema.optional(ClosingModeSchema)
+});
+export type DevelopmentTraits = typeof DevelopmentTraitsSchema.Type;
+
+export const TraitRecordSchema = Schema.Struct({
+  value: Schema.optional(TraitValueSchema),
+  confidence: TraitConfidenceSchema,
+  status: TraitStatusSchema,
+  evidenceExampleIds: Schema.Array(Schema.String)
+});
+export type TraitRecord = typeof TraitRecordSchema.Type;
+
+export const DevelopmentTraitProfileSchema = Schema.Struct({
+  traits: DevelopmentTraitsSchema,
+  records: Schema.Record({ key: TraitKeySchema, value: TraitRecordSchema })
+});
+export type DevelopmentTraitProfile = typeof DevelopmentTraitProfileSchema.Type;
+
+export const TraitEvidenceEntrySchema = Schema.Struct({
+  exampleIndex: Schema.optional(Schema.Number),
+  exampleId: Schema.optional(Schema.String),
+  value: Schema.optional(TraitValueSchema)
+});
+export type TraitEvidenceEntry = typeof TraitEvidenceEntrySchema.Type;
+
+export const TraitEvidenceDraftSchema = Schema.Record({
+  key: TraitKeySchema,
+  value: Schema.Array(TraitEvidenceEntrySchema)
+});
+export type TraitEvidenceDraft = typeof TraitEvidenceDraftSchema.Type;
+
+export const TraitConfirmationResponseSchema = Schema.Literal("confirmed", "rejected", "skipped");
+export type TraitConfirmationResponse = typeof TraitConfirmationResponseSchema.Type;
+
+export const TraitConfirmationInputSchema = Schema.Struct({
+  traitKey: TraitKeySchema,
+  response: TraitConfirmationResponseSchema
+});
+export type TraitConfirmationInput = typeof TraitConfirmationInputSchema.Type;
+
+export const TraitConfirmationRecordSchema = Schema.Struct({
+  response: TraitConfirmationResponseSchema,
+  recordedAt: Schema.String
+});
+export type TraitConfirmationRecord = typeof TraitConfirmationRecordSchema.Type;
+
 export const ArgumentDevelopmentSignatureSchema = Schema.Struct({
   developmentProse: Schema.String,
   moveLabels: Schema.Array(Schema.String),
   transitionTendencies: Schema.Array(TransitionTendencySchema),
   epistemicPosture: EpistemicPostureSchema,
-  structuralAntiPatterns: Schema.Array(Schema.String)
+  structuralAntiPatterns: Schema.Array(Schema.String),
+  traitProfile: Schema.optional(DevelopmentTraitProfileSchema)
 });
 export type ArgumentDevelopmentSignature = typeof ArgumentDevelopmentSignatureSchema.Type;
 
 export const ArgumentDevelopmentExtractionResultSchema = Schema.Struct({
-  development: ArgumentDevelopmentSignatureSchema
+  development: ArgumentDevelopmentSignatureSchema,
+  traits: Schema.optional(DevelopmentTraitsSchema),
+  traitEvidence: Schema.optional(TraitEvidenceDraftSchema)
 });
 export type ArgumentDevelopmentExtractionResult = typeof ArgumentDevelopmentExtractionResultSchema.Type;
 
@@ -106,7 +217,8 @@ export const VoiceReasoningPresentationViewSchema = Schema.Struct({
   formatExpressions: Schema.Array(FormatExpressionProfileSchema),
   reasoningVersion: Schema.optional(Schema.Number),
   development: Schema.optional(ArgumentDevelopmentSignatureSchema),
-  developmentImmature: Schema.optional(Schema.Boolean)
+  developmentImmature: Schema.optional(Schema.Boolean),
+  traitProfile: Schema.optional(DevelopmentTraitProfileSchema)
 });
 export type VoiceReasoningPresentationView = typeof VoiceReasoningPresentationViewSchema.Type;
 
@@ -137,4 +249,12 @@ export const decodeReasoningExtractionResult = createSchemaDecoder(
 export const decodeVoiceReasoningPresentationView = createSchemaDecoder(
   "VoiceReasoningPresentationView",
   VoiceReasoningPresentationViewSchema
+);
+export const decodeDevelopmentTraitProfile = createSchemaDecoder(
+  "DevelopmentTraitProfile",
+  DevelopmentTraitProfileSchema
+);
+export const decodeTraitConfirmationInput = createSchemaDecoder(
+  "TraitConfirmationInput",
+  TraitConfirmationInputSchema
 );

@@ -10,8 +10,11 @@ import {
   VoiceExamplesPageViewSchema,
   type VoiceProfileScreenView,
   VoiceProfileScreenViewSchema,
+  type VoiceProfileDiagnosticsView,
+  VoiceProfileDiagnosticsViewSchema,
   type VoiceTrainingConsentStatusView,
   VoiceTrainingConsentStatusViewSchema,
+  decodeTraitConfirmationInput,
   decodeVoiceExampleBatchCreateInput,
   decodeVoiceExampleBatchItemsInput,
   decodeVoiceExampleCreateInput,
@@ -70,6 +73,24 @@ export function registerVoiceRoutes(app: Hono, options: VoiceRouteOptions): void
       VoiceProfileScreenViewSchema,
       response satisfies VoiceProfileScreenView,
       "VoiceProfileScreenView"
+    );
+    return c.json(validated);
+  });
+
+  app.post("/me/voice-profile/trait-confirmations", async (c) => {
+    const userId = await resolveActorUserId(c, options.config, "POST /me/voice-profile/trait-confirmations", options.services);
+    const rawBody = await readJsonBody(c, "POST /me/voice-profile/trait-confirmations");
+    const input = await runEffectOrThrow(decodeTraitConfirmationInput(rawBody));
+    const response = await runEffectOrThrow(options.services.voice.recordTraitConfirmation(userId, input));
+
+    if (!response) {
+      throw new BackendVoiceProfileNotFoundError({ userId });
+    }
+
+    const validated = await validateResponseBody(
+      VoiceProfileDiagnosticsViewSchema,
+      response satisfies VoiceProfileDiagnosticsView,
+      "VoiceProfileDiagnosticsView"
     );
     return c.json(validated);
   });

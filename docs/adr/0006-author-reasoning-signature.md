@@ -82,3 +82,4 @@ Separation that matters for quality: **generator ≠ judge**. Extraction may sha
 - Implementation plan and issues should trace to this ADR, not to the kickoff brief alone.
 - PRD: [`author-reasoning-signature.md`](../live/prd/author-reasoning-signature.md) · Plan: [`author-reasoning-signature-implementation-plan.md`](../live/plan/author-reasoning-signature-implementation-plan.md)
 - Extended by [ADR 0007](./0007-argument-development-signature.md) (**Argument Development Signature**).
+- Extended by [ADR 0008](./0008-development-traits-and-author-confidence.md) (**Development Traits**, author confidence mirror).

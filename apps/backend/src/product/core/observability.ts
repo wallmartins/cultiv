@@ -26,7 +26,9 @@ const emptyCounters: Record<BackendObservabilityEventKind, number> = {
   voice_development_extraction_failed: 0,
   voice_signature_reconciliation_invoked: 0,
   voice_signature_reconciliation_skipped: 0,
-  voice_signature_reconciliation_failed: 0
+  voice_signature_reconciliation_failed: 0,
+  trait_confidence_computed: 0,
+  trait_confirmation_recorded: 0
 };
 
 export function createBackendObservabilityService(
@@ -84,6 +86,8 @@ export function createBackendObservabilityService(
         record("voice_signature_reconciliation_skipped", details),
       recordVoiceSignatureReconciliationFailed: (details) =>
         record("voice_signature_reconciliation_failed", details),
+      recordTraitConfidenceComputed: (details) => record("trait_confidence_computed", details),
+      recordTraitConfirmationRecorded: (details) => record("trait_confirmation_recorded", details),
       snapshot
     };
   });

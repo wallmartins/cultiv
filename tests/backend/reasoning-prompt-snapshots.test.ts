@@ -4,7 +4,8 @@ import { resolveStructuredStepTemplate } from "../../apps/backend/src/execution/
 import { formatAuthorReasoningBlock, formatAuthorReasoningSection } from "../../apps/backend/src/execution/pipeline/reasoning-prompt.js";
 import {
   formatArgumentDevelopmentBlock,
-  formatArgumentDevelopmentSection
+  formatArgumentDevelopmentSection,
+  formatDevelopmentTraitSummaryLine
 } from "../../apps/backend/src/execution/pipeline/development-prompt.js";
 import { resolveTemplate } from "@my-ai-orchestrator/skills";
 import { COGNITIVE_PRESET_RULE_MARKERS } from "../../apps/backend/src/product/voice/voice-presets.js";
@@ -145,5 +146,63 @@ describe("reasoning prompt snapshots", () => {
     expect(prompt).toContain("== AUTHOR REASONING ==");
     expect(prompt).toContain("== ARGUMENT DEVELOPMENT ==");
     expect(prompt).toContain(development.developmentProse);
+  });
+
+  it("includes high-confidence trait summary on structural draft steps only", () => {
+    const developmentWithTraits: ArgumentDevelopmentSignature = {
+      ...development,
+      traitProfile: {
+        traits: { openingMode: "observation", insightTiming: "late", closingMode: "open_question" },
+        records: {
+          openingMode: {
+            value: "observation",
+            confidence: "high",
+            status: "inferred",
+            evidenceExampleIds: []
+          },
+          perspectiveShiftDensity: {
+            confidence: "low",
+            status: "unknown",
+            evidenceExampleIds: []
+          },
+          usesCounterexamples: {
+            confidence: "low",
+            status: "unknown",
+            evidenceExampleIds: []
+          },
+          selfQuestioning: {
+            confidence: "low",
+            status: "unknown",
+            evidenceExampleIds: []
+          },
+          insightTiming: {
+            value: "late",
+            confidence: "high",
+            status: "inferred",
+            evidenceExampleIds: []
+          },
+          usesAnalogies: {
+            confidence: "low",
+            status: "unknown",
+            evidenceExampleIds: []
+          },
+          closingMode: {
+            value: "open_question",
+            confidence: "medium",
+            status: "disputed",
+            evidenceExampleIds: []
+          }
+        }
+      }
+    };
+
+    const draftBlock = formatArgumentDevelopmentBlock("draft", developmentWithTraits);
+    const refineBlock = formatArgumentDevelopmentBlock("refine", developmentWithTraits);
+
+    expect(draftBlock).toContain("Development traits (confirmed):");
+    expect(draftBlock).toContain("openingMode=observation");
+    expect(draftBlock).not.toContain("closingMode=open_question");
+    expect(refineBlock).not.toContain("Development traits (confirmed):");
+    expect(formatDevelopmentTraitSummaryLine(developmentWithTraits.traitProfile)).toContain("insightTiming=late");
   });
 });

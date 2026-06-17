@@ -5,6 +5,7 @@ import { getFieldHelpText, getFieldLabel } from "~/i18n/app/field-labels";
 import type { AppLocale } from "~/i18n/app/types";
 import { useAppLocale } from "~/i18n/app/use-app-locale";
 import { AppSelect } from "~/platform/ui/AppSelect";
+import { lenisScrollRegionProps } from "~/platform/ui/lenis-scroll-region";
 
 const textareaClassName =
   "workspace-field-control min-h-28 w-full font-body text-base text-foreground placeholder:text-muted";
@@ -77,6 +78,7 @@ export function BriefingForm({
                   <textarea
                     id={`briefing-${field.key}`}
                     className={textareaClassName}
+                    {...lenisScrollRegionProps}
                     value={typeof value === "string" ? value : ""}
                     onChange={(event) => updateField(field.key, event.target.value)}
                   />

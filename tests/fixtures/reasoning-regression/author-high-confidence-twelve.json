@@ -34,5 +34,14 @@
   "developmentBadCandidates": [
     "Esta abordagem revolucionária vai transformar tudo. Portanto você deve adotar já.",
     "Esta abordagem revolucionária vai transformar tudo. Você deve adotar já sem contexto."
-  ]
+  ],
+  "expectedTraits": {
+    "openingMode": "observation",
+    "perspectiveShiftDensity": "high",
+    "usesCounterexamples": "common",
+    "selfQuestioning": "moderate",
+    "insightTiming": "moderate",
+    "usesAnalogies": "common",
+    "closingMode": "conclusion"
+  }
 }

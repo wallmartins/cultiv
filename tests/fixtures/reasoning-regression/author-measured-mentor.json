@@ -33,5 +33,14 @@
   "developmentBadCandidates": [
     "Sempre faça assim. Você deve seguir este padrão sem questionar.",
     "Eu sei a única forma correta. O certo é fazer assim sempre."
-  ]
+  ],
+  "expectedTraits": {
+    "openingMode": "mixed",
+    "perspectiveShiftDensity": "moderate",
+    "usesCounterexamples": "occasional",
+    "selfQuestioning": "moderate",
+    "insightTiming": "moderate",
+    "usesAnalogies": "common",
+    "closingMode": "conclusion"
+  }
 }
