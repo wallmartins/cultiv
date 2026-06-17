@@ -1,4 +1,4 @@
-import { cn } from "@my-ai-orchestrator/ui";
+import { cn, Text } from "@my-ai-orchestrator/ui";
 import { useEffect, useId, useState } from "react";
 import {
   voiceConfidenceProgressByLevel,
@@ -135,9 +135,12 @@ export function VoiceConfidenceDial({
         </defs>
       </svg>
       <div className="pointer-events-none absolute inset-0 flex items-center justify-center px-6 text-center">
-        <span className="max-w-[5.5rem] font-body text-sm font-bold leading-snug tracking-tight text-foreground capitalize text-balance sm:max-w-[6.25rem] sm:text-[0.9375rem]">
+        <Text
+          variant="meta"
+          className="max-w-[5.75rem] text-[0.625rem] font-semibold uppercase leading-snug tracking-editorial-wide text-moss text-balance sm:max-w-[6.5rem] sm:text-[0.6875rem]"
+        >
           {centerLabel}
-        </span>
+        </Text>
       </div>
     </div>
   );

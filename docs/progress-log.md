@@ -1,5 +1,6 @@
 # Progress Log
 
+| 2026-06-17 | fix(web): restore moss uppercase meta styling on voice confidence dial center label |
 | 2026-06-17 | fix(web): show only Cultiv growth subline inside voice confidence dial |
 | 2026-06-17 | fix(voice): enforce pt-BR narrativeProse in reasoning extraction with stronger prompts, retry, and test fixture |
 | 2026-06-17 | feat(web): Voice mirror hero with confidence dial and Cultiv growth sublines |
