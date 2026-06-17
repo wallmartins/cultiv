@@ -46,7 +46,13 @@ export {
   resolveMinimumPlanTierForQualityMode
 } from "./quality-mode-entitlements.js";
 import type { BillingPlanStatus, BillingPlanTier } from "./quality-mode-entitlements.js";
-import type { BillingGatewayName } from "./gateway/types.js";
+import type {
+  BillingGatewayName,
+  CheckoutSessionRequest,
+  CheckoutSessionResult,
+  GatewayWebhookEvent
+} from "./gateway/types.js";
+import { createManualGateway } from "./gateway/manual-adapter.js";
 export type BillingUsageKind = "generation" | "refinement" | "chat" | "inference";
 export type {
   BillingCheckoutPeriod,
@@ -131,7 +137,14 @@ export interface BillingGatewayChargeResult {
 
 export interface BillingGatewayAdapter {
   readonly name: BillingGatewayName;
-  readonly charge: (request: BillingGatewayChargeRequest) => Effect.Effect<BillingGatewayChargeResult>;
+  createCheckoutSession?(
+    request: CheckoutSessionRequest
+  ): Effect.Effect<CheckoutSessionResult, BillingGatewayError>;
+  parseWebhook?(
+    payload: unknown,
+    signature: string
+  ): Effect.Effect<GatewayWebhookEvent, BillingGatewayWebhookVerificationError>;
+  charge(request: BillingGatewayChargeRequest): Effect.Effect<BillingGatewayChargeResult, BillingGatewayError>;
 }
 
 export interface BillingOperationResult<T> {
@@ -772,22 +785,17 @@ export function withBilling<T>(effect: Effect.Effect<T>, options: BillingService
   return effect.pipe(Effect.provide(createBillingServiceLayer(options)));
 }
 
-export function createManualGateway(): BillingGatewayAdapter {
-  return {
-    name: "manual",
-    charge: (request) =>
-      Effect.succeed({
-        gateway: "manual",
-        transactionId: `manual_${request.userId}_${request.subscriptionId}`,
-        status: "pending",
-        raw: request
-      })
-  };
-}
+export { createManualGateway };
 
 export function createStripeGateway(): BillingGatewayAdapter {
   return {
     name: "stripe",
+    createCheckoutSession: () =>
+      Effect.fail(new BillingGatewayError({ gateway: "stripe", message: "checkout not implemented" })),
+    parseWebhook: () =>
+      Effect.fail(
+        new BillingGatewayWebhookVerificationError({ gateway: "stripe", message: "webhook not implemented" })
+      ),
     charge: (request) =>
       Effect.succeed({
         gateway: "stripe",
@@ -801,6 +809,12 @@ export function createStripeGateway(): BillingGatewayAdapter {
 export function createAsaasGateway(): BillingGatewayAdapter {
   return {
     name: "asaas",
+    createCheckoutSession: () =>
+      Effect.fail(new BillingGatewayError({ gateway: "asaas", message: "checkout not implemented" })),
+    parseWebhook: () =>
+      Effect.fail(
+        new BillingGatewayWebhookVerificationError({ gateway: "asaas", message: "webhook not implemented" })
+      ),
     charge: (request) =>
       Effect.succeed({
         gateway: "asaas",
