@@ -155,6 +155,13 @@ export type AppVoiceMessages = {
   readonly dashboardEmptyAction: string;
   readonly confidence: string;
   readonly confidencePanelTitle: string;
+  readonly confidenceDialEyebrow: string;
+  readonly confidenceDialSubline: {
+    readonly high: string;
+    readonly medium: string;
+    readonly low: string;
+    readonly none: string;
+  };
   readonly confidenceLabels: {
     readonly high: string;
     readonly medium: string;

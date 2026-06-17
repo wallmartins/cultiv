@@ -5,8 +5,8 @@ import { AppCard } from "~/platform/ui/AppCard";
 import { AppDisclosureGroup } from "~/platform/ui/AppDisclosure";
 import { AppSkeleton } from "~/platform/ui/AppSkeleton";
 import { toVoiceConfidenceLevel } from "~/app/voice/components/VoiceConfidenceRing";
+import { VoiceMirrorHero } from "~/app/voice/components/VoiceMirrorHero";
 import { VoiceNextStepPanel } from "~/app/voice/components/VoiceNextStepPanel";
-import { VoiceProfileStatusPanel } from "~/app/voice/components/VoiceProfileStatusPanel";
 import {
   buildReasoningDetailItems,
   VoiceReasoningMirror
@@ -15,7 +15,7 @@ import {
   getMissingVoiceFormats,
   getUnderrepresentedVoiceFormats,
   getVoiceAdaptationModeCopy,
-  getVoiceConfidenceAdaptationLine,
+  getVoiceConfidenceDialSubline,
   getVoiceConfidencePanelMessage,
   getVoiceDiagnosticsText,
   resolveVoiceNextStepFromDiagnostics
@@ -92,20 +92,24 @@ export function VoiceDashboard() {
   const nextStep = resolveVoiceNextStepFromDiagnostics(profile.diagnostics, voiceMessages);
   const rebuildStatus = profile.diagnostics.pendingRebuild.status;
   const confidenceLevel = toVoiceConfidenceLevel(profile.profile.confidence);
-  const profileStatus = (
-    <VoiceProfileStatusPanel
-      level={confidenceLevel}
-      confidenceLabel={confidenceLabel}
-      panelTitle={voiceMessages.confidencePanelTitle}
-      contextCopy={getVoiceConfidencePanelMessage(profile.profile, voiceMessages, {
-        detailed: !profile.reasoning
-      })}
-      adaptationLine={getVoiceConfidenceAdaptationLine(profile.profile.adaptationMode, voiceMessages)}
-    />
-  );
+  const dialSubline = getVoiceConfidenceDialSubline(profile.profile.confidence, voiceMessages);
+  const mirrorBodyCopy = getVoiceConfidencePanelMessage(profile.profile, voiceMessages, {
+    detailed: true
+  });
 
   const healthLayer = (
     <div className="space-y-4">
+      <div>
+        <Text variant="label" className="mb-2 block">
+          {voiceMessages.confidence}
+        </Text>
+        <Text variant="body" className="mb-1 font-medium text-foreground">
+          {confidenceLabel}
+        </Text>
+        <Text variant="meta" className="w-full text-muted-foreground">
+          {getVoiceConfidencePanelMessage(profile.profile, voiceMessages, { detailed: false })}
+        </Text>
+      </div>
       <div>
         <Text variant="label" className="mb-2 block">
           {voiceMessages.adaptationMode}
@@ -197,7 +201,10 @@ export function VoiceDashboard() {
         <VoiceReasoningMirror
           messages={voiceMessages.reasoning}
           reasoning={profile.reasoning}
-          status={profileStatus}
+          confidenceLevel={confidenceLevel}
+          confidenceLabel={confidenceLabel}
+          dialEyebrow={voiceMessages.confidenceDialEyebrow}
+          dialSubline={dialSubline}
         />
       ) : (
         <section className="space-y-6">
@@ -209,7 +216,13 @@ export function VoiceDashboard() {
               {voiceMessages.mirrorFallbackSubtitle}
             </Text>
           </div>
-          {profileStatus}
+          <VoiceMirrorHero
+            level={confidenceLevel}
+            confidenceLabel={confidenceLabel}
+            dialEyebrow={voiceMessages.confidenceDialEyebrow}
+            dialSubline={dialSubline}
+            bodyCopy={mirrorBodyCopy}
+          />
         </section>
       )}
 

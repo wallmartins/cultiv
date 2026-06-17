@@ -1,10 +1,11 @@
 import { Text } from "@my-ai-orchestrator/ui";
-import type { ReactNode } from "react";
-import type { AppDisclosureItem } from "~/platform/ui/AppDisclosure";
 import { VoiceTraitChip } from "~/app/voice/components/VoiceTraitChip";
-import { getContentTypeLabel } from "~/i18n/app/content-types";
+import { VoiceMirrorHero } from "~/app/voice/components/VoiceMirrorHero";
+import type { VoiceConfidenceLevel } from "~/app/voice/components/VoiceConfidenceRing";
 import type { VoiceReasoningPresentationView } from "@my-ai-orchestrator/contracts";
 import type { AppLocale, AppMessages } from "~/i18n/app/types";
+import type { AppDisclosureItem } from "~/platform/ui/AppDisclosure";
+import { getContentTypeLabel } from "~/i18n/app/content-types";
 
 interface VoiceReasoningLayersProps {
   readonly locale: AppLocale;
@@ -90,10 +91,20 @@ export function buildReasoningDetailItems({
 interface VoiceReasoningMirrorProps {
   readonly messages: AppMessages["voice"]["reasoning"];
   readonly reasoning: VoiceReasoningPresentationView;
-  readonly status?: ReactNode;
+  readonly confidenceLevel: VoiceConfidenceLevel;
+  readonly confidenceLabel: string;
+  readonly dialEyebrow: string;
+  readonly dialSubline: string;
 }
 
-export function VoiceReasoningMirror({ messages, reasoning, status }: VoiceReasoningMirrorProps) {
+export function VoiceReasoningMirror({
+  messages,
+  reasoning,
+  confidenceLevel,
+  confidenceLabel,
+  dialEyebrow,
+  dialSubline
+}: VoiceReasoningMirrorProps) {
   return (
     <section className="space-y-6">
       <div>
@@ -105,11 +116,13 @@ export function VoiceReasoningMirror({ messages, reasoning, status }: VoiceReaso
         </Text>
       </div>
 
-      {status}
-
-      <Text variant="body-lg" className="w-full whitespace-pre-wrap leading-relaxed text-foreground">
-        {reasoning.core.narrativeProse}
-      </Text>
+      <VoiceMirrorHero
+        level={confidenceLevel}
+        confidenceLabel={confidenceLabel}
+        dialEyebrow={dialEyebrow}
+        dialSubline={dialSubline}
+        bodyCopy={reasoning.core.narrativeProse}
+      />
 
       <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
         <VoiceTraitChip

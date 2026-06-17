@@ -27,7 +27,14 @@ describe("VoiceReasoningMirror", () => {
 
   it("renders mirror prose and anti-patterns in detail items", () => {
     const html = renderToStaticMarkup(
-      <VoiceReasoningMirror messages={messages} reasoning={reasoning} />
+      <VoiceReasoningMirror
+        messages={messages}
+        reasoning={reasoning}
+        confidenceLevel="high"
+        confidenceLabel="Alta"
+        dialEyebrow="Confiança"
+        dialSubline="raízes firmes"
+      />
     );
 
     expect(html).toContain(messages.title);

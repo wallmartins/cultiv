@@ -54,6 +54,17 @@ export function getVoiceConfidenceAdaptationLine(
   return messages.confidenceAdaptationLines[mode];
 }
 
+export function getVoiceConfidenceDialSubline(
+  confidence: VoiceProfileConfidence,
+  messages: AppVoiceMessages
+): string {
+  if (confidence === "high" || confidence === "medium" || confidence === "low") {
+    return messages.confidenceDialSubline[confidence];
+  }
+
+  return messages.confidenceDialSubline.none;
+}
+
 export function getVoiceConfidencePanelMessage(
   profile: VoiceProfileView,
   messages: AppVoiceMessages,

@@ -3,19 +3,21 @@ import { useEffect, useId, useState } from "react";
 
 export type VoiceConfidenceLevel = "none" | "low" | "medium" | "high";
 
-const progressByLevel: Record<VoiceConfidenceLevel, number> = {
+export const voiceConfidenceProgressByLevel: Record<VoiceConfidenceLevel, number> = {
   none: 0.08,
   low: 0.33,
   medium: 0.66,
   high: 1
 };
 
+const progressByLevel = voiceConfidenceProgressByLevel;
+
 export interface VoiceConfidenceRingProps {
   readonly level: VoiceConfidenceLevel;
   readonly label: string;
   readonly description?: string;
   readonly className?: string;
-  readonly size?: "default" | "compact" | "panel";
+  readonly size?: "default" | "compact" | "panel" | "hero";
   readonly hideLabel?: boolean;
   readonly centerLabel?: string;
 }
@@ -23,13 +25,15 @@ export interface VoiceConfidenceRingProps {
 const ringSizeClasses = {
   default: "size-28",
   compact: "size-16",
-  panel: "size-24 sm:size-28"
+  panel: "size-24 sm:size-28",
+  hero: "size-32 sm:size-40"
 } as const;
 
 const centerLabelClasses = {
   default: "text-base",
   compact: "text-xs",
-  panel: "text-sm sm:text-base"
+  panel: "text-sm sm:text-base",
+  hero: "text-base font-semibold sm:text-lg"
 } as const;
 
 export function VoiceConfidenceRing({

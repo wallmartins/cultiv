@@ -210,6 +210,13 @@ export const appMessagesEn: AppMessages = {
     },
     confidence: "Confidence",
     confidencePanelTitle: "Confidence in your voice",
+    confidenceDialEyebrow: "Confidence",
+    confidenceDialSubline: {
+      high: "strong roots",
+      medium: "taking shape",
+      low: "sprouting",
+      none: "seeding"
+    },
     confidenceLabels: {
       high: "High",
       medium: "Medium",
