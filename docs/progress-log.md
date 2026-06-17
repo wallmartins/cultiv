@@ -1,5 +1,6 @@
 # Progress Log
 
+| 2026-06-17 | docs: payment gateway implementation plan (18 tasks, phases 1a–1c) |
 | 2026-06-17 | docs: payment gateway design spec (Stripe + Asaas hybrid) — checkout, webhooks, BRL/USD routing, security model |
 | 2026-06-17 | fix(web,voice): localize moveLabels — pt dictionary + key normalization; extraction prompt requires moveLabels in output language |
 | 2026-06-17 | feat: Development Traits program (issues 82–87) — contracts, confidence pass, divergence/reconciliation, dashboard mirror, generation pass-through, confirmation API, regression corpus |
