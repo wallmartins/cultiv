@@ -2,6 +2,8 @@ import type {
   AttentionLevel,
   AttentionReasonCode,
   ContributionCode,
+  DevelopmentTraitProfile,
+  TraitKey,
   VoiceExampleBatchCommitResultView,
   VoiceExampleBatchView,
   VoiceExampleListItemView,
@@ -17,6 +19,7 @@ import type {
   VoiceExampleBatch,
   VoiceProfileDiagnostics
 } from "@my-ai-orchestrator/domain";
+import { mergeTraitConfirmations } from "./trait-confirmation-overlay.js";
 
 export function toVoiceProfileView(profile: DerivedVoiceProfile): VoiceProfileView {
   return {
@@ -61,7 +64,14 @@ export function toVoiceProfileDiagnosticsView(
       status: diagnostics.pendingRebuild.status,
       reasonCode: diagnostics.pendingRebuild.reasonCode,
       nextActionCodes: [...diagnostics.pendingRebuild.nextActionCodes]
-    }
+    },
+    ...(diagnostics.traitConfirmations
+      ? {
+          traitConfirmations: Object.fromEntries(
+            Object.entries(diagnostics.traitConfirmations).map(([key, value]) => [key, { ...value }])
+          )
+        }
+      : {})
   };
 }
 
@@ -82,7 +92,8 @@ export function toVoiceProfileScreenView(
     ...(options?.includeReasoning && profile.coreReasoningSignature
       ? {
           reasoning: toVoiceReasoningPresentationView(profile, {
-            activeExamples: diagnostics.materialBase.activeExamples
+            activeExamples: diagnostics.materialBase.activeExamples,
+            traitConfirmations: diagnostics.traitConfirmations
           })
         }
       : {})
@@ -91,7 +102,10 @@ export function toVoiceProfileScreenView(
 
 export function toVoiceReasoningPresentationView(
   profile: DerivedVoiceProfile,
-  options?: { readonly activeExamples?: number }
+  options?: {
+    readonly activeExamples?: number;
+    readonly traitConfirmations?: VoiceProfileDiagnostics["traitConfirmations"];
+  }
 ): VoiceReasoningPresentationView | undefined {
   if (!profile.coreReasoningSignature) {
     return undefined;
@@ -100,6 +114,11 @@ export function toVoiceReasoningPresentationView(
   const formatExpressions = Object.values(profile.formatExpressionProfiles ?? {}).map(
     (expression) => ({ ...expression })
   );
+
+  const rawTraitProfile = profile.argumentDevelopmentSignature?.traitProfile;
+  const traitProfile = rawTraitProfile
+    ? overlayTraitConfirmations(rawTraitProfile, options?.traitConfirmations)
+    : undefined;
 
   return {
     core: { ...profile.coreReasoningSignature, derivedAntiPatterns: [...profile.coreReasoningSignature.derivedAntiPatterns] },
@@ -113,15 +132,37 @@ export function toVoiceReasoningPresentationView(
             structuralAntiPatterns: [...profile.argumentDevelopmentSignature.structuralAntiPatterns],
             transitionTendencies: profile.argumentDevelopmentSignature.transitionTendencies.map((tendency) => ({
               ...tendency
-            }))
+            })),
+            ...(traitProfile ? { traitProfile } : {})
           },
           developmentImmature:
             typeof options?.activeExamples === "number"
             && options.activeExamples >= 2
-            && options.activeExamples < 3
+            && options.activeExamples < 3,
+          ...(traitProfile ? { traitProfile } : {})
         }
       : {})
   };
+}
+
+function overlayTraitConfirmations(
+  traitProfile: DevelopmentTraitProfile,
+  confirmations?: VoiceProfileDiagnostics["traitConfirmations"]
+): DevelopmentTraitProfile {
+  if (!confirmations) {
+    return {
+      traits: { ...traitProfile.traits },
+      records: Object.fromEntries(
+        Object.entries(traitProfile.records).map(([key, record]) => [key, { ...record, evidenceExampleIds: [...record.evidenceExampleIds] }])
+      ) as DevelopmentTraitProfile["records"]
+    };
+  }
+
+  const confirmationResponses = Object.fromEntries(
+    Object.entries(confirmations).map(([key, record]) => [key, { response: record.response }])
+  ) as Partial<Record<TraitKey, { readonly response: "confirmed" | "rejected" | "skipped" }>>;
+
+  return mergeTraitConfirmations(traitProfile, confirmationResponses);
 }
 
 export function toVoiceExampleListItemView(

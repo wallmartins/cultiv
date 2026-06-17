@@ -72,6 +72,26 @@ _Avoid_: One-size prompt block, uniform voice injection, merged author block tha
 Heuristic evaluation of how closely a candidate follows the reconciled **Argument Development Signature** — including epistemic posture, typical moves, and structural anti-patterns — applied in every **Quality Mode** during candidate scoring, not only when **Voice Judge** runs.
 _Avoid_: Judge-only development check, format drift, surface marker drift
 
+**Development Traits**:
+A small set of stable, author-global enums inferred from **Voice Examples** that answer direct questions about how the author develops texts (opening mode, perspective-shift density, counterexample usage, self-questioning, insight timing, analogy usage, closing mode) — persisted as part of **Argument Development Signature** extraction, distinct from free-form **moveLabels**.
+_Avoid_: Fixed phase template, Cultiv ontology replacing moves, duplicate Core cognitive enums
+
+**Trait Confidence**:
+Per-trait trust level (`low`, `medium`, `high`) and status (`inferred`, `confirmed`, `disputed`, `unknown`) computed deterministically after **Argument Development Extraction** from example coverage and consistency — complementing global **Voice Confidence**, not replacing it for **Voice Adaptation Mode** in v1.
+_Avoid_: LLM confidence score, single global score for all traits, generation conservatism driven only by trait confidence
+
+**Trait Evidence**:
+The linkage between a **Development Trait** value and the **Voice Example** ids (with short excerpts in UI) that support the inference — surfaced in the **Voice Dashboard Detail Layer** so authors can validate grounded answers.
+_Avoid_: Black-box prose, full example dump in hero, author-editable evidence
+
+**Author Trait Confirmation**:
+A light read-only validation loop on the **Voice Dashboard** (sim / não / não sei) for traits with low or disputed **Trait Confidence** — updating diagnostics audit state without letting authors edit derived trait enums directly in Fase 1.
+_Avoid_: Trait settings form, inline enum editor, blocking generation on rejection
+
+**Author Development Mirror**:
+The traits strip and evidence disclosures within the second hero of **Voice Reasoning Presentation** (“how I develop a text”) — prose primary, trait chips with confidence indicators, Core authority chip cross-link, and honest unknown-state copy.
+_Avoid_: Questionnaire wizard, diagnostic warning styling, reconciliation conflict UI
+
 **Voice Judge**:
 A conditional LLM evaluation pass that scores finalist candidates against the reconciled **Core Reasoning Signature**, **Argument Development Signature**, and author examples, using a separate provider from generation to reduce self-judge bias. It never replaces heuristic **Argument Development Drift** in `fast` or `balanced`.
 _Avoid_: Second draft, rewrite pass, quality LLM step, sole development enforcement layer
@@ -85,7 +105,7 @@ The offline recalculation of the **Derived Voice Profile**, **Core Reasoning Sig
 _Avoid_: Runtime inference, per-generation profile refresh
 
 **Voice Reasoning Presentation**:
-The hero read-only mirror on the **Voice Dashboard** that shows the reconciled **Core Reasoning Signature** first (“how I think”) and the reconciled **Argument Development Signature** second (“how I develop a text”) in readable prose and sentence-case trait chips, with per-format **Format Expression Profile** and derived anti-patterns tucked into **Voice Dashboard Detail Layer** sections—not equal-weight cards, diagnostic label styling, or internal extraction conflict states.
+The hero read-only mirror on the **Voice Dashboard** that shows the reconciled **Core Reasoning Signature** first (“how I think”) and the reconciled **Argument Development Signature** second (“how I develop a text”) in readable prose, **Development Traits** with **Trait Confidence** indicators, sentence-case trait chips, and **Trait Evidence** in the **Voice Dashboard Detail Layer** — with per-format **Format Expression Profile** and derived anti-patterns in disclosures—not equal-weight cards, diagnostic label styling, or internal extraction conflict states.
 _Avoid_: Style settings, persona editor, cognitive profile form, uppercase mono trait labels, mismatch warnings, single merged narrative that hides development
 
 **Reasoning Extraction**:
@@ -553,6 +573,7 @@ _Avoid_: AI Writing Engine, content-lib, my-ai-orchestrator
 - **Voice Signature Reconciliation** must not block generation or expose internal contradiction states to the author in Fase 1.
 - **Argument Development Signature**, **Argument Development Extraction**, **Voice Signature Divergence Check**, **Voice Signature Reconciliation**, and **Argument Development Drift** ship under the same `voice.reasoningSignatureV1` feature flag as **Core Reasoning Signature** — not a separate product toggle in v1.
 - **Argument Development Extraction** runs when at least two active **Voice Examples** exist; the resulting signature is treated as immature until at least three active examples are available, aligned with **Voice Confidence** signals on the **Voice Dashboard**.
+- **Development Traits** and **Trait Confidence** extend **Argument Development Signature** with structured, evidence-backed answers to author development questions; **Author Trait Confirmation** is light validation only — authors still refine by adding examples, not editing traits (ADR 0008).
 - **Step-Scoped Reasoning Injection** applies **Core Reasoning Signature** and **Format Expression Profile** to every LLM step, with full narrative on structural steps (`hook`, `outline`, `structure`, `draft`, `expand`) and enum guardrails on refinement steps (`refine`, `tighten`).
 - **Reasoning Extraction** uses the primary provider via a dedicated extraction routing profile; **Voice Judge** uses **Voice Judge Routing Profile** (Groq preferred) and must not share the generation provider by default.
 - **Voice Judge** runs on finalist candidates when **Quality Mode** is `strict`, or in `balanced` when reasoning drift is borderline, **Argument Development Drift** is borderline, or top candidates tie; it never runs in `fast`. **Argument Development Drift** and reasoning drift heuristics run in every **Quality Mode**, including when the judge does not run.

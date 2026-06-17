@@ -2,10 +2,15 @@ import type {
   AttentionLevel,
   ContributionCode,
   ArgumentDevelopmentSignature,
+  ClosingMode,
   CoreReasoningSignature,
   FormatExpressionProfile,
+  InsightTiming,
   NextActionCode,
+  OpeningMode,
   ReasonCode,
+  TraitConfirmationRecord,
+  TraitKey,
   VoiceAdaptationMode,
   VoiceCoverage,
   VoiceExampleState,
@@ -120,6 +125,7 @@ export interface VoiceProfileDiagnostics extends Entity<string> {
   readonly underrepresentedContentTypes: readonly VoiceCoverageItem[];
   readonly pendingRebuild: PendingVoiceProfileRebuildState;
   readonly materialBase: VoiceMaterialBaseBreakdown;
+  readonly traitConfirmations?: Readonly<Partial<Record<TraitKey, TraitConfirmationRecord>>>;
   readonly createdAt: string;
   readonly updatedAt: string;
 }
@@ -140,6 +146,10 @@ export interface VoiceProfileSnapshot extends Entity<string> {
     readonly certaintyLevel?: CoreReasoningSignature["certaintyLevel"];
     readonly conclusionPace?: CoreReasoningSignature["conclusionPace"];
     readonly epistemicPosture?: ArgumentDevelopmentSignature["epistemicPosture"];
+    readonly developmentTraitsApplied?: boolean;
+    readonly openingMode?: OpeningMode;
+    readonly closingMode?: ClosingMode;
+    readonly insightTiming?: InsightTiming;
   };
   readonly resolutionContext: Readonly<Record<string, unknown>>;
   readonly createdAt: string;

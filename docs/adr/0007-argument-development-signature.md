@@ -116,6 +116,8 @@ ADR 0006 remains authoritative for: **Content Type Format Preset** scope, provid
 
 ADR 0007 adds the development layer, parallel/conditional rebuild orchestration, extended injection, **Argument Development Drift**, revised balanced judge triggers, and two-block hero presentation. Implementation issues should reference both ADRs.
 
+Extended by [ADR 0008](./0008-development-traits-and-author-confidence.md) (**Development Traits**, **Trait Confidence**, **Author Development Mirror**, **Author Trait Confirmation**).
+
 ## Consequences
 
 - `packages/contracts` gains **Argument Development Signature** types and reconciliation result shape.
@@ -130,9 +132,11 @@ ADR 0007 adds the development layer, parallel/conditional rebuild orchestration,
 - Observability: internal events for reconciliation invoked / skipped (no user-facing conflict UI in Fase 1).
 - Deeper **Core Reasoning Signature** extraction quality is explicitly deferred; may be revisited after Development layer ships.
 - PRD: [`argument-development-signature.md`](../live/prd/argument-development-signature.md) · Plan: [`argument-development-signature-implementation-plan.md`](../live/plan/argument-development-signature-implementation-plan.md)
+- Follow-on: [ADR 0008](./0008-development-traits-and-author-confidence.md) · Plan: [`development-traits-implementation-plan.md`](../live/plan/development-traits-implementation-plan.md)
 
 ## References
 
 - [ADR 0006 — Author Reasoning Signature](./0006-author-reasoning-signature.md)
+- [ADR 0008 — Development Traits and Author Confidence](./0008-development-traits-and-author-confidence.md)
 - [CONTEXT.md](../../CONTEXT.md) — canonical glossary
 - [author-layers-kickoff.md](../live/kickoff/author-layers-kickoff.md) — exploration only; not implementation source of truth

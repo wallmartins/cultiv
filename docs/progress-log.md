@@ -1,5 +1,9 @@
 # Progress Log
 
+| 2026-06-17 | feat: Development Traits program (issues 82–87) — contracts, confidence pass, divergence/reconciliation, dashboard mirror, generation pass-through, confirmation API, regression corpus |
+| 2026-06-17 | docs: issue 87 Development Traits generation pass-through (hints, snapshots, prompt summary) |
+| 2026-06-17 | docs: PRD + issues 82–86 Development Traits and Author Confidence (ADR 0008); parent issue + README indexados |
+| 2026-06-17 | docs: ADR 0008 Development Traits — structured author development answers, trait confidence, evidence mirror, confirmation loop; plan epics 82–86 |
 | 2026-06-17 | fix(voice): ADS review fixes — shared extraction JSON/errors, development drift heuristic, divergence rules, judge trigger logging, appliedSignals wiring, regression corpus, golden fixtures, reconciliation flow tests, `pnpm eval:development` |
 | 2026-06-17 | feat(voice): Argument Development Signature issues 74–81 — contracts, parallel extraction, divergence/reconciliation, prompts, drift/critic, judge policy, dashboard hero |
 | 2026-06-17 | docs: issues 74–81 Argument Development Signature (épicos A–H); parent issue + README indexados |

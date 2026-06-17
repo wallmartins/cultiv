@@ -1,6 +1,13 @@
 import { Schema } from "effect";
 import { createSchemaDecoder } from "./shared.js";
-import { EpistemicPostureSchema, VoiceReasoningPresentationViewSchema } from "./reasoning.js";
+import {
+  ClosingModeSchema,
+  EpistemicPostureSchema,
+  OpeningModeSchema,
+  InsightTimingSchema,
+  TraitConfirmationRecordSchema,
+  VoiceReasoningPresentationViewSchema
+} from "./reasoning.js";
 
 export const VoiceProfileConfidenceSchema = Schema.Literal("low", "medium", "high");
 export type VoiceProfileConfidence = typeof VoiceProfileConfidenceSchema.Type;
@@ -82,7 +89,11 @@ export const VoiceSignalSummarySchema = Schema.Struct({
   certaintyLevel: Schema.optional(Schema.Literal("low", "moderate", "high")),
   conclusionPace: Schema.optional(Schema.Literal("slow", "moderate", "fast")),
   developmentApplied: Schema.optional(Schema.Boolean),
-  epistemicPosture: Schema.optional(EpistemicPostureSchema)
+  epistemicPosture: Schema.optional(EpistemicPostureSchema),
+  developmentTraitsApplied: Schema.optional(Schema.Boolean),
+  openingMode: Schema.optional(OpeningModeSchema),
+  closingMode: Schema.optional(ClosingModeSchema),
+  insightTiming: Schema.optional(InsightTimingSchema)
 });
 export type VoiceSignalSummary = typeof VoiceSignalSummarySchema.Type;
 
@@ -135,7 +146,10 @@ export const VoiceProfileDiagnosticsViewSchema = Schema.Struct({
     status: Schema.Literal("idle", "in_progress", "failed"),
     reasonCode: Schema.optional(ReasonCodeSchema),
     nextActionCodes: Schema.Array(NextActionCodeSchema)
-  })
+  }),
+  traitConfirmations: Schema.optional(
+    Schema.Record({ key: Schema.String, value: TraitConfirmationRecordSchema })
+  )
 });
 export type VoiceProfileDiagnosticsView = typeof VoiceProfileDiagnosticsViewSchema.Type;
 
@@ -278,6 +292,10 @@ export const VoiceTrainingConsentStatusViewSchema = Schema.Struct({
 export type VoiceTrainingConsentStatusView = typeof VoiceTrainingConsentStatusViewSchema.Type;
 
 export const decodeVoiceProfileScreenView = createSchemaDecoder("VoiceProfileScreenView", VoiceProfileScreenViewSchema);
+export const decodeVoiceProfileDiagnosticsView = createSchemaDecoder(
+  "VoiceProfileDiagnosticsView",
+  VoiceProfileDiagnosticsViewSchema
+);
 export const decodeVoiceTrainingConsentStatusView = createSchemaDecoder(
   "VoiceTrainingConsentStatusView",
   VoiceTrainingConsentStatusViewSchema

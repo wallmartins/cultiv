@@ -1,7 +1,9 @@
 import type {
   ArgumentDevelopmentSignature,
   CoreReasoningSignature,
-  ReasoningExtractionResult
+  DevelopmentTraitProfile,
+  ReasoningExtractionResult,
+  TraitKey
 } from "@my-ai-orchestrator/contracts";
 
 export interface VoiceSignatureDivergence {
@@ -12,10 +14,12 @@ export interface VoiceSignatureDivergence {
 export function evaluateVoiceSignatureDivergence(args: {
   readonly reasoning: ReasoningExtractionResult;
   readonly development: ArgumentDevelopmentSignature;
+  readonly traitProfile?: DevelopmentTraitProfile;
 }): VoiceSignatureDivergence {
   const reasons: string[] = [];
   const { core } = args.reasoning;
   const development = args.development;
+  const traitProfile = args.traitProfile ?? development.traitProfile;
 
   if (
     development.epistemicPosture === "exploratory"
@@ -48,10 +52,37 @@ export function evaluateVoiceSignatureDivergence(args: {
     reasons.push("structural_anti_pattern_conflicts_with_core_traits");
   }
 
+  if (traitProfile) {
+    const insightTiming = traitProfile.traits.insightTiming ?? traitProfile.records.insightTiming?.value;
+    if (insightTiming === "late" && core.conclusionPace === "fast") {
+      reasons.push("late_insight_timing_conflicts_with_fast_conclusion_pace");
+    }
+
+    const openingMode = traitProfile.traits.openingMode ?? traitProfile.records.openingMode?.value;
+    if (
+      openingMode === "thesis"
+      && development.epistemicPosture === "exploratory"
+      && hasDoubtOrExperimentMoves(development)
+    ) {
+      reasons.push("thesis_opening_conflicts_with_exploratory_doubt_moves");
+    }
+
+    const disputedTraits = countDisputedTraits(traitProfile);
+    if (disputedTraits >= 2) {
+      reasons.push("multiple_disputed_development_traits");
+    }
+  }
+
   return {
     hasConflict: reasons.length > 0,
     reasons
   };
+}
+
+function countDisputedTraits(traitProfile: DevelopmentTraitProfile): number {
+  return (Object.keys(traitProfile.records) as TraitKey[]).filter(
+    (key) => traitProfile.records[key]?.status === "disputed"
+  ).length;
 }
 
 function hasDoubtOrExperimentMoves(development: ArgumentDevelopmentSignature): boolean {

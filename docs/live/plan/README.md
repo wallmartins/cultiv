@@ -12,6 +12,8 @@ Planejamento consolidado da implementação web do **Cultiv**, produzido nas ses
 | [text-generation-lexical-quality-implementation-plan.md](./text-generation-lexical-quality-implementation-plan.md) | Plano — qualidade lexical e domínio temático na geração de textos |
 | [author-reasoning-signature-implementation-plan.md](./author-reasoning-signature-implementation-plan.md) | Plano — raciocínio autoral, extração no rebuild, judge Groq (ADR 0006) |
 | [argument-development-signature-implementation-plan.md](./argument-development-signature-implementation-plan.md) | Plano — desenvolvimento argumentativo, extração paralela, reconciliação condicional (ADR 0007) |
+| [development-traits-implementation-plan.md](./development-traits-implementation-plan.md) | Plano — Development Traits, Trait Confidence, espelho e confirmação do autor (ADR 0008) |
+| [development-traits-regression-baseline.md](./development-traits-regression-baseline.md) | Baseline de regressão — corpus `expectedTraits`, `pnpm eval:development-traits` |
 | [text-generation-lexical-quality-tracker.md](./text-generation-lexical-quality-tracker.md) | Tracker — issues 17–26, baseline de métricas, rollout |
 | [phase-2-implementation-plan.md](./phase-2-implementation-plan.md) | Plano detalhado — App autenticado (produto) |
 | [plan-tier-quality-modes-implementation-plan.md](./plan-tier-quality-modes-implementation-plan.md) | Plano — modos por tier, formatos abertos, assinatura free no JIT (ADR 0002) |
@@ -21,6 +23,8 @@ Planejamento consolidado da implementação web do **Cultiv**, produzido nas ses
 | [web-v2-screen-specs.md](./web-v2-screen-specs.md) | Especificação por tela — wireframes, estados, campos, i18n, erros |
 | [PRD Author Reasoning Signature](../prd/author-reasoning-signature.md) | Fidelidade de raciocínio autoral (ADR 0006) |
 | [PRD Argument Development Signature](../prd/argument-development-signature.md) | Fidelidade de desenvolvimento argumentativo (ADR 0007) |
+| [PRD Development Traits](../prd/development-traits-and-author-confidence.md) | Traits estruturados e confiança do autor (ADR 0008) |
+| ADR [0008](../../adr/0008-development-traits-and-author-confidence.md) | Development Traits e confiança forte do autor |
 | [Issues Author Reasoning Signature](../prd/issue-author-reasoning-signature.md) | Vertical slices 66–73 |
 | [Issues Argument Development Signature](../prd/issue-argument-development-signature.md) | Vertical slices 74–81 |
 | [PRD fase 1](../prd/cultiv-marketing-surface-phase-1.md) | Product Requirements Document — Marketing Surface |

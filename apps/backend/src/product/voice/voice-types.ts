@@ -1,12 +1,14 @@
 import { Effect } from "effect";
 import type {
   ExecutionVoiceMetadataView,
+  TraitConfirmationInput,
   VoiceExampleBatchCommitResultView,
   VoiceExampleBatchView,
   VoiceExampleCreateInput,
   VoiceExampleListItemView,
   VoiceExamplesPageView,
   VoiceExampleUpdateInput,
+  VoiceProfileDiagnosticsView,
   VoiceProfileScreenView
 } from "@my-ai-orchestrator/contracts";
 import type {
@@ -30,6 +32,10 @@ export interface ListVoiceExamplesOptions {
 
 export interface BackendVoiceService {
   readonly getProfileScreen: (userId: string) => Effect.Effect<VoiceProfileScreenView | undefined>;
+  readonly recordTraitConfirmation: (
+    userId: string,
+    input: TraitConfirmationInput
+  ) => Effect.Effect<VoiceProfileDiagnosticsView | undefined>;
   readonly resolveEffectiveVoice: (
     userId: string,
     context: EffectiveVoiceContext

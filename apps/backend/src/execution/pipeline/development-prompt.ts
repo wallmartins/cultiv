@@ -1,4 +1,4 @@
-import type { ArgumentDevelopmentSignature } from "@my-ai-orchestrator/contracts";
+import type { ArgumentDevelopmentSignature, DevelopmentTraitProfile, TraitKey } from "@my-ai-orchestrator/contracts";
 
 const STRUCTURAL_STEPS = new Set([
   "hook",
@@ -65,6 +65,9 @@ export function formatArgumentDevelopmentBlock(
         ]
       : [];
 
+  const traitSummary = formatDevelopmentTraitSummaryLine(development.traitProfile);
+  const traitLine = traitSummary ? ["", traitSummary] : [];
+
   return [
     development.developmentProse,
     "",
@@ -75,9 +78,53 @@ export function formatArgumentDevelopmentBlock(
     ...transitions,
     "",
     "Structural anti-patterns:",
-    ...formatBulletList(development.structuralAntiPatterns)
+    ...formatBulletList(development.structuralAntiPatterns),
+    ...traitLine
   ].join("\n");
 }
+
+export function formatDevelopmentTraitSummaryLine(
+  traitProfile?: DevelopmentTraitProfile
+): string | undefined {
+  if (!traitProfile) {
+    return undefined;
+  }
+
+  const parts: string[] = [];
+
+  for (const traitKey of TRAIT_PROMPT_KEYS) {
+    const record = traitProfile.records[traitKey];
+    if (!record?.value) {
+      continue;
+    }
+
+    if (record.status === "unknown" || record.status === "disputed") {
+      continue;
+    }
+
+    if (record.confidence !== "high" && record.status !== "confirmed") {
+      continue;
+    }
+
+    parts.push(`${traitKey}=${record.value}`);
+  }
+
+  if (parts.length === 0) {
+    return undefined;
+  }
+
+  return `Development traits (confirmed): ${parts.join("; ")}`;
+}
+
+const TRAIT_PROMPT_KEYS = [
+  "openingMode",
+  "insightTiming",
+  "closingMode",
+  "perspectiveShiftDensity",
+  "usesCounterexamples",
+  "selfQuestioning",
+  "usesAnalogies"
+] as const satisfies readonly TraitKey[];
 
 function formatBulletList(items: readonly string[]): string[] {
   if (items.length === 0) {

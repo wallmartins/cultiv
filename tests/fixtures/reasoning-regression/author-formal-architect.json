@@ -33,5 +33,14 @@
   "developmentBadCandidates": [
     "Obviamente microsserviços são sempre a escolha certa. Você deve adotar já.",
     "Você deve adotar Kubernetes imediatamente, sem tradeoffs."
-  ]
+  ],
+  "expectedTraits": {
+    "openingMode": "thesis",
+    "perspectiveShiftDensity": "low",
+    "usesCounterexamples": "occasional",
+    "selfQuestioning": "low",
+    "insightTiming": "early",
+    "usesAnalogies": "occasional",
+    "closingMode": "conclusion"
+  }
 }

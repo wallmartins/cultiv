@@ -19,6 +19,7 @@ import { extractReasoningSignature } from "./reasoning-extraction.js";
 import { extractArgumentDevelopmentSignature } from "./argument-development-extraction.js";
 import { evaluateVoiceSignatureDivergence } from "./voice-signature-divergence.js";
 import { reconcileVoiceSignatures } from "./voice-signature-reconciliation.js";
+import { applyTraitConfidencePass, capTraitConfidenceForImmature } from "./trait-confidence-pass.js";
 import type {
   ArgumentDevelopmentExtractionResult,
   ArgumentDevelopmentSignature,
@@ -253,10 +254,24 @@ function processUserRebuild(
 
         if (activeExamples.length >= 2) {
           if (developmentResult._tag === "Right" && developmentResult.right !== undefined) {
-            development = developmentResult.right.development;
+            const attached = attachTraitProfileToDevelopment({
+              extraction: developmentResult.right,
+              activeExamples,
+              previousDevelopment: previousProfile?.argumentDevelopmentSignature
+            });
+            development = attached.development;
+            if (attached.confidenceMetrics) {
+              yield* observability.recordTraitConfidenceComputed({
+                userId,
+                ...attached.confidenceMetrics
+              });
+            }
             logger?.info("Argument development extraction succeeded", {
               userId,
-              epistemicPosture: developmentResult.right.development.epistemicPosture
+              epistemicPosture: development.epistemicPosture,
+              traitCount: development.traitProfile
+                ? Object.keys(development.traitProfile.records).length
+                : 0
             });
           } else if (developmentResult._tag === "Left") {
             developmentExtractionFailed = true;
@@ -277,7 +292,11 @@ function processUserRebuild(
           && !reasoningExtractionFailed
           && !developmentExtractionFailed
         ) {
-          const divergence = evaluateVoiceSignatureDivergence({ reasoning, development });
+          const divergence = evaluateVoiceSignatureDivergence({
+            reasoning,
+            development,
+            traitProfile: development.traitProfile
+          });
           if (divergence.hasConflict) {
             const reconciled = yield* reconcileVoiceSignatures({
               examples: allExamples,
@@ -477,4 +496,51 @@ function clearProfileImpactFlags(
       }).pipe(Effect.orDie),
     { concurrency: 1, discard: true }
   );
+}
+
+function attachTraitProfileToDevelopment(args: {
+  readonly extraction: ArgumentDevelopmentExtractionResult;
+  readonly activeExamples: readonly VoiceExampleRecord[];
+  readonly previousDevelopment?: ArgumentDevelopmentSignature;
+}): {
+  readonly development: ArgumentDevelopmentSignature;
+  readonly confidenceMetrics?: {
+    readonly countsByConfidence: Readonly<Record<string, number>>;
+    readonly countsByStatus: Readonly<Record<string, number>>;
+  };
+} {
+  const { traits, traitEvidence, development } = args.extraction;
+  const confidenceResult = applyTraitConfidencePass({
+    traits,
+    traitEvidence,
+    development,
+    activeExamples: args.activeExamples
+  });
+
+  if (!confidenceResult) {
+    return {
+      development: {
+        ...development,
+        ...(args.previousDevelopment?.traitProfile
+          ? { traitProfile: args.previousDevelopment.traitProfile }
+          : {})
+      }
+    };
+  }
+
+  const traitProfile = capTraitConfidenceForImmature(
+    confidenceResult.profile,
+    args.activeExamples.length
+  );
+
+  return {
+    development: {
+      ...development,
+      traitProfile
+    },
+    confidenceMetrics: {
+      countsByConfidence: confidenceResult.countsByConfidence,
+      countsByStatus: confidenceResult.countsByStatus
+    }
+  };
 }

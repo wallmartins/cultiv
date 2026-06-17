@@ -1,6 +1,7 @@
 import { Button, Text } from "@my-ai-orchestrator/ui";
 import { Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import type { TraitConfirmationInput } from "@my-ai-orchestrator/contracts";
 import { AppCard } from "~/platform/ui/AppCard";
 import { AppDisclosureGroup } from "~/platform/ui/AppDisclosure";
 import { AppSkeleton } from "~/platform/ui/AppSkeleton";
@@ -12,6 +13,10 @@ import {
   buildReasoningDetailItems,
   VoiceReasoningMirror
 } from "~/app/voice/components/VoiceReasoningSection";
+import {
+  selectTraitConfirmationTarget,
+  VoiceTraitConfirmationCard
+} from "~/app/voice/components/VoiceTraitConfirmationCard";
 import {
   getMissingVoiceFormats,
   getUnderrepresentedVoiceFormats,
@@ -35,6 +40,9 @@ export function VoiceDashboard() {
   const client = useClientSdk();
   const [status, setStatus] = useState<DashboardStatus>("loading");
   const [profile, setProfile] = useState<VoiceProfileScreenView | null>(null);
+  const [confirmationDismissed, setConfirmationDismissed] = useState(false);
+  const [confirmationSubmitting, setConfirmationSubmitting] = useState(false);
+  const authorityAnchorRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     void client
@@ -103,6 +111,37 @@ export function VoiceDashboard() {
   const mirrorBodyCopy = getVoiceConfidencePanelMessage(profile.profile, voiceMessages, {
     detailed: true
   });
+  const traitConfirmationTarget =
+    profile.reasoning?.traitProfile && !confirmationDismissed
+      ? selectTraitConfirmationTarget(
+          profile.reasoning.traitProfile,
+          profile.diagnostics.traitConfirmations
+        )
+      : undefined;
+
+  const handleTraitConfirmation = (input: TraitConfirmationInput) => {
+    setConfirmationSubmitting(true);
+    void client
+      .toPromise(client.voice.recordTraitConfirmation(input))
+      .then((diagnostics) => {
+        setProfile((current) =>
+          current
+            ? {
+                ...current,
+                diagnostics
+              }
+            : current
+        );
+        setConfirmationDismissed(true);
+      })
+      .finally(() => {
+        setConfirmationSubmitting(false);
+      });
+  };
+
+  const scrollToAuthority = () => {
+    document.getElementById("voice-core-authority")?.scrollIntoView({ behavior: "smooth", block: "center" });
+  };
 
   const healthLayer = (
     <div className="space-y-4">
@@ -197,13 +236,16 @@ export function VoiceDashboard() {
       />
 
       {profile.reasoning ? (
-        <VoiceReasoningMirror
-          messages={voiceMessages.reasoning}
-          reasoning={profile.reasoning}
-          confidenceLevel={confidenceLevel}
-          dialSubline={dialSubline}
-          dialAccessibleLabel={dialAccessibleLabel}
-        />
+        <div ref={authorityAnchorRef}>
+          <VoiceReasoningMirror
+            messages={voiceMessages.reasoning}
+            reasoning={profile.reasoning}
+            confidenceLevel={confidenceLevel}
+            dialSubline={dialSubline}
+            dialAccessibleLabel={dialAccessibleLabel}
+            onAuthorityLinkClick={scrollToAuthority}
+          />
+        </div>
       ) : (
         <section className="space-y-6">
           <div>
@@ -222,6 +264,16 @@ export function VoiceDashboard() {
           />
         </section>
       )}
+
+      {traitConfirmationTarget && profile.reasoning?.traitProfile ? (
+        <VoiceTraitConfirmationCard
+          messages={voiceMessages.reasoning.traitConfirmation}
+          traitKey={traitConfirmationTarget}
+          traitProfile={profile.reasoning.traitProfile}
+          submitting={confirmationSubmitting}
+          onConfirm={handleTraitConfirmation}
+        />
+      ) : null}
 
       <AppDisclosureGroup
         items={[

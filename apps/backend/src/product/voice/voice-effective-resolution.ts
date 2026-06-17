@@ -115,7 +115,21 @@ export function resolveEffectiveVoice(
         ...(reasoningSignatureEnabled && voiceHints.argumentDevelopmentSignature
           ? {
               developmentApplied: true,
-              epistemicPosture: voiceHints.argumentDevelopmentSignature.epistemicPosture
+              epistemicPosture: voiceHints.argumentDevelopmentSignature.epistemicPosture,
+              ...(voiceHints.argumentDevelopmentSignature.traitProfile
+                ? {
+                    developmentTraitsApplied: true,
+                    ...(voiceHints.argumentDevelopmentSignature.traitProfile.traits.openingMode
+                      ? { openingMode: voiceHints.argumentDevelopmentSignature.traitProfile.traits.openingMode }
+                      : {}),
+                    ...(voiceHints.argumentDevelopmentSignature.traitProfile.traits.closingMode
+                      ? { closingMode: voiceHints.argumentDevelopmentSignature.traitProfile.traits.closingMode }
+                      : {}),
+                    ...(voiceHints.argumentDevelopmentSignature.traitProfile.traits.insightTiming
+                      ? { insightTiming: voiceHints.argumentDevelopmentSignature.traitProfile.traits.insightTiming }
+                      : {})
+                  }
+                : {})
             }
           : {})
       },

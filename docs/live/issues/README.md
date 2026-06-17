@@ -190,3 +190,22 @@ Vertical slices for [PRD](../prd/argument-development-signature.md) · [ADR 0007
 | 81 | [Voice development presentation](./81-voice-development-presentation.md) | AFK | ready-for-agent | 74, 76 |
 
 **Suggested order:** 74 → 75 → 76 → 77 → (78 ∥ 79 ∥ 81) → 80
+
+---
+
+## Development Traits and Author Confidence
+
+Vertical slices for [PRD](../prd/development-traits-and-author-confidence.md) · [ADR 0008](../../adr/0008-development-traits-and-author-confidence.md) · [plan](../plan/development-traits-implementation-plan.md) · [parent issue](../prd/issue-development-traits.md)
+
+**Prerequisite:** Argument Development Signature (issues 74–81).
+
+| # | Issue | Type | Status | Blocked by |
+|---|-------|------|--------|------------|
+| 82 | [Development traits contracts and persistence](./82-development-traits-contracts-persistence.md) | AFK | ready-for-agent | 74 |
+| 83 | [Development traits extraction and confidence pass](./83-development-traits-extraction-confidence.md) | AFK | ready-for-agent | 75, 82 |
+| 84 | [Trait-aware divergence and reconciliation](./84-trait-aware-divergence-reconciliation.md) | AFK | ready-for-agent | 76, 83 |
+| 85 | [Author development mirror dashboard](./85-author-development-mirror-dashboard.md) | AFK | ready-for-agent | 81, 82, 84 |
+| 86 | [Author trait confirmation and regression](./86-author-trait-confirmation-regression.md) | HITL | ready-for-agent | 85 |
+| 87 | [Development traits generation pass-through](./87-development-traits-generation-pass-through.md) | AFK | ready-for-agent | 77, 78, 83, 84 |
+
+**Suggested order:** 82 → 83 → 84 → (85 ∥ 87) → 86

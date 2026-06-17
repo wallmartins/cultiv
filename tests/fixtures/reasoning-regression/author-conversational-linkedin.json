@@ -33,5 +33,14 @@
   "developmentBadCandidates": [
     "Portanto todo mundo deve seguir este framework agora, obviamente.",
     "Você deve mudar sua rotina imediatamente. O certo é fazer assim sempre."
-  ]
+  ],
+  "expectedTraits": {
+    "openingMode": "observation",
+    "perspectiveShiftDensity": "moderate",
+    "usesCounterexamples": "rare",
+    "selfQuestioning": "moderate",
+    "insightTiming": "late",
+    "usesAnalogies": "occasional",
+    "closingMode": "open_question"
+  }
 }

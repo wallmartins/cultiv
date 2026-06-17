@@ -292,6 +292,53 @@ export type AppVoiceMessages = {
     readonly developmentImmature: string;
     readonly epistemicPosture: string;
     readonly typicalMoves: string;
+    readonly developmentTraits: {
+      readonly labels: Record<
+        | "openingMode"
+        | "perspectiveShiftDensity"
+        | "usesCounterexamples"
+        | "selfQuestioning"
+        | "insightTiming"
+        | "usesAnalogies"
+        | "closingMode",
+        string
+      >;
+      readonly unknownGap: string;
+      readonly authorityLinkLabel: string;
+      readonly authorityLinkAction: string;
+      readonly evidenceTitle: string;
+      readonly gapsTitle: string;
+      readonly gapsBody: string;
+      readonly noEvidence: string;
+      readonly exampleFallback: string;
+      readonly exampleUnavailable: string;
+      readonly manageExamplesLink: string;
+      readonly evidenceHeading: (label: string, value?: string) => string;
+      readonly exampleLabel: (contentType: string) => string;
+      readonly enums: {
+        readonly openingMode: Record<"observation" | "thesis" | "mixed", string>;
+        readonly density: Record<"low" | "moderate" | "high", string>;
+        readonly frequency: Record<"rare" | "occasional" | "common" | "dominant", string>;
+        readonly insightTiming: Record<"early" | "moderate" | "late", string>;
+        readonly closingMode: Record<"conclusion" | "open_question" | "mixed", string>;
+      };
+    };
+    readonly traitConfirmation: {
+      readonly title: string;
+      readonly yes: string;
+      readonly no: string;
+      readonly unsure: string;
+      readonly prompts: Record<
+        | "openingMode"
+        | "perspectiveShiftDensity"
+        | "usesCounterexamples"
+        | "selfQuestioning"
+        | "insightTiming"
+        | "usesAnalogies"
+        | "closingMode",
+        string
+      >;
+    };
     readonly certaintyLevel: string;
     readonly judgmentFrequency: string;
     readonly conclusionPace: string;

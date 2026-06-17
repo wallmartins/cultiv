@@ -135,6 +135,7 @@ function buildReconciliationPrompt(
   return [
     "Voice examples are ground truth. Harmonize the draft Core Reasoning Signature and Argument Development Signature into one coherent author profile.",
     "Keep Core focused on cognitive traits; keep Development focused on how texts unfold.",
+    "Harmonize development traits with Core and Development prose when traitProfile is present.",
     "Resolve contradictions without collapsing the two layers into duplicate prose.",
     "",
     "Draft Core:",
@@ -143,6 +144,13 @@ function buildReconciliationPrompt(
     "Draft Development:",
     JSON.stringify(development, null, 2),
     "",
+    ...(development.traitProfile
+      ? [
+          "Draft Development Traits:",
+          JSON.stringify(development.traitProfile, null, 2),
+          ""
+        ]
+      : []),
     "Draft Format Expressions:",
     JSON.stringify(reasoning.formatExpressions, null, 2),
     "",
@@ -160,7 +168,7 @@ function buildReconciliationSystemPrompt(): string {
     "Schema:",
     "{",
     '  "core": { narrativeProse, certaintyLevel, judgmentFrequency, conclusionPace, readerRelationship, authoritySource, derivedAntiPatterns },',
-    '  "development": { developmentProse, moveLabels, transitionTendencies, epistemicPosture, structuralAntiPatterns },',
+    '  "development": { developmentProse, moveLabels, transitionTendencies, epistemicPosture, structuralAntiPatterns, traitProfile? },',
     '  "formatExpressions": { "<contentType>": { contentType, narrativeProse, register, openingStyle, technicalDensity } }',
     "}"
   ].join("\n");

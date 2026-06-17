@@ -33,5 +33,14 @@
   "developmentBadCandidates": [
     "Você deve implementar esta rotina imediatamente. O certo é seguir sem exceção.",
     "Portanto a conclusão é clara: todo mundo deve adotar este playbook agora."
-  ]
+  ],
+  "expectedTraits": {
+    "openingMode": "observation",
+    "perspectiveShiftDensity": "moderate",
+    "usesCounterexamples": "rare",
+    "selfQuestioning": "high",
+    "insightTiming": "late",
+    "usesAnalogies": "occasional",
+    "closingMode": "open_question"
+  }
 }

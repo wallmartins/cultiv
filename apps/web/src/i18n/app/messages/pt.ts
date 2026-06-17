@@ -322,6 +322,51 @@ export const appMessagesPt: AppMessages = {
       developmentImmature: "Com pelo menos três exemplos ativos, este espelho fica mais estável.",
       epistemicPosture: "Postura epistêmica",
       typicalMoves: "Movimentos típicos",
+      developmentTraits: {
+        labels: {
+          openingMode: "Abertura",
+          perspectiveShiftDensity: "Perspectiva",
+          usesCounterexamples: "Contraexemplos",
+          selfQuestioning: "Autoquestionamento",
+          insightTiming: "Insight",
+          usesAnalogies: "Analogias",
+          closingMode: "Fechamento"
+        },
+        unknownGap: "Ainda não dá para inferir com os exemplos atuais.",
+        authorityLinkLabel: "Validação (como penso)",
+        authorityLinkAction: "Ver fonte de autoridade no bloco Como penso",
+        evidenceTitle: "Evidências dos traços",
+        gapsTitle: "Lacunas",
+        gapsBody: "Alguns traços ainda não têm sinal suficiente nos exemplos ativos.",
+        noEvidence: "Ainda não há evidências vinculadas a exemplos.",
+        exampleFallback: "Exemplo",
+        exampleUnavailable: "Abra a gestão de exemplos para ver o trecho completo.",
+        manageExamplesLink: "Gerenciar exemplos",
+        evidenceHeading: (label, value) => `Evidências — ${label}${value ? `: ${value}` : ""}`,
+        exampleLabel: (contentType) => `Exemplo (${contentType})`,
+        enums: {
+          openingMode: { observation: "Observação", thesis: "Tese", mixed: "Misto" },
+          density: { low: "Baixa", moderate: "Moderada", high: "Alta" },
+          frequency: { rare: "Raro", occasional: "Ocasional", common: "Comum", dominant: "Dominante" },
+          insightTiming: { early: "Cedo", moderate: "Moderado", late: "Tarde" },
+          closingMode: { conclusion: "Conclusão", open_question: "Pergunta aberta", mixed: "Misto" }
+        }
+      },
+      traitConfirmation: {
+        title: "Isso combina com você?",
+        yes: "Sim",
+        no: "Não",
+        unsure: "Não sei",
+        prompts: {
+          openingMode: "Você costuma abrir textos a partir de observação concreta.",
+          perspectiveShiftDensity: "Você costuma mudar de perspectiva com essa frequência ao desenvolver um texto.",
+          usesCounterexamples: "Você costuma usar contraexemplos com essa frequência.",
+          selfQuestioning: "Você costuma questionar a própria hipótese enquanto escreve.",
+          insightTiming: "Seu insight costuma aparecer tarde no desenvolvimento do texto.",
+          usesAnalogies: "Você costuma raciocinar por analogias com essa frequência.",
+          closingMode: "Você costuma fechar com pergunta aberta."
+        }
+      },
       certaintyLevel: "Nível de certeza",
       judgmentFrequency: "Frequência de julgamento",
       conclusionPace: "Ritmo de conclusão",

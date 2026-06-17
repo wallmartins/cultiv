@@ -3,7 +3,9 @@ import type { AIAdapterServiceContract } from "@my-ai-orchestrator/ai-adapters";
 import type { VoiceExampleRecord } from "@my-ai-orchestrator/database";
 import {
   ArgumentDevelopmentExtractionResultSchema,
-  type ArgumentDevelopmentExtractionResult
+  type ArgumentDevelopmentExtractionResult,
+  type DevelopmentTraits,
+  type TraitEvidenceDraft
 } from "@my-ai-orchestrator/contracts";
 import type { BackendProviderTransport } from "../../execution/pipeline/provider-transport.js";
 import type { AIPolicyProviderModelAttempt } from "../ai-policy/ai-policy-types.js";
@@ -132,14 +134,18 @@ function parseDevelopmentExtractionResponse(
 function normalizeDevelopmentExtractionResult(
   result: ArgumentDevelopmentExtractionResult
 ): ArgumentDevelopmentExtractionResult {
+  const { traitProfile: _ignored, ...developmentCore } = result.development;
+
   return {
+    ...(result.traits ? { traits: result.traits } : {}),
+    ...(result.traitEvidence ? { traitEvidence: result.traitEvidence } : {}),
     development: {
-      ...result.development,
-      moveLabels: [...new Set(result.development.moveLabels.map((item) => item.trim()).filter(Boolean))],
+      ...developmentCore,
+      moveLabels: [...new Set(developmentCore.moveLabels.map((item) => item.trim()).filter(Boolean))],
       structuralAntiPatterns: [
-        ...new Set(result.development.structuralAntiPatterns.map((item) => item.trim()).filter(Boolean))
+        ...new Set(developmentCore.structuralAntiPatterns.map((item) => item.trim()).filter(Boolean))
       ],
-      transitionTendencies: result.development.transitionTendencies.filter(
+      transitionTendencies: developmentCore.transitionTendencies.filter(
         (tendency) => tendency.from.trim().length > 0 && tendency.to.trim().length > 0
       )
     }
@@ -194,10 +200,60 @@ function buildDevelopmentExtractionSystemPrompt(outputLanguage: ReasoningOutputL
     '    "transitionTendencies": [{ "from": "move", "to": "move", "frequency": "rare|occasional|common|dominant" }],',
     '    "epistemicPosture": "exploratory|investigative|advocacy_mixed",',
     '    "structuralAntiPatterns": ["wrong arc label"]',
+    "  },",
+    '  "traits": {',
+    '    "openingMode": "observation|thesis|mixed",',
+    '    "perspectiveShiftDensity": "low|moderate|high",',
+    '    "usesCounterexamples": "rare|occasional|common|dominant",',
+    '    "selfQuestioning": "low|moderate|high",',
+    '    "insightTiming": "early|moderate|late",',
+    '    "usesAnalogies": "rare|occasional|common|dominant",',
+    '    "closingMode": "conclusion|open_question|mixed"',
+    "  },",
+    '  "traitEvidence": {',
+    '    "<traitKey>": [{ "exampleIndex": 1, "value": "<enum>" }]',
     "  }",
-    "}"
+    "}",
+    "Omit trait keys you cannot infer from examples. Do not invent enum values for unknown traits."
   ].join("\n");
 }
+
+export const TEST_DEVELOPMENT_TRAITS: DevelopmentTraits = {
+  openingMode: "observation",
+  perspectiveShiftDensity: "moderate",
+  usesCounterexamples: "occasional",
+  selfQuestioning: "high",
+  insightTiming: "late",
+  usesAnalogies: "rare",
+  closingMode: "open_question"
+};
+
+export const TEST_DEVELOPMENT_TRAIT_EVIDENCE: TraitEvidenceDraft = {
+  openingMode: [
+    { exampleIndex: 1, value: "observation" },
+    { exampleIndex: 2, value: "observation" }
+  ],
+  perspectiveShiftDensity: [
+    { exampleIndex: 1, value: "moderate" },
+    { exampleIndex: 2, value: "moderate" },
+    { exampleIndex: 3, value: "moderate" }
+  ],
+  usesCounterexamples: [{ exampleIndex: 2, value: "occasional" }],
+  selfQuestioning: [
+    { exampleIndex: 1, value: "high" },
+    { exampleIndex: 2, value: "high" }
+  ],
+  insightTiming: [
+    { exampleIndex: 1, value: "late" },
+    { exampleIndex: 2, value: "late" },
+    { exampleIndex: 3, value: "late" }
+  ],
+  usesAnalogies: [{ exampleIndex: 3, value: "rare" }],
+  closingMode: [
+    { exampleIndex: 2, value: "open_question" },
+    { exampleIndex: 3, value: "open_question" }
+  ]
+};
 
 export const TEST_ARGUMENT_DEVELOPMENT_EXTRACTION_FIXTURE: ArgumentDevelopmentExtractionResult = {
   development: {
@@ -211,7 +267,9 @@ export const TEST_ARGUMENT_DEVELOPMENT_EXTRACTION_FIXTURE: ArgumentDevelopmentEx
     ],
     epistemicPosture: "exploratory",
     structuralAntiPatterns: ["premature_thesis", "advocacy_arc"]
-  }
+  },
+  traits: TEST_DEVELOPMENT_TRAITS,
+  traitEvidence: TEST_DEVELOPMENT_TRAIT_EVIDENCE
 };
 
 export const TEST_ARGUMENT_DEVELOPMENT_EXTRACTION_FIXTURE_PT: ArgumentDevelopmentExtractionResult = {
@@ -226,5 +284,7 @@ export const TEST_ARGUMENT_DEVELOPMENT_EXTRACTION_FIXTURE_PT: ArgumentDevelopmen
     ],
     epistemicPosture: "exploratory",
     structuralAntiPatterns: ["tese_prematura", "arco_advocacia"]
-  }
+  },
+  traits: TEST_DEVELOPMENT_TRAITS,
+  traitEvidence: TEST_DEVELOPMENT_TRAIT_EVIDENCE
 };

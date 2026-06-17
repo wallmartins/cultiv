@@ -26,6 +26,55 @@ const reasoning: VoiceReasoningPresentationView = {
     structuralAntiPatterns: ["tese_prematura"]
   },
   developmentImmature: true,
+  traitProfile: {
+    traits: {
+      openingMode: "observation",
+      insightTiming: "late",
+      closingMode: "open_question"
+    },
+    records: {
+      openingMode: {
+        value: "observation",
+        confidence: "medium",
+        status: "inferred",
+        evidenceExampleIds: ["ex-1"]
+      },
+      perspectiveShiftDensity: {
+        confidence: "low",
+        status: "unknown",
+        evidenceExampleIds: []
+      },
+      usesCounterexamples: {
+        value: "occasional",
+        confidence: "low",
+        status: "inferred",
+        evidenceExampleIds: ["ex-2"]
+      },
+      selfQuestioning: {
+        value: "high",
+        confidence: "high",
+        status: "inferred",
+        evidenceExampleIds: ["ex-1", "ex-2"]
+      },
+      insightTiming: {
+        value: "late",
+        confidence: "high",
+        status: "inferred",
+        evidenceExampleIds: ["ex-1"]
+      },
+      usesAnalogies: {
+        confidence: "low",
+        status: "unknown",
+        evidenceExampleIds: []
+      },
+      closingMode: {
+        value: "open_question",
+        confidence: "medium",
+        status: "inferred",
+        evidenceExampleIds: ["ex-2"]
+      }
+    }
+  },
   formatExpressions: [],
   reasoningVersion: 2
 };
@@ -50,6 +99,9 @@ describe("VoiceReasoningMirror", () => {
     expect(html).toContain(messages.developmentTitle);
     expect(html).toContain(reasoning.development?.developmentProse);
     expect(html).toContain(messages.developmentImmature);
+    expect(html).toContain(messages.developmentTraits.labels.openingMode);
+    expect(html).toContain(messages.developmentTraits.enums.openingMode.observation);
+    expect(html).toContain("—");
 
     const detailHtml = renderToStaticMarkup(
       <>
