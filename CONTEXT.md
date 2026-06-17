@@ -61,8 +61,8 @@ The offline recalculation of the **Derived Voice Profile**, **Core Reasoning Sig
 _Avoid_: Runtime inference, per-generation profile refresh
 
 **Voice Reasoning Presentation**:
-The read-only summary on the **Voice Dashboard** that shows the inferred **Core Reasoning Signature**, per-format **Format Expression Profile**, and **Derived Anti-Patterns** in human language without manual editing in Fase 1.
-_Avoid_: Style settings, persona editor, cognitive profile form
+The hero read-only mirror on the **Voice Dashboard** that shows the inferred **Core Reasoning Signature** in readable prose and sentence-case trait chips first, with per-format **Format Expression Profile** and **Derived Anti-Patterns** tucked into **Voice Dashboard Detail Layer** sections—not equal-weight cards or diagnostic label styling.
+_Avoid_: Style settings, persona editor, cognitive profile form, uppercase mono trait labels
 
 **Reasoning Extraction**:
 The single structured LLM call inside **Voice Profile Rebuild** that infers the **Core Reasoning Signature**, per-format **Format Expression Profile**, and **Derived Anti-Patterns** from all active examples in one pass, using the primary generation provider family rather than the **Voice Judge** provider.
@@ -93,8 +93,16 @@ Separate audit data that explains how the **Derived Voice Profile** was formed, 
 _Avoid_: Prompt metadata, generation hints
 
 **Voice Dashboard**:
-The authenticated summary screen for the user's **Derived Voice Profile**, showing **Voice Confidence**, diagnostic signals, format coverage, and entry points into **Voice Example** management.
-_Avoid_: Voice page, style overview, tone settings
+The authenticated summary screen whose primary job is to mirror how Cultiv models the author's thinking through **Voice Reasoning Presentation** when available, or through **Voice Confidence** copy when reasoning is not yet extracted; **Voice Diagnostics** live in a **Voice Dashboard Detail Layer**, with a single **Voice Next Step** as the growth-oriented call to action.
+_Avoid_: Voice page, style overview, tone settings, metrics dashboard
+
+**Voice Next Step**:
+The one prioritized recommended action derived from **Voice Diagnostics** `nextActionCodes[0]`, surfaced as a growth card with contextual copy and a single primary CTA on the **Voice Dashboard**; when no action is needed, the card celebrates a mature profile and invites the author to generate content instead of hiding the block or showing a generic add-examples prompt.
+_Avoid_: Next action list, todo panel, improvement checklist, duplicate example CTAs in the footer
+
+**Voice Dashboard Detail Layer**:
+A collapsible secondary section on the **Voice Dashboard**—format expressions, **Derived Anti-Patterns**, or full **Voice Diagnostics** / coverage—closed by default and openable independently so the hero **Voice Reasoning Presentation** stays readable above the fold.
+_Avoid_: Tab panel, settings section, advanced mode toggle, accordion that closes other sections
 
 **Quality Mode Presentation**:
 The product-facing label and helper copy shown in the **Authenticated Workspace** for each technical quality mode, localized through **App Locale** while the **Client Integration Surface** still sends `fast`, `balanced`, and `strict` to the backend.

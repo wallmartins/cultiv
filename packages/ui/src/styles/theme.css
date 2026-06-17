@@ -173,6 +173,15 @@
     }
   }
 
+  .ui-type-meta {
+    font-family: var(--font-body);
+    font-size: 0.875rem;
+    font-weight: 400;
+    line-height: 1.65;
+    letter-spacing: 0.005em;
+    color: var(--color-muted);
+  }
+
   .ui-type-body {
     font-family: var(--font-body);
     font-size: 0.9375rem;

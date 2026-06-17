@@ -14,7 +14,7 @@ const variantClasses = {
   caption:
     "font-body text-[0.6875rem] font-semibold uppercase tracking-editorial text-muted",
   label: "font-body text-[0.6875rem] font-semibold uppercase tracking-editorial-wide text-muted",
-  meta: "font-mono text-xs font-medium uppercase tracking-editorial text-moss",
+  meta: "ui-type-meta",
   mono: "font-mono text-xs leading-relaxed text-moss"
 } as const;
 

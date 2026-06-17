@@ -15,9 +15,21 @@ export interface VoiceConfidenceRingProps {
   readonly label: string;
   readonly description?: string;
   readonly className?: string;
+  readonly size?: "default" | "compact";
 }
 
-export function VoiceConfidenceRing({ level, label, description, className }: VoiceConfidenceRingProps) {
+const ringSizeClasses = {
+  default: "size-28",
+  compact: "size-16"
+} as const;
+
+export function VoiceConfidenceRing({
+  level,
+  label,
+  description,
+  className,
+  size = "default"
+}: VoiceConfidenceRingProps) {
   const labelId = useId();
   const gradientId = useId();
   const targetProgress = progressByLevel[level];
@@ -38,8 +50,8 @@ export function VoiceConfidenceRing({ level, label, description, className }: Vo
   }, [circumference, targetProgress]);
 
   return (
-    <div className={cn("flex items-center gap-5", className)}>
-      <div className="relative size-28 shrink-0" aria-labelledby={labelId}>
+    <div className={cn("flex items-center gap-5", size === "compact" && "gap-3", className)}>
+      <div className={cn("relative shrink-0", ringSizeClasses[size])} aria-labelledby={labelId}>
         <svg viewBox="0 0 100 100" className="size-full -rotate-90" role="img" aria-hidden>
           <circle
             cx="50"
@@ -72,7 +84,12 @@ export function VoiceConfidenceRing({ level, label, description, className }: Vo
         </svg>
       </div>
       <div className="min-w-0">
-        <Text id={labelId} as="p" variant="h2" className="mb-1">
+        <Text
+          id={labelId}
+          as="p"
+          variant={size === "compact" ? "body" : "h2"}
+          className={cn("mb-1", size === "compact" && "font-semibold")}
+        >
           {label}
         </Text>
         {description ? (

@@ -167,10 +167,47 @@ export const appMessagesEn: AppMessages = {
   },
   voice: {
     dashboardTitle: "Voice",
-    dashboardSubtitle: "Profile, diagnostics, and writing examples.",
+    dashboardSubtitle: "How Cultiv reads your writing and what to cultivate next.",
     dashboardEmpty:
       "You do not have a voice profile yet. Add samples of your writing so the AI can learn how you write.",
     dashboardEmptyAction: "Add your first example",
+    manageExamples: "Manage examples",
+    mirrorFallbackTitle: "Your voice today",
+    mirrorFallbackSubtitle:
+      "With more examples, Cultiv will also describe how you think and argue.",
+    detailLayers: {
+      formats: "By format",
+      antiPatterns: "What to avoid",
+      profileHealth: "Profile health"
+    },
+    nextStep: {
+      eyebrow: "Next step",
+      matureMessage:
+        "Your voice is well represented. The natural next step is to generate content with it.",
+      generateCta: "Generate content",
+      messages: {
+        add_more_examples:
+          "More examples make your voice more predictable and consistent in generations.",
+        add_examples_from_other_content_types:
+          "A sample in another format helps Cultiv read you across more contexts.",
+        review_conflicting_examples:
+          "Some examples pull your voice in different directions. Reviewing the set may help.",
+        remove_pinned_example:
+          "Too many pinned examples for your current base size. Consider unpinning one.",
+        retry_batch_commit: "The last batch save did not finish. Try submitting the examples again.",
+        wait_for_profile_update: "We are recalculating your voice from your latest examples.",
+        upgrade_plan: "Your current plan limits how many examples feed your profile."
+      },
+      ctas: {
+        add_more_examples: "Add example",
+        add_examples_from_other_content_types: "Add another format",
+        review_conflicting_examples: "Review examples",
+        remove_pinned_example: "View examples",
+        retry_batch_commit: "Try again",
+        wait_for_profile_update: "Recalculating…",
+        upgrade_plan: "Coming soon"
+      }
+    },
     confidence: "Confidence",
     confidenceLabels: {
       high: "High",
@@ -253,8 +290,8 @@ export const appMessagesEn: AppMessages = {
       saving: "Saving…"
     },
     reasoning: {
-      title: "Author reasoning",
-      subtitle: "How the AI infers how you observe, argue, and conclude — from your examples.",
+      title: "How Cultiv reads you",
+      subtitle: "Patterns of observation, argument, and conclusion inferred from your examples.",
       rebuilding: "Updating inferred reasoning from your latest examples.",
       failedKeepLast:
         "The latest extraction failed, but your previous reasoning snapshot remains active. Add examples or try updating again.",

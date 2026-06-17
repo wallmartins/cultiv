@@ -167,10 +167,47 @@ export const appMessagesPt: AppMessages = {
   },
   voice: {
     dashboardTitle: "Voz",
-    dashboardSubtitle: "Perfil, diagnósticos e exemplos da sua escrita.",
+    dashboardSubtitle: "Como o Cultiv lê sua escrita e o que cultivar em seguida.",
     dashboardEmpty:
       "Você ainda não tem um perfil de voz. Adicione textos seus para a IA aprender como você escreve.",
     dashboardEmptyAction: "Adicionar primeiro exemplo",
+    manageExamples: "Gerenciar exemplos",
+    mirrorFallbackTitle: "Sua voz hoje",
+    mirrorFallbackSubtitle:
+      "Com mais exemplos, o Cultiv passa a descrever também como você pensa e argumenta.",
+    detailLayers: {
+      formats: "Por formato",
+      antiPatterns: "O que evitar",
+      profileHealth: "Saúde do perfil"
+    },
+    nextStep: {
+      eyebrow: "Próximo passo",
+      matureMessage:
+        "Sua voz está bem representada. O próximo passo natural é gerar conteúdo com ela.",
+      generateCta: "Gerar conteúdo",
+      messages: {
+        add_more_examples:
+          "Mais exemplos deixam sua voz mais previsível e consistente nas gerações.",
+        add_examples_from_other_content_types:
+          "Um exemplo em outro formato ajuda o Cultiv a te ler em mais contextos.",
+        review_conflicting_examples:
+          "Alguns exemplos puxam sua voz em direções diferentes. Vale revisar o conjunto.",
+        remove_pinned_example:
+          "Há exemplos fixados demais para o tamanho atual da base. Considere liberar um fixado.",
+        retry_batch_commit: "A última gravação em lote não concluiu. Tente enviar os exemplos de novo.",
+        wait_for_profile_update: "Estamos recalculando sua voz com base nos exemplos mais recentes.",
+        upgrade_plan: "Seu plano atual limita quantos exemplos entram no perfil."
+      },
+      ctas: {
+        add_more_examples: "Adicionar exemplo",
+        add_examples_from_other_content_types: "Adicionar outro formato",
+        review_conflicting_examples: "Revisar exemplos",
+        remove_pinned_example: "Ver exemplos",
+        retry_batch_commit: "Tentar novamente",
+        wait_for_profile_update: "Recalculando…",
+        upgrade_plan: "Em breve"
+      }
+    },
     confidence: "Confiança",
     confidenceLabels: {
       high: "Alta",
@@ -253,8 +290,8 @@ export const appMessagesPt: AppMessages = {
       saving: "Salvando…"
     },
     reasoning: {
-      title: "Raciocínio autoral",
-      subtitle: "Como a IA infere a forma como você observa, argumenta e conclui — com base nos seus exemplos.",
+      title: "Como o Cultiv te lê",
+      subtitle: "Padrões de observação, argumento e conclusão inferidos dos seus exemplos.",
       rebuilding: "Atualizando o raciocínio inferido a partir dos exemplos mais recentes.",
       failedKeepLast:
         "A última extração falhou, mas o raciocínio anterior continua válido. Adicione exemplos ou tente atualizar de novo.",

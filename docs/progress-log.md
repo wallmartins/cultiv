@@ -1,5 +1,6 @@
 # Progress Log
 
+| 2026-06-16 | feat(web): Voice Dashboard UX redesign — reasoning-first mirror, detail disclosures, Voice Next Step card, graceful fallback without reasoning; global `meta` typography readable (Inter body) |
 | 2026-06-16 | fix(voice): review follow-ups — flag-off anti-pattern gating, extraction failure diagnostics, judge observability, critic dedup, explicit reasoningEvaluationEnabled, quality-voice-judge orchestration, VoiceReasoningSection tests |
 | 2026-06-16 | feat(voice): issues 66–73 Author Reasoning Signature — contracts, extraction on rebuild, format-only presets, step-scoped prompts, reasoning drift/critic, Groq voice judge, dashboard presentation, regression corpus (7 personas / 37 briefings), `pnpm eval:reasoning`, P0 drift/prompt fixes, golden extraction corpora, deploy/subprocessor docs; flag `voice.reasoningSignatureV1` |
 
