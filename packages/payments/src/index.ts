@@ -58,6 +58,7 @@ export type {
   GatewayWebhookEvent,
   GatewayWebhookEventType
 } from "./gateway/types.js";
+export { resolveGatewayForCurrency } from "./gateway/router.js";
 
 export interface BillingFeatureAllowance {
   readonly key: string;
