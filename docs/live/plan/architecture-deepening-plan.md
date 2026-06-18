@@ -128,17 +128,20 @@ Decompor `apps/backend/src/infra/postgres-billing-store.ts`.
 
 ---
 
-### Fase 6 — Hardening
+### Fase 6 — Hardening ✅ CONCLUÍDA (escopo planejado)
 
-Fechar a allowlist restante e reforçar confiabilidade.
+Fechar allowlist de módulos transversais e reforçar confiabilidade.
 
 **Entregas:**
 
-- Split `packages/feature-flags/src/index.ts` (registro, resolução, defaults)
-- Split `packages/contracts/src/execution.ts` (tipos, estados, eventos)
-- Split `apps/backend/src/config/config.ts` (env, validação, agrupamentos) ✅
-- Testes de **transport retry** para adapters AI/HTTP ✅
-- Allowlist de file-size **vazia** — nenhum arquivo acima de 400 linhas (restante: voice-rebuild-derivation, voice-rebuild-pipeline, payments/service)
+- Split `packages/feature-flags/src/index.ts` → 7 módulos + barrel 46 linhas ✅
+- Split `packages/contracts/src/execution.ts` → `execution/{job,request,view,sse,errors}.ts` ✅
+- Split `apps/backend/src/config/config.ts` → schema, env, validate + facade 44 linhas ✅
+- Testes de **transport retry** (`tests/client-sdk/http-retry.test.ts`) ✅
+
+**Dívida remanescente (allowlist, 3 entradas):** arquivos de domínio voice/payments que exigem splits adicionais — ver secção 3.
+
+**Status:** done (2026-06-18)
 
 ---
 
@@ -153,12 +156,14 @@ Cada entrada deve ser **removida da allowlist** (e do `FILE_SIZE_BASELINE`) quan
 | ~~`packages/payments/src/index.ts`~~ | ~~1255~~ | **1** — removido (74 linhas) |
 | ~~`apps/backend/src/jobs/job-store.ts`~~ | ~~437~~ | **2** — removido (255 linhas) |
 | ~~`apps/backend/src/runtime/durable-job-runtime.ts`~~ | ~~466~~ | **2** — removido (324 linhas) |
-| `apps/backend/src/product/voice/voice-rebuild-derivation.ts` | 447 | **3** — voice-rebuild |
-| `apps/backend/src/product/voice/voice-rebuild-service.ts` | 547 | **3** — voice-rebuild |
+| ~~`apps/backend/src/product/voice/voice-rebuild-service.ts`~~ | ~~547~~ | **3** — removido (38 linhas) |
+| `apps/backend/src/product/voice/voice-rebuild-derivation.ts` | 447 | futuro — split derivation helpers |
+| `apps/backend/src/product/voice/voice-rebuild-pipeline.ts` | 445 | futuro — extrair stages do pipeline |
 | ~~`apps/backend/src/infra/postgres-billing-store.ts`~~ | ~~422~~ | **5** — removido (17 linhas facade) |
-| `packages/feature-flags/src/index.ts` | 455 | **6** — hardening |
-| `packages/contracts/src/execution.ts` | 476 | **6** — hardening |
+| ~~`packages/feature-flags/src/index.ts`~~ | ~~455~~ | **6** — removido (46 linhas) |
+| ~~`packages/contracts/src/execution.ts`~~ | ~~476~~ | **6** — removido (1 linha barrel) |
 | ~~`apps/backend/src/config/config.ts`~~ | ~~413~~ | **6** — removido (44 linhas facade) |
+| `packages/payments/src/service.ts` | 520 | futuro — extrair operações de reserva/captura |
 
 **Regra anti-regressão:** enquanto na allowlist, o arquivo **não pode crescer** além do baseline registrado.
 

@@ -1,5 +1,7 @@
 # Progress Log
 
+| 2026-06-18 | docs: architecture-deepening phases 3–6 complete — allowlist reduced to 3 entries (voice-rebuild-derivation, voice-rebuild-pipeline, payments/service); 729 CI tests green |
+| 2026-06-18 | refactor(web): Fase 4 — split `GenerationScreen.tsx` (657→349 lines) into hooks (`useGenerationForm`, `useGenerationCommercialGate`), `get-blocked-reason.ts`, `GenerationPreviewSidebar`, `BriefingGuidancePanel`; `tests/web/use-generation-commercial-gate.test.ts` (8 tests) |
 | 2026-06-18 | refactor(backend): Fase 6c — split `config.ts` (413→44 lines) into `config-schema.ts`, `config-env.ts`, `config-validate.ts`; removed from file-size allowlist; `tests/backend/backend-config.test.ts` imports `validateBackendConfig` from `config-validate` |
 | 2026-06-18 | test(client-sdk): `tests/client-sdk/http-retry.test.ts` — GET retries on 429 then succeeds via `createHttpTransport` |
 | 2026-06-18 | refactor(contracts): Fase 6b — split `execution.ts` (476→1 line) into `execution/{job,request,view,sse,errors}.ts`; thin barrel preserved; `tests/contracts/execution-modules.test.ts`; removed `execution.ts` from file-size allowlist; public API unchanged |
