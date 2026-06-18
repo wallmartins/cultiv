@@ -11,7 +11,10 @@ import type {
   QualityMode
 } from "@my-ai-orchestrator/contracts";
 import {
+  BillingCheckoutCatalogNotFoundError,
   BillingEntitlementNotFoundError,
+  BillingGatewayError,
+  BillingGatewayWebhookVerificationError,
   BillingInsufficientCreditsError,
   BillingOperationConflictError,
   BillingPlanInvalidError,
@@ -22,7 +25,10 @@ import {
 } from "./errors.js";
 
 export {
+  BillingCheckoutCatalogNotFoundError,
   BillingEntitlementNotFoundError,
+  BillingGatewayError,
+  BillingGatewayWebhookVerificationError,
   BillingInsufficientCreditsError,
   BillingOperationConflictError,
   BillingPlanInvalidError,
@@ -40,8 +46,27 @@ export {
   resolveMinimumPlanTierForQualityMode
 } from "./quality-mode-entitlements.js";
 import type { BillingPlanStatus, BillingPlanTier } from "./quality-mode-entitlements.js";
+import type {
+  BillingGatewayName,
+  CheckoutSessionRequest,
+  CheckoutSessionResult,
+  GatewayWebhookEvent
+} from "./gateway/types.js";
+import { createManualGateway } from "./gateway/manual-adapter.js";
 export type BillingUsageKind = "generation" | "refinement" | "chat" | "inference";
-export type BillingGatewayName = "stripe" | "asaas" | "manual" | (string & {});
+export type {
+  BillingCheckoutPeriod,
+  BillingCurrency,
+  BillingGatewayName,
+  BillingProductKind,
+  CheckoutSessionRequest,
+  CheckoutSessionResult,
+  GatewayWebhookEvent,
+  GatewayWebhookEventType
+} from "./gateway/types.js";
+export { resolveGatewayForCurrency } from "./gateway/router.js";
+export { createStripeGatewayAdapter, mapStripeEvent } from "./gateway/stripe-adapter.js";
+export { createAsaasGatewayAdapter, mapAsaasWebhookEvent } from "./gateway/asaas-adapter.js";
 
 export interface BillingFeatureAllowance {
   readonly key: string;
@@ -114,7 +139,14 @@ export interface BillingGatewayChargeResult {
 
 export interface BillingGatewayAdapter {
   readonly name: BillingGatewayName;
-  readonly charge: (request: BillingGatewayChargeRequest) => Effect.Effect<BillingGatewayChargeResult>;
+  createCheckoutSession?(
+    request: CheckoutSessionRequest
+  ): Effect.Effect<CheckoutSessionResult, BillingGatewayError>;
+  parseWebhook?(
+    payload: unknown,
+    signature: string
+  ): Effect.Effect<GatewayWebhookEvent, BillingGatewayWebhookVerificationError>;
+  charge(request: BillingGatewayChargeRequest): Effect.Effect<BillingGatewayChargeResult, BillingGatewayError>;
 }
 
 export interface BillingOperationResult<T> {
@@ -159,6 +191,7 @@ export interface BillingPurchaseTopUpRequest {
   readonly packageId: string;
   readonly idempotencyKey: string;
   readonly chargeRequest: BillingGatewayChargeRequest;
+  readonly skipGatewayCharge?: boolean;
   readonly metadata?: Readonly<Record<string, unknown>>;
 }
 
@@ -230,8 +263,9 @@ export interface BillingServiceContract {
     | BillingEntitlementNotFoundError
     | BillingTopUpPackageNotFoundError
     | BillingOperationConflictError
+    | BillingGatewayError
   >;
-  readonly charge: (request: BillingGatewayChargeRequest) => Effect.Effect<BillingGatewayChargeResult>;
+  readonly charge: (request: BillingGatewayChargeRequest) => Effect.Effect<BillingGatewayChargeResult, BillingGatewayError>;
   readonly listPlans: () => readonly BillingPlanDefinition[];
   readonly getPrimarySubscriptionPlanId: (userId: string) => string | undefined;
   readonly listUsage: (userId?: string) => readonly BillingUsageRecord[];
@@ -684,7 +718,13 @@ export function createBillingService(options: BillingServiceOptions = {}): Billi
             return yield* Effect.fail(new BillingTopUpPackageNotFoundError({ packageId: request.packageId }));
           }
 
-          const charge = yield* gateway.charge(request.chargeRequest);
+          const charge = request.skipGatewayCharge
+            ? {
+                gateway: "webhook" as const,
+                transactionId: request.idempotencyKey,
+                status: "paid" as const
+              }
+            : yield* gateway.charge(request.chargeRequest);
           if (charge.status === "paid") {
             const accountId = createAccountId(request.userId, plan.id);
             appendLedgerEntry(repository, {
@@ -755,22 +795,17 @@ export function withBilling<T>(effect: Effect.Effect<T>, options: BillingService
   return effect.pipe(Effect.provide(createBillingServiceLayer(options)));
 }
 
-export function createManualGateway(): BillingGatewayAdapter {
-  return {
-    name: "manual",
-    charge: (request) =>
-      Effect.succeed({
-        gateway: "manual",
-        transactionId: `manual_${request.userId}_${request.subscriptionId}`,
-        status: "pending",
-        raw: request
-      })
-  };
-}
+export { createManualGateway };
 
 export function createStripeGateway(): BillingGatewayAdapter {
   return {
     name: "stripe",
+    createCheckoutSession: () =>
+      Effect.fail(new BillingGatewayError({ gateway: "stripe", message: "checkout not implemented" })),
+    parseWebhook: () =>
+      Effect.fail(
+        new BillingGatewayWebhookVerificationError({ gateway: "stripe", message: "webhook not implemented" })
+      ),
     charge: (request) =>
       Effect.succeed({
         gateway: "stripe",
@@ -784,6 +819,12 @@ export function createStripeGateway(): BillingGatewayAdapter {
 export function createAsaasGateway(): BillingGatewayAdapter {
   return {
     name: "asaas",
+    createCheckoutSession: () =>
+      Effect.fail(new BillingGatewayError({ gateway: "asaas", message: "checkout not implemented" })),
+    parseWebhook: () =>
+      Effect.fail(
+        new BillingGatewayWebhookVerificationError({ gateway: "asaas", message: "webhook not implemented" })
+      ),
     charge: (request) =>
       Effect.succeed({
         gateway: "asaas",
@@ -1252,3 +1293,5 @@ function isSameUtcDay(isoDate: string, referenceDate: Date): boolean {
 function clone<T>(value: T): T {
   return JSON.parse(JSON.stringify(value)) as T;
 }
+
+export { dispatchGatewayWebhookEvent } from "./gateway/webhook-dispatch.js";

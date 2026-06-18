@@ -1,5 +1,16 @@
 # Progress Log
 
+| 2026-06-17 | fix(payments): align gateway adapters with effect-hardening governance — tagged errors, allow stripe dep |
+| 2026-06-17 | fix(ci): grant `pull-requests: read` on path-filter job — fixes paths-filter API error and skipped downstream checks on PRs |
+| 2026-06-17 | feat(billing): phase 1b–1c — PIX checkout, top-up webhook grant, client SDK billing, `/app/billing` UI, annual installments (tasks 14–18) |
+| 2026-06-17 | feat(backend): billing checkout + webhook routes, gateway services, Stripe/Asaas config |
+| 2026-06-17 | feat(payments): Stripe + Asaas adapters, webhook dispatch (tasks 7–9) |
+| 2026-06-17 | pause(payment-gateway): Tasks 1–6 done on `feat/payment-gateway`; resume at Task 7 (Stripe adapter) |
+| 2026-06-17 | feat(backend): PostgreSQL billing gateway store — checkout intents, catalog lookup, customer/subscription upserts, event dedup |
+| 2026-06-17 | feat(backend): billing gateway PostgreSQL tables — migration 0010, five tables, dev catalog seed |
+| 2026-06-17 | feat(payments): currency-based gateway router — BRL→asaas, USD→stripe (`resolveGatewayForCurrency`) |
+| 2026-06-17 | docs: payment gateway implementation plan (18 tasks, phases 1a–1c) |
+| 2026-06-17 | docs: payment gateway design spec (Stripe + Asaas hybrid) — checkout, webhooks, BRL/USD routing, security model |
 | 2026-06-17 | fix(web,voice): localize moveLabels — pt dictionary + key normalization; extraction prompt requires moveLabels in output language |
 | 2026-06-17 | feat: Development Traits program (issues 82–87) — contracts, confidence pass, divergence/reconciliation, dashboard mirror, generation pass-through, confirmation API, regression corpus |
 | 2026-06-17 | docs: issue 87 Development Traits generation pass-through (hints, snapshots, prompt summary) |

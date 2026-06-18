@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { Schema } from 'effect';
 import {
+  BillingCheckoutRequestSchema,
   BillingGenerationReservationSchema,
   BillingLedgerEntrySchema,
   BillingWalletSchema,
@@ -72,6 +73,21 @@ describe('contracts package', () => {
 
     expect('pipeline' in simplified).toBe(false);
     expect(simplified.userId).toBe('user_2');
+  });
+
+  it('decodes a valid billing checkout request', () => {
+    const decode = Schema.decodeUnknownSync(BillingCheckoutRequestSchema);
+    const value = decode({
+      productKind: 'subscription',
+      internalRef: 'plan_pro_monthly',
+      currency: 'BRL',
+      billingPeriod: 'monthly'
+    });
+
+    expect(value.productKind).toBe('subscription');
+    expect(value.internalRef).toBe('plan_pro_monthly');
+    expect(value.currency).toBe('BRL');
+    expect(value.billingPeriod).toBe('monthly');
   });
 
   it('decodes billing wallet, ledger and reservation contracts', () => {

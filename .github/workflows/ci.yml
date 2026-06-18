@@ -15,6 +15,9 @@ jobs:
   changes:
     name: Path filter
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
     outputs:
       shared: ${{ steps.filter.outputs.shared }}
       web: ${{ steps.filter.outputs.web }}
