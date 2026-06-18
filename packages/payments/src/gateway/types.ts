@@ -3,6 +3,7 @@ export type BillingGatewayName = "stripe" | "asaas" | "manual" | (string & {});
 export type BillingCurrency = "BRL" | "USD";
 export type BillingProductKind = "subscription" | "topup";
 export type BillingCheckoutPeriod = "monthly" | "annual" | "one_time";
+export type BillingPaymentMethod = "card" | "pix";
 
 export type GatewayWebhookEventType =
   | "checkout.completed"
@@ -23,6 +24,7 @@ export interface CheckoutSessionRequest {
   readonly checkoutIntentId: string;
   readonly externalPriceId: string;
   readonly externalCustomerId?: string;
+  readonly paymentMethod?: BillingPaymentMethod;
 }
 
 export interface CheckoutSessionResult {

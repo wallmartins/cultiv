@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
-import { mapAsaasWebhookEvent } from "../../packages/payments/src/gateway/asaas-adapter.js";
+import { resolveAsaasBillingType, mapAsaasWebhookEvent } from "../../packages/payments/src/gateway/asaas-adapter.js";
 
 const fixturePath = resolve(
   import.meta.dirname,
@@ -9,6 +9,12 @@ const fixturePath = resolve(
 );
 
 describe("mapAsaasWebhookEvent", () => {
+  it("resolves PIX billing type when payment method is pix", () => {
+    expect(resolveAsaasBillingType("pix")).toBe("PIX");
+    expect(resolveAsaasBillingType("card")).toBe("CREDIT_CARD");
+    expect(resolveAsaasBillingType(undefined)).toBe("CREDIT_CARD");
+  });
+
   it("maps PAYMENT_RECEIVED to checkout.completed for checkout intent reference", () => {
     const payload = JSON.parse(readFileSync(fixturePath, "utf8"));
     const mapped = mapAsaasWebhookEvent(payload, {

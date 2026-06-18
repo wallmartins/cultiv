@@ -3,6 +3,7 @@ import { BillingGatewayError, BillingGatewayWebhookVerificationError } from "../
 import type {
   BillingCheckoutPeriod,
   BillingCurrency,
+  BillingPaymentMethod,
   CheckoutSessionRequest,
   CheckoutSessionResult,
   GatewayWebhookEvent
@@ -96,6 +97,27 @@ function priceValueFromExternalId(externalPriceId: string): number {
     return parsed;
   }
   return 1;
+}
+
+export function resolveAsaasBillingType(paymentMethod?: BillingPaymentMethod): "CREDIT_CARD" | "PIX" {
+  return paymentMethod === "pix" ? "PIX" : "CREDIT_CARD";
+}
+
+function dueDateIso(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
+async function createAsaasPayment(
+  baseUrl: string,
+  apiKey: string,
+  body: Record<string, unknown>
+): Promise<AsaasPaymentResponse> {
+  const response = await fetch(`${baseUrl}/payments`, {
+    method: "POST",
+    headers: asaasHeaders(apiKey),
+    body: JSON.stringify(body)
+  });
+  return asaasJson<AsaasPaymentResponse>(response);
 }
 
 export function mapAsaasWebhookEvent(
@@ -192,6 +214,28 @@ export function createAsaasGatewayAdapter(options: AsaasGatewayAdapterOptions): 
       Effect.tryPromise({
         try: async (): Promise<CheckoutSessionResult> => {
           const customerId = request.externalCustomerId ?? (await ensureCustomer(request.email, request.userId));
+          const billingType = resolveAsaasBillingType(request.paymentMethod);
+          const value = priceValueFromExternalId(request.externalPriceId);
+
+          if (
+            request.productKind === "subscription" &&
+            request.billingPeriod === "annual"
+          ) {
+            const payment = await createAsaasPayment(baseUrl, options.apiKey, {
+              customer: customerId,
+              billingType,
+              value,
+              dueDate: dueDateIso(),
+              externalReference: request.checkoutIntentId,
+              description: `${request.internalRef} annual`,
+              ...(billingType === "CREDIT_CARD" ? { installmentCount: 12 } : {})
+            });
+            return {
+              gateway: "asaas",
+              sessionId: payment.id,
+              url: checkoutUrlFromPayment(payment)
+            };
+          }
 
           if (request.productKind === "subscription") {
             const response = await fetch(`${baseUrl}/subscriptions`, {
@@ -199,10 +243,10 @@ export function createAsaasGatewayAdapter(options: AsaasGatewayAdapterOptions): 
               headers: asaasHeaders(options.apiKey),
               body: JSON.stringify({
                 customer: customerId,
-                billingType: "CREDIT_CARD",
+                billingType,
                 cycle: cycleFromPeriod(request.billingPeriod),
-                value: priceValueFromExternalId(request.externalPriceId),
-                nextDueDate: new Date().toISOString().slice(0, 10),
+                value,
+                nextDueDate: dueDateIso(),
                 externalReference: request.checkoutIntentId,
                 description: `${request.internalRef} ${request.billingPeriod}`
               })
@@ -224,19 +268,14 @@ export function createAsaasGatewayAdapter(options: AsaasGatewayAdapterOptions): 
             };
           }
 
-          const response = await fetch(`${baseUrl}/payments`, {
-            method: "POST",
-            headers: asaasHeaders(options.apiKey),
-            body: JSON.stringify({
-              customer: customerId,
-              billingType: "CREDIT_CARD",
-              value: priceValueFromExternalId(request.externalPriceId),
-              dueDate: new Date().toISOString().slice(0, 10),
-              externalReference: request.checkoutIntentId,
-              description: `${request.productKind}:${request.internalRef}`
-            })
+          const payment = await createAsaasPayment(baseUrl, options.apiKey, {
+            customer: customerId,
+            billingType,
+            value,
+            dueDate: dueDateIso(),
+            externalReference: request.checkoutIntentId,
+            description: `${request.productKind}:${request.internalRef}`
           });
-          const payment = await asaasJson<AsaasPaymentResponse>(response);
           return {
             gateway: "asaas",
             sessionId: payment.id,

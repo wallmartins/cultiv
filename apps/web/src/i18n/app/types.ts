@@ -12,6 +12,7 @@ export type AppShellMessages = {
     readonly history: string;
     readonly voice: string;
     readonly settings: string;
+    readonly billing: string;
     readonly logout: string;
   };
   readonly credits: { readonly label: string };
@@ -393,6 +394,38 @@ export type AppSettingsMessages = {
   readonly revokeConsent: string;
   readonly revokeDisabled: string;
   readonly logout: string;
+  readonly billing: string;
+};
+
+export type AppBillingMessages = {
+  readonly title: string;
+  readonly currentPlan: string;
+  readonly planPro: string;
+  readonly planFree: string;
+  readonly creditsBalance: string;
+  readonly upgradePro: string;
+  readonly alreadyPro: string;
+  readonly topUp: string;
+  readonly topUpDescription: string;
+  readonly topUpCta: string;
+  readonly currencyLabel: string;
+  readonly currency: {
+    readonly brl: string;
+    readonly usd: string;
+  };
+  readonly periodLabel: string;
+  readonly periodMonthly: string;
+  readonly periodAnnual: string;
+  readonly paymentMethodLabel: string;
+  readonly paymentCard: string;
+  readonly paymentPix: string;
+  readonly pixOnlyBrl: string;
+  readonly annualInstallments: string;
+  readonly checkoutSuccess: string;
+  readonly checkoutCancel: string;
+  readonly checkoutError: string;
+  readonly redirecting: string;
+  readonly loadError: string;
 };
 
 export type AppNotificationMessages = {
@@ -436,6 +469,7 @@ export type AppMessages = {
   readonly voice: AppVoiceMessages;
   readonly onboarding: AppOnboardingMessages;
   readonly settings: AppSettingsMessages;
+  readonly billing: AppBillingMessages;
   readonly notifications: AppNotificationMessages;
   readonly errors: AppErrorMessages;
 };

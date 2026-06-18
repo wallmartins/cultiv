@@ -1,8 +1,10 @@
 import { Effect } from "effect";
 import {
   BillingEntitlementNotFoundError,
+  BillingGatewayError,
   BillingOperationConflictError,
-  BillingPlanNotFoundError
+  BillingPlanNotFoundError,
+  BillingTopUpPackageNotFoundError
 } from "../errors.js";
 import type { BillingServiceContract } from "../index.js";
 import type { GatewayWebhookEvent } from "./types.js";
@@ -22,7 +24,11 @@ export function dispatchGatewayWebhookEvent(
   options: DispatchGatewayWebhookOptions
 ): Effect.Effect<
   void,
-  BillingPlanNotFoundError | BillingEntitlementNotFoundError | BillingOperationConflictError
+  | BillingPlanNotFoundError
+  | BillingEntitlementNotFoundError
+  | BillingOperationConflictError
+  | BillingTopUpPackageNotFoundError
+  | BillingGatewayError
 > {
   return Effect.gen(function* () {
     const planId = event.internalRef ?? "pro";
@@ -31,6 +37,25 @@ export function dispatchGatewayWebhookEvent(
     switch (event.type) {
       case "checkout.completed": {
         if (event.productKind === "topup") {
+          const packageId = event.internalRef;
+          if (!packageId) {
+            return;
+          }
+          const planId = billing.getPrimarySubscriptionPlanId(event.userId) ?? "pro";
+          yield* billing.purchaseTopUp({
+            userId: event.userId,
+            planId,
+            packageId,
+            idempotencyKey,
+            skipGatewayCharge: true,
+            chargeRequest: {
+              userId: event.userId,
+              subscriptionId: createSubscriptionId(event.userId, planId),
+              amount: event.amount,
+              currency: event.currency,
+              metadata: { gatewayEventId: event.eventId }
+            }
+          });
           return;
         }
         const plan = billing.listPlans().find((candidate) => candidate.id === planId);

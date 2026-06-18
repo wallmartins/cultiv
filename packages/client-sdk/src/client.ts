@@ -1,4 +1,5 @@
 import { Cause, Context, Effect, Exit, Layer } from "effect";
+import { createBillingClient, type BillingClient } from "./billing.js";
 import type { ClientSdkConfig } from "./config.js";
 import { createContentTypesClient, type ContentTypesClient } from "./content-types.js";
 import type { ClientSdkError } from "./errors.js";
@@ -12,6 +13,7 @@ export interface ClientSdk {
   readonly executions: ExecutionsClient;
   readonly voice: VoiceClient;
   readonly contentTypes: ContentTypesClient;
+  readonly billing: BillingClient;
   readonly transport: HttpTransport;
   readonly toPromise: <A>(effect: Effect.Effect<A, ClientSdkError, never>) => Promise<A>;
 }
@@ -28,6 +30,7 @@ export function createClientSdk(config: ClientSdkConfig): ClientSdk {
     executions: createExecutionsClient(config, transport),
     voice: createVoiceClient(transport),
     contentTypes: createContentTypesClient(transport),
+    billing: createBillingClient(transport),
     transport,
     toPromise(effect) {
       return Effect.runPromiseExit(effect).then((exit) => {

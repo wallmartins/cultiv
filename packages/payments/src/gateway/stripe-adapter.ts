@@ -149,7 +149,8 @@ export function createStripeGatewayAdapter(options: StripeGatewayAdapterOptions)
               application_user_id: request.userId,
               checkout_intent_id: request.checkoutIntentId,
               internal_ref: request.internalRef,
-              product_kind: request.productKind
+              product_kind: request.productKind,
+              billing_period: request.billingPeriod
             },
             ...(request.productKind === "subscription"
               ? {

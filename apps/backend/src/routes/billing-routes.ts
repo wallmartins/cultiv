@@ -45,7 +45,8 @@ export function registerBillingRoutes(app: Hono, options: BillingRouteOptions): 
         productKind: request.productKind,
         internalRef: request.internalRef,
         currency: request.currency,
-        billingPeriod: request.billingPeriod
+        billingPeriod: request.billingPeriod,
+        paymentMethod: request.paymentMethod
       })
     );
 

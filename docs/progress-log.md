@@ -1,5 +1,6 @@
 # Progress Log
 
+| 2026-06-17 | feat(billing): phase 1b–1c — PIX checkout, top-up webhook grant, client SDK billing, `/app/billing` UI, annual installments (tasks 14–18) |
 | 2026-06-17 | feat(backend): billing checkout + webhook routes, gateway services, Stripe/Asaas config |
 | 2026-06-17 | feat(payments): Stripe + Asaas adapters, webhook dispatch (tasks 7–9) |
 | 2026-06-17 | pause(payment-gateway): Tasks 1–6 done on `feat/payment-gateway`; resume at Task 7 (Stripe adapter) |

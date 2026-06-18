@@ -22,6 +22,7 @@ export interface BillingCheckoutInput {
   readonly internalRef: string;
   readonly currency: BillingCurrency;
   readonly billingPeriod: BillingCheckoutPeriod;
+  readonly paymentMethod?: "card" | "pix";
 }
 
 export interface BillingCheckoutResult {
@@ -92,6 +93,15 @@ export function createBillingCheckoutService(deps: {
           );
         }
 
+        if (input.paymentMethod === "pix" && input.currency !== "BRL") {
+          return yield* Effect.fail(
+            new BillingGatewayError({
+              gateway: "billing",
+              message: "PIX is only available for BRL checkout"
+            })
+          );
+        }
+
         const gateway = resolveGatewayForCurrency(input.currency);
         const adapter = gateway === "stripe" ? deps.stripeAdapter : deps.asaasAdapter;
         if (!adapter?.createCheckoutSession) {
@@ -154,7 +164,8 @@ export function createBillingCheckoutService(deps: {
             ? customerOption.value.externalCustomerId
             : undefined,
           successUrl: deps.config.billingCheckoutSuccessUrl,
-          cancelUrl: deps.config.billingCheckoutCancelUrl
+          cancelUrl: deps.config.billingCheckoutCancelUrl,
+          paymentMethod: input.paymentMethod
         });
 
         yield* mapStoreError(deps.gatewayStore.attachSessionToIntent(intentId, session.sessionId));
