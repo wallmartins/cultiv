@@ -7,6 +7,7 @@ export const appMessagesEn: AppMessages = {
       history: "History",
       voice: "Voice",
       settings: "Settings",
+      billing: "Billing",
       logout: "Sign out"
     },
     credits: { label: "credits" },
@@ -445,7 +446,38 @@ export const appMessagesEn: AppMessages = {
     consentMissing: "Not granted",
     revokeConsent: "Revoke consent",
     revokeDisabled: "Revocation available when the API is published.",
-    logout: "Sign out"
+    logout: "Sign out",
+    billing: "Billing & credits"
+  },
+  billing: {
+    title: "Billing",
+    currentPlan: "Current plan",
+    planPro: "Pro",
+    planFree: "Free",
+    creditsBalance: "{count} credits available",
+    upgradePro: "Upgrade to Pro",
+    alreadyPro: "You are on the Pro plan.",
+    topUp: "Top up credits",
+    topUpDescription: "Add 500 credits to your balance (one-time purchase).",
+    topUpCta: "Buy 500 credits",
+    currencyLabel: "Currency",
+    currency: {
+      brl: "BRL (Brazil)",
+      usd: "USD"
+    },
+    periodLabel: "Billing period",
+    periodMonthly: "Monthly",
+    periodAnnual: "Annual (save ~20%)",
+    paymentMethodLabel: "Payment method",
+    paymentCard: "Card",
+    paymentPix: "PIX",
+    pixOnlyBrl: "PIX is available for BRL checkout only.",
+    annualInstallments: "Annual Pro is charged in up to 12 card installments.",
+    checkoutSuccess: "Payment received. Your plan or credits will update shortly.",
+    checkoutCancel: "Checkout was cancelled. No charge was made.",
+    checkoutError: "Could not start checkout. Try again in a moment.",
+    redirecting: "Redirecting…",
+    loadError: "Could not load billing details."
   },
   notifications: {
     readyTitle: "Generation ready",

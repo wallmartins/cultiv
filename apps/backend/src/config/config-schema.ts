@@ -58,6 +58,13 @@ export interface BackendConfig extends RuntimeConfig, BackendAuthConfig {
   readonly groqApiKey?: string;
   readonly groqBaseUrl?: string;
   readonly ollamaBaseUrl?: string;
+  readonly stripeSecretKey?: string;
+  readonly stripeWebhookSecret?: string;
+  readonly asaasApiKey?: string;
+  readonly asaasWebhookToken?: string;
+  readonly asaasBaseUrl?: string;
+  readonly billingCheckoutSuccessUrl?: string;
+  readonly billingCheckoutCancelUrl?: string;
 }
 
 export interface LoadBackendEnvironmentOptions {

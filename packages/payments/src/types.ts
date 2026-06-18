@@ -10,6 +10,7 @@ import type {
 import type { Effect } from "effect";
 import type {
   BillingEntitlementNotFoundError,
+  BillingGatewayError,
   BillingInsufficientCreditsError,
   BillingOperationConflictError,
   BillingPlanInvalidError,
@@ -123,6 +124,7 @@ export interface BillingPurchaseTopUpRequest {
   readonly packageId: string;
   readonly idempotencyKey: string;
   readonly chargeRequest: BillingGatewayChargeRequest;
+  readonly skipGatewayCharge?: boolean;
   readonly metadata?: Readonly<Record<string, unknown>>;
 }
 
@@ -194,8 +196,9 @@ export interface BillingServiceContract {
     | BillingEntitlementNotFoundError
     | BillingTopUpPackageNotFoundError
     | BillingOperationConflictError
+    | BillingGatewayError
   >;
-  readonly charge: (request: BillingGatewayChargeRequest) => Effect.Effect<BillingGatewayChargeResult>;
+  readonly charge: (request: BillingGatewayChargeRequest) => Effect.Effect<BillingGatewayChargeResult, BillingGatewayError>;
   readonly listPlans: () => readonly BillingPlanDefinition[];
   readonly getPrimarySubscriptionPlanId: (userId: string) => string | undefined;
   readonly listUsage: (userId?: string) => readonly BillingUsageRecord[];

@@ -168,7 +168,13 @@ export function createBillingService(options: BillingServiceOptions = {}): Billi
             return yield* Effect.fail(new BillingTopUpPackageNotFoundError({ packageId: request.packageId }));
           }
 
-          const charge = yield* gateway.charge(request.chargeRequest);
+          const charge = request.skipGatewayCharge
+            ? {
+                gateway: "webhook" as const,
+                transactionId: request.idempotencyKey,
+                status: "paid" as const
+              }
+            : yield* gateway.charge(request.chargeRequest);
           if (charge.status === "paid") {
             const accountId = createAccountId(request.userId, plan.id);
             appendLedgerEntry(repository, {

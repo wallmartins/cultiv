@@ -12,6 +12,40 @@
 
 ---
 
+## Progress checkpoint (2026-06-17 — paused)
+
+**Branch:** `feat/payment-gateway` (7 commits ahead of `main` docs-only baseline)
+
+| Task | Status | Commit |
+|------|--------|--------|
+| 1 Gateway types and errors | ✅ | `ccfce5a` |
+| 2 Gateway router | ✅ | `1732e73` |
+| 3 Extend BillingGatewayAdapter | ✅ | `a534037` |
+| 4 PostgreSQL migration | ✅ | `6c6747b` |
+| 5 Postgres gateway store | ✅ | `ad4838f` |
+| 6 Contracts checkout API | ✅ | `43a649e` |
+| — Type fix (BillingGatewayError in service contract) | ✅ | `6adc2d3` |
+| 7 Stripe adapter | ✅ | `328a925` |
+| 8 Asaas adapter | ✅ | `976147f` |
+| 9 Webhook dispatch | ✅ | `f05fc9b` |
+| 10–13 Config + services + routes | ✅ | (latest) |
+| 14–18 PIX, top-up, SDK, UI, annual | ⏳ pending | — |
+
+**Resume at:** Task 14 — Asaas PIX checkout
+
+**Done so far:**
+- `packages/payments/src/gateway/{types,router,manual-adapter,stripe-adapter,asaas-adapter,webhook-dispatch}.ts`
+- `packages/contracts/src/billing-checkout.ts`
+- `apps/backend/src/infra/migrations/0010-billing-gateway.ts`
+- `apps/backend/src/infra/postgres-billing-gateway-store.ts`
+- `apps/backend/src/product/billing/billing-{checkout,webhook}-service.ts`
+- `apps/backend/src/routes/billing-{routes,webhook-routes}.ts`
+- Tests: gateway router, stripe/asaas webhooks, webhook dispatch
+
+**Not yet:** PIX checkout, top-up grant path, client SDK, `/app/billing` UI, annual installments.
+
+---
+
 ## File map
 
 | File | Responsibility |

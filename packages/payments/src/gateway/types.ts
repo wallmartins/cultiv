@@ -1,6 +1,54 @@
 import type { Effect } from "effect";
+import type { BillingGatewayError, BillingGatewayWebhookVerificationError } from "../errors.js";
 
 export type BillingGatewayName = "stripe" | "asaas" | "manual" | (string & {});
+
+export type BillingCurrency = "BRL" | "USD";
+export type BillingProductKind = "subscription" | "topup";
+export type BillingCheckoutPeriod = "monthly" | "annual" | "one_time";
+export type BillingPaymentMethod = "card" | "pix";
+
+export type GatewayWebhookEventType =
+  | "checkout.completed"
+  | "subscription.renewed"
+  | "subscription.cancelled"
+  | "payment.failed"
+  | "chargeback";
+
+export interface CheckoutSessionRequest {
+  readonly userId: string;
+  readonly email: string;
+  readonly productKind: BillingProductKind;
+  readonly internalRef: string;
+  readonly currency: BillingCurrency;
+  readonly billingPeriod: BillingCheckoutPeriod;
+  readonly successUrl: string;
+  readonly cancelUrl: string;
+  readonly checkoutIntentId: string;
+  readonly externalPriceId: string;
+  readonly externalCustomerId?: string;
+  readonly paymentMethod?: BillingPaymentMethod;
+}
+
+export interface CheckoutSessionResult {
+  readonly gateway: BillingGatewayName;
+  readonly sessionId: string;
+  readonly url: string;
+}
+
+export interface GatewayWebhookEvent {
+  readonly eventId: string;
+  readonly gateway: BillingGatewayName;
+  readonly type: GatewayWebhookEventType;
+  readonly userId: string;
+  readonly checkoutIntentId?: string;
+  readonly amount: number;
+  readonly currency: BillingCurrency;
+  readonly externalSubscriptionId?: string;
+  readonly externalCustomerId?: string;
+  readonly internalRef?: string;
+  readonly productKind?: BillingProductKind;
+}
 
 export interface BillingGatewayChargeRequest {
   readonly userId: string;
@@ -19,5 +67,12 @@ export interface BillingGatewayChargeResult {
 
 export interface BillingGatewayAdapter {
   readonly name: BillingGatewayName;
-  readonly charge: (request: BillingGatewayChargeRequest) => Effect.Effect<BillingGatewayChargeResult>;
+  createCheckoutSession?(
+    request: CheckoutSessionRequest
+  ): Effect.Effect<CheckoutSessionResult, BillingGatewayError>;
+  parseWebhook?(
+    payload: unknown,
+    signature: string
+  ): Effect.Effect<GatewayWebhookEvent, BillingGatewayWebhookVerificationError>;
+  charge(request: BillingGatewayChargeRequest): Effect.Effect<BillingGatewayChargeResult, BillingGatewayError>;
 }

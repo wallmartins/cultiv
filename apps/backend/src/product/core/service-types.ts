@@ -21,6 +21,8 @@ import type { BackendOperatorRepository } from "../../auth/operator.js";
 import type { BackendPolicyEvidenceService } from "../../safety/policy-evidence-types.js";
 import type { BackendRedactionService } from "../../safety/redaction-types.js";
 import type { BackendOperationalOverrideService } from "../../safety/operational-override-types.js";
+import type { BillingCheckoutService } from "../billing/billing-checkout-service.js";
+import type { BillingWebhookService } from "../billing/billing-webhook-service.js";
 
 export interface BackendProductServices {
   readonly database: DatabaseClient;
@@ -47,4 +49,6 @@ export interface BackendProductServices {
   readonly redaction: BackendRedactionService;
   readonly users: BackendApplicationUserRepository;
   readonly operators: BackendOperatorRepository;
+  readonly billingCheckout?: BillingCheckoutService;
+  readonly billingWebhook?: BillingWebhookService;
 }

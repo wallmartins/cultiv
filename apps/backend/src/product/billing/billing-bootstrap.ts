@@ -67,6 +67,16 @@ export function registerBackendBillingPlans(
         allowedModels: Array.from(allowedModels)
       });
     }
+
+    if (billing.listTopUpPackages().length === 0) {
+      billing.registerTopUpPackage({
+        id: "topup_500",
+        credits: 500,
+        priceCents: 2900,
+        currency: "BRL",
+        description: "500 credits"
+      });
+    }
   }).pipe(Effect.catchAll(swallowWithDiagnostic({
     operation: "Failed to register backend billing plans"
   })));

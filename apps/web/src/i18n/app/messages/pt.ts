@@ -7,6 +7,7 @@ export const appMessagesPt: AppMessages = {
       history: "Histórico",
       voice: "Voz",
       settings: "Configurações",
+      billing: "Plano",
       logout: "Sair"
     },
     credits: { label: "créditos" },
@@ -446,7 +447,38 @@ export const appMessagesPt: AppMessages = {
     consentMissing: "Não concedido",
     revokeConsent: "Revogar consentimento",
     revokeDisabled: "Revogação disponível quando a API estiver publicada.",
-    logout: "Sair"
+    logout: "Sair",
+    billing: "Plano e créditos"
+  },
+  billing: {
+    title: "Plano e créditos",
+    currentPlan: "Plano atual",
+    planPro: "Pro",
+    planFree: "Gratuito",
+    creditsBalance: "{count} créditos disponíveis",
+    upgradePro: "Assinar Pro",
+    alreadyPro: "Você já está no plano Pro.",
+    topUp: "Recarregar créditos",
+    topUpDescription: "Adicione 500 créditos ao seu saldo (compra avulsa).",
+    topUpCta: "Comprar 500 créditos",
+    currencyLabel: "Moeda",
+    currency: {
+      brl: "BRL (Brasil)",
+      usd: "USD"
+    },
+    periodLabel: "Período",
+    periodMonthly: "Mensal",
+    periodAnnual: "Anual (economize ~20%)",
+    paymentMethodLabel: "Forma de pagamento",
+    paymentCard: "Cartão",
+    paymentPix: "PIX",
+    pixOnlyBrl: "PIX disponível apenas para checkout em BRL.",
+    annualInstallments: "Plano anual Pro parcelado em até 12x no cartão.",
+    checkoutSuccess: "Pagamento recebido. Seu plano ou créditos serão atualizados em instantes.",
+    checkoutCancel: "Checkout cancelado. Nenhuma cobrança foi feita.",
+    checkoutError: "Não foi possível iniciar o checkout. Tente novamente.",
+    redirecting: "Redirecionando…",
+    loadError: "Não foi possível carregar os dados de cobrança."
   },
   notifications: {
     readyTitle: "Geração pronta",

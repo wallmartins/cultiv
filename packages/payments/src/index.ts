@@ -1,5 +1,8 @@
 export {
+  BillingCheckoutCatalogNotFoundError,
   BillingEntitlementNotFoundError,
+  BillingGatewayError,
+  BillingGatewayWebhookVerificationError,
   BillingInsufficientCreditsError,
   BillingOperationConflictError,
   BillingPlanInvalidError,
@@ -37,12 +40,30 @@ export type {
 } from "./types.js";
 
 export type {
+  BillingCheckoutPeriod,
+  BillingCurrency,
   BillingGatewayName,
+  BillingProductKind,
   BillingGatewayChargeRequest,
   BillingGatewayChargeResult,
-  BillingGatewayAdapter
+  BillingGatewayAdapter,
+  CheckoutSessionRequest,
+  CheckoutSessionResult,
+  GatewayWebhookEvent,
+  GatewayWebhookEventType
 } from "./gateway/types.js";
-export { createManualGateway, createStripeGateway, createAsaasGateway } from "./gateway/index.js";
+
+export {
+  createManualGateway,
+  createStripeGateway,
+  createAsaasGateway,
+  createStripeGatewayAdapter,
+  createAsaasGatewayAdapter,
+  mapStripeEvent,
+  mapAsaasWebhookEvent,
+  resolveGatewayForCurrency,
+  dispatchGatewayWebhookEvent
+} from "./gateway/index.js";
 
 export { DEFAULT_BILLING_PLANS } from "./default-plans.js";
 export { createBillingRepository } from "./repository.js";
