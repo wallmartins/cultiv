@@ -1,5 +1,7 @@
 # Progress Log
 
+| 2026-06-18 | refactor(backend): Fase 6c — split `config.ts` (413→44 lines) into `config-schema.ts`, `config-env.ts`, `config-validate.ts`; removed from file-size allowlist; `tests/backend/backend-config.test.ts` imports `validateBackendConfig` from `config-validate` |
+| 2026-06-18 | test(client-sdk): `tests/client-sdk/http-retry.test.ts` — GET retries on 429 then succeeds via `createHttpTransport` |
 | 2026-06-18 | refactor(contracts): Fase 6b — split `execution.ts` (476→1 line) into `execution/{job,request,view,sse,errors}.ts`; thin barrel preserved; `tests/contracts/execution-modules.test.ts`; removed `execution.ts` from file-size allowlist; public API unchanged |
 | 2026-06-18 | refactor(feature-flags): Fase 6a — split `index.ts` (455→47 lines) into `defaults.ts`, `types.ts`, `registry.ts`, `evaluator.ts`, `service.ts`, `validation.ts`, `domain-helpers.ts`; removed `index.ts` from file-size allowlist; `tests/feature-flags/feature-flags-module.test.ts`; public API unchanged |
 | 2026-06-18 | refactor(backend,voice): Fase 3 — split `voice-rebuild-service.ts` (547→38 lines) into `voice-rebuild-queue.ts` (113), `voice-rebuild-pipeline.ts` (445); `apps/backend/tests/voice-rebuild-queue.test.ts`, `voice-rebuild-pipeline.test.ts`; removed `voice-rebuild-service.ts` from file-size allowlist; behavior unchanged |

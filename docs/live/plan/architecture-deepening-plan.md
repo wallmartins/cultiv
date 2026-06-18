@@ -136,9 +136,9 @@ Fechar a allowlist restante e reforçar confiabilidade.
 
 - Split `packages/feature-flags/src/index.ts` (registro, resolução, defaults)
 - Split `packages/contracts/src/execution.ts` (tipos, estados, eventos)
-- Split `apps/backend/src/config/config.ts` (env, validação, agrupamentos)
-- Testes de **transport retry** para adapters AI/HTTP
-- Allowlist de file-size **vazia** — nenhum arquivo acima de 400 linhas
+- Split `apps/backend/src/config/config.ts` (env, validação, agrupamentos) ✅
+- Testes de **transport retry** para adapters AI/HTTP ✅
+- Allowlist de file-size **vazia** — nenhum arquivo acima de 400 linhas (restante: voice-rebuild-derivation, voice-rebuild-pipeline, payments/service)
 
 ---
 
@@ -158,7 +158,7 @@ Cada entrada deve ser **removida da allowlist** (e do `FILE_SIZE_BASELINE`) quan
 | ~~`apps/backend/src/infra/postgres-billing-store.ts`~~ | ~~422~~ | **5** — removido (17 linhas facade) |
 | `packages/feature-flags/src/index.ts` | 455 | **6** — hardening |
 | `packages/contracts/src/execution.ts` | 476 | **6** — hardening |
-| `apps/backend/src/config/config.ts` | 413 | **6** — hardening |
+| ~~`apps/backend/src/config/config.ts`~~ | ~~413~~ | **6** — removido (44 linhas facade) |
 
 **Regra anti-regressão:** enquanto na allowlist, o arquivo **não pode crescer** além do baseline registrado.
 
@@ -211,12 +211,13 @@ Cada entrada deve ser **removida da allowlist** (e do `FILE_SIZE_BASELINE`) quan
 - [x] Todos os módulos resultantes ≤ 400 linhas
 - [x] Testes de persistência billing durável verdes
 
-### Fase 6 — Hardening
+### Fase 6 — Hardening (em progresso)
 
-- [ ] `feature-flags`, `contracts/execution` e `config.ts` decompostos
-- [ ] Testes de transport retry adicionados/atualizados
-- [ ] **Allowlist vazia** — teste de governança passa sem exceções
-- [ ] `pnpm test:ci` verde
+- [x] `config.ts` decomposto (`config-schema`, `config-env`, `config-validate`; facade 44 linhas)
+- [x] Testes de transport retry adicionados (`tests/client-sdk/http-retry.test.ts`)
+- [ ] `feature-flags`, `contracts/execution` decompostos
+- [ ] **Allowlist vazia** — restam voice-rebuild-derivation, voice-rebuild-pipeline, payments/service
+- [x] `pnpm test:ci` verde
 
 ### Done do programa completo
 
