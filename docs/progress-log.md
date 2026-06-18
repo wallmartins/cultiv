@@ -1,5 +1,7 @@
 # Progress Log
 
+| 2026-06-18 | refactor(payments): extract generation credit and cycle operations — `billing-generation-credits.ts`, `billing-cycle-operations.ts`, `billing-service-runtime.ts`; `service.ts` 520→240 lines; removed from file-size allowlist (2 voice entries remain); `tests/payments/billing-generation-credits.test.ts`; 738 CI tests green |
+| 2026-06-18 | refactor(backend,voice): extract `voice-rebuild-pipeline-diagnostics.ts` (`markRebuildQueued`, `markRebuildFailure`, `clearProfileImpactFlags`, `attachTraitProfileToDevelopment`); `voice-rebuild-pipeline.ts` 445→298 lines; removed from file-size allowlist; `apps/backend/tests/voice-rebuild-pipeline-diagnostics.test.ts` (4 tests); 738 CI tests green |
 | 2026-06-18 | docs: architecture-deepening phases 3–6 complete — allowlist reduced to 3 entries (voice-rebuild-derivation, voice-rebuild-pipeline, payments/service); 729 CI tests green |
 | 2026-06-18 | refactor(web): Fase 4 — split `GenerationScreen.tsx` (657→349 lines) into hooks (`useGenerationForm`, `useGenerationCommercialGate`), `get-blocked-reason.ts`, `GenerationPreviewSidebar`, `BriefingGuidancePanel`; `tests/web/use-generation-commercial-gate.test.ts` (8 tests) |
 | 2026-06-18 | refactor(backend): Fase 6c — split `config.ts` (413→44 lines) into `config-schema.ts`, `config-env.ts`, `config-validate.ts`; removed from file-size allowlist; `tests/backend/backend-config.test.ts` imports `validateBackendConfig` from `config-validate` |

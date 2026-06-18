@@ -5,17 +5,9 @@ import { countLines, listTypeScriptFiles, PACKAGE_DIRS, ROOT } from "./shared.js
 const MAX_LINE_COUNT = 400;
 
 // Remove entries as architecture-deepening phases complete.
-const FILE_SIZE_ALLOWLIST = new Set<string>([
-  "apps/backend/src/product/voice/voice-rebuild-derivation.ts",
-  "apps/backend/src/product/voice/voice-rebuild-pipeline.ts",
-  "packages/payments/src/service.ts"
-]);
+const FILE_SIZE_ALLOWLIST = new Set<string>([]);
 
-const FILE_SIZE_BASELINE = new Map<string, number>([
-  ["apps/backend/src/product/voice/voice-rebuild-derivation.ts", 447],
-  ["apps/backend/src/product/voice/voice-rebuild-pipeline.ts", 445],
-  ["packages/payments/src/service.ts", 520]
-]);
+const FILE_SIZE_BASELINE = new Map<string, number>([]);
 
 function isProductionTypeScriptFile(filePath: string): boolean {
   if (filePath.endsWith(".d.ts")) {

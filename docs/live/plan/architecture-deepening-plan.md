@@ -139,7 +139,7 @@ Fechar allowlist de módulos transversais e reforçar confiabilidade.
 - Split `apps/backend/src/config/config.ts` → schema, env, validate + facade 44 linhas ✅
 - Testes de **transport retry** (`tests/client-sdk/http-retry.test.ts`) ✅
 
-**Dívida remanescente (allowlist, 3 entradas):** arquivos de domínio voice/payments que exigem splits adicionais — ver secção 3.
+**Dívida remanescente (allowlist, 2 entradas):** apenas arquivos voice-rebuild — ver secção 3. Payments `service.ts` removido da allowlist (2026-06-18).
 
 **Status:** done (2026-06-18)
 
@@ -163,9 +163,11 @@ Cada entrada deve ser **removida da allowlist** (e do `FILE_SIZE_BASELINE`) quan
 | ~~`packages/feature-flags/src/index.ts`~~ | ~~455~~ | **6** — removido (46 linhas) |
 | ~~`packages/contracts/src/execution.ts`~~ | ~~476~~ | **6** — removido (1 linha barrel) |
 | ~~`apps/backend/src/config/config.ts`~~ | ~~413~~ | **6** — removido (44 linhas facade) |
-| `packages/payments/src/service.ts` | 520 | futuro — extrair operações de reserva/captura |
+| ~~`packages/payments/src/service.ts`~~ | ~~520~~ | **1** — removido (240 linhas facade; `billing-generation-credits`, `billing-cycle-operations`, `billing-service-runtime`) |
 
 **Regra anti-regressão:** enquanto na allowlist, o arquivo **não pode crescer** além do baseline registrado.
+
+**Meta:** allowlist vazia — restam 2 entradas voice-rebuild.
 
 ---
 
