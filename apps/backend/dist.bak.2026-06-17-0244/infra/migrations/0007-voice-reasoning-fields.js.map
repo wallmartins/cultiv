@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../src/infra/migrations/0007-voice-reasoning-fields.ts"],
+  "sourcesContent": ["import { sql } from \"kysely\";\nimport type { Kysely } from \"kysely\";\nimport type { DatabaseTables } from \"../postgres-tables.js\";\n\n/**\n * Author reasoning fields (Core Reasoning Signature, Format Expression Profile)\n * are stored inside voice_profiles.data JSONB \u2014 no relational columns required.\n * Rollback: remove optional fields from persisted JSON; existing rows remain valid.\n */\nexport async function up(_db: Kysely<DatabaseTables>): Promise<void> {\n  await sql`SELECT 1`.execute(_db);\n}\n\nexport async function down(_db: Kysely<DatabaseTables>): Promise<void> {\n  await sql`SELECT 1`.execute(_db);\n}\n"],
+  "mappings": ";AAAA,SAAS,WAAW;AASpB,eAAsB,GAAG,KAA4C;AACnE,QAAM,cAAc,QAAQ,GAAG;AACjC;AAEA,eAAsB,KAAK,KAA4C;AACrE,QAAM,cAAc,QAAQ,GAAG;AACjC;",
+  "names": []
+}

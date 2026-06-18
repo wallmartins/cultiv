@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../src/infra/migrations/0011-billing-topup-seed.ts"],
+  "sourcesContent": ["import { Kysely } from \"kysely\";\nimport type { DatabaseTables } from \"../postgres-tables.js\";\n\nexport async function up(db: Kysely<DatabaseTables>): Promise<void> {\n  const existing = await db\n    .selectFrom(\"billing_top_up_packages\")\n    .select(\"id\")\n    .where(\"id\", \"=\", \"topup_500\")\n    .executeTakeFirst();\n\n  if (existing) {\n    return;\n  }\n\n  await db\n    .insertInto(\"billing_top_up_packages\")\n    .values({\n      id: \"topup_500\",\n      credits: 500,\n      price_cents: 2900,\n      currency: \"BRL\",\n      description: \"500 credits top-up\"\n    })\n    .execute();\n}\n\nexport async function down(db: Kysely<DatabaseTables>): Promise<void> {\n  await db.deleteFrom(\"billing_top_up_packages\").where(\"id\", \"=\", \"topup_500\").execute();\n}\n"],
+  "mappings": ";AAGA,eAAsB,GAAG,IAA2C;AAClE,QAAM,WAAW,MAAM,GACpB,WAAW,yBAAyB,EACpC,OAAO,IAAI,EACX,MAAM,MAAM,KAAK,WAAW,EAC5B,iBAAiB;AAEpB,MAAI,UAAU;AACZ;AAAA,EACF;AAEA,QAAM,GACH,WAAW,yBAAyB,EACpC,OAAO;AAAA,IACN,IAAI;AAAA,IACJ,SAAS;AAAA,IACT,aAAa;AAAA,IACb,UAAU;AAAA,IACV,aAAa;AAAA,EACf,CAAC,EACA,QAAQ;AACb;AAEA,eAAsB,KAAK,IAA2C;AACpE,QAAM,GAAG,WAAW,yBAAyB,EAAE,MAAM,MAAM,KAAK,WAAW,EAAE,QAAQ;AACvF;",
+  "names": []
+}
