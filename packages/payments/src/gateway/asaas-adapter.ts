@@ -75,10 +75,13 @@ function cycleFromPeriod(period: BillingCheckoutPeriod): string {
   }
 }
 
-async function asaasJson<T>(response: Response): Promise<T> {
+async function asaasJson<T>(response: Response) {
   if (!response.ok) {
     const body = await response.text();
-    throw new Error(`Asaas API ${response.status}: ${body}`);
+    throw new BillingGatewayError({
+      gateway: "asaas",
+      message: `Asaas API ${response.status}: ${body}`
+    });
   }
   return (await response.json()) as T;
 }
@@ -86,7 +89,10 @@ async function asaasJson<T>(response: Response): Promise<T> {
 function checkoutUrlFromPayment(payment: { readonly invoiceUrl?: string; readonly bankSlipUrl?: string }): string {
   const url = payment.invoiceUrl ?? payment.bankSlipUrl;
   if (!url) {
-    throw new Error("Asaas payment missing checkout url");
+    throw new BillingGatewayError({
+      gateway: "asaas",
+      message: "Asaas payment missing checkout url"
+    });
   }
   return url;
 }
@@ -111,7 +117,7 @@ async function createAsaasPayment(
   baseUrl: string,
   apiKey: string,
   body: Record<string, unknown>
-): Promise<AsaasPaymentResponse> {
+) {
   const response = await fetch(`${baseUrl}/payments`, {
     method: "POST",
     headers: asaasHeaders(apiKey),
@@ -191,7 +197,7 @@ export function mapAsaasWebhookEvent(
 export function createAsaasGatewayAdapter(options: AsaasGatewayAdapterOptions): BillingGatewayAdapter {
   const baseUrl = options.baseUrl ?? DEFAULT_BASE_URL;
 
-  async function ensureCustomer(email: string, userId: string): Promise<string> {
+  async function ensureCustomer(email: string, userId: string) {
     if (options.apiKey.startsWith("test_")) {
       return `cus_${userId}`;
     }
@@ -212,7 +218,7 @@ export function createAsaasGatewayAdapter(options: AsaasGatewayAdapterOptions): 
     name: "asaas",
     createCheckoutSession: (request: CheckoutSessionRequest) =>
       Effect.tryPromise({
-        try: async (): Promise<CheckoutSessionResult> => {
+        try: async () => {
           const customerId = request.externalCustomerId ?? (await ensureCustomer(request.email, request.userId));
           const billingType = resolveAsaasBillingType(request.paymentMethod);
           const value = priceValueFromExternalId(request.externalPriceId);
@@ -259,7 +265,10 @@ export function createAsaasGatewayAdapter(options: AsaasGatewayAdapterOptions): 
             const payments = await asaasJson<{ readonly data: readonly AsaasPaymentResponse[] }>(paymentResponse);
             const firstPayment = payments.data[0];
             if (!firstPayment) {
-              throw new Error("Asaas subscription missing initial payment");
+              throw new BillingGatewayError({
+                gateway: "asaas",
+                message: "Asaas subscription missing initial payment"
+              });
             }
             return {
               gateway: "asaas",
@@ -293,7 +302,10 @@ export function createAsaasGatewayAdapter(options: AsaasGatewayAdapterOptions): 
       Effect.try({
         try: () => {
           if (signature !== options.webhookToken) {
-            throw new Error("invalid asaas webhook token");
+            throw new BillingGatewayWebhookVerificationError({
+              gateway: "asaas",
+              message: "invalid asaas webhook token"
+            });
           }
           const body =
             typeof payload === "string"
@@ -317,7 +329,10 @@ export function createAsaasGatewayAdapter(options: AsaasGatewayAdapterOptions): 
             productKind: body.metadata?.product_kind
           });
           if (!mapped) {
-            throw new Error(`unsupported asaas event: ${body.event ?? "unknown"}`);
+            throw new BillingGatewayWebhookVerificationError({
+              gateway: "asaas",
+              message: `unsupported asaas event: ${body.event ?? "unknown"}`
+            });
           }
           return mapped;
         },

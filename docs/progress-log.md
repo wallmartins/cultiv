@@ -1,5 +1,6 @@
 # Progress Log
 
+| 2026-06-17 | fix(payments): align gateway adapters with effect-hardening governance — tagged errors, allow stripe dep |
 | 2026-06-17 | fix(ci): grant `pull-requests: read` on path-filter job — fixes paths-filter API error and skipped downstream checks on PRs |
 | 2026-06-17 | feat(billing): phase 1b–1c — PIX checkout, top-up webhook grant, client SDK billing, `/app/billing` UI, annual installments (tasks 14–18) |
 | 2026-06-17 | feat(backend): billing checkout + webhook routes, gateway services, Stripe/Asaas config |

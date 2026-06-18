@@ -138,7 +138,7 @@ export function createStripeGatewayAdapter(options: StripeGatewayAdapterOptions)
     name: "stripe" satisfies BillingGatewayName,
     createCheckoutSession: (request: CheckoutSessionRequest) =>
       Effect.tryPromise({
-        try: async (): Promise<CheckoutSessionResult> => {
+        try: async () => {
           const session = await stripe.checkout.sessions.create({
             mode: request.productKind === "subscription" ? "subscription" : "payment",
             customer_email: request.email,
@@ -165,7 +165,10 @@ export function createStripeGatewayAdapter(options: StripeGatewayAdapterOptions)
               : {})
           });
           if (!session.url) {
-            throw new Error("Stripe session missing url");
+            throw new BillingGatewayError({
+              gateway: "stripe",
+              message: "Stripe session missing url"
+            });
           }
           return { gateway: "stripe", sessionId: session.id, url: session.url };
         },
@@ -183,7 +186,10 @@ export function createStripeGatewayAdapter(options: StripeGatewayAdapterOptions)
           const event = stripe.webhooks.constructEvent(rawBody, signature, options.webhookSecret);
           const mapped = mapStripeEvent(event);
           if (!mapped) {
-            throw new Error(`unsupported stripe event type: ${event.type}`);
+            throw new BillingGatewayWebhookVerificationError({
+              gateway: "stripe",
+              message: `unsupported stripe event type: ${event.type}`
+            });
           }
           return mapped;
         },
