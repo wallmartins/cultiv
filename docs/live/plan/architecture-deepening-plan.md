@@ -80,17 +80,21 @@ Refatorar runtime durável e persistência de jobs.
 
 **Status:** done (2026-06-18)
 
-### Fase 3 — Voice rebuild
+### Fase 3 — Voice rebuild ✅ CONCLUÍDA
 
 Decompor pipeline de rebuild de voz.
 
 **Entregas:**
 
-- Extrair fila (`queue`) e pipeline de derivação
-- Separar orquestração (`voice-rebuild-service`) de derivação pura (`voice-rebuild-derivation`)
+- Extrair fila (`voice-rebuild-queue.ts`) — schedule, drain, runner, waitForIdle
+- Extrair pipeline (`voice-rebuild-pipeline.ts`) — extract → reconcile → derive → persist
+- `voice-rebuild-service.ts` como factory fina (38 linhas)
+- `apps/backend/tests/voice-rebuild-queue.test.ts`, `voice-rebuild-pipeline.test.ts`
 - Manter contratos e testes de regressão de voz verdes
 
 **Contexto:** ADRs 0006–0008 (reasoning, development, traits).
+
+**Status:** done (2026-06-18)
 
 ---
 
