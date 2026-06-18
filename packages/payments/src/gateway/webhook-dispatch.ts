@@ -6,7 +6,7 @@ import {
   BillingPlanNotFoundError,
   BillingTopUpPackageNotFoundError
 } from "../errors.js";
-import type { BillingServiceContract } from "./types.js";
+import type { BillingPlanDefinition, BillingServiceContract } from "../types.js";
 import type { GatewayWebhookEvent } from "./types.js";
 
 export interface DispatchGatewayWebhookOptions {
@@ -58,7 +58,7 @@ export function dispatchGatewayWebhookEvent(
           });
           return;
         }
-        const plan = billing.listPlans().find((candidate) => candidate.id === planId);
+        const plan = billing.listPlans().find((candidate: BillingPlanDefinition) => candidate.id === planId);
         if (!plan) {
           return yield* Effect.fail(new BillingPlanNotFoundError({ planId }));
         }
@@ -110,6 +110,10 @@ export function dispatchGatewayWebhookEvent(
         return;
       case "payment.failed":
         return;
+      default: {
+        const _exhaustive: never = event.type;
+        return _exhaustive;
+      }
     }
   });
 }
