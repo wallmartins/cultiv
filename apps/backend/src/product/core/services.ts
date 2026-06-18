@@ -27,6 +27,16 @@ import { createPostgresOperatorRepository } from "../../infra/postgres-repositor
 import { getPostgresDatabase } from "../../infra/postgres-client.js";
 import { getSharedRedisClient } from "../../infra/redis-client.js";
 import { createRedisTrafficLimitStore } from "../../runtime/redis-rate-limit-store.js";
+import { createPostgresBillingGatewayStore } from "../../infra/postgres-billing-gateway-store.js";
+import {
+  createBillingCheckoutService,
+  createBillingGatewayAdapters,
+  type BillingCheckoutService
+} from "../billing/billing-checkout-service.js";
+import {
+  createBillingWebhookService,
+  type BillingWebhookService
+} from "../billing/billing-webhook-service.js";
 
 export function createBackendProductServices(
   config: BackendConfig,
@@ -90,6 +100,23 @@ export function createBackendProductServices(
       ? createPostgresOperatorRepository(postgresDatabase)
       : createBackendOperatorMemoryRepository();
 
+    let billingCheckout: BillingCheckoutService | undefined;
+    let billingWebhook: BillingWebhookService | undefined;
+    if (postgresDatabase) {
+      const gatewayStore = createPostgresBillingGatewayStore(postgresDatabase);
+      const adapters = createBillingGatewayAdapters(config);
+      const billingDeps = {
+        billing: dependencies.billing,
+        gatewayStore,
+        stripeAdapter: adapters.stripe,
+        asaasAdapter: adapters.asaas,
+        config,
+        now
+      };
+      billingCheckout = createBillingCheckoutService(billingDeps);
+      billingWebhook = createBillingWebhookService(billingDeps);
+    }
+
     return {
       ...dependencies,
       observability,
@@ -140,7 +167,9 @@ export function createBackendProductServices(
       operationalOverride,
       redaction,
       users,
-      operators
+      operators,
+      billingCheckout,
+      billingWebhook
     };
   }) as Effect.Effect<
     BackendProductServices,

@@ -1,4 +1,4 @@
-import { readdirSync } from "node:fs";
+import { readdirSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import * as esbuild from "esbuild";
 
@@ -18,6 +18,8 @@ const migrationDir = "src/infra/migrations";
 const migrationEntries = readdirSync(migrationDir)
   .filter((file) => file.endsWith(".ts"))
   .map((file) => join(migrationDir, file));
+
+rmSync("dist", { recursive: true, force: true });
 
 await esbuild.build({
   entryPoints: [
@@ -49,3 +51,24 @@ await esbuild.build({
   sourcemap: true,
   logLevel: "info"
 });
+
+const compiledMigrationNames = new Set(
+  readdirSync("dist/infra/migrations")
+    .filter((file) => file.endsWith(".js") && !file.endsWith(".js.map"))
+    .map((file) => file.replace(/\.js$/, ""))
+);
+const sourceMigrationNames = migrationEntries.map((entry) =>
+  entry.replace(/^.*\//, "").replace(/\.ts$/, "")
+);
+
+for (const migrationName of compiledMigrationNames) {
+  if (!sourceMigrationNames.includes(migrationName)) {
+    throw new Error(`Stale compiled migration artifact: ${migrationName}.js`);
+  }
+}
+
+for (const migrationName of sourceMigrationNames) {
+  if (!compiledMigrationNames.has(migrationName)) {
+    throw new Error(`Missing compiled migration artifact: ${migrationName}.js`);
+  }
+}

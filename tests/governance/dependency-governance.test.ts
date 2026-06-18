@@ -22,7 +22,7 @@ describe("dependency governance", () => {
       ]),
       "ai-adapters": new Set(["effect"]),
       "feature-flags": new Set(["@my-ai-orchestrator/contracts", "effect"]),
-      payments: new Set(["@my-ai-orchestrator/contracts", "effect"]),
+      payments: new Set(["@my-ai-orchestrator/contracts", "effect", "stripe"]),
       "client-sdk": new Set(["@my-ai-orchestrator/contracts", "effect"]),
       skills: new Set([
         "@my-ai-orchestrator/contracts",

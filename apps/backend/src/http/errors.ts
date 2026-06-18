@@ -245,3 +245,8 @@ export class BackendOperationalOverrideStateError extends Data.TaggedError("Back
   readonly reason: "override_not_found" | "override_expired" | "override_already_consumed";
   readonly message: string;
 }> {}
+
+export class BackendBillingNotConfiguredError extends Data.TaggedError("BackendBillingNotConfiguredError")<{
+  readonly route: string;
+  readonly message?: string;
+}> {}

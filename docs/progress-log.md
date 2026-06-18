@@ -1,5 +1,38 @@
 # Progress Log
 
+| 2026-06-18 | merge(main): integrate payment gateway (Stripe/Asaas) with architecture-deepening modular payments and split config |
+| 2026-06-18 | refactor(backend,voice): extract `voice-rebuild-derivation-resolvers.ts` (178 lines) — resolvers + text/diversity helpers from `voice-rebuild-derivation.ts` (447→283); `apps/backend/tests/voice-rebuild-derivation-resolvers.test.ts` (3 tests); removed `voice-rebuild-derivation.ts` from file-size allowlist; public API unchanged |
+| 2026-06-18 | refactor(payments): extract generation credit and cycle operations — `billing-generation-credits.ts`, `billing-cycle-operations.ts`, `billing-service-runtime.ts`; `service.ts` 520→240 lines; removed from file-size allowlist; `tests/payments/billing-generation-credits.test.ts`; file-size allowlist now empty |
+| 2026-06-18 | refactor(backend,voice): extract `voice-rebuild-pipeline-diagnostics.ts` (`markRebuildQueued`, `markRebuildFailure`, `clearProfileImpactFlags`, `attachTraitProfileToDevelopment`); `voice-rebuild-pipeline.ts` 445→298 lines; removed from file-size allowlist; `apps/backend/tests/voice-rebuild-pipeline-diagnostics.test.ts` (4 tests) |
+| 2026-06-18 | docs: architecture-deepening phases 3–6 complete — allowlist empty after final splits |
+| 2026-06-18 | refactor(web): Fase 4 — split `GenerationScreen.tsx` (657→349 lines) into hooks (`useGenerationForm`, `useGenerationCommercialGate`), `get-blocked-reason.ts`, `GenerationPreviewSidebar`, `BriefingGuidancePanel`; `tests/web/use-generation-commercial-gate.test.ts` (8 tests) |
+| 2026-06-18 | refactor(backend): Fase 6c — split `config.ts` (413→44 lines) into `config-schema.ts`, `config-env.ts`, `config-validate.ts`; removed from file-size allowlist; `tests/backend/backend-config.test.ts` imports `validateBackendConfig` from `config-validate` |
+| 2026-06-18 | test(client-sdk): `tests/client-sdk/http-retry.test.ts` — GET retries on 429 then succeeds via `createHttpTransport` |
+| 2026-06-18 | refactor(contracts): Fase 6b — split `execution.ts` (476→1 line) into `execution/{job,request,view,sse,errors}.ts`; thin barrel preserved; `tests/contracts/execution-modules.test.ts`; removed `execution.ts` from file-size allowlist; public API unchanged |
+| 2026-06-18 | refactor(feature-flags): Fase 6a — split `index.ts` (455→47 lines) into `defaults.ts`, `types.ts`, `registry.ts`, `evaluator.ts`, `service.ts`, `validation.ts`, `domain-helpers.ts`; removed `index.ts` from file-size allowlist; `tests/feature-flags/feature-flags-module.test.ts`; public API unchanged |
+| 2026-06-18 | refactor(backend,voice): Fase 3 — split `voice-rebuild-service.ts` (547→38 lines) into `voice-rebuild-queue.ts` (113), `voice-rebuild-pipeline.ts` (445); `apps/backend/tests/voice-rebuild-queue.test.ts`, `voice-rebuild-pipeline.test.ts`; removed `voice-rebuild-service.ts` from file-size allowlist; behavior unchanged |
+| 2026-06-18 | refactor(backend): split postgres billing store — `billing/billing-persist-queue.ts`, `billing-row-mappers.ts`, `postgres-billing-repository.ts`, `billing-snapshot-migration.ts`; `postgres-billing-store.ts` 422→17 lines (facade); removed from file-size allowlist; `apps/backend/tests/billing-row-mappers.test.ts`, `billing-persist-queue.test.ts`; Fase 5 done |
+| 2026-06-18 | refactor(backend): Task 2.4 — extract `in-memory-job-repository.ts` (Map CRUD); `job-store.ts` 421→255 lines (composition + event bus); removed `job-store.ts` and `durable-job-runtime.ts` from file-size allowlist; `apps/backend/tests/in-memory-job-repository.test.ts`; Fase 2 done |
+| 2026-06-18 | refactor(backend): Task 2.3 — extract `execution-enqueue-transaction.ts` (`resolveEnqueueUserId`, `buildRuntimeBase`, `buildExecutionJobRecord`, `runExecutionEnqueueTransaction`); `durable-job-runtime.ts` 466→325 lines (baseline); `apps/backend/tests/execution-enqueue-transaction.test.ts`; enqueue path behavior unchanged |
+| 2026-06-18 | refactor(backend): Task 2.1 — extract `job-status-mappers.ts` (`resolveContentType`, `resolveEstimatedSteps`, `toJobStatusResponse`); dedupe from `job-store.ts` (−16 lines) and `durable-job-runtime.ts` (−27 lines); `apps/backend/tests/job-status-mappers.test.ts`; behavior unchanged |
+| 2026-06-18 | refactor(payments): Task 1.5 — extract domain types to `packages/payments/src/types.ts` and entitlement helpers to `entitlement.ts`; `index.ts` 321→73 lines (re-exports only); internal imports use `./types.js`; removed `index.ts` from file-size allowlist; `tests/payments/billing-types-module.test.ts`; public API unchanged |
+| 2026-06-18 | refactor(payments): Task 1.3 — extract ledger/wallet logic to `packages/payments/src/ledger.ts` (`appendLedgerEntry`, `createWalletFromRepository`, `createEntitlementFromRepository`, `sumLedger`); `service.ts` 631→520 lines; `tests/payments/billing-ledger.test.ts`; public API unchanged |
+| 2026-06-18 | refactor(payments): Task 1.2 — extract `BillingService` to `packages/payments/src/service.ts`; shared helpers in `billing-utils.ts`; repository/plan/credit/subscription modules to break circular deps; `tests/payments/billing-service-module.test.ts`; public API unchanged |
+| 2026-06-18 | refactor(payments): Task 1.1 — extract gateway adapters to `packages/payments/src/gateway/`; types in `gateway/types.ts`; public API unchanged via index re-exports; `tests/payments/gateway-adapters.test.ts` |
+| 2026-06-18 | docs: architecture deepening plan — fases 0–6, allowlist, TDD, dependências |
+| 2026-06-18 | test(governance): file-size governance — 400-line budget for production TS; allowlist with baselines (now empty) |
+| 2026-06-17 | fix(payments): align gateway adapters with effect-hardening governance — tagged errors, allow stripe dep |
+| 2026-06-17 | fix(ci): grant `pull-requests: read` on path-filter job — fixes paths-filter API error and skipped downstream checks on PRs |
+| 2026-06-17 | feat(billing): phase 1b–1c — PIX checkout, top-up webhook grant, client SDK billing, `/app/billing` UI, annual installments (tasks 14–18) |
+| 2026-06-17 | feat(backend): billing checkout + webhook routes, gateway services, Stripe/Asaas config |
+| 2026-06-17 | feat(payments): Stripe + Asaas adapters, webhook dispatch (tasks 7–9) |
+| 2026-06-17 | pause(payment-gateway): Tasks 1–6 done on `feat/payment-gateway`; resume at Task 7 (Stripe adapter) |
+| 2026-06-17 | feat(backend): PostgreSQL billing gateway store — checkout intents, catalog lookup, customer/subscription upserts, event dedup |
+| 2026-06-17 | feat(backend): billing gateway PostgreSQL tables — migration 0010, five tables, dev catalog seed |
+| 2026-06-17 | feat(payments): currency-based gateway router — BRL→asaas, USD→stripe (`resolveGatewayForCurrency`) |
+| 2026-06-17 | docs: payment gateway implementation plan (18 tasks, phases 1a–1c) |
+| 2026-06-17 | docs: payment gateway design spec (Stripe + Asaas hybrid) — checkout, webhooks, BRL/USD routing, security model |
+| 2026-06-17 | fix(web,voice): localize moveLabels — pt dictionary + key normalization; extraction prompt requires moveLabels in output language |
 | 2026-06-17 | feat: Development Traits program (issues 82–87) — contracts, confidence pass, divergence/reconciliation, dashboard mirror, generation pass-through, confirmation API, regression corpus |
 | 2026-06-17 | docs: issue 87 Development Traits generation pass-through (hints, snapshots, prompt summary) |
 | 2026-06-17 | docs: PRD + issues 82–86 Development Traits and Author Confidence (ADR 0008); parent issue + README indexados |

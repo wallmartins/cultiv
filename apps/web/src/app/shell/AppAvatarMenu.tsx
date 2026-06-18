@@ -9,6 +9,26 @@ export interface AppAvatarMenuProps {
   readonly messages: AppMessages;
 }
 
+function MenuIconBilling() {
+  return (
+    <svg viewBox="0 0 16 16" fill="none" className="size-4 shrink-0 opacity-70" aria-hidden>
+      <path
+        d="M2.5 5.5h11v7a1 1 0 0 1-1 1h-9a1 1 0 0 1-1-1v-7Z"
+        stroke="currentColor"
+        strokeWidth="1.25"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M2.5 6.5 8 3.5l5.5 3M5.5 9h5"
+        stroke="currentColor"
+        strokeWidth="1.25"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 function MenuIconSettings() {
   return (
     <svg viewBox="0 0 16 16" fill="none" className="size-4 shrink-0 opacity-70" aria-hidden>
@@ -143,6 +163,16 @@ export function AppAvatarMenu({ messages }: AppAvatarMenuProps) {
       ) : null}
 
       {displayName ? <div className="workspace-overlay-divider" role="presentation" /> : null}
+
+      <Link
+        to="/app/billing"
+        role="menuitem"
+        className="workspace-overlay-item"
+        onClick={() => setOpen(false)}
+      >
+        <MenuIconBilling />
+        {messages.shell.nav.billing}
+      </Link>
 
       <Link
         to="/app/settings"

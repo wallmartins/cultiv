@@ -23,6 +23,15 @@ export async function readPackageJson(name: string): Promise<Record<string, unkn
   return JSON.parse(await readFile(filePath, "utf-8")) as Record<string, unknown>;
 }
 
+export async function countLines(filePath: string): Promise<number> {
+  const content = await readFile(filePath, "utf-8");
+  if (content.length === 0) {
+    return 0;
+  }
+
+  return content.split("\n").length;
+}
+
 export async function listTypeScriptFiles(dir: string): Promise<string[]> {
   const entries = await readdir(dir, { withFileTypes: true });
   const files: string[] = [];

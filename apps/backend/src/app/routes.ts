@@ -26,6 +26,8 @@ import { registerInternalPolicyRoutes } from "../routes/internal-policy-routes.j
 import { registerInternalOverrideRoutes } from "../routes/internal-override-routes.js";
 import { registerVoiceRoutes } from "../routes/voice-routes.js";
 import { registerDevShowcaseRoutes } from "../routes/dev-showcase-routes.js";
+import { registerBillingRoutes } from "../routes/billing-routes.js";
+import { registerBillingWebhookRoutes } from "../routes/billing-webhook-routes.js";
 import { Routes } from "./route-definitions.js";
 
 export interface BackendRouteOptions {
@@ -149,6 +151,14 @@ export function registerBackendRoutes(app: Hono, options: BackendRouteOptions): 
     config: options.config,
     services: options.services,
     now: options.now
+  });
+  registerBillingRoutes(app, {
+    config: options.config,
+    services: options.services
+  });
+  registerBillingWebhookRoutes(app, {
+    config: options.config,
+    services: options.services
   });
 
   app.route("/health", health);

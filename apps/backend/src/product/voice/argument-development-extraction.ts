@@ -162,7 +162,7 @@ function buildDevelopmentExtractionPrompt(
 
   return [
     `Dominant example language: ${outputLanguage.bcp47} (${outputLanguage.label}).`,
-    `Write developmentProse in ${outputLanguage.label}.`,
+    `Write developmentProse and moveLabels in ${outputLanguage.label}.`,
     "Analyze how the author develops texts — argumentative moves, transitions, epistemic posture while writing, and structural habits.",
     "Do NOT infer cognitive traits (certainty, judgment) — focus on how the text unfolds.",
     "Do NOT impose a fixed phase template; infer moves from examples only.",
@@ -175,14 +175,14 @@ function buildDevelopmentExtractionPrompt(
 
 function resolveDevelopmentLanguageInstruction(outputLanguage: ReasoningOutputLanguage): string {
   if (outputLanguage.primary === "pt") {
-    return "CRITICAL: developmentProse MUST be written in Brazilian Portuguese (pt-BR).";
+    return "CRITICAL: developmentProse and moveLabels MUST be written in Brazilian Portuguese (pt-BR). Use short snake_case slugs in Portuguese (for example experiencia_vivida, duvida) or natural Portuguese phrases — never English move labels when examples are Portuguese.";
   }
 
   if (outputLanguage.primary === "en") {
-    return "CRITICAL: developmentProse MUST be written in English.";
+    return "CRITICAL: developmentProse and moveLabels MUST be written in English.";
   }
 
-  return "CRITICAL: developmentProse MUST match the majority example language.";
+  return "CRITICAL: developmentProse and moveLabels MUST match the majority example language.";
 }
 
 function buildDevelopmentExtractionSystemPrompt(outputLanguage: ReasoningOutputLanguage): string {
@@ -190,7 +190,8 @@ function buildDevelopmentExtractionSystemPrompt(outputLanguage: ReasoningOutputL
     "You extract how an author develops texts from writing examples.",
     "Respond with JSON only — no markdown fences or commentary.",
     `OUTPUT LANGUAGE: ${outputLanguage.label} (${outputLanguage.bcp47}).`,
-    `developmentProse MUST be written in ${outputLanguage.label}.`,
+    `developmentProse and moveLabels MUST be written in ${outputLanguage.label}.`,
+    "moveLabels are author-specific short labels (snake_case slugs or brief phrases) in the output language — not schema enum literals.",
     "Enum fields remain schema literals in English.",
     "Schema:",
     "{",

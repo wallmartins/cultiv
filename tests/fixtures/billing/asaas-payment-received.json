@@ -1,0 +1,15 @@
+{
+  "id": "evt_asaas_payment_received",
+  "event": "PAYMENT_RECEIVED",
+  "payment": {
+    "object": "payment",
+    "id": "pay_test_1",
+    "customer": "cus_asaas_test",
+    "subscription": "sub_asaas_test",
+    "value": 79.9,
+    "billingType": "CREDIT_CARD",
+    "status": "RECEIVED",
+    "externalReference": "chk_test_intent",
+    "description": "Pro monthly"
+  }
+}

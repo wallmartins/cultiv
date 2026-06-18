@@ -30,6 +30,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-monorepo
       - run: pnpm build:backend
+      - name: Prune stale migration bundles
+        run: bash infra/integrator/scripts/prune-stale-migration-bundles.sh apps/backend/dist apps/backend/src/infra/migrations
       - uses: actions/upload-artifact@v4
         with:
           name: backend-dist-manual
@@ -59,6 +61,7 @@ jobs:
         run: |
           set -euo pipefail
           export ARTIFACT_DIR=/tmp/deploy-artifact
+          export CHECKOUT_DIR="$GITHUB_WORKSPACE"
           export CULTIV_ROOT="${CULTIV_ROOT:-}"
           export CULTIV_APP="${CULTIV_APP:-}"
           bash infra/integrator/scripts/deploy-app.sh

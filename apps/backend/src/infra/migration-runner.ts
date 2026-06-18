@@ -41,7 +41,9 @@ const migrationTableMarkers = {
   "0006-billing-relational": ["billing_plans", "billing_subscriptions"],
   "0007-voice-reasoning-fields": ["voice_profiles"],
   "0008-argument-development-signature": ["voice_profiles"],
-  "0009-development-trait-profile": ["voice_profiles"]
+  "0009-development-trait-profile": ["voice_profiles"],
+  "0012-billing-gateway": ["billing_gateway_catalog", "billing_gateway_events"],
+  "0011-billing-topup-seed": ["billing_top_up_packages"]
 } as const;
 
 export function baselineAppliedMigrations(

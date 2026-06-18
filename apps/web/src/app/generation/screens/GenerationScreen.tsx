@@ -1,79 +1,40 @@
 import { useAuth0 } from "@auth0/auth0-react";
-import type { ContentTypeCatalogItemView, QualityMode } from "@my-ai-orchestrator/contracts";
-import { Button, Text } from "@my-ai-orchestrator/ui";
+import type { QualityMode } from "@my-ai-orchestrator/contracts";
+import { Text } from "@my-ai-orchestrator/ui";
 import { Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
-import { BriefingForm, isBriefingComplete } from "~/app/generation/components/BriefingForm";
+import { useState } from "react";
+import { BriefingGuidancePanel } from "~/app/generation/components/BriefingGuidancePanel";
+import { BriefingForm } from "~/app/generation/components/BriefingForm";
+import { GenerationPreviewSidebar } from "~/app/generation/components/GenerationPreviewSidebar";
 import { QualityModeHelpContent } from "~/app/generation/components/QualityModeHelpContent";
-import type { AppLocale } from "~/i18n/app/types";
-import { useAppLocale } from "~/i18n/app/use-app-locale";
-import { getBriefingGuidance } from "~/i18n/app/briefing-guidance";
-import { getContentTypeLabel, getContentTypeDescription } from "~/i18n/app/content-types";
-import { getGenerationLanguageLabel } from "~/i18n/app/generation-languages";
-import { getPreviewRecommendationExplanation } from "~/i18n/app/preview-recommendation";
-import {
-  getQualityModeHelpScreenReaderText,
-  getQualityModeTooltip,
-  type QualityModeHelpContext
-} from "~/i18n/app/quality-mode-tooltips";
-import { HelpTooltip } from "~/platform/ui/HelpTooltip";
-import { useActiveExecutions } from "~/platform/active-executions/active-execution-store";
-import { setCachedCreditBalance } from "~/platform/credits/credit-balance-cache";
-import { consumeGeneratePrefill } from "~/app/generation/lib/generate-prefill";
+import { useGenerationCommercialGate } from "~/app/generation/hooks/useGenerationCommercialGate";
+import { IMPORTED_CONTEXT_MAX, useGenerationForm } from "~/app/generation/hooks/useGenerationForm";
+import { getBlockedReason } from "~/app/generation/lib/get-blocked-reason";
 import { useContentTypes } from "~/app/generation/lib/use-content-types";
 import {
   useCommercialGenerationPreview,
   useFullGenerationPreview
 } from "~/app/generation/lib/use-generation-preview";
 import { isVoiceStepSkipped } from "~/app/onboarding/lib/onboarding-flags";
+import { getContentTypeLabel, getContentTypeDescription } from "~/i18n/app/content-types";
+import { getGenerationLanguageLabel } from "~/i18n/app/generation-languages";
+import {
+  getQualityModeHelpScreenReaderText,
+  getQualityModeTooltip
+} from "~/i18n/app/quality-mode-tooltips";
+import { useAppLocale } from "~/i18n/app/use-app-locale";
+import { useActiveExecutions } from "~/platform/active-executions/active-execution-store";
+import { setCachedCreditBalance } from "~/platform/credits/credit-balance-cache";
 import { formatSdkError } from "~/platform/sdk/format-sdk-error";
 import { useClientSdk } from "~/platform/runtime/client-sdk-context";
-import { AppSelect } from "~/platform/ui/AppSelect";
 import { AppCard } from "~/platform/ui/AppCard";
 import { AppField, AppFieldSlot } from "~/platform/ui/AppField";
 import { AppSegmentedControl } from "~/platform/ui/AppSegmentedControl";
+import { AppSelect } from "~/platform/ui/AppSelect";
 import { AppSkeleton } from "~/platform/ui/AppSkeleton";
+import { HelpTooltip } from "~/platform/ui/HelpTooltip";
 
-const IMPORTED_CONTEXT_MAX = 8000;
 const QUALITY_MODES: readonly QualityMode[] = ["fast", "balanced", "strict"];
-
-const INITIAL_GENERATION_FORM = {
-  contentTypeId: "",
-  briefing: {} as Record<string, unknown>,
-  language: "",
-  qualityMode: "fast" as QualityMode,
-  importedContext: "",
-  importedOpen: false,
-  submitError: null as string | null,
-  fullRefreshKey: 0
-};
-
-function getBlockedReason(
-  reasonCode: string | undefined,
-  messages: ReturnType<typeof useAppLocale>["messages"]
-): string {
-  if (reasonCode === "plan_restriction") {
-    return messages.generate.blockedReasons.planRestriction;
-  }
-
-  if (reasonCode === "feature_flag_disabled") {
-    return messages.generate.blockedReasons.featureFlagDisabled;
-  }
-
-  if (reasonCode === "subscription_inactive") {
-    return messages.generate.blockedReasons.subscriptionInactive;
-  }
-
-  if (reasonCode === "quality_mode_plan_restriction") {
-    return messages.generate.blockedReasons.qualityModePlanRestriction;
-  }
-
-  if (reasonCode === "insufficient_credits") {
-    return messages.generate.blockedReasons.insufficientCredits;
-  }
-
-  return messages.generate.blocked;
-}
 
 export function GenerationScreen() {
   const { user } = useAuth0();
@@ -81,208 +42,73 @@ export function GenerationScreen() {
   const client = useClientSdk();
   const { registerQueuedExecution, openDrawer } = useActiveExecutions();
   const { status: catalogStatus, catalog, error: catalogError, retry: retryCatalog } = useContentTypes();
-
-  const [contentTypeId, setContentTypeId] = useState("");
-  const [briefing, setBriefing] = useState<Record<string, unknown>>({});
-  const [language, setLanguage] = useState("");
-  const [qualityMode, setQualityMode] = useState<QualityMode>("fast");
-  const [importedContext, setImportedContext] = useState("");
-  const [importedOpen, setImportedOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState<string | null>(null);
-  const [fullRefreshKey, setFullRefreshKey] = useState(0);
 
-  const selectedType = useMemo(
-    () => catalog?.items.find((item) => item.id === contentTypeId) ?? null,
-    [catalog?.items, contentTypeId]
-  );
-
-  function resetGenerationForm() {
-    setContentTypeId(INITIAL_GENERATION_FORM.contentTypeId);
-    setBriefing(INITIAL_GENERATION_FORM.briefing);
-    setLanguage(INITIAL_GENERATION_FORM.language);
-    setQualityMode(INITIAL_GENERATION_FORM.qualityMode);
-    setImportedContext(INITIAL_GENERATION_FORM.importedContext);
-    setImportedOpen(INITIAL_GENERATION_FORM.importedOpen);
-    setSubmitError(INITIAL_GENERATION_FORM.submitError);
-    setFullRefreshKey(INITIAL_GENERATION_FORM.fullRefreshKey);
-  }
-
-  useEffect(() => {
-    const prefill = consumeGeneratePrefill();
-    if (!prefill) {
-      return;
-    }
-
-    setContentTypeId(prefill.contentType);
-    setBriefing(prefill.briefing ?? {});
-    setLanguage(prefill.language ?? "pt-BR");
-    setQualityMode(prefill.qualityMode ?? "balanced");
-    setImportedContext(prefill.importedContext ?? "");
-    if (prefill.importedContext) {
-      setImportedOpen(true);
-    }
-  }, []);
-
-  function handleContentTypeChange(nextContentTypeId: string) {
-    if (nextContentTypeId !== contentTypeId) {
-      setBriefing({});
-    }
-
-    setContentTypeId(nextContentTypeId);
-
-    const nextType = catalog?.items.find((item) => item.id === nextContentTypeId);
-    if (nextType) {
-      setLanguage(nextType.defaultLanguage);
-    }
-  }
-
-  const commercialRequest = useMemo(() => {
-    if (!contentTypeId || !language) {
-      return null;
-    }
-
-    return {
-      contentType: contentTypeId,
-      language,
-      qualityMode
-    };
-  }, [contentTypeId, language, qualityMode]);
-
-  const briefingComplete = selectedType
-    ? isBriefingComplete(selectedType.inputSchema, briefing)
-    : false;
-
-  const fullPreviewRequest = useMemo(() => {
-    if (!selectedType || !language || !briefingComplete) {
-      return null;
-    }
-
-    return {
-      contentType: contentTypeId,
-      briefing,
-      language,
-      qualityMode,
-      importedContext: importedContext.trim() ? importedContext : undefined
-    };
-  }, [briefing, briefingComplete, contentTypeId, importedContext, language, qualityMode, selectedType]);
-
-  useEffect(() => {
-    if (!briefingComplete) {
-      setFullRefreshKey(0);
-      return;
-    }
-
-    setFullRefreshKey((key) => (key === 0 ? 1 : key));
-  }, [briefingComplete]);
-
+  const form = useGenerationForm(catalog);
   const {
     status: commercialStatus,
     preview: commercialPreview,
     error: commercialError,
     isRefreshing: commercialRefreshing
-  } = useCommercialGenerationPreview(commercialRequest);
+  } = useCommercialGenerationPreview(form.commercialRequest);
   const {
     status: fullStatus,
     preview: fullPreview,
     error: fullError,
     isStale: recommendationStale,
     isRefreshing: fullRefreshing
-  } = useFullGenerationPreview(fullPreviewRequest, fullRefreshKey);
+  } = useFullGenerationPreview(form.fullPreviewRequest, form.fullRefreshKey);
 
-  const qualityModeOptions = commercialPreview?.options.qualityModes ?? [];
-  const qualityModeDisplayOptions = fullPreview?.options.qualityModes ?? qualityModeOptions;
-  const catalogAllowedModes = catalog?.commercial?.allowedQualityModes;
+  const commercialGate = useGenerationCommercialGate({
+    qualityMode: form.qualityMode,
+    setQualityMode: form.setQualityMode,
+    commercialPreview,
+    fullPreview,
+    catalog
+  });
 
-  function isModeAllowedForUser(mode: QualityMode): boolean {
-    const previewOption = qualityModeOptions.find((option) => option.id === mode);
-    if (previewOption) {
-      return previewOption.allowed;
-    }
-
-    return catalogAllowedModes?.includes(mode) ?? false;
-  }
-
-  const selectedModeAllowed = isModeAllowedForUser(qualityMode);
-
-  const qualityModeHelpContext = useMemo((): QualityModeHelpContext => {
-    const selectedOption = qualityModeOptions.find((option) => option.id === qualityMode);
-
-    return {
-      allowed: selectedModeAllowed,
-      blockedReason:
-        selectedOption?.blockedReason ?? (!selectedModeAllowed ? "quality_mode_plan_restriction" : undefined)
-    };
-  }, [qualityMode, qualityModeOptions, selectedModeAllowed]);
-
-  useEffect(() => {
-    if (!catalogAllowedModes?.length || catalogAllowedModes.includes(qualityMode)) {
-      return;
-    }
-
-    setQualityMode(catalogAllowedModes[0] ?? "fast");
-  }, [catalogAllowedModes, qualityMode]);
-
-  useEffect(() => {
-    if (qualityModeOptions.length === 0 || selectedModeAllowed) {
-      return;
-    }
-
-    const fallback =
-      qualityModeOptions.find((option) => option.recommended && option.allowed) ??
-      qualityModeOptions.find((option) => option.allowed);
-
-    if (fallback && fallback.id !== qualityMode) {
-      setQualityMode(fallback.id);
-    }
-  }, [qualityMode, qualityModeOptions, selectedModeAllowed]);
-
-  const importedTooLarge = importedContext.length > IMPORTED_CONTEXT_MAX;
-  const currentBalance = commercialPreview?.currentBalance ?? null;
-  const creditPrice = commercialPreview?.pricingSnapshot.creditPrice ?? null;
-  const noCredits = currentBalance !== null && creditPrice !== null && currentBalance < creditPrice;
   const previewRecommendation =
     fullPreview?.recommendation && !recommendationStale ? fullPreview.recommendation : undefined;
 
   async function handleGenerate() {
     if (
-      !selectedType ||
+      !form.selectedType ||
       !commercialPreview ||
-      !briefingComplete ||
-      importedTooLarge ||
-      noCredits ||
-      !selectedModeAllowed
+      !form.briefingComplete ||
+      form.importedTooLarge ||
+      commercialGate.noCredits ||
+      !commercialGate.selectedModeAllowed
     ) {
       return;
     }
 
     setSubmitting(true);
-    setSubmitError(null);
+    form.setSubmitError(null);
 
     try {
       const queued = await client.toPromise(
         client.executions.create({
-          contentType: contentTypeId,
-          briefing,
-          language,
-          qualityMode,
+          contentType: form.contentTypeId,
+          briefing: form.briefing,
+          language: form.language,
+          qualityMode: form.qualityMode,
           quoteId: commercialPreview.pricingSnapshot.quoteId,
           previewRecommendation,
-          importedContext: importedContext.trim() ? importedContext : undefined
+          importedContext: form.importedContext.trim() ? form.importedContext : undefined
         })
       );
 
       registerQueuedExecution(queued, {
-        contentTypeLabel: getContentTypeLabel(locale, contentTypeId, selectedType.label),
-        briefing,
-        language,
-        qualityMode
+        contentTypeLabel: getContentTypeLabel(locale, form.contentTypeId, form.selectedType.label),
+        briefing: form.briefing,
+        language: form.language,
+        qualityMode: form.qualityMode
       });
       openDrawer(queued.jobId);
       setCachedCreditBalance(commercialPreview.projectedBalanceAfterGeneration);
-      resetGenerationForm();
+      form.resetGenerationForm();
     } catch (error) {
-      setSubmitError(formatSdkError(error, messages).message);
+      form.setSubmitError(formatSdkError(error, messages).message);
     } finally {
       setSubmitting(false);
     }
@@ -294,8 +120,7 @@ export function GenerationScreen() {
   const fullErrorMessage = fullError ? formatSdkError(fullError, messages).message : null;
   const commercialInitialLoad = commercialStatus === "loading" && !commercialPreview;
   const showCommercialCalculating =
-    commercialStatus === "idle" && commercialRequest !== null && !commercialPreview;
-
+    commercialStatus === "idle" && form.commercialRequest !== null && !commercialPreview;
   const showReminder = isVoiceStepSkipped(user?.sub);
 
   return (
@@ -350,9 +175,9 @@ export function GenerationScreen() {
               <AppFieldSlot
                 label={messages.generate.contentType}
                 labelAccessory={
-                  contentTypeId && getContentTypeDescription(locale, contentTypeId) ? (
+                  form.contentTypeId && getContentTypeDescription(locale, form.contentTypeId) ? (
                     <HelpTooltip
-                      text={getContentTypeDescription(locale, contentTypeId)!}
+                      text={getContentTypeDescription(locale, form.contentTypeId)!}
                       ariaLabel={messages.generate.contentTypeHelp}
                       placement="responsive-end"
                       size="wide"
@@ -363,8 +188,8 @@ export function GenerationScreen() {
                 <AppSelect
                   id="content-type"
                   className="w-full"
-                  value={contentTypeId}
-                  onChange={handleContentTypeChange}
+                  value={form.contentTypeId}
+                  onChange={form.handleContentTypeChange}
                   placeholder={messages.generate.contentTypePlaceholder}
                   options={(catalog?.items ?? []).map((item) => ({
                     value: item.id,
@@ -377,281 +202,148 @@ export function GenerationScreen() {
               </AppFieldSlot>
             </AppCard>
 
-          {selectedType ? (
-            <>
-              <BriefingGuidancePanel locale={locale} item={selectedType} />
-              <AppCard>
-                <Text as="h2" variant="label" className="mb-4 block">
-                  {messages.generate.briefing}
-                </Text>
-                <BriefingForm
-                  locale={locale}
-                  contentTypeId={selectedType.id}
-                  fields={selectedType.inputSchema}
-                  values={briefing}
-                  onChange={setBriefing}
-                />
-              </AppCard>
-
-              <AppCard padding="compact">
-                {importedOpen ? (
-                  <AppField
-                    multiline
-                    label={messages.generate.importedContextExpand}
-                    value={importedContext}
-                    onChange={(event) => setImportedContext(event.target.value)}
-                    maxLength={IMPORTED_CONTEXT_MAX}
-                    hint={messages.generate.importedContextCounter.replace(
-                      "{count}",
-                      String(importedContext.length)
-                    )}
-                    error={importedTooLarge ? messages.generate.importedContextTooLarge : undefined}
+            {form.selectedType ? (
+              <>
+                <BriefingGuidancePanel locale={locale} item={form.selectedType} />
+                <AppCard>
+                  <Text as="h2" variant="label" className="mb-4 block">
+                    {messages.generate.briefing}
+                  </Text>
+                  <BriefingForm
+                    locale={locale}
+                    contentTypeId={form.selectedType.id}
+                    fields={form.selectedType.inputSchema}
+                    values={form.briefing}
+                    onChange={form.setBriefing}
                   />
-                ) : null}
-                <button
-                  type="button"
-                  className="text-sm font-medium text-moss underline-offset-2 hover:underline"
-                  onClick={() => setImportedOpen((open) => !open)}
-                >
-                  {importedOpen
-                    ? messages.generate.importedContextExpand
-                    : messages.generate.importedContextExpand}
-                </button>
-              </AppCard>
+                </AppCard>
 
-              <AppCard padding="compact">
-                <AppFieldSlot label={messages.generate.language}>
-                  <AppSelect
-                    value={language}
-                    onChange={setLanguage}
-                    options={selectedType.supportedLanguages.map((option) => ({
-                      value: option,
-                      label: getGenerationLanguageLabel(locale, option)
-                    }))}
-                  />
-                </AppFieldSlot>
-              </AppCard>
-
-              <AppCard padding="compact">
-                <AppFieldSlot
-                  label={messages.generate.qualityMode}
-                  labelAccessory={
-                    <HelpTooltip
-                      ariaLabel={messages.qualityModes.help}
-                      placement="responsive-end"
-                      size="wide"
-                      screenReaderText={getQualityModeHelpScreenReaderText(
-                        locale,
-                        qualityMode,
-                        messages,
-                        qualityModeHelpContext
+                <AppCard padding="compact">
+                  {form.importedOpen ? (
+                    <AppField
+                      multiline
+                      label={messages.generate.importedContextExpand}
+                      value={form.importedContext}
+                      onChange={(event) => form.setImportedContext(event.target.value)}
+                      maxLength={IMPORTED_CONTEXT_MAX}
+                      hint={messages.generate.importedContextCounter.replace(
+                        "{count}",
+                        String(form.importedContext.length)
                       )}
-                    >
-                      <QualityModeHelpContent
-                        locale={locale}
-                        mode={qualityMode}
-                        messages={messages}
-                        context={qualityModeHelpContext}
-                      />
-                    </HelpTooltip>
-                  }
-                >
-                  <AppSegmentedControl
-                    name="quality-mode"
-                    value={qualityMode}
-                    onChange={(mode) => setQualityMode(mode as QualityMode)}
-                    options={QUALITY_MODES.map((mode) => {
-                      const option = qualityModeDisplayOptions.find((candidate) => candidate.id === mode);
-                      const allowed = isModeAllowedForUser(mode);
-                      const blockedReason =
-                        option?.blockedReason ?? (!allowed ? "quality_mode_plan_restriction" : undefined);
-
-                      return {
-                        value: mode,
-                        disabled: !allowed,
-                        ariaLabel: getQualityModeTooltip(locale, mode, messages, {
-                          allowed,
-                          blockedReason
-                        }),
-                        label: (
-                          <>
-                            {messages.qualityModes[mode]}
-                            {option?.recommended ? " ★" : ""}
-                          </>
-                        )
-                      };
-                    })}
-                  />
-                </AppFieldSlot>
-              </AppCard>
-            </>
-          ) : null}
-          </div>
-
-          {selectedType ? (
-            <aside className="mt-8 space-y-4 lg:mt-0 lg:sticky lg:top-[calc(var(--app-header-height)+1.5rem)]">
-              <AppCard className="space-y-4">
-                <Text as="h2" variant="label" className="block">
-                  {messages.generate.previewTitle}
-                </Text>
-                {commercialInitialLoad ? (
-                  <AppSkeleton className="h-16 w-full" />
-                ) : null}
-                {commercialPreview ? (
-                  <div
-                    className={`space-y-2 transition-opacity duration-300 ease-out ${
-                      commercialRefreshing ? "opacity-55" : "opacity-100"
-                    }`}
-                  >
-                    <Text variant="meta">
-                      {messages.generate.previewPrice.replace(
-                        "{price}",
-                        String(commercialPreview.pricingSnapshot.creditPrice)
-                      )}
-                    </Text>
-                    <Text variant="meta">
-                      {messages.generate.previewBalance
-                        .replace("{current}", String(commercialPreview.currentBalance))
-                        .replace("{projected}", String(commercialPreview.projectedBalanceAfterGeneration))}
-                    </Text>
-                  </div>
-                ) : null}
-                {fullStatus === "loading" && !fullPreview && briefingComplete ? (
-                  <AppSkeleton className="h-10 w-full" />
-                ) : null}
-                {fullPreview && (previewRecommendation || recommendationStale) ? (
-                  <div
-                    className={`space-y-2 transition-opacity duration-300 ease-out ${
-                      fullRefreshing ? "opacity-55" : "opacity-100"
-                    }`}
-                  >
-                    {previewRecommendation ? (
-                      <Text variant="meta" className="text-muted-foreground">
-                        {getPreviewRecommendationExplanation(locale, previewRecommendation, {
-                          fast: messages.qualityModes.fast,
-                          balanced: messages.qualityModes.balanced,
-                          strict: messages.qualityModes.strict
-                        })}
-                      </Text>
-                    ) : null}
-                    {recommendationStale ? (
-                      <Text variant="meta" className="text-muted-foreground">
-                        {messages.generate.previewRecommendationStale}
-                      </Text>
-                    ) : null}
-                  </div>
-                ) : null}
-                {briefingComplete ? (
+                      error={form.importedTooLarge ? messages.generate.importedContextTooLarge : undefined}
+                    />
+                  ) : null}
                   <button
                     type="button"
-                    className="text-sm font-medium text-moss underline-offset-2 hover:underline disabled:opacity-50"
-                    disabled={fullStatus === "loading"}
-                    onClick={() => setFullRefreshKey((key) => key + 1)}
+                    className="text-sm font-medium text-moss underline-offset-2 hover:underline"
+                    onClick={() => form.setImportedOpen((open) => !open)}
                   >
-                    {messages.generate.previewRefreshRecommendation}
+                    {form.importedOpen
+                      ? messages.generate.importedContextExpand
+                      : messages.generate.importedContextExpand}
                   </button>
-                ) : null}
-                {commercialStatus === "error" && commercialErrorMessage ? (
-                  <Text variant="meta" className="text-red-700">
-                    {commercialErrorMessage}
-                  </Text>
-                ) : null}
-                {fullStatus === "error" && fullErrorMessage ? (
-                  <Text variant="meta" className="text-red-700">
-                    {fullErrorMessage}
-                  </Text>
-                ) : null}
-                {showCommercialCalculating ? (
-                  <Text variant="meta" className="text-muted-foreground">
-                    {messages.generate.calculating}
-                  </Text>
-                ) : null}
+                </AppCard>
 
-                {submitError ? (
-                  <Text variant="meta" className="text-red-700">
-                    {submitError}
-                  </Text>
-                ) : null}
+                <AppCard padding="compact">
+                  <AppFieldSlot label={messages.generate.language}>
+                    <AppSelect
+                      value={form.language}
+                      onChange={form.setLanguage}
+                      options={form.selectedType.supportedLanguages.map((option) => ({
+                        value: option,
+                        label: getGenerationLanguageLabel(locale, option)
+                      }))}
+                    />
+                  </AppFieldSlot>
+                </AppCard>
 
-                <Button
-                  type="button"
-                  className="w-full justify-center"
-                  disabled={
-                    !briefingComplete ||
-                    importedTooLarge ||
-                    submitting ||
-                    commercialStatus === "loading" ||
-                    !commercialPreview ||
-                    noCredits ||
-                    !selectedModeAllowed
-                  }
-                  onClick={() => void handleGenerate()}
-                >
-                  {submitting
-                    ? messages.generate.sending
-                    : noCredits
-                      ? messages.generate.noCredits
-                      : !briefingComplete
-                        ? messages.generate.incomplete
-                        : creditPrice !== null
-                          ? messages.generate.generateWithCredits.replace("{price}", String(creditPrice))
-                          : messages.generate.generate}
-                </Button>
-              </AppCard>
-            </aside>
+                <AppCard padding="compact">
+                  <AppFieldSlot
+                    label={messages.generate.qualityMode}
+                    labelAccessory={
+                      <HelpTooltip
+                        ariaLabel={messages.qualityModes.help}
+                        placement="responsive-end"
+                        size="wide"
+                        screenReaderText={getQualityModeHelpScreenReaderText(
+                          locale,
+                          form.qualityMode,
+                          messages,
+                          commercialGate.qualityModeHelpContext
+                        )}
+                      >
+                        <QualityModeHelpContent
+                          locale={locale}
+                          mode={form.qualityMode}
+                          messages={messages}
+                          context={commercialGate.qualityModeHelpContext}
+                        />
+                      </HelpTooltip>
+                    }
+                  >
+                    <AppSegmentedControl
+                      name="quality-mode"
+                      value={form.qualityMode}
+                      onChange={(mode) => form.setQualityMode(mode as QualityMode)}
+                      options={QUALITY_MODES.map((mode) => {
+                        const option = commercialGate.qualityModeDisplayOptions.find(
+                          (candidate) => candidate.id === mode
+                        );
+                        const allowed = commercialGate.isModeAllowedForUser(mode);
+                        const blockedReason =
+                          option?.blockedReason ?? (!allowed ? "quality_mode_plan_restriction" : undefined);
+
+                        return {
+                          value: mode,
+                          disabled: !allowed,
+                          ariaLabel: getQualityModeTooltip(locale, mode, messages, {
+                            allowed,
+                            blockedReason
+                          }),
+                          label: (
+                            <>
+                              {messages.qualityModes[mode]}
+                              {option?.recommended ? " ★" : ""}
+                            </>
+                          )
+                        };
+                      })}
+                    />
+                  </AppFieldSlot>
+                </AppCard>
+              </>
+            ) : null}
+          </div>
+
+          {form.selectedType ? (
+            <GenerationPreviewSidebar
+              locale={locale}
+              messages={messages}
+              commercialStatus={commercialStatus}
+              commercialPreview={commercialPreview}
+              commercialErrorMessage={commercialErrorMessage}
+              commercialInitialLoad={commercialInitialLoad}
+              showCommercialCalculating={showCommercialCalculating}
+              fullStatus={fullStatus}
+              fullPreview={fullPreview}
+              fullErrorMessage={fullErrorMessage}
+              previewRecommendation={previewRecommendation}
+              recommendationStale={recommendationStale}
+              fullRefreshing={fullRefreshing}
+              commercialRefreshing={commercialRefreshing}
+              briefingComplete={form.briefingComplete}
+              submitError={form.submitError}
+              importedTooLarge={form.importedTooLarge}
+              submitting={submitting}
+              noCredits={commercialGate.noCredits}
+              selectedModeAllowed={commercialGate.selectedModeAllowed}
+              creditPrice={commercialGate.creditPrice}
+              onRefreshRecommendation={() => form.setFullRefreshKey((key) => key + 1)}
+              onGenerate={() => void handleGenerate()}
+            />
           ) : null}
         </div>
       ) : null}
     </div>
-  );
-}
-
-function BriefingGuidancePanel({
-  locale,
-  item
-}: {
-  readonly locale: AppLocale;
-  readonly item: ContentTypeCatalogItemView;
-}) {
-  const { messages } = useAppLocale();
-  const guidance = getBriefingGuidance(locale, item.id, item.briefingGuidance);
-
-  return (
-    <AppCard className="bg-soft-loam/30">
-      <Text as="h2" variant="label" className="mb-2">
-        {messages.generate.guidanceTitle}
-      </Text>
-      <Text variant="meta" className="mb-3 block">
-        {guidance.objective}
-      </Text>
-      {guidance.tips.length > 0 ? (
-        <div className="mb-3">
-          <Text variant="meta" className="mb-1 font-medium">
-            {messages.generate.guidanceTips}
-          </Text>
-          <ul className="list-disc space-y-1 pl-5">
-            {guidance.tips.map((tip) => (
-              <li key={tip}>
-                <Text variant="meta">{tip}</Text>
-              </li>
-            ))}
-          </ul>
-        </div>
-      ) : null}
-      {guidance.commonMistakes.length > 0 ? (
-        <div>
-          <Text variant="meta" className="mb-1 font-medium">
-            {messages.generate.guidanceMistakes}
-          </Text>
-          <ul className="list-disc space-y-1 pl-5">
-            {guidance.commonMistakes.map((mistake) => (
-              <li key={mistake}>
-                <Text variant="meta">{mistake}</Text>
-              </li>
-            ))}
-          </ul>
-        </div>
-      ) : null}
-    </AppCard>
   );
 }
