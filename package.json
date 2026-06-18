@@ -26,6 +26,8 @@
     "eval:reasoning": "tsx scripts/eval-reasoning.ts",
     "eval:development": "tsx scripts/eval-development.ts",
     "eval:development-traits": "tsx scripts/eval-development-traits.ts",
+    "billing:calibrate": "tsx scripts/calibrate-hybrid-pricing.ts",
+    "billing:export-jobs": "pnpm --filter @my-ai-orchestrator/backend exec tsx ../../scripts/export-calibration-jobs.ts",
     "smoke": "vitest run tests/governance/monorepo-governance.test.ts",
     "guardrails:effect": "vitest run tests/governance/effect-hardening-governance.test.ts",
     "test:coverage": "vitest run --coverage",

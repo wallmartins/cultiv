@@ -1,5 +1,8 @@
 # Progress Log
 
+| 2026-06-18 | feat(billing): pricing calibration toolkit + export/calibrate scripts (Phase 0) |
+| 2026-06-18 | docs: hybrid pricing implementation plan (10 tasks, calibration → repricing → quota UX) |
+| 2026-06-18 | docs: hybrid pricing design spec — token-calibrated internal credits, quota presentation layer, Free/Criador/Pro ladder, Generation Screen educational copy (no internal credit exposure) |
 | 2026-06-18 | merge(main): integrate payment gateway (Stripe/Asaas) with architecture-deepening modular payments and split config |
 | 2026-06-18 | refactor(backend,voice): extract `voice-rebuild-derivation-resolvers.ts` (178 lines) — resolvers + text/diversity helpers from `voice-rebuild-derivation.ts` (447→283); `apps/backend/tests/voice-rebuild-derivation-resolvers.test.ts` (3 tests); removed `voice-rebuild-derivation.ts` from file-size allowlist; public API unchanged |
 | 2026-06-18 | refactor(payments): extract generation credit and cycle operations — `billing-generation-credits.ts`, `billing-cycle-operations.ts`, `billing-service-runtime.ts`; `service.ts` 520→240 lines; removed from file-size allowlist; `tests/payments/billing-generation-credits.test.ts`; file-size allowlist now empty |
