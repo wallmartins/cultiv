@@ -1,5 +1,14 @@
 # Progress Log
 
+| 2026-06-18 | refactor(backend): Task 2.4 — extract `in-memory-job-repository.ts` (Map CRUD); `job-store.ts` 421→255 lines (composition + event bus); removed `job-store.ts` and `durable-job-runtime.ts` from file-size allowlist; `apps/backend/tests/in-memory-job-repository.test.ts`; Fase 2 done |
+| 2026-06-18 | refactor(backend): Task 2.3 — extract `execution-enqueue-transaction.ts` (`resolveEnqueueUserId`, `buildRuntimeBase`, `buildExecutionJobRecord`, `runExecutionEnqueueTransaction`); `durable-job-runtime.ts` 466→325 lines (baseline); `apps/backend/tests/execution-enqueue-transaction.test.ts`; enqueue path behavior unchanged |
+| 2026-06-18 | refactor(backend): Task 2.1 — extract `job-status-mappers.ts` (`resolveContentType`, `resolveEstimatedSteps`, `toJobStatusResponse`); dedupe from `job-store.ts` (−16 lines) and `durable-job-runtime.ts` (−27 lines); `apps/backend/tests/job-status-mappers.test.ts`; behavior unchanged |
+| 2026-06-18 | refactor(payments): Task 1.5 — extract domain types to `packages/payments/src/types.ts` and entitlement helpers to `entitlement.ts`; `index.ts` 321→73 lines (re-exports only); internal imports use `./types.js`; removed `index.ts` from file-size allowlist; `tests/payments/billing-types-module.test.ts`; public API unchanged |
+| 2026-06-18 | refactor(payments): Task 1.3 — extract ledger/wallet logic to `packages/payments/src/ledger.ts` (`appendLedgerEntry`, `createWalletFromRepository`, `createEntitlementFromRepository`, `sumLedger`); `service.ts` 631→520 lines; `tests/payments/billing-ledger.test.ts`; public API unchanged |
+| 2026-06-18 | refactor(payments): Task 1.2 — extract `BillingService` to `packages/payments/src/service.ts`; shared helpers in `billing-utils.ts`; repository/plan/credit/subscription modules to break circular deps; `tests/payments/billing-service-module.test.ts`; public API unchanged |
+| 2026-06-18 | refactor(payments): Task 1.1 — extract gateway adapters to `packages/payments/src/gateway/`; types in `gateway/types.ts`; public API unchanged via index re-exports; `tests/payments/gateway-adapters.test.ts` |
+| 2026-06-18 | docs: architecture deepening plan — fases 0–6, allowlist, TDD, dependências |
+| 2026-06-18 | test(governance): file-size governance — 400-line budget for production TS; 9-file allowlist with baselines |
 | 2026-06-17 | docs: payment gateway implementation plan (18 tasks, phases 1a–1c) |
 | 2026-06-17 | docs: payment gateway design spec (Stripe + Asaas hybrid) — checkout, webhooks, BRL/USD routing, security model |
 | 2026-06-17 | fix(web,voice): localize moveLabels — pt dictionary + key normalization; extraction prompt requires moveLabels in output language |
