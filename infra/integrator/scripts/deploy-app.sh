@@ -53,7 +53,24 @@ if [ ! -d "$ARTIFACT_DIR/apps/backend/dist" ]; then
   exit 1
 fi
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PRUNE_SCRIPT="$SCRIPT_DIR/prune-stale-migration-bundles.sh"
+
 cd "$APP_DIR"
+
+if [ -n "${CHECKOUT_DIR:-}" ] && [ -d "$CHECKOUT_DIR/apps/backend/src/infra/migrations" ]; then
+  mkdir -p apps/backend/src/infra/migrations
+  rsync -a --delete "$CHECKOUT_DIR/apps/backend/src/infra/migrations/" apps/backend/src/infra/migrations/
+fi
+
+MIGRATION_SRC_DIR="apps/backend/src/infra/migrations"
+if [ -n "${CHECKOUT_DIR:-}" ] && [ -d "$CHECKOUT_DIR/apps/backend/src/infra/migrations" ]; then
+  MIGRATION_SRC_DIR="$CHECKOUT_DIR/apps/backend/src/infra/migrations"
+fi
+
+if [ -d "$ARTIFACT_DIR/apps/backend/dist" ]; then
+  bash "$PRUNE_SCRIPT" "$ARTIFACT_DIR/apps/backend/dist" "$MIGRATION_SRC_DIR"
+fi
 
 if [ -d apps/backend/dist ]; then
   mv apps/backend/dist "apps/backend/dist.bak.$(date +%F-%H%M)"
@@ -63,16 +80,7 @@ mkdir -p apps/backend/dist
 rsync -a --delete "$ARTIFACT_DIR/apps/backend/dist/" apps/backend/dist/
 cp -r "$ARTIFACT_DIR/apps/backend/policies" apps/backend/policies
 
-if [ -n "${CHECKOUT_DIR:-}" ] && [ -d "$CHECKOUT_DIR/apps/backend/src/infra/migrations" ]; then
-  mkdir -p apps/backend/src/infra/migrations
-  rsync -a --delete "$CHECKOUT_DIR/apps/backend/src/infra/migrations/" apps/backend/src/infra/migrations/
-fi
-
-if [ -f apps/backend/dist/infra/migrations/0010-billing-gateway.js ]; then
-  echo "Stale migration bundle 0010-billing-gateway.js found in deployed dist." >&2
-  ls -la apps/backend/dist/infra/migrations >&2
-  exit 1
-fi
+bash "$PRUNE_SCRIPT" apps/backend/dist "$MIGRATION_SRC_DIR"
 
 if compgen -G "$ARTIFACT_DIR/packages/*/dist" > /dev/null; then
   for pkg in "$ARTIFACT_DIR"/packages/*/dist; do

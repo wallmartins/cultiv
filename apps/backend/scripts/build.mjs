@@ -19,6 +19,8 @@ const migrationEntries = readdirSync(migrationDir)
   .filter((file) => file.endsWith(".ts"))
   .map((file) => join(migrationDir, file));
 
+rmSync("dist", { recursive: true, force: true });
+
 await esbuild.build({
   entryPoints: [
     "src/cli/main.ts",
@@ -37,8 +39,6 @@ await esbuild.build({
   sourcemap: true,
   logLevel: "info"
 });
-
-rmSync("dist/infra/migrations", { recursive: true, force: true });
 
 await esbuild.build({
   entryPoints: migrationEntries,
