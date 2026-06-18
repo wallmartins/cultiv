@@ -30,3 +30,4 @@ apps/web/.nitro/
 # Local scratch and agent session state (not product source)
 .scratch/
 .agents/
+.worktrees/
