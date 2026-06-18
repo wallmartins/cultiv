@@ -1,41 +1,22 @@
-import { randomUUID } from "node:crypto";
 import { Context, Effect, Layer, Ref } from "effect";
 import type {
   JobCreatedResponse,
   JobError,
   JobProgress,
   JobResult,
-  JobStatus,
   JobStatusResponse,
   PipelineRequest,
   ExecutionVoiceMetadataView
 } from "@my-ai-orchestrator/contracts";
-
-interface StoredJob {
-  readonly jobId: string;
-  readonly request: PipelineRequest;
-  readonly createdAt: string;
-  updatedAt: string;
-  readonly contentType: string;
-  readonly estimatedSteps: number;
-  status: JobStatus;
-  progress: JobProgress | null;
-  result: JobResult | null;
-  error: JobError | null;
-  completedAt: string | null;
-  voice: ExecutionVoiceMetadataView | null;
-  readonly userId: string;
-}
+import { createInMemoryJobRepository, snapshotStoredJob } from "./in-memory-job-repository.js";
 
 interface BackendJobStoreState {
-  readonly jobs: Map<string, StoredJob>;
   readonly jobEvents: Map<string, BackendJobEvent[]>;
   readonly listeners: Map<string, Set<JobListener>>;
 }
 
 function createBackendJobStoreState(): BackendJobStoreState {
   return {
-    jobs: new Map(),
     jobEvents: new Map(),
     listeners: new Map()
   };
@@ -113,7 +94,9 @@ export class BackendJobStoreService extends Context.Tag("BackendJobStoreService"
 
 export function createBackendJobStoreService(): Effect.Effect<BackendJobStoreServiceContract, never> {
   return Effect.gen(function* () {
+    const jobsRef = yield* Ref.make(new Map());
     const stateRef = yield* Ref.make(createBackendJobStoreState());
+    const repository = createInMemoryJobRepository(jobsRef);
 
     const notifyListeners = (jobId: string, event: BackendJobEvent) =>
       Effect.gen(function* () {
@@ -139,179 +122,66 @@ export function createBackendJobStoreService(): Effect.Effect<BackendJobStoreSer
         };
       });
 
+    const publishProgress = (jobId: string, progress: JobProgress, occurredAt: string) =>
+      Effect.gen(function* () {
+        const event: BackendJobEvent = {
+          type: "progress",
+          jobId,
+          payload: progress,
+          occurredAt
+        };
+        yield* appendEvent(event);
+        yield* notifyListeners(jobId, event);
+      });
+
     return {
       createQueuedJob: (request, options = {}) =>
         Effect.gen(function* () {
-          const createdAt = options.createdAt ?? new Date().toISOString();
-          const jobId = randomUUID();
-          const contentType = options.contentType ?? resolveContentType(request);
-          const estimatedSteps = options.estimatedSteps ?? resolveEstimatedSteps(request);
-
-          const userId = typeof request === "object" && request !== null && "userId" in request && typeof request.userId === "string"
-            ? request.userId
-            : "anonymous";
-          const job: StoredJob = {
-            jobId,
-            request,
-            createdAt,
-            updatedAt: createdAt,
-            contentType,
-            estimatedSteps,
-            status: "queued",
-            progress: null,
-            result: null,
-            error: null,
-            completedAt: null,
-            voice: options.voice ?? null,
-            userId
-          };
-
-          yield* Ref.update(stateRef, (state) => {
-            const jobs = new Map(state.jobs);
-            jobs.set(jobId, job);
-            return {
-              ...state,
-              jobs
-            };
-          });
-
+          const job = yield* repository.createQueuedJob(request, options);
           const queuedProgress: JobProgress = {
             currentStep: "queued",
             stepIndex: 0,
-            totalSteps: estimatedSteps,
+            totalSteps: job.estimatedSteps,
             percent: 0
           };
-          const event: BackendJobEvent = {
-            type: "progress",
-            jobId,
-            payload: queuedProgress,
-            occurredAt: createdAt
-          };
-          yield* appendEvent(event);
-          yield* notifyListeners(jobId, event);
+          yield* publishProgress(job.jobId, queuedProgress, job.createdAt);
 
           return {
-            jobId,
+            jobId: job.jobId,
             status: "queued",
-            contentType,
-            estimatedSteps,
-            createdAt
+            contentType: job.contentType,
+            estimatedSteps: job.estimatedSteps,
+            createdAt: job.createdAt
           };
         }),
       getJobStatus: (jobId) =>
-        Ref.get(stateRef).pipe(
-          Effect.map((state) => {
-            const job = state.jobs.get(jobId);
-            if (!job) {
-              return undefined;
-            }
-            return snapshotJob(job);
-          })
-        ),
+        repository.getJob(jobId).pipe(Effect.map((job) => (job ? snapshotStoredJob(job) : undefined))),
       listJobs: () =>
-        Ref.get(stateRef).pipe(
-          Effect.map((state) => [...state.jobs.values()].map(snapshotJob).sort((left, right) => right.createdAt.localeCompare(left.createdAt)))
-        ),
+        repository.listJobs().pipe(Effect.map((jobs) => jobs.map(snapshotStoredJob))),
       listJobsForUser: (userId, limit, offset) =>
-        Ref.get(stateRef).pipe(
-          Effect.map((state) => {
-            const items = [...state.jobs.values()]
-              .filter((job) => job.userId === userId)
-              .map(snapshotJob)
-              .sort((left, right) => right.createdAt.localeCompare(left.createdAt));
-            return {
-              items: items.slice(offset, offset + limit),
-              total: items.length
-            };
-          })
+        repository.listJobsForUser(userId, limit, offset).pipe(
+          Effect.map(({ items, total }) => ({
+            items: items.map(snapshotStoredJob),
+            total
+          }))
         ),
-      claimQueuedJob: (jobId) =>
-        Effect.gen(function* () {
-          const state = yield* Ref.get(stateRef);
-          const job = state.jobs.get(jobId);
-          if (!job || job.status !== "queued") {
-            return false;
-          }
-
-          const nextJob: StoredJob = {
-            ...job,
-            status: "running",
-            updatedAt: new Date().toISOString()
-          };
-
-          yield* Ref.update(stateRef, (current) => {
-            const jobs = new Map(current.jobs);
-            jobs.set(jobId, nextJob);
-            return { ...current, jobs };
-          });
-
-          return true;
-        }),
+      claimQueuedJob: (jobId) => repository.claimQueuedJob(jobId),
       updateJobProgress: (jobId, progress, updatedAt = new Date().toISOString()) =>
         Effect.gen(function* () {
-          const state = yield* Ref.get(stateRef);
-          const job = state.jobs.get(jobId);
+          const job = yield* repository.updateJobProgress(jobId, progress, updatedAt);
           if (!job) {
             return undefined;
           }
 
-          const nextJob: StoredJob = {
-            ...job,
-            status: "running",
-            progress,
-            updatedAt
-          };
-
-          yield* Ref.update(stateRef, (current) => {
-            const jobs = new Map(current.jobs);
-            jobs.set(jobId, nextJob);
-            return {
-              ...current,
-              jobs
-            };
-          });
-
-          const event: BackendJobEvent = {
-            type: "progress",
-            jobId,
-            payload: progress,
-            occurredAt: updatedAt
-          };
-          yield* appendEvent(event);
-          yield* notifyListeners(jobId, event);
-
-          return snapshotJob(nextJob);
+          yield* publishProgress(jobId, progress, updatedAt);
+          return snapshotStoredJob(job);
         }),
       completeJob: (jobId, result, completedAt = new Date().toISOString()) =>
         Effect.gen(function* () {
-          const state = yield* Ref.get(stateRef);
-          const job = state.jobs.get(jobId);
+          const job = yield* repository.completeJob(jobId, result, completedAt);
           if (!job) {
             return undefined;
           }
-
-          const nextJob: StoredJob = {
-            ...job,
-            status: "done",
-            result,
-            completedAt,
-            updatedAt: completedAt,
-            progress: {
-              currentStep: "completed",
-              stepIndex: Math.max(job.estimatedSteps - 1, 0),
-              totalSteps: job.estimatedSteps,
-              percent: 100
-            }
-          };
-
-          yield* Ref.update(stateRef, (current) => {
-            const jobs = new Map(current.jobs);
-            jobs.set(jobId, nextJob);
-            return {
-              ...current,
-              jobs
-            };
-          });
 
           const event: BackendJobEvent = {
             type: "done",
@@ -321,33 +191,14 @@ export function createBackendJobStoreService(): Effect.Effect<BackendJobStoreSer
           };
           yield* appendEvent(event);
           yield* notifyListeners(jobId, event);
-
-          return snapshotJob(nextJob);
+          return snapshotStoredJob(job);
         }),
       failJob: (jobId, error, completedAt = new Date().toISOString()) =>
         Effect.gen(function* () {
-          const state = yield* Ref.get(stateRef);
-          const job = state.jobs.get(jobId);
+          const job = yield* repository.failJob(jobId, error, completedAt);
           if (!job) {
             return undefined;
           }
-
-          const nextJob: StoredJob = {
-            ...job,
-            status: "failed",
-            error,
-            completedAt,
-            updatedAt: completedAt
-          };
-
-          yield* Ref.update(stateRef, (current) => {
-            const jobs = new Map(current.jobs);
-            jobs.set(jobId, nextJob);
-            return {
-              ...current,
-              jobs
-            };
-          });
 
           const event: BackendJobEvent = {
             type: "error",
@@ -357,8 +208,7 @@ export function createBackendJobStoreService(): Effect.Effect<BackendJobStoreSer
           };
           yield* appendEvent(event);
           yield* notifyListeners(jobId, event);
-
-          return snapshotJob(nextJob);
+          return snapshotStoredJob(job);
         }),
       listJobEvents: (jobId) =>
         Ref.get(stateRef).pipe(
@@ -402,35 +252,4 @@ export function createBackendJobStoreService(): Effect.Effect<BackendJobStoreSer
 
 export function createBackendJobStoreLayer() {
   return Layer.effect(BackendJobStoreService, createBackendJobStoreService());
-}
-
-function resolveContentType(request: PipelineRequest): string {
-  if ("pipeline" in request) {
-    return request.pipeline.name;
-  }
-
-  return request.contentType ?? request.pipelineType;
-}
-
-function resolveEstimatedSteps(request: PipelineRequest): number {
-  if ("pipeline" in request) {
-    return Math.max(request.pipeline.steps.length, 1);
-  }
-
-  return 1;
-}
-
-function snapshotJob(job: StoredJob): JobStatusResponse {
-  return {
-    jobId: job.jobId,
-    status: job.status,
-    contentType: job.contentType,
-    progress: job.progress,
-    result: job.result,
-    error: job.error,
-    createdAt: job.createdAt,
-    completedAt: job.completedAt,
-    ...(job.voice ? { voice: job.voice } : {}),
-    userId: job.userId
-  };
 }

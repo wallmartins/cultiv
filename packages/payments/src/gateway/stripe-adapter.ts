@@ -9,7 +9,7 @@ import type {
   CheckoutSessionResult,
   GatewayWebhookEvent
 } from "./types.js";
-import type { BillingGatewayAdapter, BillingGatewayChargeRequest } from "../index.js";
+import type { BillingGatewayAdapter, BillingGatewayChargeRequest } from "./types.js";
 
 export interface StripeGatewayAdapterOptions {
   readonly secretKey: string;

@@ -1,6 +1,5 @@
 import { randomUUID } from "node:crypto";
 import { Effect } from "effect";
-import { createBillingService } from "@my-ai-orchestrator/payments";
 import type { Kysely } from "kysely";
 import type { Redis } from "ioredis";
 import type {
@@ -18,69 +17,28 @@ import type { DatabaseClient } from "@my-ai-orchestrator/database";
 import type { BackendConfig } from "../config/config.js";
 import type { ResolvedPricingEnvelope } from "../product/ai-policy/ai-policy-types.js";
 import type { BackendJobEvent, BackendJobStoreServiceContract } from "../jobs/job-store.js";
-import type { DatabaseTables } from "../infra/postgres-tables.js";
 import {
-  insertOutboxEvent,
-  reloadBillingRepositoryInto,
-  saveBillingRepositoryInTransaction
-} from "../infra/durable-store.js";
+  resolveContentType,
+  resolveEstimatedSteps,
+  toJobStatusResponse
+} from "../jobs/job-status-mappers.js";
+import type { DatabaseTables } from "../infra/postgres-tables.js";
+import { reloadBillingRepositoryInto } from "../infra/durable-store.js";
 import { appendPersistedExecutionEvent, listPersistedExecutionEvents } from "./execution-events.js";
 import { closeExecutionEventSubscriber, subscribeExecutionEvents } from "./execution-events.js";
 import { persistContentType } from "../product/catalog/persistence-content-types.js";
-import {
-  reserveBackendExecutionCredits
-} from "../execution/billing.js";
 import { resolveBackendBillingIdentity } from "../execution/billing.js";
-import { resolveUsagePolicyModel } from "../product/usage/resolve-usage-policy-model.js";
 import { createExecutionFailure } from "../execution/pipeline/execution-failure.js";
 import { BackendExecutionFailedError } from "../http/errors.js";
+import {
+  buildEnqueueCreatedResponse,
+  buildEnqueueProgressEvent,
+  resolveEnqueueEstimatedSteps,
+  runExecutionEnqueueTransaction,
+  type ExecutionRuntimePayload
+} from "./execution-enqueue-transaction.js";
 
-export interface ExecutionRuntimePayload {
-  readonly userId: string;
-  readonly request: PipelineRequest;
-  readonly plan?: OrchestrationPlan;
-  readonly estimatedSteps: number;
-  readonly voice?: ExecutionVoiceMetadataView;
-  readonly pricingEnvelope?: ResolvedPricingEnvelope;
-  readonly simulateCredits?: boolean;
-  readonly creditReservationId?: string;
-}
-
-export interface ExecutionJobDocument {
-  readonly runtime: ExecutionRuntimePayload;
-  readonly estimatedSteps: number;
-}
-
-function resolveContentType(request: PipelineRequest): string {
-  if ("pipeline" in request) {
-    return request.pipeline.name;
-  }
-
-  return request.contentType ?? request.pipelineType ?? "unknown";
-}
-
-function resolveEstimatedSteps(request: PipelineRequest, fallback: number): number {
-  if ("pipeline" in request) {
-    return Math.max(1, request.pipeline.steps.length);
-  }
-
-  return fallback;
-}
-
-function toJobStatusResponse(record: import("@my-ai-orchestrator/database").JobRecord, runtime?: ExecutionRuntimePayload): JobStatusResponse {
-  return {
-    jobId: record.id,
-    status: record.status,
-    contentType: record.contentType,
-    progress: record.progress,
-    result: record.result,
-    error: record.error,
-    createdAt: record.createdAt,
-    completedAt: record.completedAt,
-    voice: runtime?.voice,
-    userId: runtime?.userId
-  };
-}
+export type { ExecutionRuntimePayload, ExecutionJobDocument } from "./execution-enqueue-transaction.js";
 
 function readRuntimePayload(record: import("@my-ai-orchestrator/database").JobRecord): ExecutionRuntimePayload | undefined {
   const historyPayload = record.history.find((entry) => entry.type === "created")?.payload;
@@ -133,10 +91,7 @@ export function createDurableJobRuntime(options: DurableJobRuntimeOptions): Dura
     Effect.gen(function* () {
       const createdAt = options.now().toISOString();
       const jobId = randomUUID();
-      const userId =
-        "userId" in request && typeof request.userId === "string" ? request.userId : "anonymous";
-      const estimatedSteps = Math.max(1, input.plan.pipeline.steps.length);
-
+      const estimatedSteps = resolveEnqueueEstimatedSteps(input.plan);
       const billingIdentity = resolveBackendBillingIdentity(
         request,
         options.billing,
@@ -144,110 +99,26 @@ export function createDurableJobRuntime(options: DurableJobRuntimeOptions): Dura
         `generation:${input.plan.pipeline.name}:${input.plan.request.idempotencyKey ?? jobId}`
       );
 
-      const runtimeBase = {
-        userId,
-        request,
-        plan: input.plan,
-        estimatedSteps,
-        voice: input.voice,
-        pricingEnvelope: input.pricingEnvelope,
-        simulateCredits: input.simulateCredits
-      } satisfies Omit<ExecutionRuntimePayload, "creditReservationId">;
-
       yield* Effect.tryPromise({
         try: () =>
-          options.postgres.transaction().execute(async (trx) => {
-            let creditReservationId: string | undefined;
-
-            if (!input.simulateCredits) {
-              const txnBilling = createBillingService({ repository: options.billingRepository });
-              const reservation = await Effect.runPromise(
-                reserveBackendExecutionCredits(
-                  txnBilling,
-                  billingIdentity,
-                  input.plan.request.qualityMode,
-                  Math.max(0, input.plan.pipeline.steps.length - 1),
-                  input.pricingEnvelope?.creditPrice,
-                  {
-                    pipelineName: input.plan.pipeline.name,
-                    contentType: input.plan.contentType.id,
-                    adapter: request.adapter ?? options.config.serviceName,
-                    model: resolveUsagePolicyModel(
-                      request,
-                      input.plan.request.qualityMode ?? options.config.qualityMode
-                    )
-                  }
-                )
-              );
-              creditReservationId = reservation.reservationId;
-              await Effect.runPromise(
-                saveBillingRepositoryInTransaction(trx, options.billingRepository, createdAt)
-              );
-            }
-
-            const runtime: ExecutionRuntimePayload = {
-              ...runtimeBase,
-              creditReservationId
-            };
-
-            const queuedProgress: JobProgress = {
-              currentStep: "queued",
-              stepIndex: 0,
-              totalSteps: estimatedSteps,
-              percent: 0
-            };
-
-            const record = {
-              id: jobId,
-              status: "queued" as const,
-              executionMode: input.plan.request.executionMode,
-              contentType: input.plan.contentType.id,
+          runExecutionEnqueueTransaction(
+            {
+              postgres: options.postgres,
+              billingRepository: options.billingRepository,
+              billing: options.billing,
+              config: options.config
+            },
+            {
+              request,
+              plan: input.plan,
+              voice: input.voice,
+              pricingEnvelope: input.pricingEnvelope,
+              simulateCredits: input.simulateCredits,
+              jobId,
               createdAt,
-              completedAt: null,
-              pipelineId: input.plan.pipeline.name,
-              version: 1,
-              progress: queuedProgress,
-              progressHistory: [],
-              result: null,
-              error: null,
-              updatedAt: createdAt,
-              history: [
-                {
-                  type: "created" as const,
-                  at: createdAt,
-                  payload: {
-                    runtime,
-                    contentType: input.plan.contentType.id,
-                    executionMode: input.plan.request.executionMode,
-                    pipelineName: input.plan.pipeline.name
-                  }
-                }
-              ]
-            };
-
-            await trx
-              .insertInto("jobs")
-              .values({
-                id: jobId,
-                user_id: userId,
-                data: JSON.stringify(record),
-                version: 1,
-                created_at: createdAt,
-                updated_at: createdAt
-              })
-              .execute();
-
-            await Effect.runPromise(
-              insertOutboxEvent(trx, {
-                id: randomUUID(),
-                aggregateType: "execution",
-                aggregateId: jobId,
-                eventType: "ExecutionEnqueued",
-                payload: { executionId: jobId, userId },
-                occurredAt: createdAt
-              })
-            );
-          }),
+              billingIdentity
+            }
+          ),
         catch: (error) =>
           createExecutionFailure({
             message: error instanceof Error ? error.message : String(error),
@@ -259,26 +130,14 @@ export function createDurableJobRuntime(options: DurableJobRuntimeOptions): Dura
 
       yield* persistContentType(options.database, input.plan, createdAt).pipe(Effect.catchAll(() => Effect.void));
 
-      const event: BackendJobEvent = {
-        type: "progress",
-        jobId,
-        payload: {
-          currentStep: "queued",
-          stepIndex: 0,
-          totalSteps: estimatedSteps,
-          percent: 0
-        },
-        occurredAt: createdAt
-      };
-      yield* publish(event);
+      yield* publish(buildEnqueueProgressEvent(jobId, estimatedSteps, createdAt));
 
-      return {
+      return buildEnqueueCreatedResponse({
         jobId,
-        status: "queued",
-        contentType: input.plan.contentType.id,
+        plan: input.plan,
         estimatedSteps,
         createdAt
-      } satisfies JobCreatedResponse;
+      });
     });
 
   return {
@@ -296,7 +155,7 @@ export function createDurableJobRuntime(options: DurableJobRuntimeOptions): Dura
           typeof request === "object" && request !== null && "userId" in request && typeof request.userId === "string"
             ? request.userId
             : "anonymous";
-        const contentType = enqueueOptions.contentType ?? resolveContentType(request);
+        const contentType = enqueueOptions.contentType ?? resolveContentType(request, "unknown");
         const estimatedSteps = enqueueOptions.estimatedSteps ?? resolveEstimatedSteps(request, 1);
         const queuedProgress: JobProgress = {
           currentStep: "queued",

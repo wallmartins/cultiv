@@ -9,6 +9,7 @@ import {
   loadBackendEnvironment,
   readValidatedBackendConfig
 } from "../../apps/backend";
+import { validateBackendConfig } from "../../apps/backend/src/config/config-validate.js";
 
 describe("backend config bootstrap", () => {
   it("loads local env files through the shared bootstrap path", () => {
@@ -69,6 +70,31 @@ describe("backend config bootstrap", () => {
         requiredEnvVars: ["GEMINI_API_KEY"]
       })
     ).toThrowError(BackendConfigValidationError);
+  });
+
+  it("validates config through config-validate module", () => {
+    const envVars: NodeJS.ProcessEnv = {
+      NODE_ENV: "development",
+      SERVICE_NAME: "backend",
+      HOST: "127.0.0.1",
+      PORT: "3000",
+      APP_VERSION: "0.1.0",
+      BACKEND_ALLOW_IN_MEMORY_RUNTIME: "true"
+    };
+
+    expect(() =>
+      validateBackendConfig(envVars, {
+        environment: "development",
+        executionMode: "sync",
+        qualityMode: "balanced",
+        defaultLanguage: "pt-BR",
+        serviceName: "backend",
+        host: "127.0.0.1",
+        port: 3000,
+        version: "0.1.0",
+        allowInMemoryRuntime: true
+      })
+    ).not.toThrow();
   });
 
   it("fails fast with clear validation errors for invalid or missing required config", () => {

@@ -3,7 +3,7 @@ import type {
   BillingGatewayAdapter,
   BillingGatewayChargeRequest,
   BillingGatewayChargeResult
-} from "../index.js";
+} from "./types.js";
 
 export function createManualGateway(): BillingGatewayAdapter {
   return {
