@@ -10,7 +10,6 @@ const FILE_SIZE_ALLOWLIST = new Set<string>([
   "apps/backend/src/product/voice/voice-rebuild-derivation.ts",
   "apps/backend/src/product/voice/voice-rebuild-pipeline.ts",
   "packages/contracts/src/execution.ts",
-  "packages/feature-flags/src/index.ts",
   "packages/payments/src/service.ts"
 ]);
 
@@ -19,7 +18,6 @@ const FILE_SIZE_BASELINE = new Map<string, number>([
   ["apps/backend/src/product/voice/voice-rebuild-derivation.ts", 447],
   ["apps/backend/src/product/voice/voice-rebuild-pipeline.ts", 445],
   ["packages/contracts/src/execution.ts", 476],
-  ["packages/feature-flags/src/index.ts", 455],
   ["packages/payments/src/service.ts", 520]
 ]);
 

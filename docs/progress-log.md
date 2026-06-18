@@ -1,5 +1,6 @@
 # Progress Log
 
+| 2026-06-18 | refactor(feature-flags): Fase 6a — split `index.ts` (455→47 lines) into `defaults.ts`, `types.ts`, `registry.ts`, `evaluator.ts`, `service.ts`, `validation.ts`, `domain-helpers.ts`; removed `index.ts` from file-size allowlist; `tests/feature-flags/feature-flags-module.test.ts`; public API unchanged |
 | 2026-06-18 | refactor(backend,voice): Fase 3 — split `voice-rebuild-service.ts` (547→38 lines) into `voice-rebuild-queue.ts` (113), `voice-rebuild-pipeline.ts` (445); `apps/backend/tests/voice-rebuild-queue.test.ts`, `voice-rebuild-pipeline.test.ts`; removed `voice-rebuild-service.ts` from file-size allowlist; behavior unchanged |
 | 2026-06-18 | refactor(backend): split postgres billing store — `billing/billing-persist-queue.ts`, `billing-row-mappers.ts`, `postgres-billing-repository.ts`, `billing-snapshot-migration.ts`; `postgres-billing-store.ts` 422→17 lines (facade); removed from file-size allowlist; `apps/backend/tests/billing-row-mappers.test.ts`, `billing-persist-queue.test.ts`; Fase 5 done |
 | 2026-06-18 | refactor(backend): Task 2.4 — extract `in-memory-job-repository.ts` (Map CRUD); `job-store.ts` 421→255 lines (composition + event bus); removed `job-store.ts` and `durable-job-runtime.ts` from file-size allowlist; `apps/backend/tests/in-memory-job-repository.test.ts`; Fase 2 done |
