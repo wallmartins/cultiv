@@ -89,14 +89,16 @@ export function mapBillingUsageToRow(entry: BillingUsageRecord): BillingUsageRec
   };
 }
 
-export function mapBillingLedgerFromRow(row: BillingLedgerEntriesTable): BillingLedgerEntry {
+export function mapBillingLedgerFromRow(
+  row: Omit<BillingLedgerEntriesTable, "id"> & { readonly id?: number }
+): BillingLedgerEntry {
   return {
     subscriptionId: row.subscription_id,
     accountId: row.account_id,
-    entryType: row.entry_type,
+    entryType: row.entry_type as BillingLedgerEntry["entryType"],
     creditsDelta: row.credits_delta,
     balanceAfter: row.balance_after,
-    referenceType: row.reference_type,
+    referenceType: row.reference_type as BillingLedgerEntry["referenceType"],
     referenceId: row.reference_id,
     idempotencyKey: row.idempotency_key,
     metadata: (row.metadata ?? {}) as Record<string, unknown>,
@@ -127,10 +129,10 @@ export function mapBillingReservationFromRow(
     generationCycleId: row.generation_cycle_id,
     subscriptionId: row.subscription_id,
     accountId: row.account_id,
-    qualityMode: row.quality_mode,
+    qualityMode: row.quality_mode as BillingGenerationReservation["qualityMode"],
     retryCount: row.retry_count,
     reservedCredits: row.reserved_credits,
-    status: row.status,
+    status: row.status as BillingGenerationReservation["status"],
     idempotencyKey: row.idempotency_key,
     metadata: (row.metadata ?? {}) as Record<string, unknown>,
     createdAt: row.created_at,
