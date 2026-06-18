@@ -94,22 +94,23 @@ Decompor pipeline de rebuild de voz.
 
 ---
 
-### Fase 4 — GenerationScreen (hooks + components)
+### Fase 4 — GenerationScreen ✅ CONCLUÍDA
 
 Refatorar a tela de geração web (~657 linhas).
 
 **Entregas:**
 
-- Extrair hooks (`useGenerationForm`, preview, submit, blocked reasons)
-- Componentes de apresentação menores (formulário, preview, quality mode, ações)
-- `GenerationScreen.tsx` como composição fina (≤ 400 linhas)
-- Testes web existentes verdes; cobertura para hooks extraídos onde fizer sentido
+- Extrair hooks (`useGenerationForm`, `useGenerationCommercialGate`)
+- Componentes de apresentação menores (`GenerationPreviewSidebar`, `BriefingGuidancePanel`)
+- `get-blocked-reason.ts` — função pura de mapeamento de bloqueio
+- `GenerationScreen.tsx` como composição fina (349 linhas, ≤ 400)
+- `tests/web/use-generation-commercial-gate.test.ts` — 8 testes para `getBlockedReason` e `isQualityModeAllowedForUser`
 
 **Nota:** O teste de governança atual **não** cobre `apps/web/`; esta fase prepara o terreno para extensão futura do orçamento ao frontend.
 
----
+**Status:** done (2026-06-18)
 
-### Fase 5 — Postgres billing store split
+### Fase 5 — Postgres billing store split ✅ CONCLUÍDA
 
 Decompor `apps/backend/src/infra/postgres-billing-store.ts`.
 
@@ -118,6 +119,8 @@ Decompor `apps/backend/src/infra/postgres-billing-store.ts`.
 - Separar mappers, queries Kysely e adaptador de repositório
 - Depende da estrutura de tipos/módulos da Fase 1 (`packages/payments`)
 - Testes de persistência billing durável verdes
+
+**Status:** done (2026-06-18)
 
 ---
 
@@ -148,7 +151,7 @@ Cada entrada deve ser **removida da allowlist** (e do `FILE_SIZE_BASELINE`) quan
 | ~~`apps/backend/src/runtime/durable-job-runtime.ts`~~ | ~~466~~ | **2** — removido (324 linhas) |
 | `apps/backend/src/product/voice/voice-rebuild-derivation.ts` | 447 | **3** — voice-rebuild |
 | `apps/backend/src/product/voice/voice-rebuild-service.ts` | 547 | **3** — voice-rebuild |
-| `apps/backend/src/infra/postgres-billing-store.ts` | 422 | **5** — postgres-billing-store |
+| ~~`apps/backend/src/infra/postgres-billing-store.ts`~~ | ~~422~~ | **5** — removido (17 linhas facade) |
 | `packages/feature-flags/src/index.ts` | 455 | **6** — hardening |
 | `packages/contracts/src/execution.ts` | 476 | **6** — hardening |
 | `apps/backend/src/config/config.ts` | 413 | **6** — hardening |
@@ -190,19 +193,19 @@ Cada entrada deve ser **removida da allowlist** (e do `FILE_SIZE_BASELINE`) quan
 - [ ] Todos os módulos resultantes ≤ 400 linhas
 - [ ] Regressões de voz (`pnpm eval:reasoning`, `pnpm eval:development`) verdes
 
-### Fase 4 — GenerationScreen
+### Fase 4 — GenerationScreen ✅
 
-- [ ] Hooks dedicados extraídos de `GenerationScreen.tsx`
-- [ ] Componentes de UI menores e reutilizáveis
-- [ ] `GenerationScreen.tsx` ≤ 400 linhas
-- [ ] Testes web verdes; sem regressão visual/funcional na tela de geração
+- [x] Hooks dedicados extraídos de `GenerationScreen.tsx`
+- [x] Componentes de UI menores e reutilizáveis
+- [x] `GenerationScreen.tsx` ≤ 400 linhas (349)
+- [x] Testes web verdes; sem regressão visual/funcional na tela de geração
 
-### Fase 5 — Postgres billing store
+### Fase 5 — Postgres billing store ✅
 
-- [ ] `postgres-billing-store.ts` decomposto (mappers, queries, adapter)
-- [ ] Entrada removida da allowlist
-- [ ] Todos os módulos resultantes ≤ 400 linhas
-- [ ] Testes de persistência billing durável verdes
+- [x] `postgres-billing-store.ts` decomposto (mappers, queries, adapter)
+- [x] Entrada removida da allowlist
+- [x] Todos os módulos resultantes ≤ 400 linhas
+- [x] Testes de persistência billing durável verdes
 
 ### Fase 6 — Hardening
 

@@ -7,7 +7,6 @@ const MAX_LINE_COUNT = 400;
 // Remove entries as architecture-deepening phases complete.
 const FILE_SIZE_ALLOWLIST = new Set<string>([
   "apps/backend/src/config/config.ts",
-  "apps/backend/src/infra/postgres-billing-store.ts",
   "apps/backend/src/product/voice/voice-rebuild-derivation.ts",
   "apps/backend/src/product/voice/voice-rebuild-service.ts",
   "packages/contracts/src/execution.ts",
@@ -17,7 +16,6 @@ const FILE_SIZE_ALLOWLIST = new Set<string>([
 
 const FILE_SIZE_BASELINE = new Map<string, number>([
   ["apps/backend/src/config/config.ts", 413],
-  ["apps/backend/src/infra/postgres-billing-store.ts", 422],
   ["apps/backend/src/product/voice/voice-rebuild-derivation.ts", 447],
   ["apps/backend/src/product/voice/voice-rebuild-service.ts", 547],
   ["packages/contracts/src/execution.ts", 476],
