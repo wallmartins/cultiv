@@ -1,5 +1,6 @@
 # Progress Log
 
+| 2026-06-18 | refactor(backend,voice): extract `voice-rebuild-derivation-resolvers.ts` (178 lines) — resolvers + text/diversity helpers from `voice-rebuild-derivation.ts` (447→283); `apps/backend/tests/voice-rebuild-derivation-resolvers.test.ts` (3 tests); removed `voice-rebuild-derivation.ts` from file-size allowlist; public API unchanged |
 | 2026-06-18 | refactor(payments): extract generation credit and cycle operations — `billing-generation-credits.ts`, `billing-cycle-operations.ts`, `billing-service-runtime.ts`; `service.ts` 520→240 lines; removed from file-size allowlist (2 voice entries remain); `tests/payments/billing-generation-credits.test.ts`; 738 CI tests green |
 | 2026-06-18 | refactor(backend,voice): extract `voice-rebuild-pipeline-diagnostics.ts` (`markRebuildQueued`, `markRebuildFailure`, `clearProfileImpactFlags`, `attachTraitProfileToDevelopment`); `voice-rebuild-pipeline.ts` 445→298 lines; removed from file-size allowlist; `apps/backend/tests/voice-rebuild-pipeline-diagnostics.test.ts` (4 tests); 738 CI tests green |
 | 2026-06-18 | docs: architecture-deepening phases 3–6 complete — allowlist reduced to 3 entries (voice-rebuild-derivation, voice-rebuild-pipeline, payments/service); 729 CI tests green |
