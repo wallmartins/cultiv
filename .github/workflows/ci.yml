@@ -234,6 +234,7 @@ jobs:
         run: |
           set -euo pipefail
           export ARTIFACT_DIR=/tmp/deploy-artifact
+          export CHECKOUT_DIR="$GITHUB_WORKSPACE"
           export CULTIV_ROOT="${CULTIV_ROOT:-}"
           export CULTIV_APP="${CULTIV_APP:-}"
           bash infra/integrator/scripts/deploy-app.sh

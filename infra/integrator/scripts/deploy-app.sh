@@ -59,8 +59,20 @@ if [ -d apps/backend/dist ]; then
   mv apps/backend/dist "apps/backend/dist.bak.$(date +%F-%H%M)"
 fi
 
-cp -r "$ARTIFACT_DIR/apps/backend/dist" apps/backend/dist
+mkdir -p apps/backend/dist
+rsync -a --delete "$ARTIFACT_DIR/apps/backend/dist/" apps/backend/dist/
 cp -r "$ARTIFACT_DIR/apps/backend/policies" apps/backend/policies
+
+if [ -n "${CHECKOUT_DIR:-}" ] && [ -d "$CHECKOUT_DIR/apps/backend/src/infra/migrations" ]; then
+  mkdir -p apps/backend/src/infra/migrations
+  rsync -a --delete "$CHECKOUT_DIR/apps/backend/src/infra/migrations/" apps/backend/src/infra/migrations/
+fi
+
+if [ -f apps/backend/dist/infra/migrations/0010-billing-gateway.js ]; then
+  echo "Stale migration bundle 0010-billing-gateway.js found in deployed dist." >&2
+  ls -la apps/backend/dist/infra/migrations >&2
+  exit 1
+fi
 
 if compgen -G "$ARTIFACT_DIR/packages/*/dist" > /dev/null; then
   for pkg in "$ARTIFACT_DIR"/packages/*/dist; do
