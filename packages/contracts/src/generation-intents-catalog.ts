@@ -1,6 +1,7 @@
 import { Schema } from "effect";
 import { BriefingGuidanceViewSchema, ContentTypeFieldViewSchema } from "./content-types.js";
 import { GenerationIntentSchema, GenerationLengthTierSchema } from "./generation-intent.js";
+import { createSchemaDecoder } from "./shared.js";
 
 export const GenerationIntentCatalogItemSchema = Schema.Struct({
   id: GenerationIntentSchema,
@@ -17,3 +18,8 @@ export const GenerationIntentCatalogViewSchema = Schema.Struct({
   items: Schema.Array(GenerationIntentCatalogItemSchema)
 });
 export type GenerationIntentCatalogView = typeof GenerationIntentCatalogViewSchema.Type;
+
+export const decodeGenerationIntentCatalogView = createSchemaDecoder(
+  "GenerationIntentCatalogView",
+  GenerationIntentCatalogViewSchema
+);

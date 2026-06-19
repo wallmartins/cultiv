@@ -20,6 +20,7 @@ import { assertQuoteConsistency, resolveExecutionPricingSnapshot } from "../prod
 import { resolvePublicActor } from "../auth/auth-middleware.js";
 import { registerExecutionRoutes } from "../routes/execution-routes.js";
 import { registerContentTypeRoutes } from "../routes/content-type-routes.js";
+import { registerGenerationIntentRoutes } from "../routes/generation-intent-routes.js";
 import { registerGenerationPreviewRoutes } from "../routes/generation-preview-routes.js";
 import { registerExperimentalExecutionRoutes } from "../routes/experimental-execution-routes.js";
 import { registerInternalPolicyRoutes } from "../routes/internal-policy-routes.js";
@@ -121,6 +122,10 @@ export function registerBackendRoutes(app: Hono, options: BackendRouteOptions): 
     services: options.services
   });
   registerContentTypeRoutes(app, {
+    config: options.config,
+    services: options.services
+  });
+  registerGenerationIntentRoutes(app, {
     config: options.config,
     services: options.services
   });

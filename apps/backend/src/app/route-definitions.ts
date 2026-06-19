@@ -7,6 +7,7 @@ export const Routes = {
   PostApiRun: "POST /api/run",
 
   GetMeContentTypes: "GET /me/content-types",
+  GetMeGenerationIntents: "GET /me/generation-intents",
 
   PostMeExecutionsRun: "POST /me/executions/run",
   GetMeExecutions: "GET /me/executions",
