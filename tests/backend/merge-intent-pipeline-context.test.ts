@@ -26,4 +26,42 @@ describe("mergeIntentPipelineContext", () => {
     expect(mergeIntentPipelineContext({ keep: true }, undefined)).toEqual({ keep: true });
     expect(mergeIntentPipelineContext(undefined, undefined)).toBeUndefined();
   });
+
+  it("merges compositor metadata when a compositor plan is provided", () => {
+    const merged = mergeIntentPipelineContext(
+      { existing: "value" },
+      {
+        intent: "share-idea",
+        scope: { lengthTier: "medium", channel: "email" },
+        legacyContentTypeId: "linkedin-post",
+        wordTarget: { min: 400, max: 1200 },
+        channelHint: "email"
+      },
+      {
+        planId: "plan-test",
+        planSignature: "edition-piece",
+        steps: [{ name: "draft", skill: "draft", execution: "llm" }],
+        parameters: {
+          wordTarget: { min: 400, max: 1200 },
+          expressionProfile: "email-share-idea",
+          intent: "share-idea",
+          lengthTier: "medium"
+        }
+      }
+    );
+
+    expect(merged).toEqual({
+      existing: "value",
+      wordTarget: { min: 400, max: 1200 },
+      generationIntent: "share-idea",
+      generationChannel: "email",
+      compositor: {
+        planId: "plan-test",
+        planSignature: "edition-piece",
+        expressionProfile: "email-share-idea",
+        lengthTier: "medium",
+        wordTarget: { min: 400, max: 1200 }
+      }
+    });
+  });
 });

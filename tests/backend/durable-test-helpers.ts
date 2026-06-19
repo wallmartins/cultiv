@@ -129,7 +129,9 @@ export function createDurableTestPlan(request: PipelineRequest = createDurableTe
   });
 }
 
-export async function openDurableTestContext(): Promise<DurableTestContext> {
+export async function openDurableTestContext(
+  configOverrides: Partial<BackendConfig> = {}
+): Promise<DurableTestContext> {
   if (!backendTestDatabaseUrl) {
     throw new Error("BACKEND_TEST_DATABASE_URL is required for durable runtime integration tests");
   }
@@ -142,7 +144,7 @@ export async function openDurableTestContext(): Promise<DurableTestContext> {
   redis.on("error", () => undefined);
   await redis.connect();
 
-  const config = createDurableTestConfig(backendTestDatabaseUrl, durableTestRedisUrl);
+  const config = createDurableTestConfig(backendTestDatabaseUrl, durableTestRedisUrl, configOverrides);
   const database = createPostgresDatabaseClient(postgres.db);
   const billingRepository = await Effect.runPromise(loadBillingRepository(postgres.db));
   const now = () => new Date("2026-06-14T12:00:00.000Z");

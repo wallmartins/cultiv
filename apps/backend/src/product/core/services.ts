@@ -147,7 +147,8 @@ export function createBackendProductServices(
         database: dependencies.database,
         billing: dependencies.billing,
         aiPolicy: dependencies.aiPolicy,
-        inputSafety
+        inputSafety,
+        featureFlags: dependencies.featureFlags
       }),
       voiceRebuild,
       voiceConsent,

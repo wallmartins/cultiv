@@ -30,6 +30,14 @@ export const DEFAULT_FEATURE_FLAGS: readonly FeatureFlagDefinition[] = [
     variants: ["off", "on"]
   },
   {
+    key: "generation.compositor_v1",
+    scope: "generation",
+    enabled: false,
+    description: "Use Generation Compositor v1 instead of @phase1-legacy contentType resolver",
+    defaultVariant: "off",
+    variants: ["off", "on"]
+  },
+  {
     key: "voice.reasoningSignatureV1",
     scope: "content",
     enabled: false,

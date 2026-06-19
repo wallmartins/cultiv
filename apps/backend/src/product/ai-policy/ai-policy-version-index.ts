@@ -91,11 +91,32 @@ export function resolvePolicyPricingEnvelope(
     readonly planTier: string;
     readonly contentType: string;
     readonly qualityMode: string;
+    readonly planSignature?: import("@my-ai-orchestrator/contracts").PlanSignature;
+    readonly lengthTier?: import("@my-ai-orchestrator/contracts").GenerationLengthTier;
   }
 ): Effect.Effect<import("./ai-policy-types.js").ResolvedPricingEnvelope, BackendAIPolicyPricingError> {
-  const matchingPrice = index.pricingDocuments
-    .get(policy.version)
-    ?.pricing.pricing.find(
+  const pricingDocument = index.pricingDocuments.get(policy.version)?.pricing;
+  const compositorPrice =
+    args.planSignature && args.lengthTier
+      ? pricingDocument?.pricesByPlan?.[args.planSignature]?.[args.lengthTier]?.[
+          args.qualityMode as import("@my-ai-orchestrator/contracts").QualityMode
+        ]
+      : undefined;
+
+  if (compositorPrice !== undefined) {
+    return Effect.succeed({
+      policyVersion: policy.version,
+      lifecycle: policy.lifecycle,
+      planTier: args.planTier as import("./ai-policy-types.js").ResolvedPricingEnvelope["planTier"],
+      contentType: args.planSignature ?? args.contentType,
+      qualityMode: args.qualityMode as import("./ai-policy-types.js").ResolvedPricingEnvelope["qualityMode"],
+      creditPrice: compositorPrice,
+      planSignature: args.planSignature,
+      lengthTier: args.lengthTier
+    });
+  }
+
+  const matchingPrice = pricingDocument?.pricing.find(
       (price) =>
         price.planTier === args.planTier &&
         price.contentType === args.contentType &&

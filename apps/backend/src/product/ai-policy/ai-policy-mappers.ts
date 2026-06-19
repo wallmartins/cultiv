@@ -10,8 +10,18 @@ import type { ResolvedVersionDocument } from "./ai-policy-loader.js";
 
 export function toResolvedAIPolicyVersion(document: ResolvedVersionDocument): ResolvedAIPolicyVersion {
   const contentTypes = Object.fromEntries(
-    document.catalog.contentTypes.map((contentType) => [contentType.id, contentType] as const)
+    document.catalog.contentTypes.map((contentType) => [
+      contentType.id,
+      {
+        id: contentType.id,
+        label: contentType.label,
+        defaultLanguage: contentType.defaultLanguage,
+        pipelineType: contentType.pipelineType,
+        ...(contentType.internal === true ? { internal: true } : {})
+      }
+    ] as const)
   ) as Readonly<Record<string, AIPolicyContentTypeDefinition>>;
+  const userFacingContentTypes = document.catalog.contentTypes.filter((contentType) => contentType.internal !== true);
   const pipelines = Object.fromEntries(
     document.catalog.pipelines.map((pipeline) => [pipeline.pipelineType, pipeline] as const)
   ) as Readonly<Record<AIPolicyPipelineDefinition["pipelineType"], AIPolicyPipelineDefinition>>;
@@ -36,7 +46,7 @@ export function toResolvedAIPolicyVersion(document: ResolvedVersionDocument): Re
         ] as const)
       ) as unknown as OrchestrationCatalog["pipelines"],
       contentTypes: Object.fromEntries(
-        document.catalog.contentTypes.map((contentType) => [
+        userFacingContentTypes.map((contentType) => [
           contentType.id,
           {
             id: contentType.id,

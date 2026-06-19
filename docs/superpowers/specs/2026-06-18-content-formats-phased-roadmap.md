@@ -19,7 +19,7 @@ Hybrid pricing (internal credits + quota UX) is designed but **final commercial 
 | Phase | Focus | Public contract | Execution | Pricing |
 |-------|--------|-----------------|-----------|---------|
 | **1** | Goal-first wizard | `intent` + `scope` | Temporary resolver → 6 legacy pipelines | Legacy `contentType` prices (interim) |
-| **2** | Meta-pipelines | Same intent/scope | `generationProfile` + `lengthTier` params | Hybrid quotas finalized |
+| **2** | Compositor + presets | Same intent/scope | `CompositorPlanner` → `ExecutionPlan`; presets as templates | Hybrid quotas finalized (`planSignature × lengthTier × mode`) |
 | **3** | Dynamic planner | Same | Skill sequence per generation | Telemetry-driven recalibration |
 
 ## Specs & plans
@@ -27,7 +27,7 @@ Hybrid pricing (internal credits + quota UX) is designed but **final commercial 
 | Phase | Design spec | Implementation plan |
 |-------|-------------|---------------------|
 | 1 | [generation-intent-wizard-design.md](./2026-06-18-generation-intent-wizard-design.md) | TBD after spec approval |
-| 2 | TBD (`generation-profiles-design.md`) | TBD |
+| 2 | [generation-compositor-design.md](./2026-06-19-generation-compositor-design.md) | [generation-compositor.md](../plans/2026-06-19-generation-compositor.md) |
 | 3 | TBD | TBD |
 | Pricing | [hybrid-pricing-design.md](./2026-06-18-hybrid-pricing-design.md) | [hybrid-pricing.md](../plans/2026-06-18-hybrid-pricing.md) — execute in Phase 2 |
 
@@ -41,3 +41,4 @@ Production calibration (14 generations) lives in [2026-06-18-hybrid-pricing-cali
 - **2026-06-18:** Three-phase execution evolution approved; no launch rush.
 - **2026-06-18:** Phase 1 keeps legacy pipelines as temporary adapter only.
 - **2026-06-18:** Final hybrid pricing deferred to Phase 2.
+- **2026-06-19:** Phase 2 execution pivots to **Generation Compositor v1** (see compositor design spec); four presets are templates/pricing buckets, not exclusive user routes.

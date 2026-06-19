@@ -28,7 +28,11 @@ export function parseJobTelemetryRow(job: unknown): CalibrationTelemetryRow | nu
 
   return {
     jobId: record.id ?? "unknown",
-    contentType: telemetry.pricing?.contentType ?? record.contentType ?? "unknown",
+    contentType:
+      telemetry.pricing?.planSignature ??
+      telemetry.pricing?.contentType ??
+      record.contentType ??
+      "unknown",
     qualityMode,
     inputTokensTotal: cost.inputTokensTotal,
     outputTokensTotal: cost.outputTokensTotal,

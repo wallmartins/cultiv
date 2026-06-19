@@ -21,6 +21,7 @@ import {
   resolveRefinementMode,
   resolveStructuredStepTemplate
 } from "./skill-templates.js";
+import { resolveExpressionFormatInstructions } from "../product/generation/compositor/expression-instructions.js";
 import {
   collectVoiceExampleTexts,
   getBriefingSample,
@@ -113,6 +114,11 @@ export function createBackendSkillDefinition(
         const topic = getTopic(context.inputs, context.state, context.pipeline.name);
         const domain = generationContext?.domain;
         const contextWordTarget = resolveContextWordTarget(context.inputs);
+        const expressionProfile =
+          typeof context.inputs.expressionProfile === "string" ? context.inputs.expressionProfile : undefined;
+        const formatInstructions = expressionProfile
+          ? resolveExpressionFormatInstructions(expressionProfile, step.name, contextWordTarget)
+          : resolveFormatInstructions(context.pipeline.name, step.name, contextWordTarget);
         const templateContext = {
           state: context.state,
           inputs: context.inputs,
@@ -131,7 +137,7 @@ export function createBackendSkillDefinition(
             briefingText,
             previousContent: normalizeOutput(previousContent),
             sourceText: normalizeOutput(previousContent) || briefingText,
-            formatInstructions: resolveFormatInstructions(context.pipeline.name, step.name, contextWordTarget),
+            formatInstructions,
             outputRules: resolveOutputRules(step.name),
             voiceDescription: voiceProfile?.description?.trim() || "- (not specified)",
             styleMarkers: stepVoice.styleMarkers,

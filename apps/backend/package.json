@@ -17,6 +17,7 @@
     "billing:export-jobs": "node dist/scripts/export-calibration-jobs.js",
     "billing:calibration-sweep": "node dist/scripts/run-calibration-sweep.js",
     "billing:analyze-option-b": "node dist/scripts/analyze-calibration-option-b.js",
+    "compositor:parity": "node dist/scripts/compositor-parity-harness.js",
     "rotate-voice-key": "node dist/cli/rotate-voice-protection-key.js",
     "rotate-voice-key:dev": "tsx src/cli/rotate-voice-protection-key.ts",
     "rotate-voice-key:dry-run": "node dist/cli/rotate-voice-protection-key.js --dry-run"

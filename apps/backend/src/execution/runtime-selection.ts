@@ -3,6 +3,7 @@ import type { BillingServiceContract } from "@my-ai-orchestrator/payments";
 import type { BackendExecutionFailedError } from "../http/errors.js";
 import type { ExecutePipelineOptions, RuntimeSelectionContext } from "./runtime-types.js";
 import { resolveBackendBillingIdentity } from "./billing.js";
+import { resolveCompositorPricingKeys } from "../product/ai-policy/ai-policy-resolution.js";
 import { normalizeExecutionFailure } from "./pipeline/execution-failure.js";
 import {
   buildQualityAttempts,
@@ -29,12 +30,15 @@ export function resolveRuntimeSelectionContext(options: ExecutePipelineOptions):
   const attempts = buildQualityAttempts(selection.qualityMode, controls.maxIterations ?? 1);
   const billingEnabled = !options.simulateCredits;
   const billing = options.services.billing;
+  const compositorPricing = resolveCompositorPricingKeys(options.request);
   const pricingEnvelope = options.pricingEnvelope ?? (billingEnabled
     ? yield* options.services.aiPolicy.resolvePricingEnvelope({
         planTier: (billing.getEntitlement(billingIdentity.userId)?.tier ?? "free"),
         contentType: options.plan.contentType.id,
         qualityMode: selection.qualityMode,
-        attachedPolicyVersion: options.config.aiPolicyAttachedVersion
+        attachedPolicyVersion: options.config.aiPolicyAttachedVersion,
+        planSignature: compositorPricing.planSignature,
+        lengthTier: compositorPricing.lengthTier
       })
     : undefined);
   const debitedCreditsEstimate = billingEnabled
