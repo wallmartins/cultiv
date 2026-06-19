@@ -1,6 +1,7 @@
 # Progress Log
 
-| 2026-06-19 | docs: Phase 3 dynamic StepPlanner one-pager — scope, COGS spike gate, quota vs repricing sequencing |
+| 2026-06-19 | test(step-planner): integration coverage, COGS variance harness, planner telemetry — Phase 3 Tasks 8–10 |
+| 2026-06-19 | feat(generation): wire step planner behind feature flag — Phase 3 Task 7 |
 | 2026-06-19 | compositor parity PASS — founder rubric 6/6 on VPS; heroes signed off; spec approved |
 | 2026-06-19 | fix(compositor): parity report rubric table scope bug |
 | 2026-06-19 | fix(compositor): hide internal preset content types from /me/content-types; implement dominant COGS planSignature; CI green |

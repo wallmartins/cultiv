@@ -1,7 +1,7 @@
 ---
 title: Dynamic Step Planner — Phase 3 One-Pager
 doc_type: design
-status: draft
+status: approved
 domain: product
 last_updated: 2026-06-19
 phase: 3
