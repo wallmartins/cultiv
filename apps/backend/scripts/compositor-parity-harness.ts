@@ -5,7 +5,7 @@ import { Effect } from "effect";
 import { resolveGenerationTarget } from "../src/product/generation/resolve-generation-target.js";
 import { planGeneration } from "../src/product/generation/compositor/compositor-planner.js";
 import { loadCalibrationEnvironment } from "./calibration/load-env.js";
-import { resolveCalibrationRepoPath } from "./calibration/resolve-repo-path.js";
+import { calibrationRepoRoot, resolveCalibrationRepoPath } from "./calibration/resolve-repo-path.js";
 import {
   COMPOSITOR_PARITY_FIXTURES,
   type CompositorParityFixture
@@ -357,6 +357,11 @@ function renderReport(input: {
 
 async function main(): Promise<void> {
   const { dryRunOnly, executeHttp, outPath } = parseArgs(process.argv.slice(2));
+
+  if (executeHttp && !dryRunOnly) {
+    loadCalibrationEnvironment();
+  }
+
   const generatedAt = new Date().toISOString();
   const dryComparisons = COMPOSITOR_PARITY_FIXTURES.map((fixture) => compareFixturePlans(fixture));
   const httpRuns: HttpRunResult[] = [];
@@ -377,9 +382,14 @@ async function main(): Promise<void> {
 
   if (executeHttp && !dryRunOnly) {
     if (!token || !databaseUrl) {
-      console.warn("Skipping HTTP runs — CALIBRATION_ACCESS_TOKEN and DATABASE_URL are required.");
+      const missing = [
+        !token ? "CALIBRATION_ACCESS_TOKEN" : null,
+        !databaseUrl ? "DATABASE_URL" : null
+      ].filter((name): name is string => name !== null);
+      console.warn(
+        `Skipping HTTP runs — missing ${missing.join(" and ")} (expected in ${calibrationRepoRoot()}/.env).`
+      );
     } else {
-      loadCalibrationEnvironment();
       const baseUrl = (process.env.CALIBRATION_BASE_URL ?? "http://127.0.0.1:3001").replace(/\/$/, "");
       const pollMs = Number(process.env.COMPOSITOR_PARITY_POLL_MS ?? "5000");
       const timeoutMs = Number(process.env.COMPOSITOR_PARITY_TIMEOUT_MS ?? "900000");
