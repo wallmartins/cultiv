@@ -36,6 +36,23 @@ export const appMessagesPt: AppMessages = {
     },
     selectPlaceholder: "Selecione uma opção"
   },
+  intentWizard: {
+    stepObjectiveTitle: "O que você quer fazer?",
+    stepObjectiveSubtitle: "Escolha o objetivo principal do texto.",
+    stepScopeTitle: "Tamanho e canal",
+    stepScopeSubtitle: "Defina o tamanho. O canal é opcional.",
+    moreOptions: "Mais opções",
+    lengthTier: "Tamanho",
+    channel: "Canal",
+    channelOptional: "Opcional",
+    channelExpand: "Escolher canal",
+    intentHelp: "Sobre este objetivo",
+    back: "Voltar",
+    continue: "Continuar",
+    changeIntent: "Trocar objetivo",
+    catalogLoadError: "Não foi possível carregar os objetivos de geração.",
+    catalogRetry: "Tentar novamente"
+  },
   generate: {
     title: "Gerar",
     contentType: "Formato",
