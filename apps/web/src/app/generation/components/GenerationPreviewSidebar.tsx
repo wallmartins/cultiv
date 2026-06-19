@@ -29,6 +29,7 @@ export function GenerationPreviewSidebar({
   noCredits,
   selectedModeAllowed,
   creditPrice,
+  fallbackBalance,
   onRefreshRecommendation,
   onGenerate
 }: {
@@ -53,6 +54,7 @@ export function GenerationPreviewSidebar({
   readonly noCredits: boolean;
   readonly selectedModeAllowed: boolean;
   readonly creditPrice: number | null;
+  readonly fallbackBalance: number | null;
   readonly onRefreshRecommendation: () => void;
   readonly onGenerate: () => void;
 }) {
@@ -77,7 +79,10 @@ export function GenerationPreviewSidebar({
             </Text>
             <Text variant="meta">
               {messages.generate.previewBalance
-                .replace("{current}", String(commercialPreview.currentBalance))
+                .replace(
+                  "{current}",
+                  String(commercialPreview.currentBalance ?? fallbackBalance ?? "—")
+                )
                 .replace("{projected}", String(commercialPreview.projectedBalanceAfterGeneration))}
             </Text>
           </div>

@@ -3,12 +3,10 @@ import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 import { useClientSdk } from "~/platform/runtime/client-sdk-context";
 import {
   getCachedCreditBalance,
-  getCreditBalanceInFlight,
   invalidateCreditBalanceCache,
-  setCachedCreditBalance,
-  setCreditBalanceInFlight,
   subscribeCreditBalance
 } from "./credit-balance-cache";
+import { fetchCreditBalance } from "./fetch-credit-balance";
 
 export type CreditBalanceStatus = "loading" | "ready" | "error";
 
@@ -16,28 +14,6 @@ export interface CreditBalanceState {
   readonly status: CreditBalanceStatus;
   readonly balance: number | null;
   readonly retry: () => void;
-}
-
-function fetchCreditBalance(client: ClientSdk): Promise<number> {
-  const existing = getCreditBalanceInFlight();
-  if (existing) {
-    return existing;
-  }
-
-  const promise = client
-    .toPromise(client.preview.get({ includeRecommendation: false }))
-    .then((preview) => {
-      setCachedCreditBalance(preview.currentBalance);
-      setCreditBalanceInFlight(null);
-      return preview.currentBalance;
-    })
-    .catch((error: unknown) => {
-      setCreditBalanceInFlight(null);
-      throw error;
-    });
-
-  setCreditBalanceInFlight(promise);
-  return promise;
 }
 
 export function useCreditBalance(): CreditBalanceState {
