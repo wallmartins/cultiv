@@ -1,10 +1,6 @@
 # Compositor parity report
 
-<<<<<<< Updated upstream
-Generated: 2026-06-19T19:48:40.881Z
-=======
-Generated: 2026-06-19T19:53:20.135Z
->>>>>>> Stashed changes
+Generated: 2026-06-19T20:29:40.094Z
 
 ## Dry plan comparison (local)
 
@@ -23,12 +19,12 @@ HTTP runs executed against the live API (server flag determines legacy vs compos
 
 | Fixture | Job ID | Status | planSignature | USD est. | Progress events |
 |---------|--------|--------|---------------|----------|-----------------|
-| share-idea-short-professional-network | e33e74e0-f4fd-42fc-83d9-a55c4e280fad | done | — | 0.0871 | 12 |
-| share-idea-medium-email | f45af196-3f10-4653-9035-b395d17d227f | done | — | 0.0930 | 12 |
-| explain-deeply-long-blog | 8c0211c4-65e0-40a6-8a64-d917e26ca3d2 | failed | — | — | 7 |
-| document-decision-medium-unspecified | eb4353e2-9912-403c-bc33-39a87bdb076d | failed | — | — | 3 |
-| engage-audience-short-social | c3cb30e2-b259-48de-9210-d16b5fd8bd72 | failed | — | — | 2 |
-| tell-story-medium-unspecified | 14bdb444-2479-47ae-846d-2c45c96c89a8 | failed | — | — | 1 |
+| share-idea-short-professional-network | 390a12b0-7058-4061-b5c3-3a9f33482d83 | done | — | 0.0932 | 12 |
+| share-idea-medium-email | 1e10c847-1cf5-4ba7-92c2-6fd8b0419bbd | done | — | 0.0959 | 11 |
+| explain-deeply-long-blog | 57884f6a-873b-4302-9db8-aa1d8c242320 | done | — | 0.1364 | 14 |
+| document-decision-medium-unspecified | d193ab19-5e60-4dd0-bb41-c973bf754b5e | done | — | 0.2057 | 11 |
+| engage-audience-short-social | c9a6772b-5d74-4c9d-8750-25b5cf30998f | done | — | 0.0939 | 9 |
+| tell-story-medium-unspecified | 9bf54c56-be73-4c1e-9823-5423e5d1a117 | done | — | 0.0751 | 10 |
 
 ## Manual rubric (founder — fill after reading outputs)
 
