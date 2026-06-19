@@ -71,20 +71,33 @@ export function GenerationPreviewSidebar({
               commercialRefreshing ? "opacity-55" : "opacity-100"
             }`}
           >
-            <Text variant="meta">
-              {messages.generate.previewPrice.replace(
-                "{price}",
-                String(commercialPreview.pricingSnapshot.creditPrice)
-              )}
-            </Text>
-            <Text variant="meta">
-              {messages.generate.previewBalance
-                .replace(
-                  "{current}",
-                  String(commercialPreview.currentBalance ?? fallbackBalance ?? "—")
-                )
-                .replace("{projected}", String(commercialPreview.projectedBalanceAfterGeneration))}
-            </Text>
+            {typeof commercialPreview.quotaCost === "number" &&
+            typeof commercialPreview.quotaRemaining === "number" &&
+            typeof commercialPreview.quotaLimit === "number" ? (
+              <Text variant="meta">
+                {messages.generate.previewQuota
+                  .replace("{cost}", String(commercialPreview.quotaCost))
+                  .replace("{remaining}", String(commercialPreview.quotaRemaining))
+                  .replace("{limit}", String(commercialPreview.quotaLimit))}
+              </Text>
+            ) : (
+              <>
+                <Text variant="meta">
+                  {messages.generate.previewPrice.replace(
+                    "{price}",
+                    String(commercialPreview.pricingSnapshot.creditPrice)
+                  )}
+                </Text>
+                <Text variant="meta">
+                  {messages.generate.previewBalance
+                    .replace(
+                      "{current}",
+                      String(commercialPreview.currentBalance ?? fallbackBalance ?? "—")
+                    )
+                    .replace("{projected}", String(commercialPreview.projectedBalanceAfterGeneration))}
+                </Text>
+              </>
+            )}
           </div>
         ) : null}
         {fullStatus === "loading" && !fullPreview && briefingComplete ? (

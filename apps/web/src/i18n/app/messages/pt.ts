@@ -71,6 +71,7 @@ export const appMessagesPt: AppMessages = {
     previewTitle: "Prévia",
     previewPrice: "Preço: {price} créditos",
     previewBalance: "Saldo: {current} → {projected}",
+    previewQuota: "Usa ~{cost} geração(ões) · Restam aprox. {remaining} de {limit}",
     previewRefreshRecommendation: "Atualizar recomendação",
     previewRecommendationStale: "O briefing mudou — atualize a recomendação de modo.",
     generate: "Gerar texto",
