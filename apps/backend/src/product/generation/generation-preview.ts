@@ -7,8 +7,13 @@ import type {
 import type { BackendConfig } from "../../config/config.js";
 import type { DatabaseClient } from "@my-ai-orchestrator/database";
 import type { BillingPlanTier, BillingServiceContract } from "@my-ai-orchestrator/payments";
+import {
+  resolveQuotaCost,
+  resolveQuotaLimit,
+  resolveQuotaRemaining
+} from "@my-ai-orchestrator/payments";
 import { isQualityModeAllowed, resolveQualityModeBlockedReason } from "../billing/commercial-access.js";
-import { resolveStoredUserEntitlement } from "../billing/resolve-user-billing.js";
+import { resolveStoredUserEntitlement, resolveStoredUserPlanId } from "../billing/resolve-user-billing.js";
 import { buildContentTypeCatalogView } from "../catalog/content-type-catalog.js";
 import { resolveCatalogContentTypeDefinitions } from "../catalog/resolve-catalog-content-types.js";
 import type { BackendAIPolicyServiceContract } from "../ai-policy/ai-policy-types.js";
@@ -122,11 +127,19 @@ export function createBackendGenerationPreviewService(options: {
           lengthTier: compositorPricing?.lengthTier
         });
         const commercialPricingSnapshot = toGenerationPricingSnapshot(pricingSnapshot);
+        const canonicalCreditCost = options.aiPolicy.getCanonicalCreditCost();
+        const planId = resolveStoredUserPlanId(options.billing, sanitizedArgs.userId);
+        const plan = options.billing.listPlans().find((candidate) => candidate.id === planId);
+        const monthlyCredits = plan?.monthlyCredits ?? 0;
 
         return {
           pricingSnapshot: commercialPricingSnapshot,
           currentBalance,
           projectedBalanceAfterGeneration: roundCredits(currentBalance - pricingSnapshot.creditPrice),
+          quotaRemaining: resolveQuotaRemaining(currentBalance, canonicalCreditCost),
+          quotaLimit: resolveQuotaLimit(monthlyCredits, canonicalCreditCost),
+          quotaCost: resolveQuotaCost(pricingSnapshot.creditPrice, canonicalCreditCost),
+          canonicalCreditCost,
           recommendation: recommendation
             ? {
                 qualityMode: recommendation.qualityMode,

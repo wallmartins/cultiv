@@ -60,6 +60,11 @@ describe("backend generation preview", () => {
     expect(decoded.recommendation?.reasonCodes.length).toBeGreaterThan(0);
     expect(decoded.currentBalance).toBe(2500);
     expect(decoded.projectedBalanceAfterGeneration).toBe(2490);
+    expect(decoded.quotaCost).toBeGreaterThanOrEqual(1);
+    expect(decoded.quotaLimit).toBeGreaterThan(0);
+    expect(decoded.quotaRemaining).toBeLessThanOrEqual(decoded.quotaLimit);
+    expect(decoded.currentBalance).toBeTypeOf("number");
+    expect(decoded.canonicalCreditCost).toBe(2.5);
     expect(decoded.options.contentTypes.some((contentType) => contentType.id === "newsletter")).toBe(true);
     expect(decoded.options.qualityModes.find((mode) => mode.id === "strict")?.allowed).toBe(true);
     const recommended = decoded.options.qualityModes.filter((mode) => mode.recommended);

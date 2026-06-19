@@ -90,6 +90,7 @@ export type AIPolicyCatalogDocument = typeof AIPolicyCatalogDocumentSchema.Type;
 export const AIPolicyPricingDocumentSchema = Schema.Struct({
   policyVersion: Schema.String,
   lifecycle: AIPolicyLifecycleSchema,
+  canonicalCreditCost: Schema.optional(Schema.Number),
   pricesByPlan: Schema.optional(CompositorPlanPriceGridSchema),
   pricing: Schema.Array(
     Schema.Struct({

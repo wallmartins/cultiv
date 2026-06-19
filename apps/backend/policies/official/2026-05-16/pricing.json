@@ -1,6 +1,7 @@
 {
   "policyVersion": "2026-05-16",
   "lifecycle": "active",
+  "canonicalCreditCost": 2.5,
   "pricesByPlan": {
     "short-piece": {
       "short": { "fast": 1, "balanced": 2.5, "strict": 10 },

@@ -7,6 +7,7 @@ import {
   resolvePolicyExecutionSnapshot,
   resolvePolicyPricing
 } from "./ai-policy-resolution.js";
+import { resolveCanonicalCreditCost } from "./resolve-canonical-credit-cost.js";
 import type { BackendAIPolicyServiceContract } from "./ai-policy-types.js";
 import {
   createResolvedPolicyVersionIndex,
@@ -88,6 +89,14 @@ export function createBackendAIPolicyService(options: {
       listContentTypes: () => {
         const selectedPolicyVersion = options.attachedPolicyVersion ?? pointer.getCurrentPointer().activePolicyVersion;
         return Object.values((index.versions.get(selectedPolicyVersion) ?? index.fallbackPolicy).contentTypes);
+      },
+      getCanonicalCreditCost: () => {
+        const selectedPolicyVersion = options.attachedPolicyVersion ?? pointer.getCurrentPointer().activePolicyVersion;
+        const pricing =
+          index.pricingDocuments.get(selectedPolicyVersion)?.pricing ??
+          index.pricingDocuments.get(index.fallbackPolicy.version)?.pricing;
+
+        return resolveCanonicalCreditCost(pricing);
       },
       validatePipelineRequest: (request) =>
         Effect.gen(function* () {
