@@ -420,8 +420,8 @@ function renderReport(input: {
     "|---------|------------|-----------|-------|---------|------|-------|"
   );
 
-  for (const fixture of fixtures) {
-    lines.push(`| ${fixture.label} | | | | | | |`);
+  for (const row of input.dryComparisons) {
+    lines.push(`| ${row.label} | | | | | | |`);
   }
 
   lines.push("");
