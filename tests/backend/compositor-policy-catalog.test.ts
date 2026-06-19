@@ -85,4 +85,52 @@ describe("compositor policy catalog", () => {
     expect(snapshot.pricingEnvelope.planSignature).toBe("edition-piece");
     expect(snapshot.pricingEnvelope.lengthTier).toBe("medium");
   });
+
+  it("resolves compositor structure step routing for document-decision plans", () => {
+    const services = Effect.runSync(createBackendProductServices(baseConfig));
+    const plan = planGeneration({
+      intent: "document-decision",
+      scope: { lengthTier: "medium" },
+      qualityMode: "balanced"
+    });
+    const pipeline = materializeCompositorPipeline(plan);
+
+    const snapshot = Effect.runSync(
+      services.aiPolicy.resolveExecutionSnapshot({
+        request: {
+          pipeline,
+          inputs: {
+            briefing: { decision: "Adopt immutable snapshots" },
+            wordTarget: plan.parameters.wordTarget,
+            expressionProfile: plan.parameters.expressionProfile
+          },
+          context: {
+            compositor: {
+              planId: plan.planId,
+              planSignature: plan.planSignature,
+              expressionProfile: plan.parameters.expressionProfile,
+              lengthTier: plan.parameters.lengthTier,
+              wordTarget: plan.parameters.wordTarget
+            }
+          },
+          language: "pt-BR",
+          qualityMode: "balanced"
+        },
+        planTier: "pro",
+        executionMode: "sync",
+        qualityMode: "balanced",
+        defaultLanguage: "pt-BR"
+      })
+    );
+
+    expect(snapshot.steps.map((step) => step.name)).toEqual([
+      "structure",
+      "draft",
+      "refine",
+      "tighten",
+      "sanitize"
+    ]);
+    expect(snapshot.steps[0]?.routingProfile).toBe("premium-llm");
+    expect(snapshot.steps[0]?.attempts.length).toBeGreaterThan(0);
+  });
 });

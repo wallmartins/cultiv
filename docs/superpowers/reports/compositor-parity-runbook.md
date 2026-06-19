@@ -49,7 +49,18 @@ Useful env overrides:
 CALIBRATION_BASE_URL=http://127.0.0.1:3001
 COMPOSITOR_PARITY_POLL_MS=5000
 COMPOSITOR_PARITY_TIMEOUT_MS=900000
+COMPOSITOR_PARITY_LONG_TIMEOUT_MS=1800000
+COMPOSITOR_PARITY_DELAY_MS=3000
 ```
+
+Resume from a failing fixture or run one scenario:
+
+```bash
+pnpm --filter @my-ai-orchestrator/backend compositor:parity -- --execute --from explain-deeply-long-blog
+pnpm --filter @my-ai-orchestrator/backend compositor:parity -- --execute --fixture document-decision-medium-unspecified
+```
+
+If fixtures 1–2 pass and later ones fail with `insufficient credits`, top up the calibration user wallet before continuing. `explain-deeply-long-blog` costs **8 credits** at balanced/long-piece vs **~6.5** for the first two fixtures combined.
 
 ## 3. Manual rubric
 

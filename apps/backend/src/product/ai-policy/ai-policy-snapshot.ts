@@ -1,18 +1,59 @@
 import { buildOrchestrationPlan } from "@my-ai-orchestrator/orchestrator";
+import type { PipelineStepDefinition } from "@my-ai-orchestrator/contracts";
 import type {
   BackendAIPolicyCatalogError,
   BackendAIPolicyPricingError
 } from "../../http/errors.js";
 import { BackendAIPolicyCatalogError as BackendAIPolicyCatalogFailure } from "../../http/errors.js";
 import type {
+  AIPolicyPipelineDefinition,
   BillingPlanTier,
   ResolvedAIPolicyVersion,
   ResolvedExecutionSnapshot,
   ResolvedExecutionStep,
   AIPolicyProviderModelAttempt,
-  ResolvedPricingEnvelope
+  ResolvedPricingEnvelope,
+  StepExecutionType
 } from "./ai-policy-types.js";
 import { Effect } from "effect";
+
+function isExplicitPipelineRequest(
+  request: import("@my-ai-orchestrator/contracts").PipelineRequest
+): request is import("@my-ai-orchestrator/contracts").ExplicitPipelineRequest {
+  return "pipeline" in request;
+}
+
+function readStepConfigString(
+  config: Readonly<Record<string, unknown>> | undefined,
+  key: string
+): string | undefined {
+  const value = config?.[key];
+  return typeof value === "string" && value.trim().length > 0 ? value : undefined;
+}
+
+function resolveExplicitPlanStep(
+  policy: ResolvedAIPolicyVersion,
+  step: PipelineStepDefinition,
+  pipelinePolicy: AIPolicyPipelineDefinition
+): ResolvedExecutionStep {
+  const catalogStep = pipelinePolicy.steps.find((candidate) => candidate.name === step.name);
+  const configExecution = readStepConfigString(step.config, "executionType");
+  const execution: StepExecutionType =
+    configExecution === "llm" || configExecution === "local"
+      ? configExecution
+      : (catalogStep?.execution ?? "local");
+  const routingProfile =
+    readStepConfigString(step.config, "routingProfile") ?? catalogStep?.routingProfile;
+
+  return {
+    name: step.name,
+    skill: step.skill,
+    execution,
+    routingProfile,
+    attempts: resolveStepAttempts(policy, routingProfile),
+    fallbackOn: resolveStepFallbackConditions(policy, routingProfile)
+  };
+}
 
 export function resolveExecutionSnapshot(args: {
   readonly policy: ResolvedAIPolicyVersion;
@@ -45,14 +86,17 @@ export function resolveExecutionSnapshot(args: {
       );
     }
 
-    const steps = pipelinePolicy.steps.map<ResolvedExecutionStep>((step) => ({
-      name: step.name,
-      skill: step.skill,
-      execution: step.execution,
-      routingProfile: step.routingProfile,
-      attempts: resolveStepAttempts(args.policy, step.routingProfile),
-      fallbackOn: resolveStepFallbackConditions(args.policy, step.routingProfile)
-    }));
+    const explicitPipeline = isExplicitPipelineRequest(args.request);
+    const steps = explicitPipeline
+      ? plan.pipeline.steps.map((step) => resolveExplicitPlanStep(args.policy, step, pipelinePolicy))
+      : pipelinePolicy.steps.map<ResolvedExecutionStep>((step) => ({
+          name: step.name,
+          skill: step.skill,
+          execution: step.execution,
+          routingProfile: step.routingProfile,
+          attempts: resolveStepAttempts(args.policy, step.routingProfile),
+          fallbackOn: resolveStepFallbackConditions(args.policy, step.routingProfile)
+        }));
     const resolvedPlan = {
       ...plan,
       pipeline: {

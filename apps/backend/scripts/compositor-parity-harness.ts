@@ -8,6 +8,7 @@ import { loadCalibrationEnvironment } from "./calibration/load-env.js";
 import { calibrationRepoRoot, resolveCalibrationRepoPath } from "./calibration/resolve-repo-path.js";
 import {
   COMPOSITOR_PARITY_FIXTURES,
+  findCompositorParityFixture,
   type CompositorParityFixture
 } from "./compositor/parity-fixtures.js";
 
@@ -40,11 +41,44 @@ interface HttpRunResult {
 function parseArgs(argv: readonly string[]) {
   const dryRunOnly = argv.includes("--dry-run");
   const executeHttp = argv.includes("--execute");
+  const fixtureId = argv.includes("--fixture") ? argv[argv.indexOf("--fixture") + 1] : undefined;
+  const fromFixtureId = argv.includes("--from") ? argv[argv.indexOf("--from") + 1] : undefined;
   const outPath = argv.includes("--out")
     ? resolveCalibrationRepoPath(argv[argv.indexOf("--out") + 1] ?? "docs/superpowers/reports/compositor-parity-report.md")
     : resolveCalibrationRepoPath("docs/superpowers/reports/compositor-parity-report.md");
 
-  return { dryRunOnly, executeHttp, outPath };
+  return { dryRunOnly, executeHttp, fixtureId, fromFixtureId, outPath };
+}
+
+function selectParityFixtures(args: {
+  readonly fixtureId?: string;
+  readonly fromFixtureId?: string;
+}): readonly CompositorParityFixture[] {
+  if (args.fixtureId) {
+    const fixture = findCompositorParityFixture(args.fixtureId);
+    if (!fixture) {
+      throw new Error(`Unknown --fixture id "${args.fixtureId}"`);
+    }
+    return [fixture];
+  }
+
+  if (args.fromFixtureId) {
+    const startIndex = COMPOSITOR_PARITY_FIXTURES.findIndex((fixture) => fixture.id === args.fromFixtureId);
+    if (startIndex === -1) {
+      throw new Error(`Unknown --from fixture id "${args.fromFixtureId}"`);
+    }
+    return COMPOSITOR_PARITY_FIXTURES.slice(startIndex);
+  }
+
+  return COMPOSITOR_PARITY_FIXTURES;
+}
+
+function fixtureTimeoutMs(fixture: CompositorParityFixture, defaultTimeoutMs: number): number {
+  if (fixture.expectedCompositorPlanSignature === "long-piece" && fixture.scope.lengthTier === "long") {
+    return Number(process.env.COMPOSITOR_PARITY_LONG_TIMEOUT_MS ?? String(defaultTimeoutMs * 2));
+  }
+
+  return defaultTimeoutMs;
 }
 
 function requireEnv(name: string): string {
@@ -121,7 +155,7 @@ async function pollJobDone(
   jobId: string,
   pollMs: number,
   timeoutMs: number
-): Promise<{ status: "done" | "failed"; data?: Record<string, unknown> }> {
+): Promise<{ status: "done" | "failed"; data?: Record<string, unknown>; errorMessage?: string }> {
   const client = new Client({ connectionString: databaseUrl });
   await client.connect();
   const started = Date.now();
@@ -138,15 +172,40 @@ async function pollJobDone(
         return { status: "done", data };
       }
       if (status === "failed") {
-        return { status: "failed", data };
+        const errorMessage = readJobFailureMessage(data);
+        return { status: "failed", data, errorMessage };
       }
       await sleep(pollMs);
     }
 
-    throw new Error(`Timed out waiting for job ${jobId}`);
+    throw new Error(`Timed out waiting for job ${jobId} after ${timeoutMs}ms`);
   } finally {
     await client.end();
   }
+}
+
+function readJobFailureMessage(jobData: Record<string, unknown> | undefined): string | undefined {
+  const error = jobData?.error;
+  if (typeof error === "string" && error.trim().length > 0) {
+    return error;
+  }
+
+  if (error && typeof error === "object") {
+    const message = (error as { message?: unknown }).message;
+    if (typeof message === "string" && message.trim().length > 0) {
+      return message;
+    }
+  }
+
+  const result = jobData?.result;
+  if (result && typeof result === "object") {
+    const message = (result as { message?: unknown }).message;
+    if (typeof message === "string" && message.trim().length > 0) {
+      return message;
+    }
+  }
+
+  return undefined;
 }
 
 function readUsdCost(jobData: Record<string, unknown> | undefined): number | undefined {
@@ -220,7 +279,9 @@ async function runHttpFixture(args: {
 
   const previewJson = preview.json as {
     compositor?: { planSignature?: string };
-    pricingSnapshot?: { quoteId?: string; contentType?: string };
+    pricingSnapshot?: { quoteId?: string; contentType?: string; creditPrice?: number };
+    currentBalance?: number;
+    projectedBalanceAfterGeneration?: number;
   };
   const quoteId = previewJson.pricingSnapshot?.quoteId;
   if (!quoteId) {
@@ -229,6 +290,18 @@ async function runHttpFixture(args: {
       fixtureId: args.fixture.id,
       status: "failed",
       error: "preview missing quoteId"
+    };
+  }
+
+  if (
+    typeof previewJson.projectedBalanceAfterGeneration === "number" &&
+    previewJson.projectedBalanceAfterGeneration < 0
+  ) {
+    return {
+      mode: "compositor",
+      fixtureId: args.fixture.id,
+      status: "failed",
+      error: `insufficient credits: price=${previewJson.pricingSnapshot?.creditPrice ?? "?"} balance=${previewJson.currentBalance ?? "?"} projected=${previewJson.projectedBalanceAfterGeneration}`
     };
   }
 
@@ -282,7 +355,7 @@ async function runHttpFixture(args: {
     stepCount: progressHistory.length,
     planSignature: readPlanSignature(final.data) ?? previewJson.compositor?.planSignature,
     legacyContentType: previewJson.pricingSnapshot?.contentType,
-    error: final.status === "failed" ? "job failed" : undefined
+    error: final.status === "failed" ? (final.errorMessage ?? "job failed") : undefined
   };
 }
 
@@ -347,7 +420,7 @@ function renderReport(input: {
     "|---------|------------|-----------|-------|---------|------|-------|"
   );
 
-  for (const fixture of COMPOSITOR_PARITY_FIXTURES) {
+  for (const fixture of fixtures) {
     lines.push(`| ${fixture.label} | | | | | | |`);
   }
 
@@ -356,18 +429,19 @@ function renderReport(input: {
 }
 
 async function main(): Promise<void> {
-  const { dryRunOnly, executeHttp, outPath } = parseArgs(process.argv.slice(2));
+  const { dryRunOnly, executeHttp, fixtureId, fromFixtureId, outPath } = parseArgs(process.argv.slice(2));
+  const fixtures = selectParityFixtures({ fixtureId, fromFixtureId });
 
   if (executeHttp && !dryRunOnly) {
     loadCalibrationEnvironment();
   }
 
   const generatedAt = new Date().toISOString();
-  const dryComparisons = COMPOSITOR_PARITY_FIXTURES.map((fixture) => compareFixturePlans(fixture));
+  const dryComparisons = fixtures.map((fixture) => compareFixturePlans(fixture));
   const httpRuns: HttpRunResult[] = [];
 
   console.log("Compositor parity harness");
-  console.log(`Fixtures: ${COMPOSITOR_PARITY_FIXTURES.length}`);
+  console.log(`Fixtures: ${fixtures.length}`);
   console.log(`Dry comparisons: ${dryComparisons.filter((row) => row.planSignatureMatchesExpectation).length}/${dryComparisons.length} matched expectations`);
 
   for (const row of dryComparisons) {
@@ -393,10 +467,11 @@ async function main(): Promise<void> {
       const baseUrl = (process.env.CALIBRATION_BASE_URL ?? "http://127.0.0.1:3001").replace(/\/$/, "");
       const pollMs = Number(process.env.COMPOSITOR_PARITY_POLL_MS ?? "5000");
       const timeoutMs = Number(process.env.COMPOSITOR_PARITY_TIMEOUT_MS ?? "900000");
+      const delayMs = Number(process.env.COMPOSITOR_PARITY_DELAY_MS ?? "3000");
 
       console.log(`HTTP execution enabled (base URL: ${baseUrl})`);
 
-      for (const fixture of COMPOSITOR_PARITY_FIXTURES) {
+      for (const fixture of fixtures) {
         console.log(`[http] ${fixture.id}`);
         try {
           const result = await runHttpFixture({
@@ -405,7 +480,7 @@ async function main(): Promise<void> {
             databaseUrl: requireEnv("DATABASE_URL"),
             fixture,
             pollMs,
-            timeoutMs
+            timeoutMs: fixtureTimeoutMs(fixture, timeoutMs)
           });
           httpRuns.push(result);
           console.log(
@@ -418,6 +493,13 @@ async function main(): Promise<void> {
             status: "failed",
             error: error instanceof Error ? error.message : String(error)
           });
+          console.log(
+            `  → failed — ${error instanceof Error ? error.message : String(error)}`
+          );
+        }
+
+        if (delayMs > 0) {
+          await sleep(delayMs);
         }
       }
     }
