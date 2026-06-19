@@ -1,6 +1,6 @@
 # Compositor parity report
 
-Generated: 2026-06-19T19:36:51.834Z
+Generated: 2026-06-19T19:48:40.881Z
 
 ## Dry plan comparison (local)
 
