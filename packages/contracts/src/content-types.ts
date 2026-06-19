@@ -50,6 +50,7 @@ export const ContentTypeCatalogItemViewSchema = Schema.Struct({
   id: Schema.String,
   label: Schema.String,
   available: Schema.Boolean,
+  deprecated: Schema.optional(Schema.Boolean),
   reasonCode: Schema.optional(ReasonCodeSchema),
   defaultLanguage: Schema.String,
   supportedLanguages: Schema.Array(Schema.String),

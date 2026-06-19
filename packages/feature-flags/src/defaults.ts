@@ -23,6 +23,13 @@ export const DEFAULT_FEATURE_FLAGS: readonly FeatureFlagDefinition[] = [
     variants: ["on", "off"]
   },
   {
+    key: "generation.legacy_format_picker",
+    scope: "generation",
+    enabled: false,
+    defaultVariant: "off",
+    variants: ["off", "on"]
+  },
+  {
     key: "voice.reasoningSignatureV1",
     scope: "content",
     enabled: false,
