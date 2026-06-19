@@ -1,7 +1,12 @@
 import { Schema } from "effect";
 import { createSchemaDecoder } from "./shared.js";
 import { QualityModeSchema } from "./execution.js";
-import { GenerationIntentSchema, GenerationScopeSchema } from "./generation-intent.js";
+import { CompositorMetadataSchema, PlanSignatureSchema } from "./generation-compositor.js";
+import {
+  GenerationIntentSchema,
+  GenerationLengthTierSchema,
+  GenerationScopeSchema
+} from "./generation-intent.js";
 
 const PreviewBriefingSchema = Schema.Union(
   Schema.String,
@@ -55,7 +60,9 @@ export const GenerationPricingSnapshotSchema = Schema.Struct({
   policyVersion: Schema.String,
   contentType: Schema.String,
   qualityMode: QualityModeSchema,
-  creditPrice: Schema.Number
+  creditPrice: Schema.Number,
+  planSignature: Schema.optional(PlanSignatureSchema),
+  lengthTier: Schema.optional(GenerationLengthTierSchema)
 });
 export type GenerationPricingSnapshot = typeof GenerationPricingSnapshotSchema.Type;
 
@@ -73,6 +80,7 @@ export const GenerationPreviewResponseSchema = Schema.Struct({
   projectedBalanceAfterGeneration: Schema.Number,
   recommendation: Schema.optional(GenerationPreviewRecommendationSchema),
   resolvedIntent: Schema.optional(GenerationPreviewResolvedIntentSchema),
+  compositor: Schema.optional(CompositorMetadataSchema),
   options: Schema.Struct({
     contentTypes: Schema.Array(GenerationPreviewContentTypeOptionSchema),
     qualityModes: Schema.Array(GenerationPreviewQualityModeOptionSchema)

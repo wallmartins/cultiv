@@ -35,6 +35,7 @@ export const ExplicitPipelineRequestSchema = Schema.Struct({
   qualityMode: Schema.optional(QualityModeSchema),
   model: Schema.optional(Schema.String),
   adapter: Schema.optional(Schema.String),
+  quoteId: Schema.optional(Schema.String),
   previewRecommendation: Schema.optional(PreviewRecommendationSchema),
   includeTrace: Schema.optional(Schema.Boolean),
   idempotencyKey: Schema.optional(Schema.String)

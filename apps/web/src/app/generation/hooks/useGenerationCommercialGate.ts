@@ -5,6 +5,7 @@ import type {
 } from "@my-ai-orchestrator/contracts";
 import { useEffect, useMemo } from "react";
 import type { QualityModeHelpContext } from "~/i18n/app/quality-mode-tooltips";
+import { useCreditBalance } from "~/platform/credits/use-credit-balance";
 
 type QualityModeOption = GenerationPreviewResponse["options"]["qualityModes"][number];
 
@@ -34,6 +35,7 @@ export function useGenerationCommercialGate({
   readonly fullPreview: GenerationPreviewResponse | null;
   readonly catalog: ContentTypeCatalogView | null;
 }) {
+  const { balance: entitlementBalance } = useCreditBalance();
   const qualityModeOptions = commercialPreview?.options.qualityModes ?? [];
   const qualityModeDisplayOptions = fullPreview?.options.qualityModes ?? qualityModeOptions;
   const catalogAllowedModes = catalog?.commercial?.allowedQualityModes;
@@ -76,7 +78,7 @@ export function useGenerationCommercialGate({
     }
   }, [qualityMode, qualityModeOptions, selectedModeAllowed, setQualityMode]);
 
-  const currentBalance = commercialPreview?.currentBalance ?? null;
+  const currentBalance = commercialPreview?.currentBalance ?? entitlementBalance;
   const creditPrice = commercialPreview?.pricingSnapshot.creditPrice ?? null;
   const noCredits = currentBalance !== null && creditPrice !== null && currentBalance < creditPrice;
 

@@ -82,6 +82,32 @@ export function createDefaultOrchestrationCatalog(): OrchestrationCatalog {
         createPipelineStep("refine", "refine"),
         createPipelineStep("finalize", "publish"),
         createPipelineStep("sanitize", "sanitize")
+      ]),
+      "short-piece": createPipelineDefinition("short-piece", [
+        createPipelineStep("hook", "hook"),
+        createPipelineStep("draft", "draft"),
+        createPipelineStep("refine", "refine"),
+        createPipelineStep("sanitize", "sanitize")
+      ]),
+      "long-piece": createPipelineDefinition("long-piece", [
+        createPipelineStep("research", "research"),
+        createPipelineStep("outline", "outline"),
+        createPipelineStep("draft", "draft"),
+        createPipelineStep("refine", "refine"),
+        createPipelineStep("finalize", "publish"),
+        createPipelineStep("sanitize", "sanitize")
+      ]),
+      "serial-piece": createPipelineDefinition("serial-piece", [
+        createPipelineStep("analyze", "analyze"),
+        createPipelineStep("draft", "draft"),
+        createPipelineStep("tighten", "tighten"),
+        createPipelineStep("sanitize", "sanitize")
+      ]),
+      "edition-piece": createPipelineDefinition("edition-piece", [
+        createPipelineStep("draft", "draft"),
+        createPipelineStep("refine", "refine"),
+        createPipelineStep("tighten", "tighten"),
+        createPipelineStep("sanitize", "sanitize")
       ])
     },
     contentTypes: {
@@ -126,6 +152,34 @@ export function createDefaultOrchestrationCatalog(): OrchestrationCatalog {
         steps: ["outline", "draft", "refine", "finalize", "sanitize"],
         defaultLanguage: "pt-BR",
         inputSchema: {}
+      },
+      "short-piece": {
+        id: "short-piece",
+        label: "Short Piece",
+        steps: ["hook", "draft", "refine", "sanitize"],
+        defaultLanguage: "pt-BR",
+        inputSchema: {}
+      },
+      "long-piece": {
+        id: "long-piece",
+        label: "Long Piece",
+        steps: ["research", "outline", "draft", "refine", "finalize", "sanitize"],
+        defaultLanguage: "pt-BR",
+        inputSchema: {}
+      },
+      "serial-piece": {
+        id: "serial-piece",
+        label: "Serial Piece",
+        steps: ["analyze", "draft", "tighten", "sanitize"],
+        defaultLanguage: "pt-BR",
+        inputSchema: {}
+      },
+      "edition-piece": {
+        id: "edition-piece",
+        label: "Edition Piece",
+        steps: ["draft", "refine", "tighten", "sanitize"],
+        defaultLanguage: "pt-BR",
+        inputSchema: {}
       }
     },
     defaultLanguageByPipeline: {
@@ -134,7 +188,11 @@ export function createDefaultOrchestrationCatalog(): OrchestrationCatalog {
       "architecture-post": "pt-BR",
       "linkedin-post": "pt-BR",
       "twitter-thread": "pt-BR",
-      newsletter: "pt-BR"
+      newsletter: "pt-BR",
+      "short-piece": "pt-BR",
+      "long-piece": "pt-BR",
+      "serial-piece": "pt-BR",
+      "edition-piece": "pt-BR"
     },
     defaultQualityModeByPipeline: {
       "long-form-blog": "strict",
@@ -142,7 +200,11 @@ export function createDefaultOrchestrationCatalog(): OrchestrationCatalog {
       "architecture-post": "strict",
       "linkedin-post": "balanced",
       "twitter-thread": "fast",
-      newsletter: "balanced"
+      newsletter: "balanced",
+      "short-piece": "balanced",
+      "long-piece": "strict",
+      "serial-piece": "fast",
+      "edition-piece": "balanced"
     }
   };
 }

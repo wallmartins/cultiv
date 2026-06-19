@@ -26,6 +26,14 @@ export function resolveBackendFeatureFlags(config: BackendConfig): readonly Feat
       };
     }
 
+    if (flag.key === "generation.compositor_v1") {
+      return {
+        ...flag,
+        enabled: config.compositorV1Enabled === true,
+        defaultVariant: config.compositorV1Enabled === true ? "on" : "off"
+      };
+    }
+
     return flag;
   });
 

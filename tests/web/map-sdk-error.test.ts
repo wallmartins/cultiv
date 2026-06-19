@@ -22,4 +22,20 @@ describe("formatSdkError", () => {
     const mapped = formatSdkError(new Error("boom"), appMessagesPt);
     expect(mapped.title).toBe(appMessagesPt.errors.default.title);
   });
+
+  it("surfaces backend response message for unknown http errors", () => {
+    const mapped = formatSdkError(
+      new ClientSdkHttpStatusError({
+        label: "execution create",
+        status: 500,
+        retryable: true,
+        responseMessage: "Pipeline edition-piece is not available in policy version 2026-05-16"
+      }),
+      appMessagesPt
+    );
+
+    expect(mapped.message).toBe(
+      "Pipeline edition-piece is not available in policy version 2026-05-16"
+    );
+  });
 });

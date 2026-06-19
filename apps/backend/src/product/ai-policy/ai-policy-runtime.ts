@@ -108,7 +108,9 @@ export function createBackendAIPolicyService(options: {
             policyVersion: selectedPolicyVersion,
             planTier: args.planTier,
             contentType: args.contentType,
-            qualityMode: args.qualityMode
+            qualityMode: args.qualityMode,
+            planSignature: args.planSignature,
+            lengthTier: args.lengthTier
           });
         }),
       resolveExecutionSnapshot: (args) =>

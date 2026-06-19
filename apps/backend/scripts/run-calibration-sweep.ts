@@ -1,18 +1,17 @@
 #!/usr/bin/env tsx
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
 import pg from "pg";
 import type { GenerationLengthTier, QualityMode } from "@my-ai-orchestrator/contracts";
 import { CALIBRATION_BRIEFINGS } from "./calibration/briefings.js";
 import { loadCalibrationEnvironment } from "./calibration/load-env.js";
+import { resolveCalibrationRepoPath } from "./calibration/resolve-repo-path.js";
 import {
   countSweepRuns,
   resolveSweepProfile,
   type CalibrationSweepCell
 } from "./calibration/sweep-matrix.js";
 
-const repoRoot = resolve(fileURLToPath(new URL("../../..", import.meta.url)));
 const { Client } = pg;
 
 interface SweepManifestEntry {
@@ -53,7 +52,7 @@ function parseArgs(argv: readonly string[]) {
     : 900_000;
   const outPath = argv.includes("--out")
     ? resolve(argv[argv.indexOf("--out") + 1] ?? "calibration-sweep-manifest.json")
-    : resolve(repoRoot, "docs/superpowers/reports/calibration-sweep-manifest.json");
+    : resolveCalibrationRepoPath("docs/superpowers/reports/calibration-sweep-manifest.json");
 
   return { dryRun, profileId, repeats, delayMs, pollMs, timeoutMs, outPath };
 }

@@ -1,5 +1,6 @@
 import type { PipelineRequest, QualityMode } from "@my-ai-orchestrator/contracts";
 import type { ResolvedPricingEnvelope } from "../../product/ai-policy/ai-policy-types.js";
+import { resolveCompositorPricingKeys } from "../../product/ai-policy/ai-policy-resolution.js";
 import type { BackendStepProviderAttempt } from "../pipeline/pipeline-attempt-types.js";
 import type { ExecutionSelection } from "./quality-selection.js";
 import { resolveExecutionPreviewCorrelation } from "../pipeline/preview-correlation.js";
@@ -33,9 +34,14 @@ export interface ExecutionTelemetry {
     readonly quoteId?: string;
     readonly policyVersion?: string;
     readonly contentType?: string;
+    readonly planSignature?: string;
+    readonly lengthTier?: string;
     readonly plannedCreditPrice?: number;
     readonly observedDebitedCredits: number;
     readonly observedUsdCost: number;
+  };
+  readonly compositor?: {
+    readonly planId: string;
   };
   readonly providers?: {
     readonly finalProvider: string;
@@ -81,6 +87,7 @@ export function createExecutionTelemetry(options: {
         finalQualityMode: options.finalQualityMode
       })
     : undefined;
+  const compositorTelemetry = resolveCompositorTelemetryContext(options.request, options.pricingEnvelope);
   const providerAttempts = options.providerAttempts ? [...options.providerAttempts] : [];
   const finalProviderAttempt = [...providerAttempts].reverse().find((attempt) => attempt.status === "succeeded");
   const observedDebitedCredits = Math.max(0, options.debitedCredits ?? 0);
@@ -114,16 +121,20 @@ export function createExecutionTelemetry(options: {
           recommendationReasonCodes: [...preview.recommendationReasonCodes]
         }
       : undefined,
-    pricing: options.pricingEnvelope || preview
+    pricing: options.pricingEnvelope || preview || compositorTelemetry.pricing
       ? {
           quoteId: preview?.quoteId,
           policyVersion: options.pricingEnvelope?.policyVersion,
           contentType: options.pricingEnvelope?.contentType,
+          planSignature:
+            options.pricingEnvelope?.planSignature ?? compositorTelemetry.pricing?.planSignature,
+          lengthTier: options.pricingEnvelope?.lengthTier ?? compositorTelemetry.pricing?.lengthTier,
           plannedCreditPrice: options.pricingEnvelope?.creditPrice,
           observedDebitedCredits,
           observedUsdCost: estimatedUsdCost
         }
       : undefined,
+    compositor: compositorTelemetry.compositor,
     providers: finalProviderAttempt
       ? {
           finalProvider: finalProviderAttempt.provider,
@@ -137,4 +148,59 @@ export function createExecutionTelemetry(options: {
 
 function roundEstimatedCost(value: number): number {
   return Math.round(value * 10000) / 10000;
+}
+
+function resolveCompositorTelemetryContext(
+  request: PipelineRequest | undefined,
+  pricingEnvelope: ResolvedPricingEnvelope | undefined
+): {
+  readonly pricing?: {
+    readonly planSignature?: string;
+    readonly lengthTier?: string;
+  };
+  readonly compositor?: {
+    readonly planId: string;
+  };
+} {
+  if (!request) {
+    return {
+      pricing:
+        pricingEnvelope?.planSignature || pricingEnvelope?.lengthTier
+          ? {
+              planSignature: pricingEnvelope.planSignature,
+              lengthTier: pricingEnvelope.lengthTier
+            }
+          : undefined
+    };
+  }
+
+  const compositorPricing = resolveCompositorPricingKeys(request);
+  const compositorMetadata = extractCompositorPlanId(request);
+
+  return {
+    pricing:
+      compositorPricing.planSignature || compositorPricing.lengthTier
+        ? {
+            planSignature: compositorPricing.planSignature,
+            lengthTier: compositorPricing.lengthTier
+          }
+        : undefined,
+    compositor: compositorMetadata?.planId ? { planId: compositorMetadata.planId } : undefined
+  };
+}
+
+function extractCompositorPlanId(
+  request: PipelineRequest
+): { readonly planId?: string } | undefined {
+  if (!("context" in request) || !request.context || typeof request.context !== "object") {
+    return undefined;
+  }
+
+  const compositor = (request.context as Record<string, unknown>).compositor;
+  if (!compositor || typeof compositor !== "object") {
+    return undefined;
+  }
+
+  const planId = (compositor as Record<string, unknown>).planId;
+  return typeof planId === "string" ? { planId } : undefined;
 }

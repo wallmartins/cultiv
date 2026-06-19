@@ -12,17 +12,15 @@
       ],
       "fallbackAttempts": [
         {
-          "provider": "anthropic",
-          "model": "claude-3-5-sonnet-latest",
+          "provider": "gemini",
+          "model": "gemini-2.5-flash",
           "timeoutMs": 12000
         },
-        { "provider": "gemini", "model": "gemini-1.5-pro", "timeoutMs": 12000 },
         {
-          "provider": "deepseek",
-          "model": "deepseek-chat",
+          "provider": "gemini",
+          "model": "gemini-1.5-pro",
           "timeoutMs": 12000
-        },
-        { "provider": "openai", "model": "gpt-4o-mini", "timeoutMs": 12000 }
+        }
       ],
       "operationalConstraints": {
         "fallbackOn": [
@@ -44,17 +42,15 @@
       ],
       "fallbackAttempts": [
         {
-          "provider": "anthropic",
-          "model": "claude-3-7-sonnet-latest",
+          "provider": "gemini",
+          "model": "gemini-2.5-flash",
           "timeoutMs": 15000
         },
-        { "provider": "gemini", "model": "gemini-1.5-pro", "timeoutMs": 15000 },
         {
-          "provider": "deepseek",
-          "model": "deepseek-reasoner",
+          "provider": "gemini",
+          "model": "gemini-1.5-pro",
           "timeoutMs": 15000
-        },
-        { "provider": "openai", "model": "gpt-4o-mini", "timeoutMs": 15000 }
+        }
       ],
       "operationalConstraints": {
         "fallbackOn": [
@@ -99,13 +95,7 @@
           "timeoutMs": 15000
         }
       ],
-      "fallbackAttempts": [
-        {
-          "provider": "gemini",
-          "model": "gemini-3.1-flash-lite",
-          "timeoutMs": 15000
-        }
-      ],
+      "fallbackAttempts": [],
       "operationalConstraints": {
         "fallbackOn": [
           "transport_error",
@@ -177,6 +167,34 @@
       "label": "Newsletter",
       "defaultLanguage": "pt-BR",
       "pipelineType": "newsletter"
+    },
+    {
+      "id": "short-piece",
+      "label": "Short Piece",
+      "defaultLanguage": "pt-BR",
+      "pipelineType": "short-piece",
+      "internal": true
+    },
+    {
+      "id": "long-piece",
+      "label": "Long Piece",
+      "defaultLanguage": "pt-BR",
+      "pipelineType": "long-piece",
+      "internal": true
+    },
+    {
+      "id": "serial-piece",
+      "label": "Serial Piece",
+      "defaultLanguage": "pt-BR",
+      "pipelineType": "serial-piece",
+      "internal": true
+    },
+    {
+      "id": "edition-piece",
+      "label": "Edition Piece",
+      "defaultLanguage": "pt-BR",
+      "pipelineType": "edition-piece",
+      "internal": true
     }
   ],
   "pipelines": [
@@ -345,6 +363,106 @@
           "routingProfile": "default-llm"
         },
         { "name": "finalize", "skill": "publish", "execution": "local" },
+        { "name": "sanitize", "skill": "sanitize", "execution": "local" }
+      ]
+    },
+    {
+      "pipelineType": "short-piece",
+      "contentType": "short-piece",
+      "defaultLanguage": "pt-BR",
+      "defaultQualityMode": "balanced",
+      "steps": [
+        {
+          "name": "hook",
+          "skill": "hook",
+          "execution": "llm",
+          "routingProfile": "linkedin-llm"
+        },
+        {
+          "name": "draft",
+          "skill": "draft",
+          "execution": "llm",
+          "routingProfile": "linkedin-llm"
+        },
+        {
+          "name": "refine",
+          "skill": "refine",
+          "execution": "llm",
+          "routingProfile": "linkedin-llm"
+        },
+        { "name": "sanitize", "skill": "sanitize", "execution": "local" }
+      ]
+    },
+    {
+      "pipelineType": "long-piece",
+      "contentType": "long-piece",
+      "defaultLanguage": "pt-BR",
+      "defaultQualityMode": "strict",
+      "steps": [
+        { "name": "research", "skill": "research", "execution": "local" },
+        { "name": "outline", "skill": "outline", "execution": "local" },
+        {
+          "name": "draft",
+          "skill": "draft",
+          "execution": "llm",
+          "routingProfile": "premium-llm"
+        },
+        {
+          "name": "refine",
+          "skill": "refine",
+          "execution": "llm",
+          "routingProfile": "premium-llm"
+        },
+        { "name": "finalize", "skill": "publish", "execution": "local" },
+        { "name": "sanitize", "skill": "sanitize", "execution": "local" }
+      ]
+    },
+    {
+      "pipelineType": "serial-piece",
+      "contentType": "serial-piece",
+      "defaultLanguage": "pt-BR",
+      "defaultQualityMode": "balanced",
+      "steps": [
+        { "name": "analyze", "skill": "analyze", "execution": "local" },
+        {
+          "name": "draft",
+          "skill": "draft",
+          "execution": "llm",
+          "routingProfile": "default-llm"
+        },
+        {
+          "name": "tighten",
+          "skill": "tighten",
+          "execution": "llm",
+          "routingProfile": "default-llm"
+        },
+        { "name": "sanitize", "skill": "sanitize", "execution": "local" }
+      ]
+    },
+    {
+      "pipelineType": "edition-piece",
+      "contentType": "edition-piece",
+      "defaultLanguage": "pt-BR",
+      "defaultQualityMode": "balanced",
+      "steps": [
+        {
+          "name": "draft",
+          "skill": "draft",
+          "execution": "llm",
+          "routingProfile": "default-llm"
+        },
+        {
+          "name": "refine",
+          "skill": "refine",
+          "execution": "llm",
+          "routingProfile": "default-llm"
+        },
+        {
+          "name": "tighten",
+          "skill": "tighten",
+          "execution": "llm",
+          "routingProfile": "default-llm"
+        },
         { "name": "sanitize", "skill": "sanitize", "execution": "local" }
       ]
     }

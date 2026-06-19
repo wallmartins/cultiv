@@ -4,6 +4,7 @@ import type { CorpusManager, MemoryManager } from "@my-ai-orchestrator/core";
 import type { AIAdapterServiceContract } from "@my-ai-orchestrator/ai-adapters";
 import type { FeatureFlagServiceContract } from "@my-ai-orchestrator/feature-flags";
 import type { OrchestrationPlan } from "@my-ai-orchestrator/orchestrator";
+import type { BackendConfig } from "../../config/config.js";
 import type { BackendVoiceService } from "../../product/voice/voice-types.js";
 import type { EffectiveVoiceResolution } from "../../product/voice/voice-types.js";
 import type { BackendProviderTransport } from "./provider-transport.js";
@@ -14,13 +15,7 @@ import type { BackendObservabilityService } from "../../product/core/observabili
 export interface ExecutePipelineOptions {
   readonly plan: OrchestrationPlan;
   readonly request: PipelineRequest;
-  readonly config: {
-    readonly environment: "development" | "test" | "production";
-    readonly executionMode: "sync" | "async";
-    readonly qualityMode: "fast" | "balanced" | "strict";
-    readonly defaultLanguage: string;
-    readonly serviceName: string;
-  };
+  readonly config: BackendConfig;
   readonly now: () => Date;
   readonly includeTrace: boolean;
   readonly services: {

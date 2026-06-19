@@ -5,10 +5,9 @@ import { fileURLToPath } from "node:url";
 import pg from "pg";
 import { bootstrapBackendConfig } from "../src/config/config.js";
 import { loadCalibrationEnvironment } from "./calibration/load-env.js";
+import { resolveCalibrationRepoPath } from "./calibration/resolve-repo-path.js";
 
 const { Client } = pg;
-
-const repoRoot = resolve(fileURLToPath(new URL("../../..", import.meta.url)));
 
 async function main(): Promise<void> {
   loadCalibrationEnvironment();
@@ -20,8 +19,7 @@ async function main(): Promise<void> {
     process.exit(1);
   }
 
-  const outPath = resolve(
-    repoRoot,
+  const outPath = resolveCalibrationRepoPath(
     process.argv[2] ?? "tests/fixtures/billing/calibration-jobs-production.json"
   );
   const client = new Client({ connectionString: databaseUrl });

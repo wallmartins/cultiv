@@ -34,6 +34,7 @@ export interface BackendConfig extends RuntimeConfig, BackendAuthConfig {
   readonly safetyPolicyManifestPath?: string;
   readonly experimentalDebugEnabled?: boolean;
   readonly reasoningSignatureV1Enabled?: boolean;
+  readonly compositorV1Enabled?: boolean;
   readonly aiPolicyReloadIntervalMs?: number;
   readonly readinessCacheTtlMs?: number;
   readonly corsAllowedOrigins?: readonly string[];

@@ -290,10 +290,10 @@ interface ResolvedGenerationIntent {
 
 ## Phase 2 preview (out of scope, for alignment)
 
-- Replace `legacyContentTypeId` with `generationProfileId` (`short-piece`, `long-piece`, `serial-piece`, `edition-piece`).
-- Parameterized steps and `lengthTier` drive pipeline shape.
-- Hybrid pricing spec updated to `profile × lengthTier × mode`.
-- Deprecate and remove `contentType` from public API.
+- Replace `legacyContentTypeId` resolver with **`CompositorPlanner` → `ExecutionPlan`** (see [generation-compositor-design.md](./2026-06-19-generation-compositor-design.md)).
+- Presets (`short-piece`, `long-piece`, `serial-piece`, `edition-piece`) seed the planner; users still only see intent + scope.
+- Hybrid pricing keys: `planSignature × lengthTier × mode`.
+- Deprecate and remove `contentType` from public API after parity sign-off.
 
 ## Phase 3 preview (out of scope)
 

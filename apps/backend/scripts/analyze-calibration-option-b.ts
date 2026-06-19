@@ -1,12 +1,10 @@
 #!/usr/bin/env tsx
-import { readFileSync, writeFileSync } from "node:fs";
-import { dirname, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { dirname } from "node:path";
 import { parseJobTelemetryRows } from "../../../packages/payments/src/pricing-calibration/index.js";
+import { resolveCalibrationRepoPath } from "./calibration/resolve-repo-path.js";
 import { resolvePhase1LegacyContentTypeId } from "@my-ai-orchestrator/contracts";
 import type { GenerationIntent, GenerationLengthTier } from "@my-ai-orchestrator/contracts";
-
-const repoRoot = resolve(fileURLToPath(new URL("../../..", import.meta.url)));
 
 interface TierCostStats {
   readonly lengthTier: GenerationLengthTier;
@@ -142,12 +140,22 @@ function formatReport(reports: readonly IntentVarianceReport[], totalRows: numbe
 }
 
 function main(): void {
-  const inputPath = resolve(process.argv[2] ?? `${repoRoot}/docs/superpowers/reports/calibration-jobs-sweep.json`);
-  const reportPath = resolve(
-    process.argv[3] ?? `${repoRoot}/docs/superpowers/reports/calibration-option-b-viability.md`
+  const inputPath = resolveCalibrationRepoPath(
+    process.argv[2] ?? "docs/superpowers/reports/calibration-jobs-sweep.json"
+  );
+  const reportPath = resolveCalibrationRepoPath(
+    process.argv[3] ?? "docs/superpowers/reports/calibration-option-b-viability.md"
   );
 
-  const jobs = JSON.parse(readFileSync(inputPath, "utf8")) as unknown;
+  let jobs: unknown;
+  try {
+    jobs = JSON.parse(readFileSync(inputPath, "utf8"));
+  } catch {
+    console.error(`Could not read calibration input at ${inputPath}`);
+    console.error("Export jobs first:");
+    console.error("  pnpm billing:export-jobs docs/superpowers/reports/calibration-jobs-sweep.json");
+    process.exit(1);
+  }
   const rows = parseJobTelemetryRows(jobs);
 
   const intents: GenerationIntent[] = [
@@ -164,6 +172,7 @@ function main(): void {
     .filter((report): report is IntentVarianceReport => report !== null);
 
   const markdown = formatReport(reports, rows.length);
+  mkdirSync(dirname(reportPath), { recursive: true });
   writeFileSync(reportPath, `${markdown}\n`);
   console.log(markdown);
   console.log(`\nReport written to ${reportPath}`);

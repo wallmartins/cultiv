@@ -13,7 +13,11 @@ export const PipelineTypeSchema = Schema.Literal(
   "architecture-post",
   "linkedin-post",
   "twitter-thread",
-  "newsletter"
+  "newsletter",
+  "short-piece",
+  "long-piece",
+  "serial-piece",
+  "edition-piece"
 );
 export type PipelineType = typeof PipelineTypeSchema.Type;
 
@@ -151,9 +155,16 @@ export const ExecutionTelemetrySchema = Schema.Struct({
       quoteId: Schema.optional(Schema.String),
       policyVersion: Schema.optional(Schema.String),
       contentType: Schema.optional(Schema.String),
+      planSignature: Schema.optional(Schema.String),
+      lengthTier: Schema.optional(Schema.String),
       plannedCreditPrice: Schema.optional(Schema.Number),
       observedDebitedCredits: Schema.Number,
       observedUsdCost: Schema.Number
+    })
+  ),
+  compositor: Schema.optional(
+    Schema.Struct({
+      planId: Schema.String
     })
   ),
   providers: Schema.optional(

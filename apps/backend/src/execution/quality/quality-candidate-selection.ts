@@ -20,6 +20,7 @@ import { resolveGenerationRuntimeContext } from "../pipeline/generation-runtime.
 import { resolveBriefingText } from "./quality-briefing.js";
 import { buildRuntimeQualityLanes, laneCountForQualityMode } from "./quality-lanes.js";
 import { applyVoiceJudgeToQualityResult } from "./quality-voice-judge-orchestration.js";
+import { filterConfiguredProviderAttempts } from "../pipeline/provider-availability.js";
 import {
   createRuntimeMetadataRequest,
   resolveSanitizedGenerationInput,
@@ -126,7 +127,10 @@ export function executeQualitySelectionAttempt(
       const policy = yield* options.services.aiPolicy.getActivePolicy();
       const routingProfile = policy.routingProfiles["voice-judge-llm"];
       const attempts = routingProfile
-        ? [...routingProfile.preferredAttempts, ...routingProfile.fallbackAttempts]
+        ? filterConfiguredProviderAttempts(options.config, [
+            ...routingProfile.preferredAttempts,
+            ...routingProfile.fallbackAttempts
+          ])
         : [];
 
       const judged = yield* applyVoiceJudgeToQualityResult({

@@ -30,6 +30,7 @@ export function readBackendConfig(envVars: NodeJS.ProcessEnv = process.env): Bac
     safetyPolicyManifestPath: readOptionalString(envVars.SAFETY_POLICY_MANIFEST_PATH),
     experimentalDebugEnabled: envVars.EXPERIMENTAL_DEBUG_ENABLED === "true",
     reasoningSignatureV1Enabled: envVars.VOICE_REASONING_SIGNATURE_V1 === "true",
+    compositorV1Enabled: envVars.COMPOSITOR_V1_ENABLED === "true",
     aiPolicyReloadIntervalMs: readPositiveInteger(envVars.AI_POLICY_RELOAD_INTERVAL_MS),
     readinessCacheTtlMs: readPositiveInteger(envVars.READINESS_CACHE_TTL_MS),
     corsAllowedOrigins: readCsvList(envVars.CORS_ALLOWED_ORIGINS),

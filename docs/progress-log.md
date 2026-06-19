@@ -1,6 +1,13 @@
 # Progress Log
 
-| 2026-06-19 | fix(billing): calibration scripts load root .env on VPS; dry-run skips token |
+| 2026-06-19 | compositor parity PASS — founder rubric 6/6 on VPS; heroes signed off; spec approved |
+| 2026-06-19 | fix(compositor): parity report rubric table scope bug |
+| 2026-06-19 | fix(compositor): hide internal preset content types from /me/content-types; implement dominant COGS planSignature; CI green |
+| 2026-06-19 | feat(compositor): Tasks 8–11 — policy catalog entries, expression instructions in skills, planSignature×lengthTier pricing grid, compositor telemetry metadata |
+| 2026-06-19 | feat(compositor): Tasks 5–7 — `generation.compositor_v1` flag, resolve-generation-target compositor branch, preview/execute ExplicitPipelineRequest wiring; 15 new tests pass |
+| 2026-06-19 | feat(compositor): Tasks 2–4 — preset templates, rhetorical/scale/expression layers, CompositorPlanner + materializer; 17 unit tests pass |
+| 2026-06-19 | docs: Phase 2 generation compositor implementation plan (14 tasks) |
+| 2026-06-19 | docs: Phase 2 generation compositor design — planner v1, presets as templates, parity harness gate |
 | 2026-06-19 | fix(billing): bundle calibration scripts to dist/scripts for VPS prod installs without tsx |
 | 2026-06-19 | feat(billing): calibration sweep scripts for Option B viability — `run-calibration-sweep`, `analyze-calibration-option-b`, tier-variance profile, runbook |
 | 2026-06-19 | fix(phase1): close review gaps — shared legacy map in contracts, resolveGenerationTarget tests, wizard/prefill tests, legacy flag default off, mergeIntentPipelineContext |

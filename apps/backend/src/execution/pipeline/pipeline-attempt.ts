@@ -8,6 +8,7 @@ import { createBackendSkillDefinition } from "../skills.js";
 import { createExecutionFailure, normalizeExecutionFailure } from "./execution-failure.js";
 import { scoreExecution } from "../quality/quality.js";
 import { createBackendExecutionAdapter } from "./pipeline-execution-adapter.js";
+import { filterConfiguredProviderAttempts } from "./provider-availability.js";
 import { evaluateLanguageGate } from "./pipeline-language-gate.js";
 import {
   resolveExecutionPreviewCorrelation,
@@ -114,10 +115,13 @@ export function executePipelineAttempt(
       });
       const adapter = resolveStepExecutionType(step) === "llm" && step.name !== "sanitize"
         ? createBackendExecutionAdapter({
-            attempts: resolveStepProviderModelPlan(step, {
-              provider: options.selection.adapter,
-              model: options.selection.model
-            }),
+            attempts: filterConfiguredProviderAttempts(
+              options.config,
+              resolveStepProviderModelPlan(step, {
+                provider: options.selection.adapter,
+                model: options.selection.model
+              })
+            ),
             qualityMode: options.selection.qualityMode,
             aiAdapters: options.services.aiAdapters,
             providerTransport: options.providerTransport,
