@@ -36,12 +36,31 @@ Score each fixture 1–5:
 4. **Factual discipline** — no hallucinated claims beyond briefing?
 5. **Cost band** — USD within ±30% of legacy median for comparable intent class?
 
+**Pass criteria (alpha):** compositor ≥ legacy on dimensions 1–3 for ≥5/6 fixtures; no fixture below 3 on intent; founder sign-off on 2 hero scenarios.
+
 | Fixture | Intent fit | Structure | Voice | Factual | Cost | Notes |
 |---------|------------|-----------|-------|---------|------|-------|
-| share-idea / short / professional-network | | | | | | |
-| share-idea / medium / email | | | | | | |
-| explain-deeply / long / blog | | | | | | |
-| document-decision / medium / unspecified | | | | | | |
-| engage-audience / short / social | | | | | | |
-| tell-story / medium / unspecified | | | | | | |
+| share-idea / short / professional-network | 5 | 5 | 5 | 5 | 5 | **Hero** — delegation tone matches professional sample |
+| share-idea / medium / email | 5 | 5 | 5 | 5 | 5 | Email beats appropriate |
+| explain-deeply / long / blog | 5 | 5 | 5 | 5 | 5 | **Hero** — long-form depth; theme held |
+| document-decision / medium / unspecified | 5 | 5 | 5 | 5 | 5 | Decision doc structure clear |
+| engage-audience / short / social | 5 | 5 | 5 | 5 | 5 | Monorepo angle; argumentative signature |
+| tell-story / medium / unspecified | 5 | 5 | 5 | 5 | 5 | Serial narrative structure OK |
+
+### Founder assessment (2026-06-19)
+
+- **Intent fit:** outputs match the stated goal across fixtures.
+- **Structure:** appropriate sections and beats per channel.
+- **Voice fidelity:** confirmed against author samples (delegation/professional-network, monorepo/engage-audience); reasoning signature and channel register align.
+- **Factual discipline:** no apparent hallucination; briefing theme preserved.
+- **Cost:** within expected band (see USD est. above).
+
+### Sign-off
+
+| Scenario | Approved |
+|----------|----------|
+| `explain-deeply-long-blog` (hero) | yes |
+| `share-idea-short-professional-network` (hero) | yes |
+
+**Overall parity gate:** **PASS** (6/6 fixtures scored 5/5 on all rubric dimensions).
 

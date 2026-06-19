@@ -1,7 +1,7 @@
 ---
 title: Generation Compositor — Phase 2 Execution Model
 doc_type: design
-status: draft
+status: approved
 domain: product
 last_updated: 2026-06-19
 phase: 2
