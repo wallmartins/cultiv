@@ -43,6 +43,12 @@ export interface ExecutionTelemetry {
   readonly compositor?: {
     readonly planId: string;
   };
+  readonly planner?: {
+    readonly patchCount: number;
+    readonly ops: readonly string[];
+    readonly basePlanSignature: string;
+    readonly finalPlanSignature: string;
+  };
   readonly providers?: {
     readonly finalProvider: string;
     readonly finalModel: string;
@@ -88,6 +94,7 @@ export function createExecutionTelemetry(options: {
       })
     : undefined;
   const compositorTelemetry = resolveCompositorTelemetryContext(options.request, options.pricingEnvelope);
+  const plannerTelemetry = extractStepPlannerTelemetry(options.request);
   const providerAttempts = options.providerAttempts ? [...options.providerAttempts] : [];
   const finalProviderAttempt = [...providerAttempts].reverse().find((attempt) => attempt.status === "succeeded");
   const observedDebitedCredits = Math.max(0, options.debitedCredits ?? 0);
@@ -135,6 +142,7 @@ export function createExecutionTelemetry(options: {
         }
       : undefined,
     compositor: compositorTelemetry.compositor,
+    planner: plannerTelemetry,
     providers: finalProviderAttempt
       ? {
           finalProvider: finalProviderAttempt.provider,
@@ -203,4 +211,40 @@ function extractCompositorPlanId(
 
   const planId = (compositor as Record<string, unknown>).planId;
   return typeof planId === "string" ? { planId } : undefined;
+}
+
+function extractStepPlannerTelemetry(
+  request: PipelineRequest | undefined
+): ExecutionTelemetry["planner"] {
+  if (!request || !("context" in request) || !request.context || typeof request.context !== "object") {
+    return undefined;
+  }
+
+  const stepPlanner = (request.context as Record<string, unknown>).stepPlanner;
+  if (!stepPlanner || typeof stepPlanner !== "object") {
+    return undefined;
+  }
+
+  const record = stepPlanner as Record<string, unknown>;
+  const patchCount = record.patchCount;
+  const ops = record.ops;
+  const basePlanSignature = record.basePlanSignature;
+  const finalPlanSignature = record.finalPlanSignature;
+
+  if (
+    typeof patchCount !== "number" ||
+    !Array.isArray(ops) ||
+    ops.some((entry) => typeof entry !== "string") ||
+    typeof basePlanSignature !== "string" ||
+    typeof finalPlanSignature !== "string"
+  ) {
+    return undefined;
+  }
+
+  return {
+    patchCount,
+    ops: [...ops],
+    basePlanSignature,
+    finalPlanSignature
+  };
 }

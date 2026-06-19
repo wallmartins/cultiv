@@ -1,13 +1,8 @@
 import { Schema } from "effect";
 import { GenerationIntentSchema, GenerationLengthTierSchema } from "./generation-intent.js";
+import { PlanSignatureSchema, type PlanSignature } from "./plan-signature.js";
 
-export const PlanSignatureSchema = Schema.Literal(
-  "short-piece",
-  "long-piece",
-  "serial-piece",
-  "edition-piece"
-);
-export type PlanSignature = typeof PlanSignatureSchema.Type;
+export { PlanSignatureSchema, type PlanSignature };
 
 export const PlannedStepSchema = Schema.Struct({
   name: Schema.String,

@@ -8,6 +8,7 @@ import {
   ExecutionModeSchema,
   GenerationPreviewResponseSchema,
   JobCreatedResponseSchema,
+  ExecutionTelemetrySchema,
   PipelineRequestSchema,
   PipelineTypeSchema,
   QualityModeSchema,
@@ -131,6 +132,31 @@ describe('contracts package', () => {
     expect(wallet.availableCredits).toBe(96.7);
     expect(ledger.entryType).toBe('reserve');
     expect(reservation.status).toBe('reserved');
+  });
+
+  it('decodes execution telemetry with step planner metadata', () => {
+    const value = Schema.decodeUnknownSync(ExecutionTelemetrySchema)({
+      llm: {
+        executedCount: 3,
+        bypassedCount: 1,
+        llmCallsSaved: 1,
+        bypassRate: 0.25
+      },
+      compositor: {
+        planId: 'plan-abc'
+      },
+      planner: {
+        patchCount: 1,
+        ops: ['removeStep:hook'],
+        basePlanSignature: 'short-piece',
+        finalPlanSignature: 'short-piece'
+      }
+    });
+
+    expect(value.planner?.patchCount).toBe(1);
+    expect(value.planner?.ops).toEqual(['removeStep:hook']);
+    expect(value.planner?.basePlanSignature).toBe('short-piece');
+    expect(value.planner?.finalPlanSignature).toBe('short-piece');
   });
 
   it('decodes a generation preview response', () => {

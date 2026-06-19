@@ -1,4 +1,5 @@
 import { Schema } from "effect";
+import { PlanSignatureSchema } from "../plan-signature.js";
 import { createSchemaDecoder } from "../shared.js";
 
 export const ExecutionModeSchema = Schema.Literal("sync", "async");
@@ -165,6 +166,14 @@ export const ExecutionTelemetrySchema = Schema.Struct({
   compositor: Schema.optional(
     Schema.Struct({
       planId: Schema.String
+    })
+  ),
+  planner: Schema.optional(
+    Schema.Struct({
+      patchCount: Schema.Number,
+      ops: Schema.Array(Schema.String),
+      basePlanSignature: PlanSignatureSchema,
+      finalPlanSignature: PlanSignatureSchema
     })
   ),
   providers: Schema.optional(

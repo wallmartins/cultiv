@@ -106,7 +106,8 @@ function toInternalPipelineRequest(
       const context = mergeIntentPipelineContext(
         request.context,
         resolvedTarget.resolvedIntent,
-        plan
+        plan,
+        resolvedTarget.stepPlanner
       );
 
       return {
