@@ -1,5 +1,6 @@
 # Progress Log
 
+| 2026-06-19 | fix(billing): bundle calibration scripts to dist/scripts for VPS prod installs without tsx |
 | 2026-06-19 | feat(billing): calibration sweep scripts for Option B viability — `run-calibration-sweep`, `analyze-calibration-option-b`, tier-variance profile, runbook |
 | 2026-06-19 | fix(phase1): close review gaps — shared legacy map in contracts, resolveGenerationTarget tests, wizard/prefill tests, legacy flag default off, mergeIntentPipelineContext |
 | 2026-06-19 | feat(web): Phase 1 generation intent wizard complete — contracts, resolver, catalog API, preview/execute, wordTarget prompts, SDK, i18n, IntentWizard + GenerationScreen; 800 tests pass |
