@@ -52,7 +52,10 @@ function measureBriefingText(briefing: string | Record<string, unknown>): number
     return briefing.length;
   }
 
-  return Object.values(briefing).reduce((total, value) => total + stringifyBriefingValue(value).length, 0);
+  return Object.values(briefing).reduce(
+    (total: number, value) => total + stringifyBriefingValue(value).length,
+    0
+  );
 }
 
 function stringifyBriefingValue(value: unknown): string {

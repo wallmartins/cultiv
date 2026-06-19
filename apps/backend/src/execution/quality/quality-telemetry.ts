@@ -1,65 +1,22 @@
-import type { PipelineRequest, QualityMode } from "@my-ai-orchestrator/contracts";
+import type { ExecutionTelemetry, PipelineRequest, PlanSignature, QualityMode } from "@my-ai-orchestrator/contracts";
 import type { ResolvedPricingEnvelope } from "../../product/ai-policy/ai-policy-types.js";
 import { resolveCompositorPricingKeys } from "../../product/ai-policy/ai-policy-resolution.js";
 import type { BackendStepProviderAttempt } from "../pipeline/pipeline-attempt-types.js";
 import type { ExecutionSelection } from "./quality-selection.js";
 import { resolveExecutionPreviewCorrelation } from "../pipeline/preview-correlation.js";
 
-export interface ExecutionTelemetry {
-  readonly llm?: {
-    readonly executedCount: number;
-    readonly bypassedCount: number;
-    readonly llmCallsSaved: number;
-    readonly bypassRate: number;
-  };
-  readonly cost?: {
-    readonly inputTokensTotal: number;
-    readonly outputTokensTotal: number;
-    readonly estimatedUsdCost: number;
-    readonly debitedCredits: number;
-  };
-  readonly selection?: {
-    readonly reason: string;
-    readonly adapter: string;
-    readonly model: string;
-  };
-  readonly preview?: {
-    readonly quoteId?: string;
-    readonly recommendedQualityMode?: QualityMode;
-    readonly finalQualityMode: QualityMode;
-    readonly divergedFromRecommendation: boolean;
-    readonly recommendationReasonCodes: readonly string[];
-  };
-  readonly pricing?: {
-    readonly quoteId?: string;
-    readonly policyVersion?: string;
-    readonly contentType?: string;
-    readonly planSignature?: string;
-    readonly lengthTier?: string;
-    readonly plannedCreditPrice?: number;
-    readonly observedDebitedCredits: number;
-    readonly observedUsdCost: number;
-  };
-  readonly compositor?: {
-    readonly planId: string;
-  };
-  readonly planner?: {
-    readonly patchCount: number;
-    readonly ops: readonly string[];
-    readonly basePlanSignature: string;
-    readonly finalPlanSignature: string;
-  };
-  readonly providers?: {
-    readonly finalProvider: string;
-    readonly finalModel: string;
-    readonly attempts: readonly BackendStepProviderAttempt[];
-  };
-  readonly billing?: {
-    readonly userId: string;
-    readonly planId: string;
-    readonly generationCycleId: string;
-  };
+const PLAN_SIGNATURES = new Set<PlanSignature>([
+  "short-piece",
+  "long-piece",
+  "serial-piece",
+  "edition-piece"
+]);
+
+function isPlanSignature(value: string): value is PlanSignature {
+  return PLAN_SIGNATURES.has(value as PlanSignature);
 }
+
+export type { ExecutionTelemetry };
 
 export function createExecutionTelemetry(options: {
   readonly executedCount: number;
@@ -236,7 +193,9 @@ function extractStepPlannerTelemetry(
     !Array.isArray(ops) ||
     ops.some((entry) => typeof entry !== "string") ||
     typeof basePlanSignature !== "string" ||
-    typeof finalPlanSignature !== "string"
+    typeof finalPlanSignature !== "string" ||
+    !isPlanSignature(basePlanSignature) ||
+    !isPlanSignature(finalPlanSignature)
   ) {
     return undefined;
   }
