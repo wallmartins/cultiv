@@ -19,6 +19,12 @@ export CALIBRATION_USER_ID="your_internal_user_id"   # optional, for logs
 export CALIBRATION_BASE_URL="http://127.0.0.1:3001"
 ```
 
+Production VPS installs without devDependencies (`tsx` is not on PATH). Scripts run via compiled `dist/scripts/*.js` after deploy build. If you hit `tsx: not found` on an older deploy, use:
+
+```bash
+pnpm dlx tsx apps/backend/scripts/run-calibration-sweep.ts -- --dry-run --profile tier-variance --repeats 3
+```
+
 ## 2. Dry-run the sweep plan
 
 Default profile `tier-variance` runs **intent × tier (balanced)** only where tier changes the legacy pipeline (~15 cells × 3 repeats = 45 runs):
