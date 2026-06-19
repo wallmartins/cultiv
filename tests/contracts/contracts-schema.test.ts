@@ -144,6 +144,10 @@ describe('contracts package', () => {
       },
       currentBalance: 2500,
       projectedBalanceAfterGeneration: 2497.5,
+      quotaRemaining: 1000,
+      quotaLimit: 1000,
+      quotaCost: 1,
+      canonicalCreditCost: 2.5,
       options: {
         contentTypes: [
           {
@@ -174,6 +178,10 @@ describe('contracts package', () => {
 
     expect(value.pricingSnapshot.qualityMode).toBe('balanced');
     expect(value.pricingSnapshot.quoteId).toBe('quote_123');
+    expect(value.quotaRemaining).toBe(1000);
+    expect(value.quotaLimit).toBe(1000);
+    expect(value.quotaCost).toBe(1);
+    expect(value.canonicalCreditCost).toBe(2.5);
     expect(value.options.qualityModes[1]?.creditPrice).toBe(2.5);
     expect(value.options.qualityModes[1]?.recommendation?.reasonCodes).toEqual(['balanced_default']);
   });
