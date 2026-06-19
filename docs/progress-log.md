@@ -1,5 +1,6 @@
 # Progress Log
 
+| 2026-06-19 | feat(backend): resolve intent on execution enqueue (intent wizard Task 6) |
 | 2026-06-19 | feat(backend): pass wordTarget into draft and refine prompts (intent wizard Task 7) |
 | 2026-06-18 | docs: Phase 1 generation intent wizard implementation plan (13 tasks) |
 | 2026-06-18 | docs: Phase 1 generation intent & wizard spec; phased roadmap (formats + pricing) |

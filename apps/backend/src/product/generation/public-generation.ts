@@ -2,7 +2,8 @@ import { Effect } from "effect";
 import type { PipelineRequest } from "@my-ai-orchestrator/contracts";
 import { createJobCoordinator } from "@my-ai-orchestrator/orchestrator";
 import type { BackendConfig } from "../../config/config.js";
-import { BackendAIPolicyCatalogError, BackendUsageAuthorizationError } from "../../http/errors.js";
+import { BackendAIPolicyCatalogError, BackendUsageAuthorizationError, BackendValidationError } from "../../http/errors.js";
+import { resolveGenerationTarget } from "./resolve-generation-target.js";
 import type { BackendExecutionService } from "../../execution/service-types.js";
 import { assertQuoteConsistency, toGenerationPricingSnapshot } from "../billing/generation-pricing-snapshot.js";
 import type { QualityMode } from "@my-ai-orchestrator/contracts";
@@ -78,31 +79,48 @@ export function createBackendPublicGenerationService(options: {
 function toInternalPipelineRequest(
   request: BackendPublicGenerationRequest,
   services: BackendProductServices
-): Effect.Effect<PipelineRequest, BackendAIPolicyCatalogError> {
-  const policyContentType = services.aiPolicy.listContentTypes().find((contentType) => contentType.id === request.contentType);
-  if (!policyContentType) {
-    return Effect.fail(
-      new BackendAIPolicyCatalogError({
-        policyVersion: "active",
-        message: `No policy-governed content type found for "${request.contentType}"`
-      })
-    );
-  }
+): Effect.Effect<PipelineRequest, BackendAIPolicyCatalogError | BackendValidationError> {
+  return Effect.gen(function* () {
+    const resolvedTarget = yield* resolveGenerationTarget({
+      intent: request.intent,
+      scope: request.scope,
+      contentType: request.contentType
+    });
+    const contentTypeId = resolvedTarget.contentTypeId;
+    const policyContentType = services.aiPolicy.listContentTypes().find((contentType) => contentType.id === contentTypeId);
+    if (!policyContentType) {
+      return yield* Effect.fail(
+        new BackendAIPolicyCatalogError({
+          policyVersion: "active",
+          message: `No policy-governed content type found for "${contentTypeId}"`
+        })
+      );
+    }
 
-  return Effect.succeed({
-    userId: request.userId,
-    pipelineType: policyContentType.pipelineType,
-    contentType: request.contentType,
-    briefing: request.briefing,
-    importedContext: request.importedContext,
-    context: request.context,
-    language: request.language,
-    qualityMode: request.qualityMode,
-    model: request.model,
-    quoteId: request.quoteId,
-    previewRecommendation: request.previewRecommendation,
-    includeTrace: request.includeTrace,
-    idempotencyKey: request.idempotencyKey
+    const context = resolvedTarget.resolvedIntent
+      ? {
+          ...request.context,
+          wordTarget: resolvedTarget.resolvedIntent.wordTarget,
+          generationIntent: resolvedTarget.resolvedIntent.intent,
+          generationChannel: resolvedTarget.resolvedIntent.channelHint
+        }
+      : request.context;
+
+    return {
+      userId: request.userId,
+      pipelineType: policyContentType.pipelineType,
+      contentType: contentTypeId,
+      briefing: request.briefing,
+      importedContext: request.importedContext,
+      context,
+      language: request.language,
+      qualityMode: request.qualityMode,
+      model: request.model,
+      quoteId: request.quoteId,
+      previewRecommendation: request.previewRecommendation,
+      includeTrace: request.includeTrace,
+      idempotencyKey: request.idempotencyKey
+    };
   });
 }
 
