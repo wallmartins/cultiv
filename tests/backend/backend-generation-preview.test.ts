@@ -152,6 +152,30 @@ describe("backend generation preview", () => {
     });
   });
 
+  it("rejects preview requests without intent+scope or contentType", async () => {
+    const config = createBackendAppTestConfig({ billingUserId: "user_preview_validation" });
+    const services = createBackendAppTestServices(config);
+
+    services.billing.upsertSubscription({
+      id: "sub_user_preview_validation_pro",
+      userId: "user_preview_validation",
+      planId: "pro",
+      status: "active",
+      startedAt: backendAppTestStartedAt.toISOString()
+    });
+
+    const app = createBackendAppTestApp(config, services);
+    const response = await app.request("/api/generation-preview", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        briefing: { topic: "Missing target" }
+      })
+    });
+
+    expect(response.status).toBe(400);
+  });
+
   it("skips recommendation when includeRecommendation is false", async () => {
     const config = createBackendAppTestConfig({ billingUserId: "user_3" });
     const services = createBackendAppTestServices(config);

@@ -1,5 +1,7 @@
 # Progress Log
 
+| 2026-06-19 | fix(phase1): close review gaps — shared legacy map in contracts, resolveGenerationTarget tests, wizard/prefill tests, legacy flag default off, mergeIntentPipelineContext |
+| 2026-06-19 | feat(web): Phase 1 generation intent wizard complete — contracts, resolver, catalog API, preview/execute, wordTarget prompts, SDK, i18n, IntentWizard + GenerationScreen; 800 tests pass |
 | 2026-06-19 | feat(backend): resolve intent on execution enqueue (intent wizard Task 6) |
 | 2026-06-19 | feat(backend): pass wordTarget into draft and refine prompts (intent wizard Task 7) |
 | 2026-06-18 | docs: Phase 1 generation intent wizard implementation plan (13 tasks) |

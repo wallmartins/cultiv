@@ -61,4 +61,22 @@ describe("generation intent i18n", () => {
     expect(guidance.tips[0]).not.toContain("State the hypothesis");
     expect(guidance.commonMistakes[0]).not.toContain("generic announcement");
   });
+
+  it("localizes briefing guidance for every intent in pt and en", () => {
+    const fallback = {
+      objective: "Fallback objective",
+      tips: ["Fallback tip"],
+      exampleBriefing: "Fallback example",
+      commonMistakes: ["Fallback mistake"]
+    };
+
+    for (const id of GENERATION_INTENT_IDS) {
+      for (const locale of ["pt", "en"] as const) {
+        const guidance = getIntentBriefingGuidance(locale, id, fallback);
+        expect(guidance.objective.length).toBeGreaterThan(0);
+        expect(guidance.tips.length).toBeGreaterThan(0);
+        expect(guidance.commonMistakes.length).toBeGreaterThan(0);
+      }
+    }
+  });
 });

@@ -4,6 +4,7 @@ import { createJobCoordinator } from "@my-ai-orchestrator/orchestrator";
 import type { BackendConfig } from "../../config/config.js";
 import { BackendAIPolicyCatalogError, BackendUsageAuthorizationError, BackendValidationError } from "../../http/errors.js";
 import { resolveGenerationTarget } from "./resolve-generation-target.js";
+import { mergeIntentPipelineContext } from "./merge-intent-pipeline-context.js";
 import type { BackendExecutionService } from "../../execution/service-types.js";
 import { assertQuoteConsistency, toGenerationPricingSnapshot } from "../billing/generation-pricing-snapshot.js";
 import type { QualityMode } from "@my-ai-orchestrator/contracts";
@@ -97,14 +98,7 @@ function toInternalPipelineRequest(
       );
     }
 
-    const context = resolvedTarget.resolvedIntent
-      ? {
-          ...request.context,
-          wordTarget: resolvedTarget.resolvedIntent.wordTarget,
-          generationIntent: resolvedTarget.resolvedIntent.intent,
-          generationChannel: resolvedTarget.resolvedIntent.channelHint
-        }
-      : request.context;
+    const context = mergeIntentPipelineContext(request.context, resolvedTarget.resolvedIntent);
 
     return {
       userId: request.userId,

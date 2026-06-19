@@ -6,6 +6,7 @@ import { resolveGenerationIntent, type ResolvedGenerationIntent } from "./intent
 export interface ResolvedGenerationTarget {
   readonly contentTypeId: string;
   readonly resolvedIntent?: ResolvedGenerationIntent;
+  readonly ignoredLegacyContentType?: string;
 }
 
 export function resolveGenerationTarget(request: {
@@ -15,6 +16,23 @@ export function resolveGenerationTarget(request: {
 }): Effect.Effect<ResolvedGenerationTarget, BackendValidationError> {
   if (request.intent && request.scope) {
     const resolved = resolveGenerationIntent({ intent: request.intent, scope: request.scope });
+
+    if (request.contentType && request.contentType !== resolved.legacyContentTypeId) {
+      return Effect.zipRight(
+        Effect.logWarning("Ignoring legacy contentType in favor of intent resolution", {
+          intent: request.intent,
+          scope: request.scope,
+          contentType: request.contentType,
+          resolvedContentType: resolved.legacyContentTypeId
+        }),
+        Effect.succeed({
+          contentTypeId: resolved.legacyContentTypeId,
+          resolvedIntent: resolved,
+          ignoredLegacyContentType: request.contentType
+        })
+      );
+    }
+
     return Effect.succeed({
       contentTypeId: resolved.legacyContentTypeId,
       resolvedIntent: resolved

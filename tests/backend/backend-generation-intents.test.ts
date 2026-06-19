@@ -7,6 +7,7 @@ import {
   createBackendAppTestServices,
   backendAppTestStartedAt
 } from "./backend-app.fixtures.js";
+import { createBackendTestAuthorizationHeader } from "../../apps/backend/src/auth/index.js";
 
 describe("backend generation intents catalog", () => {
   it("exposes generation intents through /me/generation-intents", async () => {
@@ -59,5 +60,45 @@ describe("backend generation intents catalog", () => {
 
     const featuredCount = decoded.items.filter((item) => item.featured).length;
     expect(featuredCount).toBe(5);
+  });
+
+  it("localizes generation intents for pt-BR voice profiles", async () => {
+    const config = createBackendAppTestConfig();
+    const services = createBackendAppTestServices(config);
+
+    Effect.runSync(
+      services.database.voiceProfiles.put({
+        id: "voice-profile:user_pt",
+        userId: "user_pt",
+        version: 1,
+        snapshotId: "voice-profile-snapshot:user_pt:v1",
+        confidence: "high",
+        adaptationMode: "standard",
+        primaryLanguage: "pt-BR",
+        tone: "informal",
+        cadence: "direct",
+        description: "Perfil em português.",
+        lexicon: ["produto"],
+        constraints: ["direto"],
+        styleMarkers: ["primeira pessoa"],
+        rules: ["abrir com opinião"],
+        antiPatterns: ["intro genérica"],
+        createdAt: backendAppTestStartedAt.toISOString(),
+        updatedAt: backendAppTestStartedAt.toISOString()
+      })
+    );
+
+    const app = createBackendAppTestApp(config, services);
+    const response = await app.request("/me/generation-intents", {
+      headers: { authorization: createBackendTestAuthorizationHeader({ userId: "user_pt" }) }
+    });
+
+    expect(response.status).toBe(200);
+
+    const decoded = await Effect.runPromise(decodeGenerationIntentCatalogView(await response.json()));
+    const shareIdea = decoded.items.find((item) => item.id === "share-idea");
+
+    expect(shareIdea?.label).toBe("Compartilhar uma ideia");
+    expect(shareIdea?.description).toContain("Opinião");
   });
 });

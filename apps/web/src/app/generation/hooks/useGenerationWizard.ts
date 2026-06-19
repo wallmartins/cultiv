@@ -6,12 +6,16 @@ import type {
 } from "@my-ai-orchestrator/contracts";
 import { useCallback, useMemo, useState } from "react";
 import type { GenerationIntentCatalogItemView } from "~/app/generation/lib/use-generation-intents";
+import {
+  buildScopeForIntent,
+  canAdvanceToCompose,
+  goBackFromScopeStep,
+  type WizardStep,
+  withChannel,
+  withLengthTier
+} from "~/app/generation/lib/generation-wizard-logic";
 
-export type WizardStep = 1 | 2 | 3;
-
-const INITIAL_SCOPE: GenerationScope = {
-  lengthTier: "medium"
-};
+export type { WizardStep };
 
 export function useGenerationWizard(intents: readonly GenerationIntentCatalogItemView[]) {
   const [step, setStep] = useState<WizardStep>(1);
@@ -24,7 +28,7 @@ export function useGenerationWizard(intents: readonly GenerationIntentCatalogIte
     [intent, intents]
   );
 
-  const isReadyForCompose = intent !== null && scope?.lengthTier !== undefined;
+  const isReadyForCompose = canAdvanceToCompose(intent, scope);
 
   const selectIntent = useCallback(
     (nextIntent: GenerationIntent) => {
@@ -34,45 +38,28 @@ export function useGenerationWizard(intents: readonly GenerationIntentCatalogIte
       }
 
       setIntent(nextIntent);
-      setScope({
-        lengthTier: catalogItem.defaultLengthTier
-      });
+      setScope(buildScopeForIntent(catalogItem.defaultLengthTier));
       setStep(2);
     },
     [intents]
   );
 
   const setLengthTier = useCallback((lengthTier: GenerationLengthTier) => {
-    setScope((current) => ({
-      ...(current ?? INITIAL_SCOPE),
-      lengthTier
-    }));
+    setScope((current) => withLengthTier(current, lengthTier));
   }, []);
 
   const setChannel = useCallback((channel: GenerationChannel) => {
-    setScope((current) => {
-      if (!current) {
-        return {
-          lengthTier: "medium",
-          channel
-        };
-      }
-
-      return {
-        ...current,
-        channel
-      };
-    });
+    setScope((current) => withChannel(current, channel));
   }, []);
 
   const continueFromScope = useCallback(() => {
-    if (intent !== null && scope?.lengthTier !== undefined) {
+    if (canAdvanceToCompose(intent, scope)) {
       setStep(3);
     }
-  }, [intent, scope?.lengthTier]);
+  }, [intent, scope]);
 
   const goBack = useCallback(() => {
-    setStep((current) => (current === 2 ? 1 : current));
+    setStep((current) => goBackFromScopeStep(current));
   }, []);
 
   const changeIntent = useCallback(() => {
