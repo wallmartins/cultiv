@@ -70,6 +70,13 @@ export function validateBackendConfig(
   }
 
   if (
+    envVars.COMPOSITOR_V1_ENABLED &&
+    !backendBooleanLiterals.includes(envVars.COMPOSITOR_V1_ENABLED as (typeof backendBooleanLiterals)[number])
+  ) {
+    issues.push("COMPOSITOR_V1_ENABLED must be either \"true\" or \"false\"");
+  }
+
+  if (
     envVars.BACKEND_TRUST_PROXY &&
     !backendBooleanLiterals.includes(envVars.BACKEND_TRUST_PROXY as (typeof backendBooleanLiterals)[number])
   ) {

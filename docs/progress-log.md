@@ -1,5 +1,6 @@
 # Progress Log
 
+| 2026-06-19 | fix(routing): Gemini-only generation fallbacks, Groq-only voice judge, skip unconfigured providers; wire `COMPOSITOR_V1_ENABLED` env |
 | 2026-06-19 | fix(compositor): hide internal preset content types from /me/content-types; implement dominant COGS planSignature; CI green |
 | 2026-06-19 | feat(compositor): Tasks 8–11 — policy catalog entries, expression instructions in skills, planSignature×lengthTier pricing grid, compositor telemetry metadata |
 | 2026-06-19 | feat(compositor): Tasks 5–7 — `generation.compositor_v1` flag, resolve-generation-target compositor branch, preview/execute ExplicitPipelineRequest wiring; 15 new tests pass |
