@@ -155,6 +155,7 @@ jobs:
             package.json
             pnpm-workspace.yaml
             pnpm-lock.yaml
+            infra/integrator/configs/ecosystem.config.cjs
 
   build-web:
     name: Build web
