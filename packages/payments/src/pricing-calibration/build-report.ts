@@ -15,15 +15,19 @@ import {
   estimateTheoreticalCostUsd
 } from "./theoretical-cost.js";
 
+export type CalibrationPlanGrants = Readonly<
+  Record<string, { readonly monthlyCredits: number; readonly revenueUsdMonthly: number }>
+>;
+
 export interface BuildCalibrationReportOptions {
   readonly jobs: unknown;
   readonly policyVersion?: string;
   readonly targetMargin?: number;
   readonly targetCanonicalCredits?: number;
-  readonly planGrants?: Readonly<Record<string, { monthlyCredits: number; revenueUsdMonthly: number }>>;
+  readonly planGrants?: CalibrationPlanGrants;
 }
 
-const DEFAULT_PLAN_GRANTS: BuildCalibrationReportOptions["planGrants"] = {
+const DEFAULT_PLAN_GRANTS: CalibrationPlanGrants = {
   free: { monthlyCredits: 96, revenueUsdMonthly: 0 },
   criador: { monthlyCredits: 300, revenueUsdMonthly: 24 },
   pro: { monthlyCredits: 720, revenueUsdMonthly: 59 }
