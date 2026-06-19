@@ -28,6 +28,8 @@
     "eval:development-traits": "tsx scripts/eval-development-traits.ts",
     "billing:calibrate": "tsx scripts/calibrate-hybrid-pricing.ts",
     "billing:export-jobs": "pnpm --filter @my-ai-orchestrator/backend billing:export-jobs",
+    "billing:calibration-sweep": "pnpm --filter @my-ai-orchestrator/backend billing:calibration-sweep",
+    "billing:analyze-option-b": "pnpm --filter @my-ai-orchestrator/backend billing:analyze-option-b",
     "smoke": "vitest run tests/governance/monorepo-governance.test.ts",
     "guardrails:effect": "vitest run tests/governance/effect-hardening-governance.test.ts",
     "test:coverage": "vitest run --coverage",
