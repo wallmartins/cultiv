@@ -1,19 +1,25 @@
-import type { ContentTypeCatalogItemView } from "@my-ai-orchestrator/contracts";
+import type { BriefingGuidanceView } from "@my-ai-orchestrator/contracts";
 import { Text } from "@my-ai-orchestrator/ui";
 import { getBriefingGuidance } from "~/i18n/app/briefing-guidance";
+import { getIntentBriefingGuidance } from "~/i18n/app/intent-briefing";
 import type { AppLocale } from "~/i18n/app/types";
 import { useAppLocale } from "~/i18n/app/use-app-locale";
 import { AppCard } from "~/platform/ui/AppCard";
 
 export function BriefingGuidancePanel({
   locale,
-  item
+  item,
+  guidanceSource = "content-type"
 }: {
   readonly locale: AppLocale;
-  readonly item: ContentTypeCatalogItemView;
+  readonly item: { readonly id: string; readonly briefingGuidance: BriefingGuidanceView };
+  readonly guidanceSource?: "content-type" | "intent";
 }) {
   const { messages } = useAppLocale();
-  const guidance = getBriefingGuidance(locale, item.id, item.briefingGuidance);
+  const guidance =
+    guidanceSource === "intent"
+      ? getIntentBriefingGuidance(locale, item.id, item.briefingGuidance)
+      : getBriefingGuidance(locale, item.id, item.briefingGuidance);
 
   return (
     <AppCard className="bg-soft-loam/30">
