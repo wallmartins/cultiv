@@ -5,7 +5,8 @@ import type {
   BackendAIPolicyPricingError,
   BackendInputSafetyGatewayFailureError,
   BackendInputSafetyPolicyError,
-  BackendSafetyPolicyDefinitionError
+  BackendSafetyPolicyDefinitionError,
+  BackendValidationError
 } from "../../http/errors.js";
 import type { SanitizedGenerationPreviewRequest } from "../../safety/public-input-safety-types.js";
 
@@ -19,6 +20,7 @@ export interface BackendGenerationPreviewService {
     | BackendInputSafetyGatewayFailureError
     | BackendInputSafetyPolicyError
     | BackendSafetyPolicyDefinitionError
+    | BackendValidationError
   >;
 }
 

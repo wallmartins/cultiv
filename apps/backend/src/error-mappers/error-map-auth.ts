@@ -5,7 +5,8 @@ import {
   BackendReadinessError,
   BackendRequestBodyParseError,
   BackendRequestRateLimitError,
-  BackendUserSuspendedError
+  BackendUserSuspendedError,
+  BackendValidationError
 } from "../http/errors.js";
 import { createHttpErrorResponse, normalizeAuthenticationCode, normalizeAuthorizationCode } from "../http/error-response-core.js";
 import type { HttpErrorResponse } from "../http/error-response-core.js";
@@ -15,6 +16,13 @@ export function mapAuthError(error: unknown, path: string): HttpErrorResponse | 
     return createHttpErrorResponse(400, "invalid_request", {
       message: error.message,
       details: { route: error.route, path }
+    });
+  }
+
+  if (error instanceof BackendValidationError) {
+    return createHttpErrorResponse(400, "invalid_request", {
+      message: error.message,
+      details: { ...(error.details ?? {}), path }
     });
   }
 

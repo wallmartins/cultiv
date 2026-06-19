@@ -42,6 +42,7 @@ function buildContentTypeCatalogItem(
     id: definition.id,
     label: definition.label,
     available,
+    deprecated: true,
     defaultLanguage: definition.defaultLanguage,
     supportedLanguages,
     steps: [...definition.steps],

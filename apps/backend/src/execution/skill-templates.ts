@@ -1,5 +1,42 @@
 import { describeOutputWordTarget, resolveOutputWordTargetForFormatName } from "@my-ai-orchestrator/text-quality";
 
+export interface IntentWordTarget {
+  readonly min: number;
+  readonly max: number;
+}
+
+export function isIntentWordTarget(value: unknown): value is IntentWordTarget {
+  return (
+    typeof value === "object"
+    && value !== null
+    && typeof (value as IntentWordTarget).min === "number"
+    && typeof (value as IntentWordTarget).max === "number"
+  );
+}
+
+export function resolveContextWordTarget(
+  inputs: Readonly<Record<string, unknown>>
+): IntentWordTarget | undefined {
+  if (isIntentWordTarget(inputs.wordTarget)) {
+    return inputs.wordTarget;
+  }
+
+  const nestedContext = inputs.context;
+  if (
+    typeof nestedContext === "object"
+    && nestedContext !== null
+    && isIntentWordTarget((nestedContext as Record<string, unknown>).wordTarget)
+  ) {
+    return (nestedContext as { readonly wordTarget: IntentWordTarget }).wordTarget;
+  }
+
+  return undefined;
+}
+
+export function formatIntentWordTargetLine(wordTarget: IntentWordTarget): string {
+  return `Target length: between ${wordTarget.min} and ${wordTarget.max} words.`;
+}
+
 export function classifyStep(stepName: string): "generate" | "transform" | "validate" | "enrich" {
   if (stepName === "refine" || stepName === "tighten" || stepName === "publish") {
     return "transform";
@@ -185,9 +222,15 @@ export function resolveStructuredStepTemplate(stepName: string): StructuredStepT
   }
 }
 
-export function resolveFormatInstructions(contentType: string, stepName: string): string {
+export function resolveFormatInstructions(
+  contentType: string,
+  stepName: string,
+  contextWordTarget?: IntentWordTarget
+): string {
   const target = resolveContentFormat(contentType);
-  const wordTarget = describeOutputWordTarget(resolveOutputWordTargetForFormatName(contentType));
+  const wordTarget = (stepName === "draft" || stepName === "refine") && contextWordTarget
+    ? formatIntentWordTargetLine(contextWordTarget)
+    : `Target length: ${describeOutputWordTarget(resolveOutputWordTargetForFormatName(contentType))}.`;
   const stepContract = stepName === "hook"
     ? "Return only the opening hook, not the full piece."
     : stepName === "outline" || stepName === "structure" || stepName === "analyze"
@@ -198,7 +241,7 @@ export function resolveFormatInstructions(contentType: string, stepName: string)
           ? "Return only the condensed final text in the target format."
           : "Return only the final revised text in the target format.";
 
-  return `${target} Target length: ${wordTarget}. ${stepContract}`.trim();
+  return `${target} ${wordTarget} ${stepContract}`.trim();
 }
 
 export function resolveOutputRules(stepName: string): string {

@@ -2,6 +2,7 @@ import { Cause, Context, Effect, Exit, Layer } from "effect";
 import { createBillingClient, type BillingClient } from "./billing.js";
 import type { ClientSdkConfig } from "./config.js";
 import { createContentTypesClient, type ContentTypesClient } from "./content-types.js";
+import { createGenerationIntentsClient, type GenerationIntentsClient } from "./generation-intents.js";
 import type { ClientSdkError } from "./errors.js";
 import { createExecutionsClient, type ExecutionsClient } from "./executions.js";
 import { createPreviewClient, type PreviewClient } from "./preview.js";
@@ -13,6 +14,7 @@ export interface ClientSdk {
   readonly executions: ExecutionsClient;
   readonly voice: VoiceClient;
   readonly contentTypes: ContentTypesClient;
+  readonly generationIntents: GenerationIntentsClient;
   readonly billing: BillingClient;
   readonly transport: HttpTransport;
   readonly toPromise: <A>(effect: Effect.Effect<A, ClientSdkError, never>) => Promise<A>;
@@ -30,6 +32,7 @@ export function createClientSdk(config: ClientSdkConfig): ClientSdk {
     executions: createExecutionsClient(config, transport),
     voice: createVoiceClient(transport),
     contentTypes: createContentTypesClient(transport),
+    generationIntents: createGenerationIntentsClient(transport),
     billing: createBillingClient(transport),
     transport,
     toPromise(effect) {

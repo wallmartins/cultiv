@@ -1,6 +1,7 @@
 import { Schema } from "effect";
 import { createSchemaDecoder } from "./shared.js";
 import { QualityModeSchema } from "./execution.js";
+import { GenerationIntentSchema, GenerationScopeSchema } from "./generation-intent.js";
 
 const PreviewBriefingSchema = Schema.Union(
   Schema.String,
@@ -9,6 +10,8 @@ const PreviewBriefingSchema = Schema.Union(
 
 export const GenerationPreviewRequestSchema = Schema.Struct({
   contentType: Schema.optional(Schema.String),
+  intent: Schema.optional(GenerationIntentSchema),
+  scope: Schema.optional(GenerationScopeSchema),
   briefing: Schema.optional(PreviewBriefingSchema),
   importedContext: Schema.optional(Schema.String),
   language: Schema.optional(Schema.String),
@@ -56,11 +59,20 @@ export const GenerationPricingSnapshotSchema = Schema.Struct({
 });
 export type GenerationPricingSnapshot = typeof GenerationPricingSnapshotSchema.Type;
 
+export const GenerationPreviewResolvedIntentSchema = Schema.Struct({
+  intent: GenerationIntentSchema,
+  scope: GenerationScopeSchema,
+  wordTargetMin: Schema.Number,
+  wordTargetMax: Schema.Number
+});
+export type GenerationPreviewResolvedIntent = typeof GenerationPreviewResolvedIntentSchema.Type;
+
 export const GenerationPreviewResponseSchema = Schema.Struct({
   pricingSnapshot: GenerationPricingSnapshotSchema,
   currentBalance: Schema.Number,
   projectedBalanceAfterGeneration: Schema.Number,
   recommendation: Schema.optional(GenerationPreviewRecommendationSchema),
+  resolvedIntent: Schema.optional(GenerationPreviewResolvedIntentSchema),
   options: Schema.Struct({
     contentTypes: Schema.Array(GenerationPreviewContentTypeOptionSchema),
     qualityModes: Schema.Array(GenerationPreviewQualityModeOptionSchema)

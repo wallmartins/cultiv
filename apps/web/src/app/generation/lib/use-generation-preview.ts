@@ -1,4 +1,9 @@
-import type { GenerationPreviewRequest, GenerationPreviewResponse } from "@my-ai-orchestrator/contracts";
+import type {
+  GenerationIntent,
+  GenerationPreviewRequest,
+  GenerationPreviewResponse,
+  GenerationScope
+} from "@my-ai-orchestrator/contracts";
 import { useEffect, useRef, useState } from "react";
 import { useDebouncedValue } from "~/hooks/use-debounced-value";
 import { useClientSdk } from "~/platform/runtime/client-sdk-context";
@@ -9,10 +14,20 @@ export type GenerationPreviewStatus = "idle" | "loading" | "ready" | "error";
 const COMMERCIAL_DEBOUNCE_MS = 400;
 
 export type CommercialPreviewRequest = {
-  readonly contentType: string;
+  readonly intent?: GenerationIntent;
+  readonly scope?: GenerationScope;
+  readonly contentType?: string;
   readonly language: string;
   readonly qualityMode: GenerationPreviewRequest["qualityMode"];
 };
+
+function hasCommercialTarget(request: CommercialPreviewRequest): boolean {
+  if (request.contentType) {
+    return true;
+  }
+
+  return request.intent !== undefined && request.scope !== undefined;
+}
 
 async function fetchPreview(
   client: ReturnType<typeof useClientSdk>,
@@ -30,7 +45,7 @@ export function useCommercialGenerationPreview(request: CommercialPreviewRequest
   const [error, setError] = useState<unknown>(null);
 
   useEffect(() => {
-    if (!debouncedRequest?.contentType || !debouncedRequest.language) {
+    if (!debouncedRequest?.language || !hasCommercialTarget(debouncedRequest)) {
       setStatus("idle");
       setPreview(null);
       setError(null);
@@ -45,6 +60,8 @@ export function useCommercialGenerationPreview(request: CommercialPreviewRequest
     void fetchPreview(
       client,
       {
+        intent: debouncedRequest.intent,
+        scope: debouncedRequest.scope,
         contentType: debouncedRequest.contentType,
         language: debouncedRequest.language,
         qualityMode: debouncedRequest.qualityMode,

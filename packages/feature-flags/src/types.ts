@@ -2,7 +2,7 @@ import { Context, Effect } from "effect";
 import type { ExecutionMode, PipelineType, QualityMode } from "@my-ai-orchestrator/contracts";
 import type { FeatureFlagDefinitionError, FeatureFlagRolloutError, FeatureFlagVariantError } from "./errors.js";
 
-export type FeatureFlagScope = "execution" | "content" | "rollout";
+export type FeatureFlagScope = "execution" | "content" | "generation" | "rollout";
 
 export interface FeatureFlagTarget {
   readonly userId?: string;

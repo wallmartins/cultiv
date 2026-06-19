@@ -14,6 +14,7 @@
     "migrate:dev": "tsx src/cli/migrate.ts",
     "billing:activate": "node dist/cli/billing-activate.js",
     "billing:activate:dev": "tsx src/cli/billing-activate.ts",
+    "billing:export-jobs": "tsx scripts/export-calibration-jobs.ts",
     "rotate-voice-key": "node dist/cli/rotate-voice-protection-key.js",
     "rotate-voice-key:dev": "tsx src/cli/rotate-voice-protection-key.ts",
     "rotate-voice-key:dry-run": "node dist/cli/rotate-voice-protection-key.js --dry-run"

@@ -1,0 +1,86 @@
+[
+  {
+    "id": "job-fixture-001",
+    "status": "done",
+    "contentType": "validation-post",
+    "result": {
+      "metadata": {
+        "qualityMode": "balanced",
+        "telemetry": {
+          "cost": {
+            "inputTokensTotal": 4200,
+            "outputTokensTotal": 1800,
+            "estimatedUsdCost": 0.142,
+            "debitedCredits": 2.5
+          },
+          "preview": {
+            "finalQualityMode": "balanced"
+          },
+          "pricing": {
+            "contentType": "validation-post",
+            "plannedCreditPrice": 2.5,
+            "policyVersion": "2026-05-16",
+            "observedDebitedCredits": 2.5,
+            "observedUsdCost": 0.142
+          }
+        }
+      }
+    }
+  },
+  {
+    "id": "job-fixture-002",
+    "status": "done",
+    "contentType": "linkedin-post",
+    "result": {
+      "metadata": {
+        "qualityMode": "fast",
+        "telemetry": {
+          "cost": {
+            "inputTokensTotal": 2800,
+            "outputTokensTotal": 650,
+            "estimatedUsdCost": 0.038,
+            "debitedCredits": 1
+          },
+          "preview": {
+            "finalQualityMode": "fast"
+          },
+          "pricing": {
+            "contentType": "linkedin-post",
+            "plannedCreditPrice": 1,
+            "policyVersion": "2026-05-16",
+            "observedDebitedCredits": 1,
+            "observedUsdCost": 0.038
+          }
+        }
+      }
+    }
+  },
+  {
+    "id": "job-fixture-003",
+    "status": "done",
+    "contentType": "long-form-blog",
+    "result": {
+      "metadata": {
+        "qualityMode": "strict",
+        "telemetry": {
+          "cost": {
+            "inputTokensTotal": 18500,
+            "outputTokensTotal": 9200,
+            "estimatedUsdCost": 1.24,
+            "debitedCredits": 10
+          },
+          "preview": {
+            "finalQualityMode": "strict"
+          },
+          "pricing": {
+            "contentType": "long-form-blog",
+            "plannedCreditPrice": 10,
+            "policyVersion": "2026-05-16",
+            "observedDebitedCredits": 10,
+            "observedUsdCost": 1.24
+          }
+        }
+      }
+    }
+  }
+]

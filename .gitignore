@@ -31,3 +31,7 @@ apps/web/.nitro/
 .scratch/
 .agents/
 .worktrees/
+
+# Production billing calibration exports (may contain real usage telemetry)
+tests/fixtures/billing/calibration-jobs-production.json
+docs/superpowers/reports/2026-06-18-hybrid-pricing-calibration.md

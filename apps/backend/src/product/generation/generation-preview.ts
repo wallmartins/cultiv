@@ -19,6 +19,7 @@ import type {
 } from "./generation-preview-types.js";
 import { toGenerationPricingSnapshot } from "../billing/generation-pricing-snapshot.js";
 import { recommendGenerationPreviewQualityMode } from "./generation-preview-recommendation.js";
+import { resolveGenerationTarget } from "./resolve-generation-target.js";
 import type { BackendPublicInputSafetyGatewayService } from "../../safety/public-input-safety-types.js";
 
 const QUALITY_MODES: readonly QualityMode[] = ["fast", "balanced", "strict"];
@@ -48,7 +49,12 @@ export function createBackendGenerationPreviewService(options: {
           }
         );
         const planTier = (entitlement?.tier ?? "free") as BillingPlanTier;
-        const selectedContentType = selectContentType(sanitizedArgs.contentType, contentTypes);
+        const resolvedTarget = yield* resolveGenerationTarget({
+          intent: sanitizedArgs.intent,
+          scope: sanitizedArgs.scope,
+          contentType: sanitizedArgs.contentType
+        });
+        const selectedContentType = selectContentType(resolvedTarget.contentTypeId, contentTypes);
         const qualityModePricing = yield* Effect.all(
           QUALITY_MODES.map((mode) =>
             options.aiPolicy.resolvePricingEnvelope({
@@ -113,6 +119,16 @@ export function createBackendGenerationPreviewService(options: {
                 explanation: recommendation.explanation
               }
             : undefined,
+          ...(resolvedTarget.resolvedIntent
+            ? {
+                resolvedIntent: {
+                  intent: resolvedTarget.resolvedIntent.intent,
+                  scope: resolvedTarget.resolvedIntent.scope,
+                  wordTargetMin: resolvedTarget.resolvedIntent.wordTarget.min,
+                  wordTargetMax: resolvedTarget.resolvedIntent.wordTarget.max
+                }
+              }
+            : {}),
           options: {
             contentTypes: contentTypes.map((contentType) => ({
               id: contentType.id,
