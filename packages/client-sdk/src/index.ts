@@ -21,6 +21,7 @@ export type { PreviewClient, PreviewGetInput } from "./preview.js";
 export type { ExecutionsClient, ExecutionsCreateInput, ExecutionsGetInput, ExecutionsListInput } from "./executions.js";
 export type { VoiceClient, VoiceGetProfileInput, VoiceListExamplesInput, VoiceCreateExampleInput, VoiceUpdateExampleInput, VoiceCreateBatchInput, VoiceAddBatchItemsInput, VoiceCommitBatchInput } from "./voice.js";
 export type { ContentTypesClient, ContentTypesListInput } from "./content-types.js";
+export type { GenerationIntentsClient, GenerationIntentsListInput } from "./generation-intents.js";
 export type {
   BillingClient,
   BillingCreateCheckoutInput,
