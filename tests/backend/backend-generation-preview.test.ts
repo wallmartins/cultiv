@@ -113,6 +113,45 @@ describe("backend generation preview", () => {
     expect(recommended?.recommendation?.reasonCodes).toContain("allowed_option_guard");
   });
 
+  it("resolves share-idea short to linkedin-post pricing with resolvedIntent", async () => {
+    const config = createBackendAppTestConfig({ billingUserId: "user_intent_preview" });
+    const services = createBackendAppTestServices(config);
+
+    services.billing.upsertSubscription({
+      id: "sub_user_intent_preview_pro",
+      userId: "user_intent_preview",
+      planId: "pro",
+      status: "active",
+      startedAt: backendAppTestStartedAt.toISOString()
+    });
+
+    const app = createBackendAppTestApp(config, services);
+    const response = await app.request("/api/generation-preview", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        intent: "share-idea",
+        scope: { lengthTier: "short" },
+        briefing: {
+          topic: "Delegating product decisions"
+        }
+      })
+    });
+
+    expect(response.status).toBe(200);
+
+    const decoded = await Effect.runPromise(decodeGenerationPreviewResponse(await response.json()));
+
+    expect(decoded.pricingSnapshot.contentType).toBe("linkedin-post");
+    expect(decoded.pricingSnapshot.creditPrice).toBeGreaterThan(0);
+    expect(decoded.resolvedIntent).toEqual({
+      intent: "share-idea",
+      scope: { lengthTier: "short" },
+      wordTargetMin: 150,
+      wordTargetMax: 400
+    });
+  });
+
   it("skips recommendation when includeRecommendation is false", async () => {
     const config = createBackendAppTestConfig({ billingUserId: "user_3" });
     const services = createBackendAppTestServices(config);
