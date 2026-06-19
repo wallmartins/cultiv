@@ -10,14 +10,16 @@ Run structured generation sweeps on the production VPS to collect telemetry befo
 
 ## 1. Get an access token
 
-From the web app (logged in as your user), obtain a Bearer token for the backend API audience (`VITE_AUTH0_AUDIENCE`). Set:
+From the web app (logged in as your user), obtain a Bearer token for the backend API audience (`VITE_AUTH0_AUDIENCE`). Add to the **repo root** `.env`:
 
 ```bash
-export CALIBRATION_ACCESS_TOKEN="eyJ..."
-export DATABASE_URL="postgresql://..."
-export CALIBRATION_USER_ID="your_internal_user_id"   # optional, for logs
-export CALIBRATION_BASE_URL="http://127.0.0.1:3001"
+CALIBRATION_ACCESS_TOKEN=eyJ...
+DATABASE_URL=postgresql://...
+CALIBRATION_USER_ID=your_internal_user_id   # optional, for logs
+CALIBRATION_BASE_URL=http://127.0.0.1:3001
 ```
+
+Operator scripts load `~/app/.env` even when `NODE_ENV=production`. Dry-run does not need the token; real runs do.
 
 Production VPS installs without devDependencies (`tsx` is not on PATH). Scripts run via compiled `dist/scripts/*.js` after deploy build. If you hit `tsx: not found` on an older deploy, use:
 
