@@ -1,6 +1,10 @@
 # Compositor parity report
 
+<<<<<<< Updated upstream
 Generated: 2026-06-19T19:48:40.881Z
+=======
+Generated: 2026-06-19T19:53:20.135Z
+>>>>>>> Stashed changes
 
 ## Dry plan comparison (local)
 
@@ -15,7 +19,16 @@ Generated: 2026-06-19T19:48:40.881Z
 
 ## Optional HTTP execution
 
-Skipped — set `CALIBRATION_ACCESS_TOKEN` and `DATABASE_URL`, then rerun with `--execute`.
+HTTP runs executed against the live API (server flag determines legacy vs compositor path).
+
+| Fixture | Job ID | Status | planSignature | USD est. | Progress events |
+|---------|--------|--------|---------------|----------|-----------------|
+| share-idea-short-professional-network | e33e74e0-f4fd-42fc-83d9-a55c4e280fad | done | — | 0.0871 | 12 |
+| share-idea-medium-email | f45af196-3f10-4653-9035-b395d17d227f | done | — | 0.0930 | 12 |
+| explain-deeply-long-blog | 8c0211c4-65e0-40a6-8a64-d917e26ca3d2 | failed | — | — | 7 |
+| document-decision-medium-unspecified | eb4353e2-9912-403c-bc33-39a87bdb076d | failed | — | — | 3 |
+| engage-audience-short-social | c3cb30e2-b259-48de-9210-d16b5fd8bd72 | failed | — | — | 2 |
+| tell-story-medium-unspecified | 14bdb444-2479-47ae-846d-2c45c96c89a8 | failed | — | — | 1 |
 
 ## Manual rubric (founder — fill after reading outputs)
 
