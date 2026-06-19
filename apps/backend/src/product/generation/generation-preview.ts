@@ -7,8 +7,13 @@ import type {
 import type { BackendConfig } from "../../config/config.js";
 import type { DatabaseClient } from "@my-ai-orchestrator/database";
 import type { BillingPlanTier, BillingServiceContract } from "@my-ai-orchestrator/payments";
+import {
+  resolveQuotaCost,
+  resolveQuotaLimit,
+  resolveQuotaRemaining
+} from "@my-ai-orchestrator/payments";
 import { isQualityModeAllowed, resolveQualityModeBlockedReason } from "../billing/commercial-access.js";
-import { resolveStoredUserEntitlement } from "../billing/resolve-user-billing.js";
+import { resolveStoredUserEntitlement, resolveStoredUserPlanId } from "../billing/resolve-user-billing.js";
 import { buildContentTypeCatalogView } from "../catalog/content-type-catalog.js";
 import { resolveCatalogContentTypeDefinitions } from "../catalog/resolve-catalog-content-types.js";
 import type { BackendAIPolicyServiceContract } from "../ai-policy/ai-policy-types.js";
@@ -22,6 +27,7 @@ import { resolveCompositorPricingArgs } from "../billing/compositor-pricing-args
 import { recommendGenerationPreviewQualityMode } from "./generation-preview-recommendation.js";
 import { resolveGenerationTarget } from "./resolve-generation-target.js";
 import { isGenerationCompositorEnabled } from "./is-compositor-enabled.js";
+import { isGenerationStepPlannerEnabled } from "./is-step-planner-enabled.js";
 import type { BackendPublicInputSafetyGatewayService } from "../../safety/public-input-safety-types.js";
 import type { FeatureFlagServiceContract } from "@my-ai-orchestrator/feature-flags";
 
@@ -54,11 +60,14 @@ export function createBackendGenerationPreviewService(options: {
         );
         const planTier = (entitlement?.tier ?? "free") as BillingPlanTier;
         const compositorEnabled = isGenerationCompositorEnabled(options.featureFlags, options.config);
+        const stepPlannerEnabled = isGenerationStepPlannerEnabled(options.featureFlags, options.config);
         const resolvedTarget = yield* resolveGenerationTarget({
           intent: sanitizedArgs.intent,
           scope: sanitizedArgs.scope,
           contentType: sanitizedArgs.contentType,
           compositorEnabled,
+          stepPlannerEnabled,
+          briefing: sanitizedArgs.briefing,
           qualityMode: sanitizedArgs.qualityMode
         });
         const compositorPricing = resolveCompositorPricingArgs(resolvedTarget);
@@ -122,11 +131,19 @@ export function createBackendGenerationPreviewService(options: {
           lengthTier: compositorPricing?.lengthTier
         });
         const commercialPricingSnapshot = toGenerationPricingSnapshot(pricingSnapshot);
+        const canonicalCreditCost = options.aiPolicy.getCanonicalCreditCost();
+        const planId = resolveStoredUserPlanId(options.billing, sanitizedArgs.userId);
+        const plan = options.billing.listPlans().find((candidate) => candidate.id === planId);
+        const monthlyCredits = plan?.monthlyCredits ?? 0;
 
         return {
           pricingSnapshot: commercialPricingSnapshot,
           currentBalance,
           projectedBalanceAfterGeneration: roundCredits(currentBalance - pricingSnapshot.creditPrice),
+          quotaRemaining: resolveQuotaRemaining(currentBalance, canonicalCreditCost),
+          quotaLimit: resolveQuotaLimit(monthlyCredits, canonicalCreditCost),
+          quotaCost: resolveQuotaCost(pricingSnapshot.creditPrice, canonicalCreditCost),
+          canonicalCreditCost,
           recommendation: recommendation
             ? {
                 qualityMode: recommendation.qualityMode,

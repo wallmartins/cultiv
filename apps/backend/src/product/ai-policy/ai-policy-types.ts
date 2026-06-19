@@ -148,6 +148,7 @@ export interface BackendAIPolicyServiceContract {
   }) => Effect.Effect<void, never>;
   readonly recommendFuturePolicyVersion: () => Effect.Effect<BackendAIPolicyDegradationRecommendation | undefined, never>;
   readonly listContentTypes: () => readonly AIPolicyContentTypeDefinition[];
+  readonly getCanonicalCreditCost: () => number;
   readonly validatePipelineRequest: (
     request: PipelineRequest
   ) => Effect.Effect<void, BackendAIPolicyCatalogError>;

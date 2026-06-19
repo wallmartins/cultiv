@@ -77,6 +77,7 @@ export type AppGenerateMessages = {
   readonly previewTitle: string;
   readonly previewPrice: string;
   readonly previewBalance: string;
+  readonly previewQuota: string;
   readonly previewRefreshRecommendation: string;
   readonly previewRecommendationStale: string;
   readonly generate: string;

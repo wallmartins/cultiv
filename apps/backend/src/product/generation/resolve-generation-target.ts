@@ -10,6 +10,15 @@ import { BackendValidationError } from "../../http/errors.js";
 import { planGeneration } from "./compositor/compositor-planner.js";
 import { materializeCompositorPipeline } from "./compositor/plan-materializer.js";
 import { resolveGenerationIntent, type ResolvedGenerationIntent } from "./intent-resolver.js";
+import { formatPatchOp } from "./step-planner/format-patch-op.js";
+import { patchExecutionPlan } from "./step-planner/step-planner.js";
+
+export interface StepPlannerTelemetry {
+  readonly patchCount: number;
+  readonly ops: readonly string[];
+  readonly basePlanSignature: ExecutionPlan["planSignature"];
+  readonly finalPlanSignature: ExecutionPlan["planSignature"];
+}
 
 export interface ResolvedGenerationTarget {
   readonly contentTypeId: string;
@@ -19,6 +28,37 @@ export interface ResolvedGenerationTarget {
     readonly plan: ExecutionPlan;
     readonly pipeline: PipelineDefinition;
   };
+  readonly stepPlanner?: StepPlannerTelemetry;
+}
+
+function resolveCompositorPlan(args: {
+  readonly basePlan: ExecutionPlan;
+  readonly stepPlannerEnabled?: boolean;
+  readonly briefing?: string | Record<string, unknown>;
+}): {
+  readonly plan: ExecutionPlan;
+  readonly pipeline: PipelineDefinition;
+  readonly stepPlanner?: StepPlannerTelemetry;
+} {
+  if (args.stepPlannerEnabled && args.briefing !== undefined) {
+    const patched = patchExecutionPlan(args.basePlan, args.briefing);
+    const plan = patched.plan;
+    return {
+      plan,
+      pipeline: materializeCompositorPipeline(plan),
+      stepPlanner: {
+        patchCount: patched.ops.length,
+        ops: patched.ops.map(formatPatchOp),
+        basePlanSignature: patched.basePlanSignature,
+        finalPlanSignature: plan.planSignature
+      }
+    };
+  }
+
+  return {
+    plan: args.basePlan,
+    pipeline: materializeCompositorPipeline(args.basePlan)
+  };
 }
 
 export function resolveGenerationTarget(request: {
@@ -26,22 +66,29 @@ export function resolveGenerationTarget(request: {
   readonly scope?: GenerationScope;
   readonly contentType?: string;
   readonly compositorEnabled?: boolean;
+  readonly stepPlannerEnabled?: boolean;
+  readonly briefing?: string | Record<string, unknown>;
   readonly qualityMode?: QualityMode;
 }): Effect.Effect<ResolvedGenerationTarget, BackendValidationError> {
   if (request.intent && request.scope) {
     const resolved = resolveGenerationIntent({ intent: request.intent, scope: request.scope });
 
     if (request.compositorEnabled) {
-      const plan = planGeneration({
+      const basePlan = planGeneration({
         intent: request.intent,
         scope: request.scope,
         qualityMode: request.qualityMode ?? "balanced"
       });
-      const pipeline = materializeCompositorPipeline(plan);
+      const { plan, pipeline, stepPlanner } = resolveCompositorPlan({
+        basePlan,
+        stepPlannerEnabled: request.stepPlannerEnabled,
+        briefing: request.briefing
+      });
       const compositorResult: ResolvedGenerationTarget = {
         contentTypeId: plan.planSignature,
         resolvedIntent: resolved,
-        compositor: { plan, pipeline }
+        compositor: { plan, pipeline },
+        ...(stepPlanner ? { stepPlanner } : {})
       };
 
       if (request.contentType && request.contentType !== resolved.legacyContentTypeId) {

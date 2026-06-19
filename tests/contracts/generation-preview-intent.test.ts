@@ -31,6 +31,10 @@ describe("generation preview and execution intent contracts", () => {
       },
       currentBalance: 2500,
       projectedBalanceAfterGeneration: 2497.5,
+      quotaRemaining: 1000,
+      quotaLimit: 1000,
+      quotaCost: 1,
+      canonicalCreditCost: 2.5,
       resolvedIntent: {
         intent: "share-idea",
         scope: { lengthTier: "short" },

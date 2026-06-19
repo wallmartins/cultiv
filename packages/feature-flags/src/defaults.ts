@@ -38,6 +38,14 @@ export const DEFAULT_FEATURE_FLAGS: readonly FeatureFlagDefinition[] = [
     variants: ["off", "on"]
   },
   {
+    key: "generation.step_planner_v1",
+    scope: "generation",
+    enabled: false,
+    description: "Apply briefing-driven StepPlanner patches after compositor planning",
+    defaultVariant: "off",
+    variants: ["off", "on"]
+  },
+  {
     key: "voice.reasoningSignatureV1",
     scope: "content",
     enabled: false,

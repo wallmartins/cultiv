@@ -20,7 +20,7 @@ Hybrid pricing (internal credits + quota UX) is designed but **final commercial 
 |-------|--------|-----------------|-----------|---------|
 | **1** | Goal-first wizard | `intent` + `scope` | Temporary resolver → 6 legacy pipelines | Legacy `contentType` prices (interim) |
 | **2** | Compositor + presets | Same intent/scope | `CompositorPlanner` → `ExecutionPlan`; presets as templates | Hybrid quotas finalized (`planSignature × lengthTier × mode`) |
-| **3** | Dynamic planner | Same | Skill sequence per generation | Telemetry-driven recalibration |
+| **3** | Dynamic planner | Same | Skill sequence per generation (StepPlanner patches compositor plan) | Telemetry-driven recalibration after COGS spike |
 
 ## Specs & plans
 
@@ -28,7 +28,7 @@ Hybrid pricing (internal credits + quota UX) is designed but **final commercial 
 |-------|-------------|---------------------|
 | 1 | [generation-intent-wizard-design.md](./2026-06-18-generation-intent-wizard-design.md) | TBD after spec approval |
 | 2 | [generation-compositor-design.md](./2026-06-19-generation-compositor-design.md) | [generation-compositor.md](../plans/2026-06-19-generation-compositor.md) |
-| 3 | TBD | TBD |
+| 3 | TBD → [dynamic-step-planner-phase3-onepager.md](./2026-06-19-dynamic-step-planner-phase3-onepager.md) | TBD after one-pager approval |
 | Pricing | [hybrid-pricing-design.md](./2026-06-18-hybrid-pricing-design.md) | [hybrid-pricing.md](../plans/2026-06-18-hybrid-pricing.md) — execute in Phase 2 |
 
 ## Calibration artifact

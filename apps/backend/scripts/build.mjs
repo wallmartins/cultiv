@@ -45,7 +45,8 @@ await esbuild.build({
     "scripts/export-calibration-jobs.ts",
     "scripts/run-calibration-sweep.ts",
     "scripts/analyze-calibration-option-b.ts",
-    "scripts/compositor-parity-harness.ts"
+    "scripts/compositor-parity-harness.ts",
+    "scripts/step-planner-cogs-harness.ts"
   ],
   outdir: "dist/scripts",
   outbase: "scripts",
