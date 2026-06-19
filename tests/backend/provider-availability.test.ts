@@ -8,7 +8,9 @@ describe("provider availability", () => {
   };
 
   it("filters attempts to providers with configured API keys", () => {
-    const attempts = filterConfiguredProviderAttempts(geminiOnlyConfig, [
+    const attempts = filterConfiguredProviderAttempts(
+      { environment: "production", ...geminiOnlyConfig },
+      [
       { provider: "gemini", model: "gemini-3.1-flash-lite" },
       { provider: "openai", model: "gpt-4o-mini" },
       { provider: "groq", model: "llama-3.3-70b-versatile" }
@@ -24,5 +26,17 @@ describe("provider availability", () => {
     expect(isProviderConfigured(geminiOnlyConfig, "gemini")).toBe(true);
     expect(isProviderConfigured(geminiOnlyConfig, "openai")).toBe(false);
     expect(isProviderConfigured(geminiOnlyConfig, "groq")).toBe(true);
+  });
+
+  it("keeps all attempts in test environment regardless of API keys", () => {
+    const attempts = filterConfiguredProviderAttempts(
+      { environment: "test" },
+      [
+        { provider: "gemini", model: "gemini-3.1-flash-lite" },
+        { provider: "openai", model: "gpt-4o-mini" }
+      ]
+    );
+
+    expect(attempts).toHaveLength(2);
   });
 });

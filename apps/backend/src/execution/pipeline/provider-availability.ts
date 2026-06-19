@@ -39,6 +39,7 @@ export function isProviderConfigured(
 export function filterConfiguredProviderAttempts<T extends ProviderModelAttempt>(
   config: Pick<
     BackendConfig,
+    | "environment"
     | "openAIApiKey"
     | "anthropicApiKey"
     | "geminiApiKey"
@@ -48,5 +49,9 @@ export function filterConfiguredProviderAttempts<T extends ProviderModelAttempt>
   >,
   attempts: readonly T[]
 ): readonly T[] {
+  if (config.environment === "test") {
+    return attempts;
+  }
+
   return attempts.filter((attempt) => isProviderConfigured(config, attempt.provider));
 }
