@@ -27,6 +27,7 @@ import { resolveCompositorPricingArgs } from "../billing/compositor-pricing-args
 import { recommendGenerationPreviewQualityMode } from "./generation-preview-recommendation.js";
 import { resolveGenerationTarget } from "./resolve-generation-target.js";
 import { isGenerationCompositorEnabled } from "./is-compositor-enabled.js";
+import { isGenerationStepPlannerEnabled } from "./is-step-planner-enabled.js";
 import type { BackendPublicInputSafetyGatewayService } from "../../safety/public-input-safety-types.js";
 import type { FeatureFlagServiceContract } from "@my-ai-orchestrator/feature-flags";
 
@@ -59,11 +60,14 @@ export function createBackendGenerationPreviewService(options: {
         );
         const planTier = (entitlement?.tier ?? "free") as BillingPlanTier;
         const compositorEnabled = isGenerationCompositorEnabled(options.featureFlags, options.config);
+        const stepPlannerEnabled = isGenerationStepPlannerEnabled(options.featureFlags, options.config);
         const resolvedTarget = yield* resolveGenerationTarget({
           intent: sanitizedArgs.intent,
           scope: sanitizedArgs.scope,
           contentType: sanitizedArgs.contentType,
           compositorEnabled,
+          stepPlannerEnabled,
+          briefing: sanitizedArgs.briefing,
           qualityMode: sanitizedArgs.qualityMode
         });
         const compositorPricing = resolveCompositorPricingArgs(resolvedTarget);

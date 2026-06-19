@@ -6,6 +6,7 @@ import { BackendAIPolicyCatalogError, BackendUsageAuthorizationError, BackendVal
 import { resolveGenerationTarget } from "./resolve-generation-target.js";
 import { mergeIntentPipelineContext } from "./merge-intent-pipeline-context.js";
 import { isGenerationCompositorEnabled } from "./is-compositor-enabled.js";
+import { isGenerationStepPlannerEnabled } from "./is-step-planner-enabled.js";
 import type { BackendExecutionService } from "../../execution/service-types.js";
 import { assertQuoteConsistency, toGenerationPricingSnapshot } from "../billing/generation-pricing-snapshot.js";
 import type { QualityMode } from "@my-ai-orchestrator/contracts";
@@ -89,11 +90,14 @@ function toInternalPipelineRequest(
 ): Effect.Effect<PipelineRequest, BackendAIPolicyCatalogError | BackendValidationError> {
   return Effect.gen(function* () {
     const compositorEnabled = isGenerationCompositorEnabled(services.featureFlags, config);
+    const stepPlannerEnabled = isGenerationStepPlannerEnabled(services.featureFlags, config);
     const resolvedTarget = yield* resolveGenerationTarget({
       intent: request.intent,
       scope: request.scope,
       contentType: request.contentType,
       compositorEnabled,
+      stepPlannerEnabled,
+      briefing: request.briefing,
       qualityMode: request.qualityMode
     });
 

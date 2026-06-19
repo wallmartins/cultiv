@@ -10,6 +10,7 @@ import { BackendValidationError } from "../../http/errors.js";
 import { planGeneration } from "./compositor/compositor-planner.js";
 import { materializeCompositorPipeline } from "./compositor/plan-materializer.js";
 import { resolveGenerationIntent, type ResolvedGenerationIntent } from "./intent-resolver.js";
+import { patchExecutionPlan } from "./step-planner/step-planner.js";
 
 export interface ResolvedGenerationTarget {
   readonly contentTypeId: string;
@@ -21,23 +22,49 @@ export interface ResolvedGenerationTarget {
   };
 }
 
+function resolveCompositorPlan(args: {
+  readonly basePlan: ExecutionPlan;
+  readonly stepPlannerEnabled?: boolean;
+  readonly briefing?: string | Record<string, unknown>;
+}): { readonly plan: ExecutionPlan; readonly pipeline: PipelineDefinition } {
+  if (args.stepPlannerEnabled && args.briefing !== undefined) {
+    const patched = patchExecutionPlan(args.basePlan, args.briefing);
+    const plan = patched.plan;
+    return {
+      plan,
+      pipeline: materializeCompositorPipeline(plan)
+    };
+  }
+
+  return {
+    plan: args.basePlan,
+    pipeline: materializeCompositorPipeline(args.basePlan)
+  };
+}
+
 export function resolveGenerationTarget(request: {
   readonly intent?: GenerationIntent;
   readonly scope?: GenerationScope;
   readonly contentType?: string;
   readonly compositorEnabled?: boolean;
+  readonly stepPlannerEnabled?: boolean;
+  readonly briefing?: string | Record<string, unknown>;
   readonly qualityMode?: QualityMode;
 }): Effect.Effect<ResolvedGenerationTarget, BackendValidationError> {
   if (request.intent && request.scope) {
     const resolved = resolveGenerationIntent({ intent: request.intent, scope: request.scope });
 
     if (request.compositorEnabled) {
-      const plan = planGeneration({
+      const basePlan = planGeneration({
         intent: request.intent,
         scope: request.scope,
         qualityMode: request.qualityMode ?? "balanced"
       });
-      const pipeline = materializeCompositorPipeline(plan);
+      const { plan, pipeline } = resolveCompositorPlan({
+        basePlan,
+        stepPlannerEnabled: request.stepPlannerEnabled,
+        briefing: request.briefing
+      });
       const compositorResult: ResolvedGenerationTarget = {
         contentTypeId: plan.planSignature,
         resolvedIntent: resolved,
