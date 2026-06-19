@@ -10,6 +10,7 @@ import {
   formatArgumentDevelopmentBlock,
   formatArgumentDevelopmentSection
 } from "./development-prompt.js";
+import { resolveContextWordTarget } from "../skill-templates.js";
 
 export interface StepVoiceContext {
   readonly voiceExamples: string;
@@ -152,12 +153,14 @@ export function buildAdapterStepContext(
       return compactRecord({
         topic,
         briefing,
+        wordTarget: resolveContextWordTarget(inputs),
         previous: pickPreviousOutput(state, ["hook", "outline", "structure", "research", "analyze"])
       });
     case "refine":
       return compactRecord({
         topic,
         briefingSummary: summarizeBriefing(briefing),
+        wordTarget: resolveContextWordTarget(inputs),
         previous: pickPreviousOutput(state, ["draft", "expand", "hook"])
       });
     case "tighten": {

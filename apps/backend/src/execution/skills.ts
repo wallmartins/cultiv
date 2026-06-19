@@ -15,6 +15,7 @@ import { buildStepVoiceContext } from "./pipeline/step-context.js";
 import {
   classifyStep,
   formatStepLabel,
+  resolveContextWordTarget,
   resolveFormatInstructions,
   resolveOutputRules,
   resolveRefinementMode,
@@ -111,6 +112,7 @@ export function createBackendSkillDefinition(
         const briefingText = getBriefingText(context.inputs);
         const topic = getTopic(context.inputs, context.state, context.pipeline.name);
         const domain = generationContext?.domain;
+        const contextWordTarget = resolveContextWordTarget(context.inputs);
         const templateContext = {
           state: context.state,
           inputs: context.inputs,
@@ -129,7 +131,7 @@ export function createBackendSkillDefinition(
             briefingText,
             previousContent: normalizeOutput(previousContent),
             sourceText: normalizeOutput(previousContent) || briefingText,
-            formatInstructions: resolveFormatInstructions(context.pipeline.name, step.name),
+            formatInstructions: resolveFormatInstructions(context.pipeline.name, step.name, contextWordTarget),
             outputRules: resolveOutputRules(step.name),
             voiceDescription: voiceProfile?.description?.trim() || "- (not specified)",
             styleMarkers: stepVoice.styleMarkers,

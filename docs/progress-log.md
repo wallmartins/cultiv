@@ -1,5 +1,8 @@
 # Progress Log
 
+| 2026-06-19 | feat(backend): pass wordTarget into draft and refine prompts (intent wizard Task 7) |
+| 2026-06-18 | docs: Phase 1 generation intent wizard implementation plan (13 tasks) |
+| 2026-06-18 | docs: Phase 1 generation intent & wizard spec; phased roadmap (formats + pricing) |
 | 2026-06-18 | feat(billing): pricing calibration toolkit + export/calibrate scripts (Phase 0) |
 | 2026-06-18 | docs: hybrid pricing implementation plan (10 tasks, calibration → repricing → quota UX) |
 | 2026-06-18 | docs: hybrid pricing design spec — token-calibrated internal credits, quota presentation layer, Free/Criador/Pro ladder, Generation Screen educational copy (no internal credit exposure) |
