@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 import pg from "pg";
 import type { GenerationLengthTier, QualityMode } from "@my-ai-orchestrator/contracts";
 import { CALIBRATION_BRIEFINGS } from "./calibration/briefings.js";
+import { loadCalibrationEnvironment } from "./calibration/load-env.js";
 import {
   countSweepRuns,
   resolveSweepProfile,
@@ -60,7 +61,9 @@ function parseArgs(argv: readonly string[]) {
 function requireEnv(name: string): string {
   const value = process.env[name]?.trim();
   if (!value) {
-    console.error(`Missing required environment variable: ${name}`);
+    console.error(
+      `Missing required environment variable: ${name} (set in ~/app/.env or export before running)`
+    );
     process.exit(1);
   }
   return value;
@@ -220,10 +223,13 @@ async function main(): Promise<void> {
   const profile = resolveSweepProfile(profileId, repeats);
   const totalRuns = countSweepRuns(profile.cells);
   const baseUrl = (process.env.CALIBRATION_BASE_URL ?? "http://127.0.0.1:3001").replace(/\/$/, "");
-  const token = requireEnv("CALIBRATION_ACCESS_TOKEN");
-  const databaseUrl = requireEnv("DATABASE_URL");
-  const userId = process.env.CALIBRATION_USER_ID ?? "(from token)";
   const sweepId = process.env.CALIBRATION_SWEEP_ID ?? `sweep-${new Date().toISOString().replace(/[:.]/g, "-")}`;
+
+  if (!dryRun) {
+    loadCalibrationEnvironment();
+  }
+
+  const userId = process.env.CALIBRATION_USER_ID ?? "(from token)";
 
   console.log(`Calibration sweep: ${profile.id}`);
   console.log(profile.description);
@@ -240,6 +246,9 @@ async function main(): Promise<void> {
     }
     return;
   }
+
+  const token = requireEnv("CALIBRATION_ACCESS_TOKEN");
+  const databaseUrl = requireEnv("DATABASE_URL");
 
   const manifest: SweepManifest = {
     sweepId,

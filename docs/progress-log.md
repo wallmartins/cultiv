@@ -1,5 +1,6 @@
 # Progress Log
 
+| 2026-06-19 | fix(billing): calibration scripts load root .env on VPS; dry-run skips token |
 | 2026-06-19 | fix(billing): bundle calibration scripts to dist/scripts for VPS prod installs without tsx |
 | 2026-06-19 | feat(billing): calibration sweep scripts for Option B viability — `run-calibration-sweep`, `analyze-calibration-option-b`, tier-variance profile, runbook |
 | 2026-06-19 | fix(phase1): close review gaps — shared legacy map in contracts, resolveGenerationTarget tests, wizard/prefill tests, legacy flag default off, mergeIntentPipelineContext |

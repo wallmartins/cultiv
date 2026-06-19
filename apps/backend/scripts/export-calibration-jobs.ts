@@ -4,13 +4,15 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import pg from "pg";
 import { bootstrapBackendConfig } from "../src/config/config.js";
+import { loadCalibrationEnvironment } from "./calibration/load-env.js";
 
 const { Client } = pg;
 
 const repoRoot = resolve(fileURLToPath(new URL("../../..", import.meta.url)));
 
 async function main(): Promise<void> {
-  const config = bootstrapBackendConfig();
+  loadCalibrationEnvironment();
+  const config = bootstrapBackendConfig({ loadEnvFile: false });
   const databaseUrl = process.env.DATABASE_URL ?? config.databaseUrl;
 
   if (!databaseUrl) {
