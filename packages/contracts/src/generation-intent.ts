@@ -1,5 +1,5 @@
 import { Schema } from "effect";
-import { QualityModeSchema } from "./execution.js";
+import { QualityModeSchema } from "./execution/job.js";
 
 export const GenerationIntentSchema = Schema.Literal(
   "share-idea",
