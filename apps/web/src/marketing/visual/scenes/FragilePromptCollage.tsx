@@ -8,7 +8,7 @@ export interface FragilePromptCollageProps {
 }
 
 const fragmentStyles = [
-  { font: "handwritten" as const, fontSize: 13 },
+  { font: "imprint" as const, fontSize: 13 },
   { font: "mono" as const, fontSize: 10 },
   { font: "body" as const, fontSize: 11 },
   { font: "body" as const, fontSize: 10, italic: true }
@@ -76,7 +76,7 @@ export function FragilePromptCollage({ className, copy }: FragilePromptCollagePr
           y={composerTop + 22}
           fontFamily="var(--font-mono)"
           fontSize="9"
-          fill="var(--color-moss)"
+          fill="var(--color-pigment-terracotta)"
           letterSpacing="0.14em"
         >
           {copy.composerLabel.toUpperCase()}
@@ -94,16 +94,16 @@ export function FragilePromptCollage({ className, copy }: FragilePromptCollagePr
           const style = fragmentStyles[index];
           const lineY = composerTop + 52 + index * 22;
           const fontFamily =
-            style.font === "handwritten"
-              ? "var(--font-handwritten)"
+            style.font === "imprint"
+              ? "var(--font-impressao)"
               : style.font === "mono"
                 ? "var(--font-mono)"
                 : "var(--font-body)";
           const textFill =
-            style.font === "handwritten"
-              ? "var(--color-golden)"
+            style.font === "imprint"
+              ? "var(--color-pigment-ochre)"
               : style.font === "mono"
-                ? "var(--color-moss)"
+                ? "var(--color-pigment-terracotta)"
                 : "var(--color-foreground)";
 
           return (
@@ -113,9 +113,9 @@ export function FragilePromptCollage({ className, copy }: FragilePromptCollagePr
                 y={lineY - 14}
                 width="432"
                 height="20"
-                fill="var(--color-golden)"
+                fill="var(--color-pigment-ochre)"
                 opacity="0.14"
-                stroke="var(--color-golden)"
+                stroke="var(--color-pigment-ochre)"
                 strokeWidth="0.75"
                 strokeOpacity="0.35"
               />

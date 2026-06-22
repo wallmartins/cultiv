@@ -14,7 +14,7 @@ export interface WaitlistFormProps {
 type FormStatus = "idle" | "submitting" | "success" | "error";
 
 const fieldClassName =
-  "w-full border-0 border-b border-invert-foreground/25 bg-transparent py-3.5 font-body text-[1.0625rem] text-invert-foreground placeholder:text-invert-foreground/30 transition-colors duration-200 focus:border-golden focus:outline-none";
+  "w-full border-0 border-b border-paper/25 bg-transparent py-3.5 font-body text-[1.0625rem] text-paper placeholder:text-paper/30 transition-colors duration-200 focus:border-pigment-terracotta focus:outline-none";
 
 export function WaitlistForm({ locale, copy }: WaitlistFormProps) {
   const [email, setEmail] = useState("");
@@ -59,10 +59,10 @@ export function WaitlistForm({ locale, copy }: WaitlistFormProps) {
   if (status === "success") {
     return (
       <div className="waitlist-form-panel space-y-4">
-        <Text as="p" variant="meta" className="text-golden">
+        <Text as="p" variant="meta" className="text-pigment-ochre">
           [ ok ]
         </Text>
-        <Text as="p" variant="body-lg" className="max-w-md font-handwritten text-2xl text-golden">
+        <Text as="p" variant="imprint" className="max-w-md text-2xl text-pigment-ochre">
           {copy.success}
         </Text>
       </div>
@@ -73,7 +73,7 @@ export function WaitlistForm({ locale, copy }: WaitlistFormProps) {
     <form className="waitlist-form-panel space-y-10" onSubmit={onSubmit} noValidate>
       <div className="space-y-8">
         <label className="block space-y-3">
-          <Text as="span" variant="meta" className="text-invert-foreground/55">
+          <Text as="span" variant="meta" className="text-paper/55">
             {copy.emailLabel}
           </Text>
           <input
@@ -88,7 +88,7 @@ export function WaitlistForm({ locale, copy }: WaitlistFormProps) {
         </label>
 
         <label className="block space-y-3">
-          <Text as="span" variant="meta" className="text-invert-foreground/55">
+          <Text as="span" variant="meta" className="text-paper/55">
             {copy.nameLabel}
           </Text>
           <input
@@ -111,14 +111,14 @@ export function WaitlistForm({ locale, copy }: WaitlistFormProps) {
             required
             checked={consent}
             onChange={(event) => setConsent(event.target.checked)}
-            className="size-4 appearance-none border border-invert-foreground/35 bg-transparent checked:border-golden checked:bg-golden focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-golden"
+            className="size-4 appearance-none border border-paper/35 bg-transparent checked:border-pigment-terracotta checked:bg-pigment-terracotta focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pigment-terracotta"
           />
         </span>
-        <Text as="span" variant="body" className="leading-[1.85] text-invert-foreground/70">
+        <Text as="span" variant="body" className="leading-[1.85] text-paper/70">
           {copy.consentPrefix}{" "}
           <Link
             to={getPrivacyPath(locale)}
-            className="text-invert-foreground underline decoration-golden/50 underline-offset-4 transition-colors hover:decoration-golden"
+            className="text-paper underline decoration-pigment-terracotta/50 underline-offset-4 transition-colors hover:decoration-pigment-terracotta"
           >
             {copy.consentLink}
           </Link>
@@ -127,17 +127,12 @@ export function WaitlistForm({ locale, copy }: WaitlistFormProps) {
       </label>
 
       {errorMessage ? (
-        <Text as="p" variant="body" className="text-invert-foreground/70">
+        <Text as="p" variant="body" className="text-paper/70">
           {errorMessage}
         </Text>
       ) : null}
 
-      <Button
-        type="submit"
-        variant="ghost"
-        disabled={status === "submitting"}
-        className="min-h-12 border border-golden bg-golden px-10 py-3.5 text-rich-soil hover:bg-transparent hover:text-golden disabled:opacity-50"
-      >
+      <Button type="submit" variant="primary" disabled={status === "submitting"}>
         {status === "submitting" ? copy.submitting : copy.submit}
       </Button>
     </form>

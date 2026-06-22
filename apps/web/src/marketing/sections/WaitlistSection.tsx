@@ -1,4 +1,4 @@
-import { Container, SectionHeader, Text } from "@my-ai-orchestrator/ui";
+import { Container, InkBleed, SectionHeader, Text } from "@my-ai-orchestrator/ui";
 import { useSectionReveal } from "~/marketing/animations/use-section-reveal";
 import { WaitlistForm } from "~/marketing/components/WaitlistForm";
 import { getLocaleMessages } from "~/i18n/marketing/get-locale";
@@ -17,12 +17,9 @@ export function WaitlistSection({ locale }: WaitlistSectionProps) {
   return (
     <section
       id="waitlist"
-      className="editorial-rule relative flex min-h-svh flex-col overflow-hidden bg-invert text-invert-foreground"
+      className="relative flex min-h-svh flex-col overflow-hidden border-t border-ink-ghost bg-ink text-paper"
     >
-      <div
-        aria-hidden
-        className="organic-glow-invert pointer-events-none absolute inset-0"
-      />
+      <InkBleed />
 
       <Container
         ref={sectionRef}
@@ -40,27 +37,27 @@ export function WaitlistSection({ locale }: WaitlistSectionProps) {
 
         <div
           aria-hidden
-          className="mx-auto my-10 h-px w-full max-w-xs bg-gradient-to-r from-transparent via-golden/45 to-transparent md:my-14"
+          className="mx-auto my-10 h-px w-full max-w-xs bg-ink-ghost md:my-14"
         />
 
         <div className="grid items-start gap-14 lg:grid-cols-[1fr_1fr] lg:gap-20 xl:gap-24">
           <div data-section-item className="space-y-12 lg:pr-6">
             <header className="max-w-5xl space-y-7 md:space-y-8">
-              <Text as="p" variant="meta" className="text-showcase-muted">
+              <Text as="p" variant="meta" className="text-paper/70">
                 {waitlist.eyebrow}
               </Text>
               <div className="space-y-4 md:space-y-5">
                 <Text
                   as="h2"
-                  variant="chapter"
-                  className="max-w-5xl text-showcase-foreground leading-[1.02]"
+                  variant="display"
+                  className="max-w-5xl text-paper leading-[1.08]"
                 >
                   {titleLine1}
                 </Text>
                 <Text
                   as="p"
-                  variant="chapter"
-                  className="max-w-5xl text-showcase-foreground leading-[1.02]"
+                  variant="display"
+                  className="max-w-5xl text-paper leading-[1.08]"
                 >
                   {titleLine2}
                 </Text>
@@ -68,18 +65,18 @@ export function WaitlistSection({ locale }: WaitlistSectionProps) {
               <Text
                 as="p"
                 variant="body-lg"
-                className="max-w-2xl pt-1 text-showcase-muted leading-[1.85] md:pt-2"
+                className="max-w-2xl pt-1 text-paper/70 leading-[1.85] md:pt-2"
               >
                 {waitlist.description}
               </Text>
             </header>
-            <StampBadge label={waitlist.stampLabel} value={waitlist.stampValue} />
+            <StampBadge invert label={waitlist.stampLabel} value={waitlist.stampValue} />
           </div>
 
           <div data-section-item className="relative lg:pt-2">
             <div
               aria-hidden
-              className="absolute top-3 bottom-3 left-0 hidden w-px bg-gradient-to-b from-transparent via-golden/50 to-transparent lg:block"
+              className="absolute top-3 bottom-3 left-0 hidden w-px bg-ink-ghost lg:block"
             />
             <WaitlistForm locale={locale} copy={waitlist} />
           </div>

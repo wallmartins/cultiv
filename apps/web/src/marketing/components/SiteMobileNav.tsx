@@ -60,7 +60,7 @@ export function SiteMobileNav({ locale, messages }: SiteMobileNavProps) {
               onClick={(event) => event.stopPropagation()}
             >
               <div className="mb-5 flex items-center justify-between gap-4">
-                <Text as="p" variant="meta" className="text-moss">
+                <Text as="p" variant="meta" className="text-ink-muted">
                   {messages.navLabel}
                 </Text>
                 <button

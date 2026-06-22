@@ -43,7 +43,7 @@ export function ChapterPanel({
         )}
       >
         <div className="space-y-5">
-          <Text as="p" variant="meta" className={isShowcase ? "text-showcase-accent" : "text-moss"}>
+          <Text as="p" variant="meta" className={isShowcase ? "text-showcase-accent" : "text-ink-muted"}>
             [{index}]
           </Text>
           <Text

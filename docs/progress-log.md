@@ -1,5 +1,6 @@
 # Progress Log
 
+| 2026-06-22 | feat(marketing): reskin all showcase sections to Imprint — SectionHeader/ComparisonCard patterns, PaperSurface sections, numbered product flow, InkBleed waitlist (Task 10) |
 | 2026-06-22 | feat(marketing): Imprint hero, header, and footer — PaperSurface hero with stamp reveal, PressMark BrandMark, ink/terracotta chrome (Task 9) |
 | 2026-06-22 | refactor(web): replace workspace surface fork with Imprint intensity modes — `data-intensity` on marketing/app shells, remove ADR 0003 CSS overrides (Task 7) |
 | 2026-06-22 | feat(ui): rebuild Button, Text, and Input for Imprint identity — terracotta/ink variants, Conducão typography scale, press-edge inputs (Task 6) |

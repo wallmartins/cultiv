@@ -4,8 +4,6 @@ import { ProblemPerspectiveRow } from "~/marketing/components/ProblemPerspective
 import { FullScreenSection } from "~/marketing/components/FullScreenSection";
 import { getLocaleMessages } from "~/i18n/marketing/get-locale";
 import type { MarketingLocale } from "~/i18n/marketing/types";
-import { FragilePromptCollage } from "~/marketing/visual/scenes/FragilePromptCollage";
-import { GenericOutputStack } from "~/marketing/visual/scenes/GenericOutputStack";
 
 export interface ProblemSectionProps {
   readonly locale: MarketingLocale;
@@ -16,7 +14,10 @@ export function ProblemSection({ locale }: ProblemSectionProps) {
   const sectionRef = useSectionReveal("[data-section-item]");
 
   return (
-    <FullScreenSection id="problema" className="editorial-rule relative overflow-hidden">
+    <FullScreenSection
+      id="problema"
+      className="imprint-grain bg-paper press-edge relative overflow-hidden border-t border-ink-ghost"
+    >
       <Container ref={sectionRef} className="relative z-[3] space-y-16 md:space-y-24">
         <div data-section-item>
           <SectionHeader eyebrow={problem.eyebrow} title={problem.title} className="mb-0" />
@@ -25,13 +26,15 @@ export function ProblemSection({ locale }: ProblemSectionProps) {
           index={problem.perspectives[0].index}
           title={problem.perspectives[0].title}
           body={problem.perspectives[0].body}
-          visual={<GenericOutputStack copy={scenes.genericOutput} />}
+          proofLabel={scenes.genericOutput.repeatToneLabel}
+          proofLines={scenes.genericOutput.lines}
         />
         <ProblemPerspectiveRow
           index={problem.perspectives[1].index}
           title={problem.perspectives[1].title}
           body={problem.perspectives[1].body}
-          visual={<FragilePromptCollage copy={scenes.fragilePrompt} />}
+          proofLabel={scenes.fragilePrompt.newChatHint}
+          proofLines={scenes.fragilePrompt.fragments}
           reverse
         />
       </Container>

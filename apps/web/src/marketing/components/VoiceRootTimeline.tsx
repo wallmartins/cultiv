@@ -39,7 +39,7 @@ export function VoiceRootTimeline({ outputLabel, steps, className }: VoiceRootTi
     >
       <div className="voice-root-timeline__stage relative mx-auto w-full max-w-[min(100%,88rem,80svh)]">
         <div data-root-reveal>
-          <VoiceRootSystemArt className="h-auto w-full text-moss" />
+          <VoiceRootSystemArt className="h-auto w-full text-pigment-terracotta" />
         </div>
 
         <div

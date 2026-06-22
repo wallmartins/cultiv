@@ -11,7 +11,7 @@ export interface LegalDocumentPageProps {
 
 export function LegalDocumentPage({ document, locale, kind }: LegalDocumentPageProps) {
   return (
-    <main className="editorial-rule py-[var(--spacing-section)]">
+    <main className="imprint-grain bg-paper press-edge border-t border-ink-ghost py-[var(--spacing-section)]">
       <LegalStructuredData locale={locale} kind={kind} />
       <Container className="max-w-3xl">
         <Text as="p" variant="meta" className="mb-6">

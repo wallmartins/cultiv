@@ -13,8 +13,8 @@ export function StampBadge({ label, value, className, invert }: StampBadgeProps)
       className={cn(
         "inline-flex -rotate-3 flex-col items-center justify-center rounded-full border-2 px-5 py-3 text-center",
         invert
-          ? "border-showcase-accent text-showcase-accent"
-          : "border-golden text-golden",
+          ? "border-pigment-ochre text-pigment-ochre"
+          : "border-pigment-ochre text-pigment-ochre",
         className
       )}
       style={{
@@ -23,8 +23,8 @@ export function StampBadge({ label, value, className, invert }: StampBadgeProps)
     >
       <span
         className={cn(
-          "font-mono text-[0.625rem] uppercase tracking-editorial",
-          invert ? "text-showcase-accent" : "text-golden/80"
+          "font-mono text-[0.625rem] uppercase tracking-[0.04em]",
+          invert ? "text-pigment-ochre/80" : "text-pigment-ochre/80"
         )}
       >
         {label}
