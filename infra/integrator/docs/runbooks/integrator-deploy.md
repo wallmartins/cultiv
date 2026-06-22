@@ -71,8 +71,6 @@ git pull
 bash infra/integrator/scripts/manual-build-deploy.sh
 ```
 
-The script forces a full dependency install (`NODE_ENV=development` + `--prod=false`) so `esbuild` is available even when `.env` sets `NODE_ENV=production`.
-
 Verify the voice-judge fix (or any backend change) reached the running worker:
 
 ```bash

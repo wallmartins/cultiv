@@ -2,54 +2,31 @@
 
 Validate **StepPlanner v1** and quota presentation on the live stack before commercial repricing.
 
+Same operational model as [compositor-parity-runbook.md](./compositor-parity-runbook.md): harnesses run from **pre-built** `apps/backend/dist/scripts/*.js` (CI deploy or local `pnpm build:backend` on a dev machine). On the VPS you normally **do not** run `pnpm build` after `git pull`.
+
 ## Prerequisites
 
-- Backend built (`apps/backend/dist/…`) — see **VPS build** below if `git pull` only updated source
+- `apps/backend/dist/scripts/step-planner-smoke-harness.js` present (from last CI deploy to `main`, or local build on dev)
 - API + worker online
 - Flags on API **and** worker:
   - `COMPOSITOR_V1_ENABLED=true`
   - `STEP_PLANNER_V1_ENABLED=true`
-- Repo root `.env` or VPS `~/app/.env`:
-  - `CALIBRATION_ACCESS_TOKEN` — JWT for calibration user (credits + voice profile)
-  - `DATABASE_URL` — PostgreSQL (job polling)
+- Repo root `.env` or VPS `~/app/.env` (HTTP mode only):
+  - `CALIBRATION_ACCESS_TOKEN`
+  - `DATABASE_URL`
   - `CALIBRATION_BASE_URL` — default `http://127.0.0.1:3001`
 
-See also [compositor-parity-runbook.md](./compositor-parity-runbook.md) for token and wallet setup.
-
-## VPS build (after `git pull`)
-
-`git pull` updates **TypeScript source only**. Harness scripts run from **bundled** `apps/backend/dist/scripts/*.js`. The build uses `esbuild`, which is a **devDependency** — a production-only `pnpm install --prod` (CI deploy) does not install it.
-
-**Do not** run bare `pnpm build` after prod install — you will get `Cannot find package 'esbuild'`.
-
-`NODE_ENV=production` in `.env` makes `pnpm install` skip devDependencies even without `--prod`. Use the manual script (it forces a full install) or:
+Check the bundle landed on VPS:
 
 ```bash
-env NODE_ENV=development pnpm install --frozen-lockfile --prod=false
-env NODE_ENV=development pnpm build:backend
+ls apps/backend/dist/scripts/step-planner-smoke-harness.js
 ```
 
-From the app root (`/home/cultiv/app`):
-
-```bash
-git pull
-bash infra/integrator/scripts/manual-build-deploy.sh
-```
-
-That script runs `env NODE_ENV=development pnpm install --frozen-lockfile --prod=false` (so `esbuild` is installed despite production `.env`), `pnpm build:backend`, migrations, and PM2 reload.
-
-Harness-only rebuild (no PM2 restart):
-
-```bash
-env NODE_ENV=development pnpm install --frozen-lockfile --prod=false
-env NODE_ENV=development pnpm build:backend
-```
-
-Automated path: merge to `main` and let CI deploy the pre-built artifact (no local build on VPS).
+If missing, wait for **CI deploy** (`push` → `main` → `deploy-app.sh` copies `dist/`), not a local VPS build.
 
 ## 1. Smoke (fast — 5 curated scenarios)
 
-Dry-run only (no LLM):
+Dry-run only (no LLM, no API):
 
 ```bash
 pnpm --filter @my-ai-orchestrator/backend step-planner:smoke
@@ -77,7 +54,7 @@ Dry-run (planner math only):
 pnpm --filter @my-ai-orchestrator/backend step-planner:cogs
 ```
 
-Live execution — **all 18 rows** (~high credit cost):
+Live execution — all 18 rows (~high credit cost):
 
 ```bash
 pnpm --filter @my-ai-orchestrator/backend step-planner:cogs -- --execute
@@ -107,14 +84,25 @@ STEP_PLANNER_COGS_LONG_TIMEOUT_MS=1800000
 STEP_PLANNER_COGS_DELAY_MS=3000
 ```
 
-## 3. Recommended VPS sequence
+## 3. Recommended sequence
 
-1. `step-planner:smoke` (dry) — instant pass/fail on rules
-2. `step-planner:smoke -- --execute` — validates quota UX + `telemetry.planner`
-3. `step-planner:cogs -- --execute --execute-patched-only` — USD samples for patched paths
-4. If gate passes → recalibrate `pricing.json` and plan allowances (hybrid pricing Track C)
+1. Merge Phase 3 to `main` → CI `build-backend` + VPS deploy (updates `dist/`)
+2. `step-planner:smoke` (dry) on VPS
+3. `step-planner:smoke -- --execute` — quota UX + `telemetry.planner`
+4. `step-planner:cogs -- --execute --execute-patched-only` — USD samples
+5. If gate passes → recalibrate `pricing.json` (hybrid pricing Track C)
 
-## 4. Repricing gate
+## 4. When to use manual build on VPS
+
+Only when you intentionally change backend **without** going through CI deploy (same as any other backend change):
+
+```bash
+bash infra/integrator/scripts/manual-build-deploy.sh
+```
+
+See [integrator-deploy.md](../../../infra/integrator/docs/runbooks/integrator-deploy.md). For harness smoke after a normal release, **CI deploy is enough** — same as `compositor:parity`.
+
+## 5. Repricing gate
 
 From the Phase 3 one-pager — proceed when either:
 
