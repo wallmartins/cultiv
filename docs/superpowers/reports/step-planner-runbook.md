@@ -22,6 +22,13 @@ See also [compositor-parity-runbook.md](./compositor-parity-runbook.md) for toke
 
 **Do not** run bare `pnpm build` after prod install — you will get `Cannot find package 'esbuild'`.
 
+`NODE_ENV=production` in `.env` makes `pnpm install` skip devDependencies even without `--prod`. Use the manual script (it forces a full install) or:
+
+```bash
+env NODE_ENV=development pnpm install --frozen-lockfile --prod=false
+env NODE_ENV=development pnpm build:backend
+```
+
 From the app root (`/home/cultiv/app`):
 
 ```bash
@@ -29,13 +36,13 @@ git pull
 bash infra/integrator/scripts/manual-build-deploy.sh
 ```
 
-That script runs `pnpm install --frozen-lockfile` (includes dev deps), `pnpm build:backend`, migrations, and PM2 reload.
+That script runs `env NODE_ENV=development pnpm install --frozen-lockfile --prod=false` (so `esbuild` is installed despite production `.env`), `pnpm build:backend`, migrations, and PM2 reload.
 
 Harness-only rebuild (no PM2 restart):
 
 ```bash
-pnpm install --frozen-lockfile
-pnpm build:backend
+env NODE_ENV=development pnpm install --frozen-lockfile --prod=false
+env NODE_ENV=development pnpm build:backend
 ```
 
 Automated path: merge to `main` and let CI deploy the pre-built artifact (no local build on VPS).

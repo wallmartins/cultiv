@@ -29,8 +29,14 @@ APP_DIR="$(resolve_cultiv_app_dir)"
 cd "$APP_DIR"
 
 echo "Building backend in: $APP_DIR"
-pnpm install --frozen-lockfile
-pnpm build:backend
+
+# VPS .env sets NODE_ENV=production for PM2. pnpm then omits devDependencies
+# (including esbuild), so `node scripts/build.mjs` fails unless we force a full install.
+echo "Installing dependencies (dev deps required for backend esbuild bundle)..."
+env NODE_ENV=development pnpm install --frozen-lockfile --prod=false
+
+echo "Bundling backend..."
+env NODE_ENV=development pnpm build:backend
 pnpm --filter @my-ai-orchestrator/backend migrate
 
 pm2 reload ecosystem.config.cjs --only cultiv-api
