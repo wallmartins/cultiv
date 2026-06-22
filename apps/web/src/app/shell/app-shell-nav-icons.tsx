@@ -47,3 +47,12 @@ export function NavIconVoice({ active, className }: NavIconProps) {
     </svg>
   );
 }
+
+export function NavIconPlans({ active, className }: NavIconProps) {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden className={iconClassName(active, className)}>
+      <rect {...stroke} x="4" y="5" width="16" height="14" rx="2" />
+      <path {...stroke} d="M8 9h8M8 13h5" />
+    </svg>
+  );
+}
