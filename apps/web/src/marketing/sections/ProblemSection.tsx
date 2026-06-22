@@ -4,7 +4,6 @@ import { ProblemPerspectiveRow } from "~/marketing/components/ProblemPerspective
 import { FullScreenSection } from "~/marketing/components/FullScreenSection";
 import { getLocaleMessages } from "~/i18n/marketing/get-locale";
 import type { MarketingLocale } from "~/i18n/marketing/types";
-import { FallingLeavesLayer } from "~/marketing/visual/FallingLeavesLayer";
 import { FragilePromptCollage } from "~/marketing/visual/scenes/FragilePromptCollage";
 import { GenericOutputStack } from "~/marketing/visual/scenes/GenericOutputStack";
 
@@ -18,7 +17,6 @@ export function ProblemSection({ locale }: ProblemSectionProps) {
 
   return (
     <FullScreenSection id="problema" className="editorial-rule relative overflow-hidden">
-      <FallingLeavesLayer density="sparse" className="z-[2]" />
       <Container ref={sectionRef} className="relative z-[3] space-y-16 md:space-y-24">
         <div data-section-item>
           <SectionHeader eyebrow={problem.eyebrow} title={problem.title} className="mb-0" />

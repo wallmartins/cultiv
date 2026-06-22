@@ -1,12 +1,7 @@
 import { ButtonLink, Text } from "@my-ai-orchestrator/ui";
 import { useSectionReveal } from "~/marketing/animations/use-section-reveal";
-import { useDrawStroke } from "~/marketing/animations/use-draw-stroke";
-import { useBotanicalUpright } from "~/marketing/animations/use-botanical-upright";
 import { getLocaleMessages } from "~/i18n/marketing/get-locale";
 import type { MarketingLocale } from "~/i18n/marketing/types";
-import { FallingLeavesLayer } from "~/marketing/visual/FallingLeavesLayer";
-import { IllustrationFrame } from "~/marketing/visual/IllustrationFrame";
-import { BotanicalTree } from "~/marketing/visual/illustrations/BotanicalTree";
 import { WordReveal } from "~/marketing/visual/typography/WordReveal";
 
 export interface HeroSectionProps {
@@ -16,27 +11,12 @@ export interface HeroSectionProps {
 export function HeroSection({ locale }: HeroSectionProps) {
   const { hero } = getLocaleMessages(locale);
   const sectionRef = useSectionReveal("[data-hero-item]");
-  const drawRef = useDrawStroke<HTMLDivElement>();
-  const uprightRef = useBotanicalUpright<HTMLDivElement>();
 
   return (
     <section
       id="hero"
       className="organic-glow-hero relative isolate h-hero-viewport overflow-hidden"
     >
-      <IllustrationFrame
-        ref={(node) => {
-          drawRef.current = node;
-          uprightRef.current = node;
-        }}
-        grain={false}
-        className="hero-tree-layer absolute bottom-[-8%] left-1/2 z-0 h-[112%] w-[min(92vw,40rem)] -translate-x-1/2 text-moss opacity-[0.44] sm:opacity-[0.48] md:bottom-[-6%] md:h-[108%] md:w-[min(78vw,44rem)] md:opacity-[0.52]"
-      >
-        <BotanicalTree className="h-full w-full" />
-      </IllustrationFrame>
-
-      <FallingLeavesLayer density="hero" className="z-[3]" />
-
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 z-[2] bg-[radial-gradient(ellipse_52%_58%_at_50%_44%,color-mix(in_srgb,var(--color-surface)_68%,transparent),color-mix(in_srgb,var(--color-surface)_32%,transparent)_62%,transparent_100%)]"

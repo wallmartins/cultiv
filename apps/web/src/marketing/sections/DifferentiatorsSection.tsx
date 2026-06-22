@@ -1,6 +1,5 @@
 import type { ReactNode } from "react";
 import { Container, SectionHeader, Text } from "@my-ai-orchestrator/ui";
-import { useDrawStroke } from "~/marketing/animations/use-draw-stroke";
 import { useDifferentiatorChapters } from "~/marketing/animations/use-differentiator-chapters";
 import { useSectionReveal } from "~/marketing/animations/use-section-reveal";
 import { ChapterPanel } from "~/marketing/components/differentiators/ChapterPanel";
@@ -9,9 +8,7 @@ import { getLinkedInShowcaseSample } from "~/marketing/content/showcase/get-link
 import { useIsMdUp } from "~/hooks/use-media-query";
 import { getLocaleMessages } from "~/i18n/marketing/get-locale";
 import type { MarketingLocale } from "~/i18n/marketing/types";
-import { IllustrationFrame } from "~/marketing/visual/IllustrationFrame";
 import { ProblemSceneMat } from "~/marketing/visual/ProblemSceneMat";
-import { WaveformScript } from "~/marketing/visual/illustrations/WaveformScript";
 import { BriefingScene } from "~/marketing/visual/scenes/BriefingScene";
 import { PreviewConfidenceScene } from "~/marketing/visual/scenes/PreviewConfidenceScene";
 import { TeachVoiceScene } from "~/marketing/visual/scenes/TeachVoiceScene";
@@ -57,14 +54,8 @@ export function DifferentiatorsSection({ locale }: DifferentiatorsSectionProps) 
   const isDesktop = useIsMdUp();
   const { sectionRef, stackRef } = useDifferentiatorChapters<HTMLElement>(isDesktop);
   const mobileRevealRef = useSectionReveal("[data-section-item]", { start: "top bottom" });
-  const waveformRef = useDrawStroke<HTMLDivElement>();
 
   const chapters = differentiators.chapters;
-  const waveform = (
-    <IllustrationFrame ref={waveformRef} className="max-w-xl text-showcase-muted">
-      <WaveformScript className="h-auto w-full" script={showcase.waveformScript} />
-    </IllustrationFrame>
-  );
 
   if (!isDesktop) {
     return (
@@ -95,7 +86,6 @@ export function DifferentiatorsSection({ locale }: DifferentiatorsSectionProps) 
               <Text as="p" variant="body-lg" className="text-showcase-muted">
                 {chapters[0].body}
               </Text>
-              {waveform}
               <ShowcaseTeaserPanel sample={linkedInSample} showcase={showcase} />
             </article>
             <MobileChapterBlock
@@ -139,7 +129,6 @@ export function DifferentiatorsSection({ locale }: DifferentiatorsSectionProps) 
           title={chapters[0].title}
           body={chapters[0].body}
           variant="showcase"
-          visual={waveform}
         >
           <ShowcaseTeaserPanel sample={linkedInSample} showcase={showcase} />
         </ChapterPanel>

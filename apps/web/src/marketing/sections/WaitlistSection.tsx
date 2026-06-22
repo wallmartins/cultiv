@@ -3,7 +3,6 @@ import { useSectionReveal } from "~/marketing/animations/use-section-reveal";
 import { WaitlistForm } from "~/marketing/components/WaitlistForm";
 import { getLocaleMessages } from "~/i18n/marketing/get-locale";
 import type { MarketingLocale } from "~/i18n/marketing/types";
-import { FallingLeavesLayer } from "~/marketing/visual/FallingLeavesLayer";
 import { StampBadge } from "~/marketing/visual/typography/StampBadge";
 
 export interface WaitlistSectionProps {
@@ -23,11 +22,6 @@ export function WaitlistSection({ locale }: WaitlistSectionProps) {
       <div
         aria-hidden
         className="organic-glow-invert pointer-events-none absolute inset-0"
-      />
-      <FallingLeavesLayer
-        density="whisper"
-        className="z-[2]"
-        colorClassName="text-golden/25"
       />
 
       <Container
