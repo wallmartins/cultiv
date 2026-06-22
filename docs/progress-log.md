@@ -1,6 +1,6 @@
 # Progress Log
 
-| 2026-06-22 | docs: Cultiv Imprint implementation plan (15 tasks — tokens, primitives, marketing/app reskin, governance) |
+| 2026-06-22 | feat(ui): Cultiv Imprint design tokens and motion scale — paper/ink palette, Imprint typography utilities, press/reveal motion tokens (Task 2) |
 | 2026-06-22 | docs: Cultiv Imprint unified visual identity design spec — Modernism + Arts and Crafts + Minimalism synthesis, Press Mark brand, typography/color/motion tokens, supersedes ADR 0003 |
 | 2026-06-22 | refactor(web): rename billing screen to Plans (`/app/plans`) — upgrade/checkout focus; `/app/billing` redirects |
 | 2026-06-22 | feat(billing): policy `2026-06-22` — step-planner COGS-calibrated `pricesByPlan`; plan grants 20/150 monthly credits |

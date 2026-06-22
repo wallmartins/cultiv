@@ -1,39 +1,60 @@
 @theme {
-  --font-display: "Playfair Display", Georgia, serif;
-  --font-handwritten: "Caveat", cursive;
-  --font-body: "Inter", system-ui, sans-serif;
+  --font-conducao: "Bricolage Grotesque", system-ui, sans-serif;
+  --font-impressao: "Fraunces", Georgia, serif;
+  --font-leitura: "Source Serif 4", Georgia, serif;
+  --font-body: var(--font-conducao);
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  /* Keep legacy font aliases pointing to new fonts during migration */
+  --font-display: var(--font-impressao);
+  --font-handwritten: var(--font-impressao);
 
-  --color-surface: #f5f0e8;
-  --color-surface-elevated: #faf7f2;
-  --color-foreground: #1e2f2a;
-  --color-muted: #5c6b66;
-  --color-ghost: #ddd4c8;
-  --color-rich-soil: #1e2f2a;
-  --color-golden: #d4a843;
-  --color-moss: #6b9080;
-  --color-soft-loam: #e8e0d4;
-  --color-accent: #6b9080;
-  --color-accent-secondary: #d4a843;
-  --color-accent-foreground: #f5f0e8;
-  --color-tech: #6b9080;
-  --color-border: #1e2f2a;
-  --color-border-subtle: #d9cfc2;
-  --color-invert: #1e2f2a;
-  --color-invert-foreground: #e8e0d4;
-  --color-showcase: #243830;
-  --color-showcase-foreground: #f5f0e8;
-  --color-showcase-muted: #a8bdb2;
-  --color-showcase-accent: #d4a843;
+  --color-paper: #f3f0ea;
+  --color-paper-elevated: #faf8f4;
+  --color-paper-pressed: #e8e4dc;
+  --color-ink: #1a1a18;
+  --color-ink-muted: #6b6860;
+  --color-ink-ghost: #c8c4bc;
+  --color-pigment-terracotta: #c4705a;
+  --color-pigment-indigo: #3d4f7c;
+  --color-pigment-ochre: #c4a35a;
+  --color-success: #5a8c6b;
+  --color-warning: #c4a35a;
+  --color-error: #c45a5a;
+  --color-info: #3d4f7c;
 
+  --radius-press: 2px;
+  --spacing-gutter: clamp(1.25rem, 4vw, 2.5rem);
   --spacing-section: 5.5rem;
   --spacing-section-sm: 3.5rem;
-  --spacing-gutter: clamp(1.25rem, 4vw, 2.5rem);
-  --radius-sm: 0;
-  --radius-md: 0;
+  --shadow-press-edge:
+    inset 0 1px 0 rgb(255 255 255 / 0.4),
+    inset 0 -1px 0 rgb(0 0 0 / 0.06);
   --tracking-editorial: 0.18em;
   --tracking-editorial-wide: 0.28em;
   --tracking-handwritten: 0.05em;
+
+  /* migration aliases — remove in Task 13 */
+  --color-surface: var(--color-paper);
+  --color-surface-elevated: var(--color-paper-elevated);
+  --color-foreground: var(--color-ink);
+  --color-muted: var(--color-ink-muted);
+  --color-ghost: var(--color-ink-ghost);
+  --color-rich-soil: var(--color-ink);
+  --color-border-subtle: var(--color-ink-ghost);
+  --color-border: var(--color-ink);
+  --color-accent: var(--color-pigment-terracotta);
+  --color-accent-secondary: var(--color-pigment-ochre);
+  --color-accent-foreground: var(--color-paper);
+  --color-moss: var(--color-pigment-terracotta);
+  --color-golden: var(--color-pigment-ochre);
+  --color-soft-loam: var(--color-paper-pressed);
+  --color-tech: var(--color-pigment-indigo);
+  --color-invert: var(--color-ink);
+  --color-invert-foreground: var(--color-paper);
+  --color-showcase: var(--color-ink);
+  --color-showcase-foreground: var(--color-paper);
+  --color-showcase-muted: var(--color-ink-muted);
+  --color-showcase-accent: var(--color-pigment-ochre);
 }
 
 @layer base {
@@ -49,14 +70,15 @@
   }
 
   .dark {
-    --color-surface: #141c19;
-    --color-surface-elevated: #1a2420;
-    --color-foreground: #e8e0d4;
-    --color-muted: #a8bdb2;
-    --color-ghost: #2a3531;
-    --color-invert: #e8e0d4;
-    --color-invert-foreground: #1e2f2a;
-    --color-showcase: #0f1814;
+    --color-paper: #1a1a18;
+    --color-paper-elevated: #2a2a26;
+    --color-paper-pressed: #33332f;
+    --color-ink: #f3f0ea;
+    --color-ink-muted: #a8a59c;
+    --color-ink-ghost: #3d3d38;
+    --color-pigment-terracotta: #d17f68;
+    --color-pigment-indigo: #4a5f94;
+    --color-pigment-ochre: #d4b066;
     color-scheme: dark;
   }
 
@@ -1015,5 +1037,66 @@
     .motion-hover:hover {
       transform: translateY(-2px);
     }
+  }
+
+  .font-conducao {
+    font-family: var(--font-conducao);
+  }
+
+  .font-impressao {
+    font-family: var(--font-impressao);
+  }
+
+  .font-leitura {
+    font-family: var(--font-leitura);
+  }
+
+  .press-edge {
+    box-shadow: var(--shadow-press-edge);
+  }
+
+  .imprint-grain {
+    position: relative;
+  }
+
+  .imprint-grain::after {
+    content: "";
+    pointer-events: none;
+    position: absolute;
+    inset: 0;
+    mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+  }
+
+  [data-intensity="expressive"] .imprint-grain::after {
+    opacity: 0.05;
+  }
+
+  [data-intensity="quiet"] .imprint-grain::after,
+  :root:not([data-intensity]) .imprint-grain::after {
+    opacity: 0.03;
+  }
+
+  .ui-type-display-xl {
+    font-family: var(--font-conducao);
+    font-size: clamp(2.5rem, 6vw, 3.052rem);
+    font-weight: 500;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+
+  .ui-type-reading {
+    font-family: var(--font-leitura);
+    font-size: 1.125rem;
+    line-height: 1.75;
+    letter-spacing: 0.01em;
+  }
+
+  .ui-type-imprint {
+    font-family: var(--font-impressao);
+    font-size: 1.25rem;
+    line-height: 1.4;
+    letter-spacing: 0.02em;
   }
 }
