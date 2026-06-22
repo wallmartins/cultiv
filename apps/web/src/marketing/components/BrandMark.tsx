@@ -1,39 +1,33 @@
-import { cn } from "@my-ai-orchestrator/ui";
-import {
-  BRAND_ICON_PATH,
-  BRAND_WORDMARK_DARK_PATH,
-  BRAND_WORDMARK_PATH
-} from "~/brand/assets";
+import { cn, PressMark, Text } from "@my-ai-orchestrator/ui";
 
 export type BrandMarkVariant = "wordmark" | "icon";
 
 export interface BrandMarkProps {
   readonly className?: string;
   readonly variant?: BrandMarkVariant;
-  readonly dark?: boolean;
 }
 
-const variantClasses: Record<BrandMarkVariant, string> = {
-  wordmark: "h-[1.625rem] w-auto md:h-7",
-  icon: "h-9 w-9 md:h-11 md:w-11"
+const pressMarkSize: Record<BrandMarkVariant, number> = {
+  icon: 36,
+  wordmark: 28
 };
 
-export function BrandMark({ className, variant = "wordmark", dark = false }: BrandMarkProps) {
-  const src =
-    variant === "icon"
-      ? BRAND_ICON_PATH
-      : dark
-        ? BRAND_WORDMARK_DARK_PATH
-        : BRAND_WORDMARK_PATH;
+export function BrandMark({ className, variant = "wordmark" }: BrandMarkProps) {
+  if (variant === "icon") {
+    return (
+      <PressMark
+        size={pressMarkSize.icon}
+        className={cn("block shrink-0", className)}
+      />
+    );
+  }
 
   return (
-    <img
-      src={src}
-      alt="Cultiv"
-      width={variant === "icon" ? 44 : 104}
-      height={variant === "icon" ? 44 : 26}
-      decoding="async"
-      className={cn("block shrink-0", variantClasses[variant], className)}
-    />
+    <span className={cn("inline-flex shrink-0 items-center gap-2", className)}>
+      <PressMark size={pressMarkSize.wordmark} className="block shrink-0" />
+      <Text as="span" variant="heading" className="font-semibold tracking-[-0.01em] text-ink">
+        Cultiv
+      </Text>
+    </span>
   );
 }

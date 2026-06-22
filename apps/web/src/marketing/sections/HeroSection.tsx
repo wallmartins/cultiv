@@ -1,8 +1,14 @@
-import { ButtonLink, Text } from "@my-ai-orchestrator/ui";
+import {
+  ButtonLink,
+  InkBleed,
+  PaperSurface,
+  PressMark,
+  Text
+} from "@my-ai-orchestrator/ui";
 import { useSectionReveal } from "~/marketing/animations/use-section-reveal";
+import { useStampReveal } from "~/marketing/animations/use-stamp-reveal";
 import { getLocaleMessages } from "~/i18n/marketing/get-locale";
 import type { MarketingLocale } from "~/i18n/marketing/types";
-import { WordReveal } from "~/marketing/visual/typography/WordReveal";
 
 export interface HeroSectionProps {
   readonly locale: MarketingLocale;
@@ -11,53 +17,59 @@ export interface HeroSectionProps {
 export function HeroSection({ locale }: HeroSectionProps) {
   const { hero } = getLocaleMessages(locale);
   const sectionRef = useSectionReveal("[data-hero-item]");
+  const stampRef = useStampReveal<HTMLDivElement>();
+  const heroTagline =
+    "tagline" in hero && typeof hero.tagline === "string" ? hero.tagline : undefined;
 
   return (
-    <section
+    <PaperSurface
       id="hero"
-      className="organic-glow-hero relative isolate h-hero-viewport overflow-hidden"
+      className="relative isolate flex h-hero-viewport items-center justify-center overflow-hidden"
     >
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 z-[2] bg-[radial-gradient(ellipse_52%_58%_at_50%_44%,color-mix(in_srgb,var(--color-surface)_68%,transparent),color-mix(in_srgb,var(--color-surface)_32%,transparent)_62%,transparent_100%)]"
-      />
+      <InkBleed />
 
       <div
         ref={sectionRef}
-        className="relative z-10 mx-auto flex h-full w-full max-w-6xl items-center justify-center px-[var(--spacing-gutter)] lg:max-w-7xl"
+        className="relative z-10 mx-auto flex w-full max-w-4xl flex-col items-center px-[var(--spacing-gutter)] text-center"
       >
-        <div className="flex w-full max-w-4xl flex-col items-center text-center">
-          <WordReveal
-            text={hero.headline}
-            as="h1"
-            className="mx-auto w-full text-center font-handwritten text-[clamp(2.5rem,8vw,5.25rem)] font-medium leading-[1.02] tracking-handwritten text-foreground"
-          />
+        <div ref={stampRef} className="mb-8">
+          <PressMark size={64} />
+        </div>
 
-          <Text
-            as="p"
-            variant="body-lg"
-            data-hero-item
-            className="mx-auto mt-6 max-w-xl text-center text-muted md:mt-8"
-          >
-            {hero.subheadline}
+        <Text as="h1" variant="display-xl" data-hero-item className="text-ink">
+          {hero.headline}
+        </Text>
+
+        {heroTagline ? (
+          <Text as="p" variant="imprint" data-hero-item className="mt-4 text-ink-muted">
+            {heroTagline}
           </Text>
+        ) : null}
 
-          <div
-            data-hero-item
-            className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center md:mt-12"
+        <Text
+          as="p"
+          variant="body-lg"
+          data-hero-item
+          className="mx-auto mt-6 max-w-xl text-ink-muted md:mt-8"
+        >
+          {hero.subheadline}
+        </Text>
+
+        <div
+          data-hero-item
+          className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center md:mt-12"
+        >
+          <ButtonLink href="#waitlist" variant="primary">
+            {hero.ctaPrimary}
+          </ButtonLink>
+          <a
+            href="#problema"
+            className="motion-hover font-conducao text-[0.6875rem] font-semibold uppercase tracking-[0.04em] text-pigment-terracotta hover:text-ink"
           >
-            <ButtonLink href="#waitlist" variant="primary">
-              {hero.ctaPrimary}
-            </ButtonLink>
-            <a
-              href="#problema"
-              className="motion-hover font-body text-[0.6875rem] font-semibold uppercase tracking-editorial-wide text-moss hover:text-foreground"
-            >
-              {hero.ctaSecondary} →
-            </a>
-          </div>
+            {hero.ctaSecondary} →
+          </a>
         </div>
       </div>
-    </section>
+    </PaperSurface>
   );
 }
