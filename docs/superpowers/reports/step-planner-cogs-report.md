@@ -1,6 +1,6 @@
 # Step planner COGS variance report
 
-Generated: 2026-06-22T14:41:50.382Z
+Generated: 2026-06-22T14:49:24.592Z
 
 ## Summary
 
@@ -8,9 +8,9 @@ Generated: 2026-06-22T14:41:50.382Z
 - p50 absolute LLM step delta: 0
 - p90 absolute LLM step delta: 0
 - planSignature drift rate: 0.0%
-- HTTP runs: 4/18 done
-- p50 USD (executed): 0.1326
-- p90 USD (executed): 0.1536
+- HTTP runs: 17/18 done
+- p50 USD (executed): 0.1065
+- p90 USD (executed): 0.1442
 
 ## Dry-run comparisons (local)
 
@@ -41,32 +41,44 @@ Live preview + execute against the running API (`COMPOSITOR_V1_ENABLED` + `STEP_
 
 | Fixture | Variant | Status | Job | planSignature | USD est. | Planner patches |
 |---------|---------|--------|-----|---------------|----------|-----------------|
-| explain-deeply / long / blog | minimal | done | f0c4b9ba-28db-4712-81ec-4b342375c9d4 | long-piece | 0.1441 | 2 (removeStep:research, removeStep:outline) |
-| explain-deeply / long / blog | typical | done | e8c28bb9-20b2-41d7-a7d7-9f189254b47f | long-piece | 0.1326 | 2 (removeStep:research, removeStep:outline) |
-| document-decision / medium / unspecified | heavy | done | 4385e746-7f0f-41a7-a684-16e584c9036b | edition-piece | 0.1536 | 1 (insertStep:structure:before:draft) |
-| engage-audience / short / social | minimal | done | f9843969-2bc0-4a47-893e-35beb9be4669 | short-piece | 0.0474 | 1 (removeStep:hook) |
-| share-idea / short / professional-network | minimal | skipped | — | — | — | — |
-| share-idea / short / professional-network | typical | skipped | — | — | — | — |
-| share-idea / short / professional-network | heavy | skipped | — | — | — | — |
-| share-idea / medium / email | minimal | skipped | — | — | — | — |
-| share-idea / medium / email | typical | skipped | — | — | — | — |
-| share-idea / medium / email | heavy | skipped | — | — | — | — |
-| explain-deeply / long / blog | heavy | skipped | — | — | — | — |
-| document-decision / medium / unspecified | minimal | skipped | — | — | — | — |
-| document-decision / medium / unspecified | typical | skipped | — | — | — | — |
-| engage-audience / short / social | typical | skipped | — | — | — | — |
-| engage-audience / short / social | heavy | skipped | — | — | — | — |
-| tell-story / medium / unspecified | minimal | skipped | — | — | — | — |
-| tell-story / medium / unspecified | typical | skipped | — | — | — | — |
-| tell-story / medium / unspecified | heavy | skipped | — | — | — | — |
+| share-idea / short / professional-network | minimal | done | 41dc9923-03c1-4b8f-91bb-98e58dd5292f | short-piece | 0.0753 | 0 |
+| share-idea / short / professional-network | typical | done | 072c4fde-f29b-42dd-b24c-7df55f81b4e1 | short-piece | 0.0726 | 0 |
+| share-idea / short / professional-network | heavy | failed | 8cab9555-51fe-4ebf-9a73-0cbe37faadc8 | short-piece | — | — |
+| share-idea / medium / email | minimal | done | 31d32fe4-d84b-4121-a4ba-eb3768a115ec | edition-piece | 0.1065 | 0 |
+| share-idea / medium / email | typical | done | c0579dfd-72cb-42e4-8e82-901f4d873566 | edition-piece | 0.1080 | 0 |
+| share-idea / medium / email | heavy | done | 324b18c0-d635-4335-adf0-c95ef5afb018 | edition-piece | 0.1068 | 0 |
+| explain-deeply / long / blog | minimal | done | 93855306-e42a-4b9b-921e-62008a2a15ee | long-piece | 0.1359 | 2 (removeStep:research, removeStep:outline) |
+| explain-deeply / long / blog | typical | done | a4dbf7cc-50ed-4a7b-9a1a-1e2a0d2b3b6c | long-piece | 0.1328 | 2 (removeStep:research, removeStep:outline) |
+| explain-deeply / long / blog | heavy | done | f53bbcc4-e339-4f94-ae75-fb477af80732 | long-piece | 0.1288 | 0 |
+| document-decision / medium / unspecified | minimal | done | 617be9f4-abcc-4069-b837-a908237b91a0 | edition-piece | 0.1371 | 0 |
+| document-decision / medium / unspecified | typical | done | b7ba5416-d61c-4776-9837-c68d1e1365f1 | edition-piece | 0.1442 | 0 |
+| document-decision / medium / unspecified | heavy | done | 74f7e93b-c0a1-4f4d-82c0-5632f4e49d64 | edition-piece | 0.1546 | 1 (insertStep:structure:before:draft) |
+| engage-audience / short / social | minimal | done | fc67def0-1ddb-4e72-8884-64d7a50b7721 | short-piece | 0.0476 | 1 (removeStep:hook) |
+| engage-audience / short / social | typical | done | c3674eaf-6d5c-450e-adb3-c88904a45671 | short-piece | 0.0754 | 0 |
+| engage-audience / short / social | heavy | done | 9eaa4063-0074-4a5b-907e-3daf52af0325 | short-piece | 0.0639 | 0 |
+| tell-story / medium / unspecified | minimal | done | 340d8477-a65a-4811-9cf8-bf068a6ebdb7 | serial-piece | 0.0708 | 0 |
+| tell-story / medium / unspecified | typical | done | 97eaa376-85e1-479b-86a8-1b4cff20eae2 | serial-piece | 0.0724 | 0 |
+| tell-story / medium / unspecified | heavy | done | 8506f26e-287b-4f33-8a75-db77c2166d71 | serial-piece | 0.0722 | 0 |
 
 ### USD by final planSignature
 
 | planSignature | Runs | p50 USD | p90 USD |
 |---------------|------|---------|---------|
-| edition-piece | 1 | 0.1536 | 0.1536 |
-| long-piece | 2 | 0.1326 | 0.1441 |
-| short-piece | 1 | 0.0474 | 0.0474 |
+| edition-piece | 6 | 0.1080 | 0.1546 |
+| long-piece | 3 | 0.1328 | 0.1359 |
+| serial-piece | 3 | 0.0722 | 0.0724 |
+| short-piece | 5 | 0.0726 | 0.0754 |
+
+### HTTP failures
+
+- **share-idea-short-professional-network/heavy**: Quality lane "short-piece:lane:1" failed while generating execution candidates for pipeline "short-piece": Pipeline "short-piece" failed at step "refine": AIAdapterTransportError: Provider "gemini" returned HTTP 503: {
+  "error": {
+    "code": 503,
+    "message": "This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.",
+    "status": "UNAVAILABLE"
+  }
+}
+
 
 ## Repricing gate (one-pager)
 
