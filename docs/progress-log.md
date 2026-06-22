@@ -1,5 +1,6 @@
 # Progress Log
 
+| 2026-06-22 | docs: Cultiv Imprint implementation complete — design-system reference, creative direction, CONTEXT.md glossary (Imprint typography/surface/intensity), ADR 0009 (Task 14) |
 | 2026-06-22 | feat(app): Imprint generation preview, execution drawer, and voice accents — ReadingSurface preview, terracotta/ochre pigments across app surfaces (Task 12) |
 | 2026-06-22 | feat(app): Imprint quiet shell and navigation — paper grain shell, press-edge nav dock, terracotta active state, compact PressMark header, workspace CSS migrated to Imprint tokens (Task 11) |
 | 2026-06-22 | feat(marketing): reskin all showcase sections to Imprint — SectionHeader/ComparisonCard patterns, PaperSurface sections, numbered product flow, InkBleed waitlist (Task 10) |

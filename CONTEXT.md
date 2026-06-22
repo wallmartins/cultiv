@@ -461,44 +461,48 @@ A curated marketing artifact for one **Content Type** that pairs a generic AI ou
 _Avoid_: Demo, case study, portfolio item
 
 **Design System**:
-The shared visual language — tokens, primitives, and reusable patterns — consumed by web and future client applications without embedding marketing-specific sections.
-_Avoid_: UI kit, component library, style guide
+The shared **Cultiv Imprint** visual language — one token set, primitives (`PaperSurface`, `ReadingSurface`, `PressMark`, …), and reusable patterns in `packages/ui` — consumed by the **Marketing Surface** and **Authenticated Workspace** without forking themes; intensity (`expressive` / `quiet`) is a composition concern at the app root, not a separate palette.
+_Avoid_: UI kit, component library, style guide, marketing-only tokens
 
-**Workspace Visual Refresh**:
-The planned premium, fluid, contemporary visual evolution scoped exclusively to the **Authenticated Workspace**, independent of the **Marketing Surface** editorial language, while preserving **Brand Tone** (organic warmth, personal growth — not cold corporate SaaS).
-_Avoid_: Rebrand, marketing redesign, global theme swap
+**Cultiv Imprint**:
+The unified visual identity for marketing and `/app/*`: authorial voice as a material mark on paper (grain, press edge, pigments), guided by Modernism → Arts and Crafts → Minimalism. Supersedes ADR 0003 workspace-only overrides (Jardim de Vidro, moss/golden, botanical editorial).
+_Avoid_: Workspace Visual Refresh, GlyphsLabs editorial, dual grammars
 
-**Workspace Typography**:
-The typographic rule for the **Authenticated Workspace**: sans-serif only (`font-body` scale) for titles, labels, and body copy; **Playfair Display** and **Caveat** remain exclusive to the **Marketing Surface**.
-_Avoid_: Editorial serif in app, handwritten in app chrome
+**Imprint Typography**:
+The three-role typographic rule for all surfaces: **Condução** (Bricolage Grotesque) for UI and headings, **Impressão** (Fraunces) for scarce brand emphasis, **Leitura** (Source Serif 4) for generated and preview content. Playfair Display and Caveat are retired.
+_Avoid_: Sans-only workspace ban, handwritten accents, display serif in chrome only on marketing
 
-**Workspace Surface Language**:
-The visual treatment for **Authenticated Workspace** surfaces: soft glass layers (backdrop blur, warm diffuse shadows, subtle borders), restrained **organic-glow** page atmosphere, and medium corner radius on cards and chrome — not flat opaque panels or editorial hard-edge frames.
-_Avoid_: Flat SaaS panels, heavy editorial borders, marketing-style scene mats
+**Imprint Surface Language**:
+The material treatment for Cultiv surfaces: warm `paper` backgrounds, `imprint-grain` texture, `press-edge` emboss on cards and inputs, `radius-press` (2px), and earthy pigments (`terracotta`, `indigo`, `ochre`) with intent — not glass blur, botanical decoration, or legacy editorial frames.
+_Avoid_: Jardim de Vidro glass, organic-glow atmosphere, moss/golden accents, hard-edge editorial frames
+
+**Imprint Intensity**:
+The root `data-intensity` attribute that varies visual volume without forking tokens: `expressive` on the **Marketing Surface** (stronger grain, ink bleed, scroll reveal) and `quiet` in the **Authenticated Workspace** (reading-first chrome, contained pigment and motion).
+_Avoid_: `data-surface="workspace"`, parallel theme files, marketing vs app token split
 
 **Generation Screen Layout**:
 The responsive layout rule for the **Generation Screen**: on desktop, a split view with the **Briefing Form** on the wider column and a sticky **Generation Preview** panel on the narrower column; on mobile, a single centered column with preview stacked below the form.
 _Avoid_: Multi-step wizard, preview-only modal, desktop single-column scroll-to-confirm
 
 **Workspace Navigation Chrome**:
-The presentation pattern for **App Shell Navigation** in the **Workspace Visual Refresh**: a floating glass dock on desktop that expands on hover or focus to reveal labels, plus a labeled bottom bar on mobile — not a fixed full-height sidebar.
-_Avoid_: Fixed sidebar, permanent wide nav column, marketing-style header nav
+The presentation pattern for **App Shell Navigation** under **Imprint Intensity** `quiet`: a floating press-edge dock on desktop that expands on hover or focus to reveal labels, with terracotta active state and compact **PressMark** in the header; labeled bottom bar on mobile — not a fixed full-height sidebar.
+_Avoid_: Fixed sidebar, permanent wide nav column, marketing-style header nav, glass blur dock
 
 **Voice Confidence Presentation**:
-The visual rule for **Voice Confidence** on the **Voice Dashboard**: a circular growth ring that fills along a moss-to-golden gradient by confidence level, paired with the textual label — not a plain text card or generic progress bar alone.
-_Avoid_: SaaS progress bar only, decorative botanical illustration, numeric score without context
+The visual rule for **Voice Confidence** on the **Voice Dashboard**: a circular growth ring that fills along an ochre-to-terracotta pigment gradient by confidence level, paired with the textual label — not a plain text card or generic progress bar alone.
+_Avoid_: SaaS progress bar only, decorative botanical illustration, numeric score without context, moss/golden legacy palette
 
-**Workspace Motion Language**:
-The animation rule for the **Authenticated Workspace**: contained fluid motion — short route fades with slight slide, 60–80ms mount staggers on forms and lists, soft drawer springs (~320ms), subtle card hover lift — without bounce, elastic, parallax, or marketing-style scroll chapters; honor `prefers-reduced-motion` by collapsing to opacity-only transitions.
-_Avoid_: Static UI, cinematic scroll storytelling, bouncy microinteractions
+**Imprint Motion Language**:
+The animation rule across Cultiv surfaces: grid-aligned entries, fade + micro-settle (as if printed), no bounce or elastic; marketing may use Lenis/GSAP section reveals under `expressive`, while `/app/*` keeps contained route fades, mount staggers, and drawer springs (~350ms) under `quiet`; honor `prefers-reduced-motion` with opacity-only transitions.
+_Avoid_: Static UI, cinematic scroll storytelling in app, bouncy microinteractions
 
-**Workspace Accent Palette**:
-The color accent rule for the **Authenticated Workspace**: moss for interactive states (active nav, focus rings, links) and golden for growth, progress, and warm emphasis (including **Voice Confidence** fill); no third chromatic accent such as violet in workspace chrome.
-_Avoid_: Violet AI accent in app, rainbow status colors, decorative color fills
+**Imprint Pigment Palette**:
+The chromatic accent rule for Cultiv: `pigment-terracotta` for primary CTA and active states, `pigment-ochre` for growth and warm emphasis (including **Voice Confidence** fill), `pigment-indigo` for links and technical meta; one dominant pigment per viewport; reading surfaces stay paper + ink only.
+_Avoid_: Moss/golden legacy accents, violet AI accent, rainbow status fills, pigment on generated text preview
 
 **Brand Tone**:
-The emotional positioning of the **Marketing Surface**: personal, organic growth rather than corporate tech or aggressive conversion.
-_Avoid_: Brand voice, marketing angle, vibe
+The emotional positioning of Cultiv across marketing and product: craft authenticity and personal authorial growth — warm paper materiality, precise modernist grid, text as protagonist — not cold corporate SaaS or aggressive conversion styling.
+_Avoid_: Brand voice, marketing angle, vibe, generic premium editorial studio
 
 **Marketing Problem Angle**:
 The primary visitor tension on the **Product Showcase**: publishing at scale with generic AI erases the author's personal voice, and manual ChatGPT voice prompts are fragile substitutes.
@@ -690,18 +694,18 @@ _Avoid_: AI Writing Engine, content-lib, my-ai-orchestrator
 - The v1 **Marketing Surface** ships bilingually; each public marketing route resolves one **Marketing Locale** at a time.
 - Portuguese (Brazil) is the default **Marketing Locale** at `/`; English is served under `/en` with equivalent routes and `hreflang` metadata.
 - The v1 **Product Showcase** ships as one editorial scroll page with anchored sections; legal pages are the only additional public routes in the **Marketing Surface**.
-- The **Design System** lives in `packages/ui` and is shared across client applications; marketing sections and app screens compose it locally in each app.
-- The **Workspace Visual Refresh** applies only under `/app/*`; the **Marketing Surface** keeps its current editorial showcase language and is not part of that pass.
-- The **Authenticated Workspace** may override or extend shared tokens locally (for example radius, shadows, app typography) without changing the **Marketing Surface** presentation.
-- **Workspace Typography** uses sans-serif only; display serif and handwritten fonts from the **Marketing Surface** must not appear in **Authenticated Workspace** UI chrome or screen titles.
-- **Workspace Surface Language** applies soft glass, warm shadows, medium radius, and subtle organic glow; form fields use solid readable backgrounds rather than glass-on-glass stacking.
-- The **Generation Screen** uses a desktop split layout with sticky **Generation Preview** and a mobile single-column stack.
-- **Workspace Navigation Chrome** keeps the floating expandable dock on desktop and bottom bar on mobile; it does not switch to a fixed sidebar in the **Workspace Visual Refresh**.
-- **Voice Confidence Presentation** uses a moss-to-golden growth ring on the **Voice Dashboard**, animated on load within reduced-motion constraints.
-- **Workspace Motion Language** applies contained fluid motion across `/app/*` and defers to opacity-only transitions when `prefers-reduced-motion` is set.
-- In the **Workspace Visual Refresh**, the **Active Execution Drawer** is a ~520px right slide-over on desktop and a full-screen sheet on mobile, optimized for reading an **Execution Result View** with relaxed typography and a fixed action toolbar.
-- **Workspace Accent Palette** limits chromatic emphasis to moss and golden within `/app/*`; alternate accent directions such as violet do not apply to the workspace refresh.
-- The v1 **Brand Tone** favors organic personal growth: warm typography, soft motion, and neutral palettes over cold tech or high-pressure conversion styling.
+- The **Design System** lives in `packages/ui` as **Cultiv Imprint** and is shared across the **Marketing Surface** and **Authenticated Workspace**; intensity (`expressive` / `quiet`) is set at layout roots, not via separate token files.
+- **Cultiv Imprint** unifies marketing and `/app/*` under one grammar (ADR 0009); ADR 0003 workspace-only overrides are retired.
+- **Imprint Typography** applies Condução / Impressão / Leitura on all surfaces; generated and preview content uses Source Serif 4 via **ReadingSurface**.
+- **Imprint Surface Language** uses paper, grain, press edge, and `radius-press`; form fields use solid readable backgrounds with terracotta focus rings.
+- **Imprint Intensity** sets `data-intensity="expressive"` on marketing layouts and `quiet` on **App Shell** and onboarding.
+- The **Generation Screen** uses a desktop split layout with sticky **Generation Preview** in **ReadingSurface** and a mobile single-column stack.
+- **Workspace Navigation Chrome** keeps the floating expandable press-edge dock on desktop and bottom bar on mobile with terracotta active state.
+- **Voice Confidence Presentation** uses an ochre-to-terracotta growth ring on the **Voice Dashboard**, animated on load within reduced-motion constraints.
+- **Imprint Motion Language** applies contained motion under `quiet` in `/app/*` and section reveals under `expressive` on marketing; `prefers-reduced-motion` collapses to opacity-only.
+- The **Active Execution Drawer** is a ~520px right slide-over on desktop and a full-screen sheet on mobile, optimized for **ReadingSurface** typography and a fixed action toolbar.
+- **Imprint Pigment Palette** limits chromatic emphasis to terracotta, ochre, and indigo with intent; reading surfaces remain paper + ink.
+- The v1 **Brand Tone** favors craft authenticity and authorial growth: paper materiality, precise grid, and text-first reading surfaces over cold tech or high-pressure conversion styling.
 - The v1 **Product Showcase** problem section uses two **Problem Perspectives** that reinforce the **Marketing Problem Angle**: generic AI tone and fragile manual voice prompts.
 - The v1 **Product Showcase** follows wireframe order: a dedicated problem block, then a separate **Solution Breath** block — not a Chromia-style problem|solution pair in one row.
 - The **Solution Breath** centers **Cultiv** and expresses the answer through a small set of **Solution Keywords** in balloon visuals rather than paragraph copy.
