@@ -6,7 +6,7 @@ import {
 } from "../../apps/web/src/platform/credits/credit-balance-cache";
 
 describe("fetchCreditBalance", () => {
-  it("loads available credits from billing entitlement", async () => {
+  it("loads quota remaining from billing entitlement", async () => {
     invalidateCreditBalanceCache();
 
     const client = {
@@ -17,13 +17,16 @@ describe("fetchCreditBalance", () => {
         planId: "pro",
         tier: "pro",
         status: "active",
-        availableCredits: 2215,
-        monthlyCreditsRemaining: 2215
+        availableCredits: 150,
+        monthlyCreditsRemaining: 150,
+        canonicalCreditCost: 2.5,
+        quotaRemaining: 60,
+        quotaLimit: 60
       })
     };
 
-    await expect(fetchCreditBalance(client as never)).resolves.toBe(2215);
-    expect(getCachedCreditBalance()).toBe(2215);
+    await expect(fetchCreditBalance(client as never)).resolves.toBe(60);
+    expect(getCachedCreditBalance()).toBe(60);
     expect(client.toPromise).toHaveBeenCalledTimes(1);
   });
 });

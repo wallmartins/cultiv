@@ -42,7 +42,7 @@ export function CreditDisplay({ status, balance, messages }: CreditDisplayProps)
             {balance}
           </Text>
           <Text as="span" variant="meta" className="text-muted-foreground">
-            {messages.shell.credits.label}
+            {messages.shell.quota.label}
           </Text>
         </>
       )}

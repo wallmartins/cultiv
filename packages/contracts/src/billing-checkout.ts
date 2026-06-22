@@ -35,6 +35,9 @@ export const BillingEntitlementViewSchema = Schema.Struct({
   status: Schema.String,
   availableCredits: Schema.Number,
   monthlyCreditsRemaining: Schema.Number,
+  canonicalCreditCost: Schema.Number,
+  quotaRemaining: Schema.Number,
+  quotaLimit: Schema.Number,
   currency: Schema.optional(BillingCurrencySchema)
 });
 export type BillingEntitlementView = typeof BillingEntitlementViewSchema.Type;

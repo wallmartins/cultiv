@@ -10,7 +10,7 @@ export const appMessagesPt: AppMessages = {
       plans: "Planos",
       logout: "Sair"
     },
-    credits: { label: "créditos" },
+    quota: { label: "gerações" },
     activeExecutions: {
       title: "Em andamento",
       empty: "Nenhuma geração ativa",

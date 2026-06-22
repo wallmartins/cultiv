@@ -14,9 +14,9 @@ export function fetchCreditBalance(client: ClientSdk): Promise<number> {
   const promise = client
     .toPromise(client.billing.getEntitlement())
     .then((entitlement) => {
-      setCachedCreditBalance(entitlement.availableCredits);
+      setCachedCreditBalance(entitlement.quotaRemaining);
       setCreditBalanceInFlight(null);
-      return entitlement.availableCredits;
+      return entitlement.quotaRemaining;
     })
     .catch((error: unknown) => {
       setCreditBalanceInFlight(null);
