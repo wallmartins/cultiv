@@ -8,7 +8,7 @@ export interface OnboardingLayoutProps {
 export function OnboardingLayout({ children }: OnboardingLayoutProps) {
   return (
     <AppLocaleProvider>
-      <div className="min-h-screen bg-surface text-foreground">
+      <div className="min-h-screen bg-surface text-foreground" data-intensity="quiet">
         <main>{children}</main>
       </div>
     </AppLocaleProvider>

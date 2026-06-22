@@ -1,5 +1,6 @@
 # Progress Log
 
+| 2026-06-22 | refactor(web): replace workspace surface fork with Imprint intensity modes — `data-intensity` on marketing/app shells, remove ADR 0003 CSS overrides (Task 7) |
 | 2026-06-22 | feat(ui): rebuild Button, Text, and Input for Imprint identity — terracotta/ink variants, Conducão typography scale, press-edge inputs (Task 6) |
 | 2026-06-22 | feat(ui): add PaperSurface, ReadingSurface, and InkBleed primitives — grain/press wrapper, immersive reading shell, decorative pigment bleed (Task 5) |
 | 2026-06-22 | feat(ui): add Press Mark logo primitive and brand SVGs — PressMark component, favicon/OG SVGs, RTL/jsdom test setup (Task 4) |

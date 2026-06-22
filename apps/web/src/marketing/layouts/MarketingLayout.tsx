@@ -13,7 +13,7 @@ export function MarketingLayout({ locale, children }: MarketingLayoutProps) {
   useDocumentLang(locale);
 
   return (
-    <div className="min-h-screen overflow-x-clip">
+    <div className="min-h-screen overflow-x-clip" data-intensity="expressive">
       <SiteHeader locale={locale} />
       {children}
       <FooterSection locale={locale} />
