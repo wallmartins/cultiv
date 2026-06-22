@@ -15,7 +15,7 @@ export type AppShellMessages = {
     readonly plans: string;
     readonly logout: string;
   };
-  readonly credits: { readonly label: string };
+  readonly quota: { readonly label: string };
   readonly activeExecutions: {
     readonly title: string;
     readonly empty: string;

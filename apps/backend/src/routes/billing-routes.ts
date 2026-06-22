@@ -4,6 +4,7 @@ import {
   BillingEntitlementViewSchema,
   decodeBillingCheckoutRequest
 } from "@my-ai-orchestrator/contracts";
+import { resolveQuotaLimit, resolveQuotaRemaining } from "@my-ai-orchestrator/payments";
 import { resolvePublicActor } from "../auth/auth-middleware.js";
 import { Routes } from "../app/route-definitions.js";
 import type { BackendConfig } from "../config/config.js";
@@ -74,14 +75,22 @@ export function registerBillingRoutes(app: Hono, options: BillingRouteOptions): 
       });
     }
 
+    const canonicalCreditCost = options.services.aiPolicy.getCanonicalCreditCost();
+    const plan = options.services.billing.listPlans().find((candidate) => candidate.id === planId);
+    const monthlyCredits = plan?.monthlyCredits ?? 0;
+    const availableCredits = entitlement.wallet.availableCredits;
+
     const validated = await validateResponseBody(
       BillingEntitlementViewSchema,
       {
         planId: entitlement.planId,
         tier: entitlement.tier,
         status: entitlement.status,
-        availableCredits: entitlement.wallet.availableCredits,
-        monthlyCreditsRemaining: entitlement.monthlyCreditsRemaining
+        availableCredits,
+        monthlyCreditsRemaining: entitlement.monthlyCreditsRemaining,
+        canonicalCreditCost,
+        quotaRemaining: resolveQuotaRemaining(availableCredits, canonicalCreditCost),
+        quotaLimit: resolveQuotaLimit(monthlyCredits, canonicalCreditCost)
       },
       "BillingEntitlementView"
     );
