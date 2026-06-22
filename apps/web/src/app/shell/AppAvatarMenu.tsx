@@ -155,9 +155,9 @@ export function AppAvatarMenu({ messages }: AppAvatarMenuProps) {
     >
       {displayName ? (
         <div className="px-3 py-2.5">
-          <p className="truncate text-sm font-medium text-foreground">{displayName}</p>
+          <p className="truncate text-sm font-medium text-ink">{displayName}</p>
           {displayEmail ? (
-            <p className="mt-0.5 truncate text-xs text-muted-foreground">{displayEmail}</p>
+            <p className="mt-0.5 truncate text-xs text-ink-muted">{displayEmail}</p>
           ) : null}
         </div>
       ) : null}
@@ -212,10 +212,10 @@ export function AppAvatarMenu({ messages }: AppAvatarMenuProps) {
         type="button"
         className={cn(
           "flex size-10 items-center justify-center overflow-hidden rounded-full",
-          "border border-border-subtle/70 bg-surface-elevated shadow-[var(--workspace-shadow-card)]",
+          "border border-ink-ghost/70 bg-paper-elevated shadow-[var(--workspace-shadow-card)]",
           "transition-[box-shadow,ring-color] duration-[var(--workspace-motion-duration-fast)]",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pigment-terracotta/35 focus-visible:ring-offset-2 focus-visible:ring-offset-surface",
-          open && "ring-2 ring-pigment-terracotta/30 ring-offset-2 ring-offset-surface"
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pigment-terracotta/35 focus-visible:ring-offset-2 focus-visible:ring-offset-paper",
+          open && "ring-2 ring-pigment-terracotta/30 ring-offset-2 ring-offset-paper"
         )}
         aria-haspopup="menu"
         aria-expanded={open}
@@ -225,7 +225,7 @@ export function AppAvatarMenu({ messages }: AppAvatarMenuProps) {
         {user?.picture ? (
           <img src={user.picture} alt="" className="size-full object-cover" />
         ) : (
-          <span className="text-xs font-semibold tracking-wide text-foreground/80">{initials}</span>
+          <span className="text-xs font-semibold tracking-wide text-ink/80">{initials}</span>
         )}
       </button>
 

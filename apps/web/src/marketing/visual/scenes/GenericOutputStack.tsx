@@ -15,7 +15,7 @@ export function GenericOutputStack({ className, copy }: GenericOutputStackProps)
       viewBox="0 0 480 400"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      className={cn("h-auto w-full max-w-[440px] text-foreground", className)}
+      className={cn("h-auto w-full max-w-[440px] text-ink", className)}
       aria-hidden
     >
       <ChatWindowChrome title={copy.chatTitle}>
@@ -25,7 +25,7 @@ export function GenericOutputStack({ className, copy }: GenericOutputStackProps)
           textAnchor="middle"
           fontFamily="var(--font-mono)"
           fontSize="9"
-          fill="var(--color-muted)"
+          fill="var(--color-ink-muted)"
           letterSpacing="0.12em"
         >
           {copy.recentRepliesLabel}
@@ -44,7 +44,7 @@ export function GenericOutputStack({ className, copy }: GenericOutputStackProps)
           textAnchor="middle"
           fontFamily="var(--font-mono)"
           fontSize="9"
-          fill="var(--color-moss)"
+          fill="var(--color-pigment-terracotta)"
           opacity="0.75"
           letterSpacing="0.14em"
         >
@@ -55,12 +55,12 @@ export function GenericOutputStack({ className, copy }: GenericOutputStackProps)
           y="336"
           width="448"
           height="48"
-          fill="var(--color-surface)"
-          stroke="var(--color-border-subtle)"
+          fill="var(--color-paper)"
+          stroke="var(--color-ink-ghost)"
           strokeWidth="1"
         />
-        <rect x="28" y="358" width="280" height="6" fill="var(--color-ghost)" opacity="0.45" />
-        <circle cx="444" cy="360" r="12" fill="var(--color-foreground)" opacity="0.12" />
+        <rect x="28" y="358" width="280" height="6" fill="var(--color-ink-ghost)" opacity="0.45" />
+        <circle cx="444" cy="360" r="12" fill="var(--color-ink)" opacity="0.12" />
       </ChatWindowChrome>
     </svg>
   );

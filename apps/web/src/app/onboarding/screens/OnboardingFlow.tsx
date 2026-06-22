@@ -45,10 +45,10 @@ export function OnboardingFlow() {
   return (
     <Container className="py-8 md:py-10">
       <div className="mb-6">
-        <Text variant="meta" className="mb-2 text-muted-foreground">
+        <Text variant="meta" className="mb-2 text-ink-muted">
           {messages.onboarding.stepLabel.replace("{current}", String(step)).replace("{total}", "2")}
         </Text>
-        <div className="h-1.5 overflow-hidden rounded-full bg-soft-loam">
+        <div className="h-1.5 overflow-hidden rounded-full bg-paper-pressed">
           <div
             className="h-full rounded-full bg-gradient-to-r from-pigment-terracotta to-pigment-ochre transition-[width] duration-300 ease-out"
             style={{ width: step === 1 ? "50%" : "100%" }}
@@ -62,7 +62,7 @@ export function OnboardingFlow() {
             <Text as="h1" variant="h1" className="mb-3">
               {messages.onboarding.step1Title}
             </Text>
-            <Text variant="body" className="text-muted-foreground">
+            <Text variant="body" className="text-ink-muted">
               {messages.onboarding.step1Subtitle}
             </Text>
           </div>

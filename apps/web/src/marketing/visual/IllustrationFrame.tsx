@@ -13,8 +13,8 @@ export const IllustrationFrame = forwardRef<HTMLDivElement, IllustrationFramePro
       <div
         ref={ref}
         className={cn(
-          "pointer-events-none relative text-foreground",
-          grain && "paper-grain",
+          "pointer-events-none relative text-ink",
+          grain && "imprint-grain",
           className
         )}
         aria-hidden

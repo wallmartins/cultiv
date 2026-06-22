@@ -17,14 +17,14 @@ export function Accordion({ items }: AccordionProps) {
   const [openId, setOpenId] = useState<string | null>(items[0]?.id ?? null);
 
   return (
-    <div className="border-t border-foreground">
+    <div className="border-t border-ink">
       {items.map((item, itemIndex) => {
         const isOpen = openId === item.id;
         const panelId = `${baseId}-${item.id}`;
         const index = String(itemIndex + 1).padStart(2, "0");
 
         return (
-          <section key={item.id} className="border-b border-foreground">
+          <section key={item.id} className="border-b border-ink">
             <button
               type="button"
               aria-expanded={isOpen}
@@ -32,7 +32,7 @@ export function Accordion({ items }: AccordionProps) {
               className="group flex w-full items-center gap-4 py-6 text-left md:gap-6 md:py-8"
               onClick={() => setOpenId(isOpen ? null : item.id)}
             >
-              <Text as="span" variant="meta" className="shrink-0 text-foreground">
+              <Text as="span" variant="meta" className="shrink-0 text-ink">
                 [{index}]
               </Text>
               <Text as="span" variant="h3" className="min-w-0 flex-1 text-base md:text-lg">
@@ -40,7 +40,7 @@ export function Accordion({ items }: AccordionProps) {
               </Text>
               <span
                 aria-hidden
-                className="shrink-0 font-body text-xl leading-none text-muted transition-transform duration-200 group-hover:text-foreground"
+                className="shrink-0 font-body text-xl leading-none text-ink-muted transition-transform duration-200 group-hover:text-ink"
               >
                 {isOpen ? "−" : "+"}
               </span>
@@ -58,7 +58,7 @@ export function Accordion({ items }: AccordionProps) {
                 >
                   [{index}]
                 </Text>
-                <Text as="div" variant="body" className="min-w-0 flex-1 text-muted">
+                <Text as="div" variant="body" className="min-w-0 flex-1 text-ink-muted">
                   {item.answer}
                 </Text>
               </div>

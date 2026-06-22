@@ -27,20 +27,20 @@ export function ShowcaseLinkedInPostPreview({
   moreBlocksLabel,
   hiddenParagraphCount = 0
 }: ShowcaseLinkedInPostPreviewProps) {
-  const textClass = muted ? "text-showcase-muted" : "text-showcase-foreground";
+  const textClass = muted ? "text-ink-muted" : "text-paper";
   const paragraphClamp = truncateParagraphs ? "line-clamp-3" : "";
   const showMarkdownTitle = document.titleFromMarkdown;
 
   return (
     <article
-      className={`flex min-h-0 flex-col border border-showcase-foreground/15 bg-showcase-foreground/[0.03] p-4 md:p-5 ${
+      className={`flex min-h-0 flex-col border border-paper/15 bg-paper/[0.03] p-4 md:p-5 ${
         truncateParagraphs ? "md:min-h-[18rem]" : ""
       }`}
     >
       <header className="mb-4 flex shrink-0 items-center gap-3">
         <div
-          className={`size-10 shrink-0 rounded-full border border-showcase-foreground/20 ${
-            muted ? "bg-showcase-muted/20" : "bg-showcase-accent/25"
+          className={`size-10 shrink-0 rounded-full border border-paper/20 ${
+            muted ? "bg-ink-muted/20" : "bg-pigment-ochre/25"
           }`}
           aria-hidden
         />
@@ -48,7 +48,7 @@ export function ShowcaseLinkedInPostPreview({
           <Text as="p" variant="body-lg" className={`truncate font-medium ${textClass}`}>
             {authorName}
           </Text>
-          <Text as="p" variant="caption" className="text-showcase-muted">
+          <Text as="p" variant="caption" className="text-ink-muted">
             {authorMeta}
           </Text>
         </div>
@@ -79,7 +79,7 @@ export function ShowcaseLinkedInPostPreview({
         ))}
 
         {hiddenParagraphCount > 0 && moreBlocksLabel ? (
-          <Text as="p" variant="caption" className="text-showcase-muted">
+          <Text as="p" variant="caption" className="text-ink-muted">
             {moreBlocksLabel}
           </Text>
         ) : null}

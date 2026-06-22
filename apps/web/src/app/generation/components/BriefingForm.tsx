@@ -8,7 +8,7 @@ import { AppSelect } from "~/platform/ui/AppSelect";
 import { lenisScrollRegionProps } from "~/platform/ui/lenis-scroll-region";
 
 const textareaClassName =
-  "workspace-field-control min-h-28 w-full font-body text-base text-foreground placeholder:text-muted";
+  "workspace-field-control min-h-28 w-full font-body text-base text-ink placeholder:text-ink-muted";
 
 export interface BriefingFormProps {
   readonly locale: AppLocale;

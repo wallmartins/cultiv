@@ -180,7 +180,7 @@ export function HelpTooltip({
       <button
         ref={triggerRef}
         type="button"
-        className={cn("workspace-tooltip-trigger", open && "border-moss/45 bg-moss/8 text-foreground")}
+        className={cn("workspace-tooltip-trigger", open && "border-pigment-terracotta/45 bg-pigment-terracotta/8 text-ink")}
         aria-label={ariaLabel}
         aria-describedby={open && accessibleText ? tooltipId : undefined}
         aria-expanded={open}

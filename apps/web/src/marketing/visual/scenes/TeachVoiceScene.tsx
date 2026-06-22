@@ -20,15 +20,15 @@ export function TeachVoiceScene({ className, copy, size = "large" }: TeachVoiceS
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={cn(
-        "h-auto w-full text-foreground",
+        "h-auto w-full text-ink",
         size === "large" ? "max-w-[min(40rem,100%)]" : "max-w-[min(28rem,100%)]",
         className
       )}
       aria-hidden
     >
-      <circle cx="260" cy="200" r="72" stroke="var(--color-ghost)" strokeWidth="1" strokeDasharray="4 6" opacity="0.6" />
-      <circle cx="260" cy="200" r="10" fill="var(--color-moss)" opacity="0.35" />
-      <text x="260" y="205" textAnchor="middle" fontFamily="var(--font-mono)" fontSize="10" fill="var(--color-moss)">
+      <circle cx="260" cy="200" r="72" stroke="var(--color-ink-ghost)" strokeWidth="1" strokeDasharray="4 6" opacity="0.6" />
+      <circle cx="260" cy="200" r="10" fill="var(--color-pigment-terracotta)" opacity="0.35" />
+      <text x="260" y="205" textAnchor="middle" fontFamily="var(--font-mono)" fontSize="10" fill="var(--color-pigment-terracotta)">
         {copy.centerLabel}
       </text>
       {copy.examples.map((example, index) => {
@@ -43,25 +43,25 @@ export function TeachVoiceScene({ className, copy, size = "large" }: TeachVoiceS
             <rect
               width={layout.width}
               height={layout.height}
-              fill="var(--color-surface-elevated)"
+              fill="var(--color-paper-elevated)"
               stroke="currentColor"
               strokeWidth="1"
             />
-            <text x="14" y="28" fontFamily="var(--font-mono)" fontSize="10" fill="var(--color-moss)">
+            <text x="14" y="28" fontFamily="var(--font-mono)" fontSize="10" fill="var(--color-pigment-terracotta)">
               [{String(index + 1).padStart(2, "0")}]
             </text>
             <text x="14" y="52" fontFamily="var(--font-body)" fontSize="14" fill="currentColor">
               {example.title}
             </text>
-            <text x="14" y="72" fontFamily="var(--font-body)" fontSize="11" fill="var(--color-muted)">
+            <text x="14" y="72" fontFamily="var(--font-body)" fontSize="11" fill="var(--color-ink-muted)">
               {example.meta}
             </text>
           </g>
         );
       })}
-      <path d="M148 168 Q204 188 236 144" stroke="var(--color-moss)" strokeWidth="0.75" opacity="0.35" />
-      <path d="M324 144 Q280 184 260 200" stroke="var(--color-moss)" strokeWidth="0.75" opacity="0.35" />
-      <path d="M188 304 Q216 248 260 210" stroke="var(--color-moss)" strokeWidth="0.75" opacity="0.35" />
+      <path d="M148 168 Q204 188 236 144" stroke="var(--color-pigment-terracotta)" strokeWidth="0.75" opacity="0.35" />
+      <path d="M324 144 Q280 184 260 200" stroke="var(--color-pigment-terracotta)" strokeWidth="0.75" opacity="0.35" />
+      <path d="M188 304 Q216 248 260 210" stroke="var(--color-pigment-terracotta)" strokeWidth="0.75" opacity="0.35" />
     </svg>
   );
 }

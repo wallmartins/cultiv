@@ -4,7 +4,7 @@ import { getAlternateLocale, getHomePath, getLocaleMessages } from "~/i18n/marke
 import type { MarketingLocale } from "~/i18n/marketing/types";
 
 export const navItemClassName =
-  "motion-hover font-body text-[0.6875rem] font-semibold uppercase tracking-editorial text-foreground hover:opacity-60";
+  "motion-hover font-body text-[0.6875rem] font-semibold uppercase tracking-editorial text-ink hover:opacity-60";
 
 export interface LocaleToggleProps {
   readonly locale: MarketingLocale;
@@ -22,7 +22,7 @@ export function LocaleToggle({ locale, invert, className }: LocaleToggleProps) {
       to={targetPath}
       className={cn(
         navItemClassName,
-        invert && "text-invert-foreground hover:opacity-80",
+        invert && "text-paper hover:opacity-80",
         className
       )}
     >

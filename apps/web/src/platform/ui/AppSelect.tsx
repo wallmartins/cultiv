@@ -159,15 +159,15 @@ export function AppSelect({
         aria-expanded={open}
         aria-controls={open ? listboxId : undefined}
         className={cn(
-          "workspace-field-control flex w-full items-center justify-between gap-3 text-left text-foreground",
+          "workspace-field-control flex w-full items-center justify-between gap-3 text-left text-ink",
           "focus-visible:outline-none",
           compact ? "px-3 py-2 text-sm" : "px-4 py-3"
         )}
         onClick={() => (open ? setOpen(false) : openList())}
         onKeyDown={onTriggerKeyDown}
       >
-        <span className={cn("truncate", !selected && "text-muted-foreground")}>{displayLabel}</span>
-        <span aria-hidden className="text-muted-foreground">
+        <span className={cn("truncate", !selected && "text-ink-muted")}>{displayLabel}</span>
+        <span aria-hidden className="text-ink-muted">
           ▾
         </span>
       </button>
@@ -182,7 +182,7 @@ export function AppSelect({
           data-lenis-prevent
           data-lenis-prevent-wheel
           data-lenis-prevent-touch
-          className="showcase-output-scroll absolute top-[calc(100%+0.25rem)] z-50 max-h-60 w-full overflow-y-auto overscroll-contain rounded-[var(--workspace-radius-sm)] border border-border-subtle/80 bg-surface-elevated shadow-[var(--workspace-shadow-card)]"
+          className="showcase-output-scroll absolute top-[calc(100%+0.25rem)] z-50 max-h-60 w-full overflow-y-auto overscroll-contain rounded-[var(--workspace-radius-sm)] border border-ink-ghost/80 bg-paper-elevated shadow-[var(--workspace-shadow-card)]"
           onKeyDown={onListKeyDown}
           onWheel={(event) => event.stopPropagation()}
         >
@@ -198,11 +198,11 @@ export function AppSelect({
                 aria-selected={isSelected}
                 aria-disabled={option.disabled || undefined}
                 className={cn(
-                  "cursor-pointer px-4 py-3 text-left text-foreground",
+                  "cursor-pointer px-4 py-3 text-left text-ink",
                   compact && "px-3 py-2 text-sm",
                   option.disabled && "cursor-not-allowed opacity-50",
-                  !option.disabled && (isActive || isSelected) && "bg-soft-loam",
-                  !option.disabled && !isActive && !isSelected && "hover:bg-soft-loam/70"
+                  !option.disabled && (isActive || isSelected) && "bg-paper-pressed",
+                  !option.disabled && !isActive && !isSelected && "hover:bg-paper-pressed/70"
                 )}
                 onMouseEnter={() => {
                   if (!option.disabled) {

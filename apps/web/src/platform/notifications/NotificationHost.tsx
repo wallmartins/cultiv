@@ -13,7 +13,7 @@ export function NotificationHost() {
       {notifications.map((notification) => (
         <div
           key={notification.id}
-          className="pointer-events-auto flex w-full max-w-md items-center justify-between gap-3 rounded-2xl border border-border bg-surface-elevated px-4 py-3 shadow-lg"
+          className="pointer-events-auto flex w-full max-w-md items-center justify-between gap-3 rounded-2xl border border-ink bg-paper-elevated px-4 py-3 shadow-lg"
           role="status"
         >
           <Text variant="meta" className="font-medium">
@@ -23,7 +23,7 @@ export function NotificationHost() {
             {notification.actionLabel && notification.onAction ? (
               <button
                 type="button"
-                className="text-sm font-medium text-moss underline-offset-2 hover:underline"
+                className="text-sm font-medium text-pigment-terracotta underline-offset-2 hover:underline"
                 onClick={() => {
                   notification.onAction?.();
                   dismiss(notification.id);
@@ -34,7 +34,7 @@ export function NotificationHost() {
             ) : null}
             <button
               type="button"
-              className="text-sm text-muted-foreground"
+              className="text-sm text-ink-muted"
               aria-label="Dismiss"
               onClick={() => dismiss(notification.id)}
             >

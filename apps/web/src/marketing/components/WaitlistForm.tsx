@@ -58,7 +58,7 @@ export function WaitlistForm({ locale, copy }: WaitlistFormProps) {
 
   if (status === "success") {
     return (
-      <div className="waitlist-form-panel space-y-4">
+      <div className="relative px-1 py-2 sm:px-4 lg:pl-10 lg:pr-2 space-y-4">
         <Text as="p" variant="meta" className="text-pigment-ochre">
           [ ok ]
         </Text>
@@ -70,7 +70,7 @@ export function WaitlistForm({ locale, copy }: WaitlistFormProps) {
   }
 
   return (
-    <form className="waitlist-form-panel space-y-10" onSubmit={onSubmit} noValidate>
+    <form className="relative px-1 py-2 sm:px-4 lg:pl-10 lg:pr-2 space-y-10" onSubmit={onSubmit} noValidate>
       <div className="space-y-8">
         <label className="block space-y-3">
           <Text as="span" variant="meta" className="text-paper/55">

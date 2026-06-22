@@ -16,16 +16,16 @@ export function ShowcaseBlogPostPreview({
   moreBlocksLabel,
   hiddenParagraphCount = 0
 }: ShowcaseBlogPostPreviewProps) {
-  const textClass = muted ? "text-showcase-muted" : "text-showcase-foreground";
+  const textClass = muted ? "text-ink-muted" : "text-paper";
   const paragraphClamp = truncateParagraphs ? "line-clamp-3" : "";
 
   return (
-    <article className="min-h-0 space-y-4 border border-showcase-foreground/15 bg-showcase-foreground/[0.03] p-4 md:min-h-[18rem] md:p-5">
-      <header className="space-y-2 border-b border-showcase-foreground/10 pb-4">
+    <article className="min-h-0 space-y-4 border border-paper/15 bg-paper/[0.03] p-4 md:min-h-[18rem] md:p-5">
+      <header className="space-y-2 border-b border-paper/10 pb-4">
         <Text
           as="h4"
           variant="display-sm"
-          className={`line-clamp-2 ${muted ? "text-showcase-muted" : "text-showcase-foreground"}`}
+          className={`line-clamp-2 ${muted ? "text-ink-muted" : "text-paper"}`}
         >
           {document.title}
         </Text>
@@ -43,7 +43,7 @@ export function ShowcaseBlogPostPreview({
         ))}
       </div>
       {hiddenParagraphCount > 0 && moreBlocksLabel ? (
-        <Text as="p" variant="caption" className="text-showcase-muted">
+        <Text as="p" variant="caption" className="text-ink-muted">
           {moreBlocksLabel}
         </Text>
       ) : null}

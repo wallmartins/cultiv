@@ -30,7 +30,7 @@ export function BriefingScene({ className, copy, size = "large" }: BriefingScene
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={cn(
-        "h-auto w-full text-foreground",
+        "h-auto w-full text-ink",
         size === "large" ? "max-w-[min(36rem,100%)]" : "max-w-[min(30rem,100%)]",
         className
       )}

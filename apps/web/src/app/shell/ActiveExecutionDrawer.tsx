@@ -71,7 +71,7 @@ export function ActiveExecutionDrawer() {
     <div className="fixed inset-0 z-[70]">
       <button
         type="button"
-        className="absolute inset-0 bg-rich-soil/25 backdrop-blur-sm transition-opacity"
+        className="absolute inset-0 bg-ink/25 backdrop-blur-sm transition-opacity"
         aria-label={messages.shell.activeExecutions.closeDrawer}
         onClick={closeDrawer}
       />
@@ -79,11 +79,11 @@ export function ActiveExecutionDrawer() {
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="workspace-drawer-panel absolute inset-0 flex max-h-dvh min-h-0 flex-col border-border-subtle/60 bg-surface/95 backdrop-blur-xl md:inset-auto md:top-0 md:right-0 md:bottom-0 md:h-dvh md:w-full md:max-w-[32.5rem] md:border-l md:shadow-[var(--workspace-shadow-card)]"
+        className="workspace-drawer-panel absolute inset-0 flex max-h-dvh min-h-0 flex-col border-ink-ghost/60 bg-paper/95 backdrop-blur-xl md:inset-auto md:top-0 md:right-0 md:bottom-0 md:h-dvh md:w-full md:max-w-[32.5rem] md:border-l md:shadow-[var(--workspace-shadow-card)]"
         onClick={(event) => event.stopPropagation()}
       >
-        <div className="sticky top-0 z-10 flex items-center justify-between gap-4 border-b border-border-subtle/50 bg-surface/90 px-[var(--spacing-gutter)] py-4 backdrop-blur-md">
-          <Text id={titleId} as="h2" variant="label" className="text-foreground">
+        <div className="sticky top-0 z-10 flex items-center justify-between gap-4 border-b border-ink-ghost/50 bg-paper/90 px-[var(--spacing-gutter)] py-4 backdrop-blur-md">
+          <Text id={titleId} as="h2" variant="label" className="text-ink">
             {item?.contentTypeLabel ?? messages.shell.activeExecutions.title}
           </Text>
           <button
@@ -111,7 +111,7 @@ export function ActiveExecutionDrawer() {
 
         {item && (item.status === "running" || item.status === "queued") ? (
           <div className="space-y-4">
-            <Text variant="meta" className="rounded-xl border border-border-subtle/70 bg-soft-loam/40 px-3 py-3 text-muted-foreground">
+            <Text variant="meta" className="rounded-xl border border-ink-ghost/70 bg-paper-pressed/40 px-3 py-3 text-ink-muted">
               {messages.shell.activeExecutions.hybridHint}
             </Text>
             {item.progress ? (
@@ -158,7 +158,7 @@ export function ActiveExecutionDrawer() {
             <Text variant="meta" className="text-red-700">
               {item.error?.message ?? messages.shell.activeExecutions.statusFailed}
             </Text>
-            <Text variant="meta" className="text-muted-foreground">
+            <Text variant="meta" className="text-ink-muted">
               {messages.shell.activeExecutions.noCreditsCharged}
             </Text>
             <Button type="button" size="compact" onClick={handleRegenerate}>
@@ -185,7 +185,7 @@ export function ActiveExecutionMobileTrigger({
   return (
     <button
       type="button"
-      className="relative flex size-10 items-center justify-center rounded-full border border-border-subtle/70 bg-surface-elevated/80 shadow-[0_4px_20px_color-mix(in_srgb,var(--color-rich-soil)_8%,transparent)] backdrop-blur-sm"
+      className="relative flex size-10 items-center justify-center rounded-full border border-ink-ghost/70 bg-paper-elevated/80 shadow-[0_4px_20px_color-mix(in_srgb,var(--color-ink)_8%,transparent)] backdrop-blur-sm"
       aria-label={messages.shell.activeExecutions.openDrawer}
       onClick={onOpen}
     >

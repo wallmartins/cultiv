@@ -26,46 +26,46 @@ export function BriefingWindowChrome({
     <>
       <defs>
         <filter id={shadowId} x="-8%" y="-6%" width="116%" height="118%">
-          <feDropShadow dx="0" dy="10" stdDeviation="14" floodColor="var(--color-rich-soil)" floodOpacity="0.1" />
-          <feDropShadow dx="0" dy="2" stdDeviation="3" floodColor="var(--color-rich-soil)" floodOpacity="0.06" />
+          <feDropShadow dx="0" dy="10" stdDeviation="14" floodColor="var(--color-ink)" floodOpacity="0.1" />
+          <feDropShadow dx="0" dy="2" stdDeviation="3" floodColor="var(--color-ink)" floodOpacity="0.06" />
         </filter>
         <linearGradient id={headerId} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="var(--color-surface)" />
-          <stop offset="100%" stopColor="var(--color-surface-elevated)" />
+          <stop offset="0%" stopColor="var(--color-paper)" />
+          <stop offset="100%" stopColor="var(--color-paper-elevated)" />
         </linearGradient>
       </defs>
       <rect
         width="520"
         height="480"
-        fill="var(--color-surface-elevated)"
-        stroke="var(--color-border-subtle)"
+        fill="var(--color-paper-elevated)"
+        stroke="var(--color-ink-ghost)"
         strokeWidth="1"
         filter={`url(#${shadowId})`}
       />
       <rect width="520" height="56" fill={`url(#${headerId})`} />
-      <line x1="0" y1="56" x2="520" y2="56" stroke="var(--color-border-subtle)" strokeWidth="1" />
-      <circle cx="28" cy="28" r="7" fill="var(--color-moss)" opacity="0.18" />
-      <circle cx="28" cy="28" r="3.5" fill="var(--color-moss)" />
-      <text x="44" y="33" fontFamily="var(--font-body)" fontSize="12" fontWeight="600" fill="var(--color-foreground)">
+      <line x1="0" y1="56" x2="520" y2="56" stroke="var(--color-ink-ghost)" strokeWidth="1" />
+      <circle cx="28" cy="28" r="7" fill="var(--color-pigment-terracotta)" opacity="0.18" />
+      <circle cx="28" cy="28" r="3.5" fill="var(--color-pigment-terracotta)" />
+      <text x="44" y="33" fontFamily="var(--font-body)" fontSize="12" fontWeight="600" fill="var(--color-ink)">
         {productLabel}
       </text>
       <text x="100" y="33" fontFamily="var(--font-body)" fontSize="11">
-        <tspan fill="var(--color-muted)">{breadcrumb}</tspan>
-        <tspan dx="6" fill="var(--color-ghost)">
+        <tspan fill="var(--color-ink-muted)">{breadcrumb}</tspan>
+        <tspan dx="6" fill="var(--color-ink-ghost)">
           /
         </tspan>
-        <tspan dx="6" fill="var(--color-foreground)">
+        <tspan dx="6" fill="var(--color-ink)">
           {screenTitle}
         </tspan>
       </text>
-      <rect x="418" y="18" width="82" height="24" fill="var(--color-surface)" stroke="var(--color-border-subtle)" strokeWidth="1" />
+      <rect x="418" y="18" width="82" height="24" fill="var(--color-paper)" stroke="var(--color-ink-ghost)" strokeWidth="1" />
       <text
         x="459"
         y="34"
         textAnchor="middle"
         fontFamily="var(--font-mono)"
         fontSize="9"
-        fill="var(--color-muted)"
+        fill="var(--color-ink-muted)"
         letterSpacing="0.08em"
       >
         {stepIndicator}
@@ -85,19 +85,19 @@ export function BriefingStatusStrip({ draftSaved, progress }: BriefingStatusStri
 
   return (
     <g transform="translate(32 68)">
-      <circle cx="6" cy="6" r="4" fill="var(--color-moss)" opacity="0.85" />
+      <circle cx="6" cy="6" r="4" fill="var(--color-pigment-terracotta)" opacity="0.85" />
       <path
         d="M3.5 6 L5.2 7.6 L8.8 4.2"
-        stroke="var(--color-surface-elevated)"
+        stroke="var(--color-paper-elevated)"
         strokeWidth="1.1"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-      <text x="18" y="10" fontFamily="var(--font-body)" fontSize="10" fill="var(--color-muted)">
+      <text x="18" y="10" fontFamily="var(--font-body)" fontSize="10" fill="var(--color-ink-muted)">
         {draftSaved}
       </text>
-      <rect x="0" y="22" width={FORM_WIDTH - 32} height="3" fill="var(--color-ghost)" opacity="0.55" />
-      <rect x="0" y="22" width={barWidth} height="3" fill="var(--color-moss)" opacity="0.75" />
+      <rect x="0" y="22" width={FORM_WIDTH - 32} height="3" fill="var(--color-ink-ghost)" opacity="0.55" />
+      <rect x="0" y="22" width={barWidth} height="3" fill="var(--color-pigment-terracotta)" opacity="0.75" />
     </g>
   );
 }
@@ -114,7 +114,7 @@ export function BriefingFieldLabel({ y, label }: BriefingFieldLabelProps) {
       y={y}
       fontFamily="var(--font-mono)"
       fontSize="9"
-      fill="var(--color-muted)"
+      fill="var(--color-ink-muted)"
       letterSpacing="0.12em"
     >
       {label}
@@ -133,16 +133,16 @@ export function BriefingSelectField({ y, value }: BriefingSelectFieldProps) {
       <rect
         width={FORM_WIDTH}
         height="40"
-        fill="var(--color-surface)"
-        stroke="var(--color-border-subtle)"
+        fill="var(--color-paper)"
+        stroke="var(--color-ink-ghost)"
         strokeWidth="1"
       />
-      <text x="14" y="25" fontFamily="var(--font-body)" fontSize="13" fill="var(--color-foreground)">
+      <text x="14" y="25" fontFamily="var(--font-body)" fontSize="13" fill="var(--color-ink)">
         {value}
       </text>
       <path
         d="M434 18 L440 24 L446 18"
-        stroke="var(--color-muted)"
+        stroke="var(--color-ink-muted)"
         strokeWidth="1.2"
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -162,11 +162,11 @@ export function BriefingInputField({ y, value }: BriefingInputFieldProps) {
       <rect
         width={FORM_WIDTH}
         height="40"
-        fill="var(--color-surface)"
-        stroke="var(--color-border-subtle)"
+        fill="var(--color-paper)"
+        stroke="var(--color-ink-ghost)"
         strokeWidth="1"
       />
-      <text x="14" y="25" fontFamily="var(--font-body)" fontSize="13" fill="var(--color-foreground)">
+      <text x="14" y="25" fontFamily="var(--font-body)" fontSize="13" fill="var(--color-ink)">
         {value}
       </text>
     </g>
@@ -188,19 +188,19 @@ export function BriefingChipGroup({ y, chips, addLabel }: BriefingChipGroupProps
         const chipWidth = Math.max(72, chip.length * 7 + 34);
         const group = (
           <g key={chip} transform={`translate(${offsetX} 0)`}>
-            <rect width={chipWidth} height="30" fill="var(--color-moss)" opacity="0.08" />
+            <rect width={chipWidth} height="30" fill="var(--color-pigment-terracotta)" opacity="0.08" />
             <rect
               width={chipWidth}
               height="30"
               fill="none"
-              stroke="var(--color-moss)"
+              stroke="var(--color-pigment-terracotta)"
               strokeWidth="1"
               opacity="0.28"
             />
-            <text x="12" y="19" fontFamily="var(--font-body)" fontSize="11" fill="var(--color-foreground)">
+            <text x="12" y="19" fontFamily="var(--font-body)" fontSize="11" fill="var(--color-ink)">
               {chip}
             </text>
-            <text x={chipWidth - 14} y="17" textAnchor="middle" fontFamily="var(--font-body)" fontSize="12" fill="var(--color-muted)">
+            <text x={chipWidth - 14} y="17" textAnchor="middle" fontFamily="var(--font-body)" fontSize="12" fill="var(--color-ink-muted)">
               ×
             </text>
           </g>
@@ -214,11 +214,11 @@ export function BriefingChipGroup({ y, chips, addLabel }: BriefingChipGroupProps
           width="96"
           height="30"
           fill="transparent"
-          stroke="var(--color-border-subtle)"
+          stroke="var(--color-ink-ghost)"
           strokeWidth="1"
           strokeDasharray="3 3"
         />
-        <text x="48" y="19" textAnchor="middle" fontFamily="var(--font-body)" fontSize="10" fill="var(--color-muted)">
+        <text x="48" y="19" textAnchor="middle" fontFamily="var(--font-body)" fontSize="10" fill="var(--color-ink-muted)">
           {addLabel}
         </text>
       </g>
@@ -235,20 +235,20 @@ export interface BriefingTextareaFieldProps {
 export function BriefingTextareaField({ y, value, helper }: BriefingTextareaFieldProps) {
   return (
     <g transform={`translate(32 ${y})`}>
-      <rect width="4" height="72" fill="var(--color-golden)" opacity="0.9" />
+      <rect width="4" height="72" fill="var(--color-pigment-ochre)" opacity="0.9" />
       <rect
         x="4"
         width={FORM_WIDTH - 4}
         height="72"
-        fill="var(--color-surface)"
-        stroke="var(--color-moss)"
+        fill="var(--color-paper)"
+        stroke="var(--color-pigment-terracotta)"
         strokeWidth="1.25"
       />
-      <text x="18" y="28" fontFamily="var(--font-body)" fontSize="13" fill="var(--color-foreground)">
+      <text x="18" y="28" fontFamily="var(--font-body)" fontSize="13" fill="var(--color-ink)">
         {value}
       </text>
-      <line x1="18" y1="40" x2="318" y2="40" stroke="var(--color-foreground)" strokeWidth="1.2" opacity="0.85" />
-      <text x="18" y="60" fontFamily="var(--font-body)" fontSize="9.5" fill="var(--color-muted)">
+      <line x1="18" y1="40" x2="318" y2="40" stroke="var(--color-ink)" strokeWidth="1.2" opacity="0.85" />
+      <text x="18" y="60" fontFamily="var(--font-body)" fontSize="9.5" fill="var(--color-ink-muted)">
         {helper}
       </text>
     </g>
@@ -263,13 +263,13 @@ export interface BriefingFormFooterProps {
 export function BriefingFormFooter({ voiceStatus, actionLabel }: BriefingFormFooterProps) {
   return (
     <>
-      <line x1="32" y1="408" x2="488" y2="408" stroke="var(--color-border-subtle)" strokeWidth="1" />
-      <circle cx="44" cy="434" r="4" fill="var(--color-moss)" opacity="0.85" />
-      <circle cx="44" cy="434" r="7" fill="var(--color-moss)" opacity="0.14" />
-      <text x="58" y="438" fontFamily="var(--font-body)" fontSize="11" fill="var(--color-muted)">
+      <line x1="32" y1="408" x2="488" y2="408" stroke="var(--color-ink-ghost)" strokeWidth="1" />
+      <circle cx="44" cy="434" r="4" fill="var(--color-pigment-terracotta)" opacity="0.85" />
+      <circle cx="44" cy="434" r="7" fill="var(--color-pigment-terracotta)" opacity="0.14" />
+      <text x="58" y="438" fontFamily="var(--font-body)" fontSize="11" fill="var(--color-ink-muted)">
         {voiceStatus}
       </text>
-      <rect x="332" y="416" width="156" height="40" fill="var(--color-rich-soil)" />
+      <rect x="332" y="416" width="156" height="40" fill="var(--color-ink)" />
       <text
         x="410"
         y="441"
@@ -277,14 +277,14 @@ export function BriefingFormFooter({ voiceStatus, actionLabel }: BriefingFormFoo
         fontFamily="var(--font-body)"
         fontSize="11"
         fontWeight="600"
-        fill="var(--color-surface-elevated)"
+        fill="var(--color-paper-elevated)"
         letterSpacing="0.06em"
       >
         {actionLabel}
       </text>
       <path
         d="M462 432 L468 438 L462 444"
-        stroke="var(--color-surface-elevated)"
+        stroke="var(--color-paper-elevated)"
         strokeWidth="1.4"
         strokeLinecap="round"
         strokeLinejoin="round"

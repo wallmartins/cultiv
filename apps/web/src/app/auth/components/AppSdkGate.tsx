@@ -20,7 +20,7 @@ export function AppSdkGate({ children }: AppSdkGateProps) {
   if (sessionStatus === "failed") {
     return (
       <div className="flex min-h-[50vh] flex-col items-center justify-center gap-4 px-[var(--spacing-gutter)] py-16 text-center">
-        <Text variant="body" className="max-w-md text-muted-foreground">
+        <Text variant="body" className="max-w-md text-ink-muted">
           Não foi possível preparar a sessão com o backend. Verifique se o servidor está em execução e se o
           audience do Auth0 está correto.
         </Text>

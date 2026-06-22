@@ -20,7 +20,7 @@ export function SettingsScreen() {
             {messages.settings.profile}
           </Text>
           <div>
-            <Text variant="meta" className="text-muted-foreground">
+            <Text variant="meta" className="text-ink-muted">
               {messages.settings.email}
             </Text>
             <Text variant="body">{user?.email ?? "—"}</Text>
@@ -59,7 +59,7 @@ export function SettingsScreen() {
           <Button type="button" variant="ghost" size="compact" disabled>
             {messages.settings.revokeConsent}
           </Button>
-          <Text variant="meta" className="text-muted-foreground">
+          <Text variant="meta" className="text-ink-muted">
             {messages.settings.revokeDisabled}
           </Text>
         </AppCard>

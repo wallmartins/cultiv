@@ -17,7 +17,7 @@ export function VoiceMirrorHero({
 }: VoiceMirrorHeroProps) {
   return (
     <div className="flex flex-col items-center gap-8 sm:flex-row sm:items-center sm:gap-10 lg:gap-14">
-      <Text variant="body-lg" className="min-w-0 flex-1 w-full whitespace-pre-wrap leading-relaxed text-foreground">
+      <Text variant="body-lg" className="min-w-0 flex-1 w-full whitespace-pre-wrap leading-relaxed text-ink">
         {bodyCopy}
       </Text>
       <div className="shrink-0 pr-3 sm:pr-6">

@@ -263,7 +263,7 @@ export function GenerationScreen() {
           </Text>
           <Link
             to="/app/voice/examples/new"
-            className="text-sm font-medium text-foreground underline-offset-2 hover:underline"
+            className="text-sm font-medium text-ink underline-offset-2 hover:underline"
           >
             {messages.generate.reminderBannerAction}
           </Link>
@@ -333,7 +333,7 @@ export function GenerationScreen() {
           </Text>
           <button
             type="button"
-            className="text-sm font-medium text-foreground underline-offset-2 hover:underline"
+            className="text-sm font-medium text-ink underline-offset-2 hover:underline"
             onClick={retryContentTypes}
           >
             {messages.generate.catalogRetry}

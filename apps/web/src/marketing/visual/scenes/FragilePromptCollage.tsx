@@ -22,7 +22,7 @@ export function FragilePromptCollage({ className, copy }: FragilePromptCollagePr
       viewBox="0 0 480 400"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      className={cn("h-auto w-full max-w-[440px] text-foreground", className)}
+      className={cn("h-auto w-full max-w-[440px] text-ink", className)}
       aria-hidden
     >
       <ChatWindowChrome title={copy.chatTitle}>
@@ -31,21 +31,21 @@ export function FragilePromptCollage({ className, copy }: FragilePromptCollagePr
           y="72"
           width="280"
           height="36"
-          fill="var(--color-surface)"
-          stroke="var(--color-border-subtle)"
+          fill="var(--color-paper)"
+          stroke="var(--color-ink-ghost)"
           strokeWidth="1"
         />
-        <text x="76" y="94" fontFamily="var(--font-body)" fontSize="11" fill="var(--color-foreground)">
+        <text x="76" y="94" fontFamily="var(--font-body)" fontSize="11" fill="var(--color-ink)">
           {copy.userMessagePreview}
         </text>
-        <circle cx="36" cy="90" r="14" fill="var(--color-foreground)" opacity="0.08" />
+        <circle cx="36" cy="90" r="14" fill="var(--color-ink)" opacity="0.08" />
         <text
           x="36"
           y="94"
           textAnchor="middle"
           fontFamily="var(--font-mono)"
           fontSize="8"
-          fill="var(--color-muted)"
+          fill="var(--color-ink-muted)"
         >
           {copy.userAvatarLabel}
         </text>
@@ -56,7 +56,7 @@ export function FragilePromptCollage({ className, copy }: FragilePromptCollagePr
           textAnchor="middle"
           fontFamily="var(--font-mono)"
           fontSize="9"
-          fill="var(--color-muted)"
+          fill="var(--color-ink-muted)"
           letterSpacing="0.1em"
         >
           {copy.newChatHint}
@@ -67,7 +67,7 @@ export function FragilePromptCollage({ className, copy }: FragilePromptCollagePr
           y={composerTop}
           width="448"
           height="136"
-          fill="var(--color-surface)"
+          fill="var(--color-paper)"
           stroke="currentColor"
           strokeWidth="1"
         />
@@ -86,7 +86,7 @@ export function FragilePromptCollage({ className, copy }: FragilePromptCollagePr
           y1={composerTop + 30}
           x2="452"
           y2={composerTop + 30}
-          stroke="var(--color-border-subtle)"
+          stroke="var(--color-ink-ghost)"
           strokeWidth="1"
         />
 
@@ -104,7 +104,7 @@ export function FragilePromptCollage({ className, copy }: FragilePromptCollagePr
               ? "var(--color-pigment-ochre)"
               : style.font === "mono"
                 ? "var(--color-pigment-terracotta)"
-                : "var(--color-foreground)";
+                : "var(--color-ink)";
 
           return (
             <g key={fragment}>
@@ -133,14 +133,14 @@ export function FragilePromptCollage({ className, copy }: FragilePromptCollagePr
           );
         })}
 
-        <rect x="404" y={composerTop + 104} width="48" height="24" fill="var(--color-foreground)" />
+        <rect x="404" y={composerTop + 104} width="48" height="24" fill="var(--color-ink)" />
         <text
           x="428"
           y={composerTop + 120}
           textAnchor="middle"
           fontFamily="var(--font-mono)"
           fontSize="8"
-          fill="var(--color-surface)"
+          fill="var(--color-paper)"
           letterSpacing="0.12em"
         >
           {copy.sendLabel}

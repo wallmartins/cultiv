@@ -42,12 +42,12 @@ export function buildReasoningDetailItems({
             {reasoning.formatExpressions.map((expression) => (
               <div
                 key={expression.contentType}
-                className="rounded-[var(--workspace-radius-sm)] border border-border-subtle/60 bg-surface-elevated/60 p-4"
+                className="rounded-[var(--workspace-radius-sm)] border border-ink-ghost/60 bg-paper-elevated/60 p-4"
               >
                 <Text variant="label" className="mb-2 block">
                   {getContentTypeLabel(locale, expression.contentType, expression.contentType)}
                 </Text>
-                <Text variant="body" className="mb-3 w-full text-muted-foreground">
+                <Text variant="body" className="mb-3 w-full text-ink-muted">
                   {expression.narrativeProse}
                 </Text>
                 <div className="flex flex-wrap gap-2">
@@ -68,7 +68,7 @@ export function buildReasoningDetailItems({
             ))}
           </div>
         ) : (
-          <Text variant="body" className="w-full text-muted-foreground">
+          <Text variant="body" className="w-full text-ink-muted">
             {reasoningMessages.partialFormats}
           </Text>
         )
@@ -95,7 +95,7 @@ export function buildReasoningDetailItems({
                   title: reasoningMessages.developmentTraits.gapsTitle,
                   count: gapCount,
                   children: (
-                    <Text variant="body" className="w-full text-muted-foreground">
+                    <Text variant="body" className="w-full text-ink-muted">
                       {reasoningMessages.developmentTraits.gapsBody}
                     </Text>
                   )
@@ -113,14 +113,14 @@ export function buildReasoningDetailItems({
           <ul className="list-disc space-y-2 pl-5">
             {reasoning.core.derivedAntiPatterns.map((pattern) => (
               <li key={pattern}>
-                <Text variant="body" className="w-full text-foreground">
+                <Text variant="body" className="w-full text-ink">
                   {pattern}
                 </Text>
               </li>
             ))}
           </ul>
         ) : (
-          <Text variant="body" className="w-full text-muted-foreground">
+          <Text variant="body" className="w-full text-ink-muted">
             {reasoningMessages.noAntiPatterns}
           </Text>
         )
@@ -156,13 +156,13 @@ export function VoiceReasoningMirror({
         <Text as="h2" variant="h2" className="mb-2">
           {messages.title}
         </Text>
-        <Text variant="meta" className="w-full text-muted-foreground">
+        <Text variant="meta" className="w-full text-ink-muted">
           {messages.subtitle}
         </Text>
       </div>
 
       <div className="space-y-4">
-        <Text variant="label" className="block text-muted-foreground">
+        <Text variant="label" className="block text-ink-muted">
           {messages.coreTitle}
         </Text>
         <VoiceMirrorHero
@@ -198,19 +198,19 @@ export function VoiceReasoningMirror({
       </div>
 
       {development ? (
-        <div className="space-y-4 border-t border-border-subtle/60 pt-8">
+        <div className="space-y-4 border-t border-ink-ghost/60 pt-8">
           <div>
-            <Text variant="label" className="mb-2 block text-muted-foreground">
+            <Text variant="label" className="mb-2 block text-ink-muted">
               {messages.developmentTitle}
             </Text>
-            <Text variant="meta" className="mb-4 w-full text-muted-foreground">
+            <Text variant="meta" className="mb-4 w-full text-ink-muted">
               {messages.developmentSubtitle}
             </Text>
-            <Text variant="body-lg" className="w-full whitespace-pre-wrap leading-relaxed text-foreground">
+            <Text variant="body-lg" className="w-full whitespace-pre-wrap leading-relaxed text-ink">
               {development.developmentProse}
             </Text>
             {reasoning.developmentImmature ? (
-              <Text variant="meta" className="mt-3 w-full text-muted-foreground">
+              <Text variant="meta" className="mt-3 w-full text-ink-muted">
                 {messages.developmentImmature}
               </Text>
             ) : null}
@@ -224,15 +224,15 @@ export function VoiceReasoningMirror({
           </div>
 
           {development.moveLabels.length > 0 ? (
-            <div className="rounded-[var(--workspace-radius-sm)] border border-border-subtle/60 bg-surface-elevated/40 px-3 py-3">
-              <Text variant="meta" className="mb-2 block text-xs text-muted-foreground">
+            <div className="rounded-[var(--workspace-radius-sm)] border border-ink-ghost/60 bg-paper-elevated/40 px-3 py-3">
+              <Text variant="meta" className="mb-2 block text-xs text-ink-muted">
                 {messages.typicalMoves}
               </Text>
               <ul className="flex flex-wrap gap-2">
                 {development.moveLabels.map((move) => (
                   <li
                     key={move}
-                    className="rounded-full bg-pigment-terracotta/10 px-3 py-1 text-sm font-medium text-foreground"
+                    className="rounded-full bg-pigment-terracotta/10 px-3 py-1 text-sm font-medium text-ink"
                   >
                     {getMoveLabel(locale, move)}
                   </li>
@@ -273,7 +273,7 @@ function TraitEvidenceDisclosure({
 
   if (traitsWithEvidence.length === 0) {
     return (
-      <Text variant="body" className="w-full text-muted-foreground">
+      <Text variant="body" className="w-full text-ink-muted">
         {traitMessages.noEvidence}
       </Text>
     );
@@ -286,7 +286,7 @@ function TraitEvidenceDisclosure({
         return (
           <div
             key={traitKey}
-            className="rounded-[var(--workspace-radius-sm)] border border-border-subtle/60 bg-surface-elevated/60 p-4"
+            className="rounded-[var(--workspace-radius-sm)] border border-ink-ghost/60 bg-paper-elevated/60 p-4"
           >
             <Text variant="label" className="mb-3 block">
               {traitMessages.evidenceHeading(traitMessages.labels[traitKey], record.value)}
@@ -296,14 +296,14 @@ function TraitEvidenceDisclosure({
                 const excerpt = exampleExcerpts?.[exampleId];
                 return (
                   <div key={exampleId}>
-                    <Text variant="meta" className="mb-1 block text-muted-foreground">
+                    <Text variant="meta" className="mb-1 block text-ink-muted">
                       {excerpt
                         ? traitMessages.exampleLabel(
                             getContentTypeLabel(locale, excerpt.contentType, excerpt.contentType)
                           )
                         : traitMessages.exampleFallback}
                     </Text>
-                    <Text variant="body" className="w-full text-foreground">
+                    <Text variant="body" className="w-full text-ink">
                       {excerpt?.previewText ? `"${excerpt.previewText}"` : traitMessages.exampleUnavailable}
                     </Text>
                   </div>

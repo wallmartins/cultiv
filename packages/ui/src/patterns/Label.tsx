@@ -9,7 +9,7 @@ export interface LabelProps {
 export function Label({ index, children }: LabelProps) {
   return (
     <Text as="p" variant="label">
-      <span className="text-foreground">[{index}]</span> {children}
+      <span className="text-ink">[{index}]</span> {children}
     </Text>
   );
 }

@@ -16,7 +16,7 @@ export function ShowcaseProseOutput({
       as="p"
       variant="body-lg"
       className={`${truncate ? "line-clamp-10 overflow-hidden text-ellipsis md:line-clamp-12" : ""} ${
-        muted ? "text-showcase-muted" : "text-showcase-foreground"
+        muted ? "text-ink-muted" : "text-paper"
       }`}
     >
       {text}

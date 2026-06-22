@@ -36,13 +36,13 @@ export function ShowcaseThreadPosts({
         {visiblePosts.map((post, index) => (
           <li
             key={`${index + 1}-${post.slice(0, 24)}`}
-            className={`border border-showcase-foreground/15 p-3 ${numbered ? "space-y-1" : ""}`}
+            className={`border border-paper/15 p-3 ${numbered ? "space-y-1" : ""}`}
           >
             {numbered ? (
               <Text
                 as="p"
                 variant="caption"
-                className={muted ? "text-showcase-muted" : "text-showcase-accent"}
+                className={muted ? "text-ink-muted" : "text-pigment-ochre"}
               >
                 {index + 1}/
               </Text>
@@ -51,7 +51,7 @@ export function ShowcaseThreadPosts({
               as="p"
               variant="body-lg"
               className={`${clampClass} overflow-hidden text-ellipsis ${
-                muted ? "text-showcase-muted" : "text-showcase-foreground"
+                muted ? "text-ink-muted" : "text-paper"
               }`}
             >
               {post}
@@ -60,7 +60,7 @@ export function ShowcaseThreadPosts({
         ))}
       </ol>
       {hiddenCount > 0 && moreBlocksLabel ? (
-        <Text as="p" variant="caption" className="text-showcase-muted">
+        <Text as="p" variant="caption" className="text-ink-muted">
           {moreBlocksLabel}
         </Text>
       ) : null}

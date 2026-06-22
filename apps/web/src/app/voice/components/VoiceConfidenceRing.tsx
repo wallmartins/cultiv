@@ -87,7 +87,7 @@ export function VoiceConfidenceRing({
             cy="50"
             r="42"
             fill="none"
-            stroke="color-mix(in srgb, var(--color-soft-loam) 90%, transparent)"
+            stroke="color-mix(in srgb, var(--color-paper-pressed) 90%, transparent)"
             strokeWidth="8"
           />
           <circle
@@ -114,7 +114,7 @@ export function VoiceConfidenceRing({
         {centerLabel ? (
           <span
             className={cn(
-              "absolute inset-0 flex items-center justify-center font-body font-semibold leading-none text-foreground",
+              "absolute inset-0 flex items-center justify-center font-body font-semibold leading-none text-ink",
               centerLabelClasses[size]
             )}
           >
@@ -133,7 +133,7 @@ export function VoiceConfidenceRing({
             {label}
           </Text>
           {description ? (
-            <Text variant="meta" className="text-muted-foreground">
+            <Text variant="meta" className="text-ink-muted">
               {description}
             </Text>
           ) : null}

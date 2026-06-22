@@ -14,7 +14,7 @@ export function AppPage({ title, subtitle, children }: AppPageProps) {
         {title}
       </Text>
       {subtitle ? (
-        <Text variant="body" className="mb-6 text-muted-foreground">
+        <Text variant="body" className="mb-6 text-ink-muted">
           {subtitle}
         </Text>
       ) : null}

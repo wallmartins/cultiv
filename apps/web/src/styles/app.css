@@ -8,7 +8,7 @@
   ::before,
   ::backdrop,
   ::file-selector-button {
-    border-color: var(--color-border, currentcolor);
+    border-color: var(--color-ink-ghost, currentcolor);
   }
 
   :root {
@@ -90,7 +90,7 @@
 @layer utilities {
   .showcase-output-scroll {
     overscroll-behavior: contain;
-    scrollbar-color: color-mix(in oklab, var(--color-showcase-foreground) 35%, transparent) transparent;
+    scrollbar-color: color-mix(in oklab, var(--color-paper) 35%, transparent) transparent;
     scrollbar-width: thin;
   }
 
@@ -100,7 +100,7 @@
 
   .showcase-output-scroll::-webkit-scrollbar-thumb {
     border-radius: 9999px;
-    background-color: color-mix(in oklab, var(--color-showcase-foreground) 35%, transparent);
+    background-color: color-mix(in oklab, var(--color-paper) 35%, transparent);
   }
 
   .app-bottom-nav-shell {

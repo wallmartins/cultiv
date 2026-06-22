@@ -51,7 +51,7 @@ export function VoiceExamplesList() {
 
       <ul className="space-y-3">
         {items.map((item) => (
-          <li key={item.exampleId} className="rounded-2xl border border-border-subtle p-4">
+          <li key={item.exampleId} className="rounded-2xl border border-ink-ghost p-4">
             <div className="mb-2 flex items-center justify-between gap-3">
               <Text variant="label">
                 {getContentTypeLabel(
@@ -68,7 +68,7 @@ export function VoiceExamplesList() {
                 Edit
               </Link>
             </div>
-            <Text variant="meta" className="line-clamp-3 text-muted-foreground">
+            <Text variant="meta" className="line-clamp-3 text-ink-muted">
               {item.previewText || item.text}
             </Text>
           </li>

@@ -21,9 +21,9 @@ export function ShowcaseVariantPanel({ sample, showcase, className }: ShowcaseVa
   const moreBlocksLabel = sample.id === "thread" ? showcase.threadMorePosts : showcase.proseMoreBlocks;
 
   return (
-    <div className={cn("border border-showcase-foreground/25", className)}>
+    <div className={cn("border border-paper/25", className)}>
       <div
-        className="grid grid-cols-2 gap-0 border-b border-showcase-foreground/25"
+        className="grid grid-cols-2 gap-0 border-b border-paper/25"
         role="tablist"
         aria-label={showcase.genericLabel}
       >
@@ -36,8 +36,8 @@ export function ShowcaseVariantPanel({ sample, showcase, className }: ShowcaseVa
           className={cn(
             "px-4 py-3 text-left font-body text-[0.6875rem] font-semibold uppercase tracking-editorial transition-colors md:px-6 md:py-3.5",
             isGeneric
-              ? "bg-showcase-foreground/10 text-showcase-foreground"
-              : "text-showcase-muted hover:bg-showcase-foreground/5 hover:text-showcase-foreground"
+              ? "bg-paper/10 text-paper"
+              : "text-ink-muted hover:bg-paper/5 hover:text-paper"
           )}
           onClick={() => setVariant("generic")}
         >
@@ -50,10 +50,10 @@ export function ShowcaseVariantPanel({ sample, showcase, className }: ShowcaseVa
           aria-selected={!isGeneric}
           aria-controls={`showcase-variant-${sample.id}-panel`}
           className={cn(
-            "border-l border-showcase-foreground/25 px-4 py-3 text-left font-body text-[0.6875rem] font-semibold uppercase tracking-editorial transition-colors md:px-6 md:py-3.5",
+            "border-l border-paper/25 px-4 py-3 text-left font-body text-[0.6875rem] font-semibold uppercase tracking-editorial transition-colors md:px-6 md:py-3.5",
             !isGeneric
-              ? "bg-showcase-accent/10 text-showcase-foreground"
-              : "text-showcase-muted hover:bg-showcase-foreground/5 hover:text-showcase-foreground"
+              ? "bg-pigment-ochre/10 text-paper"
+              : "text-ink-muted hover:bg-paper/5 hover:text-paper"
           )}
           onClick={() => setVariant("voice")}
         >

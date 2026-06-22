@@ -26,7 +26,7 @@ export function SectionHeader({
         <Text
           as="p"
           variant="meta"
-          className={invert ? "text-showcase-muted" : "text-ink-muted"}
+          className={invert ? "text-paper/70" : "text-ink-muted"}
         >
           {eyebrow}
         </Text>
@@ -35,7 +35,7 @@ export function SectionHeader({
         as="h2"
         variant="display"
         className={cn(
-          invert ? "text-showcase-foreground" : "text-ink",
+          invert ? "text-paper" : "text-ink",
           "max-w-5xl overflow-hidden"
         )}
       >
@@ -48,13 +48,13 @@ export function SectionHeader({
         ) : (
           title
         )}
-        <span className={invert ? "text-showcase-muted" : "text-ink-muted"}>.</span>
+        <span className={invert ? "text-paper/70" : "text-ink-muted"}>.</span>
       </Text>
       {description ? (
         <Text
           as="p"
           variant="body-lg"
-          className={invert ? "max-w-2xl text-showcase-muted" : "max-w-2xl text-ink-muted"}
+          className={invert ? "max-w-2xl text-paper/70" : "max-w-2xl text-ink-muted"}
         >
           {description}
         </Text>

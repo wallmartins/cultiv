@@ -19,16 +19,16 @@ export function VoiceTrainingConsentModal({
   }
 
   return (
-    <div className="fixed inset-0 z-[90] flex items-center justify-center bg-surface/80 p-4 backdrop-blur-sm">
+    <div className="fixed inset-0 z-[90] flex items-center justify-center bg-paper/80 p-4 backdrop-blur-sm">
       <div
         role="dialog"
         aria-modal="true"
-        className="w-full max-w-md rounded-2xl border border-border bg-surface-elevated p-6 shadow-lg"
+        className="w-full max-w-md rounded-2xl border border-ink bg-paper-elevated p-6 shadow-lg"
       >
         <Text as="h2" variant="h2" className="mb-3">
           {messages.voice.consent.title}
         </Text>
-        <Text variant="body" className="mb-6 text-muted-foreground">
+        <Text variant="body" className="mb-6 text-ink-muted">
           {messages.voice.consent.body}
         </Text>
         <div className="flex justify-end gap-2">

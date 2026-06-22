@@ -21,7 +21,7 @@ export function PreviewConfidenceScene({ className, copy, size = "large" }: Prev
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={cn(
-        "h-auto w-full text-foreground",
+        "h-auto w-full text-ink",
         size === "large" ? "max-w-[min(36rem,100%)]" : "max-w-[min(30rem,100%)]",
         className
       )}
@@ -36,7 +36,7 @@ export function PreviewConfidenceScene({ className, copy, size = "large" }: Prev
       >
         <BriefingStatusStrip draftSaved={copy.readyStatus} progress={1} />
         <BriefingFieldLabel y={118} label={copy.label} />
-        <text x="32" y="136" fontFamily="var(--font-body)" fontSize="12" fill="var(--color-muted)">
+        <text x="32" y="136" fontFamily="var(--font-body)" fontSize="12" fill="var(--color-ink-muted)">
           {copy.formatRecap}
         </text>
         <PreviewMetricCard x={32} y={156} value={copy.creditsAmount} caption={copy.creditsCaption} accent="golden" />

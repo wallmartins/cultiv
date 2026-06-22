@@ -47,7 +47,7 @@ export function ProblemSceneMat({ children, className, reverse = false }: Proble
     >
       <div className="scene-artifact-mat__halo" aria-hidden />
       <div className="scene-artifact-mat__underlay" aria-hidden />
-      <div className="scene-artifact-mat__plate paper-grain">
+      <div className="scene-artifact-mat__plate imprint-grain">
         <div className="scene-artifact-mat__rule" aria-hidden />
         <CornerMark className="scene-artifact-mat__corner scene-artifact-mat__corner--tl" />
         <CornerMark className="scene-artifact-mat__corner scene-artifact-mat__corner--tr" />

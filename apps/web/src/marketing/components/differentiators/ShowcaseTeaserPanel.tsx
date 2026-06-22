@@ -12,7 +12,7 @@ export function ShowcaseTeaserPanel({ sample, showcase }: ShowcaseTeaserPanelPro
   return (
     <div className="space-y-4">
       <ShowcaseVariantPanel sample={sample} showcase={showcase} />
-      <Text as="p" variant="meta" className="text-showcase-muted">
+      <Text as="p" variant="meta" className="text-ink-muted">
         {sample.briefing}
       </Text>
     </div>

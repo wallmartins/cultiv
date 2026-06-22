@@ -63,7 +63,7 @@ export function VoiceConfidenceDial({
           cy="50"
           r="33"
           fill="none"
-          stroke="color-mix(in srgb, var(--color-soft-loam) 85%, transparent)"
+          stroke="color-mix(in srgb, var(--color-paper-pressed) 85%, transparent)"
           strokeWidth="0.75"
         />
         {Array.from({ length: TICK_COUNT }, (_, index) => {
@@ -85,7 +85,7 @@ export function VoiceConfidenceDial({
               stroke={
                 active
                   ? "color-mix(in srgb, var(--color-pigment-terracotta) 72%, transparent)"
-                  : "color-mix(in srgb, var(--color-soft-loam) 95%, transparent)"
+                  : "color-mix(in srgb, var(--color-paper-pressed) 95%, transparent)"
               }
               strokeWidth={active ? 1.1 : 0.85}
               strokeLinecap="round"
@@ -97,7 +97,7 @@ export function VoiceConfidenceDial({
           cy="50"
           r={DIAL_RADIUS}
           fill="none"
-          stroke="color-mix(in srgb, var(--color-soft-loam) 90%, transparent)"
+          stroke="color-mix(in srgb, var(--color-paper-pressed) 90%, transparent)"
           strokeWidth="5"
         />
         <g transform="rotate(-90 50 50)">
@@ -121,7 +121,7 @@ export function VoiceConfidenceDial({
           cy={dot.cy}
           r="3.25"
           fill="var(--color-pigment-ochre)"
-          stroke="var(--color-surface-elevated)"
+          stroke="var(--color-paper-elevated)"
           strokeWidth="1.5"
           style={{
             transition: "cx 700ms var(--workspace-motion-ease, ease), cy 700ms var(--workspace-motion-ease, ease)"

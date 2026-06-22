@@ -40,7 +40,7 @@ export function SolutionBreathChip({ phrase, microcopy, className }: SolutionBre
       <div className="solution-breath-chip-host__underlay" aria-hidden />
       <button
         type="button"
-        className={cn("solution-breath-chip paper-grain", active && "solution-breath-chip--expanded")}
+        className={cn("solution-breath-chip imprint-grain", active && "solution-breath-chip--expanded")}
         aria-expanded={active}
         aria-describedby={active ? descriptionId : undefined}
         onMouseEnter={() => setHovered(true)}

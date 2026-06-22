@@ -162,7 +162,7 @@ export function VoiceExampleComposer({ mode, initialExample, onSaved }: VoiceExa
   return (
     <div className="space-y-6">
       {slots.map((slot, index) => (
-        <div key={slot.id} className="rounded-2xl border border-border-subtle p-5">
+        <div key={slot.id} className="rounded-2xl border border-ink-ghost p-5">
           <div className="mb-4 flex items-center justify-between gap-3">
             <Text variant="label">
               {messages.voice.composer.slotTitle.replace("{n}", String(index + 1))}
@@ -170,7 +170,7 @@ export function VoiceExampleComposer({ mode, initialExample, onSaved }: VoiceExa
             {mode === "create" && slots.length > 1 ? (
               <button
                 type="button"
-                className="text-sm text-muted-foreground"
+                className="text-sm text-ink-muted"
                 onClick={() => setSlots((current) => current.filter((entry) => entry.id !== slot.id))}
               >
                 {messages.voice.composer.removeSlot}
@@ -184,7 +184,7 @@ export function VoiceExampleComposer({ mode, initialExample, onSaved }: VoiceExa
                 {messages.voice.composer.text} *
               </label>
               <textarea
-                className="mt-2 min-h-32 w-full border border-foreground bg-transparent px-4 py-3"
+                className="mt-2 min-h-32 w-full border border-ink bg-transparent px-4 py-3"
                 {...lenisScrollRegionProps}
                 value={slot.text}
                 onChange={(event) => updateSlot(slot.id, { text: event.target.value })}
@@ -248,7 +248,7 @@ export function VoiceExampleComposer({ mode, initialExample, onSaved }: VoiceExa
                     {messages.voice.composer.context}
                   </label>
                   <textarea
-                    className="mt-2 min-h-20 w-full border border-foreground bg-transparent px-4 py-3"
+                    className="mt-2 min-h-20 w-full border border-ink bg-transparent px-4 py-3"
                     {...lenisScrollRegionProps}
                     value={slot.context}
                     onChange={(event) => updateSlot(slot.id, { context: event.target.value })}
@@ -259,7 +259,7 @@ export function VoiceExampleComposer({ mode, initialExample, onSaved }: VoiceExa
                     {messages.voice.composer.antiPatterns}
                   </label>
                   <input
-                    className="mt-2 w-full border border-foreground bg-transparent px-4 py-3"
+                    className="mt-2 w-full border border-ink bg-transparent px-4 py-3"
                     value={slot.antiPatterns}
                     onChange={(event) => updateSlot(slot.id, { antiPatterns: event.target.value })}
                   />

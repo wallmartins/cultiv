@@ -106,7 +106,7 @@ export function ExecutionHistoryDetail({ executionId }: { readonly executionId: 
       <Text as="h1" variant="h1" className="mb-3">
         {getContentTypeLabel(locale, execution.contentType, execution.contentType)}
       </Text>
-      <Text variant="meta" className="mb-6 text-muted-foreground">
+      <Text variant="meta" className="mb-6 text-ink-muted">
         {execution.status}
       </Text>
 

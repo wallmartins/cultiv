@@ -113,8 +113,8 @@ export function AppShellNavItem({
               ? "font-body text-[0.625rem] font-semibold text-pigment-terracotta"
               : "font-body text-sm font-semibold text-pigment-terracotta"
             : isHorizontal
-              ? "font-body text-[0.625rem] font-medium tracking-wide text-muted-foreground"
-              : "font-body text-sm font-medium text-muted-foreground"
+              ? "font-body text-[0.625rem] font-medium tracking-wide text-ink-muted"
+              : "font-body text-sm font-medium text-ink-muted"
         )}
       >
         {item.label}
@@ -148,7 +148,7 @@ export function AppShellNavExpandableItem({
           "group-focus-within/dock:max-w-[9rem] group-focus-within/dock:opacity-100",
           active
             ? "font-body text-sm font-semibold text-pigment-terracotta"
-            : "font-body text-sm font-medium text-muted-foreground"
+            : "font-body text-sm font-medium text-ink-muted"
         )}
       >
         {item.label}

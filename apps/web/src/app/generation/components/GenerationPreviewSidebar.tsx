@@ -146,7 +146,7 @@ export function GenerationPreviewSidebar({
           </Text>
         ) : null}
         {showCommercialCalculating ? (
-          <Text variant="meta" className="text-muted-foreground">
+          <Text variant="meta" className="text-ink-muted">
             {messages.generate.calculating}
           </Text>
         ) : null}

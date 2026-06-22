@@ -31,7 +31,7 @@ export function ChapterPanel({
       className={cn(
         "flex w-full flex-col justify-center py-[var(--spacing-section-sm)] md:py-[var(--spacing-section)]",
         pinned && "absolute inset-0 h-svh",
-        isShowcase ? "bg-showcase text-showcase-foreground" : "bg-surface"
+        isShowcase ? "bg-ink text-paper" : "bg-paper"
       )}
     >
       <Container
@@ -43,20 +43,20 @@ export function ChapterPanel({
         )}
       >
         <div className="space-y-5">
-          <Text as="p" variant="meta" className={isShowcase ? "text-showcase-accent" : "text-ink-muted"}>
+          <Text as="p" variant="meta" className={isShowcase ? "text-pigment-ochre" : "text-ink-muted"}>
             [{index}]
           </Text>
           <Text
             as="h3"
             variant="display-sm"
-            className={isShowcase ? "text-showcase-foreground" : undefined}
+            className={isShowcase ? "text-paper" : undefined}
           >
             {title}
           </Text>
           <Text
             as="p"
             variant="body-lg"
-            className={isShowcase ? "text-showcase-muted" : "text-muted"}
+            className={isShowcase ? "text-ink-muted" : "text-ink-muted"}
           >
             {body}
           </Text>

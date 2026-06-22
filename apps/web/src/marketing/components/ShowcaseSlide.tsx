@@ -37,20 +37,20 @@ export function ShowcaseSlide({
       className={cn(
         "flex w-full flex-col",
         isStacked
-          ? "border-b border-showcase-foreground/20 py-10 last:border-b-0 md:py-12"
+          ? "border-b border-paper/20 py-10 last:border-b-0 md:py-12"
           : "h-full min-h-0 w-screen max-w-full shrink-0 px-[var(--spacing-gutter)] py-8 md:px-12 md:py-10"
       )}
     >
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 md:gap-8">
         <div className="flex shrink-0 flex-wrap items-start justify-between gap-6">
           <div className="space-y-4">
-            <Text as="p" variant="meta" className="text-showcase-accent">
+            <Text as="p" variant="meta" className="text-pigment-ochre">
               {slideLabel}
             </Text>
-            <Text as="h3" variant="display-sm" className="max-w-3xl text-showcase-foreground">
+            <Text as="h3" variant="display-sm" className="max-w-3xl text-paper">
               {sample.contentTypeLabel}
             </Text>
-            <Text as="p" variant="body-lg" className="line-clamp-3 max-w-2xl text-showcase-muted">
+            <Text as="p" variant="body-lg" className="line-clamp-3 max-w-2xl text-ink-muted">
               {sample.briefing}
             </Text>
           </div>
