@@ -1,7 +1,7 @@
 ---
 title: Cultiv Imprint — Unified Visual Identity
 doc_type: design
-status: approved
+status: implemented
 domain: design-system
 last_updated: 2026-06-22
 source_kickoff: docs/live/kickoff/redisign-cultiv.md

@@ -1,5 +1,6 @@
 # Progress Log
 
+| 2026-06-22 | docs: Cultiv Imprint identity marked implemented — Task 15 quality verification: 920 tests pass (28 skipped), `pnpm --filter web build` pass, `imprint-visual-governance` pass; Lighthouse not run in CI — manual checklist: (1) Lighthouse mobile on `/` — Performance ≥ 90, Accessibility ≥ 90; (2) `prefers-reduced-motion: reduce` — no Lenis/GSAP transforms, stamp/static render; (3) isolated `PaperSurface` + `ComparisonCard` screenshot — Cultiv signature without logo |
 | 2026-06-22 | docs: Cultiv Imprint implementation complete — design-system reference, creative direction, CONTEXT.md glossary (Imprint typography/surface/intensity), ADR 0009 (Task 14) |
 | 2026-06-22 | feat(app): Imprint generation preview, execution drawer, and voice accents — ReadingSurface preview, terracotta/ochre pigments across app surfaces (Task 12) |
 | 2026-06-22 | feat(app): Imprint quiet shell and navigation — paper grain shell, press-edge nav dock, terracotta active state, compact PressMark header, workspace CSS migrated to Imprint tokens (Task 11) |
