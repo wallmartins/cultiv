@@ -12,7 +12,7 @@ export type AppShellMessages = {
     readonly history: string;
     readonly voice: string;
     readonly settings: string;
-    readonly billing: string;
+    readonly plans: string;
     readonly logout: string;
   };
   readonly credits: { readonly label: string };
@@ -413,16 +413,19 @@ export type AppSettingsMessages = {
   readonly revokeConsent: string;
   readonly revokeDisabled: string;
   readonly logout: string;
-  readonly billing: string;
+  readonly plans: string;
 };
 
-export type AppBillingMessages = {
+export type AppPlansMessages = {
   readonly title: string;
+  readonly subtitle: string;
   readonly currentPlan: string;
+  readonly usageHint: string;
+  readonly changePlan: string;
+  readonly changePlanDescription: string;
   readonly planPro: string;
   readonly planCriador: string;
   readonly planFree: string;
-  readonly creditsBalance: string;
   readonly upgradeCriador: string;
   readonly upgradePro: string;
   readonly alreadyPro: string;
@@ -491,7 +494,7 @@ export type AppMessages = {
   readonly voice: AppVoiceMessages;
   readonly onboarding: AppOnboardingMessages;
   readonly settings: AppSettingsMessages;
-  readonly billing: AppBillingMessages;
+  readonly plans: AppPlansMessages;
   readonly notifications: AppNotificationMessages;
   readonly errors: AppErrorMessages;
 };

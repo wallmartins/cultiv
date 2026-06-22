@@ -165,13 +165,13 @@ export function AppAvatarMenu({ messages }: AppAvatarMenuProps) {
       {displayName ? <div className="workspace-overlay-divider" role="presentation" /> : null}
 
       <Link
-        to="/app/billing"
+        to="/app/plans"
         role="menuitem"
         className="workspace-overlay-item"
         onClick={() => setOpen(false)}
       >
         <MenuIconBilling />
-        {messages.shell.nav.billing}
+        {messages.shell.nav.plans}
       </Link>
 
       <Link

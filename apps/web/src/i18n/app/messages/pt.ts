@@ -7,7 +7,7 @@ export const appMessagesPt: AppMessages = {
       history: "Histórico",
       voice: "Voz",
       settings: "Configurações",
-      billing: "Plano",
+      plans: "Planos",
       logout: "Sair"
     },
     credits: { label: "créditos" },
@@ -466,21 +466,24 @@ export const appMessagesPt: AppMessages = {
     revokeConsent: "Revogar consentimento",
     revokeDisabled: "Revogação disponível quando a API estiver publicada.",
     logout: "Sair",
-    billing: "Plano e créditos"
+    plans: "Planos e upgrade"
   },
-  billing: {
-    title: "Plano e créditos",
-    currentPlan: "Plano atual",
+  plans: {
+    title: "Planos",
+    subtitle: "Compare planos e faça upgrade quando precisar de mais gerações por mês.",
+    currentPlan: "Seu plano",
+    usageHint: "Seu uso do mês aparece ao gerar conteúdo.",
+    changePlan: "Mudar de plano",
+    changePlanDescription: "Escolha moeda, período e forma de pagamento para assinar.",
     planPro: "Pro",
     planCriador: "Criador",
     planFree: "Gratuito",
-    creditsBalance: "{count} créditos disponíveis",
     upgradeCriador: "Assinar Criador",
     upgradePro: "Assinar Pro",
     alreadyPro: "Você já está no plano Pro.",
-    topUp: "Recarregar créditos",
-    topUpDescription: "Adicione 500 créditos ao seu saldo (compra avulsa).",
-    topUpCta: "Comprar 500 créditos",
+    topUp: "Comprar mais gerações",
+    topUpDescription: "Pacote avulso para usar além da cota do plano.",
+    topUpCta: "Comprar pacote",
     currencyLabel: "Moeda",
     currency: {
       brl: "BRL (Brasil)",
@@ -498,7 +501,7 @@ export const appMessagesPt: AppMessages = {
     checkoutCancel: "Checkout cancelado. Nenhuma cobrança foi feita.",
     checkoutError: "Não foi possível iniciar o checkout. Tente novamente.",
     redirecting: "Redirecionando…",
-    loadError: "Não foi possível carregar os dados de cobrança."
+    loadError: "Não foi possível carregar seu plano."
   },
   notifications: {
     readyTitle: "Geração pronta",

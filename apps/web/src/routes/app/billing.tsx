@@ -1,5 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { BillingScreen } from "~/app/billing/screens/BillingScreen";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
 type BillingSearch = {
   readonly status?: "success" | "cancel";
@@ -10,9 +9,10 @@ export const Route = createFileRoute("/app/billing")({
     status:
       search.status === "success" || search.status === "cancel" ? search.status : undefined
   }),
-  component: BillingPage
+  beforeLoad: ({ search }) => {
+    throw redirect({
+      to: "/app/plans",
+      search
+    });
+  }
 });
-
-function BillingPage() {
-  return <BillingScreen />;
-}

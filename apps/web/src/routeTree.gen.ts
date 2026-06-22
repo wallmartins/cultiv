@@ -26,6 +26,7 @@ import { Route as EnPrivacyRouteImport } from './routes/en/privacy'
 import { Route as EnLlmsDottxtRouteImport } from './routes/en/llms[.]txt'
 import { Route as EnLlmsFullDottxtRouteImport } from './routes/en/llms-full[.]txt'
 import { Route as AppSettingsRouteImport } from './routes/app/settings'
+import { Route as AppPlansRouteImport } from './routes/app/plans'
 import { Route as AppOnboardingRouteImport } from './routes/app/onboarding'
 import { Route as AppHistoryRouteImport } from './routes/app/history'
 import { Route as AppGenerateRouteImport } from './routes/app/generate'
@@ -125,6 +126,11 @@ const AppSettingsRoute = AppSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => AppRoute,
 } as any)
+const AppPlansRoute = AppPlansRouteImport.update({
+  id: '/plans',
+  path: '/plans',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppOnboardingRoute = AppOnboardingRouteImport.update({
   id: '/onboarding',
   path: '/onboarding',
@@ -208,6 +214,7 @@ export interface FileRoutesByFullPath {
   '/app/generate': typeof AppGenerateRouteWithChildren
   '/app/history': typeof AppHistoryRouteWithChildren
   '/app/onboarding': typeof AppOnboardingRoute
+  '/app/plans': typeof AppPlansRoute
   '/app/settings': typeof AppSettingsRoute
   '/en/llms-full.txt': typeof EnLlmsFullDottxtRoute
   '/en/llms.txt': typeof EnLlmsDottxtRoute
@@ -237,6 +244,7 @@ export interface FileRoutesByTo {
   '/app/billing': typeof AppBillingRoute
   '/app/generate': typeof AppGenerateRouteWithChildren
   '/app/onboarding': typeof AppOnboardingRoute
+  '/app/plans': typeof AppPlansRoute
   '/app/settings': typeof AppSettingsRoute
   '/en/llms-full.txt': typeof EnLlmsFullDottxtRoute
   '/en/llms.txt': typeof EnLlmsDottxtRoute
@@ -270,6 +278,7 @@ export interface FileRoutesById {
   '/app/generate': typeof AppGenerateRouteWithChildren
   '/app/history': typeof AppHistoryRouteWithChildren
   '/app/onboarding': typeof AppOnboardingRoute
+  '/app/plans': typeof AppPlansRoute
   '/app/settings': typeof AppSettingsRoute
   '/en/llms-full.txt': typeof EnLlmsFullDottxtRoute
   '/en/llms.txt': typeof EnLlmsDottxtRoute
@@ -304,6 +313,7 @@ export interface FileRouteTypes {
     | '/app/generate'
     | '/app/history'
     | '/app/onboarding'
+    | '/app/plans'
     | '/app/settings'
     | '/en/llms-full.txt'
     | '/en/llms.txt'
@@ -333,6 +343,7 @@ export interface FileRouteTypes {
     | '/app/billing'
     | '/app/generate'
     | '/app/onboarding'
+    | '/app/plans'
     | '/app/settings'
     | '/en/llms-full.txt'
     | '/en/llms.txt'
@@ -365,6 +376,7 @@ export interface FileRouteTypes {
     | '/app/generate'
     | '/app/history'
     | '/app/onboarding'
+    | '/app/plans'
     | '/app/settings'
     | '/en/llms-full.txt'
     | '/en/llms.txt'
@@ -521,6 +533,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppSettingsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/plans': {
+      id: '/app/plans'
+      path: '/plans'
+      fullPath: '/app/plans'
+      preLoaderRoute: typeof AppPlansRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/onboarding': {
       id: '/app/onboarding'
       path: '/onboarding'
@@ -665,6 +684,7 @@ interface AppRouteChildren {
   AppGenerateRoute: typeof AppGenerateRouteWithChildren
   AppHistoryRoute: typeof AppHistoryRouteWithChildren
   AppOnboardingRoute: typeof AppOnboardingRoute
+  AppPlansRoute: typeof AppPlansRoute
   AppSettingsRoute: typeof AppSettingsRoute
   AppIndexRoute: typeof AppIndexRoute
 }
@@ -675,6 +695,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppGenerateRoute: AppGenerateRouteWithChildren,
   AppHistoryRoute: AppHistoryRouteWithChildren,
   AppOnboardingRoute: AppOnboardingRoute,
+  AppPlansRoute: AppPlansRoute,
   AppSettingsRoute: AppSettingsRoute,
   AppIndexRoute: AppIndexRoute,
 }
