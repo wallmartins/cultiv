@@ -28,9 +28,9 @@ export interface BuildCalibrationReportOptions {
 }
 
 const DEFAULT_PLAN_GRANTS: CalibrationPlanGrants = {
-  free: { monthlyCredits: 96, revenueUsdMonthly: 0 },
-  criador: { monthlyCredits: 300, revenueUsdMonthly: 24 },
-  pro: { monthlyCredits: 720, revenueUsdMonthly: 59 }
+  free: { monthlyCredits: 20, revenueUsdMonthly: 0 },
+  criador: { monthlyCredits: 63, revenueUsdMonthly: 24 },
+  pro: { monthlyCredits: 150, revenueUsdMonthly: 59 }
 };
 
 export function buildCalibrationReport(options: BuildCalibrationReportOptions): CalibrationReport {

@@ -9,6 +9,16 @@ import {
 } from "../../packages/payments/src/index.js";
 
 describe("default free subscription", () => {
+  it("registers criador plan with starter tier and 63 monthly credits", () => {
+    const criador = DEFAULT_BILLING_PLANS.find((plan) => plan.id === "criador");
+    expect(criador).toMatchObject({
+      tier: "starter",
+      name: "Criador",
+      monthlyCredits: 63
+    });
+    expect(criador?.dailyCredits).toBeUndefined();
+  });
+
   it("provisions an active free subscription and entitlement for a new user", () => {
     const billing = createBillingService({
       repository: createBillingRepository({ plans: DEFAULT_BILLING_PLANS })
@@ -24,7 +34,7 @@ describe("default free subscription", () => {
     expect(entitlement.planId).toBe("free");
     expect(entitlement.tier).toBe("free");
     expect(entitlement.status).toBe("active");
-    expect(entitlement.wallet.availableCredits).toBe(50);
+    expect(entitlement.wallet.availableCredits).toBe(20);
   });
 
   it("does not provision free tier when the user already has an unresolved subscription plan", () => {
@@ -73,7 +83,7 @@ describe("default free subscription", () => {
     );
 
     expect(entitlement?.planId).toBe("pro");
-    expect(entitlement?.wallet.availableCredits).toBe(2500);
+    expect(entitlement?.wallet.availableCredits).toBe(150);
     expect(entitlement?.activeCycleId).toBe("user_orphan_pro:pro:cycle:default");
     expect(billing.listLedger("user_orphan_pro", "pro")).toHaveLength(1);
     expect(billing.listLedger("user_orphan_pro", "pro")[0]?.entryType).toBe("grant_cycle");
@@ -100,7 +110,7 @@ describe("default free subscription", () => {
     );
 
     expect(second.planId).toBe(first.planId);
-    expect(second.wallet.availableCredits).toBe(40);
+    expect(second.wallet.availableCredits).toBe(10);
   });
 
   it("activates a paid plan with subscription and cycle in one step", () => {
@@ -118,7 +128,26 @@ describe("default free subscription", () => {
     );
 
     expect(entitlement.planId).toBe("pro");
-    expect(entitlement.wallet.availableCredits).toBe(2500);
+    expect(entitlement.wallet.availableCredits).toBe(150);
     expect(billing.getPrimarySubscriptionPlanId("user_upgrade")).toBe("pro");
+  });
+
+  it("activates criador with starter tier quality modes and monthly grant", () => {
+    const billing = createBillingService({
+      repository: createBillingRepository({ plans: DEFAULT_BILLING_PLANS })
+    });
+
+    const entitlement = Effect.runSync(
+      activateSubscription(billing, {
+        userId: "user_criador",
+        planId: "criador",
+        now: () => new Date("2026-06-12T00:00:00.000Z"),
+        idempotencyNamespace: "test"
+      })
+    );
+
+    expect(entitlement.planId).toBe("criador");
+    expect(entitlement.tier).toBe("starter");
+    expect(entitlement.wallet.availableCredits).toBe(63);
   });
 });

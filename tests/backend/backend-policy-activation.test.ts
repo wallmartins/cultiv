@@ -69,8 +69,8 @@ describe("backend policy activation", () => {
       availableVersions: Array<{ version: string }>;
       activePointer: { activePolicyVersion: string };
     };
-    expect(listed.activePointer.activePolicyVersion).toBe("2026-05-16");
-    expect(listed.availableVersions.map((version) => version.version)).toContain("2026-04-01");
+    expect(listed.activePointer.activePolicyVersion).toBe("2026-06-22");
+    expect(listed.availableVersions.map((version) => version.version)).toContain("2026-05-16");
 
     const activateResponse = await app.request("/api/internal/policies/activate", {
       method: "POST",
@@ -126,7 +126,7 @@ describe("backend policy activation", () => {
 
     expect(previewResponse.status).toBe(200);
     const preview = await Effect.runPromise(decodeGenerationPreviewResponse(await previewResponse.json()));
-    expect(preview.pricingSnapshot.policyVersion).toBe("2026-05-16");
+    expect(preview.pricingSnapshot.policyVersion).toBe("2026-06-22");
 
     const activateResponse = await app.request("/api/internal/policies/activate", {
       method: "POST",
@@ -191,7 +191,7 @@ describe("backend policy activation", () => {
         defaultLanguage: "pt-BR"
       })
     );
-    expect(snapshotBeforeActivation.policyVersion).toBe("2026-05-16");
+    expect(snapshotBeforeActivation.policyVersion).toBe("2026-06-22");
 
     Effect.runSync(
       servicesA.aiPolicy.activatePolicyVersion({
@@ -202,12 +202,12 @@ describe("backend policy activation", () => {
     );
 
     const stillCachedPolicy = Effect.runSync(servicesB.aiPolicy.getActivePolicy());
-    expect(stillCachedPolicy.version).toBe("2026-05-16");
+    expect(stillCachedPolicy.version).toBe("2026-06-22");
 
     clock.current = new Date(backendAppTestNow.getTime() + 2_000);
     const reloadedPolicy = Effect.runSync(servicesB.aiPolicy.getActivePolicy());
     expect(reloadedPolicy.version).toBe("2026-04-01");
-    expect(snapshotBeforeActivation.policyVersion).toBe("2026-05-16");
+    expect(snapshotBeforeActivation.policyVersion).toBe("2026-06-22");
   });
 
   it("recommends a future policy version from degradation signals without auto-activating it", () => {
@@ -225,7 +225,7 @@ describe("backend policy activation", () => {
 
     Effect.runSync(
       services.aiPolicy.recordDegradationSignal({
-        policyVersion: "2026-05-16",
+        policyVersion: "2026-06-22",
         provider: "openai",
         occurredAt: backendAppTestStartedAt.toISOString(),
         failureCount: 3
@@ -235,7 +235,7 @@ describe("backend policy activation", () => {
     const recommendation = Effect.runSync(services.aiPolicy.recommendFuturePolicyVersion());
     const activePointer = Effect.runSync(services.aiPolicy.getActivePolicyPointer());
 
-    expect(recommendation?.recommendedPolicyVersion).toBe("2026-04-01");
-    expect(activePointer.activePolicyVersion).toBe("2026-05-16");
+    expect(recommendation?.recommendedPolicyVersion).toBe("2026-05-16");
+    expect(activePointer.activePolicyVersion).toBe("2026-06-22");
   });
 });

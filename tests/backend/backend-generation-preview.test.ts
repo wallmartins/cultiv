@@ -58,8 +58,8 @@ describe("backend generation preview", () => {
     expect(secondDecoded.pricingSnapshot.quoteId).toBe(decoded.pricingSnapshot.quoteId);
     expect(decoded.recommendation?.qualityMode).toBeDefined();
     expect(decoded.recommendation?.reasonCodes.length).toBeGreaterThan(0);
-    expect(decoded.currentBalance).toBe(2500);
-    expect(decoded.projectedBalanceAfterGeneration).toBe(2490);
+    expect(decoded.currentBalance).toBe(150);
+    expect(decoded.projectedBalanceAfterGeneration).toBe(140);
     expect(decoded.quotaCost).toBeGreaterThanOrEqual(1);
     expect(decoded.quotaLimit).toBeGreaterThan(0);
     expect(decoded.quotaRemaining).toBeLessThanOrEqual(decoded.quotaLimit);
@@ -87,7 +87,7 @@ describe("backend generation preview", () => {
     });
     seedExecutionVoiceState(services, "user_2");
 
-    await Effect.runPromise(services.billing.consumeCredits("user_2", "pro", 2498, "generation"));
+    await Effect.runPromise(services.billing.consumeCredits("user_2", "pro", 148, "generation"));
 
     const app = createBackendAppTestApp(config, services);
     const response = await app.request("/api/generation-preview", {

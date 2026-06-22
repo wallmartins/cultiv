@@ -15,7 +15,7 @@ export function CreditDisplay({ status, balance, messages }: CreditDisplayProps)
 
   return (
     <Link
-      to="/app/billing"
+      to="/app/plans"
       className={cn(
         "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 font-mono text-xs tabular-nums backdrop-blur-sm transition-colors hover:border-moss/40",
         isZero

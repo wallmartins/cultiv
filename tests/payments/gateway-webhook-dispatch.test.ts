@@ -21,7 +21,7 @@ describe("dispatchGatewayWebhookEvent", () => {
               id: "pro",
               tier: "pro",
               name: "Pro",
-              monthlyCredits: 2500,
+              monthlyCredits: 150,
               features: [{ key: "execution.sync_mode", enabled: true }]
             })
           )
@@ -48,7 +48,50 @@ describe("dispatchGatewayWebhookEvent", () => {
 
     const entitlement = service.getEntitlement("user_1", "pro");
     expect(entitlement?.status).toBe("active");
-    expect(entitlement?.wallet.availableCredits).toBe(2500);
+    expect(entitlement?.wallet.availableCredits).toBe(150);
+  });
+
+  it("activates criador subscription on checkout.completed", async () => {
+    const fixedNow = new Date("2026-06-17T12:00:00.000Z");
+    const service = createBillingService({
+      gateway: createStripeGateway(),
+      clock: { now: () => fixedNow },
+      repository: createBillingRepository({
+        plans: [
+          Effect.runSync(
+            defineBillingPlan({
+              id: "criador",
+              tier: "starter",
+              name: "Criador",
+              monthlyCredits: 63,
+              features: [{ key: "execution.sync_mode", enabled: true }]
+            })
+          )
+        ]
+      })
+    });
+
+    await Effect.runPromise(
+      dispatchGatewayWebhookEvent(
+        service,
+        {
+          eventId: "evt_criador",
+          gateway: "stripe",
+          type: "checkout.completed",
+          userId: "user_criador",
+          amount: 24,
+          currency: "USD",
+          internalRef: "criador",
+          productKind: "subscription"
+        },
+        { now: () => fixedNow, idempotencyNamespace: "test" }
+      )
+    );
+
+    const entitlement = service.getEntitlement("user_criador", "criador");
+    expect(entitlement?.status).toBe("active");
+    expect(entitlement?.tier).toBe("starter");
+    expect(entitlement?.wallet.availableCredits).toBe(63);
   });
 
   it("starts a new cycle on subscription.renewed", async () => {
@@ -63,7 +106,7 @@ describe("dispatchGatewayWebhookEvent", () => {
               id: "pro",
               tier: "pro",
               name: "Pro",
-              monthlyCredits: 2500,
+              monthlyCredits: 150,
               features: [{ key: "execution.sync_mode", enabled: true }]
             })
           )
@@ -123,7 +166,7 @@ describe("dispatchGatewayWebhookEvent", () => {
               id: "pro",
               tier: "pro",
               name: "Pro",
-              monthlyCredits: 2500,
+              monthlyCredits: 150,
               features: [{ key: "execution.sync_mode", enabled: true }]
             })
           )

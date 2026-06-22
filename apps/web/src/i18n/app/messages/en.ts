@@ -7,7 +7,7 @@ export const appMessagesEn: AppMessages = {
       history: "History",
       voice: "Voice",
       settings: "Settings",
-      billing: "Billing",
+      plans: "Plans",
       logout: "Sign out"
     },
     credits: { label: "credits" },
@@ -465,19 +465,24 @@ export const appMessagesEn: AppMessages = {
     revokeConsent: "Revoke consent",
     revokeDisabled: "Revocation available when the API is published.",
     logout: "Sign out",
-    billing: "Billing & credits"
+    plans: "Plans & upgrades"
   },
-  billing: {
-    title: "Billing",
-    currentPlan: "Current plan",
+  plans: {
+    title: "Plans",
+    subtitle: "Compare plans and upgrade when you need more generations each month.",
+    currentPlan: "Your plan",
+    usageHint: "Your monthly usage appears when you generate content.",
+    changePlan: "Change plan",
+    changePlanDescription: "Pick currency, billing period, and payment method to subscribe.",
     planPro: "Pro",
+    planCriador: "Creator",
     planFree: "Free",
-    creditsBalance: "{count} credits available",
+    upgradeCriador: "Upgrade to Creator",
     upgradePro: "Upgrade to Pro",
     alreadyPro: "You are on the Pro plan.",
-    topUp: "Top up credits",
-    topUpDescription: "Add 500 credits to your balance (one-time purchase).",
-    topUpCta: "Buy 500 credits",
+    topUp: "Buy more generations",
+    topUpDescription: "One-time pack to use beyond your plan allowance.",
+    topUpCta: "Buy pack",
     currencyLabel: "Currency",
     currency: {
       brl: "BRL (Brazil)",
@@ -495,7 +500,7 @@ export const appMessagesEn: AppMessages = {
     checkoutCancel: "Checkout was cancelled. No charge was made.",
     checkoutError: "Could not start checkout. Try again in a moment.",
     redirecting: "Redirecting…",
-    loadError: "Could not load billing details."
+    loadError: "Could not load your plan."
   },
   notifications: {
     readyTitle: "Generation ready",

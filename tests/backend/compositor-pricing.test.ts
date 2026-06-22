@@ -38,8 +38,8 @@ describe("compositor pricing", () => {
       })
     );
 
-    expect(medium.creditPrice).toBe(4);
-    expect(long.creditPrice).toBe(5);
+    expect(medium.creditPrice).toBe(3.8);
+    expect(long.creditPrice).toBe(4.8);
     expect(medium.planSignature).toBe("edition-piece");
     expect(medium.lengthTier).toBe("medium");
   });
@@ -62,22 +62,22 @@ describe("compositor pricing", () => {
 
   it("changes quote id when compositor length tier changes", () => {
     const medium = toGenerationPricingSnapshot({
-      policyVersion: "2026-05-16",
+      policyVersion: "2026-06-22",
       lifecycle: "active",
       planTier: "pro",
       contentType: "edition-piece",
       qualityMode: "balanced",
-      creditPrice: 4,
+      creditPrice: 3.8,
       planSignature: "edition-piece",
       lengthTier: "medium"
     });
     const long = toGenerationPricingSnapshot({
-      policyVersion: "2026-05-16",
+      policyVersion: "2026-06-22",
       lifecycle: "active",
       planTier: "pro",
       contentType: "edition-piece",
       qualityMode: "balanced",
-      creditPrice: 5,
+      creditPrice: 4.8,
       planSignature: "edition-piece",
       lengthTier: "long"
     });

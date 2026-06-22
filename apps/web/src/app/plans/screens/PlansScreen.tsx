@@ -8,7 +8,7 @@ import { AppCard } from "~/platform/ui/AppCard";
 
 type CheckoutStatus = "success" | "cancel" | undefined;
 
-export function BillingScreen() {
+export function PlansScreen() {
   const { messages } = useAppLocale();
   const client = useClientSdk();
   const search = useSearch({ strict: false }) as { status?: CheckoutStatus };
@@ -19,12 +19,10 @@ export function BillingScreen() {
     readonly planId: string;
     readonly tier: string;
     readonly status: string;
-    readonly availableCredits: number;
-    readonly monthlyCreditsRemaining: number;
   } | null>(null);
   const [loadError, setLoadError] = useState(false);
   const [checkoutError, setCheckoutError] = useState(false);
-  const [loadingCheckout, setLoadingCheckout] = useState<"pro" | "topup" | null>(null);
+  const [loadingCheckout, setLoadingCheckout] = useState<"pro" | "criador" | "topup" | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -54,7 +52,9 @@ export function BillingScreen() {
     period: BillingCheckoutPeriod
   ): Promise<void> {
     setCheckoutError(false);
-    setLoadingCheckout(productKind === "topup" ? "topup" : "pro");
+    setLoadingCheckout(
+      productKind === "topup" ? "topup" : internalRef === "criador" ? "criador" : "pro"
+    );
 
     try {
       const result = await client.toPromise(
@@ -74,17 +74,27 @@ export function BillingScreen() {
   }
 
   const isPro = entitlement?.tier === "pro" && entitlement.status === "active";
+  const isCriador = entitlement?.tier === "starter" && entitlement.status === "active";
+  const currentPlanLabel =
+    entitlement?.tier === "pro"
+      ? messages.plans.planPro
+      : entitlement?.tier === "starter"
+        ? messages.plans.planCriador
+        : messages.plans.planFree;
   const statusBanner =
     search.status === "success"
-      ? messages.billing.checkoutSuccess
+      ? messages.plans.checkoutSuccess
       : search.status === "cancel"
-        ? messages.billing.checkoutCancel
+        ? messages.plans.checkoutCancel
         : null;
 
   return (
     <Container className="py-8 md:py-10">
-      <Text as="h1" variant="h1" className="mb-8">
-        {messages.billing.title}
+      <Text as="h1" variant="h1" className="mb-3">
+        {messages.plans.title}
+      </Text>
+      <Text variant="body" className="mb-8 max-w-2xl text-muted-foreground">
+        {messages.plans.subtitle}
       </Text>
 
       {statusBanner ? (
@@ -96,22 +106,17 @@ export function BillingScreen() {
       <section className="mb-8 space-y-4">
         <AppCard>
           <Text variant="label" className="mb-3 block">
-            {messages.billing.currentPlan}
+            {messages.plans.currentPlan}
           </Text>
           {loadError ? (
             <Text variant="meta" className="text-muted-foreground">
-              {messages.billing.loadError}
+              {messages.plans.loadError}
             </Text>
           ) : entitlement ? (
             <div className="space-y-2">
-              <Text variant="body">
-                {entitlement.tier === "pro" ? messages.billing.planPro : messages.billing.planFree}
-              </Text>
+              <Text variant="body">{currentPlanLabel}</Text>
               <Text variant="meta" className="text-muted-foreground">
-                {messages.billing.creditsBalance.replace(
-                  "{count}",
-                  String(entitlement.availableCredits)
-                )}
+                {messages.plans.usageHint}
               </Text>
             </div>
           ) : (
@@ -124,18 +129,25 @@ export function BillingScreen() {
 
       <section className="mb-8 space-y-4">
         <AppCard>
+          <Text variant="label" className="mb-2 block">
+            {messages.plans.changePlan}
+          </Text>
+          <Text variant="meta" className="mb-4 text-muted-foreground">
+            {messages.plans.changePlanDescription}
+          </Text>
+
           <Text variant="label" className="mb-4 block">
-            {messages.billing.currencyLabel}
+            {messages.plans.currencyLabel}
           </Text>
           <div className="mb-6 flex flex-wrap gap-2">
             <ToggleButton
               active={currency === "BRL"}
-              label={messages.billing.currency.brl}
+              label={messages.plans.currency.brl}
               onClick={() => setCurrency("BRL")}
             />
             <ToggleButton
               active={currency === "USD"}
-              label={messages.billing.currency.usd}
+              label={messages.plans.currency.usd}
               onClick={() => {
                 setCurrency("USD");
                 setPaymentMethod("card");
@@ -144,17 +156,17 @@ export function BillingScreen() {
           </div>
 
           <Text variant="label" className="mb-4 block">
-            {messages.billing.periodLabel}
+            {messages.plans.periodLabel}
           </Text>
           <div className="mb-6 flex flex-wrap gap-2">
             <ToggleButton
               active={billingPeriod === "monthly"}
-              label={messages.billing.periodMonthly}
+              label={messages.plans.periodMonthly}
               onClick={() => setBillingPeriod("monthly")}
             />
             <ToggleButton
               active={billingPeriod === "annual"}
-              label={messages.billing.periodAnnual}
+              label={messages.plans.periodAnnual}
               onClick={() => setBillingPeriod("annual")}
             />
           </div>
@@ -162,43 +174,57 @@ export function BillingScreen() {
           {currency === "BRL" ? (
             <>
               <Text variant="label" className="mb-4 block">
-                {messages.billing.paymentMethodLabel}
+                {messages.plans.paymentMethodLabel}
               </Text>
               <div className="mb-6 flex flex-wrap gap-2">
                 <ToggleButton
                   active={paymentMethod === "card"}
-                  label={messages.billing.paymentCard}
+                  label={messages.plans.paymentCard}
                   onClick={() => setPaymentMethod("card")}
                 />
                 <ToggleButton
                   active={paymentMethod === "pix"}
-                  label={messages.billing.paymentPix}
+                  label={messages.plans.paymentPix}
                   onClick={() => setPaymentMethod("pix")}
                 />
               </div>
               {paymentMethod === "pix" ? (
                 <Text variant="meta" className="mb-4 text-muted-foreground">
-                  {messages.billing.pixOnlyBrl}
+                  {messages.plans.pixOnlyBrl}
                 </Text>
               ) : billingPeriod === "annual" ? (
                 <Text variant="meta" className="mb-4 text-muted-foreground">
-                  {messages.billing.annualInstallments}
+                  {messages.plans.annualInstallments}
                 </Text>
               ) : null}
             </>
           ) : null}
 
           {!isPro ? (
-            <Button
-              type="button"
-              disabled={loadingCheckout !== null}
-              onClick={() => void startCheckout("subscription", "pro", billingPeriod)}
-            >
-              {loadingCheckout === "pro" ? messages.billing.redirecting : messages.billing.upgradePro}
-            </Button>
+            <div className="flex flex-wrap gap-3">
+              {!isCriador ? (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  disabled={loadingCheckout !== null}
+                  onClick={() => void startCheckout("subscription", "criador", billingPeriod)}
+                >
+                  {loadingCheckout === "criador"
+                    ? messages.plans.redirecting
+                    : messages.plans.upgradeCriador}
+                </Button>
+              ) : null}
+              <Button
+                type="button"
+                disabled={loadingCheckout !== null}
+                onClick={() => void startCheckout("subscription", "pro", billingPeriod)}
+              >
+                {loadingCheckout === "pro" ? messages.plans.redirecting : messages.plans.upgradePro}
+              </Button>
+            </div>
           ) : (
             <Text variant="meta" className="text-muted-foreground">
-              {messages.billing.alreadyPro}
+              {messages.plans.alreadyPro}
             </Text>
           )}
         </AppCard>
@@ -207,10 +233,10 @@ export function BillingScreen() {
       <section className="space-y-4">
         <AppCard>
           <Text variant="label" className="mb-2 block">
-            {messages.billing.topUp}
+            {messages.plans.topUp}
           </Text>
           <Text variant="meta" className="mb-4 text-muted-foreground">
-            {messages.billing.topUpDescription}
+            {messages.plans.topUpDescription}
           </Text>
           <Button
             type="button"
@@ -218,14 +244,14 @@ export function BillingScreen() {
             disabled={loadingCheckout !== null}
             onClick={() => void startCheckout("topup", "topup_500", "one_time")}
           >
-            {loadingCheckout === "topup" ? messages.billing.redirecting : messages.billing.topUpCta}
+            {loadingCheckout === "topup" ? messages.plans.redirecting : messages.plans.topUpCta}
           </Button>
         </AppCard>
       </section>
 
       {checkoutError ? (
         <Text variant="meta" className="mt-4 text-red-700">
-          {messages.billing.checkoutError}
+          {messages.plans.checkoutError}
         </Text>
       ) : null}
     </Container>

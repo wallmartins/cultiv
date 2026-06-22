@@ -21,6 +21,6 @@ describe("billing activation module", () => {
     expect(entitlement?.planId).toBe("free");
     expect(entitlement?.tier).toBe("free");
     expect(entitlement?.status).toBe("active");
-    expect(entitlement?.wallet.availableCredits).toBe(50);
+    expect(entitlement?.wallet.availableCredits).toBe(20);
   });
 });
