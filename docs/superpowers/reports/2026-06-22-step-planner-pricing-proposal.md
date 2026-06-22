@@ -117,7 +117,7 @@ Worst-case cell in sample (edition-piece / medium / balanced, 2 quotas each):
 
 1. [ ] Apply `pricesByPlan` + keep `canonicalCreditCost: 2.5` in `pricing.json`
 2. [ ] Bump `policyVersion` if required by governance (>15% change on long-piece — **yes**, new version recommended: `2026-06-22`)
-3. [ ] Update billing plan definitions (`monthlyCredits`) to match quota targets
+3. [ ] Update billing plan definitions (`monthlyCredits`) to match quota targets — **done** for free/pro/criador in `default-plans.ts`
 4. [ ] Re-run one preview + execute smoke after deploy
 5. [ ] Commit this report + `step-planner-cogs-report.md` as sign-off artifacts
 6. [ ] Optional: rerun failed fixture `share-idea / heavy` (Gemini 503) for 18/18 completeness

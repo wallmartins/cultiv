@@ -24,7 +24,7 @@ export function BillingScreen() {
   } | null>(null);
   const [loadError, setLoadError] = useState(false);
   const [checkoutError, setCheckoutError] = useState(false);
-  const [loadingCheckout, setLoadingCheckout] = useState<"pro" | "topup" | null>(null);
+  const [loadingCheckout, setLoadingCheckout] = useState<"pro" | "criador" | "topup" | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -54,7 +54,9 @@ export function BillingScreen() {
     period: BillingCheckoutPeriod
   ): Promise<void> {
     setCheckoutError(false);
-    setLoadingCheckout(productKind === "topup" ? "topup" : "pro");
+    setLoadingCheckout(
+      productKind === "topup" ? "topup" : internalRef === "criador" ? "criador" : "pro"
+    );
 
     try {
       const result = await client.toPromise(
@@ -74,6 +76,13 @@ export function BillingScreen() {
   }
 
   const isPro = entitlement?.tier === "pro" && entitlement.status === "active";
+  const isCriador = entitlement?.tier === "starter" && entitlement.status === "active";
+  const currentPlanLabel =
+    entitlement?.tier === "pro"
+      ? messages.billing.planPro
+      : entitlement?.tier === "starter"
+        ? messages.billing.planCriador
+        : messages.billing.planFree;
   const statusBanner =
     search.status === "success"
       ? messages.billing.checkoutSuccess
@@ -104,9 +113,7 @@ export function BillingScreen() {
             </Text>
           ) : entitlement ? (
             <div className="space-y-2">
-              <Text variant="body">
-                {entitlement.tier === "pro" ? messages.billing.planPro : messages.billing.planFree}
-              </Text>
+              <Text variant="body">{currentPlanLabel}</Text>
               <Text variant="meta" className="text-muted-foreground">
                 {messages.billing.creditsBalance.replace(
                   "{count}",
@@ -189,13 +196,27 @@ export function BillingScreen() {
           ) : null}
 
           {!isPro ? (
-            <Button
-              type="button"
-              disabled={loadingCheckout !== null}
-              onClick={() => void startCheckout("subscription", "pro", billingPeriod)}
-            >
-              {loadingCheckout === "pro" ? messages.billing.redirecting : messages.billing.upgradePro}
-            </Button>
+            <div className="flex flex-wrap gap-3">
+              {!isCriador ? (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  disabled={loadingCheckout !== null}
+                  onClick={() => void startCheckout("subscription", "criador", billingPeriod)}
+                >
+                  {loadingCheckout === "criador"
+                    ? messages.billing.redirecting
+                    : messages.billing.upgradeCriador}
+                </Button>
+              ) : null}
+              <Button
+                type="button"
+                disabled={loadingCheckout !== null}
+                onClick={() => void startCheckout("subscription", "pro", billingPeriod)}
+              >
+                {loadingCheckout === "pro" ? messages.billing.redirecting : messages.billing.upgradePro}
+              </Button>
+            </div>
           ) : (
             <Text variant="meta" className="text-muted-foreground">
               {messages.billing.alreadyPro}

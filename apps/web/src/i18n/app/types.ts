@@ -420,8 +420,10 @@ export type AppBillingMessages = {
   readonly title: string;
   readonly currentPlan: string;
   readonly planPro: string;
+  readonly planCriador: string;
   readonly planFree: string;
   readonly creditsBalance: string;
+  readonly upgradeCriador: string;
   readonly upgradePro: string;
   readonly alreadyPro: string;
   readonly topUp: string;

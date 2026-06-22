@@ -9,6 +9,16 @@ import {
 } from "../../packages/payments/src/index.js";
 
 describe("default free subscription", () => {
+  it("registers criador plan with starter tier and 63 monthly credits", () => {
+    const criador = DEFAULT_BILLING_PLANS.find((plan) => plan.id === "criador");
+    expect(criador).toMatchObject({
+      tier: "starter",
+      name: "Criador",
+      monthlyCredits: 63
+    });
+    expect(criador?.dailyCredits).toBeUndefined();
+  });
+
   it("provisions an active free subscription and entitlement for a new user", () => {
     const billing = createBillingService({
       repository: createBillingRepository({ plans: DEFAULT_BILLING_PLANS })
@@ -120,5 +130,24 @@ describe("default free subscription", () => {
     expect(entitlement.planId).toBe("pro");
     expect(entitlement.wallet.availableCredits).toBe(150);
     expect(billing.getPrimarySubscriptionPlanId("user_upgrade")).toBe("pro");
+  });
+
+  it("activates criador with starter tier quality modes and monthly grant", () => {
+    const billing = createBillingService({
+      repository: createBillingRepository({ plans: DEFAULT_BILLING_PLANS })
+    });
+
+    const entitlement = Effect.runSync(
+      activateSubscription(billing, {
+        userId: "user_criador",
+        planId: "criador",
+        now: () => new Date("2026-06-12T00:00:00.000Z"),
+        idempotencyNamespace: "test"
+      })
+    );
+
+    expect(entitlement.planId).toBe("criador");
+    expect(entitlement.tier).toBe("starter");
+    expect(entitlement.wallet.availableCredits).toBe(63);
   });
 });

@@ -13,6 +13,17 @@ export const DEFAULT_BILLING_PLANS: readonly BillingPlanDefinition[] = [
     allowedModels: ["llama3.1", "gpt-4o-mini"]
   },
   {
+    id: "criador",
+    tier: "starter",
+    name: "Criador",
+    monthlyCredits: 63,
+    features: [
+      { key: "execution.sync_mode", enabled: true },
+      { key: "content.language.refinement", enabled: false }
+    ],
+    allowedModels: ["gpt-4o-mini", "gpt-4.1"]
+  },
+  {
     id: "pro",
     tier: "pro",
     name: "Pro",
