@@ -4,7 +4,7 @@ Validate **StepPlanner v1** and quota presentation on the live stack before comm
 
 ## Prerequisites
 
-- Backend built: `pnpm --filter @my-ai-orchestrator/backend build`
+- Backend built (`apps/backend/dist/…`) — see **VPS build** below if `git pull` only updated source
 - API + worker online
 - Flags on API **and** worker:
   - `COMPOSITOR_V1_ENABLED=true`
@@ -15,6 +15,30 @@ Validate **StepPlanner v1** and quota presentation on the live stack before comm
   - `CALIBRATION_BASE_URL` — default `http://127.0.0.1:3001`
 
 See also [compositor-parity-runbook.md](./compositor-parity-runbook.md) for token and wallet setup.
+
+## VPS build (after `git pull`)
+
+`git pull` updates **TypeScript source only**. Harness scripts run from **bundled** `apps/backend/dist/scripts/*.js`. The build uses `esbuild`, which is a **devDependency** — a production-only `pnpm install --prod` (CI deploy) does not install it.
+
+**Do not** run bare `pnpm build` after prod install — you will get `Cannot find package 'esbuild'`.
+
+From the app root (`/home/cultiv/app`):
+
+```bash
+git pull
+bash infra/integrator/scripts/manual-build-deploy.sh
+```
+
+That script runs `pnpm install --frozen-lockfile` (includes dev deps), `pnpm build:backend`, migrations, and PM2 reload.
+
+Harness-only rebuild (no PM2 restart):
+
+```bash
+pnpm install --frozen-lockfile
+pnpm build:backend
+```
+
+Automated path: merge to `main` and let CI deploy the pre-built artifact (no local build on VPS).
 
 ## 1. Smoke (fast — 5 curated scenarios)
 
