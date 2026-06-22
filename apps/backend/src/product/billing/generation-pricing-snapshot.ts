@@ -10,6 +10,7 @@ import type {
   BillingPlanTier,
   ResolvedPricingEnvelope
 } from "../ai-policy/ai-policy-types.js";
+import { resolveCompositorPricingKeys } from "../ai-policy/ai-policy-resolution.js";
 import { resolveStoredUserPlanTier } from "./resolve-user-billing.js";
 
 interface GenerationQuoteSeed {
@@ -18,6 +19,8 @@ interface GenerationQuoteSeed {
   readonly contentType: string;
   readonly qualityMode: string;
   readonly creditPrice: number;
+  readonly planSignature?: string;
+  readonly lengthTier?: string;
 }
 
 export function toGenerationPricingSnapshot(pricingEnvelope: ResolvedPricingEnvelope): GenerationPricingSnapshot {
@@ -27,12 +30,16 @@ export function toGenerationPricingSnapshot(pricingEnvelope: ResolvedPricingEnve
       planTier: pricingEnvelope.planTier,
       contentType: pricingEnvelope.contentType,
       qualityMode: pricingEnvelope.qualityMode,
-      creditPrice: pricingEnvelope.creditPrice
+      creditPrice: pricingEnvelope.creditPrice,
+      planSignature: pricingEnvelope.planSignature,
+      lengthTier: pricingEnvelope.lengthTier
     }),
     policyVersion: pricingEnvelope.policyVersion,
     contentType: pricingEnvelope.contentType,
     qualityMode: pricingEnvelope.qualityMode,
-    creditPrice: pricingEnvelope.creditPrice
+    creditPrice: pricingEnvelope.creditPrice,
+    ...(pricingEnvelope.planSignature ? { planSignature: pricingEnvelope.planSignature } : {}),
+    ...(pricingEnvelope.lengthTier ? { lengthTier: pricingEnvelope.lengthTier } : {})
   };
 }
 
@@ -50,13 +57,16 @@ export function resolveExecutionPricingSnapshot(args: {
     defaultLanguage: args.config.defaultLanguage
   });
   const planTier = resolveStoredUserPlanTier(args.billing, args.userId);
+  const compositorPricing = resolveCompositorPricingKeys(args.request);
 
   return Effect.map(
     args.aiPolicy.resolvePricingEnvelope({
       planTier,
       contentType: normalized.contentTypeId,
       qualityMode: normalized.qualityMode,
-      attachedPolicyVersion: args.config.aiPolicyAttachedVersion
+      attachedPolicyVersion: args.config.aiPolicyAttachedVersion,
+      planSignature: compositorPricing.planSignature,
+      lengthTier: compositorPricing.lengthTier
     }),
     toGenerationPricingSnapshot
   );
@@ -89,7 +99,9 @@ function createGenerationQuoteId(seed: GenerationQuoteSeed): string {
     seed.planTier,
     seed.contentType,
     seed.qualityMode,
-    seed.creditPrice
+    seed.creditPrice,
+    seed.planSignature ?? null,
+    seed.lengthTier ?? null
   ]);
 
   return `quote_${createHash("sha256").update(canonical).digest("hex")}`;

@@ -1,5 +1,26 @@
 # Progress Log
 
+| 2026-06-19 | test(step-planner): integration coverage, COGS variance harness, planner telemetry — Phase 3 Tasks 8–10 |
+| 2026-06-19 | feat(generation): wire step planner behind feature flag — Phase 3 Task 7 |
+| 2026-06-19 | compositor parity PASS — founder rubric 6/6 on VPS; heroes signed off; spec approved |
+| 2026-06-19 | fix(compositor): parity report rubric table scope bug |
+| 2026-06-19 | fix(compositor): hide internal preset content types from /me/content-types; implement dominant COGS planSignature; CI green |
+| 2026-06-19 | feat(compositor): Tasks 8–11 — policy catalog entries, expression instructions in skills, planSignature×lengthTier pricing grid, compositor telemetry metadata |
+| 2026-06-19 | feat(compositor): Tasks 5–7 — `generation.compositor_v1` flag, resolve-generation-target compositor branch, preview/execute ExplicitPipelineRequest wiring; 15 new tests pass |
+| 2026-06-19 | feat(compositor): Tasks 2–4 — preset templates, rhetorical/scale/expression layers, CompositorPlanner + materializer; 17 unit tests pass |
+| 2026-06-19 | docs: Phase 2 generation compositor implementation plan (14 tasks) |
+| 2026-06-19 | docs: Phase 2 generation compositor design — planner v1, presets as templates, parity harness gate |
+| 2026-06-19 | fix(billing): bundle calibration scripts to dist/scripts for VPS prod installs without tsx |
+| 2026-06-19 | feat(billing): calibration sweep scripts for Option B viability — `run-calibration-sweep`, `analyze-calibration-option-b`, tier-variance profile, runbook |
+| 2026-06-19 | fix(phase1): close review gaps — shared legacy map in contracts, resolveGenerationTarget tests, wizard/prefill tests, legacy flag default off, mergeIntentPipelineContext |
+| 2026-06-19 | feat(web): Phase 1 generation intent wizard complete — contracts, resolver, catalog API, preview/execute, wordTarget prompts, SDK, i18n, IntentWizard + GenerationScreen; 800 tests pass |
+| 2026-06-19 | feat(backend): resolve intent on execution enqueue (intent wizard Task 6) |
+| 2026-06-19 | feat(backend): pass wordTarget into draft and refine prompts (intent wizard Task 7) |
+| 2026-06-18 | docs: Phase 1 generation intent wizard implementation plan (13 tasks) |
+| 2026-06-18 | docs: Phase 1 generation intent & wizard spec; phased roadmap (formats + pricing) |
+| 2026-06-18 | feat(billing): pricing calibration toolkit + export/calibrate scripts (Phase 0) |
+| 2026-06-18 | docs: hybrid pricing implementation plan (10 tasks, calibration → repricing → quota UX) |
+| 2026-06-18 | docs: hybrid pricing design spec — token-calibrated internal credits, quota presentation layer, Free/Criador/Pro ladder, Generation Screen educational copy (no internal credit exposure) |
 | 2026-06-18 | merge(main): integrate payment gateway (Stripe/Asaas) with architecture-deepening modular payments and split config |
 | 2026-06-18 | refactor(backend,voice): extract `voice-rebuild-derivation-resolvers.ts` (178 lines) — resolvers + text/diversity helpers from `voice-rebuild-derivation.ts` (447→283); `apps/backend/tests/voice-rebuild-derivation-resolvers.test.ts` (3 tests); removed `voice-rebuild-derivation.ts` from file-size allowlist; public API unchanged |
 | 2026-06-18 | refactor(payments): extract generation credit and cycle operations — `billing-generation-credits.ts`, `billing-cycle-operations.ts`, `billing-service-runtime.ts`; `service.ts` 520→240 lines; removed from file-size allowlist; `tests/payments/billing-generation-credits.test.ts`; file-size allowlist now empty |

@@ -1,53 +1,22 @@
-import type { PipelineRequest, QualityMode } from "@my-ai-orchestrator/contracts";
+import type { ExecutionTelemetry, PipelineRequest, PlanSignature, QualityMode } from "@my-ai-orchestrator/contracts";
 import type { ResolvedPricingEnvelope } from "../../product/ai-policy/ai-policy-types.js";
+import { resolveCompositorPricingKeys } from "../../product/ai-policy/ai-policy-resolution.js";
 import type { BackendStepProviderAttempt } from "../pipeline/pipeline-attempt-types.js";
 import type { ExecutionSelection } from "./quality-selection.js";
 import { resolveExecutionPreviewCorrelation } from "../pipeline/preview-correlation.js";
 
-export interface ExecutionTelemetry {
-  readonly llm?: {
-    readonly executedCount: number;
-    readonly bypassedCount: number;
-    readonly llmCallsSaved: number;
-    readonly bypassRate: number;
-  };
-  readonly cost?: {
-    readonly inputTokensTotal: number;
-    readonly outputTokensTotal: number;
-    readonly estimatedUsdCost: number;
-    readonly debitedCredits: number;
-  };
-  readonly selection?: {
-    readonly reason: string;
-    readonly adapter: string;
-    readonly model: string;
-  };
-  readonly preview?: {
-    readonly quoteId?: string;
-    readonly recommendedQualityMode?: QualityMode;
-    readonly finalQualityMode: QualityMode;
-    readonly divergedFromRecommendation: boolean;
-    readonly recommendationReasonCodes: readonly string[];
-  };
-  readonly pricing?: {
-    readonly quoteId?: string;
-    readonly policyVersion?: string;
-    readonly contentType?: string;
-    readonly plannedCreditPrice?: number;
-    readonly observedDebitedCredits: number;
-    readonly observedUsdCost: number;
-  };
-  readonly providers?: {
-    readonly finalProvider: string;
-    readonly finalModel: string;
-    readonly attempts: readonly BackendStepProviderAttempt[];
-  };
-  readonly billing?: {
-    readonly userId: string;
-    readonly planId: string;
-    readonly generationCycleId: string;
-  };
+const PLAN_SIGNATURES = new Set<PlanSignature>([
+  "short-piece",
+  "long-piece",
+  "serial-piece",
+  "edition-piece"
+]);
+
+function isPlanSignature(value: string): value is PlanSignature {
+  return PLAN_SIGNATURES.has(value as PlanSignature);
 }
+
+export type { ExecutionTelemetry };
 
 export function createExecutionTelemetry(options: {
   readonly executedCount: number;
@@ -81,6 +50,8 @@ export function createExecutionTelemetry(options: {
         finalQualityMode: options.finalQualityMode
       })
     : undefined;
+  const compositorTelemetry = resolveCompositorTelemetryContext(options.request, options.pricingEnvelope);
+  const plannerTelemetry = extractStepPlannerTelemetry(options.request);
   const providerAttempts = options.providerAttempts ? [...options.providerAttempts] : [];
   const finalProviderAttempt = [...providerAttempts].reverse().find((attempt) => attempt.status === "succeeded");
   const observedDebitedCredits = Math.max(0, options.debitedCredits ?? 0);
@@ -114,16 +85,21 @@ export function createExecutionTelemetry(options: {
           recommendationReasonCodes: [...preview.recommendationReasonCodes]
         }
       : undefined,
-    pricing: options.pricingEnvelope || preview
+    pricing: options.pricingEnvelope || preview || compositorTelemetry.pricing
       ? {
           quoteId: preview?.quoteId,
           policyVersion: options.pricingEnvelope?.policyVersion,
           contentType: options.pricingEnvelope?.contentType,
+          planSignature:
+            options.pricingEnvelope?.planSignature ?? compositorTelemetry.pricing?.planSignature,
+          lengthTier: options.pricingEnvelope?.lengthTier ?? compositorTelemetry.pricing?.lengthTier,
           plannedCreditPrice: options.pricingEnvelope?.creditPrice,
           observedDebitedCredits,
           observedUsdCost: estimatedUsdCost
         }
       : undefined,
+    compositor: compositorTelemetry.compositor,
+    planner: plannerTelemetry,
     providers: finalProviderAttempt
       ? {
           finalProvider: finalProviderAttempt.provider,
@@ -137,4 +113,97 @@ export function createExecutionTelemetry(options: {
 
 function roundEstimatedCost(value: number): number {
   return Math.round(value * 10000) / 10000;
+}
+
+function resolveCompositorTelemetryContext(
+  request: PipelineRequest | undefined,
+  pricingEnvelope: ResolvedPricingEnvelope | undefined
+): {
+  readonly pricing?: {
+    readonly planSignature?: string;
+    readonly lengthTier?: string;
+  };
+  readonly compositor?: {
+    readonly planId: string;
+  };
+} {
+  if (!request) {
+    return {
+      pricing:
+        pricingEnvelope?.planSignature || pricingEnvelope?.lengthTier
+          ? {
+              planSignature: pricingEnvelope.planSignature,
+              lengthTier: pricingEnvelope.lengthTier
+            }
+          : undefined
+    };
+  }
+
+  const compositorPricing = resolveCompositorPricingKeys(request);
+  const compositorMetadata = extractCompositorPlanId(request);
+
+  return {
+    pricing:
+      compositorPricing.planSignature || compositorPricing.lengthTier
+        ? {
+            planSignature: compositorPricing.planSignature,
+            lengthTier: compositorPricing.lengthTier
+          }
+        : undefined,
+    compositor: compositorMetadata?.planId ? { planId: compositorMetadata.planId } : undefined
+  };
+}
+
+function extractCompositorPlanId(
+  request: PipelineRequest
+): { readonly planId?: string } | undefined {
+  if (!("context" in request) || !request.context || typeof request.context !== "object") {
+    return undefined;
+  }
+
+  const compositor = (request.context as Record<string, unknown>).compositor;
+  if (!compositor || typeof compositor !== "object") {
+    return undefined;
+  }
+
+  const planId = (compositor as Record<string, unknown>).planId;
+  return typeof planId === "string" ? { planId } : undefined;
+}
+
+function extractStepPlannerTelemetry(
+  request: PipelineRequest | undefined
+): ExecutionTelemetry["planner"] {
+  if (!request || !("context" in request) || !request.context || typeof request.context !== "object") {
+    return undefined;
+  }
+
+  const stepPlanner = (request.context as Record<string, unknown>).stepPlanner;
+  if (!stepPlanner || typeof stepPlanner !== "object") {
+    return undefined;
+  }
+
+  const record = stepPlanner as Record<string, unknown>;
+  const patchCount = record.patchCount;
+  const ops = record.ops;
+  const basePlanSignature = record.basePlanSignature;
+  const finalPlanSignature = record.finalPlanSignature;
+
+  if (
+    typeof patchCount !== "number" ||
+    !Array.isArray(ops) ||
+    ops.some((entry) => typeof entry !== "string") ||
+    typeof basePlanSignature !== "string" ||
+    typeof finalPlanSignature !== "string" ||
+    !isPlanSignature(basePlanSignature) ||
+    !isPlanSignature(finalPlanSignature)
+  ) {
+    return undefined;
+  }
+
+  return {
+    patchCount,
+    ops: [...ops],
+    basePlanSignature,
+    finalPlanSignature
+  };
 }

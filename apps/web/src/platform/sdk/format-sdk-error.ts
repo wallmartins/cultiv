@@ -4,7 +4,22 @@ import { mapSdkErrorCode, type MappedSdkError } from "./map-sdk-error-code";
 
 export function formatSdkError(error: unknown, messages: AppMessages): MappedSdkError {
   if (isClientSdkError(error, "ClientSdkHttpStatusError")) {
-    return mapSdkErrorCode((error as ClientSdkHttpStatusError).code, messages);
+    const httpError = error as ClientSdkHttpStatusError;
+    const mapped = mapSdkErrorCode(httpError.code, messages);
+    if (httpError.responseMessage && mapped === messages.errors.default) {
+      return {
+        ...mapped,
+        message: httpError.responseMessage
+      };
+    }
+    return mapped;
+  }
+
+  if (isClientSdkError(error, "ClientSdkContractFailure")) {
+    return {
+      ...messages.errors.default,
+      message: messages.errors.default.message
+    };
   }
 
   if (isClientSdkError(error, "ClientSdkObservationFailure")) {

@@ -41,6 +41,25 @@ await esbuild.build({
 });
 
 await esbuild.build({
+  entryPoints: [
+    "scripts/export-calibration-jobs.ts",
+    "scripts/run-calibration-sweep.ts",
+    "scripts/analyze-calibration-option-b.ts",
+    "scripts/compositor-parity-harness.ts",
+    "scripts/step-planner-cogs-harness.ts"
+  ],
+  outdir: "dist/scripts",
+  outbase: "scripts",
+  bundle: true,
+  platform: "node",
+  target: "node20",
+  format: "esm",
+  external,
+  sourcemap: true,
+  logLevel: "info"
+});
+
+await esbuild.build({
   entryPoints: migrationEntries,
   outdir: "dist/infra/migrations",
   bundle: true,

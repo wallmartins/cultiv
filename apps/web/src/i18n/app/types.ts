@@ -41,6 +41,24 @@ export type AppShellMessages = {
   readonly selectPlaceholder: string;
 };
 
+export type AppIntentWizardMessages = {
+  readonly stepObjectiveTitle: string;
+  readonly stepObjectiveSubtitle: string;
+  readonly stepScopeTitle: string;
+  readonly stepScopeSubtitle: string;
+  readonly moreOptions: string;
+  readonly lengthTier: string;
+  readonly channel: string;
+  readonly channelOptional: string;
+  readonly channelExpand: string;
+  readonly intentHelp: string;
+  readonly back: string;
+  readonly continue: string;
+  readonly changeIntent: string;
+  readonly catalogLoadError: string;
+  readonly catalogRetry: string;
+};
+
 export type AppGenerateMessages = {
   readonly title: string;
   readonly contentType: string;
@@ -59,6 +77,7 @@ export type AppGenerateMessages = {
   readonly previewTitle: string;
   readonly previewPrice: string;
   readonly previewBalance: string;
+  readonly previewQuota: string;
   readonly previewRefreshRecommendation: string;
   readonly previewRecommendationStale: string;
   readonly generate: string;
@@ -462,6 +481,7 @@ export type AppExecutionStepsMessages = {
 
 export type AppMessages = {
   readonly shell: AppShellMessages;
+  readonly intentWizard: AppIntentWizardMessages;
   readonly generate: AppGenerateMessages;
   readonly qualityModes: AppQualityModeMessages;
   readonly executionSteps: AppExecutionStepsMessages;

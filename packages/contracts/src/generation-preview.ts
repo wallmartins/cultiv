@@ -1,6 +1,12 @@
 import { Schema } from "effect";
 import { createSchemaDecoder } from "./shared.js";
 import { QualityModeSchema } from "./execution.js";
+import { CompositorMetadataSchema, PlanSignatureSchema } from "./generation-compositor.js";
+import {
+  GenerationIntentSchema,
+  GenerationLengthTierSchema,
+  GenerationScopeSchema
+} from "./generation-intent.js";
 
 const PreviewBriefingSchema = Schema.Union(
   Schema.String,
@@ -9,6 +15,8 @@ const PreviewBriefingSchema = Schema.Union(
 
 export const GenerationPreviewRequestSchema = Schema.Struct({
   contentType: Schema.optional(Schema.String),
+  intent: Schema.optional(GenerationIntentSchema),
+  scope: Schema.optional(GenerationScopeSchema),
   briefing: Schema.optional(PreviewBriefingSchema),
   importedContext: Schema.optional(Schema.String),
   language: Schema.optional(Schema.String),
@@ -52,15 +60,31 @@ export const GenerationPricingSnapshotSchema = Schema.Struct({
   policyVersion: Schema.String,
   contentType: Schema.String,
   qualityMode: QualityModeSchema,
-  creditPrice: Schema.Number
+  creditPrice: Schema.Number,
+  planSignature: Schema.optional(PlanSignatureSchema),
+  lengthTier: Schema.optional(GenerationLengthTierSchema)
 });
 export type GenerationPricingSnapshot = typeof GenerationPricingSnapshotSchema.Type;
+
+export const GenerationPreviewResolvedIntentSchema = Schema.Struct({
+  intent: GenerationIntentSchema,
+  scope: GenerationScopeSchema,
+  wordTargetMin: Schema.Number,
+  wordTargetMax: Schema.Number
+});
+export type GenerationPreviewResolvedIntent = typeof GenerationPreviewResolvedIntentSchema.Type;
 
 export const GenerationPreviewResponseSchema = Schema.Struct({
   pricingSnapshot: GenerationPricingSnapshotSchema,
   currentBalance: Schema.Number,
   projectedBalanceAfterGeneration: Schema.Number,
+  quotaRemaining: Schema.Number,
+  quotaLimit: Schema.Number,
+  quotaCost: Schema.Number,
+  canonicalCreditCost: Schema.optional(Schema.Number),
   recommendation: Schema.optional(GenerationPreviewRecommendationSchema),
+  resolvedIntent: Schema.optional(GenerationPreviewResolvedIntentSchema),
+  compositor: Schema.optional(CompositorMetadataSchema),
   options: Schema.Struct({
     contentTypes: Schema.Array(GenerationPreviewContentTypeOptionSchema),
     qualityModes: Schema.Array(GenerationPreviewQualityModeOptionSchema)

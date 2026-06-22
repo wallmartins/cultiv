@@ -8,6 +8,7 @@ import type {
   BackendExecutionIntegrityError,
   BackendInputSafetyGatewayFailureError,
   BackendInputSafetyPolicyError,
+  BackendValidationError,
   BackendGenerationQuoteMismatchError,
   BackendSafetyPolicyDefinitionError,
   BackendUsageAuthorizationError
@@ -29,6 +30,7 @@ export interface BackendPublicGenerationService {
     | BackendExecutionIntegrityError
     | BackendInputSafetyGatewayFailureError
     | BackendInputSafetyPolicyError
+    | BackendValidationError
     | BackendGenerationQuoteMismatchError
     | BackendSafetyPolicyDefinitionError
     | BackendUsageAuthorizationError

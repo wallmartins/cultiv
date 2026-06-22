@@ -5,6 +5,11 @@ export class BackendRequestBodyParseError extends Data.TaggedError("BackendReque
   readonly message: string;
 }> {}
 
+export class BackendValidationError extends Data.TaggedError("BackendValidationError")<{
+  readonly message: string;
+  readonly details?: Readonly<Record<string, unknown>>;
+}> {}
+
 export class BackendReadinessError extends Data.TaggedError("BackendReadinessError")<{
   readonly reason: "config" | "auth" | "database";
   readonly message: string;

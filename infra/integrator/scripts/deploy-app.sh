@@ -14,6 +14,8 @@ set -euo pipefail
 #   CULTIV_ROOT    — optional; parent of app (e.g. /home/cultiv or /home/cultiv/cultiv)
 
 ARTIFACT_DIR="${ARTIFACT_DIR:?ARTIFACT_DIR is required}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+INTEGRATOR_CONFIGS_DIR="$SCRIPT_DIR/../configs"
 
 resolve_cultiv_app_dir() {
   if [ -n "${CULTIV_APP:-}" ] && [ -d "$CULTIV_APP" ]; then
@@ -41,7 +43,35 @@ APP_DIR="$(resolve_cultiv_app_dir)"
 ECOSYSTEM_FILE="$APP_DIR/ecosystem.config.cjs"
 WORKER_BUNDLE="$APP_DIR/apps/backend/dist/cli/worker-main.js"
 
+ensure_ecosystem_file() {
+  if [ -f "$ECOSYSTEM_FILE" ]; then
+    return 0
+  fi
+
+  local template=""
+  for candidate in \
+    "${CHECKOUT_DIR:-}/infra/integrator/configs/ecosystem.config.cjs" \
+    "$INTEGRATOR_CONFIGS_DIR/ecosystem.config.cjs" \
+    "${ARTIFACT_DIR}/infra/integrator/configs/ecosystem.config.cjs" \
+    "${CULTIV_ROOT:-}/configs/ecosystem.config.cjs"; do
+    if [ -f "$candidate" ]; then
+      template="$candidate"
+      break
+    fi
+  done
+
+  if [ -z "$template" ]; then
+    echo "Missing PM2 ecosystem file: $ECOSYSTEM_FILE (no template found in repo or CULTIV_ROOT)" >&2
+    exit 1
+  fi
+
+  echo "Installing PM2 ecosystem file from template: $template"
+  cp "$template" "$ECOSYSTEM_FILE"
+}
+
 echo "Deploying backend artifact to: $APP_DIR"
+
+ensure_ecosystem_file
 
 if [ ! -f "$ECOSYSTEM_FILE" ]; then
   echo "Missing PM2 ecosystem file: $ECOSYSTEM_FILE" >&2
@@ -53,7 +83,6 @@ if [ ! -d "$ARTIFACT_DIR/apps/backend/dist" ]; then
   exit 1
 fi
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PRUNE_SCRIPT="$SCRIPT_DIR/prune-stale-migration-bundles.sh"
 
 cd "$APP_DIR"

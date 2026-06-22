@@ -1,5 +1,21 @@
 import { Schema } from "effect";
 import { PipelineTypeSchema, QualityModeSchema } from "@my-ai-orchestrator/contracts";
+import { GenerationLengthTierSchema, PlanSignatureSchema } from "@my-ai-orchestrator/contracts";
+
+const CompositorQualityPriceGridSchema = Schema.Record({
+  key: QualityModeSchema,
+  value: Schema.Number
+});
+
+const CompositorLengthTierPriceGridSchema = Schema.Record({
+  key: GenerationLengthTierSchema,
+  value: CompositorQualityPriceGridSchema
+});
+
+const CompositorPlanPriceGridSchema = Schema.Record({
+  key: PlanSignatureSchema,
+  value: CompositorLengthTierPriceGridSchema
+});
 
 const StepExecutionTypeSchema = Schema.Literal("local", "llm");
 const AIPolicyLifecycleSchema = Schema.Literal("active", "legacy-supported");
@@ -55,7 +71,8 @@ export const AIPolicyCatalogDocumentSchema = Schema.Struct({
       id: Schema.String,
       label: Schema.String,
       defaultLanguage: Schema.String,
-      pipelineType: PipelineTypeSchema
+      pipelineType: PipelineTypeSchema,
+      internal: Schema.optional(Schema.Boolean)
     })
   ),
   pipelines: Schema.Array(
@@ -73,6 +90,8 @@ export type AIPolicyCatalogDocument = typeof AIPolicyCatalogDocumentSchema.Type;
 export const AIPolicyPricingDocumentSchema = Schema.Struct({
   policyVersion: Schema.String,
   lifecycle: AIPolicyLifecycleSchema,
+  canonicalCreditCost: Schema.optional(Schema.Number),
+  pricesByPlan: Schema.optional(CompositorPlanPriceGridSchema),
   pricing: Schema.Array(
     Schema.Struct({
       planTier: BillingPlanTierSchema,

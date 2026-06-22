@@ -1,14 +1,21 @@
-import type { ContentTypeCatalogView, QualityMode } from "@my-ai-orchestrator/contracts";
+import type {
+  ContentTypeCatalogItemView,
+  ContentTypeCatalogView,
+  GenerationIntent,
+  GenerationScope,
+  QualityMode
+} from "@my-ai-orchestrator/contracts";
 import { useEffect, useMemo, useState } from "react";
 import { isBriefingComplete } from "~/app/generation/components/BriefingForm";
-import { consumeGeneratePrefill } from "~/app/generation/lib/generate-prefill";
+import type { GenerationIntentCatalogItemView } from "~/app/generation/lib/use-generation-intents";
 
 export const IMPORTED_CONTEXT_MAX = 8000;
 
+export const GENERATION_SUPPORTED_LANGUAGES = ["pt-BR", "en-US"] as const;
+
 const INITIAL_GENERATION_FORM = {
-  contentTypeId: "",
   briefing: {} as Record<string, unknown>,
-  language: "",
+  language: "pt-BR",
   qualityMode: "fast" as QualityMode,
   importedContext: "",
   importedOpen: false,
@@ -16,8 +23,24 @@ const INITIAL_GENERATION_FORM = {
   fullRefreshKey: 0
 };
 
-export function useGenerationForm(catalog: ContentTypeCatalogView | null) {
-  const [contentTypeId, setContentTypeId] = useState(INITIAL_GENERATION_FORM.contentTypeId);
+export type GenerationFormSelection =
+  | {
+      readonly mode: "intent";
+      readonly intent: GenerationIntent;
+      readonly scope: GenerationScope;
+      readonly catalogItem: GenerationIntentCatalogItemView;
+      readonly fieldLabelKey: string;
+    }
+  | {
+      readonly mode: "legacy";
+      readonly contentTypeId: string;
+      readonly catalogItem: ContentTypeCatalogItemView;
+    };
+
+export function useGenerationForm(
+  selection: GenerationFormSelection | null,
+  commercialCatalog: ContentTypeCatalogView | null
+) {
   const [briefing, setBriefing] = useState<Record<string, unknown>>(INITIAL_GENERATION_FORM.briefing);
   const [language, setLanguage] = useState(INITIAL_GENERATION_FORM.language);
   const [qualityMode, setQualityMode] = useState<QualityMode>(INITIAL_GENERATION_FORM.qualityMode);
@@ -26,13 +49,26 @@ export function useGenerationForm(catalog: ContentTypeCatalogView | null) {
   const [submitError, setSubmitError] = useState<string | null>(INITIAL_GENERATION_FORM.submitError);
   const [fullRefreshKey, setFullRefreshKey] = useState(INITIAL_GENERATION_FORM.fullRefreshKey);
 
-  const selectedType = useMemo(
-    () => catalog?.items.find((item) => item.id === contentTypeId) ?? null,
-    [catalog?.items, contentTypeId]
-  );
+  const selectionKey = selection
+    ? selection.mode === "intent"
+      ? `${selection.intent}:${selection.scope.lengthTier}:${selection.scope.channel ?? ""}`
+      : selection.contentTypeId
+    : null;
+
+  useEffect(() => {
+    setBriefing({});
+  }, [selectionKey]);
+
+  const inputSchema = selection?.catalogItem.inputSchema ?? [];
+  const supportedLanguages =
+    selection?.mode === "legacy"
+      ? selection.catalogItem.supportedLanguages
+      : [...GENERATION_SUPPORTED_LANGUAGES];
+
+  const fieldLabelKey =
+    selection?.mode === "intent" ? selection.fieldLabelKey : (selection?.contentTypeId ?? "");
 
   function resetGenerationForm() {
-    setContentTypeId(INITIAL_GENERATION_FORM.contentTypeId);
     setBriefing(INITIAL_GENERATION_FORM.briefing);
     setLanguage(INITIAL_GENERATION_FORM.language);
     setQualityMode(INITIAL_GENERATION_FORM.qualityMode);
@@ -42,29 +78,22 @@ export function useGenerationForm(catalog: ContentTypeCatalogView | null) {
     setFullRefreshKey(INITIAL_GENERATION_FORM.fullRefreshKey);
   }
 
-  useEffect(() => {
-    const prefill = consumeGeneratePrefill();
-    if (!prefill) {
-      return;
-    }
-
-    setContentTypeId(prefill.contentType);
+  function applyPrefill(prefill: {
+    readonly briefing?: Record<string, unknown>;
+    readonly language?: string;
+    readonly qualityMode?: QualityMode;
+    readonly importedContext?: string;
+  }) {
     setBriefing(prefill.briefing ?? {});
-    setLanguage(prefill.language ?? "pt-BR");
-    setQualityMode(prefill.qualityMode ?? "balanced");
+    setLanguage(prefill.language ?? INITIAL_GENERATION_FORM.language);
+    setQualityMode(prefill.qualityMode ?? INITIAL_GENERATION_FORM.qualityMode);
     setImportedContext(prefill.importedContext ?? "");
     if (prefill.importedContext) {
       setImportedOpen(true);
     }
-  }, []);
+  }
 
-  function handleContentTypeChange(nextContentTypeId: string) {
-    if (nextContentTypeId !== contentTypeId) {
-      setBriefing({});
-    }
-
-    setContentTypeId(nextContentTypeId);
-
+  function handleLegacyContentTypeChange(nextContentTypeId: string, catalog: ContentTypeCatalogView | null) {
     const nextType = catalog?.items.find((item) => item.id === nextContentTypeId);
     if (nextType) {
       setLanguage(nextType.defaultLanguage);
@@ -72,34 +101,53 @@ export function useGenerationForm(catalog: ContentTypeCatalogView | null) {
   }
 
   const commercialRequest = useMemo(() => {
-    if (!contentTypeId || !language) {
+    if (!selection || !language) {
       return null;
     }
 
+    if (selection.mode === "intent") {
+      return {
+        intent: selection.intent,
+        scope: selection.scope,
+        language,
+        qualityMode
+      };
+    }
+
     return {
-      contentType: contentTypeId,
+      contentType: selection.contentTypeId,
       language,
       qualityMode
     };
-  }, [contentTypeId, language, qualityMode]);
+  }, [language, qualityMode, selection]);
 
-  const briefingComplete = selectedType
-    ? isBriefingComplete(selectedType.inputSchema, briefing)
-    : false;
+  const briefingComplete = selection ? isBriefingComplete(inputSchema, briefing) : false;
 
   const fullPreviewRequest = useMemo(() => {
-    if (!selectedType || !language || !briefingComplete) {
+    if (!selection || !language || !briefingComplete) {
       return null;
     }
 
-    return {
-      contentType: contentTypeId,
+    const shared = {
       briefing,
       language,
       qualityMode,
       importedContext: importedContext.trim() ? importedContext : undefined
     };
-  }, [briefing, briefingComplete, contentTypeId, importedContext, language, qualityMode, selectedType]);
+
+    if (selection.mode === "intent") {
+      return {
+        ...shared,
+        intent: selection.intent,
+        scope: selection.scope
+      };
+    }
+
+    return {
+      ...shared,
+      contentType: selection.contentTypeId
+    };
+  }, [briefing, briefingComplete, importedContext, language, qualityMode, selection]);
 
   useEffect(() => {
     if (!briefingComplete) {
@@ -113,7 +161,6 @@ export function useGenerationForm(catalog: ContentTypeCatalogView | null) {
   const importedTooLarge = importedContext.length > IMPORTED_CONTEXT_MAX;
 
   return {
-    contentTypeId,
     briefing,
     language,
     qualityMode,
@@ -121,7 +168,10 @@ export function useGenerationForm(catalog: ContentTypeCatalogView | null) {
     importedOpen,
     submitError,
     fullRefreshKey,
-    selectedType,
+    selection,
+    inputSchema,
+    supportedLanguages,
+    fieldLabelKey,
     briefingComplete,
     commercialRequest,
     fullPreviewRequest,
@@ -133,7 +183,8 @@ export function useGenerationForm(catalog: ContentTypeCatalogView | null) {
     setImportedOpen,
     setSubmitError,
     setFullRefreshKey,
-    handleContentTypeChange,
+    applyPrefill,
+    handleLegacyContentTypeChange,
     resetGenerationForm
   };
 }

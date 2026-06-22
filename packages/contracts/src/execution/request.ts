@@ -6,6 +6,7 @@ import {
   PreviewRecommendationSchema,
   QualityModeSchema
 } from "./job.js";
+import { GenerationIntentSchema, GenerationScopeSchema } from "../generation-intent.js";
 
 export const SimplifiedPipelineRequestSchema = Schema.Struct({
   userId: Schema.String,
@@ -34,6 +35,7 @@ export const ExplicitPipelineRequestSchema = Schema.Struct({
   qualityMode: Schema.optional(QualityModeSchema),
   model: Schema.optional(Schema.String),
   adapter: Schema.optional(Schema.String),
+  quoteId: Schema.optional(Schema.String),
   previewRecommendation: Schema.optional(PreviewRecommendationSchema),
   includeTrace: Schema.optional(Schema.Boolean),
   idempotencyKey: Schema.optional(Schema.String)
@@ -47,7 +49,9 @@ export const PipelineRequestSchema = Schema.Union(
 export type PipelineRequest = typeof PipelineRequestSchema.Type;
 
 export const MeExecutionRequestSchema = Schema.Struct({
-  contentType: Schema.String,
+  contentType: Schema.optional(Schema.String),
+  intent: Schema.optional(GenerationIntentSchema),
+  scope: Schema.optional(GenerationScopeSchema),
   briefing: Schema.Union(Schema.String, Schema.Record({ key: Schema.String, value: Schema.Unknown })),
   importedContext: Schema.optional(Schema.String),
   context: Schema.optional(Schema.Record({ key: Schema.String, value: Schema.Unknown })),

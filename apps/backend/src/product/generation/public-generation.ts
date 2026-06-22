@@ -1,8 +1,12 @@
 import { Effect } from "effect";
-import type { PipelineRequest } from "@my-ai-orchestrator/contracts";
+import type { ExplicitPipelineRequest, PipelineRequest } from "@my-ai-orchestrator/contracts";
 import { createJobCoordinator } from "@my-ai-orchestrator/orchestrator";
 import type { BackendConfig } from "../../config/config.js";
-import { BackendAIPolicyCatalogError, BackendUsageAuthorizationError } from "../../http/errors.js";
+import { BackendAIPolicyCatalogError, BackendUsageAuthorizationError, BackendValidationError } from "../../http/errors.js";
+import { resolveGenerationTarget } from "./resolve-generation-target.js";
+import { mergeIntentPipelineContext } from "./merge-intent-pipeline-context.js";
+import { isGenerationCompositorEnabled } from "./is-compositor-enabled.js";
+import { isGenerationStepPlannerEnabled } from "./is-step-planner-enabled.js";
 import type { BackendExecutionService } from "../../execution/service-types.js";
 import { assertQuoteConsistency, toGenerationPricingSnapshot } from "../billing/generation-pricing-snapshot.js";
 import type { QualityMode } from "@my-ai-orchestrator/contracts";
@@ -23,10 +27,14 @@ export function createBackendPublicGenerationService(options: {
     execute(request) {
       return Effect.gen(function* () {
         const sanitizedRequest = yield* options.services.inputSafety.authorizeGenerationInput(request);
-        const internalRequest = yield* toInternalPipelineRequest({
-          ...request,
-          ...sanitizedRequest
-        }, options.services);
+        const internalRequest = yield* toInternalPipelineRequest(
+          {
+            ...request,
+            ...sanitizedRequest
+          },
+          options.services,
+          options.config
+        );
         const planTier = resolveStoredUserPlanTier(options.services.billing, request.userId);
         const executionSnapshot = yield* options.services.aiPolicy.resolveExecutionSnapshot({
           request: internalRequest,
@@ -77,33 +85,89 @@ export function createBackendPublicGenerationService(options: {
 
 function toInternalPipelineRequest(
   request: BackendPublicGenerationRequest,
-  services: BackendProductServices
-): Effect.Effect<PipelineRequest, BackendAIPolicyCatalogError> {
-  const policyContentType = services.aiPolicy.listContentTypes().find((contentType) => contentType.id === request.contentType);
-  if (!policyContentType) {
-    return Effect.fail(
-      new BackendAIPolicyCatalogError({
-        policyVersion: "active",
-        message: `No policy-governed content type found for "${request.contentType}"`
-      })
-    );
-  }
+  services: BackendProductServices,
+  config: BackendConfig
+): Effect.Effect<PipelineRequest, BackendAIPolicyCatalogError | BackendValidationError> {
+  return Effect.gen(function* () {
+    const compositorEnabled = isGenerationCompositorEnabled(services.featureFlags, config);
+    const stepPlannerEnabled = isGenerationStepPlannerEnabled(services.featureFlags, config);
+    const resolvedTarget = yield* resolveGenerationTarget({
+      intent: request.intent,
+      scope: request.scope,
+      contentType: request.contentType,
+      compositorEnabled,
+      stepPlannerEnabled,
+      briefing: request.briefing,
+      qualityMode: request.qualityMode
+    });
 
-  return Effect.succeed({
-    userId: request.userId,
-    pipelineType: policyContentType.pipelineType,
-    contentType: request.contentType,
-    briefing: request.briefing,
-    importedContext: request.importedContext,
-    context: request.context,
-    language: request.language,
-    qualityMode: request.qualityMode,
-    model: request.model,
-    quoteId: request.quoteId,
-    previewRecommendation: request.previewRecommendation,
-    includeTrace: request.includeTrace,
-    idempotencyKey: request.idempotencyKey
+    if (resolvedTarget.compositor) {
+      const plan = resolvedTarget.compositor.plan;
+      const context = mergeIntentPipelineContext(
+        request.context,
+        resolvedTarget.resolvedIntent,
+        plan,
+        resolvedTarget.stepPlanner
+      );
+
+      return {
+        pipeline: resolvedTarget.compositor.pipeline,
+        inputs: buildCompositorPipelineInputs(request.briefing, plan),
+        importedContext: request.importedContext,
+        context,
+        language: request.language,
+        qualityMode: request.qualityMode,
+        model: request.model,
+        quoteId: request.quoteId,
+        previewRecommendation: request.previewRecommendation,
+        includeTrace: request.includeTrace,
+        idempotencyKey: request.idempotencyKey
+      } satisfies ExplicitPipelineRequest;
+    }
+
+    const contentTypeId = resolvedTarget.contentTypeId;
+    const policyContentType = services.aiPolicy.listContentTypes().find((contentType) => contentType.id === contentTypeId);
+    if (!policyContentType) {
+      return yield* Effect.fail(
+        new BackendAIPolicyCatalogError({
+          policyVersion: "active",
+          message: `No policy-governed content type found for "${contentTypeId}"`
+        })
+      );
+    }
+
+    const context = mergeIntentPipelineContext(request.context, resolvedTarget.resolvedIntent);
+
+    return {
+      userId: request.userId,
+      pipelineType: policyContentType.pipelineType,
+      contentType: contentTypeId,
+      briefing: request.briefing,
+      importedContext: request.importedContext,
+      context,
+      language: request.language,
+      qualityMode: request.qualityMode,
+      model: request.model,
+      quoteId: request.quoteId,
+      previewRecommendation: request.previewRecommendation,
+      includeTrace: request.includeTrace,
+      idempotencyKey: request.idempotencyKey
+    };
   });
+}
+
+function buildCompositorPipelineInputs(
+  briefing: BackendPublicGenerationRequest["briefing"],
+  plan: import("@my-ai-orchestrator/contracts").ExecutionPlan
+): Record<string, unknown> {
+  const briefingInputs =
+    typeof briefing === "object" && briefing !== null ? briefing : { briefing };
+
+  return {
+    ...briefingInputs,
+    wordTarget: plan.parameters.wordTarget,
+    expressionProfile: plan.parameters.expressionProfile
+  };
 }
 
 function assertPublicGenerationAccess(args: {

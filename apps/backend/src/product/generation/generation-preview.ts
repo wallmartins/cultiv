@@ -7,8 +7,13 @@ import type {
 import type { BackendConfig } from "../../config/config.js";
 import type { DatabaseClient } from "@my-ai-orchestrator/database";
 import type { BillingPlanTier, BillingServiceContract } from "@my-ai-orchestrator/payments";
+import {
+  resolveQuotaCost,
+  resolveQuotaLimit,
+  resolveQuotaRemaining
+} from "@my-ai-orchestrator/payments";
 import { isQualityModeAllowed, resolveQualityModeBlockedReason } from "../billing/commercial-access.js";
-import { resolveStoredUserEntitlement } from "../billing/resolve-user-billing.js";
+import { resolveStoredUserEntitlement, resolveStoredUserPlanId } from "../billing/resolve-user-billing.js";
 import { buildContentTypeCatalogView } from "../catalog/content-type-catalog.js";
 import { resolveCatalogContentTypeDefinitions } from "../catalog/resolve-catalog-content-types.js";
 import type { BackendAIPolicyServiceContract } from "../ai-policy/ai-policy-types.js";
@@ -18,8 +23,13 @@ import type {
   BackendGenerationPreviewService
 } from "./generation-preview-types.js";
 import { toGenerationPricingSnapshot } from "../billing/generation-pricing-snapshot.js";
+import { resolveCompositorPricingArgs } from "../billing/compositor-pricing-args.js";
 import { recommendGenerationPreviewQualityMode } from "./generation-preview-recommendation.js";
+import { resolveGenerationTarget } from "./resolve-generation-target.js";
+import { isGenerationCompositorEnabled } from "./is-compositor-enabled.js";
+import { isGenerationStepPlannerEnabled } from "./is-step-planner-enabled.js";
 import type { BackendPublicInputSafetyGatewayService } from "../../safety/public-input-safety-types.js";
+import type { FeatureFlagServiceContract } from "@my-ai-orchestrator/feature-flags";
 
 const QUALITY_MODES: readonly QualityMode[] = ["fast", "balanced", "strict"];
 
@@ -29,6 +39,7 @@ export function createBackendGenerationPreviewService(options: {
   readonly billing: BillingServiceContract;
   readonly aiPolicy: BackendAIPolicyServiceContract;
   readonly inputSafety: BackendPublicInputSafetyGatewayService;
+  readonly featureFlags: FeatureFlagServiceContract;
 }): BackendGenerationPreviewService {
   return {
     preview(args) {
@@ -48,14 +59,31 @@ export function createBackendGenerationPreviewService(options: {
           }
         );
         const planTier = (entitlement?.tier ?? "free") as BillingPlanTier;
-        const selectedContentType = selectContentType(sanitizedArgs.contentType, contentTypes);
+        const compositorEnabled = isGenerationCompositorEnabled(options.featureFlags, options.config);
+        const stepPlannerEnabled = isGenerationStepPlannerEnabled(options.featureFlags, options.config);
+        const resolvedTarget = yield* resolveGenerationTarget({
+          intent: sanitizedArgs.intent,
+          scope: sanitizedArgs.scope,
+          contentType: sanitizedArgs.contentType,
+          compositorEnabled,
+          stepPlannerEnabled,
+          briefing: sanitizedArgs.briefing,
+          qualityMode: sanitizedArgs.qualityMode
+        });
+        const compositorPricing = resolveCompositorPricingArgs(resolvedTarget);
+        const pricingContentType = compositorPricing?.planSignature ?? resolvedTarget.contentTypeId;
+        const selectedContentType = resolvedTarget.compositor
+          ? buildCompositorContentTypeView(resolvedTarget, primaryLanguage)
+          : selectContentType(resolvedTarget.contentTypeId, contentTypes);
         const qualityModePricing = yield* Effect.all(
           QUALITY_MODES.map((mode) =>
             options.aiPolicy.resolvePricingEnvelope({
               planTier,
-              contentType: selectedContentType.id,
+              contentType: pricingContentType,
               qualityMode: mode,
-              attachedPolicyVersion: options.config.aiPolicyAttachedVersion
+              attachedPolicyVersion: options.config.aiPolicyAttachedVersion,
+              planSignature: compositorPricing?.planSignature,
+              lengthTier: compositorPricing?.lengthTier
             })
           )
         );
@@ -96,16 +124,26 @@ export function createBackendGenerationPreviewService(options: {
           : null;
         const pricingSnapshot = yield* options.aiPolicy.resolvePricingEnvelope({
           planTier,
-          contentType: selectedContentType.id,
+          contentType: pricingContentType,
           qualityMode: selectedQualityMode,
-          attachedPolicyVersion: options.config.aiPolicyAttachedVersion
+          attachedPolicyVersion: options.config.aiPolicyAttachedVersion,
+          planSignature: compositorPricing?.planSignature,
+          lengthTier: compositorPricing?.lengthTier
         });
         const commercialPricingSnapshot = toGenerationPricingSnapshot(pricingSnapshot);
+        const canonicalCreditCost = options.aiPolicy.getCanonicalCreditCost();
+        const planId = resolveStoredUserPlanId(options.billing, sanitizedArgs.userId);
+        const plan = options.billing.listPlans().find((candidate) => candidate.id === planId);
+        const monthlyCredits = plan?.monthlyCredits ?? 0;
 
         return {
           pricingSnapshot: commercialPricingSnapshot,
           currentBalance,
           projectedBalanceAfterGeneration: roundCredits(currentBalance - pricingSnapshot.creditPrice),
+          quotaRemaining: resolveQuotaRemaining(currentBalance, canonicalCreditCost),
+          quotaLimit: resolveQuotaLimit(monthlyCredits, canonicalCreditCost),
+          quotaCost: resolveQuotaCost(pricingSnapshot.creditPrice, canonicalCreditCost),
+          canonicalCreditCost,
           recommendation: recommendation
             ? {
                 qualityMode: recommendation.qualityMode,
@@ -113,6 +151,27 @@ export function createBackendGenerationPreviewService(options: {
                 explanation: recommendation.explanation
               }
             : undefined,
+          ...(resolvedTarget.resolvedIntent
+            ? {
+                resolvedIntent: {
+                  intent: resolvedTarget.resolvedIntent.intent,
+                  scope: resolvedTarget.resolvedIntent.scope,
+                  wordTargetMin: resolvedTarget.resolvedIntent.wordTarget.min,
+                  wordTargetMax: resolvedTarget.resolvedIntent.wordTarget.max
+                }
+              }
+            : {}),
+          ...(resolvedTarget.compositor
+            ? {
+                compositor: {
+                  planId: resolvedTarget.compositor.plan.planId,
+                  planSignature: resolvedTarget.compositor.plan.planSignature,
+                  expressionProfile: resolvedTarget.compositor.plan.parameters.expressionProfile,
+                  lengthTier: resolvedTarget.compositor.plan.parameters.lengthTier,
+                  wordTarget: resolvedTarget.compositor.plan.parameters.wordTarget
+                }
+              }
+            : {}),
           options: {
             contentTypes: contentTypes.map((contentType) => ({
               id: contentType.id,
@@ -197,4 +256,27 @@ function resolvePreviewQualityModeBlockedReason(
   args: Parameters<typeof resolveQualityModeBlockedReason>[0]
 ): string {
   return resolveQualityModeBlockedReason(args) ?? "plan_restriction";
+}
+
+function buildCompositorContentTypeView(
+  resolvedTarget: import("./resolve-generation-target.js").ResolvedGenerationTarget,
+  primaryLanguage: string
+): ContentTypeCatalogItemView {
+  const plan = resolvedTarget.compositor!.plan;
+
+  return {
+    id: resolvedTarget.contentTypeId,
+    label: plan.planSignature,
+    available: true,
+    defaultLanguage: primaryLanguage,
+    supportedLanguages: [primaryLanguage],
+    steps: plan.steps.map((step) => step.name),
+    inputSchema: [],
+    briefingGuidance: {
+      objective: "Compositor-planned generation.",
+      tips: [],
+      exampleBriefing: "",
+      commonMistakes: []
+    }
+  };
 }

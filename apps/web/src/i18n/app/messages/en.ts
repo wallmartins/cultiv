@@ -36,6 +36,23 @@ export const appMessagesEn: AppMessages = {
     },
     selectPlaceholder: "Select an option"
   },
+  intentWizard: {
+    stepObjectiveTitle: "What do you want to do?",
+    stepObjectiveSubtitle: "Choose the main goal for this piece.",
+    stepScopeTitle: "Length and channel",
+    stepScopeSubtitle: "Set the length. Channel is optional.",
+    moreOptions: "More options",
+    lengthTier: "Length",
+    channel: "Channel",
+    channelOptional: "Optional",
+    channelExpand: "Choose channel",
+    intentHelp: "About this goal",
+    back: "Back",
+    continue: "Continue",
+    changeIntent: "Change goal",
+    catalogLoadError: "Could not load generation goals.",
+    catalogRetry: "Try again"
+  },
   generate: {
     title: "Generate",
     contentType: "Format",
@@ -54,6 +71,7 @@ export const appMessagesEn: AppMessages = {
     previewTitle: "Preview",
     previewPrice: "Price: {price} credits",
     previewBalance: "Balance: {current} → {projected}",
+    previewQuota: "Uses ~{cost} generation(s) · About {remaining} of {limit} remaining",
     previewRefreshRecommendation: "Refresh recommendation",
     previewRecommendationStale: "Briefing changed — refresh the mode recommendation.",
     generate: "Generate text",

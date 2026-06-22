@@ -139,6 +139,71 @@ describe("backend app execution quotes and telemetry", () => {
     expect(staleError.details?.recovery).toBe("refresh_preview");
   });
 
+  it("accepts intent-based preview and execution with matching quote; rejects stale quote", async () => {
+    const { app, services } = createExecutionApp("sync");
+    services.billing.upsertSubscription({
+      id: "sub_user_1_pro",
+      userId: "user_1",
+      planId: "pro",
+      status: "active",
+      startedAt: backendAppTestStartedAt.toISOString()
+    });
+    const previewPayload = {
+      intent: "share-idea",
+      scope: { lengthTier: "short" },
+      qualityMode: "balanced",
+      briefing: {
+        topic: "Delegating product decisions",
+        audience: "product leaders"
+      }
+    };
+
+    const previewResponse = await app.request("/api/generation-preview", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(previewPayload)
+    });
+
+    expect(previewResponse.status).toBe(200);
+    const preview = await Effect.runPromise(decodeGenerationPreviewResponse(await previewResponse.json()));
+    expect(preview.pricingSnapshot.contentType).toBe("linkedin-post");
+
+    const successResponse = await app.request("/me/executions/run", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        intent: "share-idea",
+        scope: { lengthTier: "short" },
+        briefing: previewPayload.briefing,
+        qualityMode: "balanced",
+        quoteId: preview.pricingSnapshot.quoteId
+      })
+    });
+
+    expect(successResponse.status).toBe(200);
+    const decodedSuccess = await Effect.runPromise(decodeSyncExecutionView(await successResponse.json()));
+    expect(decodedSuccess.contentType).toBe("linkedin-post");
+
+    const staleResponse = await app.request("/me/executions/run", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        intent: "share-idea",
+        scope: { lengthTier: "short" },
+        briefing: previewPayload.briefing,
+        qualityMode: "strict",
+        quoteId: preview.pricingSnapshot.quoteId
+      })
+    });
+
+    expect(staleResponse.status).toBe(409);
+    const staleError = await Effect.runPromise(decodeApiErrorResponse(await staleResponse.json()));
+    expect(staleError.code).toBe("quote_stale");
+    expect(staleError.category).toBe("conflict");
+    expect(staleError.message).toContain("Refresh preview");
+    expect(staleError.details?.recovery).toBe("refresh_preview");
+  });
+
   it("correlates preview recommendation, quoteId and final quality mode in sync telemetry and trace", async () => {
     const config = createBackendAppTestConfig({
       billingUserId: "user_1",

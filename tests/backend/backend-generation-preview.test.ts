@@ -60,6 +60,11 @@ describe("backend generation preview", () => {
     expect(decoded.recommendation?.reasonCodes.length).toBeGreaterThan(0);
     expect(decoded.currentBalance).toBe(2500);
     expect(decoded.projectedBalanceAfterGeneration).toBe(2490);
+    expect(decoded.quotaCost).toBeGreaterThanOrEqual(1);
+    expect(decoded.quotaLimit).toBeGreaterThan(0);
+    expect(decoded.quotaRemaining).toBeLessThanOrEqual(decoded.quotaLimit);
+    expect(decoded.currentBalance).toBeTypeOf("number");
+    expect(decoded.canonicalCreditCost).toBe(2.5);
     expect(decoded.options.contentTypes.some((contentType) => contentType.id === "newsletter")).toBe(true);
     expect(decoded.options.qualityModes.find((mode) => mode.id === "strict")?.allowed).toBe(true);
     const recommended = decoded.options.qualityModes.filter((mode) => mode.recommended);
@@ -111,6 +116,69 @@ describe("backend generation preview", () => {
     expect(decoded.options.qualityModes.find((mode) => mode.id === "strict")?.allowed).toBe(false);
     expect(recommended?.id).toBe("fast");
     expect(recommended?.recommendation?.reasonCodes).toContain("allowed_option_guard");
+  });
+
+  it("resolves share-idea short to linkedin-post pricing with resolvedIntent", async () => {
+    const config = createBackendAppTestConfig({ billingUserId: "user_intent_preview" });
+    const services = createBackendAppTestServices(config);
+
+    services.billing.upsertSubscription({
+      id: "sub_user_intent_preview_pro",
+      userId: "user_intent_preview",
+      planId: "pro",
+      status: "active",
+      startedAt: backendAppTestStartedAt.toISOString()
+    });
+
+    const app = createBackendAppTestApp(config, services);
+    const response = await app.request("/api/generation-preview", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        intent: "share-idea",
+        scope: { lengthTier: "short" },
+        briefing: {
+          topic: "Delegating product decisions"
+        }
+      })
+    });
+
+    expect(response.status).toBe(200);
+
+    const decoded = await Effect.runPromise(decodeGenerationPreviewResponse(await response.json()));
+
+    expect(decoded.pricingSnapshot.contentType).toBe("linkedin-post");
+    expect(decoded.pricingSnapshot.creditPrice).toBeGreaterThan(0);
+    expect(decoded.resolvedIntent).toEqual({
+      intent: "share-idea",
+      scope: { lengthTier: "short" },
+      wordTargetMin: 150,
+      wordTargetMax: 400
+    });
+  });
+
+  it("rejects preview requests without intent+scope or contentType", async () => {
+    const config = createBackendAppTestConfig({ billingUserId: "user_preview_validation" });
+    const services = createBackendAppTestServices(config);
+
+    services.billing.upsertSubscription({
+      id: "sub_user_preview_validation_pro",
+      userId: "user_preview_validation",
+      planId: "pro",
+      status: "active",
+      startedAt: backendAppTestStartedAt.toISOString()
+    });
+
+    const app = createBackendAppTestApp(config, services);
+    const response = await app.request("/api/generation-preview", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        briefing: { topic: "Missing target" }
+      })
+    });
+
+    expect(response.status).toBe(400);
   });
 
   it("skips recommendation when includeRecommendation is false", async () => {

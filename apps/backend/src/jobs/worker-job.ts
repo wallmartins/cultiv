@@ -30,6 +30,9 @@ export async function processQueuedJob(options: BackendJobWorkerOptions, job: Ba
           adapter: result.adapter,
           model: result.model,
           qualityMode: result.qualityMode,
+          planSignature: result.telemetry?.pricing?.planSignature,
+          lengthTier: result.telemetry?.pricing?.lengthTier,
+          compositor: result.telemetry?.compositor,
           telemetry: result.telemetry,
           billing: result.telemetry?.billing,
           voice: result.voice

@@ -93,3 +93,8 @@ export {
 } from "./activation.js";
 export type { BillingActivationOptions, ActivateSubscriptionRequest } from "./activation.js";
 export { createBillingEntitlement, listBillingFeatures } from "./entitlement.js";
+export {
+  resolveQuotaCost,
+  resolveQuotaLimit,
+  resolveQuotaRemaining
+} from "./quota-presentation.js";

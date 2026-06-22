@@ -39,6 +39,7 @@ export interface AIPolicyContentTypeDefinition {
   readonly label: string;
   readonly defaultLanguage: string;
   readonly pipelineType: PipelineType;
+  readonly internal?: boolean;
 }
 
 export interface AIPolicyProviderModelAttempt {
@@ -70,6 +71,8 @@ export interface ResolvedPricingEnvelope {
   readonly contentType: string;
   readonly qualityMode: QualityMode;
   readonly creditPrice: number;
+  readonly planSignature?: import("@my-ai-orchestrator/contracts").PlanSignature;
+  readonly lengthTier?: import("@my-ai-orchestrator/contracts").GenerationLengthTier;
 }
 
 export interface ResolvedExecutionStep {
@@ -145,6 +148,7 @@ export interface BackendAIPolicyServiceContract {
   }) => Effect.Effect<void, never>;
   readonly recommendFuturePolicyVersion: () => Effect.Effect<BackendAIPolicyDegradationRecommendation | undefined, never>;
   readonly listContentTypes: () => readonly AIPolicyContentTypeDefinition[];
+  readonly getCanonicalCreditCost: () => number;
   readonly validatePipelineRequest: (
     request: PipelineRequest
   ) => Effect.Effect<void, BackendAIPolicyCatalogError>;
@@ -153,6 +157,8 @@ export interface BackendAIPolicyServiceContract {
       readonly planTier: BillingPlanTier;
       readonly contentType: string;
       readonly qualityMode: QualityMode;
+      readonly planSignature?: import("@my-ai-orchestrator/contracts").PlanSignature;
+      readonly lengthTier?: import("@my-ai-orchestrator/contracts").GenerationLengthTier;
       readonly attachedPolicyVersion?: string;
     }
   ) => Effect.Effect<ResolvedPricingEnvelope, BackendAIPolicyCatalogError | BackendAIPolicyPricingError>;
