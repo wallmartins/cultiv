@@ -21,7 +21,7 @@ describe("dispatchGatewayWebhookEvent", () => {
               id: "pro",
               tier: "pro",
               name: "Pro",
-              monthlyCredits: 2500,
+              monthlyCredits: 150,
               features: [{ key: "execution.sync_mode", enabled: true }]
             })
           )
@@ -48,7 +48,7 @@ describe("dispatchGatewayWebhookEvent", () => {
 
     const entitlement = service.getEntitlement("user_1", "pro");
     expect(entitlement?.status).toBe("active");
-    expect(entitlement?.wallet.availableCredits).toBe(2500);
+    expect(entitlement?.wallet.availableCredits).toBe(150);
   });
 
   it("starts a new cycle on subscription.renewed", async () => {
@@ -63,7 +63,7 @@ describe("dispatchGatewayWebhookEvent", () => {
               id: "pro",
               tier: "pro",
               name: "Pro",
-              monthlyCredits: 2500,
+              monthlyCredits: 150,
               features: [{ key: "execution.sync_mode", enabled: true }]
             })
           )
@@ -123,7 +123,7 @@ describe("dispatchGatewayWebhookEvent", () => {
               id: "pro",
               tier: "pro",
               name: "Pro",
-              monthlyCredits: 2500,
+              monthlyCredits: 150,
               features: [{ key: "execution.sync_mode", enabled: true }]
             })
           )

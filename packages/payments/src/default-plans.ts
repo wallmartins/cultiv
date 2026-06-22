@@ -5,7 +5,7 @@ export const DEFAULT_BILLING_PLANS: readonly BillingPlanDefinition[] = [
     id: "free",
     tier: "free",
     name: "Free",
-    monthlyCredits: 50,
+    monthlyCredits: 20,
     features: [
       { key: "execution.sync_mode", enabled: true },
       { key: "content.language.refinement", enabled: false }
@@ -16,8 +16,7 @@ export const DEFAULT_BILLING_PLANS: readonly BillingPlanDefinition[] = [
     id: "pro",
     tier: "pro",
     name: "Pro",
-    monthlyCredits: 2500,
-    dailyCredits: 300,
+    monthlyCredits: 150,
     features: [
       { key: "execution.sync_mode", enabled: true },
       { key: "content.language.refinement", enabled: true },

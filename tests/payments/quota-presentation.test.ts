@@ -19,6 +19,6 @@ describe("quota presentation", () => {
   });
 
   it("converts monthly credits to quota limit", () => {
-    expect(resolveQuotaLimit(50, canonical)).toBe(20);
+    expect(resolveQuotaLimit(20, canonical)).toBe(8);
   });
 });

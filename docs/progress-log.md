@@ -1,5 +1,6 @@
 # Progress Log
 
+| 2026-06-22 | feat(billing): policy `2026-06-22` — step-planner COGS-calibrated `pricesByPlan`; plan grants 20/150 monthly credits |
 | 2026-06-19 | test(step-planner): integration coverage, COGS variance harness, planner telemetry — Phase 3 Tasks 8–10 |
 | 2026-06-19 | feat(generation): wire step planner behind feature flag — Phase 3 Task 7 |
 | 2026-06-19 | compositor parity PASS — founder rubric 6/6 on VPS; heroes signed off; spec approved |

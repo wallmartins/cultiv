@@ -1,0 +1,470 @@
+{
+  "policyVersion": "2026-06-22",
+  "routingProfiles": [
+    {
+      "id": "default-llm",
+      "preferredAttempts": [
+        {
+          "provider": "gemini",
+          "model": "gemini-3.1-flash-lite",
+          "timeoutMs": 12000
+        }
+      ],
+      "fallbackAttempts": [
+        {
+          "provider": "gemini",
+          "model": "gemini-2.5-flash",
+          "timeoutMs": 12000
+        },
+        {
+          "provider": "gemini",
+          "model": "gemini-1.5-pro",
+          "timeoutMs": 12000
+        }
+      ],
+      "operationalConstraints": {
+        "fallbackOn": [
+          "transport_error",
+          "timeout",
+          "provider_unavailable",
+          "invalid_response"
+        ]
+      }
+    },
+    {
+      "id": "premium-llm",
+      "preferredAttempts": [
+        {
+          "provider": "gemini",
+          "model": "gemini-3.1-flash-lite",
+          "timeoutMs": 12000
+        }
+      ],
+      "fallbackAttempts": [
+        {
+          "provider": "gemini",
+          "model": "gemini-2.5-flash",
+          "timeoutMs": 15000
+        },
+        {
+          "provider": "gemini",
+          "model": "gemini-1.5-pro",
+          "timeoutMs": 15000
+        }
+      ],
+      "operationalConstraints": {
+        "fallbackOn": [
+          "transport_error",
+          "timeout",
+          "provider_unavailable",
+          "invalid_response"
+        ]
+      }
+    },
+    {
+      "id": "voice-extraction-llm",
+      "preferredAttempts": [
+        {
+          "provider": "gemini",
+          "model": "gemini-3.1-flash-lite",
+          "timeoutMs": 20000
+        }
+      ],
+      "fallbackAttempts": [
+        {
+          "provider": "gemini",
+          "model": "gemini-2.5-flash",
+          "timeoutMs": 20000
+        }
+      ],
+      "operationalConstraints": {
+        "fallbackOn": [
+          "transport_error",
+          "timeout",
+          "provider_unavailable",
+          "invalid_response"
+        ]
+      }
+    },
+    {
+      "id": "voice-judge-llm",
+      "preferredAttempts": [
+        {
+          "provider": "groq",
+          "model": "llama-3.3-70b-versatile",
+          "timeoutMs": 15000
+        }
+      ],
+      "fallbackAttempts": [],
+      "operationalConstraints": {
+        "fallbackOn": [
+          "transport_error",
+          "timeout",
+          "provider_unavailable",
+          "invalid_response"
+        ]
+      }
+    },
+    {
+      "id": "linkedin-llm",
+      "preferredAttempts": [
+        {
+          "provider": "gemini",
+          "model": "gemini-3.1-flash-lite",
+          "timeoutMs": 12000
+        }
+      ],
+      "fallbackAttempts": [
+        {
+          "provider": "gemini",
+          "model": "gemini-2.5-flash",
+          "timeoutMs": 12000
+        }
+      ],
+      "operationalConstraints": {
+        "fallbackOn": [
+          "transport_error",
+          "timeout",
+          "provider_unavailable",
+          "invalid_response"
+        ]
+      }
+    }
+  ],
+  "contentTypes": [
+    {
+      "id": "long-form-blog",
+      "label": "Long Form Blog",
+      "defaultLanguage": "pt-BR",
+      "pipelineType": "long-form-blog"
+    },
+    {
+      "id": "validation-post",
+      "label": "Validation Post",
+      "defaultLanguage": "pt-BR",
+      "pipelineType": "validation-post"
+    },
+    {
+      "id": "architecture-post",
+      "label": "Architecture Post",
+      "defaultLanguage": "pt-BR",
+      "pipelineType": "architecture-post"
+    },
+    {
+      "id": "linkedin-post",
+      "label": "LinkedIn Post",
+      "defaultLanguage": "pt-BR",
+      "pipelineType": "linkedin-post"
+    },
+    {
+      "id": "twitter-thread",
+      "label": "Twitter Thread",
+      "defaultLanguage": "pt-BR",
+      "pipelineType": "twitter-thread"
+    },
+    {
+      "id": "newsletter",
+      "label": "Newsletter",
+      "defaultLanguage": "pt-BR",
+      "pipelineType": "newsletter"
+    },
+    {
+      "id": "short-piece",
+      "label": "Short Piece",
+      "defaultLanguage": "pt-BR",
+      "pipelineType": "short-piece",
+      "internal": true
+    },
+    {
+      "id": "long-piece",
+      "label": "Long Piece",
+      "defaultLanguage": "pt-BR",
+      "pipelineType": "long-piece",
+      "internal": true
+    },
+    {
+      "id": "serial-piece",
+      "label": "Serial Piece",
+      "defaultLanguage": "pt-BR",
+      "pipelineType": "serial-piece",
+      "internal": true
+    },
+    {
+      "id": "edition-piece",
+      "label": "Edition Piece",
+      "defaultLanguage": "pt-BR",
+      "pipelineType": "edition-piece",
+      "internal": true
+    }
+  ],
+  "pipelines": [
+    {
+      "pipelineType": "long-form-blog",
+      "contentType": "long-form-blog",
+      "defaultLanguage": "pt-BR",
+      "defaultQualityMode": "strict",
+      "steps": [
+        { "name": "research", "skill": "research", "execution": "local" },
+        { "name": "outline", "skill": "outline", "execution": "local" },
+        {
+          "name": "draft",
+          "skill": "draft",
+          "execution": "llm",
+          "routingProfile": "premium-llm"
+        },
+        {
+          "name": "refine",
+          "skill": "refine",
+          "execution": "llm",
+          "routingProfile": "premium-llm"
+        },
+        { "name": "finalize", "skill": "publish", "execution": "local" },
+        { "name": "sanitize", "skill": "sanitize", "execution": "local" }
+      ]
+    },
+    {
+      "pipelineType": "validation-post",
+      "contentType": "validation-post",
+      "defaultLanguage": "pt-BR",
+      "defaultQualityMode": "balanced",
+      "steps": [
+        { "name": "analyze", "skill": "analyze", "execution": "local" },
+        {
+          "name": "draft",
+          "skill": "draft",
+          "execution": "llm",
+          "routingProfile": "default-llm"
+        },
+        {
+          "name": "refine",
+          "skill": "refine",
+          "execution": "llm",
+          "routingProfile": "default-llm"
+        },
+        { "name": "sanitize", "skill": "sanitize", "execution": "local" }
+      ]
+    },
+    {
+      "pipelineType": "architecture-post",
+      "contentType": "architecture-post",
+      "defaultLanguage": "pt-BR",
+      "defaultQualityMode": "strict",
+      "steps": [
+        { "name": "analyze", "skill": "analyze", "execution": "local" },
+        {
+          "name": "structure",
+          "skill": "structure",
+          "execution": "llm",
+          "routingProfile": "premium-llm",
+          "override": {
+            "from": "local",
+            "to": "llm",
+            "reason": "architecture framing needs model synthesis"
+          }
+        },
+        {
+          "name": "draft",
+          "skill": "draft",
+          "execution": "llm",
+          "routingProfile": "premium-llm"
+        },
+        {
+          "name": "refine",
+          "skill": "refine",
+          "execution": "llm",
+          "routingProfile": "premium-llm"
+        },
+        { "name": "sanitize", "skill": "sanitize", "execution": "local" }
+      ]
+    },
+    {
+      "pipelineType": "linkedin-post",
+      "contentType": "linkedin-post",
+      "defaultLanguage": "pt-BR",
+      "defaultQualityMode": "balanced",
+      "steps": [
+        {
+          "name": "hook",
+          "skill": "hook",
+          "execution": "llm",
+          "routingProfile": "linkedin-llm"
+        },
+        {
+          "name": "draft",
+          "skill": "draft",
+          "execution": "llm",
+          "routingProfile": "linkedin-llm"
+        },
+        {
+          "name": "refine",
+          "skill": "refine",
+          "execution": "llm",
+          "routingProfile": "linkedin-llm"
+        },
+        {
+          "name": "tighten",
+          "skill": "tighten",
+          "execution": "llm",
+          "routingProfile": "linkedin-llm"
+        },
+        { "name": "sanitize", "skill": "sanitize", "execution": "local" }
+      ]
+    },
+    {
+      "pipelineType": "twitter-thread",
+      "contentType": "twitter-thread",
+      "defaultLanguage": "pt-BR",
+      "defaultQualityMode": "fast",
+      "steps": [
+        {
+          "name": "hook",
+          "skill": "hook",
+          "execution": "llm",
+          "routingProfile": "default-llm"
+        },
+        {
+          "name": "expand",
+          "skill": "draft",
+          "execution": "llm",
+          "routingProfile": "default-llm"
+        },
+        {
+          "name": "tighten",
+          "skill": "tighten",
+          "execution": "llm",
+          "routingProfile": "default-llm"
+        },
+        { "name": "sanitize", "skill": "sanitize", "execution": "local" }
+      ]
+    },
+    {
+      "pipelineType": "newsletter",
+      "contentType": "newsletter",
+      "defaultLanguage": "pt-BR",
+      "defaultQualityMode": "balanced",
+      "steps": [
+        { "name": "outline", "skill": "outline", "execution": "local" },
+        {
+          "name": "draft",
+          "skill": "draft",
+          "execution": "llm",
+          "routingProfile": "default-llm"
+        },
+        {
+          "name": "refine",
+          "skill": "refine",
+          "execution": "llm",
+          "routingProfile": "default-llm"
+        },
+        {
+          "name": "tighten",
+          "skill": "tighten",
+          "execution": "llm",
+          "routingProfile": "default-llm"
+        },
+        { "name": "finalize", "skill": "publish", "execution": "local" },
+        { "name": "sanitize", "skill": "sanitize", "execution": "local" }
+      ]
+    },
+    {
+      "pipelineType": "short-piece",
+      "contentType": "short-piece",
+      "defaultLanguage": "pt-BR",
+      "defaultQualityMode": "balanced",
+      "steps": [
+        {
+          "name": "hook",
+          "skill": "hook",
+          "execution": "llm",
+          "routingProfile": "linkedin-llm"
+        },
+        {
+          "name": "draft",
+          "skill": "draft",
+          "execution": "llm",
+          "routingProfile": "linkedin-llm"
+        },
+        {
+          "name": "refine",
+          "skill": "refine",
+          "execution": "llm",
+          "routingProfile": "linkedin-llm"
+        },
+        { "name": "sanitize", "skill": "sanitize", "execution": "local" }
+      ]
+    },
+    {
+      "pipelineType": "long-piece",
+      "contentType": "long-piece",
+      "defaultLanguage": "pt-BR",
+      "defaultQualityMode": "strict",
+      "steps": [
+        { "name": "research", "skill": "research", "execution": "local" },
+        { "name": "outline", "skill": "outline", "execution": "local" },
+        {
+          "name": "draft",
+          "skill": "draft",
+          "execution": "llm",
+          "routingProfile": "premium-llm"
+        },
+        {
+          "name": "refine",
+          "skill": "refine",
+          "execution": "llm",
+          "routingProfile": "premium-llm"
+        },
+        { "name": "finalize", "skill": "publish", "execution": "local" },
+        { "name": "sanitize", "skill": "sanitize", "execution": "local" }
+      ]
+    },
+    {
+      "pipelineType": "serial-piece",
+      "contentType": "serial-piece",
+      "defaultLanguage": "pt-BR",
+      "defaultQualityMode": "balanced",
+      "steps": [
+        { "name": "analyze", "skill": "analyze", "execution": "local" },
+        {
+          "name": "draft",
+          "skill": "draft",
+          "execution": "llm",
+          "routingProfile": "default-llm"
+        },
+        {
+          "name": "tighten",
+          "skill": "tighten",
+          "execution": "llm",
+          "routingProfile": "default-llm"
+        },
+        { "name": "sanitize", "skill": "sanitize", "execution": "local" }
+      ]
+    },
+    {
+      "pipelineType": "edition-piece",
+      "contentType": "edition-piece",
+      "defaultLanguage": "pt-BR",
+      "defaultQualityMode": "balanced",
+      "steps": [
+        {
+          "name": "draft",
+          "skill": "draft",
+          "execution": "llm",
+          "routingProfile": "default-llm"
+        },
+        {
+          "name": "refine",
+          "skill": "refine",
+          "execution": "llm",
+          "routingProfile": "default-llm"
+        },
+        {
+          "name": "tighten",
+          "skill": "tighten",
+          "execution": "llm",
+          "routingProfile": "default-llm"
+        },
+        { "name": "sanitize", "skill": "sanitize", "execution": "local" }
+      ]
+    }
+  ]
+}
