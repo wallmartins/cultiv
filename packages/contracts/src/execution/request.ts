@@ -27,6 +27,7 @@ export const SimplifiedPipelineRequestSchema = Schema.Struct({
 export type SimplifiedPipelineRequest = typeof SimplifiedPipelineRequestSchema.Type;
 
 export const ExplicitPipelineRequestSchema = Schema.Struct({
+  userId: Schema.optional(Schema.String),
   pipeline: PipelineDefinitionSchema,
   importedContext: Schema.optional(Schema.String),
   context: Schema.optional(Schema.Record({ key: Schema.String, value: Schema.Unknown })),

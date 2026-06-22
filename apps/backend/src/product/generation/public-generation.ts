@@ -111,6 +111,7 @@ function toInternalPipelineRequest(
       );
 
       return {
+        userId: request.userId,
         pipeline: resolvedTarget.compositor.pipeline,
         inputs: buildCompositorPipelineInputs(request.briefing, plan),
         importedContext: request.importedContext,
