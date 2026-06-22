@@ -1,12 +1,8 @@
 const { readFileSync, existsSync } = require("fs");
-<<<<<<< HEAD
-const { resolve } = require("path");
-=======
 const { resolve, join } = require("path");
 
 const APP_ROOT = resolve(__dirname);
 const LOG_ROOT = process.env.CULTIV_LOG_ROOT || resolve(APP_ROOT, "..", "logs");
->>>>>>> 163a3c4d1ec450438ab189b6bc93ab3e1e809aa0
 
 function loadDotenvFile(filePath) {
   if (!existsSync(filePath)) return {};
