@@ -261,12 +261,11 @@
     min-height: 2.75rem;
     padding-inline: 2rem;
     padding-block: 0.75rem;
+    border-radius: var(--radius-press);
     font-family: var(--font-body);
     font-size: 0.6875rem;
     font-weight: 600;
     line-height: 1;
-    text-transform: uppercase;
-    letter-spacing: var(--tracking-editorial);
     cursor: pointer;
     transition:
       color 0.2s ease,

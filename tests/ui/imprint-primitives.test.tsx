@@ -4,9 +4,17 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
+import { Button } from "../../packages/ui/src/primitives/Button.js";
 import { PaperSurface } from "../../packages/ui/src/primitives/PaperSurface.js";
 import { PressMark } from "../../packages/ui/src/primitives/PressMark.js";
 import { ReadingSurface } from "../../packages/ui/src/primitives/ReadingSurface.js";
+
+describe("Button", () => {
+  it("primary variant uses terracotta pigment", () => {
+    render(<Button variant="primary">Join</Button>);
+    expect(screen.getByRole("button").className).toMatch(/bg-pigment-terracotta/);
+  });
+});
 
 describe("PressMark", () => {
   it("renders accessible logo mark", () => {

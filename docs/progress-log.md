@@ -1,5 +1,7 @@
 # Progress Log
 
+| 2026-06-22 | feat(ui): rebuild Button, Text, and Input for Imprint identity — terracotta/ink variants, Conducão typography scale, press-edge inputs (Task 6) |
+| 2026-06-22 | feat(ui): add PaperSurface, ReadingSurface, and InkBleed primitives — grain/press wrapper, immersive reading shell, decorative pigment bleed (Task 5) |
 | 2026-06-22 | feat(ui): add Press Mark logo primitive and brand SVGs — PressMark component, favicon/OG SVGs, RTL/jsdom test setup (Task 4) |
 | 2026-06-22 | feat(ui): Cultiv Imprint design tokens and motion scale — paper/ink palette, Imprint typography utilities, press/reveal motion tokens (Task 2) |
 | 2026-06-22 | docs: Cultiv Imprint unified visual identity design spec — Modernism + Arts and Crafts + Minimalism synthesis, Press Mark brand, typography/color/motion tokens, supersedes ADR 0003 |

@@ -10,11 +10,11 @@ export interface ButtonLinkProps extends AnchorHTMLAttributes<HTMLAnchorElement>
 
 const variantClasses = {
   primary:
-    "border border-foreground bg-foreground text-surface hover:bg-transparent hover:text-foreground",
+    "border border-pigment-terracotta bg-pigment-terracotta text-paper-elevated hover:brightness-105 press-edge",
   ghost:
-    "border border-transparent bg-transparent text-foreground hover:border-foreground",
+    "border border-ink-ghost bg-transparent text-ink hover:bg-paper-pressed press-edge",
   invert:
-    "border border-invert-foreground bg-invert-foreground text-foreground hover:bg-transparent hover:text-invert-foreground"
+    "border border-paper bg-paper text-ink hover:bg-transparent hover:text-paper press-edge"
 } as const;
 
 export function ButtonLink({
