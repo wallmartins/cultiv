@@ -233,7 +233,7 @@ export function VoiceExampleComposer({ mode, initialExample, onSaved }: VoiceExa
 
             <button
               type="button"
-              className="text-sm font-medium text-moss"
+              className="text-sm font-medium text-pigment-terracotta"
               onClick={() =>
                 setAdvancedOpen((current) => ({ ...current, [slot.id]: !current[slot.id] }))
               }

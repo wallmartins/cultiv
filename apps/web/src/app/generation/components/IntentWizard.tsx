@@ -52,7 +52,7 @@ function IntentOptionCard({
         padding="compact"
         className={cn(
           "h-full transition-shadow",
-          selected && "ring-2 ring-moss/30 ring-offset-2 ring-offset-surface"
+          selected && "ring-2 ring-pigment-terracotta/30 ring-offset-2 ring-offset-surface"
         )}
       >
         <div className="flex items-start justify-between gap-3">
@@ -147,7 +147,7 @@ export function IntentWizard({
           <div className="space-y-3">
             <button
               type="button"
-              className="text-sm font-medium text-moss underline-offset-2 hover:underline"
+              className="text-sm font-medium text-pigment-terracotta underline-offset-2 hover:underline"
               onClick={() => wizard.setShowMoreIntents((open) => !open)}
             >
               {messages.intentWizard.moreOptions}
@@ -187,7 +187,7 @@ export function IntentWizard({
         </div>
 
         {wizard.selectedIntent ? (
-          <AppCard padding="compact" className="border-moss/20 bg-moss/5">
+          <AppCard padding="compact" className="border-pigment-terracotta/20 bg-pigment-terracotta/5">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <Text variant="meta" className="mb-1 block text-muted-foreground">
@@ -197,7 +197,7 @@ export function IntentWizard({
               </div>
               <button
                 type="button"
-                className="text-sm font-medium text-moss underline-offset-2 hover:underline"
+                className="text-sm font-medium text-pigment-terracotta underline-offset-2 hover:underline"
                 onClick={wizard.changeIntent}
               >
                 {messages.intentWizard.changeIntent}
@@ -244,7 +244,7 @@ export function IntentWizard({
             ) : (
               <button
                 type="button"
-                className="text-sm font-medium text-moss underline-offset-2 hover:underline"
+                className="text-sm font-medium text-pigment-terracotta underline-offset-2 hover:underline"
                 onClick={() => setChannelExpanded(true)}
               >
                 {messages.intentWizard.channelExpand}

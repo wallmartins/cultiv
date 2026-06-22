@@ -29,7 +29,7 @@ export function ProgressSteps({ progress, locale, messages }: ProgressStepsProps
       </div>
       <div className="h-2 w-full overflow-hidden rounded-full bg-soft-loam">
         <div
-          className="h-full bg-moss transition-[width] duration-300"
+          className="h-full bg-pigment-terracotta transition-[width] duration-300"
           style={{ width: `${Math.min(100, Math.max(0, progress.percent))}%` }}
           role="progressbar"
           aria-valuenow={progress.percent}

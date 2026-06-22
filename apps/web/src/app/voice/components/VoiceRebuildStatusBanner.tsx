@@ -8,7 +8,7 @@ export function VoiceRebuildStatusBanner(props: {
 }) {
   if (props.status === "in_progress") {
     return (
-      <AppCard padding="compact" className="border-golden/40 bg-golden/10">
+      <AppCard padding="compact" className="border-pigment-ochre/40 bg-pigment-ochre/10">
         <Text variant="body">{props.updatingMessage}</Text>
       </AppCard>
     );

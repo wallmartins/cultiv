@@ -232,7 +232,7 @@ export function VoiceReasoningMirror({
                 {development.moveLabels.map((move) => (
                   <li
                     key={move}
-                    className="rounded-full bg-moss/10 px-3 py-1 text-sm font-medium text-foreground"
+                    className="rounded-full bg-pigment-terracotta/10 px-3 py-1 text-sm font-medium text-foreground"
                   >
                     {getMoveLabel(locale, move)}
                   </li>
@@ -313,7 +313,7 @@ function TraitEvidenceDisclosure({
           </div>
         );
       })}
-      <a href="/app/voice/examples" className="text-sm font-medium text-moss underline-offset-2 hover:underline">
+      <a href="/app/voice/examples" className="text-sm font-medium text-pigment-terracotta underline-offset-2 hover:underline">
         {traitMessages.manageExamplesLink}
       </a>
     </div>

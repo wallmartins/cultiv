@@ -145,7 +145,7 @@ export function ActiveExecutionDrawer() {
             <Link
               to="/app/history/$executionId"
               params={{ executionId: item.id }}
-              className="text-sm font-medium text-moss underline-offset-2 hover:underline"
+              className="text-sm font-medium text-pigment-terracotta underline-offset-2 hover:underline"
               onClick={closeDrawer}
             >
               {messages.shell.activeExecutions.viewHistory}
@@ -193,7 +193,7 @@ export function ActiveExecutionMobileTrigger({
         ⧗
       </span>
       {inFlightCount > 0 ? (
-        <span className="absolute -top-1 -right-1 flex min-w-5 items-center justify-center rounded-full bg-moss px-1 text-[0.65rem] font-medium text-surface">
+        <span className="absolute -top-1 -right-1 flex min-w-5 items-center justify-center rounded-full bg-pigment-terracotta px-1 text-[0.65rem] font-medium text-paper-elevated">
           {inFlightCount}
         </span>
       ) : null}

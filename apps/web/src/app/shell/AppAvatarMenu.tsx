@@ -214,8 +214,8 @@ export function AppAvatarMenu({ messages }: AppAvatarMenuProps) {
           "flex size-10 items-center justify-center overflow-hidden rounded-full",
           "border border-border-subtle/70 bg-surface-elevated shadow-[var(--workspace-shadow-card)]",
           "transition-[box-shadow,ring-color] duration-[var(--workspace-motion-duration-fast)]",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-moss/35 focus-visible:ring-offset-2 focus-visible:ring-offset-surface",
-          open && "ring-2 ring-moss/30 ring-offset-2 ring-offset-surface"
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pigment-terracotta/35 focus-visible:ring-offset-2 focus-visible:ring-offset-surface",
+          open && "ring-2 ring-pigment-terracotta/30 ring-offset-2 ring-offset-surface"
         )}
         aria-haspopup="menu"
         aria-expanded={open}

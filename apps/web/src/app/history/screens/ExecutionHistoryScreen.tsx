@@ -97,7 +97,7 @@ export function ExecutionHistoryScreen() {
           <Text variant="meta">{messages.history.empty}</Text>
           <Link
             to="/app/generate"
-            className="text-sm font-medium text-moss underline-offset-2 hover:underline"
+            className="text-sm font-medium text-pigment-terracotta underline-offset-2 hover:underline"
           >
             {messages.history.emptyAction}
           </Link>
@@ -156,11 +156,11 @@ export function ExecutionHistoryScreen() {
 function HistoryStatus({ status }: { readonly status: string }) {
   const dotClass =
     status === "done"
-      ? "bg-moss"
+      ? "bg-pigment-terracotta"
       : status === "failed"
         ? "bg-red-700"
         : status === "running" || status === "queued"
-          ? "bg-golden"
+          ? "bg-pigment-ochre"
           : "bg-muted";
 
   return (

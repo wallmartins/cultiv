@@ -49,7 +49,7 @@ export function VoiceDevelopmentTraitsStrip({
         <button
           type="button"
           onClick={onAuthorityLinkClick}
-          className="rounded-[var(--workspace-radius-sm)] bg-moss/10 px-3 py-2 text-sm font-medium text-foreground underline-offset-2 hover:underline"
+          className="rounded-[var(--workspace-radius-sm)] bg-pigment-terracotta/10 px-3 py-2 text-sm font-medium text-foreground underline-offset-2 hover:underline"
         >
           {traitMessages.authorityLinkAction}
         </button>
@@ -99,7 +99,7 @@ export function TraitConfidenceDots({ confidence }: { readonly confidence: Trait
   const filled = confidence === "high" ? 3 : confidence === "medium" ? 2 : 1;
 
   return (
-    <span className="text-xs tracking-widest text-moss" aria-hidden="true">
+    <span className="text-xs tracking-widest text-pigment-terracotta" aria-hidden="true">
       {[0, 1, 2].map((index) => (
         <span key={index} className={index < filled ? "opacity-100" : "opacity-25"}>
           ●

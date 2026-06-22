@@ -63,7 +63,7 @@ export function VoiceExamplesList() {
               <Link
                 to="/app/voice/examples/$id/edit"
                 params={{ id: item.exampleId }}
-                className="text-sm font-medium text-moss underline-offset-2 hover:underline"
+                className="text-sm font-medium text-pigment-terracotta underline-offset-2 hover:underline"
               >
                 Edit
               </Link>

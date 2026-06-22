@@ -257,7 +257,7 @@ export function GenerationScreen() {
   return (
     <div className="px-[var(--spacing-gutter)] py-8 md:py-10">
       {showReminder ? (
-        <div className="mb-6 rounded-2xl border border-golden/40 bg-golden/10 px-4 py-3">
+        <div className="mb-6 rounded-2xl border border-pigment-ochre/40 bg-pigment-ochre/10 px-4 py-3">
           <Text variant="meta" className="mb-2 block">
             {messages.generate.reminderBanner}
           </Text>
@@ -391,7 +391,7 @@ export function GenerationScreen() {
                 ) : null}
                 <button
                   type="button"
-                  className="text-sm font-medium text-moss underline-offset-2 hover:underline"
+                  className="text-sm font-medium text-pigment-terracotta underline-offset-2 hover:underline"
                   onClick={() => form.setImportedOpen((open) => !open)}
                 >
                   {form.importedOpen

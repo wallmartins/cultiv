@@ -98,7 +98,7 @@ export function PlansScreen() {
       </Text>
 
       {statusBanner ? (
-        <AppCard className="mb-6 border-moss/30 bg-moss/5">
+        <AppCard className="mb-6 border-pigment-terracotta/30 bg-pigment-terracotta/5">
           <Text variant="body">{statusBanner}</Text>
         </AppCard>
       ) : null}
@@ -264,7 +264,7 @@ function ToggleButton(props: { readonly active: boolean; readonly label: string;
       type="button"
       className={
         props.active
-          ? "rounded-full border border-moss/40 bg-moss/10 px-4 py-1.5 text-sm font-medium text-foreground"
+          ? "rounded-full border border-pigment-terracotta/40 bg-pigment-terracotta/10 px-4 py-1.5 text-sm font-medium text-foreground"
           : "rounded-full border border-border-subtle/70 px-4 py-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
       }
       aria-pressed={props.active}

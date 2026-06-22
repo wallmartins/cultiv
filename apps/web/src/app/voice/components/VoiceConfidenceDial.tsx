@@ -84,7 +84,7 @@ export function VoiceConfidenceDial({
               y2={y2}
               stroke={
                 active
-                  ? "color-mix(in srgb, var(--color-moss) 72%, transparent)"
+                  ? "color-mix(in srgb, var(--color-pigment-terracotta) 72%, transparent)"
                   : "color-mix(in srgb, var(--color-soft-loam) 95%, transparent)"
               }
               strokeWidth={active ? 1.1 : 0.85}
@@ -120,7 +120,7 @@ export function VoiceConfidenceDial({
           cx={dot.cx}
           cy={dot.cy}
           r="3.25"
-          fill="var(--color-golden)"
+          fill="var(--color-pigment-ochre)"
           stroke="var(--color-surface-elevated)"
           strokeWidth="1.5"
           style={{
@@ -129,15 +129,15 @@ export function VoiceConfidenceDial({
         />
         <defs>
           <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="var(--color-moss)" />
-            <stop offset="100%" stopColor="var(--color-golden)" />
+            <stop offset="0%" stopColor="var(--color-pigment-terracotta)" />
+            <stop offset="100%" stopColor="var(--color-pigment-ochre)" />
           </linearGradient>
         </defs>
       </svg>
       <div className="pointer-events-none absolute inset-0 flex items-center justify-center px-6 text-center">
         <Text
           variant="meta"
-          className="max-w-[5.75rem] text-[0.625rem] font-semibold uppercase leading-snug tracking-editorial-wide text-moss text-balance sm:max-w-[6.5rem] sm:text-[0.6875rem]"
+          className="max-w-[5.75rem] text-[0.625rem] font-semibold uppercase leading-snug tracking-editorial-wide text-pigment-terracotta text-balance sm:max-w-[6.5rem] sm:text-[0.6875rem]"
         >
           {centerLabel}
         </Text>

@@ -106,8 +106,8 @@ export function VoiceConfidenceRing({
           />
           <defs>
             <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="var(--color-moss)" />
-              <stop offset="100%" stopColor="var(--color-golden)" />
+              <stop offset="0%" stopColor="var(--color-pigment-terracotta)" />
+              <stop offset="100%" stopColor="var(--color-pigment-ochre)" />
             </linearGradient>
           </defs>
         </svg>
