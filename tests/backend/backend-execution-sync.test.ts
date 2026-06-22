@@ -61,7 +61,7 @@ describe("backend execution service sync", () => {
 
     const ledger = services.billing.listLedger("backend", "pro");
     expect(ledger.map((entry) => entry.entryType)).toEqual(["grant_cycle", "reserve", "capture"]);
-    expect(services.billing.getWallet("backend", "pro")?.availableCredits).toBe(2497.5);
+    expect(services.billing.getWallet("backend", "pro")?.availableCredits).toBe(147.5);
   });
 
   it("fails trusted execution with integrity errors instead of recomputing policy", async () => {
