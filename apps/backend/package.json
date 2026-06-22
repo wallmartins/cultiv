@@ -19,6 +19,8 @@
     "billing:analyze-option-b": "node dist/scripts/analyze-calibration-option-b.js",
     "compositor:parity": "node dist/scripts/compositor-parity-harness.js",
     "step-planner:cogs": "node dist/scripts/step-planner-cogs-harness.js",
+    "step-planner:smoke": "node dist/scripts/step-planner-smoke-harness.js",
+    "step-planner:smoke:dev": "tsx scripts/step-planner-smoke-harness.ts",
     "rotate-voice-key": "node dist/cli/rotate-voice-protection-key.js",
     "rotate-voice-key:dev": "tsx src/cli/rotate-voice-protection-key.ts",
     "rotate-voice-key:dry-run": "node dist/cli/rotate-voice-protection-key.js --dry-run"

@@ -1,6 +1,6 @@
 # Step planner COGS variance report
 
-Generated: 2026-06-19T21:38:39.230Z
+Generated: 2026-06-22T13:54:20.859Z
 
 ## Summary
 
@@ -32,7 +32,15 @@ Generated: 2026-06-19T21:38:39.230Z
 | tell-story / medium / unspecified | typical | serial-piece | serial-piece | no | 2 | 2 | +0 | — |
 | tell-story / medium / unspecified | heavy | serial-piece | serial-piece | no | 2 | 2 | +0 | — |
 
-## Optional HTTP execution
+## HTTP execution
 
-Skipped — dry-run only. Pass `--execute` when live calibration env is wired (future).
+Skipped — pass `--execute` with `CALIBRATION_ACCESS_TOKEN` and `DATABASE_URL` in repo `.env`.
+
+
+## Repricing gate (one-pager)
+
+Proceed with full repricing when either:
+
+- ≥80% of runs keep the same `planSignature` after patches, **or**
+- p90 USD within ±30% of bucket median for each `(planSignature, tier, balanced)`.
 
