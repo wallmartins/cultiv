@@ -1,7 +1,7 @@
 import { cn } from "@my-ai-orchestrator/ui";
 import { Link } from "@tanstack/react-router";
 import type { ComponentType, CSSProperties, ReactNode } from "react";
-import { NavIconGenerate, NavIconHistory, NavIconPlans, NavIconVoice } from "./app-shell-nav-icons";
+import { NavIconGenerate, NavIconHistory, NavIconVoice } from "./app-shell-nav-icons";
 import type { AppShellNavItem, AppShellNavKey } from "./app-shell-nav";
 
 export type AppShellNavOrientation = "horizontal" | "vertical";
@@ -10,8 +10,7 @@ export type AppShellNavVariant = "labeled" | "icon" | "expandable";
 const navIcons: Record<AppShellNavKey, ComponentType<{ readonly active: boolean }>> = {
   generate: NavIconGenerate,
   history: NavIconHistory,
-  voice: NavIconVoice,
-  plans: NavIconPlans
+  voice: NavIconVoice
 };
 
 const dockClassName =

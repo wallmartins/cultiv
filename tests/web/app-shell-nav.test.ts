@@ -16,13 +16,6 @@ describe("app shell nav", () => {
     expect(isAppShellNavActive("/app/history", history)).toBe(true);
     expect(isAppShellNavActive("/app/history/job-1", history)).toBe(true);
   });
-
-  it("includes plans in workspace navigation", () => {
-    const plans = items.find((item) => item.key === "plans");
-    expect(plans).toMatchObject({ to: "/app/plans", label: "Planos" });
-    expect(isAppShellNavActive("/app/plans", plans!)).toBe(true);
-    expect(isAppShellNavActive("/app/billing", plans!)).toBe(true);
-  });
 });
 
 describe("resolveAppLocale", () => {
