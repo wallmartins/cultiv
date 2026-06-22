@@ -1,0 +1,36 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" role="img" xmlns="http://www.w3.org/2000/svg">
+  <title>Cultiv</title>
+  <rect width="1200" height="630" fill="#F3F0EA"/>
+  <g transform="translate(600 315)">
+    <g transform="translate(-140 0)">
+      <path
+        d="M4 6 L44 5 L46 43 L5 44 Z"
+        fill="#FAF8F4"
+        stroke="#C8C4BC"
+        stroke-width="0.5"
+      />
+      <text
+        x="24"
+        y="31"
+        text-anchor="middle"
+        font-family="Bricolage Grotesque, system-ui, sans-serif"
+        font-size="22"
+        font-weight="600"
+        fill="#1A1A18"
+      >
+        C
+      </text>
+    </g>
+    <text
+      x="20"
+      y="12"
+      font-family="Bricolage Grotesque, system-ui, sans-serif"
+      font-size="56"
+      font-weight="600"
+      letter-spacing="-0.02em"
+      fill="#1A1A18"
+    >
+      Cultiv
+    </text>
+  </g>
+</svg>

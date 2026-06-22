@@ -1,3 +1,4 @@
+import "@testing-library/jest-dom/vitest";
 import { config as loadDotEnv } from "dotenv";
 
 loadDotEnv({ quiet: true });

@@ -8,6 +8,7 @@ export { ButtonLink, type ButtonLinkProps } from "./primitives/ButtonLink.js";
 export { Container, type ContainerProps } from "./primitives/Container.js";
 export { Input, type InputProps } from "./primitives/Input.js";
 export { Grid, type GridProps } from "./primitives/Grid.js";
+export { PressMark, type PressMarkProps } from "./primitives/PressMark.js";
 
 export { Label, type LabelProps } from "./patterns/Label.js";
 export { SectionHeader, type SectionHeaderProps } from "./patterns/SectionHeader.js";
