@@ -1,5 +1,5 @@
+import { PressMark } from "@my-ai-orchestrator/ui";
 import { Link } from "@tanstack/react-router";
-import { BrandMark } from "~/marketing/components/BrandMark";
 import type { AppMessages } from "~/i18n/app/types";
 import type { CreditBalanceStatus } from "~/platform/credits/use-credit-balance";
 import { useActiveExecutions } from "~/platform/active-executions/active-execution-store";
@@ -23,10 +23,10 @@ export function AppHeader({
   const { openDrawer } = useActiveExecutions();
 
   return (
-    <header className="sticky top-0 z-40 flex h-[var(--app-header-height)] items-center border-b border-border-subtle/60 bg-surface/80 backdrop-blur-xl">
+    <header className="sticky top-0 z-40 flex h-[var(--app-header-height)] items-center border-b border-ink-ghost bg-paper/95 backdrop-blur-sm">
       <div className="flex w-full items-center justify-between gap-3 px-[var(--spacing-gutter)]">
         <Link to="/app/generate" aria-label="Cultiv" className="shrink-0">
-          <BrandMark variant="icon" />
+          <PressMark size={28} className="block shrink-0 text-ink" />
         </Link>
 
         <div className="flex items-center gap-2 sm:gap-3">
