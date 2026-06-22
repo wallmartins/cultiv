@@ -1,9 +1,12 @@
 ---
 title: Workspace Visual Refresh
 doc_type: adr
-status: accepted
+status: superseded
 last_updated: 2026-06-14
+superseded_by: docs/adr/0009-cultiv-imprint-identity.md
 ---
+
+> **Superseded by [ADR 0009](./0009-cultiv-imprint-identity.md).**
 
 # Workspace visual refresh (Authenticated Workspace only)
 
