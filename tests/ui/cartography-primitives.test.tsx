@@ -4,11 +4,14 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
+import { Button } from "../../packages/ui/src/primitives/Button.js";
 import { CartographySurface } from "../../packages/ui/src/primitives/CartographySurface.js";
 import { CompassMark } from "../../packages/ui/src/primitives/CompassMark.js";
 import { CoordinateLabel } from "../../packages/ui/src/primitives/CoordinateLabel.js";
 import { ExpeditionCard } from "../../packages/ui/src/primitives/ExpeditionCard.js";
+import { Input } from "../../packages/ui/src/primitives/Input.js";
 import { LogbookProse } from "../../packages/ui/src/primitives/LogbookProse.js";
+import { Text } from "../../packages/ui/src/primitives/Text.js";
 
 describe("CartographySurface", () => {
   it("applies cartography-grain class", () => {
@@ -40,6 +43,31 @@ describe("LogbookProse", () => {
   it("applies logbook typography class", () => {
     render(<LogbookProse data-testid="logbook">Prose</LogbookProse>);
     expect(screen.getByTestId("logbook").className).toMatch(/ui-type-logbook/);
+  });
+});
+
+describe("Button", () => {
+  it("primary variant uses terracotta background and cartography shadow", () => {
+    render(<Button>Continue</Button>);
+    const button = screen.getByRole("button", { name: "Continue" });
+    expect(button.className).toMatch(/bg-terracotta/);
+    expect(button.className).toMatch(/shadow-cartography/);
+  });
+});
+
+describe("Text", () => {
+  it("logbook variant uses ui-type-logbook", () => {
+    render(<Text variant="logbook">Entry</Text>);
+    expect(screen.getByText("Entry").className).toMatch(/ui-type-logbook/);
+  });
+});
+
+describe("Input", () => {
+  it("applies dotted cartography border", () => {
+    render(<Input aria-label="Name" />);
+    expect(screen.getByRole("textbox", { name: "Name" }).className).toMatch(
+      /border-dotted-cartography/
+    );
   });
 });
 

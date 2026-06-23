@@ -8,12 +8,21 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const variantClasses = {
-  primary:
-    "border border-pigment-terracotta bg-pigment-terracotta text-paper-elevated hover:brightness-105 press-edge",
-  ghost:
-    "border border-ink-ghost bg-transparent text-ink hover:bg-paper-pressed press-edge",
-  invert:
-    "border border-paper bg-paper text-ink hover:bg-transparent hover:text-paper press-edge"
+  primary: cn(
+    "border border-terracotta bg-terracotta text-off-white shadow-cartography",
+    "hover:-translate-y-0.5 transition duration-200",
+    "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-terracotta"
+  ),
+  ghost: cn(
+    "border border-deep-blue bg-transparent text-deep-blue",
+    "hover:-translate-y-0.5 hover:bg-off-white transition duration-200",
+    "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-deep-blue"
+  ),
+  invert: cn(
+    "border border-off-white bg-off-white text-deep-blue",
+    "hover:-translate-y-0.5 hover:bg-transparent hover:text-off-white transition duration-200",
+    "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-off-white"
+  )
 } as const;
 
 export function Button({
@@ -28,7 +37,7 @@ export function Button({
     <button
       type={type}
       className={cn(
-        "ui-btn motion-hover",
+        "ui-btn",
         size === "compact" && "ui-btn--compact",
         variantClasses[variant],
         className
