@@ -39,6 +39,7 @@ export type AppShellMessages = {
     readonly retry: string;
   };
   readonly selectPlaceholder: string;
+  readonly notFound: string;
 };
 
 export type AppIntentWizardMessages = {
@@ -249,6 +250,7 @@ export type AppVoiceMessages = {
   readonly manageExamples: string;
   readonly mirrorFallbackTitle: string;
   readonly mirrorFallbackSubtitle: string;
+  readonly mapLayersTitle: string;
   readonly detailLayers: {
     readonly formats: string;
     readonly antiPatterns: string;
@@ -416,6 +418,7 @@ export type AppSettingsMessages = {
   readonly revokeDisabled: string;
   readonly logout: string;
   readonly plans: string;
+  readonly saved: string;
 };
 
 export type AppPlansMessages = {
