@@ -460,6 +460,12 @@
 [data-surface="marketing"] {
   --cartography-grain-opacity: 0.06;
   --site-header-height: 4.25rem;
+  --cartography-grain-x: 0%;
+  --cartography-grain-y: 0%;
+}
+
+[data-surface="marketing"][data-paper-parallax]::before {
+  background-position: var(--cartography-grain-x) var(--cartography-grain-y);
 }
 
 @media (min-width: 768px) {

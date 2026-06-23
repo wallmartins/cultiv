@@ -6,6 +6,7 @@ import {
   Text,
   cn,
 } from "@my-ai-orchestrator/ui";
+import { useHeroHeadlineWords } from "~/marketing/animations/use-hero-headline-words";
 import { useSectionReveal } from "~/marketing/animations/use-section-reveal";
 import { getLocaleMessages } from "~/i18n/marketing/get-locale";
 import type { MarketingLocale } from "~/i18n/marketing/types";
@@ -18,6 +19,27 @@ const heroCoordinateLabels: Record<MarketingLocale, string> = {
 
 export interface HeroSectionProps {
   readonly locale: MarketingLocale;
+}
+
+function HeroHeadline({ text }: { readonly text: string }) {
+  const headlineRef = useHeroHeadlineWords();
+  const words = text.split(/\s+/);
+
+  return (
+    <h1
+      ref={headlineRef}
+      className={cn("ui-type-display-xl text-deep-blue")}
+    >
+      {words.map((word, index) => (
+        <span key={`${word}-${index}`} className="inline-block">
+          {index > 0 ? "\u00a0" : null}
+          <span data-hero-word className="inline-block">
+            {word}
+          </span>
+        </span>
+      ))}
+    </h1>
+  );
 }
 
 export function HeroSection({ locale }: HeroSectionProps) {
@@ -49,14 +71,7 @@ export function HeroSection({ locale }: HeroSectionProps) {
               </span>
             </div>
 
-            <Text
-              as="h1"
-              variant="display-xl"
-              data-hero-item
-              className="text-deep-blue"
-            >
-              {hero.headline}
-            </Text>
+            <HeroHeadline text={hero.headline} />
 
             <Text
               as="p"

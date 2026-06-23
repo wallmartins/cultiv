@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
 import { CartographySurface, RouteLine } from "@my-ai-orchestrator/ui";
+import { usePaperParallax } from "~/marketing/animations/use-paper-parallax";
+import { useRouteDraw } from "~/marketing/animations/use-route-draw";
 import { SiteHeader } from "~/marketing/components/SiteHeader";
 import { useDocumentLang } from "~/hooks/use-document-lang";
 import { FooterSection } from "~/marketing/sections/FooterSection";
@@ -12,19 +14,28 @@ export interface MarketingLayoutProps {
 
 export function MarketingLayout({ locale, children }: MarketingLayoutProps) {
   useDocumentLang(locale);
+  usePaperParallax();
+  const routeDrawRef = useRouteDraw({ immediate: true });
 
   return (
     <CartographySurface
       className="rebrand min-h-screen overflow-x-clip font-inter"
       data-surface="marketing"
+      data-paper-parallax=""
     >
       <SiteHeader locale={locale} />
       <div className="relative flex">
-        <aside className="hidden w-12 shrink-0 lg:block" aria-hidden="true">
-          <RouteLine
-            orientation="vertical"
-            className="sticky top-24 h-[calc(100vh-6rem)]"
-          />
+        <aside
+          ref={routeDrawRef}
+          className="hidden w-12 shrink-0 lg:block"
+          aria-hidden="true"
+        >
+          <div data-route-draw className="sticky top-24 h-[calc(100vh-6rem)]">
+            <RouteLine
+              orientation="vertical"
+              className="h-full w-full"
+            />
+          </div>
         </aside>
         <div className="min-w-0 flex-1">{children}</div>
       </div>

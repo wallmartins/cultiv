@@ -7,6 +7,8 @@ import {
   Text,
   cn,
 } from "@my-ai-orchestrator/ui";
+import { mergeRefs } from "~/marketing/animations/merge-refs";
+import { useRouteDraw } from "~/marketing/animations/use-route-draw";
 import { useSectionReveal } from "~/marketing/animations/use-section-reveal";
 import { getLocaleMessages } from "~/i18n/marketing/get-locale";
 import type { MarketingLocale } from "~/i18n/marketing/types";
@@ -18,6 +20,8 @@ export interface HowItWorksSectionProps {
 export function HowItWorksSection({ locale }: HowItWorksSectionProps) {
   const { route } = getLocaleMessages(locale);
   const sectionRef = useSectionReveal("[data-section-item]");
+  const routeDrawRef = useRouteDraw();
+  const containerRef = mergeRefs(sectionRef, routeDrawRef);
   const [activeIndex, setActiveIndex] = useState(0);
   const stepRefs = useRef<(HTMLElement | null)[]>([]);
 
@@ -53,7 +57,7 @@ export function HowItWorksSection({ locale }: HowItWorksSectionProps) {
     <section id="rota" className="border-b border-ink-ghost/30">
       <CartographySurface className="bg-off-white">
         <Container
-          ref={sectionRef}
+          ref={containerRef}
           className="py-[var(--spacing-section-sm)] md:py-[var(--spacing-section)]"
         >
           <header
@@ -68,6 +72,7 @@ export function HowItWorksSection({ locale }: HowItWorksSectionProps) {
 
           <div className="relative mx-auto max-w-2xl" data-section-item>
             <div
+              data-route-draw
               className="absolute bottom-0 left-[1.125rem] top-0 w-5 md:left-6"
               aria-hidden="true"
             >
