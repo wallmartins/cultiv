@@ -1,6 +1,6 @@
 import { useAuth0 } from "@auth0/auth0-react";
 import type { QualityMode } from "@my-ai-orchestrator/contracts";
-import { CartographySurface, CoordinateLabel, LogbookProse, Text } from "@my-ai-orchestrator/ui";
+import { CartographySurface, cn, CoordinateLabel, LogbookProse, Text } from "@my-ai-orchestrator/ui";
 import { Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { BriefingGuidancePanel } from "~/app/generation/components/BriefingGuidancePanel";
@@ -256,6 +256,7 @@ export function GenerationScreen() {
 
   return (
     <CartographySurface className="px-[var(--spacing-gutter)] py-8 md:py-10">
+      <div className="mx-auto w-full max-w-7xl">
       {showReminder ? (
         <LogbookProse className="mb-6 border-ochre/40 bg-ochre/10 p-4">
           <Text variant="meta" className="mb-2 block">
@@ -341,7 +342,12 @@ export function GenerationScreen() {
         </LogbookProse>
       ) : null}
 
-      <div className="lg:grid lg:grid-cols-[minmax(0,13fr)_minmax(280px,7fr)] lg:items-start lg:gap-8">
+      <div
+        className={cn(
+          showComposeStep &&
+            "lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(300px,22rem)] lg:items-start lg:gap-10"
+        )}
+      >
         <div className="space-y-6">
           {showWizard ? (
             <IntentWizard
@@ -501,6 +507,7 @@ export function GenerationScreen() {
             onGenerate={() => void handleGenerate()}
           />
         ) : null}
+      </div>
       </div>
     </CartographySurface>
   );

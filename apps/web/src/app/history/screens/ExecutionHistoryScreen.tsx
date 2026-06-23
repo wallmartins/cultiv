@@ -119,43 +119,41 @@ export function ExecutionHistoryScreen() {
         </Link>
       </div>
 
-      <div className="mb-6 -mx-[var(--spacing-gutter)] overflow-x-auto px-[var(--spacing-gutter)] pb-1">
-        <div className="flex min-w-max gap-6">
-          <FilterToggleGroup
-            label={messages.history.filters.period}
-            value={filters.period}
-            onChange={(value) => setFilters((current) => ({ ...current, period: value as HistoryPeriod }))}
-            options={[
-              ["7d", messages.history.filters.period7d],
-              ["30d", messages.history.filters.period30d],
-              ["90d", messages.history.filters.period90d],
-              ["all", messages.history.filters.periodAll]
-            ]}
-          />
-          <FilterToggleGroup
-            label={messages.history.filters.status}
-            value={filters.status}
-            onChange={(value) =>
-              setFilters((current) => ({ ...current, status: value as HistoryStatusFilter }))
-            }
-            options={[
-              ["all", messages.history.filters.statusAll],
-              ["done", messages.history.filters.statusDone],
-              ["failed", messages.history.filters.statusFailed],
-              ["running", messages.history.filters.statusRunning],
-              ["queued", messages.history.filters.statusQueued]
-            ]}
-          />
-          <FilterToggleGroup
-            label={messages.history.filters.contentType}
-            value={filters.contentType}
-            onChange={(value) => setFilters((current) => ({ ...current, contentType: value }))}
-            options={[
-              ["all", messages.history.filters.contentTypeAll],
-              ...contentTypes.map((id) => [id, getContentTypeLabel(locale, id, id)] as const)
-            ]}
-          />
-        </div>
+      <div className="mb-6 grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+        <FilterToggleGroup
+          label={messages.history.filters.period}
+          value={filters.period}
+          onChange={(value) => setFilters((current) => ({ ...current, period: value as HistoryPeriod }))}
+          options={[
+            ["7d", messages.history.filters.period7d],
+            ["30d", messages.history.filters.period30d],
+            ["90d", messages.history.filters.period90d],
+            ["all", messages.history.filters.periodAll]
+          ]}
+        />
+        <FilterToggleGroup
+          label={messages.history.filters.status}
+          value={filters.status}
+          onChange={(value) =>
+            setFilters((current) => ({ ...current, status: value as HistoryStatusFilter }))
+          }
+          options={[
+            ["all", messages.history.filters.statusAll],
+            ["done", messages.history.filters.statusDone],
+            ["failed", messages.history.filters.statusFailed],
+            ["running", messages.history.filters.statusRunning],
+            ["queued", messages.history.filters.statusQueued]
+          ]}
+        />
+        <FilterToggleGroup
+          label={messages.history.filters.contentType}
+          value={filters.contentType}
+          onChange={(value) => setFilters((current) => ({ ...current, contentType: value }))}
+          options={[
+            ["all", messages.history.filters.contentTypeAll],
+            ...contentTypes.map((id) => [id, getContentTypeLabel(locale, id, id)] as const)
+          ]}
+        />
       </div>
 
       {status === "loading" && items.length === 0 ? (

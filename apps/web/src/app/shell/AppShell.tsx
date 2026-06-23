@@ -8,6 +8,7 @@ import { NotificationHost } from "~/platform/notifications/NotificationHost";
 import { AppBottomNav } from "./AppBottomNav";
 import { AppHeader } from "./AppHeader";
 import { AppSidebar } from "./AppSidebar";
+import { AppSidebarProvider } from "./app-sidebar-context";
 import { ActiveExecutionDrawer } from "./ActiveExecutionDrawer";
 
 export interface AppShellProps {
@@ -21,29 +22,31 @@ function AppShellFrame({ children }: AppShellProps) {
   const { inFlightCount } = useActiveExecutions();
 
   return (
-    <div
-      className="cartography-grain cartography-grain-quiet relative min-h-screen bg-paper text-ink"
-      data-surface="workspace"
-    >
-      <AppSidebar messages={messages} />
+    <AppSidebarProvider>
+      <div
+        className="cartography-grain cartography-grain-quiet relative min-h-screen bg-paper text-ink"
+        data-surface="workspace"
+      >
+        <AppSidebar messages={messages} />
 
-      <div className="flex min-h-screen flex-col pl-0 md:pl-16 lg:pl-20">
-        <AppHeader
-          messages={messages}
-          creditStatus={client ? status : "loading"}
-          creditBalance={balance}
-          inFlightCount={inFlightCount}
-        />
+        <div className="flex min-h-screen flex-col pl-0 md:pl-16 lg:pl-20">
+          <AppHeader
+            messages={messages}
+            creditStatus={client ? status : "loading"}
+            creditBalance={balance}
+            inFlightCount={inFlightCount}
+          />
 
-        <main className="min-w-0 flex-1 pb-[var(--app-bottom-nav-offset)] md:pb-0">
-          {children}
-        </main>
+          <main className="min-w-0 flex-1 pb-[var(--app-bottom-nav-offset)] md:pb-0">
+            {children}
+          </main>
+        </div>
+
+        <AppBottomNav messages={messages} />
+        <ActiveExecutionDrawer />
+        <NotificationHost />
       </div>
-
-      <AppBottomNav messages={messages} />
-      <ActiveExecutionDrawer />
-      <NotificationHost />
-    </div>
+    </AppSidebarProvider>
   );
 }
 

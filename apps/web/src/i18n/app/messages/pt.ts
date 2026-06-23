@@ -202,6 +202,11 @@ export const appMessagesPt: AppMessages = {
     mirrorFallbackSubtitle:
       "Com mais textos de referência, o Cultiv passa a mapear também seus padrões cognitivos e argumentativos.",
     mapLayersTitle: "Camadas do mapa",
+    dashboardTabs: {
+      overview: "Panorama",
+      layers: "Camadas",
+      health: "Saúde do mapa"
+    },
     detailLayers: {
       formats: "Rotas por território",
       antiPatterns: "Terrenos a evitar",
@@ -239,10 +244,10 @@ export const appMessagesPt: AppMessages = {
     confidencePanelTitle: "Confiança do mapa de voz",
     confidenceDialEyebrow: "Confiança",
     confidenceDialSubline: {
-      high: "raízes firmes",
-      medium: "ganhando corpo",
-      low: "germinando",
-      none: "semeando"
+      high: "terreno mapeado",
+      medium: "contornos em traço",
+      low: "rotas incipientes",
+      none: "mapa em branco"
     },
     confidenceLabels: {
       high: "Alta",

@@ -18,10 +18,14 @@ const navIcons: Record<AppShellNavKey | AppShellBottomNavKey, ComponentType<{ re
 
 export function AppShellSidebarItem({
   item,
-  active
+  active,
+  expanded,
+  onNavigate
 }: {
   readonly item: AppShellNavItem;
   readonly active: boolean;
+  readonly expanded: boolean;
+  readonly onNavigate?: () => void;
 }) {
   const Icon = navIcons[item.key];
 
@@ -29,6 +33,7 @@ export function AppShellSidebarItem({
     <Link
       to={item.to}
       aria-current={active ? "page" : undefined}
+      onClick={onNavigate}
       className={cn(
         "relative flex h-11 min-w-0 items-center overflow-hidden transition-colors duration-150 ease-out",
         active
@@ -43,7 +48,8 @@ export function AppShellSidebarItem({
       </span>
       <span
         className={cn(
-          "min-w-0 truncate pr-3 font-body text-sm leading-none opacity-0 transition-opacity duration-[250ms] ease-out group-hover/sidebar:opacity-100 group-focus-within/sidebar:opacity-100",
+          "min-w-0 truncate pr-3 font-body text-sm leading-none transition-opacity duration-[250ms] ease-out",
+          expanded ? "opacity-100" : "opacity-0",
           active ? "font-semibold text-pigment-terracotta" : "font-medium"
         )}
       >

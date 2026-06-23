@@ -43,14 +43,14 @@ export function buildReasoningDetailItems({
           formatCount > 0 ? (
           <div className="space-y-4">
             {reasoning.formatExpressions.map((expression) => (
-              <LogbookProse key={expression.contentType} className="space-y-3 p-4">
+              <LogbookProse key={expression.contentType} className="space-y-3 border-0 bg-off-white p-4 shadow-cartography">
                 <Text variant="label" className="block font-inter text-xs font-semibold uppercase tracking-wider text-ink-muted">
                   {getContentTypeLabel(locale, expression.contentType, expression.contentType)}
                 </Text>
                 <Text variant="body" className="w-full whitespace-pre-wrap leading-relaxed text-ink">
                   {expression.narrativeProse}
                 </Text>
-                <div className="flex flex-wrap gap-2 border-t border-dotted-cartography pt-3">
+                <div className="flex flex-wrap gap-2 border-t border-ink-ghost/20 pt-3">
                   <VoiceTraitChip
                     label={reasoningMessages.register}
                     value={reasoningMessages.enums.register[expression.register]}
@@ -171,7 +171,7 @@ export function VoiceReasoningMirror({
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
-        <LogbookProse className="space-y-3 p-5">
+        <LogbookProse className="space-y-3 border-0 bg-off-white p-5 shadow-cartography">
           <CoordinateLabel index={1} label={sectionTitles.navigate} className="mb-1 block" />
           <Text variant="meta" className="block text-ink-muted">
             {messages.subtitle}
@@ -181,7 +181,7 @@ export function VoiceReasoningMirror({
           </Text>
         </LogbookProse>
 
-        <LogbookProse className="space-y-3 p-5">
+        <LogbookProse className="space-y-3 border-0 bg-off-white p-5 shadow-cartography">
           <CoordinateLabel index={2} label={sectionTitles.mapRoutes} className="mb-1 block" />
           <Text variant="meta" className="block text-ink-muted">
             {messages.developmentSubtitle}
@@ -230,7 +230,7 @@ export function VoiceReasoningMirror({
       </div>
 
       {development ? (
-        <div className="space-y-4 border-t border-dotted-cartography pt-8">
+        <div className="space-y-4 border-t border-ink-ghost/20 pt-8">
           <div className="flex flex-wrap gap-2">
             <VoiceTraitChip
               label={messages.epistemicPosture}
@@ -239,13 +239,13 @@ export function VoiceReasoningMirror({
           </div>
 
           {development.moveLabels.length > 0 ? (
-            <LogbookProse className="space-y-3 p-4">
+            <LogbookProse className="space-y-3 border-0 bg-off-white p-4 shadow-cartography">
               <CoordinateLabel index={3} label={messages.typicalMoves} className="block" />
               <ul className="flex flex-wrap gap-2">
                 {development.moveLabels.map((move) => (
                   <li
                     key={move}
-                    className="rounded-[5px] border border-dotted-cartography bg-cream px-3 py-1 font-inter text-sm font-medium text-terracotta"
+                    className="rounded-[5px] border border-ink-ghost/25 bg-cream px-3 py-1 font-inter text-sm font-medium text-terracotta"
                   >
                     {getMoveLabel(locale, move)}
                   </li>
