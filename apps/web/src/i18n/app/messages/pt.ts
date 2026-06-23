@@ -5,7 +5,7 @@ export const appMessagesPt: AppMessages = {
     nav: {
       generate: "Gerar",
       history: "Caderno de bordo",
-      voice: "Voz",
+      voice: "Mapa da voz",
       settings: "Configurações",
       plans: "Planos",
       logout: "Sair"
@@ -186,25 +186,25 @@ export const appMessagesPt: AppMessages = {
     }
   },
   voice: {
-    dashboardTitle: "Seu perfil de voz",
-    dashboardSubtitle: "O arquivo digital das suas impressões autorais e evolução da escrita.",
+    dashboardTitle: "Mapa da sua voz",
+    dashboardSubtitle: "Como você navega, como traça rotas — e como melhorar.",
     dashboardEmpty:
-      "Seu atelier de voz está silencioso. Adicione os primeiros exemplos para moldar sua identidade digital.",
-    dashboardEmptyAction: "Adicionar primeiro exemplo",
-    manageExamples: "Gerenciar exemplos",
-    mirrorFallbackTitle: "Sua voz hoje",
+      "Seu mapa de voz ainda está vazio. Adicione os primeiros textos para começar a mapear sua identidade.",
+    dashboardEmptyAction: "Adicionar primeiro texto",
+    manageExamples: "Gerenciar textos",
+    mirrorFallbackTitle: "Seu mapa hoje",
     mirrorFallbackSubtitle:
-      "Com mais matéria-prima, o Cultiv passa a mapear também seus padrões cognitivos e argumentativos.",
+      "Com mais textos de referência, o Cultiv passa a mapear também seus padrões cognitivos e argumentativos.",
     detailLayers: {
-      formats: "Por formato",
-      antiPatterns: "O que evitar",
-      profileHealth: "Saúde do perfil"
+      formats: "Rotas por território",
+      antiPatterns: "Terrenos a evitar",
+      profileHealth: "Saúde da expedição"
     },
     nextStep: {
-      eyebrow: "Próximo passo",
+      eyebrow: "Próxima rota",
       matureMessage:
-        "Sua voz está bem representada. O próximo passo natural é gerar conteúdo com ela.",
-      generateCta: "Gerar conteúdo",
+        "Seu mapa de voz está completo. O próximo passo natural é traçar uma nova expedição.",
+      generateCta: "Nova expedição",
       messages: {
         add_more_examples:
           "Mais exemplos deixam sua voz mais previsível e consistente nas gerações.",
@@ -228,8 +228,8 @@ export const appMessagesPt: AppMessages = {
         upgrade_plan: "Em breve"
       }
     },
-    confidence: "Confiança",
-    confidencePanelTitle: "Confiança na sua voz",
+    confidence: "Confiança do mapa",
+    confidencePanelTitle: "Confiança do mapa de voz",
     confidenceDialEyebrow: "Confiança",
     confidenceDialSubline: {
       high: "raízes firmes",
@@ -282,34 +282,34 @@ export const appMessagesPt: AppMessages = {
       standard:
         "Adaptação equilibrada entre fidelidade aos exemplos e flexibilidade nos formatos."
     },
-    diagnostics: "Diagnósticos",
+    diagnostics: "Diagnóstico da expedição",
     reasonCodeMessages: {
       insufficient_examples:
-        "Ainda faltam exemplos suficientes para consolidar uma voz forte e previsível. Cada texto novo aproxima o perfil do seu estilo real.",
+        "Ainda faltam textos de referência para consolidar um mapa forte e previsível. Cada novo texto aproxima o mapa do seu estilo real.",
       insufficient_diversity:
-        "Já existe base suficiente, mas ainda falta diversidade de formatos e contextos para estabilizar a voz nas gerações.",
+        "Já existe base suficiente, mas ainda falta diversidade de territórios e contextos para estabilizar o mapa nas gerações.",
       language_conflict:
-        "Os exemplos misturam idiomas, o que reduz a consistência. Priorize um idioma principal ou separe textos por idioma."
+        "Os textos misturam idiomas, o que reduz a consistência. Priorize um idioma principal ou separe textos por idioma."
     },
     diagnosticsHealthy: {
       highMultiFormat:
-        "Sua voz está bem representada e cobre mais de um tipo de conteúdo. O perfil está pronto para adaptações firmes.",
-      high: "Sua voz está bem representada e pronta para adaptações mais firmes nas gerações.",
-      default: "O perfil atual já é utilizável, mas ainda pode ficar mais representativo com novos exemplos."
+        "Seu mapa está bem representado e cobre mais de um território. A expedição está pronta para rotas firmes.",
+      high: "Seu mapa está bem representado e pronto para adaptações mais firmes nas gerações.",
+      default: "O mapa atual já é utilizável, mas ainda pode ficar mais representativo com novos textos."
     },
-    coverage: "Cobertura por formato",
-    coverageMissingFormats: "Ainda faltam exemplos nestes formatos:",
+    coverage: "Territórios mapeados",
+    coverageMissingFormats: "Ainda faltam textos nestes territórios:",
     coverageComplete:
-      "Você cobriu todos os formatos recomendados. Parabéns — sua voz está bem distribuída entre os tipos de conteúdo que o Cultiv apoia.",
-    underrepresented: "Formatos com poucos exemplos:",
-    examplesTitle: "Exemplos",
-    examplesEmpty: "Nenhum exemplo ainda.",
-    examplesEmptyAction: "Adicionar exemplo",
-    addExamples: "Adicionar exemplos",
-    newExampleTitle: "Novo exemplo",
-    editExampleTitle: "Editar exemplo",
-    updatingBanner: "Atualizando sua voz…",
-    rebuildFailed: "A última atualização do perfil falhou.",
+      "Você cobriu todos os territórios recomendados. Parabéns — sua voz está bem distribuída entre os tipos de conteúdo que o Cultiv apoia.",
+    underrepresented: "Territórios com poucos textos:",
+    examplesTitle: "Textos de referência",
+    examplesEmpty: "Nenhum texto de referência ainda.",
+    examplesEmptyAction: "Adicionar texto",
+    addExamples: "Adicionar textos",
+    newExampleTitle: "Novo texto de referência",
+    editExampleTitle: "Editar texto de referência",
+    updatingBanner: "Reconstruindo seu mapa…",
+    rebuildFailed: "A última reconstrução do mapa falhou.",
     upgradeSoon: "Em breve",
     composer: {
       addSlot: "Adicionar outro exemplo",
