@@ -4,6 +4,7 @@ import {
   CoordinateLabel,
   Container,
   Text,
+  cn,
 } from "@my-ai-orchestrator/ui";
 import { useSectionReveal } from "~/marketing/animations/use-section-reveal";
 import { getLocaleMessages } from "~/i18n/marketing/get-locale";
@@ -16,11 +17,6 @@ export interface PricingSectionProps {
 export function PricingSection({ locale }: PricingSectionProps) {
   const { pricing } = getLocaleMessages(locale);
   const sectionRef = useSectionReveal("[data-section-item]");
-  const plan = pricing.plans[0];
-
-  if (!plan) {
-    return null;
-  }
 
   return (
     <section id="preco" className="border-b border-ink-ghost/30">
@@ -43,45 +39,62 @@ export function PricingSection({ locale }: PricingSectionProps) {
             </Text>
           </header>
 
-          <article
-            className="mx-auto max-w-md rounded-[5px] border-double-cartography bg-off-white p-6 shadow-cartography md:p-8"
+          <div
+            className="mx-auto grid max-w-6xl gap-5 md:grid-cols-3 md:gap-6"
             data-section-item
           >
-            <Text
-              as="p"
-              variant="mono"
-              className="mb-5 text-center uppercase tracking-widest"
-            >
-              {plan.name}
-            </Text>
-
-            <Text as="p" variant="body" className="mb-6 text-ink-muted">
-              {plan.description}
-            </Text>
-
-            <ul className="mb-8 space-y-3">
-              {plan.features.map((feature) => (
-                <li key={feature} className="flex items-start gap-3">
-                  <span
-                    aria-hidden
-                    className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-terracotta"
-                  />
-                  <Text as="span" variant="body" className="text-ink-muted">
-                    {feature}
+            {pricing.plans.map((plan) => (
+              <article
+                key={plan.name}
+                className={cn(
+                  "flex flex-col rounded-[5px] bg-off-white p-6 shadow-cartography md:p-7",
+                  plan.recommended && "md:-translate-y-1 md:shadow-[6px_6px_0_rgba(26,46,60,0.1)]"
+                )}
+              >
+                <div className="mb-4 flex flex-wrap items-center gap-2">
+                  <Text as="h3" variant="heading" className="text-deep-blue">
+                    {plan.name}
                   </Text>
-                </li>
-              ))}
-            </ul>
+                  {plan.badge ? (
+                    <span
+                      className={cn(
+                        "rounded-[5px] px-2 py-0.5 ui-type-mono text-[0.625rem] uppercase tracking-widest",
+                        plan.recommended
+                          ? "bg-terracotta/10 text-terracotta"
+                          : "bg-cream text-ink-muted"
+                      )}
+                    >
+                      {plan.badge}
+                    </span>
+                  ) : null}
+                </div>
 
-            <div className="border-t border-dotted-cartography pt-6">
-              <Text as="p" variant="mono" className="mb-5 text-ink-muted">
-                {plan.footer}
-              </Text>
-              <ButtonLink href="#waitlist" variant="primary" className="w-full">
-                {pricing.cta}
-              </ButtonLink>
-            </div>
-          </article>
+                <Text as="p" variant="body" className="mb-6 text-ink-muted">
+                  {plan.description}
+                </Text>
+
+                <ul className="mb-8 flex-1 space-y-3">
+                  {plan.features.map((feature) => (
+                    <li key={feature} className="flex items-start gap-3">
+                      <span
+                        aria-hidden
+                        className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-terracotta"
+                      />
+                      <Text as="span" variant="body" className="text-ink-muted">
+                        {feature}
+                      </Text>
+                    </li>
+                  ))}
+                </ul>
+
+                <div className="flex justify-center pt-2">
+                  <ButtonLink href="#waitlist" variant="primary">
+                    {pricing.cta}
+                  </ButtonLink>
+                </div>
+              </article>
+            ))}
+          </div>
         </Container>
       </CartographySurface>
     </section>

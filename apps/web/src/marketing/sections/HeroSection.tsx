@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import {
   ButtonLink,
   CartographySurface,
@@ -31,12 +32,12 @@ function HeroHeadline({ text }: { readonly text: string }) {
       className={cn("ui-type-display-xl text-deep-blue")}
     >
       {words.map((word, index) => (
-        <span key={`${word}-${index}`} className="inline-block">
-          {index > 0 ? "\u00a0" : null}
+        <Fragment key={`${word}-${index}`}>
+          {index > 0 ? " " : null}
           <span data-hero-word className="inline-block">
             {word}
           </span>
-        </span>
+        </Fragment>
       ))}
     </h1>
   );
@@ -49,10 +50,10 @@ export function HeroSection({ locale }: HeroSectionProps) {
 
   return (
     <section id="hero" className="border-b border-ink-ghost/30">
-      <CartographySurface className="min-h-hero-viewport">
+      <CartographySurface className="min-h-hero-viewport [&>div]:flex [&>div]:min-h-[inherit] [&>div]:items-center">
       <Container
         ref={sectionRef}
-        className="flex flex-col justify-center py-[var(--spacing-section-sm)] lg:py-[var(--spacing-section)]"
+        className="w-full px-[clamp(1.75rem,5.5vw,4rem)] py-6 md:py-10"
       >
         <div className="grid items-center gap-10 lg:grid-cols-12 lg:gap-12">
           <div className="flex flex-col gap-6 lg:col-span-5">

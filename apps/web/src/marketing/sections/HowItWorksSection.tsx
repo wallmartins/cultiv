@@ -3,12 +3,9 @@ import {
   CartographySurface,
   CoordinateLabel,
   Container,
-  RouteLine,
   Text,
   cn,
 } from "@my-ai-orchestrator/ui";
-import { mergeRefs } from "~/marketing/animations/merge-refs";
-import { useRouteDraw } from "~/marketing/animations/use-route-draw";
 import { useSectionReveal } from "~/marketing/animations/use-section-reveal";
 import { getLocaleMessages } from "~/i18n/marketing/get-locale";
 import type { MarketingLocale } from "~/i18n/marketing/types";
@@ -20,8 +17,6 @@ export interface HowItWorksSectionProps {
 export function HowItWorksSection({ locale }: HowItWorksSectionProps) {
   const { route } = getLocaleMessages(locale);
   const sectionRef = useSectionReveal("[data-section-item]");
-  const routeDrawRef = useRouteDraw();
-  const containerRef = mergeRefs(sectionRef, routeDrawRef);
   const [activeIndex, setActiveIndex] = useState(0);
   const stepRefs = useRef<(HTMLElement | null)[]>([]);
 
@@ -51,13 +46,11 @@ export function HowItWorksSection({ locale }: HowItWorksSectionProps) {
     };
   }, [route.steps.length]);
 
-  const routeProgress = (activeIndex + 1) / route.steps.length;
-
   return (
     <section id="rota" className="border-b border-ink-ghost/30">
       <CartographySurface className="bg-off-white">
         <Container
-          ref={containerRef}
+          ref={sectionRef}
           className="py-[var(--spacing-section-sm)] md:py-[var(--spacing-section)]"
         >
           <header
@@ -70,29 +63,16 @@ export function HowItWorksSection({ locale }: HowItWorksSectionProps) {
             </Text>
           </header>
 
-          <div className="relative mx-auto max-w-2xl" data-section-item>
-            <div
-              data-route-draw
-              className="absolute bottom-0 left-[1.125rem] top-0 w-5 md:left-6"
-              aria-hidden="true"
-            >
-              <RouteLine
-                orientation="vertical"
-                progress={routeProgress}
-                animate
-                className="h-full w-full"
-              />
-            </div>
-
-            <ol className="relative space-y-8 md:space-y-10">
+          <div className="mx-auto max-w-2xl" data-section-item>
+            <ol className="space-y-8 md:space-y-10">
               {route.steps.map((step, index) => {
                 const isActive = index <= activeIndex;
 
                 return (
-                  <li key={step.index} className="relative flex gap-5 md:gap-6">
+                  <li key={step.index} className="flex gap-5 md:gap-6">
                     <div
                       className={cn(
-                        "relative z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-full",
+                        "flex h-9 w-9 shrink-0 items-center justify-center rounded-full",
                         "border-2 transition-colors duration-300 motion-reduce:transition-none",
                         isActive
                           ? "border-terracotta bg-terracotta text-off-white"

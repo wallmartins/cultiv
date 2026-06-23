@@ -1,5 +1,6 @@
 # Progress Log
 
+| 2026-06-23 | fix(marketing): Cartography landing polish — section rail, compositor demo, shared comparison frame, pricing plans, copy without em dashes, hero headline wrap fix |
 | 2026-06-23 | docs: Cartography redesign implemented — Task 21 QA gate: fixed migration test drift (geo llms route copy, generation intent labels, VoiceReasoningMirror voiceMessages prop, content-type labels, cartography motion tokens); 936 tests pass (28 skipped), web build pass, cartography governance + primitives pass; manual QA: governance ✓, web build ✓, full suite ✓ |
 | 2026-06-23 | feat(marketing): Cartography motion — route draw, reveal stagger, hero word fade; retired stamp reveal and scroll-pin hooks |
 | 2026-06-23 | docs: Cultiv Cartography redesign implementation plan — 21 tasks across tokens, primitives, marketing reskin, workspace shell, Imprint retirement, QA gate |

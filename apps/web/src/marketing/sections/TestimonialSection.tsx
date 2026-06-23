@@ -16,7 +16,7 @@ export function TestimonialSection({ locale }: TestimonialSectionProps) {
   const sectionRef = useSectionReveal("[data-section-item]");
 
   return (
-    <section className="border-b border-ink-ghost/30">
+    <section id="depoimento" className="border-b border-ink-ghost/30">
       <CartographySurface className="bg-off-white">
         <Container
           ref={sectionRef}

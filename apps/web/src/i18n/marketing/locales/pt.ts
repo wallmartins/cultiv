@@ -21,15 +21,15 @@ export const pt: LocaleMessages = {
     contact: "contato@cultiv.app",
     location: "Brasil",
     description:
-      "Sua voz. Seu território. Suas palavras. A IA que mapeia como você escreve — e gera textos com sua assinatura.",
+      "Sua voz. Seu território. Suas palavras. A IA que mapeia como você escreve e gera textos com sua assinatura.",
     signature: "Com ♥ e ✦, Cultiv",
     seal: "Feito à mão com IA"
   },
   hero: {
-    badge: "Acesso antecipado — mapa em construção",
-    headline: "A IA que aprende o mapa da sua voz — e escreve como se fosse você.",
+    badge: "Acesso antecipado, mapa em construção",
+    headline: "A IA que aprende o mapa da sua voz e escreve como se fosse você.",
     subheadline:
-      "Cultiv aprende seu tom, sua cadência, sua assinatura. E gera textos que parecem ter saído da sua mão — não de um template.",
+      "Cultiv aprende seu tom, sua cadência, sua assinatura. E gera textos que parecem ter saído da sua mão, não de um template.",
     ctaPrimary: "Explorar sua voz",
     ctaSecondary: "Ver a rota",
     genericLabel: "ChatGPT (genérico)",
@@ -47,7 +47,7 @@ export const pt: LocaleMessages = {
       {
         title: "Voz genérica",
         body:
-          "Toda ferramenta entrega respostas corretas — mas sem rastro seu. Quanto mais você publica, mais o mapa da sua voz some no ruído."
+          "Toda ferramenta entrega respostas corretas, mas sem rastro seu. Quanto mais você publica, mais o mapa da sua voz some no ruído."
       },
       {
         title: "Voz que não evolui",
@@ -57,7 +57,7 @@ export const pt: LocaleMessages = {
       {
         title: "Voz diluída",
         body:
-          "Prompts avulsos imitam seu tom por um parágrafo — sem memória, sem continuidade, sem coordenadas."
+          "Prompts avulsos imitam seu tom por um parágrafo, sem memória, sem continuidade, sem coordenadas."
       }
     ]
   },
@@ -73,7 +73,7 @@ export const pt: LocaleMessages = {
       {
         index: "02",
         title: "Ensine sua voz",
-        body: "Cole exemplos da sua escrita real — artigos, posts, qualquer texto que carregue sua assinatura."
+        body: "Cole exemplos da sua escrita real, como artigos, posts ou qualquer texto que carregue sua assinatura."
       },
       {
         index: "03",
@@ -88,19 +88,86 @@ export const pt: LocaleMessages = {
       {
         index: "05",
         title: "Dê forma ao texto",
-        body: "Texto finalizado com sua assinatura — pronto para publicar no território que você escolheu."
+        body: "Texto finalizado com sua assinatura, pronto para publicar no território que você escolheu."
       }
     ]
   },
   tools: {
     eyebrow: "Ferramentas",
-    title: "Seis territórios para sua mensagem",
+    title: "O compositor monta a rota do seu texto",
     subtitle:
-      "Cada formato é um terreno diferente. Escolha onde sua voz vai habitar — Cultiv adapta tom, estrutura e extensão."
+      "Sem escolher formato fixo. Você define objetivo, escala e briefing, e o Cultiv traça a geração com a sua voz.",
+    demo: {
+      stepLabels: ["Explorar", "Escala", "Coordenadas"],
+      phases: [
+        {
+          title: "O que você quer fazer?",
+          subtitle:
+            "Escolha o objetivo retórico. O compositor usa isso para definir estrutura, tom e passos de geração.",
+          intents: [
+            {
+              label: "Compartilhar uma ideia",
+              description: "Um insight, uma descoberta ou uma posição clara.",
+              selected: true
+            },
+            {
+              label: "Explicar com profundidade",
+              description: "Desdobrar um tema com contexto, argumento e nuance."
+            },
+            {
+              label: "Engajar a audiência",
+              description: "Provocar, convidar à conversa ou à ação."
+            },
+            {
+              label: "Contar uma história",
+              description: "Narrativa com começo, meio e virada."
+            }
+          ]
+        },
+        {
+          title: "Tamanho e destino",
+          subtitle: "Defina a escala do texto e, se quiser, onde ele será publicado.",
+          selectedIntentLabel: "Compartilhar uma ideia",
+          changeIntent: "Mudar objetivo",
+          lengthTierLabel: "Profundidade",
+          lengthTiers: [
+            { label: "Curta" },
+            { label: "Média", selected: true },
+            { label: "Longa" }
+          ],
+          channelLabel: "Destino",
+          channelOptional: "Opcional",
+          channelValue: "Newsletter"
+        },
+        {
+          title: "Coordenadas do texto",
+          subtitle: "Tema, audiência e contexto, com prévia da rota antes de gerar.",
+          fields: [
+            {
+              label: "Tema",
+              value: "Por que parei de perseguir toda tendência da semana"
+            },
+            {
+              label: "Audiência",
+              value: "Criadores que publicam com regularidade"
+            },
+            {
+              label: "Contexto",
+              value: "Tom reflexivo, sem jargão de produtividade"
+            }
+          ],
+          previewLabel: "Prévia da rota",
+          previewMode: "Modo equilibrado",
+          previewCost: "3 créditos",
+          generateCta: "Gerar com minha voz"
+        }
+      ]
+    }
   },
   comparison: {
     eyebrow: "A diferença é real",
     title: "Mesmo briefing. Dois resultados.",
+    comparisonLabel: "Comparação",
     verdict: "A autenticidade não é um luxo. É o que faz seu público voltar.",
     signature: "Tecnologia de ponta, feita com alma de artesão.",
     genericLabel: "ChatGPT (seu prompt)",
@@ -119,24 +186,51 @@ export const pt: LocaleMessages = {
   },
   pricing: {
     eyebrow: "Recursos da jornada",
-    title: "Pague só pelas rotas que traçar",
+    title: "Planos para cada fase da sua escrita",
     cta: "Entrar na lista",
-    recommendedBadge: "Recomendado",
+    recommendedBadge: "Mais popular",
     plans: [
       {
-        name: "Créditos por geração",
-        badge: "Modelo de créditos",
-        description:
-          "Cada texto consome créditos conforme formato e extensão. Você vê o custo na prévia antes de confirmar.",
+        name: "Explorador (Free)",
+        badge: "Para começar",
+        description: "Ideal para conhecer o Cultiv e mapear sua voz.",
         features: [
-          "Prévia com custo antes de gerar",
-          "Seis formatos de conteúdo",
-          "Mapa de voz personalizado",
-          "Modos de navegação: leve, equilibrado e polido",
-          "Histórico completo no caderno de bordo"
+          "Acesso à plataforma",
+          "Mapa de voz básico",
+          "Todos os objetivos de escrita",
+          "Modo rápido de geração",
+          "Cota mensal de gerações para experimentar",
+          "Prévia antes de gerar"
         ],
-        footer: "Valores detalhados no lançamento do acesso antecipado",
+        footer: "Valor: em definição"
+      },
+      {
+        name: "Criador",
+        badge: "Mais popular",
+        description: "Para quem publica com regularidade e quer mais profundidade.",
+        features: [
+          "Tudo do Explorador",
+          "Mais gerações por mês",
+          "Modos rápido e equilibrado",
+          "Perfil de voz mais robusto",
+          "Suporte a textos de médio e longo alcance"
+        ],
+        footer: "Valor: em definição",
         recommended: true
+      },
+      {
+        name: "Pro",
+        badge: "Para profissionais",
+        description:
+          "Para quem escreve com frequência e quer o máximo de controle e qualidade.",
+        features: [
+          "Tudo do Criador",
+          "Uma cota muito mais generosa de gerações",
+          "Todos os modos de geração, incluindo o mais refinado",
+          "Acesso antecipado a novidades",
+          "Prioridade no rollout"
+        ],
+        footer: "Valor: em definição"
       }
     ]
   },
@@ -148,7 +242,7 @@ export const pt: LocaleMessages = {
         id: "what",
         question: "O Cultiv substitui meu estilo de escrita?",
         answer:
-          "Não. Cultiv mapeia e preserva sua voz — é uma extensão do seu jeito de escrever, não um substituto."
+          "Não. Cultiv mapeia e preserva sua voz. É uma extensão do seu jeito de escrever, não um substituto."
       },
       {
         id: "how",
@@ -166,7 +260,7 @@ export const pt: LocaleMessages = {
         id: "pricing",
         question: "Quanto custa?",
         answer:
-          "Créditos por geração. O custo aparece na prévia antes de confirmar — sem surpresas no meio da rota."
+          "Três planos (Explorador, Criador e Pro) com cotas e modos de geração diferentes. Valores em definição; entre na lista para o acesso antecipado."
       },
       {
         id: "access",
@@ -199,7 +293,7 @@ export const pt: LocaleMessages = {
     "long-form-blog": {
       label: "Artigo aprofundado",
       description:
-        "Desenvolva um argumento com estrutura sólida — profundidade além do post rápido."
+        "Desenvolva um argumento com estrutura sólida e profundidade além do post rápido."
     },
     "validation-post": {
       label: "Teste de ideia",
@@ -228,17 +322,17 @@ export const pt: LocaleMessages = {
     }
   },
   seo: {
-    homeTitle: "Cultiv — Sua voz. Seu território. Suas palavras.",
+    homeTitle: "Cultiv: Sua voz. Seu território. Suas palavras.",
     homeDescription:
-      "A IA que aprende o mapa da sua voz — e escreve como se fosse você. Cultiv aprende seu tom, cadência e assinatura para gerar textos autênticos.",
+      "A IA que aprende o mapa da sua voz e escreve como se fosse você. Cultiv aprende seu tom, cadência e assinatura para gerar textos autênticos.",
     privacyDescription: "Como Cultiv trata dados pessoais, consentimentos e exemplos de voz.",
     termsDescription: "Termos de uso do site e da lista de espera do Cultiv.",
-    ogImageAlt: "Cultiv — Sua voz. Seu território. Suas palavras."
+    ogImageAlt: "Cultiv: Sua voz. Seu território. Suas palavras."
   },
   geo: {
     brand: "Cultiv",
     productDefinition:
-      "Cultiv é um motor de escrita com IA que mapeia a identidade autoral do usuário e gera textos com assinatura própria — não genéricos.",
+      "Cultiv é um motor de escrita com IA que mapeia a identidade autoral do usuário e gera textos com assinatura própria, não genéricos.",
     keyFacts: [
       "Produto em acesso antecipado com lista de espera pública",
       "Voz ensinada com exemplos reais de escrita do autor",
@@ -249,10 +343,10 @@ export const pt: LocaleMessages = {
     ],
     llms: {
       title: "Cultiv",
-      fullTitle: "Cultiv — documentação completa",
+      fullTitle: "Cultiv: documentação completa",
       tagline: "Sua voz. Seu território. Suas palavras.",
       summary:
-        "Cultiv aprende como você escreve e gera textos que carregam sua assinatura — não o tom de todo mundo.",
+        "Cultiv aprende como você escreve e gera textos que carregam sua assinatura, não o tom de todo mundo.",
       category: "BusinessApplication",
       audience:
         "Criadores, fundadores e marcas que publicam conteúdo original e precisam de escala sem perder autenticidade.",
