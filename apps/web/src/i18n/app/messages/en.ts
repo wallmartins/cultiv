@@ -4,7 +4,7 @@ export const appMessagesEn: AppMessages = {
   shell: {
     nav: {
       generate: "Generate",
-      history: "History",
+      history: "Logbook",
       voice: "Voice",
       settings: "Settings",
       plans: "Plans",
@@ -143,19 +143,19 @@ export const appMessagesEn: AppMessages = {
     }
   },
   history: {
-    title: "Generation history",
-    subtitle: "Your past generations.",
-    empty: "No generations yet. Start by writing your first text.",
-    emptyAction: "Go to Generate",
-    error: "Could not load history.",
+    title: "Logbook",
+    subtitle: "All your expeditions in one place.",
+    empty: "No expeditions logged yet. Start by mapping your first route.",
+    emptyAction: "New expedition",
+    error: "Could not load the logbook.",
     retry: "Try again",
     filters: {
       period: "Period",
       status: "Status",
       contentType: "Format",
-      period7d: "7 days",
-      period30d: "30 days",
-      period90d: "90 days",
+      period7d: "Last 7 days",
+      period30d: "Last 30 days",
+      period90d: "Last 90 days",
       periodAll: "All time",
       statusAll: "All",
       statusDone: "Completed",
@@ -165,24 +165,24 @@ export const appMessagesEn: AppMessages = {
       contentTypeAll: "All formats"
     },
     columns: {
-      format: "Format",
-      date: "Date",
+      format: "Expedition",
+      date: "Departure date",
       mode: "Mode",
       credits: "Credits",
       status: "Status"
     },
     detail: {
       copy: "Copy",
-      regenerate: "Regenerate",
-      details: "Details",
-      executionId: "Execution ID",
-      createdAt: "Created at",
-      completedAt: "Completed at",
+      regenerate: "New expedition",
+      details: "Route details",
+      executionId: "Expedition ID",
+      createdAt: "Departure",
+      completedAt: "Return",
       voiceConfidence: "Voice confidence",
       adaptationMode: "Adaptation mode",
       progressSteps: "Steps",
-      loading: "Loading execution…",
-      notFound: "Execution not found."
+      loading: "Loading expedition…",
+      notFound: "Expedition not found."
     }
   },
   voice: {

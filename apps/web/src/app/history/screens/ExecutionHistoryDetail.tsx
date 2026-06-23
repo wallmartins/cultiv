@@ -1,5 +1,5 @@
 import type { ExecutionStatusView } from "@my-ai-orchestrator/contracts";
-import { Button, Text } from "@my-ai-orchestrator/ui";
+import { Button, cn, Text } from "@my-ai-orchestrator/ui";
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { ExecutionResultView } from "~/app/execution/components/ExecutionResultView";
@@ -10,6 +10,48 @@ import { useAppLocale } from "~/i18n/app/use-app-locale";
 import { getContentTypeLabel } from "~/i18n/app/content-types";
 import { storeGeneratePrefill } from "~/app/generation/lib/generate-prefill";
 import { useClientSdk } from "~/platform/runtime/client-sdk-context";
+
+function StatusBadge({ status }: { readonly status: string }) {
+  const configs: Record<string, { bg: string; border: string; text: string; label: string }> = {
+    done: {
+      bg: "bg-musgo/10",
+      border: "border-musgo/30",
+      text: "text-musgo",
+      label: "Concluída"
+    },
+    running: {
+      bg: "bg-azul/8",
+      border: "border-azul/25",
+      text: "text-azul",
+      label: "Em andamento"
+    },
+    queued: {
+      bg: "bg-ocre/12",
+      border: "border-ocre/30",
+      text: "text-ocre",
+      label: "Na fila"
+    },
+    failed: {
+      bg: "bg-terracota/8",
+      border: "border-terracota/25",
+      text: "text-terracota",
+      label: "Falha"
+    }
+  };
+
+  const config = configs[status] ?? {
+    bg: "bg-borda/10",
+    border: "border-borda/20",
+    text: "text-borda",
+    label: status
+  };
+
+  return (
+    <span className={cn("inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 font-inter text-xs font-medium", config.bg, config.border, config.text)}>
+      {config.label}
+    </span>
+  );
+}
 
 export function ExecutionHistoryDetail({ executionId }: { readonly executionId: string }) {
   const { locale, messages } = useAppLocale();
@@ -93,9 +135,18 @@ export function ExecutionHistoryDetail({ executionId }: { readonly executionId: 
 
   if (status === "error" || !execution) {
     return (
-      <Text variant="meta" className="px-[var(--spacing-gutter)] py-8 text-red-700">
-        {messages.history.detail.notFound}
-      </Text>
+      <div className="px-[var(--spacing-gutter)] py-8">
+        <AppCard className="text-center">
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full border border-terracota/20 bg-terracota/5">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6 text-terracota">
+              <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4.5c-.77-.833-2.694-.833-3.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
+            </svg>
+          </div>
+          <Text variant="meta" className="text-terracota">
+            {messages.history.detail.notFound}
+          </Text>
+        </AppCard>
+      </div>
     );
   }
 
@@ -103,12 +154,12 @@ export function ExecutionHistoryDetail({ executionId }: { readonly executionId: 
 
   return (
     <div className="px-[var(--spacing-gutter)] py-8 md:py-10">
-      <Text as="h1" variant="h1" className="mb-3">
-        {getContentTypeLabel(locale, execution.contentType, execution.contentType)}
-      </Text>
-      <Text variant="meta" className="mb-6 text-ink-muted">
-        {execution.status}
-      </Text>
+      <div className="mb-6">
+        <Text as="h1" variant="h1" className="mb-3 font-playfair text-azul">
+          {getContentTypeLabel(locale, execution.contentType, execution.contentType)}
+        </Text>
+        <StatusBadge status={execution.status} />
+      </div>
 
       {execution.progress && (execution.status === "running" || execution.status === "queued") ? (
         <div className="mb-6">
@@ -117,15 +168,17 @@ export function ExecutionHistoryDetail({ executionId }: { readonly executionId: 
       ) : null}
 
       {execution.result ? (
-        <AppCard className="mb-6">
+        <AppCard className="mb-6 border-borda/15">
           <ExecutionResultView content={execution.result.content} />
         </AppCard>
       ) : null}
 
       {execution.error ? (
-        <Text variant="meta" className="mb-6 text-red-700">
-          {execution.error.message}
-        </Text>
+        <AppCard className="mb-6 border-terracota/20 bg-terracota/5">
+          <Text variant="meta" className="text-terracota">
+            {execution.error.message}
+          </Text>
+        </AppCard>
       ) : null}
 
       <div className="mb-6 flex flex-wrap gap-2">
@@ -164,34 +217,34 @@ export function ExecutionHistoryDetail({ executionId }: { readonly executionId: 
         </Button>
       </div>
 
-      <AppCard padding="compact" className="mb-6">
+      <AppCard padding="compact" className="border-borda/15">
         <details>
-          <summary className="cursor-pointer text-sm font-medium">
+          <summary className="cursor-pointer font-inter text-sm font-medium text-azul">
             {messages.history.detail.details}
           </summary>
           <div className="mt-3 space-y-2">
-          <Text variant="meta">
-            {messages.history.detail.executionId}: {execution.jobId}
-          </Text>
-          <Text variant="meta">
-            {messages.history.detail.createdAt}: {execution.createdAt}
-          </Text>
-          {execution.completedAt ? (
-            <Text variant="meta">
-              {messages.history.detail.completedAt}: {execution.completedAt}
+            <Text variant="meta" className="font-inter">
+              {messages.history.detail.executionId}: <span className="font-mono text-texto-sec">{execution.jobId}</span>
             </Text>
-          ) : null}
-          {execution.voice ? (
-            <>
-              <Text variant="meta">
-                {messages.history.detail.voiceConfidence}: {execution.voice.voiceProfileConfidence}
+            <Text variant="meta" className="font-inter">
+              {messages.history.detail.createdAt}: <span className="text-texto-sec">{execution.createdAt}</span>
+            </Text>
+            {execution.completedAt ? (
+              <Text variant="meta" className="font-inter">
+                {messages.history.detail.completedAt}: <span className="text-texto-sec">{execution.completedAt}</span>
               </Text>
-              <Text variant="meta">
-                {messages.history.detail.adaptationMode}: {execution.voice.voiceAdaptationMode}
-              </Text>
-            </>
-          ) : null}
-        </div>
+            ) : null}
+            {execution.voice ? (
+              <>
+                <Text variant="meta" className="font-inter">
+                  {messages.history.detail.voiceConfidence}: <span className="text-texto-sec">{execution.voice.voiceProfileConfidence}</span>
+                </Text>
+                <Text variant="meta" className="font-inter">
+                  {messages.history.detail.adaptationMode}: <span className="text-texto-sec">{execution.voice.voiceAdaptationMode}</span>
+                </Text>
+              </>
+            ) : null}
+          </div>
         </details>
       </AppCard>
     </div>
