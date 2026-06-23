@@ -182,7 +182,7 @@ export function AppSelect({
           data-lenis-prevent
           data-lenis-prevent-wheel
           data-lenis-prevent-touch
-          className="showcase-output-scroll absolute top-[calc(100%+0.25rem)] z-50 max-h-60 w-full overflow-y-auto overscroll-contain rounded-[var(--radius-press)] border border-ink-ghost/80 bg-paper-elevated shadow-[var(--shadow-press-edge)]"
+          className="showcase-output-scroll absolute top-[calc(100%+0.25rem)] z-50 max-h-60 w-full overflow-y-auto overscroll-contain rounded-[var(--radius-cartography)] border border-ink-ghost/80 bg-paper-elevated shadow-[var(--shadow-cartography)]"
           onKeyDown={onListKeyDown}
           onWheel={(event) => event.stopPropagation()}
         >

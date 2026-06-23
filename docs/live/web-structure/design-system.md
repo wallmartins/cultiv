@@ -3,19 +3,19 @@ title: Design System — estrutura e referência
 doc_type: reference
 status: live
 domain: design-system
-last_updated: 2026-06-22
+last_updated: 2026-06-23
 ---
 
 # Design System — estrutura e referência
 
-O **Cultiv Imprint** é a identidade visual unificada do monorepo — marketing e workspace autenticado compartilham um único pacote **`packages/ui`** (`@my-ai-orchestrator/ui`). A organização segue camadas: tokens → primitives → patterns. Intensidade (`expressive` / `quiet`) é composição no app, não um fork de tokens.
+O **Cultiv Cartography** é a identidade visual unificada do monorepo — marketing e workspace autenticado compartilham um único pacote **`packages/ui`** (`@my-ai-orchestrator/ui`). A organização segue camadas: tokens → primitives → patterns. Volume de superfície (`marketing` / `workspace`) é composição no app, não um fork de tokens.
 
-Decisão arquitetural: [ADR 0009 — Cultiv Imprint unified identity](../../adr/0009-cultiv-imprint-identity.md).
+Decisão arquitetural: [ADR 0010 — Cultiv Cartography unified identity](../../adr/0010-cultiv-cartography-identity.md).
 
 Documentação relacionada:
 
-- [Direção criativa](./design-system-creative-direction.md) — filosofia Imprint
-- [Especificação completa](../../superpowers/specs/2026-06-22-cultiv-imprint-identity-design.md)
+- [Direção criativa](./design-system-creative-direction.md) — filosofia Cartography
+- [Especificação completa](../../superpowers/specs/2026-06-23-cultiv-cartography-redesign-design.md)
 - [Sistema de animação](./system-animation.md) — GSAP, Lenis, scroll reveal (marketing)
 
 ---
@@ -25,7 +25,7 @@ Documentação relacionada:
 ```
 packages/ui/
 ├── src/
-│   ├── styles/theme.css      # tokens Imprint (Tailwind v4 @theme)
+│   ├── styles/theme.css      # tokens Cartography (Tailwind v4 @theme)
 │   ├── tokens/               # motion, spacing (TypeScript)
 │   ├── primitives/           # componentes base
 │   ├── patterns/             # composições reutilizáveis
@@ -37,7 +37,7 @@ packages/ui/
 
 | Export | Caminho | Uso |
 |--------|---------|-----|
-| Componentes e tokens JS | `@my-ai-orchestrator/ui` | `import { Button, Text, PaperSurface } from "…"` |
+| Componentes e tokens JS | `@my-ai-orchestrator/ui` | `import { Button, Text, ExpeditionCard } from "…"` |
 | Tema CSS | `@my-ai-orchestrator/ui/styles/theme.css` | `@import` no CSS do app |
 
 ---
@@ -46,39 +46,40 @@ packages/ui/
 
 Fonte única via **Tailwind CSS v4** (`@theme`). Sem tokens paralelos marketing vs app.
 
-### Tipografia — três papéis
+### Tipografia — quatro papéis
 
-Regra: *sans conduz, serif imprime, leitura respira.*
+Regra: *Playfair conduz autoridade, Inter conduz interface, Caveat anota margens, mono marca coordenadas.*
 
 | Papel | Token CSS | Fonte | Uso |
 |-------|-----------|-------|-----|
-| **Condução** | `--font-conducao` / `font-conducao` | Bricolage Grotesque | UI, nav, títulos, labels, botões |
-| **Impressão** | `--font-impressao` / `font-impressao` | Fraunces | Taglines, citações de voz, ênfase de marca (escassa) |
-| **Leitura** | `--font-leitura` / `font-leitura` | Source Serif 4 | Texto gerado, preview, drawer de execução, showcase |
-| **Mono** | `--font-mono` | JetBrains Mono | Meta técnica, créditos, timestamps |
+| **Autoridade** | `--font-autoridade` / `font-autoridade` | Playfair Display | Títulos display, logbook |
+| **Condução** | `--font-conducao` / `font-conducao` | Inter | UI, nav, labels, botões |
+| **Margem** | `--font-margem` / `font-margem` | Caveat | Anotações escassas |
+| **Coordenadas** | `--font-coordenadas` / `font-mono` | JetBrains Mono | Meta técnica, créditos, timestamps |
 
-`--font-body` aponta para Condução. Utilitários: `.ui-type-display-xl`, `.ui-type-reading`, `.ui-type-imprint`.
+`--font-body` aponta para Condução. Utilitários: `.ui-type-display-xl`, `.ui-type-logbook`, `.ui-type-mono`.
 
 ### Cores
 
 | Token | Papel |
 |-------|-------|
-| `paper` / `paper-elevated` / `paper-pressed` | Fundos de papel |
+| `cream` / `off-white` | Fundos de atlas |
 | `ink` / `ink-muted` / `ink-ghost` | Texto e divisores |
-| `pigment-terracotta` | Acento primário, CTA, estados ativos |
-| `pigment-indigo` | Acento secundário, links, meta mono |
-| `pigment-ochre` | Destaque sutil, progresso, confiança |
+| `terracotta` | Acento primário, CTA, estados ativos |
+| `deep-blue` | Acento estrutural, links, meta mono |
+| `ochre` | Destaque sutil, progresso, confiança |
 | `success` / `warning` / `error` / `info` | Semântica |
 
-Paleta legada (moss, golden, showcase editorial) foi removida.
+Aliases `paper`, `pigment-*` e nomes pt-BR (`creme`, `terracota`, …) mapeiam para os tokens cartográficos.
 
 ### Materialidade
 
 | Token / classe | Papel |
 |----------------|-------|
-| `--shadow-press-edge` / `.press-edge` | Borda embutida simulando impressão |
-| `.imprint-grain` | Textura de papel (opacidade via `data-intensity`) |
-| `--radius-press` (`2px`) | Botões, inputs, cards |
+| `--shadow-cartography` / `.shadow-cartography` | Sombra offset editorial |
+| `.cartography-grain` | Textura de papel (opacidade via `data-surface`) |
+| `.border-dotted-cartography` | Borda pontilhada de carta |
+| `--radius-cartography` (`5px`) | Botões, inputs, cards |
 
 ### Espaçamento e layout
 
@@ -92,24 +93,23 @@ Dark theme: variáveis sob `.dark` preparadas, não productizadas em v1.
 
 ### Motion (`tokens/motion.ts`)
 
-`instant`, `fast`, `base`, `slow`, `press`, `reveal`, `hover`, `stagger` — alinhados à narrativa impressão → silêncio. GSAP/Lenis permanecem em `apps/web/src/animations/`.
+`instant`, `fast`, `base`, `slow`, `press`, `reveal`, `hover`, `stagger` — alinhados à narrativa expedição → silêncio. GSAP/Lenis permanecem em `apps/web/src/animations/`.
 
 ---
 
-## 2. Modos de intensidade
+## 2. Modos de superfície
 
-Atributo raiz `data-intensity` — mesmos tokens, volume visual diferente.
+Atributo raiz `data-surface` — mesmos tokens, volume visual diferente.
 
-| Aspecto | `expressive` (marketing) | `quiet` (`/app/*`) |
-|---------|--------------------------|---------------------|
-| Paper grain | 5% | 3% |
-| Press edge | cards e seções | cards + inputs + chrome |
-| Ink bleed | hero, waitlist | onboarding |
-| Fraunces | taglines, pull quotes | rótulos de voz |
+| Aspecto | `marketing` | `workspace` (`/app/*`) |
+|---------|-------------|------------------------|
+| Paper grain | 6% | 3% |
+| Parallax de textura | sim | não |
+| Playfair display | hero, seções | rótulos de voz |
 | Pigmentos | terracotta + ochre | terracotta em CTA ativo |
 | Lenis / scroll reveal | sim | não (mount apenas) |
 
-Implementação: `MarketingLayout` (`expressive`), `AppShell` / `OnboardingLayout` (`quiet`).
+Implementação: `MarketingLayout` (`data-surface="marketing"`), `AppShell` / `OnboardingLayout` (`data-surface="workspace"`).
 
 ---
 
@@ -117,25 +117,24 @@ Implementação: `MarketingLayout` (`expressive`), `AppShell` / `OnboardingLayou
 
 | Componente | Papel |
 |------------|-------|
-| **Text** | Escala Condução + variantes `reading` / `imprint` |
-| **Button** / **ButtonLink** | `radius-press`, terracotta primário, press edge |
-| **Input** | Inset press edge, anel de foco terracotta |
-| **Container** / **Grid** | Layout com gutter Imprint |
-| **PressMark** | Logo SVG (marca de prensa) |
-| **PaperSurface** | `imprint-grain` + `press-edge` |
-| **ReadingSurface** | Superfície de leitura imersiva (preview, drawer) |
-| **InkBleed** | Gradiente decorativo de pigmento (marketing/onboarding) |
+| **Text** | Escala Condução + variantes `logbook` / `margem` |
+| **Button** / **ButtonLink** | `radius-cartography`, terracotta primário, shadow cartography |
+| **Input** | Borda pontilhada, anel de foco terracotta |
+| **Container** / **Grid** | Layout com gutter cartográfico |
+| **CompassMark** | Logo SVG (marca bússola) |
+| **CartographySurface** | `cartography-grain` + fundo cream |
+| **LogbookProse** | Superfície de leitura imersiva (preview, drawer) |
+| **ExpeditionCard** | Card cream + borda pontilhada + terracotta quando selecionado |
+| **RouteLine** / **CoordinateLabel** | Linha de rota e rótulos §01 · … |
 
 ### Text — variantes principais
 
 | Variante | Papel |
 |----------|-------|
-| `display-xl`, `display`, `heading-lg`, `heading`, `h1`–`h3` | Condução |
+| `display-hero`, `display-xl`, `display`, `heading-lg`, `heading`, `h1`–`h3` | Autoridade (Playfair) |
 | `body`, `body-lg`, `caption`, `label`, `meta`, `mono` | UI e meta |
-| `reading` | Source Serif 4 — conteúdo gerado |
-| `imprint` | Fraunces — ênfase escassa |
-
-Aliases legados (`chapter`, `handwritten`) mapeiam para a escala Imprint.
+| `logbook` | Playfair itálico — conteúdo gerado |
+| `margem` | Caveat — anotações escassas |
 
 ---
 
@@ -162,28 +161,29 @@ Composições por superfície:
 
 ```
 apps/web/src/
-├── marketing/     # expressive — hero, showcase, waitlist
-├── app/           # quiet — shell, geração, voz, histórico
+├── marketing/     # marketing — hero, showcase, waitlist
+├── app/           # workspace — shell, geração, voz, histórico
 ├── animations/    # GSAP + Lenis (marketing)
-└── styles/app.css # overrides mínimos de intensidade
+└── styles/app.css # overrides mínimos de superfície
 ```
 
-Governança: `tests/governance/imprint-visual-governance.test.ts` bloqueia padrões legados (Playfair, Caveat, moss/golden, botânicos).
+Governança: `tests/governance/cartography-visual-governance.test.ts` bloqueia padrões Imprint legados (PressMark, Bricolage, Fraunces, Source Serif, botânicos, `imprint-grain`, `press-edge`, `data-intensity`).
 
 ---
 
 ## 6. Princípios (três movimentos)
 
 1. **Modernismo** — funcional, preciso; grid antes de curva.
-2. **Arts and Crafts** — textura e autenticidade (grain, press edge).
+2. **Arts and Crafts** — textura e autenticidade (grain, bordas pontilhadas).
 3. **Minimalismo** — texto protagonista em superfícies de leitura.
 
 | Princípio | Implementação |
 |-----------|---------------|
-| Texto vence | `ReadingSurface` sem cromia em preview/execução |
-| Textura, não decoração | grain e press edge como material |
-| Uma gramática, dois volumes | tokens únicos + `data-intensity` |
+| Texto vence | `LogbookProse` sem cromia em preview/execução |
+| Textura, não decoração | grain e bordas como material |
+| Uma gramática, dois volumes | tokens únicos + `data-surface` |
 | Cor com intenção | neutros default; pigmentos com propósito |
+| Reconhecível isolado | cream + borda pontilhada + Playfair + terracotta |
 
 ---
 
@@ -196,10 +196,12 @@ import {
   Container,
   Input,
   Grid,
-  PressMark,
-  PaperSurface,
-  ReadingSurface,
-  InkBleed,
+  CompassMark,
+  CartographySurface,
+  ExpeditionCard,
+  LogbookProse,
+  RouteLine,
+  CoordinateLabel,
   SectionHeader,
   Accordion,
   ComparisonCard,

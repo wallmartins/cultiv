@@ -11,11 +11,7 @@ import {
   listSourceFiles
 } from "./cartography-governance-shared.js";
 
-/**
- * Full Imprint ban scan — enable after Task 20 retires PressMark, InkBleed,
- * imprint-grain, press-edge, data-intensity, botanical scenes, and migration aliases.
- */
-describe.skip("cartography migration complete", () => {
+describe("cartography migration complete", () => {
   it("contains no Imprint visual patterns in ui and web source", () => {
     expect(collectImprintBannedViolations()).toEqual([]);
   });

@@ -30,6 +30,13 @@ describe("CoordinateLabel", () => {
 });
 
 describe("ExpeditionCard", () => {
+  it("reads as Cultiv: cream, dotted border, Playfair logbook typography", () => {
+    render(<ExpeditionCard>Card</ExpeditionCard>);
+    const card = screen.getByRole("button", { name: "Card" });
+    expect(card.className).toMatch(/border-dotted-cartography/);
+    expect(card.className).toMatch(/shadow-cartography/);
+  });
+
   it("applies terracotta solid border when selected", () => {
     render(<ExpeditionCard selected>Card</ExpeditionCard>);
     const card = screen.getByRole("button", { name: "Card" });

@@ -1,4 +1,4 @@
-import { ReadingSurface } from "@my-ai-orchestrator/ui";
+import { LogbookProse } from "@my-ai-orchestrator/ui";
 import { lenisScrollRegionClassName, lenisScrollRegionProps } from "~/platform/ui/lenis-scroll-region";
 
 export interface ExecutionResultViewProps {
@@ -9,15 +9,15 @@ export interface ExecutionResultViewProps {
 
 export function ExecutionResultView({ content, embedInScrollParent = false }: ExecutionResultViewProps) {
   return (
-    <ReadingSurface
+    <LogbookProse
       className={
         embedInScrollParent
-          ? "whitespace-pre-wrap rounded-[var(--radius-press)] px-4 py-5"
-          : `max-h-[min(70vh,40rem)] overflow-y-auto whitespace-pre-wrap rounded-[var(--radius-press)] px-4 py-5 ${lenisScrollRegionClassName}`
+          ? "whitespace-pre-wrap rounded-[var(--radius-cartography)] px-4 py-5"
+          : `max-h-[min(70vh,40rem)] overflow-y-auto whitespace-pre-wrap rounded-[var(--radius-cartography)] px-4 py-5 ${lenisScrollRegionClassName}`
       }
       {...(embedInScrollParent ? {} : lenisScrollRegionProps)}
     >
       {content}
-    </ReadingSurface>
+    </LogbookProse>
   );
 }

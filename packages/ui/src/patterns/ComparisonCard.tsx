@@ -1,4 +1,4 @@
-import { ReadingSurface } from "../primitives/ReadingSurface.js";
+import { LogbookProse } from "../primitives/LogbookProse.js";
 import { Text } from "../primitives/Text.js";
 
 export interface ComparisonCardProps {
@@ -38,22 +38,22 @@ export function ComparisonCard({
       </Text>
 
       <div className="grid border-t border-ink-ghost md:grid-cols-2">
-        <ReadingSurface className="space-y-4 border-b border-ink-ghost md:border-r md:border-b-0">
+        <LogbookProse className="space-y-4 border-b border-ink-ghost md:border-r md:border-b-0">
           <Text as="p" variant="caption">
             {genericLabel}
           </Text>
-          <Text as="p" variant="reading" className="text-ink-muted">
+          <Text as="p" variant="logbook" className="text-ink-muted">
             {genericOutput}
           </Text>
-        </ReadingSurface>
-        <ReadingSurface className="space-y-4 bg-paper-elevated">
+        </LogbookProse>
+        <LogbookProse className="space-y-4 bg-off-white">
           <Text as="p" variant="caption">
             {voiceLabel}
           </Text>
-          <Text as="p" variant="reading">
+          <Text as="p" variant="logbook">
             {voiceOutput}
           </Text>
-        </ReadingSurface>
+        </LogbookProse>
       </div>
     </article>
   );

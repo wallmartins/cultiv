@@ -38,15 +38,15 @@ export const CARTOGRAPHY_INDEX_EXPORTS = [
 ] as const;
 
 export const IMPRINT_BANNED_PATTERNS = [
-  { name: "PressMark", pattern: /PressMark/, allowInIndexTs: true },
-  { name: "press-mark-geometry", pattern: /press-mark-geometry/, allowInIndexTs: true },
-  { name: "imprint-grain", pattern: /imprint-grain/, allowInThemeCss: true },
-  { name: "press-edge", pattern: /press-edge/, allowInThemeCss: true },
-  { name: "InkBleed", pattern: /InkBleed/, allowInIndexTs: true },
+  { name: "PressMark", pattern: /PressMark/ },
+  { name: "press-mark-geometry", pattern: /press-mark-geometry/ },
+  { name: "imprint-grain", pattern: /imprint-grain/ },
+  { name: "press-edge", pattern: /press-edge/ },
+  { name: "InkBleed", pattern: /InkBleed/ },
   { name: "Bricolage Grotesque", pattern: /Bricolage Grotesque/ },
-  { name: "Fraunces", pattern: /Fraunces/, allowInThemeMigrationBlock: true },
-  { name: "Source Serif 4", pattern: /Source Serif 4/, allowInThemeMigrationBlock: true },
-  { name: "data-intensity=", pattern: /data-intensity=/, allowInThemeCss: true },
+  { name: "Fraunces", pattern: /Fraunces/ },
+  { name: "Source Serif 4", pattern: /Source Serif 4/ },
+  { name: "data-intensity=", pattern: /data-intensity=/ },
   { name: "BotanicalTree", pattern: /BotanicalTree/ },
   { name: "BotanicalStem", pattern: /BotanicalStem/ },
   { name: "FallingLeavesLayer", pattern: /FallingLeavesLayer/ }
@@ -55,8 +55,6 @@ export const IMPRINT_BANNED_PATTERNS = [
 export const WORKSPACE_BLUR_PATTERN = /backdrop-blur/;
 export const WORKSPACE_RADIUS_PATTERN = /rounded-(2xl|xl|3xl)/;
 export const WORKSPACE_GRADIENT_PATTERN = /bg-gradient/;
-
-const MIGRATION_ALIASES_MARKER = "migration aliases — remove Task 20";
 
 export function listSourceFiles(directory: string): string[] {
   const files: string[] = [];
@@ -87,49 +85,6 @@ export function repoFileExists(relativePath: string): boolean {
   return existsSync(join(ROOT, relativePath));
 }
 
-export function stripThemeMigrationAliasesBlock(content: string): string {
-  const markerIndex = content.indexOf(MIGRATION_ALIASES_MARKER);
-  if (markerIndex === -1) {
-    return content;
-  }
-
-  const pressEdgeIndex = content.indexOf("--shadow-press-edge:", markerIndex);
-  if (pressEdgeIndex === -1) {
-    return content.slice(0, markerIndex);
-  }
-
-  const blockEnd = content.indexOf(";", pressEdgeIndex);
-  if (blockEnd === -1) {
-    return content.slice(0, markerIndex);
-  }
-
-  return content.slice(0, markerIndex) + content.slice(blockEnd + 1);
-}
-
-export function contentForBannedPatternScan(
-  filePath: string,
-  content: string,
-  rule: (typeof IMPRINT_BANNED_PATTERNS)[number]
-): string | null {
-  const relativePath = relative(ROOT, filePath).replace(/\\/g, "/");
-
-  if (rule.allowInIndexTs && relativePath === UI_INDEX_PATH) {
-    return null;
-  }
-
-  if (relativePath === THEME_CSS_PATH) {
-    if (rule.allowInThemeCss) {
-      return null;
-    }
-
-    if (rule.allowInThemeMigrationBlock) {
-      return stripThemeMigrationAliasesBlock(content);
-    }
-  }
-
-  return content;
-}
-
 export function collectImprintBannedViolations(): string[] {
   const files = SCAN_ROOTS.flatMap((root) => listSourceFiles(join(ROOT, root)));
   const violations: string[] = [];
@@ -138,12 +93,7 @@ export function collectImprintBannedViolations(): string[] {
     const content = readFileSync(file, "utf8");
 
     for (const rule of IMPRINT_BANNED_PATTERNS) {
-      const scannable = contentForBannedPatternScan(file, content, rule);
-      if (scannable === null) {
-        continue;
-      }
-
-      if (rule.pattern.test(scannable)) {
+      if (rule.pattern.test(content)) {
         violations.push(`${relative(ROOT, file)}: ${rule.name}`);
       }
     }
