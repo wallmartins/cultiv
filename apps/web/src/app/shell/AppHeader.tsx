@@ -23,7 +23,7 @@ export function AppHeader({
   const { openDrawer } = useActiveExecutions();
 
   return (
-    <header className="sticky top-0 z-40 flex h-[var(--app-header-height)] items-center border-b border-ink-ghost bg-paper/95 backdrop-blur-sm">
+    <header className="sticky top-0 z-40 flex h-[var(--app-header-height)] items-center border-b border-ink-ghost bg-paper">
       <div className="flex w-full items-center justify-between gap-3 px-[var(--spacing-gutter)]">
         <Link to="/app/generate" aria-label="Cultiv" className="shrink-0">
           <PressMark size={28} className="block shrink-0 text-ink" />

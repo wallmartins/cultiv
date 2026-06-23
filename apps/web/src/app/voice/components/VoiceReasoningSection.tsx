@@ -42,7 +42,7 @@ export function buildReasoningDetailItems({
             {reasoning.formatExpressions.map((expression) => (
               <div
                 key={expression.contentType}
-                className="rounded-[var(--workspace-radius-sm)] border border-ink-ghost/60 bg-paper-elevated/60 p-4"
+                className="rounded-[var(--radius-press)] border border-ink-ghost/60 bg-paper-elevated/60 p-4"
               >
                 <Text variant="label" className="mb-2 block">
                   {getContentTypeLabel(locale, expression.contentType, expression.contentType)}
@@ -224,7 +224,7 @@ export function VoiceReasoningMirror({
           </div>
 
           {development.moveLabels.length > 0 ? (
-            <div className="rounded-[var(--workspace-radius-sm)] border border-ink-ghost/60 bg-paper-elevated/40 px-3 py-3">
+            <div className="rounded-[var(--radius-press)] border border-ink-ghost/60 bg-paper-elevated/40 px-3 py-3">
               <Text variant="meta" className="mb-2 block text-xs text-ink-muted">
                 {messages.typicalMoves}
               </Text>
@@ -232,7 +232,7 @@ export function VoiceReasoningMirror({
                 {development.moveLabels.map((move) => (
                   <li
                     key={move}
-                    className="rounded-full bg-pigment-terracotta/10 px-3 py-1 text-sm font-medium text-ink"
+                    className="rounded-[var(--radius-press)] bg-pigment-terracotta/10 px-3 py-1 text-sm font-medium text-ink"
                   >
                     {getMoveLabel(locale, move)}
                   </li>
@@ -286,7 +286,7 @@ function TraitEvidenceDisclosure({
         return (
           <div
             key={traitKey}
-            className="rounded-[var(--workspace-radius-sm)] border border-ink-ghost/60 bg-paper-elevated/60 p-4"
+            className="rounded-[var(--radius-press)] border border-ink-ghost/60 bg-paper-elevated/60 p-4"
           >
             <Text variant="label" className="mb-3 block">
               {traitMessages.evidenceHeading(traitMessages.labels[traitKey], record.value)}

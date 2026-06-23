@@ -8,7 +8,7 @@ export interface VoiceTraitChipProps {
 
 export function VoiceTraitChip({ label, value, id }: VoiceTraitChipProps) {
   return (
-    <div id={id} className="rounded-[var(--workspace-radius-sm)] bg-pigment-terracotta/10 px-3 py-2.5">
+    <div id={id} className="rounded-[var(--radius-press)] bg-pigment-terracotta/10 px-3 py-2.5">
       <Text variant="meta" className="mb-0.5 block text-xs text-ink-muted">
         {label}
       </Text>

@@ -101,7 +101,7 @@ export function IntentWizard({
 
   if (status === "error" && featuredIntents.length === 0) {
     return (
-      <div className="rounded-2xl border border-red-700/30 bg-red-700/10 px-4 py-4">
+      <div className="rounded-[var(--radius-press)] border border-red-700/30 bg-red-700/10 px-4 py-4">
         <Text variant="body" className="mb-2 text-red-800">
           {messages.intentWizard.catalogLoadError}
         </Text>

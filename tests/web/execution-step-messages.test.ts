@@ -6,12 +6,12 @@ import { getExecutionStepPresentation } from "../../apps/web/src/app/execution/l
 describe("execution step presentation", () => {
   it("maps known pipeline steps to localized label and summary", () => {
     const draft = getExecutionStepPresentation("pt", "draft", appMessagesPt);
-    expect(draft.label).toBe("Rascunho");
-    expect(draft.summary).toContain("perfil de voz");
+    expect(draft.label).toBe("Primeira impressão");
+    expect(draft.summary).toContain("voz");
 
     const refine = getExecutionStepPresentation("en", "refine", appMessagesEn);
-    expect(refine.label).toBe("Refinement");
-    expect(refine.summary).toContain("tone");
+    expect(refine.label).toBe("Afinement");
+    expect(refine.summary).toContain("authorial");
   });
 
   it("falls back for unknown step ids", () => {

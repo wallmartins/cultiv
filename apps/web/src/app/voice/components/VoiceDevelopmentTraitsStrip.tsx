@@ -49,7 +49,7 @@ export function VoiceDevelopmentTraitsStrip({
         <button
           type="button"
           onClick={onAuthorityLinkClick}
-          className="rounded-[var(--workspace-radius-sm)] bg-pigment-terracotta/10 px-3 py-2 text-sm font-medium text-ink underline-offset-2 hover:underline"
+          className="rounded-[var(--radius-press)] bg-pigment-terracotta/10 px-3 py-2 text-sm font-medium text-ink underline-offset-2 hover:underline"
         >
           {traitMessages.authorityLinkAction}
         </button>
@@ -75,7 +75,7 @@ function TraitStripCell({
   const confidence = developmentImmature && record?.confidence === "high" ? "medium" : record?.confidence;
 
   return (
-    <div className="rounded-[var(--workspace-radius-sm)] border border-ink-ghost/60 bg-paper-elevated/40 px-3 py-3">
+    <div className="rounded-[var(--radius-press)] border border-ink-ghost/60 bg-paper-elevated/40 px-3 py-3">
       <Text variant="meta" className="mb-1 block text-xs text-ink-muted">
         {label}
       </Text>

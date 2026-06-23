@@ -50,7 +50,7 @@ export function OnboardingFlow() {
         </Text>
         <div className="h-1.5 overflow-hidden rounded-full bg-paper-pressed">
           <div
-            className="h-full rounded-full bg-gradient-to-r from-pigment-terracotta to-pigment-ochre transition-[width] duration-300 ease-out"
+            className="h-full rounded-full bg-pigment-terracotta transition-[width] duration-300 ease-out"
             style={{ width: step === 1 ? "50%" : "100%" }}
           />
         </div>

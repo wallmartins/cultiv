@@ -1,0 +1,14 @@
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" role="img">
+  <title>Cultiv  Registro + Sulco (open)</title>
+  <defs>
+    <linearGradient id="paper" x1="0.1" y1="0" x2="0.95" y2="1">
+      <stop offset="0%" stop-color="#FAF8F4"/>
+      <stop offset="100%" stop-color="#E8E4DC"/>
+    </linearGradient>
+  </defs>
+  <path d="M8 12 L52 10 L56 28 L54 52 L12 54 L6 34 Z" fill="url(#paper)" stroke="#C8C4BC" stroke-width="0.65"/>
+  <path d="M14 16 H23 M14 16 V25" stroke="#C4705A" stroke-width="1.05" stroke-linecap="square" opacity="0.62"/>
+  <path d="M17 32 C26 23 38 25 45 32" fill="none" stroke="#C4705A" stroke-width="2.8" stroke-linecap="round" opacity="0.18" transform="translate(1.2 1)"/>
+  <path d="M17 32 C26 23 38 25 45 32" fill="none" stroke="#1A1A18" stroke-width="2.8" stroke-linecap="round"/>
+  <circle cx="24" cy="36" r="2" fill="#C4705A" opacity="0.88"/>
+</svg>

@@ -257,7 +257,7 @@ export function GenerationScreen() {
   return (
     <div className="px-[var(--spacing-gutter)] py-8 md:py-10">
       {showReminder ? (
-        <div className="mb-6 rounded-2xl border border-pigment-ochre/40 bg-pigment-ochre/10 px-4 py-3">
+        <div className="mb-6 rounded-[var(--radius-press)] border border-pigment-ochre/40 bg-pigment-ochre/10 px-4 py-3">
           <Text variant="meta" className="mb-2 block">
             {messages.generate.reminderBanner}
           </Text>
@@ -322,7 +322,7 @@ export function GenerationScreen() {
       ) : null}
 
       {legacyFormatPickerEnabled && contentTypesStatus === "error" && !contentTypesCatalog ? (
-        <div className="mb-6 rounded-2xl border border-red-700/30 bg-red-700/10 px-4 py-4">
+        <div className="mb-6 rounded-[var(--radius-press)] border border-red-700/30 bg-red-700/10 px-4 py-4">
           <Text variant="body" className="mb-2 text-red-800">
             {messages.generate.catalogLoadError}
           </Text>

@@ -112,7 +112,7 @@ export function VoiceConfidenceDial({
             strokeDasharray={CIRCUMFERENCE}
             strokeDashoffset={strokeOffset}
             style={{
-              transition: "stroke-dashoffset 700ms var(--workspace-motion-ease, ease)"
+              transition: "stroke-dashoffset 700ms var(--app-motion-ease)"
             }}
           />
         </g>
@@ -124,7 +124,7 @@ export function VoiceConfidenceDial({
           stroke="var(--color-paper-elevated)"
           strokeWidth="1.5"
           style={{
-            transition: "cx 700ms var(--workspace-motion-ease, ease), cy 700ms var(--workspace-motion-ease, ease)"
+            transition: "cx 700ms var(--app-motion-ease), cy 700ms var(--app-motion-ease)"
           }}
         />
         <defs>

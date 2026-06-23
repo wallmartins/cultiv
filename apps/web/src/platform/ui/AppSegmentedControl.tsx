@@ -43,14 +43,14 @@ export function AppSegmentedControl({
   return (
     <div
       className={cn(
-        "relative flex rounded-[var(--workspace-radius-md)] border border-ink-ghost/70 bg-paper/70 p-1 backdrop-blur-sm",
+        "relative flex rounded-[var(--radius-press)] border border-ink-ghost/70 bg-paper/70 p-1",
         className
       )}
       role="radiogroup"
     >
       <span
         aria-hidden
-        className="app-shell-nav-pill pointer-events-none absolute rounded-[calc(var(--workspace-radius-md)-0.2rem)] bg-pigment-terracotta/14 shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--color-pigment-terracotta)_28%,transparent)]"
+        className="app-shell-nav-pill pointer-events-none absolute rounded-[calc(var(--radius-press)-0.2rem)] bg-pigment-terracotta/14 shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--color-pigment-terracotta)_28%,transparent)]"
         style={pillStyle(activeIndex, options.length)}
       />
       {options.map((option) => {

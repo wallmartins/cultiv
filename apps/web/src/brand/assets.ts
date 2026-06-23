@@ -1,7 +1,7 @@
 export const BRAND_NAME = "Cultiv";
 
 export const BRAND_ICON_PATH = "/cultiv-press-mark.svg";
-export const BRAND_WORDMARK_PATH = "/cultiv-logo-wordmark.svg";
+export const BRAND_WORDMARK_PATH = "/cultiv-press-mark.svg";
 export const BRAND_WORDMARK_DARK_PATH = "/cultiv-press-mark.svg";
 export const BRAND_LOGO_FULL_PATH = "/cultiv-og-imprint.svg";
 export const BRAND_OG_IMAGE_PATH = "/cultiv-og-imprint.svg";

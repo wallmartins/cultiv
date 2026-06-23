@@ -17,7 +17,7 @@ export function CreditDisplay({ status, balance, messages }: CreditDisplayProps)
     <Link
       to="/app/plans"
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 font-mono text-xs tabular-nums backdrop-blur-sm transition-colors hover:border-pigment-terracotta/40",
+        "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 font-mono text-xs tabular-nums transition-colors hover:border-pigment-terracotta/40",
         isZero
           ? "border-red-700/30 bg-paper-elevated/90 text-red-700"
           : "border-ink-ghost/70 bg-paper-elevated/80 text-ink shadow-[0_4px_20px_color-mix(in_srgb,var(--color-ink)_8%,transparent)]"

@@ -101,7 +101,7 @@ export function VoiceConfidenceRing({
             strokeDasharray={circumference}
             strokeDashoffset={animatedOffset}
             style={{
-              transition: "stroke-dashoffset 600ms var(--workspace-motion-ease)"
+              transition: "stroke-dashoffset 600ms var(--app-motion-ease)"
             }}
           />
           <defs>

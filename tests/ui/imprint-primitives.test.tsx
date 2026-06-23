@@ -21,6 +21,20 @@ describe("PressMark", () => {
     render(<PressMark />);
     expect(screen.getByRole("img", { name: /cultiv/i })).toBeInTheDocument();
   });
+
+  it("uses compact variant without stamp pad at small sizes", () => {
+    const { container } = render(<PressMark size={24} />);
+    const svg = container.querySelector("svg");
+    expect(svg?.innerHTML).not.toMatch(/M9 10 L55 8/);
+    expect(svg?.innerHTML).toMatch(/C22 30 36 18 52 11/);
+  });
+
+  it("uses balanced variant with stamp pad and signature arc at medium sizes", () => {
+    const { container } = render(<PressMark size={48} />);
+    const svg = container.querySelector("svg");
+    expect(svg?.innerHTML).toMatch(/M9 10 L55 8/);
+    expect(svg?.innerHTML).toMatch(/C19 36 26 28 34 22/);
+  });
 });
 
 describe("PaperSurface", () => {

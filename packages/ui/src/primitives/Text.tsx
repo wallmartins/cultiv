@@ -2,6 +2,7 @@ import type { ComponentPropsWithoutRef, ElementType, ReactNode } from "react";
 import { cn } from "../lib/cn.js";
 
 const variantClasses = {
+  "display-hero": "ui-type-display-hero",
   "display-xl": "ui-type-display-xl",
   display:
     "font-conducao text-[clamp(1.75rem,4vw,2.441rem)] font-medium leading-[1.15] tracking-[-0.01em]",
@@ -22,10 +23,8 @@ const variantClasses = {
     "font-conducao text-[0.8rem] font-medium uppercase tracking-[0.04em] text-ink-muted",
   meta: "font-conducao text-sm leading-[1.65] text-ink-muted",
   mono: "font-mono text-xs leading-relaxed text-pigment-indigo",
-  chapter: "ui-type-display-xl",
   "display-sm":
-    "font-conducao text-[clamp(1.25rem,3vw,2rem)] font-medium leading-[1.15]",
-  handwritten: "ui-type-imprint"
+    "font-conducao text-[clamp(1.25rem,3vw,2rem)] font-medium leading-[1.15]"
 } as const;
 
 export type TextVariant = keyof typeof variantClasses;

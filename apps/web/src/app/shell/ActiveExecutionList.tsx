@@ -57,7 +57,7 @@ export function ActiveExecutionList({
             <li key={item.id}>
               <button
                 type="button"
-                className="w-full rounded-xl border border-ink-ghost bg-paper-elevated px-3 py-2 text-left transition-colors hover:bg-paper-pressed"
+                className="w-full rounded-[var(--radius-press)] border border-ink-ghost bg-paper-elevated px-3 py-2 text-left transition-colors hover:bg-paper-pressed"
                 onClick={() => onSelect?.(item.id)}
               >
                 <Text variant="meta" className="block font-medium">

@@ -212,8 +212,8 @@ export function AppAvatarMenu({ messages }: AppAvatarMenuProps) {
         type="button"
         className={cn(
           "flex size-10 items-center justify-center overflow-hidden rounded-full",
-          "border border-ink-ghost/70 bg-paper-elevated shadow-[var(--workspace-shadow-card)]",
-          "transition-[box-shadow,ring-color] duration-[var(--workspace-motion-duration-fast)]",
+          "border border-ink-ghost/70 bg-paper-elevated shadow-[var(--shadow-press-edge)]",
+          "transition-[box-shadow,ring-color] duration-[var(--app-motion-duration-fast)]",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pigment-terracotta/35 focus-visible:ring-offset-2 focus-visible:ring-offset-paper",
           open && "ring-2 ring-pigment-terracotta/30 ring-offset-2 ring-offset-paper"
         )}

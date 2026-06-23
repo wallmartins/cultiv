@@ -1,36 +1,48 @@
-<svg width="1200" height="630" viewBox="0 0 1200 630" role="img" xmlns="http://www.w3.org/2000/svg">
-  <title>Cultiv</title>
-  <rect width="1200" height="630" fill="#F3F0EA"/>
-  <g transform="translate(600 315)">
-    <g transform="translate(-140 0)">
-      <path
-        d="M4 6 L44 5 L46 43 L5 44 Z"
-        fill="#FAF8F4"
-        stroke="#C8C4BC"
-        stroke-width="0.5"
-      />
-      <text
-        x="24"
-        y="31"
-        text-anchor="middle"
-        font-family="Bricolage Grotesque, system-ui, sans-serif"
-        font-size="22"
-        font-weight="600"
-        fill="#1A1A18"
-      >
-        C
-      </text>
-    </g>
-    <text
-      x="20"
-      y="12"
-      font-family="Bricolage Grotesque, system-ui, sans-serif"
-      font-size="56"
-      font-weight="600"
-      letter-spacing="-0.02em"
-      fill="#1A1A18"
-    >
-      Cultiv
-    </text>
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1200" y2="630" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#faf8f4"/>
+      <stop offset="100%" stop-color="#f3f0ea"/>
+    </linearGradient>
+    <filter id="grain" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="4" stitchTiles="stitch" result="noise"/>
+      <feColorMatrix type="saturate" values="0" in="noise" result="mono"/>
+      <feBlend in="SourceGraphic" in2="mono" mode="multiply"/>
+    </filter>
+    <filter id="ink-bleed-og" x="-25%" y="-25%" width="150%" height="150%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.055" numOctaves="2" result="noise"/>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="0.6" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <radialGradient id="drop-fill-og" cx="35%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#c4a35a"/>
+      <stop offset="55%" stop-color="#c4705a"/>
+      <stop offset="100%" stop-color="#9a5a48"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Background with grain -->
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <rect width="1200" height="630" fill="url(#bg)" filter="url(#grain)" opacity="0.04"/>
+
+  <!-- Press Mark (large, centered-left) -->
+  <g transform="translate(180 115) scale(6)">
+    <path d="M32 6 A26 26 0 1 1 31.99 6" fill="none" stroke="#c8c4bc" stroke-width="0.9" opacity="0.5"/>
+    <path d="M16 47 C22 38 30 27 36 22 C42 17 48 13 53 10" fill="none" stroke="#c4705a" stroke-width="4.2" stroke-linecap="round" opacity="0.24" transform="translate(1.2 1)"/>
+    <path d="M16 47 C22 38 30 27 36 22 C42 17 48 13 53 10" fill="none" stroke="#1a1a18" stroke-width="4.6" stroke-linecap="round" filter="url(#ink-bleed-og)"/>
+    <circle cx="16" cy="49" r="7.5" fill="#c4705a" opacity="0.12"/>
+    <circle cx="16" cy="49" r="4.8" fill="url(#drop-fill-og)"/>
+    <ellipse cx="15" cy="47.8" rx="1.54" ry="1.2" fill="#faf8f4" opacity="0.3"/>
   </g>
+
+  <!-- Wordmark -->
+  <text x="440" y="310" font-family="Bricolage Grotesque, system-ui, sans-serif" font-size="72" font-weight="500" fill="#1a1a18" letter-spacing="-0.03em">Cultiv</text>
+
+  <!-- Tagline -->
+  <text x="442" y="360" font-family="Fraunces, Georgia, serif" font-size="24" font-style="italic" fill="#c4705a" letter-spacing="0.01em">Textos que soam como você.</text>
+
+  <!-- Subtle terracotta rule -->
+  <line x1="442" y1="385" x2="580" y2="385" stroke="#c4705a" stroke-width="1" opacity="0.3"/>
+
+  <!-- Bottom tagline -->
+  <text x="442" y="420" font-family="Bricolage Grotesque, system-ui, sans-serif" font-size="14" fill="#6b6860" letter-spacing="0.02em">Não se constrói uma voz. Cultiva-se.</text>
 </svg>
