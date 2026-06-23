@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": ["../../../src/infra/migrations/0009-development-trait-profile.ts"],
-  "sourcesContent": ["import { sql } from \"kysely\";\nimport type { Kysely } from \"kysely\";\nimport type { DatabaseTables } from \"../postgres-tables.js\";\n\n/**\n * Development Trait Profile is stored inside voice_profiles.data JSONB\n * under argumentDevelopmentSignature.traitProfile \u2014 no relational columns required.\n * Rollback: remove optional traitProfile from persisted JSON.\n */\nexport async function up(_db: Kysely<DatabaseTables>): Promise<void> {\n  await sql`SELECT 1`.execute(_db);\n}\n\nexport async function down(_db: Kysely<DatabaseTables>): Promise<void> {\n  await sql`SELECT 1`.execute(_db);\n}\n"],
-  "mappings": ";AAAA,SAAS,WAAW;AASpB,eAAsB,GAAG,KAA4C;AACnE,QAAM,cAAc,QAAQ,GAAG;AACjC;AAEA,eAAsB,KAAK,KAA4C;AACrE,QAAM,cAAc,QAAQ,GAAG;AACjC;",
-  "names": []
-}

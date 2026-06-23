@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": ["../../../src/infra/migrations/0004-add-voice-training-consents.ts"],
-  "sourcesContent": ["import { Kysely } from \"kysely\";\nimport type { DatabaseTables } from \"../postgres-tables.js\";\n\nexport async function up(db: Kysely<DatabaseTables>): Promise<void> {\n  await db.schema\n    .createTable(\"voice_training_consents\")\n    .addColumn(\"id\", \"varchar(64)\", (col) => col.primaryKey())\n    .addColumn(\"user_id\", \"varchar(64)\", (col) => col.notNull().unique())\n    .addColumn(\"data\", \"jsonb\", (col) => col.notNull())\n    .addColumn(\"version\", \"integer\", (col) => col.notNull().defaultTo(1))\n    .addColumn(\"created_at\", \"varchar(64)\", (col) => col.notNull())\n    .addColumn(\"updated_at\", \"varchar(64)\", (col) => col.notNull())\n    .execute();\n}\n\nexport async function down(db: Kysely<DatabaseTables>): Promise<void> {\n  await db.schema.dropTable(\"voice_training_consents\").ifExists().execute();\n}\n"],
-  "mappings": ";AAGA,eAAsB,GAAG,IAA2C;AAClE,QAAM,GAAG,OACN,YAAY,yBAAyB,EACrC,UAAU,MAAM,eAAe,CAAC,QAAQ,IAAI,WAAW,CAAC,EACxD,UAAU,WAAW,eAAe,CAAC,QAAQ,IAAI,QAAQ,EAAE,OAAO,CAAC,EACnE,UAAU,QAAQ,SAAS,CAAC,QAAQ,IAAI,QAAQ,CAAC,EACjD,UAAU,WAAW,WAAW,CAAC,QAAQ,IAAI,QAAQ,EAAE,UAAU,CAAC,CAAC,EACnE,UAAU,cAAc,eAAe,CAAC,QAAQ,IAAI,QAAQ,CAAC,EAC7D,UAAU,cAAc,eAAe,CAAC,QAAQ,IAAI,QAAQ,CAAC,EAC7D,QAAQ;AACb;AAEA,eAAsB,KAAK,IAA2C;AACpE,QAAM,GAAG,OAAO,UAAU,yBAAyB,EAAE,SAAS,EAAE,QAAQ;AAC1E;",
-  "names": []
-}
