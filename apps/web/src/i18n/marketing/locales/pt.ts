@@ -7,248 +7,266 @@ export const pt: LocaleMessages = {
     navLabel: "Navegação principal",
     menuOpenLabel: "Abrir menu",
     menuCloseLabel: "Fechar menu",
-    ctaWaitlist: "Lista",
+    ctaWaitlist: "Explorar",
     nav: {
-      problem: "Problema",
-      differentiators: "Diferenciais",
-      useCases: "Casos de uso",
-      waitlist: "Lista"
+      territory: "O território",
+      route: "A rota",
+      tools: "Ferramentas",
+      questions: "Perguntas"
     }
   },
   footer: {
     privacy: "Privacidade",
     terms: "Termos",
     contact: "contato@cultiv.app",
-    location: "Brasil"
+    location: "Brasil",
+    description:
+      "A IA que aprende o mapa da sua voz, e escreve como se fosse você.",
+    signature: "Com carinho e tinta, Cultiv",
+    seal: "Feito à mão com IA"
   },
   hero: {
-    headline: "Textos que soam como você.",
+    badge: "Acesso antecipado, mapa em construção",
+    headline: "A IA que aprende o mapa da sua voz, e escreve como se fosse você.",
     subheadline:
-      "Cultiv aprende como você escreve e gera textos que soam pessoais, não genéricos.",
-    ctaPrimary: "Entrar na lista",
-    ctaSecondary: "Conhecer o Cultiv"
+      "Cultiv aprende seu tom, sua cadência, sua assinatura. E gera textos que parecem ter saído da sua mão, e não de um template.",
+    ctaPrimary: "Explorar sua voz",
+    ctaSecondary: "Ver a rota",
+    genericLabel: "ChatGPT (genérico)",
+    voiceLabel: "Cultiv (com sua voz)",
+    genericLine1: "Em um mundo cada vez mais acelerado,",
+    genericLine2: "a produtividade é sobre trabalhar mais inteligente.",
+    voiceLine1: "Parei de correr atrás de toda tendência da semana.",
+    voiceLine2: "Hoje escolho um tema e mergulho por meses.",
+    comparisonLabel: "Comparação"
   },
-  problem: {
-    eyebrow: "O problema",
-    title: "Por que a escrita com IA ainda não soa como você",
-    perspectives: [
+  territory: {
+    eyebrow: "O território",
+    title: "Por que a escrita com IA ainda não soa como você?",
+    cards: [
       {
-        index: "01",
-        title: "Sua IA soa como todo mundo",
+        title: "Voz genérica",
         body:
-          "Você pede para escrever \"como você\", mas o resultado ainda parece template. O tom é correto na superfície, genérico por dentro. Quanto mais você publica, mais sua marca pessoal dilui."
+          "Cada ferramenta gera respostas corretas na superfície, mas sem identidade. Quanto mais publica, mais sua voz se dilui."
       },
       {
-        index: "02",
-        title: "Seu prompt de voz não acompanha você",
+        title: "Voz que não evolui",
         body:
-          "Seu jeito de escrever vive num prompt colado no ChatGPT. Troca de formato, nova conversa, outro briefing, e você recomeça do zero. Não há um lugar que aprende e evolui com você."
+          "Seu estilo não vive em chats descartáveis. A cada nova conversa, você recomeça do zero."
+      },
+      {
+        title: "Voz diluída",
+        body:
+          "Prompts soltos tentam imitar seu tom, mas sem memória, sem contexto, sem consistência."
       }
     ]
   },
-  solutionBreath: {
-    handwrittenNote: "Não se constrói uma voz. Cultiva-se.",
-    subtitle: "Cultiva a sua voz, em qualquer formato.",
-    keywords: [
-      {
-        phrase: "Tom que soa como você",
-        microcopy: "Tom, cadência e vocabulário que soam como você, não como um assistente."
-      },
-      {
-        phrase: "Memória que evolui",
-        microcopy: "Exemplos reais ensinam o perfil de voz e evoluem com o tempo."
-      },
-      {
-        phrase: "Qualquer formato",
-        microcopy: "Blog, LinkedIn, thread, newsletter, cada um com briefing guiado."
-      },
-      {
-        phrase: "Escala sem recomeçar",
-        microcopy: "Gere com confiança, sem recomeçar o prompt a cada publicação."
-      }
-    ]
-  },
-  differentiators: {
-    eyebrow: "Diferenciais",
-    title: "Como Cultiv preserva a sua voz",
-    chapters: [
-      {
-        index: "01",
-        title: "Mesmo briefing, voz diferente",
-        body:
-          "Compare o mesmo pedido no ChatGPT e no Cultiv com sua voz treinada, a diferença aparece na primeira frase."
-      },
-      {
-        index: "02",
-        title: "Ensine com o que você já escreveu",
-        body:
-          "Exemplos reais ensinam tom e cadência. Você revisa o que entra no treino e ajusta quando quiser."
-      },
-      {
-        index: "03",
-        title: "Briefing guiado, não prompt solto",
-        body:
-          "Formato, objetivo e audiência em um fluxo claro, sem decorar prompts ou colar instruções."
-      },
-      {
-        index: "04",
-        title: "Prévia antes de gerar",
-        body:
-          "Veja créditos e rascunho alinhado à sua voz antes de confirmar. Sem surpresa de tom ou preço."
-      }
-    ]
-  },
-  useCases: {
-    eyebrow: "Casos de uso",
-    title: "Para quem publica conteúdo autêntico",
-    cases: [
-      {
-        badge: "LinkedIn",
-        title: "Founder no LinkedIn",
-        body:
-          "Posts com gancho claro e tom pessoal, sem parecer template de influencer ou conselho genérico."
-      },
-      {
-        badge: "Thread",
-        title: "Creator em thread",
-        body:
-          "Sequências curtas com ritmo e conclusão definida, mantendo a cadência que seus leitores reconhecem."
-      },
-      {
-        badge: "Blog",
-        title: "Autor de blog",
-        body:
-          "Artigos com tese, estrutura e profundidade editorial, soando como você, não como um resumo de IA."
-      }
-    ],
-    footnote: "+ newsletter e outros formatos no lançamento"
-  },
-  productFlow: {
-    eyebrow: "Da voz ao texto",
-    title: "Como funciona",
-    outputLabel: "Texto gerado",
+  route: {
+    eyebrow: "A rota",
+    title: "Cinco passos para mapear sua voz",
     steps: [
       {
         index: "01",
-        title: "Entre na plataforma",
-        body: "Crie sua conta e acesse o espaço onde sua voz será cultivada."
+        title: "Entre",
+        body: "Crie sua conta gratuita e entre no mapa."
       },
       {
         index: "02",
         title: "Ensine sua voz",
-        body: "Cole posts, e-mails ou artigos. Cultiv observa tom, cadência e vocabulário."
+        body: "Cole exemplos da sua escrita real, artigos, posts, qualquer texto que soe como você."
       },
       {
         index: "03",
-        title: "Seu perfil de voz",
-        body: "Cultiv calcula a confiança do perfil com base nos exemplos que você ensinou."
+        title: "Seu mapa de voz é gerado",
+        body: "Cultiv analisa e constrói o mapa da sua autoria com indicadores de confiança."
       },
       {
         index: "04",
-        title: "Briefing e prévia",
-        body: "Escolha formato, objetivo e audiência. Revise créditos e rascunho antes de gerar."
+        title: "Escolha as coordenadas",
+        body: "Defina objetivo, formato e contexto. Veja o preview antes de gerar."
       },
       {
         index: "05",
-        title: "Gere com a sua voz",
-        body: "Confirme e receba o texto final, alinhado ao perfil que você ensinou."
+        title: "Dê forma ao texto",
+        body: "Texto finalizado que carrega sua assinatura, pronto para publicar."
       }
     ]
   },
-  socialProof: {
-    eyebrow: "Primeiros cultivadores",
-    title: "Quem publica com identidade própria já sentiu o problema.",
-    body:
-      "Estamos construindo Cultiv com criadores, founders e autores que não abrem mão de soar como eles mesmos."
+  tools: {
+    eyebrow: "Ferramentas",
+    title: "Como você quer dar forma ao texto?",
+    subtitle: "Três passos para transformar sua ideia em texto com sua voz.",
+    step1Label: "Passo 01",
+    step1Title: "Escolha sua intenção",
+    intentions: [
+      {
+        title: "Compartilhar uma ideia",
+        description: "Opinião, aprendizado ou insight para quem te acompanha."
+      },
+      {
+        title: "Explicar com profundidade",
+        description: "Ensinar ou desdobrar um tema com estrutura, sem virar texto genérico."
+      },
+      {
+        title: "Engajar a audiência",
+        description: "Provocar reação, pergunta ou discussão. Texto que convida resposta."
+      },
+      {
+        title: "Contar uma história",
+        description: "Narrativa em um ou mais momentos, com começo, meio e assinatura sua."
+      },
+      {
+        title: "Atualizar assinantes",
+        description: "Edição recorrente ou atualização no estilo newsletter, com o seu ritmo."
+      },
+      {
+        title: "Registrar uma decisão",
+        description: "Documentar uma escolha com contexto, alternativas e trade-offs."
+      }
+    ],
+    step2Label: "Passo 02",
+    step2Title: "Molde o texto",
+    sizeLabel: "Tamanho",
+    channelLabel: "Canal",
+    sizes: ["Curto", "Médio", "Longo"],
+    channels: ["Rede profissional", "Blog ou site", "E-mail / newsletter", "Rede social"],
+    step3Label: "Passo 03",
+    step3Title: "Defina o briefing",
+    step3Description: "Escolha o idioma, o modo de geração e preencha os detalhes. Veja o preview antes de confirmar.",
+    briefingFields: ["Objetivo", "Audiência", "Contexto", "Idioma", "Modo de geração"]
   },
-  scenes: {
-    genericOutput: {
-      chatTitle: "Assistente de IA",
-      assistantName: "IA",
-      recentRepliesLabel: "respostas recentes",
-      repeatToneLabel: "[MESMO TOM · OUTRO BRIEFING]",
-      lines: [
-        "Em um mundo cada vez mais acelerado…",
-        "A produtividade não é sobre trabalhar mais horas…",
-        "No final do dia, o que importa é entregar…"
-      ]
-    },
-    fragilePrompt: {
-      chatTitle: "Novo chat",
-      userAvatarLabel: "eu",
-      userMessagePreview: "Gere um post no meu tom…",
-      newChatHint: "nova conversa, prompt recomeça",
-      composerLabel: "Pedido para gerar o texto",
-      sendLabel: "ENVIAR",
-      fragments: [
-        "escreva como EU…",
-        "tom: reflexivo, direto",
-        "evite listas de dicas",
-        "exemplo de estilo (não copie)"
-      ]
-    },
-    teachVoice: {
-      centerLabel: "VOZ",
-      examples: [
-        { title: "post no LinkedIn", meta: "tom observado" },
-        { title: "email para cliente", meta: "cadência, vocabulário" },
-        { title: "artigo do blog", meta: "exemplos representativos" }
-      ]
-    },
-    briefing: {
-      label: "BRIEFING",
-      format: "Formato: LinkedIn",
-      objective: "Objetivo: validar hipótese",
-      audience: "Audiência: founders",
-      formatTab: "FORMATO",
-      objectiveTab: "OBJETIVO",
-      audienceTab: "AUDIÊNCIA",
-      angleTab: "ÂNGULO",
-      placeholder: "Lição prática, não motivacional",
-      previewAction: "Ver prévia",
-      productLabel: "Cultiv",
-      breadcrumb: "Conteúdo",
-      screenTitle: "Briefing guiado",
-      stepIndicator: "3 / 4",
-      draftSaved: "Rascunho salvo há 2 min",
-      angleHelper: "Ângulo editorial com prova concreta, não frase motivacional.",
-      voiceStatus: "Voz treinada · match alto",
-      audienceChips: ["founders", "product builders"],
-      addAudienceLabel: "+ segmento"
-    },
-    previewConfidence: {
-      label: "PRÉVIA",
-      productLabel: "Cultiv",
-      breadcrumb: "Conteúdo",
-      screenTitle: "Prévia",
-      stepIndicator: "4 / 4",
-      readyStatus: "Briefing pronto para revisão",
-      formatRecap: "LinkedIn · validar hipótese",
-      creditsAmount: "12 créditos",
-      creditsCaption: "estimados nesta geração",
-      matchBadge: "Match alto",
-      matchCaption: "voz treinada",
-      draftLabel: "Rascunho alinhado à sua voz",
-      draftLines: [
-        "Parei de correr atrás de toda tendência da semana.",
-        "Hoje escolho um tema e mergulho por meses.",
-        "Aprendizado não é acumular novidade, é profundidade."
-      ],
-      toneAssurance: "Tom e cadência conferem com a voz treinada",
-      backAction: "Voltar",
-      confirm: "Confirmar e gerar",
-      footnote: "Sem surpresa de tom ou preço"
+  comparison: {
+    eyebrow: "A diferença é real",
+    title: "Mesmo briefing. Dois resultados.",
+    verdict: "A autenticidade não é um luxo. É o que faz seu público voltar.",
+    signature: "Tecnologia de ponta, feita com alma de artesão.",
+    genericLabel: "ChatGPT (seu prompt)",
+    voiceLabel: "Cultiv (com sua voz)",
+    genericLine1: "Em um mundo cada vez mais acelerado,",
+    genericLine2: "a produtividade é sobre trabalhar mais inteligente.",
+    voiceLine1: "Parei de correr atrás de toda tendência da semana.",
+    voiceLine2: "Hoje escolho um tema e mergulho por meses.",
+    genericNote: "Tom genérico, sem assinatura",
+    voiceNote: "Voz autoral, identidade preservada"
+  },
+  testimonial: {
+    quote:
+      "Pela primeira vez, uma ferramenta de IA não me faz soar como todo mundo. Ela me faz soar mais eu.",
+    ps: "Ps. E olha que eu já tentei umas cinco."
+  },
+  pricing: {
+    eyebrow: "Recursos da jornada",
+    title: "Escolha seu plano",
+    cta: "Entrar na lista",
+    recommendedBadge: "Recomendado",
+    plans: [
+      {
+        name: "Explorador",
+        badge: "Para começar",
+        description: "Ideal para conhecer o Cultiv e mapear sua voz.",
+        features: [
+          "Acesso à plataforma",
+          "Mapa de voz básico",
+          "Todos os objetivos de escrita",
+          "Modo rápido de geração",
+          "Cota mensal de gerações para experimentar",
+          "Prévia antes de gerar"
+        ],
+        footer: "Valor: em definição"
+      },
+      {
+        name: "Criador",
+        badge: "Mais popular",
+        description: "Para quem publica com regularidade e quer mais profundidade.",
+        features: [
+          "Tudo do Explorador",
+          "Mais gerações por mês",
+          "Modos rápido e equilibrado",
+          "Perfil de voz mais robusto",
+          "Suporte a textos de médio e longo alcance"
+        ],
+        footer: "Valor: em definição",
+        recommended: true
+      },
+      {
+        name: "Pro",
+        badge: "Para profissionais",
+        description: "Para quem escreve com frequência e quer o máximo de controle e qualidade.",
+        features: [
+          "Tudo do Criador",
+          "Cota bem mais generosa de gerações",
+          "Todos os modos de geração, incluindo o mais refinado",
+          "Acesso antecipado a novidades",
+          "Prioridade no rollout"
+        ],
+        footer: "Valor: em definição"
+      }
+    ]
+  },
+  faq: {
+    eyebrow: "Perguntas",
+    title: "Antes de entrar na lista",
+    items: [
+      {
+        id: "what",
+        question: "O Cultiv substitui meu estilo de escrita?",
+        answer:
+          "Não. O Cultiv aprende e preserva seu estilo. Ele é uma extensão da sua voz, não um substituto."
+      },
+      {
+        id: "how",
+        question: "Como a IA aprende minha voz?",
+        answer:
+          "Você fornece exemplos reais da sua escrita. O Cultiv extrai padrões de cadência, vocabulário e argumentação."
+      },
+      {
+        id: "privacy",
+        question: "Meus dados estão seguros?",
+        answer:
+          "Sim. Seus exemplos de escrita são usados apenas para construir seu perfil de voz e nunca são compartilhados."
+      },
+      {
+        id: "pricing",
+        question: "Quanto custa?",
+        answer:
+          "O Cultiv oferece um plano gratuito com acesso básico. Planos pagos desbloqueiam mais formatos e qualidade."
+      },
+      {
+        id: "access",
+        question: "Como tenho acesso?",
+        answer:
+          "Entre na lista de espera. Você receberá um convite assim que tivermos vagas disponíveis."
+      }
+    ]
+  },
+  waitlist: {
+    eyebrow: "Acesso antecipado",
+    title: "Comece a mapear sua voz",
+    description: "Entre na lista e comece a transformar sua escrita com IA autêntica.",
+    emailLabel: "Email",
+    nameLabel: "Nome (opcional)",
+    namePlaceholder: "Seu nome",
+    consentPrefix: "Concordo em receber atualizações sobre o Cultiv conforme a",
+    consentLink: "política de privacidade",
+    submit: "Entrar na lista",
+    submitting: "Enviando...",
+    success: "Você está na lista. Obrigado!",
+    note: "Sem spam. Apenas atualizações sobre o acesso antecipado.",
+    errors: {
+      validation: "Verifique os campos e tente novamente.",
+      provider: "Não foi possível registrar agora. Tente mais tarde.",
+      rateLimited: "Muitas tentativas. Aguarde um minuto."
     }
   },
   contentTypes: {
     "long-form-blog": {
       label: "Artigo aprofundado",
-      description: "Desenvolva um argumento com estrutura editorial e profundidade além do post rápido."
+      description: "Desenvolva um argumento com estrutura sólida e profundidade além do post rápido."
     },
     "validation-post": {
       label: "Teste de ideia",
       description:
-        "Teste uma hipótese com sua audiência antes de investir em um conteúdo maior. Use contexto, pergunta e evidência."
+        "Teste uma hipótese com sua audiência antes de investir em um conteúdo maior."
     },
     "architecture-post": {
       label: "Explicar uma decisão",
@@ -258,40 +276,25 @@ export const pt: LocaleMessages = {
     "linkedin-post": {
       label: "Publicação profissional",
       description:
-        "Compartilhe uma ideia ou aprendizado com sua rede em poucos parágrafos. Ideal para LinkedIn e redes profissionais."
+        "Compartilhe uma ideia ou aprendizado com sua rede em poucos parágrafos."
     },
     "twitter-thread": {
       label: "Sequência de posts",
       description:
-        "Conte uma história ou argumento em vários posts curtos em sequência. Funciona no X e formatos parecidos."
+        "Conte uma história ou argumento em vários posts curtos em sequência."
     },
     newsletter: {
       label: "Edição de newsletter",
       description: "Organize uma edição com seções claras e tom de newsletter para assinantes."
     }
   },
-  showcase: {
-    genericLabel: "ChatGPT (seu prompt)",
-    voiceLabel: "Com sua voz",
-    stampLabel: "voice match",
-    stampValue: "98%",
-    waveformScript: "voz · tom · cadência · você · voz · tom · cadência · você ·",
-    threadMorePosts: "e mais {count} tweets",
-    proseMoreBlocks: "e mais {count} parágrafos",
-    linkedInAuthorName: "Você",
-    linkedInAuthorMeta: "Agora ·"
-  },
-  legal: {
-    privacyTitle: "Política de Privacidade",
-    termsTitle: "Termos de Uso"
-  },
   seo: {
-    homeTitle: "Cultiv, Textos que soam como você",
+    homeTitle: "Cultiv, Sua voz. Seu território. Suas palavras.",
     homeDescription:
-      "Cultiv aprende como você escreve e gera textos que soam pessoais, não genéricos. Entre na lista de espera.",
+      "A IA que aprende o mapa da sua voz, e escreve como se fosse você. Cultiv aprende seu tom, sua cadência, sua assinatura.",
     privacyDescription: "Como Cultiv trata dados pessoais, consentimentos e exemplos de voz.",
     termsDescription: "Termos de uso do site e da lista de espera do Cultiv.",
-    ogImageAlt: "Cultiv, Textos que soam como você."
+    ogImageAlt: "Cultiv, Sua voz. Seu território. Suas palavras."
   },
   geo: {
     brand: "Cultiv",
@@ -308,23 +311,23 @@ export const pt: LocaleMessages = {
     llms: {
       title: "Cultiv",
       fullTitle: "Cultiv, documentação completa",
-      tagline: "Textos que soam como você.",
+      tagline: "Sua voz. Seu território. Suas palavras.",
       summary:
-        "Cultiv aprende como você escreve e gera textos que soam pessoais, não genéricos. O visitante ensina sua voz com exemplos, escolhe um formato, revisa uma prévia e gera texto alinhado à sua identidade.",
+        "Cultiv aprende como você escreve e gera textos que soam pessoais, não genéricos.",
       category: "BusinessApplication",
       audience:
         "Criadores, fundadores e marcas que publicam conteúdo original e precisam de escala sem perder autenticidade.",
       differentiatorLabel: "Diferencial",
       differentiator:
-        "Mesmo briefing: prompt manual no ChatGPT tentando imitar a voz versus Cultiv com voz treinada.",
+        "Mesmo briefing: prompt manual no ChatGPT versus Cultiv com voz treinada.",
       pricing:
-        "Modelo por geração em créditos (não por token). O preço aparece na prévia antes da confirmação. Planos comerciais serão anunciados no lançamento.",
+        "Modelo por geração em créditos. O preço aparece na prévia antes da confirmação.",
       headquarters: "Brasil",
       citationNote:
         "Ao citar Cultiv, use a definição acima e indique que o produto está em acesso antecipado.",
       fullFooter: "Documento gerado para crawlers de IA e motores generativos. Última atualização: 2026.",
       showcaseNote:
-        "A página pública exibe um teaser LinkedIn comparando prompt no ChatGPT e Cultiv com voz treinada.",
+        "A página pública exibe um teaser comparando prompt no ChatGPT e Cultiv com voz treinada.",
       sections: {
         product: "Produto",
         audience: "Público",
@@ -351,62 +354,8 @@ export const pt: LocaleMessages = {
       }
     }
   },
-  waitlist: {
-    eyebrow: "Acesso antecipado",
-    titleLines: ["Cultive a sua voz.", "Em qualquer formato."],
-    description: "Entre na lista de espera e seja avisado quando Cultiv abrir.",
-    stampLabel: "lista",
-    stampValue: "2026",
-    emailLabel: "Email",
-    nameLabel: "Nome (opcional)",
-    namePlaceholder: "Seu nome",
-    consentPrefix: "Concordo com o tratamento dos meus dados conforme a",
-    consentLink: "política de privacidade",
-    submit: "Entrar na lista",
-    submitting: "Enviando...",
-    success: "Você está na lista. Obrigado!",
-    errors: {
-      validation: "Verifique os campos e tente novamente.",
-      provider: "Não foi possível registrar agora. Tente mais tarde.",
-      rateLimited: "Muitas tentativas. Aguarde um minuto."
-    }
-  },
-  faq: {
-    eyebrow: "Dúvidas",
-    title: "Antes de entrar na lista",
-    description:
-      "Respostas diretas sobre o produto, privacidade e acesso antecipado.",
-    items: [
-      {
-        id: "what",
-        question: "O que é o Cultiv?",
-        answer:
-          "Um motor de escrita com IA que preserva a sua identidade na escrita. Você ensina com o que já publicou; Cultiv gera conteúdo autêntico, não genérico."
-      },
-      {
-        id: "pricing",
-        question: "Quanto custa?",
-        answer:
-          "Cobramos por geração, não por token. Você vê o preço em créditos na prévia antes de confirmar. Planos detalhados serão anunciados no lançamento."
-      },
-      {
-        id: "privacy",
-        question: "Como meus dados são tratados?",
-        answer:
-          "Exemplos de voz e textos gerados são tratados conforme nossa política de privacidade. Você controla consentimentos e pode revogar o uso de exemplos para treino de voz."
-      },
-      {
-        id: "formats",
-        question: "Quais formatos são suportados?",
-        answer:
-          "Blog longo, post de validação, post de arquitetura, LinkedIn, thread e newsletter, cada um com briefing e pipeline dedicados. Veja a seção Casos de uso para exemplos."
-      },
-      {
-        id: "waitlist",
-        question: "Como entro na lista de espera?",
-        answer:
-          "Use o formulário acima nesta página. Enviaremos atualizações de acesso antecipado por email, no idioma que você preferir."
-      }
-    ]
+  legal: {
+    privacyTitle: "Política de Privacidade",
+    termsTitle: "Termos de Uso"
   }
 };

@@ -1,7 +1,8 @@
 import { useEffect, useId, useState } from "react";
 import { createPortal } from "react-dom";
 import { Text, cn } from "@my-ai-orchestrator/ui";
-import { LocaleToggle, navItemClassName } from "~/marketing/components/LocaleToggle";
+import { LocaleToggle } from "~/marketing/components/LocaleToggle";
+import { rebrandNavItemClassName } from "~/marketing/components/SiteHeader";
 import { marketingNavItems } from "~/marketing/navigation/marketing-nav-items";
 import type { LocaleMessages, MarketingLocale } from "~/i18n/marketing/types";
 
@@ -77,7 +78,7 @@ export function SiteMobileNav({ locale, messages }: SiteMobileNavProps) {
                   <li key={item.key}>
                     <a
                       href={item.href}
-                      className={`${navItemClassName} block py-1 text-sm`}
+                      className={`${rebrandNavItemClassName} block py-1 text-sm`}
                       onClick={closeMenu}
                     >
                       {messages.nav[item.key]}

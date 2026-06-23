@@ -3,10 +3,10 @@ import { BRAND_ICON_PATH, BRAND_OG_IMAGE_PATH } from "./assets.js";
 const GOOGLE_FONTS_BASE = "https://fonts.googleapis.com/css2";
 
 export const GOOGLE_FONTS_CRITICAL_STYLESHEET =
-  `${GOOGLE_FONTS_BASE}?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600&display=swap`;
+  `${GOOGLE_FONTS_BASE}?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap`;
 
 export const GOOGLE_FONTS_DEFERRED_STYLESHEET =
-  `${GOOGLE_FONTS_BASE}?family=Fraunces:opsz,wght@9..144,400;9..144,500&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=JetBrains+Mono:wght@400;500&display=swap`;
+  `${GOOGLE_FONTS_BASE}?family=Caveat:wght@400;600&family=JetBrains+Mono:wght@400;500&display=swap`;
 
 export const googleFontsAsyncScript = `(function(){
   var critical=${JSON.stringify(GOOGLE_FONTS_CRITICAL_STYLESHEET)};
@@ -34,7 +34,7 @@ export function brandHeadLinks() {
     },
     { rel: "icon", type: "image/svg+xml", href: BRAND_ICON_PATH },
     { rel: "apple-touch-icon", href: BRAND_ICON_PATH },
-    { rel: "mask-icon", href: BRAND_ICON_PATH, color: "#1A1A18" }
+    { rel: "mask-icon", href: BRAND_ICON_PATH, color: "#1A2E3C" }
   ] as const;
 }
 

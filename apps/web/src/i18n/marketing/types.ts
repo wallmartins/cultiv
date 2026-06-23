@@ -22,10 +22,10 @@ export type LocaleMessages = {
     readonly menuCloseLabel: string;
     readonly ctaWaitlist: string;
     readonly nav: {
-      readonly problem: string;
-      readonly differentiators: string;
-      readonly useCases: string;
-      readonly waitlist: string;
+      readonly territory: string;
+      readonly route: string;
+      readonly tools: string;
+      readonly questions: string;
     };
   };
   readonly footer: {
@@ -33,151 +33,119 @@ export type LocaleMessages = {
     readonly terms: string;
     readonly contact: string;
     readonly location: string;
+    readonly description: string;
+    readonly signature: string;
+    readonly seal: string;
   };
   readonly hero: {
+    readonly badge: string;
     readonly headline: string;
     readonly subheadline: string;
     readonly ctaPrimary: string;
     readonly ctaSecondary: string;
+    readonly genericLabel: string;
+    readonly voiceLabel: string;
+    readonly genericLine1: string;
+    readonly genericLine2: string;
+    readonly voiceLine1: string;
+    readonly voiceLine2: string;
+    readonly comparisonLabel: string;
   };
-  readonly problem: {
+  readonly territory: {
     readonly eyebrow: string;
     readonly title: string;
-    readonly perspectives: ReadonlyArray<{
-      readonly index: string;
+    readonly cards: ReadonlyArray<{
       readonly title: string;
       readonly body: string;
     }>;
   };
-  readonly solutionBreath: {
-    readonly handwrittenNote: string;
-    readonly subtitle: string;
-    readonly keywords: ReadonlyArray<{
-      readonly phrase: string;
-      readonly microcopy: string;
-    }>;
-  };
-  readonly differentiators: {
+  readonly route: {
     readonly eyebrow: string;
     readonly title: string;
-    readonly chapters: ReadonlyArray<{
-      readonly index: string;
-      readonly title: string;
-      readonly body: string;
-    }>;
-  };
-  readonly useCases: {
-    readonly eyebrow: string;
-    readonly title: string;
-    readonly cases: ReadonlyArray<{
-      readonly badge: string;
-      readonly title: string;
-      readonly body: string;
-    }>;
-    readonly footnote: string;
-  };
-  readonly productFlow: {
-    readonly eyebrow: string;
-    readonly title: string;
-    readonly outputLabel: string;
     readonly steps: ReadonlyArray<{
       readonly index: string;
       readonly title: string;
       readonly body: string;
     }>;
   };
-  readonly socialProof: {
+  readonly tools: {
     readonly eyebrow: string;
     readonly title: string;
-    readonly body: string;
+    readonly subtitle: string;
+    readonly step1Label: string;
+    readonly step1Title: string;
+    readonly intentions: ReadonlyArray<{
+      readonly title: string;
+      readonly description: string;
+    }>;
+    readonly step2Label: string;
+    readonly step2Title: string;
+    readonly sizeLabel: string;
+    readonly channelLabel: string;
+    readonly sizes: ReadonlyArray<string>;
+    readonly channels: ReadonlyArray<string>;
+    readonly step3Label: string;
+    readonly step3Title: string;
+    readonly step3Description: string;
+    readonly briefingFields: ReadonlyArray<string>;
   };
-  readonly scenes: {
-    readonly genericOutput: {
-      readonly chatTitle: string;
-      readonly assistantName: string;
-      readonly recentRepliesLabel: string;
-      readonly repeatToneLabel: string;
-      readonly lines: readonly [string, string, string];
-    };
-    readonly fragilePrompt: {
-      readonly chatTitle: string;
-      readonly userAvatarLabel: string;
-      readonly userMessagePreview: string;
-      readonly newChatHint: string;
-      readonly composerLabel: string;
-      readonly sendLabel: string;
-      readonly fragments: readonly [string, string, string, string];
-    };
-    readonly teachVoice: {
-      readonly centerLabel: string;
-      readonly examples: ReadonlyArray<{
-        readonly title: string;
-        readonly meta: string;
-      }>;
-    };
-    readonly briefing: {
-      readonly label: string;
-      readonly format: string;
-      readonly objective: string;
-      readonly audience: string;
-      readonly formatTab: string;
-      readonly objectiveTab: string;
-      readonly audienceTab: string;
-      readonly angleTab: string;
-      readonly placeholder: string;
-      readonly previewAction: string;
-      readonly productLabel: string;
-      readonly breadcrumb: string;
-      readonly screenTitle: string;
-      readonly stepIndicator: string;
-      readonly draftSaved: string;
-      readonly angleHelper: string;
-      readonly voiceStatus: string;
-      readonly audienceChips: readonly string[];
-      readonly addAudienceLabel: string;
-    };
-    readonly previewConfidence: {
-      readonly label: string;
-      readonly productLabel: string;
-      readonly breadcrumb: string;
-      readonly screenTitle: string;
-      readonly stepIndicator: string;
-      readonly readyStatus: string;
-      readonly formatRecap: string;
-      readonly creditsAmount: string;
-      readonly creditsCaption: string;
-      readonly matchBadge: string;
-      readonly matchCaption: string;
-      readonly draftLabel: string;
-      readonly draftLines: readonly string[];
-      readonly toneAssurance: string;
-      readonly backAction: string;
-      readonly confirm: string;
-      readonly footnote: string;
-    };
+  readonly comparison: {
+    readonly eyebrow: string;
+    readonly title: string;
+    readonly verdict: string;
+    readonly signature: string;
+    readonly genericLabel: string;
+    readonly voiceLabel: string;
+    readonly genericLine1: string;
+    readonly genericLine2: string;
+    readonly voiceLine1: string;
+    readonly voiceLine2: string;
+    readonly genericNote: string;
+    readonly voiceNote: string;
   };
-  readonly contentTypes: ContentTypeLabels;
+  readonly testimonial: {
+    readonly quote: string;
+    readonly ps: string;
+  };
+  readonly pricing: {
+    readonly eyebrow: string;
+    readonly title: string;
+    readonly cta: string;
+    readonly recommendedBadge: string;
+    readonly plans: ReadonlyArray<{
+      readonly name: string;
+      readonly badge?: string;
+      readonly description: string;
+      readonly features: ReadonlyArray<string>;
+      readonly footer: string;
+      readonly recommended?: boolean;
+    }>;
+  };
   readonly faq: {
     readonly eyebrow: string;
     readonly title: string;
-    readonly description?: string;
     readonly items: ReadonlyArray<FaqItem>;
   };
-  readonly showcase: {
-    readonly genericLabel: string;
-    readonly voiceLabel: string;
-    readonly stampLabel: string;
-    readonly stampValue: string;
-    readonly waveformScript: string;
-    readonly threadMorePosts: string;
-    readonly proseMoreBlocks: string;
-    readonly linkedInAuthorName: string;
-    readonly linkedInAuthorMeta: string;
+  readonly waitlist: {
+    readonly eyebrow: string;
+    readonly title: string;
+    readonly description: string;
+    readonly emailLabel: string;
+    readonly nameLabel: string;
+    readonly namePlaceholder: string;
+    readonly consentPrefix: string;
+    readonly consentLink: string;
+    readonly submit: string;
+    readonly submitting: string;
+    readonly success: string;
+    readonly note: string;
+    readonly errors: {
+      readonly validation: string;
+      readonly provider: string;
+      readonly rateLimited: string;
+    };
   };
-  readonly legal: {
-    readonly privacyTitle: string;
-    readonly termsTitle: string;
-  };
+  readonly contentTypes: ContentTypeLabels;
   readonly seo: {
     readonly homeTitle: string;
     readonly homeDescription: string;
@@ -229,24 +197,8 @@ export type LocaleMessages = {
       };
     };
   };
-  readonly waitlist: {
-    readonly eyebrow: string;
-    readonly titleLines: readonly [string, string];
-    readonly description: string;
-    readonly stampLabel: string;
-    readonly stampValue: string;
-    readonly emailLabel: string;
-    readonly nameLabel: string;
-    readonly namePlaceholder: string;
-    readonly consentPrefix: string;
-    readonly consentLink: string;
-    readonly submit: string;
-    readonly submitting: string;
-    readonly success: string;
-    readonly errors: {
-      readonly validation: string;
-      readonly provider: string;
-      readonly rateLimited: string;
-    };
+  readonly legal: {
+    readonly privacyTitle: string;
+    readonly termsTitle: string;
   };
 };
