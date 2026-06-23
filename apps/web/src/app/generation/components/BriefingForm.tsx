@@ -8,7 +8,7 @@ import { AppSelect } from "~/platform/ui/AppSelect";
 import { lenisScrollRegionProps } from "~/platform/ui/lenis-scroll-region";
 
 const textareaClassName =
-  "workspace-field-control min-h-28 w-full font-body text-base text-ink placeholder:text-ink-muted";
+  "workspace-field-control min-h-28 w-full font-inter text-base text-ink placeholder:text-ink-muted";
 
 export interface BriefingFormProps {
   readonly locale: AppLocale;
@@ -66,7 +66,7 @@ export function BriefingForm({
               </label>
             ) : (
               <>
-                <label htmlFor={`briefing-${field.key}`} className="mb-2 flex items-center gap-2 text-sm font-medium">
+                <label htmlFor={`briefing-${field.key}`} className="mb-2 flex items-center gap-2 text-sm font-medium font-inter">
                   <span>
                     {label}
                     {field.required ? " *" : ""}

@@ -34,6 +34,54 @@ export interface IntentWizardProps {
   readonly onRetry: () => void;
 }
 
+function StepIndicator({ current, total, labels }: { readonly current: number; readonly total: number; readonly labels: string[] }) {
+  return (
+    <div className="flex items-center gap-3 mb-6">
+      {labels.map((label, index) => {
+        const stepNum = index + 1;
+        const isActive = stepNum === current;
+        const isDone = stepNum < current;
+        return (
+          <div key={index} className="flex items-center gap-2">
+            <div
+              className={cn(
+                "flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-2 font-mono text-xs font-bold transition-colors duration-300",
+                isDone
+                  ? "border-musgo bg-musgo text-white"
+                  : isActive
+                    ? "border-terracota bg-terracota/10 text-terracota"
+                    : "border-borda/30 bg-creme text-borda"
+              )}
+            >
+              {isDone ? (
+                <svg viewBox="0 0 20 20" fill="currentColor" className="h-3.5 w-3.5">
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                </svg>
+              ) : (
+                stepNum
+              )}
+            </div>
+            <span
+              className={cn(
+                "font-inter text-xs font-medium hidden sm:inline transition-colors duration-300",
+                isActive ? "text-azul" : isDone ? "text-musgo" : "text-borda"
+              )}
+            >
+              {label}
+            </span>
+            {index < labels.length - 1 && (
+              <div className={cn(
+                "w-8 h-px mx-1 hidden sm:block",
+                isDone ? "bg-musgo/40" : "bg-borda/20"
+              )} />
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 function IntentOptionCard({
   item,
   selected,
@@ -51,13 +99,15 @@ function IntentOptionCard({
         hover
         padding="compact"
         className={cn(
-          "h-full transition-shadow",
-          selected && "ring-2 ring-pigment-terracotta/30 ring-offset-2 ring-offset-paper"
+          "h-full transition-all duration-300",
+          selected
+            ? "border-terracota/30 bg-terracota/5 shadow-[3px_3px_0px_rgba(181,90,59,0.1)]"
+            : "hover:shadow-[3px_3px_0px_rgba(26,46,60,0.06)]"
         )}
       >
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0 space-y-1">
-            <Text as="span" variant="label" className="block">
+            <Text as="span" variant="label" className={cn("block", selected && "text-terracota")}>
               {item.label}
             </Text>
             <Text as="span" variant="meta" className="block text-ink-muted">
@@ -88,6 +138,12 @@ export function IntentWizard({
 }: IntentWizardProps) {
   const { locale, messages } = useAppLocale();
   const [channelExpanded, setChannelExpanded] = useState(false);
+
+  const stepLabels = [
+    messages.intentWizard.stepObjectiveTitle,
+    messages.intentWizard.stepScopeTitle,
+    messages.generate.briefing
+  ];
 
   if (status === "loading" && featuredIntents.length === 0) {
     return (
@@ -121,9 +177,11 @@ export function IntentWizard({
 
   if (wizard.step === 1) {
     return (
-      <div className="workspace-stagger-group space-y-6">
+      <div className="space-y-6">
+        <StepIndicator current={1} total={3} labels={stepLabels} />
+
         <div>
-          <Text as="h2" variant="h2" className="mb-2">
+          <Text as="h2" variant="h2" className="mb-2 font-playfair text-azul">
             {messages.intentWizard.stepObjectiveTitle}
           </Text>
           <Text variant="body" className="text-ink-muted">
@@ -176,9 +234,11 @@ export function IntentWizard({
     const activeChannel = wizard.scope.channel ?? "unspecified";
 
     return (
-      <div className="workspace-stagger-group space-y-6">
+      <div className="space-y-6">
+        <StepIndicator current={2} total={3} labels={stepLabels} />
+
         <div>
-          <Text as="h2" variant="h2" className="mb-2">
+          <Text as="h2" variant="h2" className="mb-2 font-playfair text-azul">
             {messages.intentWizard.stepScopeTitle}
           </Text>
           <Text variant="body" className="text-ink-muted">
@@ -187,7 +247,7 @@ export function IntentWizard({
         </div>
 
         {wizard.selectedIntent ? (
-          <AppCard padding="compact" className="border-pigment-terracotta/20 bg-pigment-terracotta/5">
+          <AppCard padding="compact" className="border-terracota/20 bg-terracota/5">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <Text variant="meta" className="mb-1 block text-ink-muted">

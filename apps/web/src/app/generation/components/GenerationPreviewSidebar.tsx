@@ -60,10 +60,17 @@ export function GenerationPreviewSidebar({
 }) {
   return (
     <aside className="mt-8 space-y-4 lg:mt-0 lg:sticky lg:top-[calc(var(--app-header-height)+1.5rem)]">
-      <AppCard className="space-y-4">
-        <Text as="h2" variant="label" className="block">
-          {messages.generate.previewTitle}
-        </Text>
+      <AppCard className="space-y-4 border-azul/15">
+        <div className="flex items-center gap-2 pb-3 border-b border-borda/15">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4 text-azul">
+            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
+            <circle cx="12" cy="9" r="2.5" />
+          </svg>
+          <Text as="h2" variant="label" className="font-playfair text-azul">
+            {messages.generate.previewTitle}
+          </Text>
+        </div>
+
         {commercialInitialLoad ? <AppSkeleton className="h-16 w-full" /> : null}
         {commercialPreview ? (
           <div
@@ -82,12 +89,14 @@ export function GenerationPreviewSidebar({
               </Text>
             ) : (
               <>
-                <Text variant="meta">
-                  {messages.generate.previewPrice.replace(
-                    "{price}",
-                    String(commercialPreview.pricingSnapshot.creditPrice)
-                  )}
-                </Text>
+                <div className="flex items-center justify-between rounded-[var(--radius-press)] bg-creme px-3 py-2 border border-borda/15">
+                  <Text variant="meta" className="text-ink-muted">
+                    {messages.generate.previewPrice.replace(
+                      "{price}",
+                      String(commercialPreview.pricingSnapshot.creditPrice)
+                    )}
+                  </Text>
+                </div>
                 <Text variant="meta">
                   {messages.generate.previewBalance
                     .replace(
@@ -105,7 +114,7 @@ export function GenerationPreviewSidebar({
         ) : null}
         {fullPreview && (previewRecommendation || recommendationStale) ? (
           <ReadingSurface
-            className={`rounded-[var(--radius-press)] px-4 py-5 transition-opacity duration-300 ease-out ${
+            className={`rounded-[var(--radius-press)] px-4 py-5 border border-borda/10 bg-creme transition-opacity duration-300 ease-out ${
               fullRefreshing ? "opacity-55" : "opacity-100"
             }`}
           >
@@ -159,7 +168,7 @@ export function GenerationPreviewSidebar({
 
         <Button
           type="button"
-          className="w-full justify-center"
+          className="w-full justify-center bg-terracota text-white shadow-[3px_3px_0px_rgba(0,0,0,0.12)] hover:bg-terracota/90"
           disabled={
             !briefingComplete ||
             importedTooLarge ||

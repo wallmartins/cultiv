@@ -22,10 +22,15 @@ export function BriefingGuidancePanel({
       : getBriefingGuidance(locale, item.id, item.briefingGuidance);
 
   return (
-    <AppCard className="bg-paper-pressed/30">
-      <Text as="h2" variant="label" className="mb-2">
-        {messages.generate.guidanceTitle}
-      </Text>
+    <AppCard className="bg-creme border-borda/15">
+      <div className="flex items-center gap-2 mb-3">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4 text-terracota/60">
+          <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+        </svg>
+        <Text as="h2" variant="label" className="font-playfair text-azul">
+          {messages.generate.guidanceTitle}
+        </Text>
+      </div>
       <Text variant="meta" className="mb-3 block">
         {guidance.objective}
       </Text>
