@@ -468,14 +468,14 @@ export const appMessagesPt: AppMessages = {
     revokeConsent: "Revogar consentimento",
     revokeDisabled: "Revogação disponível quando a API estiver publicada.",
     logout: "Sair",
-    plans: "Planos e upgrade"
+    plans: "Recursos"
   },
   plans: {
-    title: "Planos",
-    subtitle: "Compare planos e faça upgrade quando precisar de mais gerações por mês.",
-    currentPlan: "Seu plano",
+    title: "Recursos da jornada",
+    subtitle: "Equipamento e suprimentos para sua próxima expedição.",
+    currentPlan: "Equipamento atual",
     usageHint: "Seu uso do mês aparece ao gerar conteúdo.",
-    changePlan: "Mudar de plano",
+    changePlan: "Novos instrumentos",
     changePlanDescription: "Escolha moeda, período e forma de pagamento para assinar.",
     planPro: "Pro",
     planCriador: "Criador",
@@ -483,9 +483,9 @@ export const appMessagesPt: AppMessages = {
     upgradeCriador: "Assinar Criador",
     upgradePro: "Assinar Pro",
     alreadyPro: "Você já está no plano Pro.",
-    topUp: "Comprar mais gerações",
-    topUpDescription: "Pacote avulso para usar além da cota do plano.",
-    topUpCta: "Comprar pacote",
+    topUp: "Suprimentos adicionais",
+    topUpDescription: "Pacote avulso de gerações extras para quando a cota do plano não for suficiente.",
+    topUpCta: "Adquirir suprimentos",
     currencyLabel: "Moeda",
     currency: {
       brl: "BRL (Brasil)",
