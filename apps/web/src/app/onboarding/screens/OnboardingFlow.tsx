@@ -1,9 +1,8 @@
 import { useAuth0 } from "@auth0/auth0-react";
-import { Button, Container, Text } from "@my-ai-orchestrator/ui";
+import { Button, CompassMark, CoordinateLabel, LogbookProse, Text } from "@my-ai-orchestrator/ui";
 import { useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { VoiceExampleComposer } from "~/app/voice/components/VoiceExampleComposer";
-import { AppCard } from "~/platform/ui/AppCard";
 import { toVoiceConfidenceLevel, VoiceConfidenceRing } from "~/app/voice/components/VoiceConfidenceRing";
 import { useAppLocale } from "~/i18n/app/use-app-locale";
 import { useCreditBalance } from "~/platform/credits/use-credit-balance";
@@ -13,7 +12,6 @@ import {
 } from "~/app/onboarding/lib/onboarding-flags";
 import { useClientSdk } from "~/platform/runtime/client-sdk-context";
 import type { VoiceProfileScreenView } from "@my-ai-orchestrator/contracts";
-import { useEffect } from "react";
 
 export function OnboardingFlow() {
   const { user } = useAuth0();
@@ -43,14 +41,18 @@ export function OnboardingFlow() {
   }
 
   return (
-    <Container className="py-8 md:py-10">
+    <div className="mx-auto max-w-[560px] px-[var(--spacing-gutter)] py-8 md:py-10">
       <div className="mb-6">
-        <Text variant="meta" className="mb-2 text-ink-muted">
-          {messages.onboarding.stepLabel.replace("{current}", String(step)).replace("{total}", "2")}
-        </Text>
-        <div className="h-1.5 overflow-hidden rounded-full bg-paper-pressed">
+        <CoordinateLabel
+          index={step}
+          label={messages.onboarding.stepLabel
+            .replace("{current}", String(step))
+            .replace("{total}", "2")}
+          className="mb-3 block"
+        />
+        <div className="h-1.5 overflow-hidden rounded-[5px] border border-dotted-cartography bg-cream">
           <div
-            className="h-full rounded-full bg-pigment-terracotta transition-[width] duration-300 ease-out"
+            className="h-full rounded-[4px] bg-terracotta transition-[width] duration-300 ease-out motion-reduce:transition-none"
             style={{ width: step === 1 ? "50%" : "100%" }}
           />
         </div>
@@ -59,7 +61,7 @@ export function OnboardingFlow() {
       {step === 1 ? (
         <div className="workspace-stagger-group space-y-6">
           <div>
-            <Text as="h1" variant="h1" className="mb-3">
+            <Text as="h1" variant="h1" className="mb-3 font-playfair text-ink">
               {messages.onboarding.step1Title}
             </Text>
             <Text variant="body" className="text-ink-muted">
@@ -67,9 +69,9 @@ export function OnboardingFlow() {
             </Text>
           </div>
 
-          <AppCard>
+          <LogbookProse className="p-5">
             <VoiceExampleComposer mode="create" onSaved={() => setStep(2)} />
-          </AppCard>
+          </LogbookProse>
 
           <div className="flex flex-wrap gap-3">
             <Button
@@ -91,17 +93,21 @@ export function OnboardingFlow() {
         </div>
       ) : (
         <div className="workspace-stagger-group space-y-6">
-          <div>
-            <Text as="h1" variant="h1" className="mb-3">
+          <div className="text-center">
+            <div className="mx-auto mb-4 flex size-20 items-center justify-center rounded-full border border-dotted-cartography bg-off-white">
+              <CompassMark size={48} variant="symbol" color="ochre" />
+            </div>
+            <Text as="h1" variant="h1" className="mb-3 font-playfair text-ink">
               {messages.onboarding.step2Title}
+            </Text>
+            <Text variant="body" className="text-ink-muted">
+              {messages.onboarding.step2Subtitle}
             </Text>
           </div>
 
-          <div className="grid gap-4 md:grid-cols-2">
-            <AppCard>
-              <Text variant="label" className="mb-4 block">
-                {messages.onboarding.confidence}
-              </Text>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <LogbookProse className="space-y-4 p-5">
+              <CoordinateLabel index={1} label={messages.onboarding.confidence} className="block" />
               <VoiceConfidenceRing
                 level={toVoiceConfidenceLevel(profile?.profile.confidence)}
                 label={
@@ -110,19 +116,18 @@ export function OnboardingFlow() {
                       messages.voice.confidenceLabels.none)
                     : messages.voice.confidenceLabels.none
                 }
+                size="panel"
               />
-            </AppCard>
-            <AppCard>
-              <Text variant="label" className="mb-2 block">
-                {messages.onboarding.credits}
-              </Text>
-              <Text variant="meta" className="font-mono text-lg">
+            </LogbookProse>
+            <LogbookProse className="space-y-3 p-5">
+              <CoordinateLabel index={2} label={messages.onboarding.credits} className="block" />
+              <Text variant="meta" className="font-mono text-2xl text-ink">
                 {balance ?? "…"}
               </Text>
-            </AppCard>
+            </LogbookProse>
           </div>
 
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap justify-center gap-3">
             <Button type="button" variant="ghost" onClick={finishOnboarding}>
               {messages.onboarding.skip}
             </Button>
@@ -132,6 +137,6 @@ export function OnboardingFlow() {
           </div>
         </div>
       )}
-    </Container>
+    </div>
   );
 }
