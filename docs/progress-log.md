@@ -1,5 +1,10 @@
 # Progress Log
 
+| 2026-06-23 | fix(marketing): Cartography landing polish — section rail, compositor demo, shared comparison frame, pricing plans, copy without em dashes, hero headline wrap fix |
+| 2026-06-23 | docs: Cartography redesign implemented — Task 21 QA gate: fixed migration test drift (geo llms route copy, generation intent labels, VoiceReasoningMirror voiceMessages prop, content-type labels, cartography motion tokens); 936 tests pass (28 skipped), web build pass, cartography governance + primitives pass; manual QA: governance ✓, web build ✓, full suite ✓ |
+| 2026-06-23 | feat(marketing): Cartography motion — route draw, reveal stagger, hero word fade; retired stamp reveal and scroll-pin hooks |
+| 2026-06-23 | docs: Cultiv Cartography redesign implementation plan — 21 tasks across tokens, primitives, marketing reskin, workspace shell, Imprint retirement, QA gate |
+| 2026-06-23 | docs: Cultiv Cartography complete platform redesign design spec — Atlas Editorial approach, cartography identity (compass logo, Playfair/Inter/Caveat/JetBrains Mono), marketing + workspace layout reimagined, premium contained motion, supersedes ADR 0009 Imprint |
 | 2026-06-22 | fix(web): Imprint visual depth — craft Press Mark, scene mats, hero split + HeroImprintArt, restore problem/differentiator SVG scenes, stronger grain/ink/type |
 | 2026-06-22 | docs: Cultiv Imprint identity marked implemented — Task 15 quality verification: 920 tests pass (28 skipped), `pnpm --filter web build` pass, `imprint-visual-governance` pass; Lighthouse not run in CI — manual checklist: (1) Lighthouse mobile on `/` — Performance ≥ 90, Accessibility ≥ 90; (2) `prefers-reduced-motion: reduce` — no Lenis/GSAP transforms, stamp/static render; (3) isolated `PaperSurface` + `ComparisonCard` screenshot — Cultiv signature without logo |
 | 2026-06-22 | docs: Cultiv Imprint implementation complete — design-system reference, creative direction, CONTEXT.md glossary (Imprint typography/surface/intensity), ADR 0009 (Task 14) |

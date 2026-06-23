@@ -73,6 +73,18 @@ export function getVoiceConfidenceDialAccessibleLabel(
   return `${messages.confidenceDialEyebrow}: ${confidenceLabel}. ${subline}`;
 }
 
+export function getVoiceDashboardSectionTitles(messages: AppVoiceMessages): {
+  readonly navigate: string;
+  readonly mapRoutes: string;
+  readonly mapLayers: string;
+} {
+  return {
+    navigate: messages.reasoning.title,
+    mapRoutes: messages.reasoning.developmentTitle,
+    mapLayers: messages.mapLayersTitle
+  };
+}
+
 export function getVoiceConfidencePanelMessage(
   profile: VoiceProfileView,
   messages: AppVoiceMessages,

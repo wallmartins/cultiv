@@ -16,10 +16,11 @@ export function useSectionReveal<T extends HTMLElement = HTMLDivElement>(
 
   useEffect(() => {
     const section = ref.current;
-    if (!section || prefersReducedMotion()) {
+    if (!section) {
       return;
     }
 
+    const reduced = prefersReducedMotion();
     let cancelled = false;
     let cleanup: (() => void) | undefined;
 
@@ -29,40 +30,36 @@ export function useSectionReveal<T extends HTMLElement = HTMLDivElement>(
       }
 
       const items = section.querySelectorAll(selector);
-      const context = gsap.context(() => {
-        if (items.length > 0) {
-          gsap.fromTo(
-            items,
-            { autoAlpha: 0, y: MOTION.reveal.y },
-            {
-              autoAlpha: 1,
-              y: 0,
-              duration: MOTION.reveal.duration,
-              ease: MOTION.reveal.ease,
-              stagger: MOTION.stagger,
-              scrollTrigger: {
-                trigger: section,
-                start: revealStart
-              }
-            }
-          );
-          return;
-        }
-
-        gsap.fromTo(
-          section,
-          { autoAlpha: 0, y: MOTION.reveal.y },
-          {
+      const fromVars = reduced ? { autoAlpha: 0 } : { autoAlpha: 0, y: MOTION.reveal.y };
+      const toVars = reduced
+        ? { autoAlpha: 1, duration: MOTION.reveal.duration, ease: MOTION.reveal.ease }
+        : {
             autoAlpha: 1,
             y: 0,
             duration: MOTION.reveal.duration,
-            ease: MOTION.reveal.ease,
+            ease: MOTION.reveal.ease
+          };
+
+      const context = gsap.context(() => {
+        if (items.length > 0) {
+          gsap.fromTo(items, fromVars, {
+            ...toVars,
+            stagger: reduced ? 0 : MOTION.stagger,
             scrollTrigger: {
               trigger: section,
               start: revealStart
             }
+          });
+          return;
+        }
+
+        gsap.fromTo(section, fromVars, {
+          ...toVars,
+          scrollTrigger: {
+            trigger: section,
+            start: revealStart
           }
-        );
+        });
       }, section);
 
       cleanup = () => context.revert();

@@ -6,8 +6,8 @@ export const appMessagesPt: AppMessages = {
       generate: "Gerar",
       history: "Caderno de bordo",
       voice: "Mapa da voz",
-      settings: "Configurações",
-      plans: "Planos",
+      settings: "Ajustes de navegação",
+      plans: "Recursos da jornada",
       logout: "Sair"
     },
     quota: { label: "gerações" },
@@ -19,22 +19,25 @@ export const appMessagesPt: AppMessages = {
       statusQueued: "Na fila",
       statusRunning: "Gerando",
       statusDone: "Pronto",
-      statusFailed: "Falhou",
+      statusFailed: "A rota não pôde ser traçada.",
       copy: "Copiar",
+      export: "Exportar",
       regenerate: "Regenerar",
+      newExpedition: "Nova expedição",
       viewHistory: "Ver completo no histórico",
       retry: "Tentar de novo",
-      noCreditsCharged: "Nenhum crédito foi cobrado.",
+      noCreditsCharged: "Seus créditos não foram consumidos.",
       observationFailure: "Perdemos conexão com a geração.",
       refresh: "Atualizar",
       hybridHint:
-        "Você pode sair desta tela — avisamos quando o texto estiver pronto. Se preferir, acompanhe cada etapa aqui embaixo."
+        "Sua rota está sendo traçada… Você pode fechar esta janela."
     },
     sdk: {
       unavailable: "Não foi possível conectar ao servidor. Alguns dados podem estar desatualizados.",
       retry: "Tentar novamente"
     },
-    selectPlaceholder: "Selecione uma opção"
+    selectPlaceholder: "Selecione uma opção",
+    notFound: "Território não encontrado."
   },
   intentWizard: {
     stepObjectiveTitle: "O que você quer explorar?",
@@ -52,7 +55,10 @@ export const appMessagesPt: AppMessages = {
     changeIntent: "Trocar expedição",
     catalogLoadError: "Não foi possível carregar as expedições.",
     catalogRetry: "Tentar novamente",
-    stepIndicator: "Passo {current} de {total}"
+    stepIndicator: "Passo {current} de {total}",
+    stepExplorar: "Explorar",
+    stepEscala: "Escala",
+    stepCoordenadas: "Coordenadas"
   },
   generate: {
     title: "Expedição",
@@ -78,7 +84,7 @@ export const appMessagesPt: AppMessages = {
     generate: "Traçar rota",
     generateWithCredits: "Traçar rota ({price} créditos)",
     calculating: "Calculando…",
-    sending: "Traçando rota…",
+    sending: "Sua rota está sendo traçada…",
     noCredits: "Sem créditos",
     incomplete: "Preencha as coordenadas obrigatórias",
     blocked: "Material bloqueado",
@@ -97,9 +103,9 @@ export const appMessagesPt: AppMessages = {
     }
   },
   qualityModes: {
-    fast: "Direto",
+    fast: "Leve",
     balanced: "Equilibrado",
-    strict: "Afinado",
+    strict: "Polido",
     helper: "Todos os modos preservam sua voz; o modo afeta profundidade e revisão.",
     recommended: "Recomendado",
     help: "Sobre este modo",
@@ -145,7 +151,7 @@ export const appMessagesPt: AppMessages = {
   history: {
     title: "Caderno de bordo",
     subtitle: "Todas as suas expedições em um só lugar.",
-    empty: "Nenhuma expedição registrada. Comece traçando sua primeira rota.",
+    empty: "Nenhuma expedição ainda. Trace sua primeira rota.",
     emptyAction: "Nova expedição",
     error: "Não foi possível carregar o caderno de bordo.",
     retry: "Tentar novamente",
@@ -189,12 +195,13 @@ export const appMessagesPt: AppMessages = {
     dashboardTitle: "Mapa da sua voz",
     dashboardSubtitle: "Como você navega, como traça rotas — e como melhorar.",
     dashboardEmpty:
-      "Seu mapa de voz ainda está vazio. Adicione os primeiros textos para começar a mapear sua identidade.",
+      "Seu mapa ainda está em branco. Ensine sua voz para começar.",
     dashboardEmptyAction: "Adicionar primeiro texto",
     manageExamples: "Gerenciar textos",
     mirrorFallbackTitle: "Seu mapa hoje",
     mirrorFallbackSubtitle:
       "Com mais textos de referência, o Cultiv passa a mapear também seus padrões cognitivos e argumentativos.",
+    mapLayersTitle: "Camadas do mapa",
     detailLayers: {
       formats: "Rotas por território",
       antiPatterns: "Terrenos a evitar",
@@ -331,13 +338,13 @@ export const appMessagesPt: AppMessages = {
       saving: "Salvando…"
     },
     reasoning: {
-      title: "Como você pensa",
+      title: "Como você navega",
       subtitle: "Padrões de observação, argumento e conclusão inferidos dos seus exemplos.",
       rebuilding: "Atualizando o raciocínio inferido a partir dos exemplos mais recentes.",
       failedKeepLast:
         "A última extração falhou, mas o raciocínio anterior continua válido. Adicione exemplos ou tente atualizar de novo.",
       coreTitle: "Raciocínio central",
-      developmentTitle: "Como você desenvolve um texto",
+      developmentTitle: "Como você traça rotas",
       developmentSubtitle: "Caminho argumentativo, postura epistêmica e movimentos típicos inferidos dos seus exemplos.",
       developmentImmature: "Com pelo menos três exemplos ativos, este espelho fica mais estável.",
       epistemicPosture: "Postura epistêmica",
@@ -468,7 +475,8 @@ export const appMessagesPt: AppMessages = {
     revokeConsent: "Revogar consentimento",
     revokeDisabled: "Revogação disponível quando a API estiver publicada.",
     logout: "Sair da expedição",
-    plans: "Recursos"
+    plans: "Recursos",
+    saved: "Ajustes salvos."
   },
   plans: {
     title: "Recursos da jornada",
@@ -506,7 +514,7 @@ export const appMessagesPt: AppMessages = {
     loadError: "Não foi possível carregar seu plano."
   },
   notifications: {
-    readyTitle: "Geração pronta",
+    readyTitle: "Rota concluída. Seu texto está pronto.",
     readyAction: "Ver resultado"
   },
   errors: {
@@ -552,7 +560,7 @@ export const appMessagesPt: AppMessages = {
     },
     observationFailure: {
       title: "Conexão perdida",
-      message: "Perdemos conexão com a geração. Atualize para ver o status.",
+      message: "Conexão perdida. Verifique sua rede e tente novamente.",
       action: "Atualizar"
     },
     default: {

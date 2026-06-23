@@ -16,61 +16,62 @@ export type AppContentTypeCopy = {
 const copy: Record<AppLocale, Record<AppContentTypeId, AppContentTypeCopy>> = {
   pt: {
     "linkedin-post": {
-      label: "Publicação profissional",
+      label: "Post LinkedIn",
       description:
-        "Compartilhe uma ideia ou aprendizado com sua rede em poucos parágrafos. Ideal para LinkedIn e redes profissionais."
+        "Compartilhe uma descoberta ou aprendizado com sua rede em poucos parágrafos."
     },
     "validation-post": {
       label: "Teste de ideia",
       description:
-        "Teste uma hipótese com sua audiência antes de investir em um conteúdo maior. Use contexto, pergunta e evidência."
+        "Teste uma hipótese com sua audiência antes de investir em um conteúdo maior."
     },
     "architecture-post": {
-      label: "Explicar uma decisão",
+      label: "Documentar decisão",
       description:
-        "Documente uma escolha com contexto, alternativas consideradas e o motivo da decisão."
+        "Registre uma escolha com contexto, alternativas consideradas e trade-offs."
     },
     "long-form-blog": {
       label: "Artigo aprofundado",
-      description: "Desenvolva um argumento com estrutura editorial e profundidade além do post rápido."
+      description: "Desenvolva um argumento com estrutura editorial e profundidade."
     },
     "twitter-thread": {
-      label: "Sequência de posts",
+      label: "Thread Twitter",
       description:
-        "Conte uma história ou argumento em vários posts curtos em sequência. Funciona no X e formatos parecidos."
+        "Conte uma história ou argumento em vários posts curtos em sequência."
     },
     newsletter: {
-      label: "Edição de newsletter",
-      description: "Organize uma edição com seções claras e tom de newsletter para assinantes."
+      label: "Newsletter",
+      description: "Organize uma edição com seções claras para seus exploradores."
     }
   },
   en: {
     "linkedin-post": {
-      label: "Professional update",
+      label: "LinkedIn post",
       description:
-        "Share an idea or lesson with your network in a few paragraphs. Best for LinkedIn and professional platforms."
+        "Share a discovery or lesson with your network in a few paragraphs."
     },
     "validation-post": {
-      label: "Idea validation",
+      label: "Idea test",
       description:
-        "Test a hypothesis with your audience before investing in a longer piece. Use context, a question, and evidence."
+        "Test a hypothesis with your audience before investing in a longer piece."
     },
     "architecture-post": {
-      label: "Explain a decision",
-      description: "Document a choice with context, alternatives considered, and why you decided."
+      label: "Document a decision",
+      description:
+        "Record a choice with context, alternatives considered, and trade-offs."
     },
     "long-form-blog": {
       label: "In-depth article",
-      description: "Develop an argument with editorial structure and depth beyond a quick post."
+      description: "Develop an argument with editorial structure and depth."
     },
     "twitter-thread": {
-      label: "Post series",
+      label: "Twitter thread",
       description:
-        "Tell a story or build an argument across several short posts in sequence. Works on X and similar formats."
+        "Tell a story or build an argument across several short posts in sequence."
     },
     newsletter: {
-      label: "Newsletter edition",
-      description: "Organize an edition with clear sections and a newsletter tone for subscribers."
+      label: "Newsletter",
+      description: "Organize an edition with clear sections for your explorers."
     }
   }
 };

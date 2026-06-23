@@ -6,8 +6,8 @@ export const appMessagesEn: AppMessages = {
       generate: "Generate",
       history: "Logbook",
       voice: "Voice map",
-      settings: "Settings",
-      plans: "Plans",
+      settings: "Navigation settings",
+      plans: "Journey resources",
       logout: "Sign out"
     },
     quota: { label: "gens" },
@@ -19,22 +19,25 @@ export const appMessagesEn: AppMessages = {
       statusQueued: "Queued",
       statusRunning: "Generating",
       statusDone: "Ready",
-      statusFailed: "Failed",
+      statusFailed: "The route could not be mapped.",
       copy: "Copy",
+      export: "Export",
       regenerate: "Regenerate",
+      newExpedition: "New expedition",
       viewHistory: "View full history",
       retry: "Try again",
-      noCreditsCharged: "No credits were charged.",
+      noCreditsCharged: "Your credits were not used.",
       observationFailure: "We lost connection to the generation.",
       refresh: "Refresh",
       hybridHint:
-        "You can leave this screen — we'll notify you when the text is ready. Or stay here and follow each step below."
+        "Your route is being mapped… You can close this window."
     },
     sdk: {
       unavailable: "Could not connect to the server. Some data may be out of date.",
       retry: "Try again"
     },
-    selectPlaceholder: "Select an option"
+    selectPlaceholder: "Select an option",
+    notFound: "Territory not found."
   },
   intentWizard: {
     stepObjectiveTitle: "What do you want to explore?",
@@ -52,7 +55,10 @@ export const appMessagesEn: AppMessages = {
     changeIntent: "Change expedition",
     catalogLoadError: "Could not load expeditions.",
     catalogRetry: "Try again",
-    stepIndicator: "Step {current} of {total}"
+    stepIndicator: "Step {current} of {total}",
+    stepExplorar: "Explore",
+    stepEscala: "Scale",
+    stepCoordenadas: "Coordinates"
   },
   generate: {
     title: "Expedition",
@@ -78,7 +84,7 @@ export const appMessagesEn: AppMessages = {
     generate: "Map the route",
     generateWithCredits: "Map the route ({price} credits)",
     calculating: "Calculating…",
-    sending: "Mapping route…",
+    sending: "Your route is being mapped…",
     noCredits: "No credits",
     incomplete: "Fill in required coordinates",
     blocked: "Material blocked",
@@ -145,7 +151,7 @@ export const appMessagesEn: AppMessages = {
   history: {
     title: "Logbook",
     subtitle: "All your expeditions in one place.",
-    empty: "No expeditions logged yet. Start by mapping your first route.",
+    empty: "No expeditions yet. Map your first route.",
     emptyAction: "New expedition",
     error: "Could not load the logbook.",
     retry: "Try again",
@@ -189,12 +195,13 @@ export const appMessagesEn: AppMessages = {
     dashboardTitle: "Your voice map",
     dashboardSubtitle: "How you navigate, how you map routes — and how to improve.",
     dashboardEmpty:
-      "Your voice map is still empty. Add the first texts to start mapping your identity.",
+      "Your map is still blank. Teach your voice to get started.",
     dashboardEmptyAction: "Add your first text",
     manageExamples: "Manage texts",
     mirrorFallbackTitle: "Your map today",
     mirrorFallbackSubtitle:
       "With more reference texts, Cultiv will also map your cognitive and argument patterns.",
+    mapLayersTitle: "Map layers",
     detailLayers: {
       formats: "Routes by territory",
       antiPatterns: "Terrains to avoid",
@@ -329,13 +336,13 @@ export const appMessagesEn: AppMessages = {
       saving: "Saving…"
     },
     reasoning: {
-      title: "How you think",
+      title: "How you navigate",
       subtitle: "Patterns of observation, argument, and conclusion inferred from your examples.",
       rebuilding: "Updating inferred reasoning from your latest examples.",
       failedKeepLast:
         "The latest extraction failed, but your previous reasoning snapshot remains active. Add examples or try updating again.",
       coreTitle: "Core reasoning",
-      developmentTitle: "How you develop a text",
+      developmentTitle: "How you map routes",
       developmentSubtitle:
         "Argumentative path, epistemic posture, and typical moves inferred from your examples.",
       developmentImmature: "With at least three active examples, this mirror becomes more stable.",
@@ -467,7 +474,8 @@ export const appMessagesEn: AppMessages = {
     revokeConsent: "Revoke consent",
     revokeDisabled: "Revocation available when the API is published.",
     logout: "Leave expedition",
-    plans: "Resources"
+    plans: "Resources",
+    saved: "Settings saved."
   },
   plans: {
     title: "Journey resources",
@@ -505,7 +513,7 @@ export const appMessagesEn: AppMessages = {
     loadError: "Could not load your plan."
   },
   notifications: {
-    readyTitle: "Generation ready",
+    readyTitle: "Route complete. Your text is ready.",
     readyAction: "View result"
   },
   errors: {
@@ -551,7 +559,7 @@ export const appMessagesEn: AppMessages = {
     },
     observationFailure: {
       title: "Connection lost",
-      message: "We lost connection to the generation. Refresh to see status.",
+      message: "Connection lost. Check your network and try again.",
       action: "Refresh"
     },
     default: {

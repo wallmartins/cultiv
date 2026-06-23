@@ -87,8 +87,8 @@ export function VoiceConfidenceRing({
             cy="50"
             r="42"
             fill="none"
-            stroke="color-mix(in srgb, var(--color-paper-pressed) 90%, transparent)"
-            strokeWidth="8"
+            stroke="color-mix(in srgb, var(--color-ink-ghost) 55%, transparent)"
+            strokeWidth="7"
           />
           <circle
             cx="50"
@@ -96,7 +96,7 @@ export function VoiceConfidenceRing({
             r="42"
             fill="none"
             stroke={`url(#${gradientId})`}
-            strokeWidth="8"
+            strokeWidth="7"
             strokeLinecap="round"
             strokeDasharray={circumference}
             strokeDashoffset={animatedOffset}
@@ -106,15 +106,15 @@ export function VoiceConfidenceRing({
           />
           <defs>
             <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="var(--color-pigment-terracotta)" />
-              <stop offset="100%" stopColor="var(--color-pigment-ochre)" />
+              <stop offset="0%" stopColor="var(--color-pigment-ochre)" />
+              <stop offset="100%" stopColor="var(--color-pigment-terracotta)" />
             </linearGradient>
           </defs>
         </svg>
         {centerLabel ? (
           <span
             className={cn(
-              "absolute inset-0 flex items-center justify-center font-body font-semibold leading-none text-ink",
+              "absolute inset-0 flex items-center justify-center px-3 text-center font-inter font-semibold leading-tight text-ink",
               centerLabelClasses[size]
             )}
           >
@@ -128,7 +128,7 @@ export function VoiceConfidenceRing({
             id={labelId}
             as="p"
             variant={size === "compact" ? "body" : "h2"}
-            className={cn("mb-1", size === "compact" && "font-semibold")}
+            className={cn("mb-1 font-playfair", size === "compact" && "font-semibold")}
           >
             {label}
           </Text>

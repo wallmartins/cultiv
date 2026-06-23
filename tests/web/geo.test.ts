@@ -23,7 +23,7 @@ describe("GEO package", () => {
     expect(full).toContain("## Perguntas frequentes");
     expect(full).toContain("O Cultiv substitui meu estilo de escrita?");
     expect(full).toContain("## Como funciona");
-    expect(full).toContain("Crie sua conta gratuita e entre no mapa.");
+    expect(full).toContain("Crie sua conta e entre no mapa.");
   });
 
   it("allows AI crawlers in robots.txt", () => {

@@ -1,9 +1,8 @@
-import { Button, cn, Text } from "@my-ai-orchestrator/ui";
+import { Button, cn, CoordinateLabel, LogbookProse, Text } from "@my-ai-orchestrator/ui";
 import { Link } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import type { TraitConfirmationInput } from "@my-ai-orchestrator/contracts";
-import { AppCard } from "~/platform/ui/AppCard";
-import { AppDisclosureGroup } from "~/platform/ui/AppDisclosure";
+import type { AppDisclosureItem } from "~/platform/ui/AppDisclosure";
 import { AppSkeleton } from "~/platform/ui/AppSkeleton";
 import { toVoiceConfidenceLevel } from "~/app/voice/components/VoiceConfidenceRing";
 import { VoiceMirrorHero } from "~/app/voice/components/VoiceMirrorHero";
@@ -25,6 +24,7 @@ import {
   getVoiceConfidenceDialSubline,
   getVoiceConfidencePanelMessage,
   getVoiceDiagnosticsText,
+  getVoiceDashboardSectionTitles,
   resolveVoiceNextStepFromDiagnostics
 } from "~/app/voice/lib/voice-dashboard-copy";
 import { useAppLocale } from "~/i18n/app/use-app-locale";
@@ -35,26 +35,93 @@ import type { VoiceProfileScreenView } from "@my-ai-orchestrator/contracts";
 
 type DashboardStatus = "loading" | "ready" | "empty" | "error";
 
-function CompassDecoration({ className }: { readonly className?: string }) {
+function formatLayerTitle(title: string, count: number | undefined): string {
+  if (count === undefined) {
+    return title;
+  }
+
+  return `${title} (${count})`;
+}
+
+function NumberedMapLayerAccordion({
+  items
+}: {
+  readonly items: ReadonlyArray<AppDisclosureItem>;
+}) {
+  const baseId = useId();
+  const [openIds, setOpenIds] = useState<ReadonlySet<string>>(() => new Set());
+
+  const toggle = (id: string) => {
+    setOpenIds((current) => {
+      const next = new Set(current);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
+
   return (
-    <svg viewBox="0 0 120 120" fill="none" className={className}>
-      <circle cx="60" cy="60" r="55" stroke="currentColor" strokeWidth="0.75" opacity="0.15" />
-      <circle cx="60" cy="60" r="40" stroke="currentColor" strokeWidth="0.5" opacity="0.1" strokeDasharray="3 3" />
-      <line x1="60" y1="5" x2="60" y2="115" stroke="currentColor" strokeWidth="0.5" opacity="0.08" />
-      <line x1="5" y1="60" x2="115" y2="60" stroke="currentColor" strokeWidth="0.5" opacity="0.08" />
-      <polygon points="60,10 65,50 60,45 55,50" fill="currentColor" opacity="0.2" />
-    </svg>
+    <div className="space-y-3">
+      {items.map((item, index) => {
+        const isOpen = openIds.has(item.id);
+        const panelId = `${baseId}-${item.id}`;
+
+        return (
+          <div
+            key={item.id}
+            className="overflow-hidden rounded-[5px] border border-dotted-cartography bg-off-white shadow-cartography"
+          >
+            <button
+              type="button"
+              aria-expanded={isOpen}
+              aria-controls={panelId}
+              className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left"
+              onClick={() => toggle(item.id)}
+            >
+              <div className="min-w-0 space-y-1">
+                <CoordinateLabel
+                  index={index + 1}
+                  label={formatLayerTitle(item.title, item.count)}
+                  className="block"
+                />
+              </div>
+              <span
+                aria-hidden
+                className="shrink-0 font-inter text-lg leading-none text-ink-muted transition-transform duration-200"
+              >
+                {isOpen ? "−" : "+"}
+              </span>
+            </button>
+            <div
+              id={panelId}
+              className={cn(
+                "border-t border-dotted-cartography px-5 pb-5 pt-4",
+                isOpen ? "block" : "hidden"
+              )}
+            >
+              {item.children}
+            </div>
+          </div>
+        );
+      })}
+    </div>
   );
 }
 
-function SectionLabel({ children }: { readonly children: React.ReactNode }) {
+function HealthStat({
+  label,
+  children
+}: {
+  readonly label: string;
+  readonly children: ReactNode;
+}) {
   return (
-    <div className="flex items-center gap-3 mb-4">
-      <div className="h-px flex-1 bg-terracota/15" />
-      <span className="font-inter text-[0.65rem] font-semibold uppercase tracking-[0.15em] text-terracota/70">
-        {children}
-      </span>
-      <div className="h-px flex-1 bg-terracota/15" />
+    <div className="space-y-1.5">
+      <CoordinateLabel index={0} label={label} className="block" />
+      {children}
     </div>
   );
 }
@@ -67,6 +134,7 @@ export function VoiceDashboard() {
   const [confirmationDismissed, setConfirmationDismissed] = useState(false);
   const [confirmationSubmitting, setConfirmationSubmitting] = useState(false);
   const authorityAnchorRef = useRef<HTMLDivElement | null>(null);
+  const sectionTitles = getVoiceDashboardSectionTitles(messages.voice);
 
   useEffect(() => {
     void client
@@ -91,9 +159,9 @@ export function VoiceDashboard() {
 
   if (status === "empty") {
     return (
-      <div className="space-y-6 px-[var(--spacing-gutter)] py-8 md:py-10">
+      <div className="mx-auto max-w-3xl space-y-6 px-[var(--spacing-gutter)] py-8 md:py-10">
         <div>
-          <Text as="h1" variant="h1" className="mb-3 font-playfair text-azul">
+          <Text as="h1" variant="h1" className="mb-3 font-playfair text-ink">
             {messages.voice.dashboardTitle}
           </Text>
           <Text variant="body" className="text-ink-muted">
@@ -110,16 +178,11 @@ export function VoiceDashboard() {
   if (status === "error" || !profile) {
     return (
       <div className="px-[var(--spacing-gutter)] py-8">
-        <AppCard className="text-center">
-          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full border border-terracota/20 bg-terracota/5">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6 text-terracota">
-              <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4.5c-.77-.833-2.694-.833-3.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
-            </svg>
-          </div>
-          <Text variant="meta" className="text-terracota">
+        <LogbookProse className="space-y-3 p-5 text-center">
+          <Text variant="meta" className="text-terracotta">
             {messages.errors.default.message}
           </Text>
-        </AppCard>
+        </LogbookProse>
       </div>
     );
   }
@@ -177,33 +240,24 @@ export function VoiceDashboard() {
   };
 
   const healthLayer = (
-    <div className="space-y-4">
-      <div>
-        <Text variant="label" className="mb-2 block font-inter text-xs font-semibold uppercase tracking-wider text-texto-sec">
-          {voiceMessages.confidence}
-        </Text>
-        <Text variant="body" className="mb-1 font-medium text-ink">
+    <LogbookProse className="space-y-5 p-4">
+      <HealthStat label={voiceMessages.confidence}>
+        <Text variant="body" className="font-medium text-ink">
           {confidenceLabel}
         </Text>
         <Text variant="meta" className="w-full text-ink-muted">
           {getVoiceConfidencePanelMessage(profile.profile, voiceMessages, { detailed: false })}
         </Text>
-      </div>
-      <div>
-        <Text variant="label" className="mb-2 block font-inter text-xs font-semibold uppercase tracking-wider text-texto-sec">
-          {voiceMessages.adaptationMode}
-        </Text>
-        <Text variant="body" className="mb-1 font-medium text-ink">
+      </HealthStat>
+      <HealthStat label={voiceMessages.adaptationMode}>
+        <Text variant="body" className="font-medium text-ink">
           {adaptationMode.label}
         </Text>
         <Text variant="meta" className="w-full text-ink-muted">
           {adaptationMode.description}
         </Text>
-      </div>
-      <div>
-        <Text variant="label" className="mb-2 block font-inter text-xs font-semibold uppercase tracking-wider text-texto-sec">
-          {voiceMessages.diagnostics}
-        </Text>
+      </HealthStat>
+      <HealthStat label={voiceMessages.diagnostics}>
         <Text variant="body" className="w-full text-ink-muted">
           {getVoiceDiagnosticsText(
             profile.diagnostics,
@@ -211,11 +265,8 @@ export function VoiceDashboard() {
             voiceMessages
           )}
         </Text>
-      </div>
-      <div>
-        <Text variant="label" className="mb-2 block font-inter text-xs font-semibold uppercase tracking-wider text-texto-sec">
-          {voiceMessages.coverage}
-        </Text>
+      </HealthStat>
+      <HealthStat label={voiceMessages.coverage}>
         {coverageComplete ? (
           <Text variant="body" className="w-full text-ink-muted">
             {voiceMessages.coverageComplete}
@@ -240,9 +291,24 @@ export function VoiceDashboard() {
             ) : null}
           </div>
         )}
-      </div>
-    </div>
+      </HealthStat>
+    </LogbookProse>
   );
+
+  const mapLayerItems: ReadonlyArray<AppDisclosureItem> = [
+    ...(profile.reasoning
+      ? buildReasoningDetailItems({
+          locale,
+          messages: voiceMessages,
+          reasoning: profile.reasoning
+        })
+      : []),
+    {
+      id: "profile-health",
+      title: voiceMessages.detailLayers.profileHealth,
+      children: healthLayer
+    }
+  ];
 
   return (
     <div className="space-y-10 px-[var(--spacing-gutter)] py-8 md:py-10">
@@ -252,27 +318,26 @@ export function VoiceDashboard() {
         failedMessage={voiceMessages.rebuildFailed}
       />
 
-      <section className="relative">
-        <CompassDecoration className="absolute -top-6 -right-6 h-32 w-32 text-azul pointer-events-none hidden lg:block" />
-
-        <div className="flex flex-wrap items-start justify-between gap-4 mb-6">
+      <section className="space-y-6">
+        <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="min-w-0">
-            <Text as="h1" variant="h1" className="mb-2 font-playfair text-azul">
+            <Text as="h1" variant="h1" className="mb-2 font-playfair text-ink">
               {voiceMessages.dashboardTitle}
             </Text>
             <Text variant="meta" className="text-ink-muted">
               {voiceMessages.dashboardSubtitle}
             </Text>
           </div>
-          <Link
-            to="/app/voice/examples"
-            className="rebrand-hover inline-flex items-center justify-center gap-2 rounded-sm bg-terracota px-5 py-2.5 font-inter text-sm font-semibold text-white shadow-[3px_3px_0px_rgba(0,0,0,0.12)] transition-all duration-300 hover:bg-terracota/90"
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
-              <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            {voiceMessages.manageExamples}
-          </Link>
+          <div className="flex flex-wrap items-center gap-2">
+            <Link to="/app/generate">
+              <Button type="button">{voiceMessages.nextStep.generateCta}</Button>
+            </Link>
+            <Link to="/app/voice/examples">
+              <Button type="button" variant="ghost">
+                {voiceMessages.manageExamples}
+              </Button>
+            </Link>
+          </div>
         </div>
 
         {profile.reasoning ? (
@@ -280,6 +345,7 @@ export function VoiceDashboard() {
             <VoiceReasoningMirror
               locale={locale}
               messages={voiceMessages.reasoning}
+              voiceMessages={voiceMessages}
               reasoning={profile.reasoning}
               confidenceLevel={confidenceLevel}
               dialSubline={dialSubline}
@@ -289,8 +355,8 @@ export function VoiceDashboard() {
           </div>
         ) : (
           <section className="space-y-6">
-            <div>
-              <Text as="h2" variant="h2" className="mb-2 font-playfair text-azul">
+            <div className="space-y-2">
+              <Text as="h2" variant="h2" className="font-playfair text-ink">
                 {voiceMessages.mirrorFallbackTitle}
               </Text>
               <Text variant="meta" className="w-full text-ink-muted">
@@ -302,6 +368,7 @@ export function VoiceDashboard() {
               dialSubline={dialSubline}
               dialAccessibleLabel={dialAccessibleLabel}
               bodyCopy={mirrorBodyCopy}
+              healthLabel={voiceMessages.detailLayers.profileHealth}
             />
           </section>
         )}
@@ -318,28 +385,17 @@ export function VoiceDashboard() {
       ) : null}
 
       <section>
-        <SectionLabel>Camadas do mapa</SectionLabel>
-        <AppDisclosureGroup
-          items={[
-            ...(profile.reasoning
-              ? buildReasoningDetailItems({
-                  locale,
-                  messages: voiceMessages,
-                  reasoning: profile.reasoning
-                })
-              : []),
-            {
-              id: "profile-health",
-              title: voiceMessages.detailLayers.profileHealth,
-              children: healthLayer
-            }
-          ]}
+        <CoordinateLabel
+          index={0}
+          label={sectionTitles.mapLayers}
+          className="mb-4 block"
         />
+        <NumberedMapLayerAccordion items={mapLayerItems} />
       </section>
 
-      <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-6 border-t border-dotted-cartography pt-8 sm:flex-row sm:items-center sm:justify-between">
         {profile.reasoning ? (
-          <Text variant="meta" className="text-ink-muted max-w-md">
+          <Text variant="meta" className="max-w-md text-ink-muted">
             {voiceMessages.reasoning.refineHint}
           </Text>
         ) : (

@@ -162,7 +162,7 @@ export function VoiceExampleComposer({ mode, initialExample, onSaved }: VoiceExa
   return (
     <div className="space-y-6">
       {slots.map((slot, index) => (
-        <div key={slot.id} className="rounded-[var(--radius-press)] border border-ink-ghost p-5">
+        <div key={slot.id} className="rounded-[var(--radius-cartography)] border border-ink-ghost p-5">
           <div className="mb-4 flex items-center justify-between gap-3">
             <Text variant="label">
               {messages.voice.composer.slotTitle.replace("{n}", String(index + 1))}

@@ -72,26 +72,41 @@ export type LocaleMessages = {
     readonly eyebrow: string;
     readonly title: string;
     readonly subtitle: string;
-    readonly step1Label: string;
-    readonly step1Title: string;
-    readonly intentions: ReadonlyArray<{
-      readonly title: string;
-      readonly description: string;
-    }>;
-    readonly step2Label: string;
-    readonly step2Title: string;
-    readonly sizeLabel: string;
-    readonly channelLabel: string;
-    readonly sizes: ReadonlyArray<string>;
-    readonly channels: ReadonlyArray<string>;
-    readonly step3Label: string;
-    readonly step3Title: string;
-    readonly step3Description: string;
-    readonly briefingFields: ReadonlyArray<string>;
+    readonly demo: {
+      readonly stepLabels: readonly [string, string, string];
+      readonly phases: ReadonlyArray<{
+        readonly title: string;
+        readonly subtitle: string;
+        readonly intents?: ReadonlyArray<{
+          readonly label: string;
+          readonly description: string;
+          readonly selected?: boolean;
+        }>;
+        readonly selectedIntentLabel?: string;
+        readonly changeIntent?: string;
+        readonly lengthTierLabel?: string;
+        readonly lengthTiers?: ReadonlyArray<{
+          readonly label: string;
+          readonly selected?: boolean;
+        }>;
+        readonly channelLabel?: string;
+        readonly channelOptional?: string;
+        readonly channelValue?: string;
+        readonly fields?: ReadonlyArray<{
+          readonly label: string;
+          readonly value: string;
+        }>;
+        readonly previewLabel?: string;
+        readonly previewMode?: string;
+        readonly previewCost?: string;
+        readonly generateCta?: string;
+      }>;
+    };
   };
   readonly comparison: {
     readonly eyebrow: string;
     readonly title: string;
+    readonly comparisonLabel: string;
     readonly verdict: string;
     readonly signature: string;
     readonly genericLabel: string;

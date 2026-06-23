@@ -43,54 +43,54 @@ export const GENERATION_CHANNEL_IDS = [
 const intentCopy: Record<AppLocale, Record<AppGenerationIntentId, AppGenerationIntentCopy>> = {
   pt: {
     "share-idea": {
-      label: "Compartilhar uma ideia",
-      description: "Opinião, aprendizado ou insight para uma audiência."
+      label: "Compartilhar descoberta",
+      description: "Compartilhe uma descoberta, aprendizado ou insight com sua audiência."
     },
     "explain-deeply": {
-      label: "Explicar com profundidade",
-      description: "Ensinar ou desdobrar um tema com estrutura."
+      label: "Mapear conceito",
+      description: "Desdobre um tema com estrutura e profundidade."
     },
     "engage-audience": {
-      label: "Engajar a audiência",
-      description: "Provocar reação, pergunta ou discussão."
+      label: "Provocar conversa",
+      description: "Abra espaço para reação, pergunta ou discussão."
     },
     "tell-story": {
-      label: "Contar uma história",
-      description: "Narrativa em um ou mais momentos."
+      label: "Narrar jornada",
+      description: "Conte uma narrativa em um ou mais momentos."
     },
     "update-subscribers": {
-      label: "Atualizar assinantes",
-      description: "Edição recorrente ou atualização no estilo newsletter."
+      label: "Atualizar exploradores",
+      description: "Envie uma edição recorrente no estilo newsletter."
     },
     "document-decision": {
-      label: "Registrar uma decisão",
-      description: "Documentar uma decisão técnica com contexto e trade-offs."
+      label: "Documentar rota",
+      description: "Registre uma decisão com contexto, alternativas e trade-offs."
     }
   },
   en: {
     "share-idea": {
-      label: "Share an idea",
-      description: "Opinion, lesson, or takeaway for an audience."
+      label: "Share a discovery",
+      description: "Share a discovery, lesson, or insight with your audience."
     },
     "explain-deeply": {
-      label: "Explain in depth",
-      description: "Teach or unpack a topic with structure."
+      label: "Map a concept",
+      description: "Unpack a topic with structure and depth."
     },
     "engage-audience": {
-      label: "Engage your audience",
-      description: "Spark reaction, question, or discussion."
+      label: "Spark conversation",
+      description: "Open room for reaction, questions, or discussion."
     },
     "tell-story": {
-      label: "Tell a story",
-      description: "Narrative across one or more beats."
+      label: "Narrate a journey",
+      description: "Tell a narrative across one or more beats."
     },
     "update-subscribers": {
-      label: "Update subscribers",
-      description: "Recurring edition or newsletter-style update."
+      label: "Update your explorers",
+      description: "Send a recurring edition in newsletter style."
     },
     "document-decision": {
-      label: "Document a decision",
-      description: "Record a technical decision with context and trade-offs."
+      label: "Document a route",
+      description: "Record a decision with context, alternatives, and trade-offs."
     }
   }
 };
@@ -98,15 +98,15 @@ const intentCopy: Record<AppLocale, Record<AppGenerationIntentId, AppGenerationI
 const lengthTierCopy: Record<AppLocale, Record<AppGenerationLengthTierId, AppScopeOptionCopy>> = {
   pt: {
     short: {
-      label: "Curto",
+      label: "Curta",
       description: "Peça breve, poucos parágrafos."
     },
     medium: {
-      label: "Médio",
+      label: "Média",
       description: "Profundidade padrão com espaço para desenvolver o argumento."
     },
     long: {
-      label: "Longo",
+      label: "Longa",
       description: "Peça aprofundada com estrutura editorial."
     }
   },

@@ -1,13 +1,19 @@
 import type { ComponentPropsWithoutRef } from "react";
 import { cn } from "../lib/cn.js";
 
-export function PaperSurface({
+export function LogbookProse({
   className,
   children,
   ...props
 }: ComponentPropsWithoutRef<"div">) {
   return (
-    <div className={cn("imprint-grain bg-paper press-edge", className)} {...props}>
+    <div
+      className={cn(
+        "border-dotted-cartography bg-off-white p-6 ui-type-logbook leading-relaxed text-ink",
+        className
+      )}
+      {...props}
+    >
       {children}
     </div>
   );

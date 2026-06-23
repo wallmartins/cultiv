@@ -26,7 +26,9 @@ export type AppShellMessages = {
     readonly statusDone: string;
     readonly statusFailed: string;
     readonly copy: string;
+    readonly export: string;
     readonly regenerate: string;
+    readonly newExpedition: string;
     readonly viewHistory: string;
     readonly retry: string;
     readonly noCreditsCharged: string;
@@ -39,6 +41,7 @@ export type AppShellMessages = {
     readonly retry: string;
   };
   readonly selectPlaceholder: string;
+  readonly notFound: string;
 };
 
 export type AppIntentWizardMessages = {
@@ -58,6 +61,9 @@ export type AppIntentWizardMessages = {
   readonly catalogLoadError: string;
   readonly catalogRetry: string;
   readonly stepIndicator: string;
+  readonly stepExplorar: string;
+  readonly stepEscala: string;
+  readonly stepCoordenadas: string;
 };
 
 export type AppGenerateMessages = {
@@ -249,6 +255,7 @@ export type AppVoiceMessages = {
   readonly manageExamples: string;
   readonly mirrorFallbackTitle: string;
   readonly mirrorFallbackSubtitle: string;
+  readonly mapLayersTitle: string;
   readonly detailLayers: {
     readonly formats: string;
     readonly antiPatterns: string;
@@ -416,6 +423,7 @@ export type AppSettingsMessages = {
   readonly revokeDisabled: string;
   readonly logout: string;
   readonly plans: string;
+  readonly saved: string;
 };
 
 export type AppPlansMessages = {

@@ -19,17 +19,19 @@ export function AppLayout() {
   return (
     <RequireAuth>
       <AppSdkGate>
-        {onboarding ? (
-          <OnboardingLayout>
-            <Outlet />
-          </OnboardingLayout>
-        ) : (
-          <OnboardingGate>
-            <AppShell>
+        <div data-surface="workspace">
+          {onboarding ? (
+            <OnboardingLayout>
               <Outlet />
-            </AppShell>
-          </OnboardingGate>
-        )}
+            </OnboardingLayout>
+          ) : (
+            <OnboardingGate>
+              <AppShell>
+                <Outlet />
+              </AppShell>
+            </OnboardingGate>
+          )}
+        </div>
       </AppSdkGate>
     </RequireAuth>
   );

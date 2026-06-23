@@ -18,8 +18,8 @@ describe("useGenerationIntents helpers", () => {
       }
     });
 
-    expect(localized.label).toBe("Compartilhar uma ideia");
-    expect(localized.description).toContain("Opinião");
+    expect(localized.label).toBe("Compartilhar descoberta");
+    expect(localized.description).toContain("descoberta");
     expect(localized.inputSchema[0]?.key).toBe("topic");
   });
 });

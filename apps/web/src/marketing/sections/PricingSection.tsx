@@ -1,8 +1,14 @@
-import { Container } from "@my-ai-orchestrator/ui";
+import {
+  ButtonLink,
+  CartographySurface,
+  CoordinateLabel,
+  Container,
+  Text,
+  cn,
+} from "@my-ai-orchestrator/ui";
 import { useSectionReveal } from "~/marketing/animations/use-section-reveal";
 import { getLocaleMessages } from "~/i18n/marketing/get-locale";
 import type { MarketingLocale } from "~/i18n/marketing/types";
-import { CheckIcon, SectionHeader } from "~/marketing/components/icons";
 
 export interface PricingSectionProps {
   readonly locale: MarketingLocale;
@@ -13,81 +19,84 @@ export function PricingSection({ locale }: PricingSectionProps) {
   const sectionRef = useSectionReveal("[data-section-item]");
 
   return (
-    <section
-      id="preco"
-      className="relative overflow-hidden bg-creme border-b border-borda/15 py-[var(--spacing-section-sm)] md:py-[var(--spacing-section)]"
-    >
-      <Container ref={sectionRef} className="relative z-10">
-        <SectionHeader eyebrow={pricing.eyebrow} title={pricing.title} />
+    <section id="preco" className="border-b border-ink-ghost/30">
+      <CartographySurface>
+        <Container
+          ref={sectionRef}
+          className="py-[var(--spacing-section-sm)] md:py-[var(--spacing-section)]"
+        >
+          <header
+            className="mx-auto mb-10 max-w-3xl text-center md:mb-14"
+            data-section-item
+          >
+            <CoordinateLabel
+              index={6}
+              label={pricing.eyebrow}
+              className="mb-4 block"
+            />
+            <Text as="h2" variant="display" className="text-deep-blue">
+              {pricing.title}
+            </Text>
+          </header>
 
-        <div className="mx-auto grid max-w-5xl gap-5 lg:grid-cols-3" data-section-item>
-          {pricing.plans.map((plan) => {
-            const isRecommended = plan.recommended === true;
-            return (
-              <div
+          <div
+            className="mx-auto grid max-w-6xl gap-5 md:grid-cols-3 md:gap-6"
+            data-section-item
+          >
+            {pricing.plans.map((plan) => (
+              <article
                 key={plan.name}
-                className={`rebrand-hover relative flex flex-col rounded-sm border bg-offwhite p-6 transition-all duration-300 ${
-                  isRecommended
-                    ? "border-terracota/30 shadow-[5px_5px_0px_rgba(181,90,59,0.1)] lg:-translate-y-2"
-                    : "border-borda/20 shadow-[3px_3px_0px_rgba(26,46,60,0.06)]"
-                }`}
-              >
-                {isRecommended && (
-                  <div className="absolute -top-3 left-6">
-                    <span className="inline-block rounded-sm bg-terracota px-3 py-1 font-inter text-[0.6rem] font-bold uppercase tracking-widest text-white shadow-[2px_2px_0px_rgba(0,0,0,0.15)]">
-                      {pricing.recommendedBadge}
-                    </span>
-                  </div>
+                className={cn(
+                  "flex flex-col rounded-[5px] bg-off-white p-6 shadow-cartography md:p-7",
+                  plan.recommended && "md:-translate-y-1 md:shadow-[6px_6px_0_rgba(26,46,60,0.1)]"
                 )}
-
-                <div className="mb-1">
-                  {plan.badge && (
-                    <span className={`inline-block font-inter text-[0.6rem] font-semibold uppercase tracking-widest mb-2 ${
-                      isRecommended ? "text-terracota" : "text-azul/50"
-                    }`}>
+              >
+                <div className="mb-4 flex flex-wrap items-center gap-2">
+                  <Text as="h3" variant="heading" className="text-deep-blue">
+                    {plan.name}
+                  </Text>
+                  {plan.badge ? (
+                    <span
+                      className={cn(
+                        "rounded-[5px] px-2 py-0.5 ui-type-mono text-[0.625rem] uppercase tracking-widest",
+                        plan.recommended
+                          ? "bg-terracotta/10 text-terracotta"
+                          : "bg-cream text-ink-muted"
+                      )}
+                    >
                       {plan.badge}
                     </span>
-                  )}
-                  <h3 className="font-playfair text-xl font-bold text-azul">
-                    {plan.name}
-                  </h3>
+                  ) : null}
                 </div>
 
-                <p className="font-inter text-sm text-texto-sec mt-2 mb-5">
+                <Text as="p" variant="body" className="mb-6 text-ink-muted">
                   {plan.description}
-                </p>
+                </Text>
 
-                <ul className="space-y-2.5 mb-6 flex-1">
-                  {plan.features.map((feature, index) => (
-                    <li key={index} className="flex items-start gap-2.5">
-                      <CheckIcon className={isRecommended ? "text-terracota" : "text-musgo"} />
-                      <span className="font-inter text-sm text-texto-sec">
+                <ul className="mb-8 flex-1 space-y-3">
+                  {plan.features.map((feature) => (
+                    <li key={feature} className="flex items-start gap-3">
+                      <span
+                        aria-hidden
+                        className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-terracotta"
+                      />
+                      <Text as="span" variant="body" className="text-ink-muted">
                         {feature}
-                      </span>
+                      </Text>
                     </li>
                   ))}
                 </ul>
 
-                <div className="pt-4 border-t border-borda/15">
-                  <p className="font-inter text-xs text-borda mb-4">
-                    {plan.footer}
-                  </p>
-                  <a
-                    href="#waitlist"
-                    className={`rebrand-hover block w-full text-center rounded-sm px-6 py-3 font-inter text-sm font-semibold transition-all duration-300 ${
-                      isRecommended
-                        ? "bg-terracota text-white shadow-[3px_3px_0px_rgba(0,0,0,0.15)] hover:bg-terracota/90"
-                        : "bg-azul text-white shadow-[3px_3px_0px_rgba(26,46,60,0.12)] hover:bg-azul/90"
-                    }`}
-                  >
+                <div className="flex justify-center pt-2">
+                  <ButtonLink href="#waitlist" variant="primary">
                     {pricing.cta}
-                  </a>
+                  </ButtonLink>
                 </div>
-              </div>
-            );
-          })}
-        </div>
-      </Container>
+              </article>
+            ))}
+          </div>
+        </Container>
+      </CartographySurface>
     </section>
   );
 }

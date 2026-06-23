@@ -1,6 +1,6 @@
 import { useAuth0 } from "@auth0/auth0-react";
 import type { QualityMode } from "@my-ai-orchestrator/contracts";
-import { Text } from "@my-ai-orchestrator/ui";
+import { CartographySurface, CoordinateLabel, LogbookProse, Text } from "@my-ai-orchestrator/ui";
 import { Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { BriefingGuidancePanel } from "~/app/generation/components/BriefingGuidancePanel";
@@ -8,6 +8,7 @@ import { BriefingForm } from "~/app/generation/components/BriefingForm";
 import { GenerationPreviewSidebar } from "~/app/generation/components/GenerationPreviewSidebar";
 import { IntentWizard } from "~/app/generation/components/IntentWizard";
 import { QualityModeHelpContent } from "~/app/generation/components/QualityModeHelpContent";
+import { WizardRouteProgress } from "~/app/generation/components/WizardRouteProgress";
 import { useGenerationCommercialGate } from "~/app/generation/hooks/useGenerationCommercialGate";
 import {
   IMPORTED_CONTEXT_MAX,
@@ -41,7 +42,6 @@ import { useActiveExecutions } from "~/platform/active-executions/active-executi
 import { setCachedCreditBalance } from "~/platform/credits/credit-balance-cache";
 import { formatSdkError } from "~/platform/sdk/format-sdk-error";
 import { useClientSdk } from "~/platform/runtime/client-sdk-context";
-import { AppCard } from "~/platform/ui/AppCard";
 import { AppField, AppFieldSlot } from "~/platform/ui/AppField";
 import { AppSegmentedControl } from "~/platform/ui/AppSegmentedControl";
 import { AppSelect } from "~/platform/ui/AppSelect";
@@ -49,51 +49,6 @@ import { AppSkeleton } from "~/platform/ui/AppSkeleton";
 import { HelpTooltip } from "~/platform/ui/HelpTooltip";
 
 const QUALITY_MODES: readonly QualityMode[] = ["fast", "balanced", "strict"];
-
-function StepIndicator({ current, total, labels }: { readonly current: number; readonly total: number; readonly labels: string[] }) {
-  return (
-    <div className="flex items-center gap-3 mb-6">
-      {labels.map((label, index) => {
-        const stepNum = index + 1;
-        const isActive = stepNum === current;
-        const isDone = stepNum < current;
-        return (
-          <div key={index} className="flex items-center gap-2">
-            <div
-              className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-2 font-mono text-xs font-bold transition-colors duration-300 ${
-                isDone
-                  ? "border-musgo bg-musgo text-white"
-                  : isActive
-                    ? "border-terracota bg-terracota/10 text-terracota"
-                    : "border-borda/30 bg-creme text-borda"
-              }`}
-            >
-              {isDone ? (
-                <svg viewBox="0 0 20 20" fill="currentColor" className="h-3.5 w-3.5">
-                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                </svg>
-              ) : (
-                stepNum
-              )}
-            </div>
-            <span
-              className={`font-inter text-xs font-medium hidden sm:inline transition-colors duration-300 ${
-                isActive ? "text-azul" : isDone ? "text-musgo" : "text-borda"
-              }`}
-            >
-              {label}
-            </span>
-            {index < labels.length - 1 && (
-              <div className={`w-8 h-px mx-1 hidden sm:block ${
-                isDone ? "bg-musgo/40" : "bg-borda/20"
-              }`} />
-            )}
-          </div>
-        );
-      })}
-    </div>
-  );
-}
 
 export function GenerationScreen() {
   const { user } = useAuth0();
@@ -299,16 +254,10 @@ export function GenerationScreen() {
   const showWizard = !useLegacyFlow && wizard.step < 3;
   const catalogReady = intentsStatus !== "loading" || intentItems.length > 0;
 
-  const stepLabels = [
-    messages.intentWizard.stepObjectiveTitle,
-    messages.intentWizard.stepScopeTitle,
-    messages.generate.briefing
-  ];
-
   return (
-    <div className="px-[var(--spacing-gutter)] py-8 md:py-10">
+    <CartographySurface className="px-[var(--spacing-gutter)] py-8 md:py-10">
       {showReminder ? (
-        <div className="mb-6 rounded-[var(--radius-press)] border border-pigment-ochre/40 bg-pigment-ochre/10 px-4 py-3">
+        <LogbookProse className="mb-6 border-ochre/40 bg-ochre/10 p-4">
           <Text variant="meta" className="mb-2 block">
             {messages.generate.reminderBanner}
           </Text>
@@ -318,10 +267,10 @@ export function GenerationScreen() {
           >
             {messages.generate.reminderBannerAction}
           </Link>
-        </div>
+        </LogbookProse>
       ) : null}
 
-      <Text as="h1" variant="h1" className="mb-3 font-playfair text-azul">
+      <Text as="h1" variant="h1" className="mb-3 font-playfair text-deep-blue">
         {messages.generate.title}
       </Text>
 
@@ -333,7 +282,7 @@ export function GenerationScreen() {
       ) : null}
 
       {legacyFormatPickerEnabled && contentTypesCatalog ? (
-        <AppCard padding="compact" className="mb-6">
+        <LogbookProse className="mb-6 p-4">
           <AppFieldSlot
             label={messages.generate.contentType}
             labelAccessory={
@@ -369,11 +318,11 @@ export function GenerationScreen() {
               }))}
             />
           </AppFieldSlot>
-        </AppCard>
+        </LogbookProse>
       ) : null}
 
       {legacyFormatPickerEnabled && contentTypesStatus === "error" && !contentTypesCatalog ? (
-        <div className="mb-6 rounded-[var(--radius-press)] border border-red-700/30 bg-red-700/10 px-4 py-4">
+        <LogbookProse className="mb-6 border-red-700/30 bg-red-700/10 p-4">
           <Text variant="body" className="mb-2 text-red-800">
             {messages.generate.catalogLoadError}
           </Text>
@@ -389,10 +338,10 @@ export function GenerationScreen() {
           >
             {messages.generate.catalogRetry}
           </button>
-        </div>
+        </LogbookProse>
       ) : null}
 
-      <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(280px,22rem)] lg:items-start lg:gap-8">
+      <div className="lg:grid lg:grid-cols-[minmax(0,13fr)_minmax(280px,7fr)] lg:items-start lg:gap-8">
         <div className="space-y-6">
           {showWizard ? (
             <IntentWizard
@@ -407,17 +356,19 @@ export function GenerationScreen() {
 
           {showComposeStep ? (
             <>
-              <StepIndicator current={3} total={3} labels={stepLabels} />
+              <WizardRouteProgress current={3} messages={messages} />
 
               <BriefingGuidancePanel
                 locale={locale}
                 item={formSelection.catalogItem}
                 guidanceSource={formSelection.mode === "intent" ? "intent" : "content-type"}
               />
-              <AppCard>
-                <Text as="h2" variant="label" className="mb-4 block font-playfair text-azul">
-                  {messages.generate.briefing}
-                </Text>
+              <LogbookProse className="p-5">
+                <CoordinateLabel
+                  index={3}
+                  label={messages.generate.briefing}
+                  className="mb-4 block"
+                />
                 <BriefingForm
                   locale={locale}
                   contentTypeId={form.fieldLabelKey}
@@ -425,9 +376,9 @@ export function GenerationScreen() {
                   values={form.briefing}
                   onChange={form.setBriefing}
                 />
-              </AppCard>
+              </LogbookProse>
 
-              <AppCard padding="compact">
+              <LogbookProse className="p-5">
                 {form.importedOpen ? (
                   <AppField
                     multiline
@@ -444,16 +395,14 @@ export function GenerationScreen() {
                 ) : null}
                 <button
                   type="button"
-                  className="text-sm font-medium text-pigment-terracotta underline-offset-2 hover:underline"
+                  className="text-sm font-medium text-terracotta underline-offset-2 hover:underline"
                   onClick={() => form.setImportedOpen((open) => !open)}
                 >
-                  {form.importedOpen
-                    ? messages.generate.importedContextExpand
-                    : messages.generate.importedContextExpand}
+                  {messages.generate.importedContextExpand}
                 </button>
-              </AppCard>
+              </LogbookProse>
 
-              <AppCard padding="compact">
+              <LogbookProse className="p-5">
                 <AppFieldSlot label={messages.generate.language}>
                   <AppSelect
                     value={form.language}
@@ -464,9 +413,9 @@ export function GenerationScreen() {
                     }))}
                   />
                 </AppFieldSlot>
-              </AppCard>
+              </LogbookProse>
 
-              <AppCard padding="compact">
+              <LogbookProse className="p-5">
                 <AppFieldSlot
                   label={messages.generate.qualityMode}
                   labelAccessory={
@@ -519,7 +468,7 @@ export function GenerationScreen() {
                     })}
                   />
                 </AppFieldSlot>
-              </AppCard>
+              </LogbookProse>
             </>
           ) : null}
         </div>
@@ -553,6 +502,6 @@ export function GenerationScreen() {
           />
         ) : null}
       </div>
-    </div>
+    </CartographySurface>
   );
 }

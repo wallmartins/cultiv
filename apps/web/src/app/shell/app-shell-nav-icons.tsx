@@ -1,4 +1,4 @@
-import { cn } from "@my-ai-orchestrator/ui";
+import { cn, IconCompass, IconMap, IconRoute } from "@my-ai-orchestrator/ui";
 
 type NavIconProps = {
   readonly active: boolean;
@@ -12,38 +12,29 @@ const iconClassName = (active: boolean, className?: string) =>
     className
   );
 
-const stroke = {
-  fill: "none",
-  stroke: "currentColor",
-  strokeWidth: 1.5,
-  strokeLinecap: "round" as const,
-  strokeLinejoin: "round" as const
-};
-
 export function NavIconGenerate({ active, className }: NavIconProps) {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden className={iconClassName(active, className)}>
-      <path
-        {...stroke}
-        d="M12 20h7M14.5 5.5l4 4M7 17l-1.5 4.5L3 19l4.5-1.5L17 8.5l-2.5-2.5L7 17z"
-      />
-    </svg>
-  );
+  return <IconCompass size={18} className={iconClassName(active, className)} />;
 }
 
 export function NavIconHistory({ active, className }: NavIconProps) {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden className={iconClassName(active, className)}>
-      <circle {...stroke} cx="12" cy="12" r="8" />
-      <path {...stroke} d="M12 8v4.5l2.75 1.75" />
-    </svg>
-  );
+  return <IconMap size={18} className={iconClassName(active, className)} />;
 }
 
 export function NavIconVoice({ active, className }: NavIconProps) {
+  return <IconRoute size={18} className={iconClassName(active, className)} />;
+}
+
+export function NavIconAccount({ active, className }: NavIconProps) {
   return (
     <svg viewBox="0 0 24 24" aria-hidden className={iconClassName(active, className)}>
-      <path {...stroke} d="M4 10v4M8 8v8M12 6v12M16 9v6M20 11v2" />
+      <circle cx="12" cy="8" r="3.5" fill="none" stroke="currentColor" strokeWidth={1.5} />
+      <path
+        d="M6 19.5c0-3 2.7-5.5 6-5.5s6 2.5 6 5.5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={1.5}
+        strokeLinecap="round"
+      />
     </svg>
   );
 }

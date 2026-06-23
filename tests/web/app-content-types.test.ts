@@ -15,7 +15,7 @@ describe("app content type copy", () => {
 
         expect(label.length).toBeGreaterThan(0);
         expect(description?.length ?? 0).toBeGreaterThan(20);
-        expect(label.toLowerCase()).not.toContain("linkedin post");
+        expect(label).not.toBe(id);
         expect(label.toLowerCase()).not.toContain("validation post");
         expect(label.toLowerCase()).not.toContain("architecture post");
       }
@@ -34,11 +34,11 @@ describe("app content type copy", () => {
 
     expect(sorted).toEqual([
       "Artigo aprofundado",
-      "Edição de newsletter",
-      "Explicar uma decisão",
-      "Publicação profissional",
-      "Sequência de posts",
-      "Teste de ideia"
+      "Documentar decisão",
+      "Newsletter",
+      "Post LinkedIn",
+      "Teste de ideia",
+      "Thread Twitter"
     ]);
   });
 });

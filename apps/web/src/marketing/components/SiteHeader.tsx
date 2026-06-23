@@ -1,32 +1,13 @@
-import { Container, cn } from "@my-ai-orchestrator/ui";
-import { useHeaderScrolled } from "~/marketing/animations/use-header-scrolled";
-import { Link } from "@tanstack/react-router";
+import { ButtonLink, cn } from "@my-ai-orchestrator/ui";
+import { BrandMark } from "~/marketing/components/BrandMark";
 import { SiteMobileNav } from "~/marketing/components/SiteMobileNav";
 import { LocaleToggle } from "~/marketing/components/LocaleToggle";
-import { getHomePath, getLocaleMessages } from "~/i18n/marketing/get-locale";
+import { getLocaleMessages } from "~/i18n/marketing/get-locale";
 import type { MarketingLocale } from "~/i18n/marketing/types";
 import { marketingNavItems } from "~/marketing/navigation/marketing-nav-items";
 
-function CompassIcon({ className }: { readonly className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={1.5}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-    >
-      <circle cx="12" cy="12" r="10" />
-      <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" fill="currentColor" opacity="0.15" />
-      <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" />
-    </svg>
-  );
-}
-
 export const rebrandNavItemClassName =
-  "rebrand-nav-hover font-inter text-xs font-semibold uppercase tracking-widest text-texto-sec";
+  "rebrand-nav-hover font-inter text-xs font-semibold uppercase tracking-widest text-ink-muted";
 
 export interface SiteHeaderProps {
   readonly locale: MarketingLocale;
@@ -34,41 +15,41 @@ export interface SiteHeaderProps {
 
 export function SiteHeader({ locale }: SiteHeaderProps) {
   const messages = getLocaleMessages(locale);
-  const scrolled = useHeaderScrolled();
 
   return (
-    <header
-      className={cn(
-        "sticky top-0 z-50 flex min-h-[var(--site-header-height)] items-center border-b bg-creme/95 backdrop-blur-sm transition-[border-color] duration-500 ease-in-out motion-reduce:transition-none",
-        scrolled ? "border-borda/30" : "border-transparent"
-      )}
-    >
-      <Container className="flex w-full items-center justify-between gap-4 py-3 md:gap-6 md:py-3.5">
-        <Link
-          to={getHomePath(locale)}
-          aria-label={messages.header.brand}
-          className="rebrand-logo-hover shrink-0 flex items-center gap-2.5"
+    <>
+      <div
+        className="marketing-header-spacer"
+        aria-hidden="true"
+      />
+      <header className="fixed top-4 left-0 right-0 z-50 px-[var(--spacing-gutter)]">
+        <div
+          className={cn(
+            "mx-auto flex w-full max-w-[60rem] items-center justify-between gap-3 rounded-[5px]",
+            "border-dotted-cartography bg-off-white/92 px-3 py-2.5 shadow-cartography backdrop-blur-sm",
+            "md:gap-4 md:px-5 md:py-3"
+          )}
         >
-          <CompassIcon className="rebrand-logo-icon h-7 w-7 text-azul rebrand-logo-breathe" />
-          <span className="rebrand-logo-text font-playfair text-xl font-semibold text-azul hidden sm:inline">
-            Cultiv
-          </span>
-        </Link>
+          <BrandMark locale={locale} brandLabel={messages.header.brand} size={32} />
 
-        <nav
-          aria-label={messages.header.navLabel}
-          className="hidden items-center justify-end gap-x-6 md:flex"
-        >
-          {marketingNavItems.map((item) => (
-            <a key={item.key} href={item.href} className={rebrandNavItemClassName}>
-              {messages.header.nav[item.key]}
-            </a>
-          ))}
-          <LocaleToggle locale={locale} className={rebrandNavItemClassName} />
-        </nav>
+          <nav
+            aria-label={messages.header.navLabel}
+            className="hidden items-center justify-end gap-x-5 md:flex"
+          >
+            {marketingNavItems.map((item) => (
+              <a key={item.key} href={item.href} className={rebrandNavItemClassName}>
+                {messages.header.nav[item.key]}
+              </a>
+            ))}
+            <LocaleToggle locale={locale} className={rebrandNavItemClassName} />
+            <ButtonLink href="#waitlist" size="compact" className="ml-1">
+              {messages.header.ctaWaitlist}
+            </ButtonLink>
+          </nav>
 
-        <SiteMobileNav locale={locale} messages={messages.header} />
-      </Container>
-    </header>
+          <SiteMobileNav locale={locale} messages={messages.header} />
+        </div>
+      </header>
+    </>
   );
 }

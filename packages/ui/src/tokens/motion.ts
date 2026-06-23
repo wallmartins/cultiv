@@ -1,10 +1,20 @@
 export const motionTokens = {
-  instant: { duration: 0.1, ease: "power1.out" },
-  fast: { duration: 0.18, ease: "power2.out" },
-  base: { duration: 0.32, ease: "power2.out" },
-  slow: { duration: 0.52, ease: "power2.out" },
-  press: { duration: 0.4, ease: "power3.out" },
-  reveal: { duration: 0.5, y: 12, ease: "power2.out" },
-  hover: { duration: 0.18, ease: "power1.out" },
-  stagger: { tight: 0.05, base: 0.085, wide: 0.14 }
+  easing: {
+    default: "cubic-bezier(0.25, 0.1, 0.25, 1)",
+    easeOut: "cubic-bezier(0.25, 0.1, 0.25, 1)"
+  },
+  duration: {
+    instant: 0,
+    fast: 200,
+    normal: 300,
+    reveal: 400,
+    routeDraw: 1200,
+    drawer: 350,
+    logoBreath: 4000
+  },
+  distance: {
+    revealY: 12,
+    wizardSlide: 24,
+    cardHover: 2
+  }
 } as const;
