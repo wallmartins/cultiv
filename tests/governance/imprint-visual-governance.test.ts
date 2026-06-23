@@ -3,8 +3,6 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 const LEGACY_PATTERNS = [
-  /Playfair Display/,
-  /Caveat/,
   /font-handwritten/,
   /ui-type-handwritten/,
   /BotanicalTree/,

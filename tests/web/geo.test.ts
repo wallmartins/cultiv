@@ -9,10 +9,10 @@ describe("GEO package", () => {
     const en = buildLlmsTxt("en");
 
     expect(pt).toContain("# Cultiv");
-    expect(pt).toContain("Textos que soam como você");
+    expect(pt).toContain("Sua voz. Seu território. Suas palavras.");
     expect(pt).toContain("/llms-full.txt");
     expect(pt).toContain("/en/llms.txt");
-    expect(en).toContain("Text that sounds like you");
+    expect(en).toContain("Your voice. Your territory. Your words.");
     expect(en).toContain("/llms.txt");
   });
 
@@ -21,9 +21,9 @@ describe("GEO package", () => {
 
     expect(full).toContain("documentação completa");
     expect(full).toContain("## Perguntas frequentes");
-    expect(full).toContain("O que é o Cultiv?");
+    expect(full).toContain("O Cultiv substitui meu estilo de escrita?");
     expect(full).toContain("## Como funciona");
-    expect(full).toContain("Entre no atelier");
+    expect(full).toContain("Crie sua conta gratuita e entre no mapa.");
   });
 
   it("allows AI crawlers in robots.txt", () => {
@@ -45,7 +45,7 @@ describe("GEO package", () => {
         expect.objectContaining({
           "@type": "FAQPage",
           mainEntity: expect.arrayContaining([
-            expect.objectContaining({ name: "O que é o Cultiv?" })
+            expect.objectContaining({ name: "O Cultiv substitui meu estilo de escrita?" })
           ])
         })
       ])

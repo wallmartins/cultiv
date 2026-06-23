@@ -26,14 +26,14 @@ describe("PressMark", () => {
     const { container } = render(<PressMark size={24} />);
     const svg = container.querySelector("svg");
     expect(svg?.innerHTML).not.toMatch(/M9 10 L55 8/);
-    expect(svg?.innerHTML).toMatch(/C22 30 36 18 52 11/);
+    expect(svg?.innerHTML).toMatch(/C24 34 37 19 52 11/);
   });
 
-  it("uses balanced variant with stamp pad and signature arc at medium sizes", () => {
+  it("uses balanced variant with ring and signature arc at medium sizes", () => {
     const { container } = render(<PressMark size={48} />);
     const svg = container.querySelector("svg");
-    expect(svg?.innerHTML).toMatch(/M9 10 L55 8/);
-    expect(svg?.innerHTML).toMatch(/C19 36 26 28 34 22/);
+    expect(svg?.innerHTML).toMatch(/M32 6 A26 26 0 1 1 31\.99 6/);
+    expect(svg?.innerHTML).toMatch(/C21 40 27 31 33 25/);
   });
 });
 
