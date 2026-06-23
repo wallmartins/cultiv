@@ -455,18 +455,18 @@ export const appMessagesEn: AppMessages = {
     credits: "Available credits"
   },
   settings: {
-    title: "Settings",
-    profile: "Account",
+    title: "Navigation settings",
+    profile: "Explorer identity",
     email: "Email",
-    locale: "Interface language",
+    locale: "Map language",
     localePt: "Português (Brasil)",
     localeEn: "English",
-    privacy: "Voice training consent",
+    privacy: "Clear footprints",
     consentActive: "Consent active",
     consentMissing: "Not granted",
     revokeConsent: "Revoke consent",
     revokeDisabled: "Revocation available when the API is published.",
-    logout: "Sign out",
+    logout: "Leave expedition",
     plans: "Resources"
   },
   plans: {

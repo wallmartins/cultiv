@@ -456,18 +456,18 @@ export const appMessagesPt: AppMessages = {
     credits: "Créditos disponíveis"
   },
   settings: {
-    title: "Configurações",
-    profile: "Conta",
+    title: "Ajustes de navegação",
+    profile: "Identidade do explorador",
     email: "Email",
-    locale: "Idioma da interface",
+    locale: "Idioma do mapa",
     localePt: "Português (Brasil)",
     localeEn: "English",
-    privacy: "Consentimento de treinamento de voz",
+    privacy: "Apagar pegadas",
     consentActive: "Consentimento ativo",
     consentMissing: "Não concedido",
     revokeConsent: "Revogar consentimento",
     revokeDisabled: "Revogação disponível quando a API estiver publicada.",
-    logout: "Sair",
+    logout: "Sair da expedição",
     plans: "Recursos"
   },
   plans: {
