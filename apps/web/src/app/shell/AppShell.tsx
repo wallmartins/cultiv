@@ -18,20 +18,24 @@ function AppShellFrame({ children }: AppShellProps) {
   const { messages } = useAppLocale();
   const client = useOptionalClientSdk();
   const { status, balance } = useCreditBalance();
-  const { items, inFlightCount } = useActiveExecutions();
+  const { inFlightCount } = useActiveExecutions();
 
   return (
-    <div className="imprint-grain min-h-screen bg-paper text-ink" data-intensity="quiet">
-      <AppHeader
-        messages={messages}
-        creditStatus={client ? status : "loading"}
-        creditBalance={balance}
-        inFlightCount={inFlightCount}
-      />
+    <div
+      className="cartography-grain cartography-grain-quiet relative min-h-screen bg-paper text-ink"
+      data-surface="workspace"
+    >
+      <AppSidebar messages={messages} />
 
-      <div className="flex min-h-[calc(100dvh-var(--app-header-height))]">
-        <AppSidebar messages={messages} />
-        <main className="min-w-0 flex-1 pb-[calc(var(--app-bottom-nav-offset)+1rem)] md:pb-0 md:pl-[4.75rem]">
+      <div className="flex min-h-screen flex-col pl-0 md:pl-16 lg:pl-20">
+        <AppHeader
+          messages={messages}
+          creditStatus={client ? status : "loading"}
+          creditBalance={balance}
+          inFlightCount={inFlightCount}
+        />
+
+        <main className="min-w-0 flex-1 pb-[var(--app-bottom-nav-offset)] md:pb-0">
           {children}
         </main>
       </div>
