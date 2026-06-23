@@ -346,17 +346,15 @@ export function IntentWizard({
               </Text>
             </div>
             {channelExpanded ? (
-              <AppFieldSlot label={messages.intentWizard.channel}>
-                <AppSelect
-                  value={activeChannel}
-                  onChange={(value) => wizard.setChannel(value as GenerationChannel)}
-                  sortAlphabetically={false}
-                  options={GENERATION_CHANNEL_IDS.map((channel) => ({
-                    value: channel,
-                    label: getChannelLabel(locale, channel, channel)
-                  }))}
-                />
-              </AppFieldSlot>
+              <AppSelect
+                value={activeChannel}
+                onChange={(value) => wizard.setChannel(value as GenerationChannel)}
+                sortAlphabetically={false}
+                options={GENERATION_CHANNEL_IDS.map((channel) => ({
+                  value: channel,
+                  label: getChannelLabel(locale, channel, channel)
+                }))}
+              />
             ) : (
               <button
                 type="button"
