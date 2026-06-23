@@ -1,9 +1,46 @@
-import { Container } from "@my-ai-orchestrator/ui";
+import type { ComponentType } from "react";
+import {
+  CartographySurface,
+  CoordinateLabel,
+  Container,
+  IconLetter,
+  IconMap,
+  IconPen,
+  IconPin,
+  IconRoute,
+  IconScroll,
+  Text,
+  cn,
+  type CartographyIconProps,
+} from "@my-ai-orchestrator/ui";
 import { useSectionReveal } from "~/marketing/animations/use-section-reveal";
-import { getMarketingContentTypes } from "~/marketing/content/content-types/catalog";
+import {
+  getMarketingContentTypes,
+  type MarketingContentTypeId,
+} from "~/marketing/content/content-types/catalog";
 import { getLocaleMessages } from "~/i18n/marketing/get-locale";
 import type { MarketingLocale } from "~/i18n/marketing/types";
-import { CompassRose, SectionHeader } from "~/marketing/components/icons";
+
+const formatIcons: Record<
+  MarketingContentTypeId,
+  ComponentType<CartographyIconProps>
+> = {
+  "long-form-blog": IconScroll,
+  "validation-post": IconPin,
+  "architecture-post": IconMap,
+  "linkedin-post": IconPen,
+  "twitter-thread": IconRoute,
+  newsletter: IconLetter,
+};
+
+const formatTags: Record<MarketingContentTypeId, string> = {
+  "long-form-blog": "long-form",
+  "validation-post": "validation",
+  "architecture-post": "architecture",
+  "linkedin-post": "linkedin",
+  "twitter-thread": "thread",
+  newsletter: "newsletter",
+};
 
 export interface FormatsSectionProps {
   readonly locale: MarketingLocale;
@@ -16,44 +53,71 @@ export function FormatsSection({ locale }: FormatsSectionProps) {
   const sectionRef = useSectionReveal("[data-section-item]");
 
   return (
-    <section
-      id="ferramentas"
-      className="relative overflow-hidden bg-creme border-b border-borda/15 py-[var(--spacing-section-sm)] md:py-[var(--spacing-section)]"
-    >
-      <div className="rebrand-vignette absolute inset-0 pointer-events-none" />
+    <section id="ferramentas" className="border-b border-ink-ghost/30">
+      <CartographySurface vignette>
+        <Container
+          ref={sectionRef}
+          className="py-[var(--spacing-section-sm)] md:py-[var(--spacing-section)]"
+        >
+          <header
+            className="mx-auto mb-10 max-w-3xl text-center md:mb-14"
+            data-section-item
+          >
+            <CoordinateLabel index={3} label={tools.eyebrow} className="mb-4 block" />
+            <Text as="h2" variant="display" className="mb-4 text-deep-blue">
+              {tools.title}
+            </Text>
+            <Text as="p" variant="body-lg" className="text-ink-muted">
+              {tools.subtitle}
+            </Text>
+          </header>
 
-      <Container ref={sectionRef} className="relative z-10">
-        <SectionHeader
-          eyebrow={tools.eyebrow}
-          title={tools.title}
-          description={tools.subtitle}
-        />
+          <div
+            className="mx-auto grid max-w-5xl grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4 md:gap-4"
+            data-section-item
+          >
+            {formats.map((format, index) => {
+              const Icon = formatIcons[format.id];
+              const isFeatured = index === 0;
 
-        <div className="relative mx-auto max-w-5xl" data-section-item>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {formats.map((format, index) => (
-              <div
-                key={format.id}
-                className={`rebrand-hover group relative rounded-sm border border-borda/20 bg-offwhite p-5 shadow-[3px_3px_0px_rgba(26,46,60,0.06)] transition-all duration-300 ${
-                  index === 0 ? "sm:col-span-2 lg:col-span-1 lg:row-span-1" : ""
-                }`}
-              >
-                <span className="mb-3 block font-mono text-[0.65rem] font-medium uppercase tracking-widest text-azul/50">
-                  {String(index + 1).padStart(2, "0")}
-                </span>
-                <h3 className="font-playfair text-base font-semibold text-azul mb-2">
-                  {format.label}
-                </h3>
-                <p className="font-inter text-sm leading-relaxed text-texto-sec">
-                  {format.description}
-                </p>
-              </div>
-            ))}
+              return (
+                <article
+                  key={format.id}
+                  className={cn(
+                    "rounded-[5px] border-dotted-cartography bg-off-white p-5 shadow-cartography",
+                    "transition duration-250 motion-reduce:transition-none",
+                    "hover:-translate-y-0.5 motion-reduce:hover:translate-y-0",
+                    isFeatured && "md:col-span-2 md:row-span-2 md:p-7"
+                  )}
+                >
+                  <span className="mb-3 block ui-type-mono text-[0.6875rem] uppercase tracking-widest text-ink-muted">
+                    {formatTags[format.id]}
+                  </span>
+                  <div
+                    className={cn(
+                      "mb-4 flex items-center justify-center rounded-[5px]",
+                      "border-dotted-cartography bg-cream text-terracotta",
+                      isFeatured ? "h-11 w-11" : "h-9 w-9"
+                    )}
+                  >
+                    <Icon size={isFeatured ? 24 : 20} aria-hidden />
+                  </div>
+                  <Text
+                    as="h3"
+                    variant="heading"
+                    className={cn("mb-2 text-deep-blue", isFeatured && "text-xl")}
+                  >
+                    {format.label}
+                  </Text>
+                  <Text as="p" variant="body" className="text-ink-muted">
+                    {format.description}
+                  </Text>
+                </article>
+              );
+            })}
           </div>
-
-          <CompassRose className="absolute -top-4 -right-4 h-16 w-16 text-azul/8 pointer-events-none hidden lg:block" />
-        </div>
-      </Container>
+        </Container>
+      </CartographySurface>
     </section>
   );
 }

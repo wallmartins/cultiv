@@ -1,8 +1,15 @@
-import { Container } from "@my-ai-orchestrator/ui";
+import { useEffect, useRef, useState } from "react";
+import {
+  CartographySurface,
+  CoordinateLabel,
+  Container,
+  RouteLine,
+  Text,
+  cn,
+} from "@my-ai-orchestrator/ui";
 import { useSectionReveal } from "~/marketing/animations/use-section-reveal";
 import { getLocaleMessages } from "~/i18n/marketing/get-locale";
 import type { MarketingLocale } from "~/i18n/marketing/types";
-import { MapPinIcon, SectionHeader } from "~/marketing/components/icons";
 
 export interface HowItWorksSectionProps {
   readonly locale: MarketingLocale;
@@ -11,55 +18,107 @@ export interface HowItWorksSectionProps {
 export function HowItWorksSection({ locale }: HowItWorksSectionProps) {
   const { route } = getLocaleMessages(locale);
   const sectionRef = useSectionReveal("[data-section-item]");
+  const [activeIndex, setActiveIndex] = useState(0);
+  const stepRefs = useRef<(HTMLElement | null)[]>([]);
+
+  useEffect(() => {
+    const observers: IntersectionObserver[] = [];
+
+    stepRefs.current.forEach((element, index) => {
+      if (!element) {
+        return;
+      }
+
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          if (entry?.isIntersecting) {
+            setActiveIndex(index);
+          }
+        },
+        { rootMargin: "-35% 0px -35% 0px", threshold: 0.1 }
+      );
+
+      observer.observe(element);
+      observers.push(observer);
+    });
+
+    return () => {
+      observers.forEach((observer) => observer.disconnect());
+    };
+  }, [route.steps.length]);
+
+  const routeProgress = (activeIndex + 1) / route.steps.length;
 
   return (
-    <section
-      id="rota"
-      className="relative overflow-hidden bg-creme border-b border-borda/15 py-[var(--spacing-section-sm)] md:py-[var(--spacing-section)]"
-    >
-      <Container ref={sectionRef} className="relative z-10">
-        <SectionHeader eyebrow={route.eyebrow} title={route.title} />
+    <section id="rota" className="border-b border-ink-ghost/30">
+      <CartographySurface className="bg-off-white">
+        <Container
+          ref={sectionRef}
+          className="py-[var(--spacing-section-sm)] md:py-[var(--spacing-section)]"
+        >
+          <header
+            className="mx-auto mb-10 max-w-3xl text-center md:mb-14"
+            data-section-item
+          >
+            <CoordinateLabel index={2} label={route.eyebrow} className="mb-4 block" />
+            <Text as="h2" variant="display" className="text-deep-blue">
+              {route.title}
+            </Text>
+          </header>
 
-        <div className="relative mx-auto max-w-3xl">
-          <div className="absolute left-[1.05rem] top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-terracota/25 to-transparent md:left-1/2 md:-translate-x-px" />
+          <div className="relative mx-auto max-w-2xl" data-section-item>
+            <div
+              className="absolute bottom-0 left-[1.125rem] top-0 w-5 md:left-6"
+              aria-hidden="true"
+            >
+              <RouteLine
+                orientation="vertical"
+                progress={routeProgress}
+                animate
+                className="h-full w-full"
+              />
+            </div>
 
-          <div className="space-y-8 md:space-y-0">
-            {route.steps.map((step, index) => (
-              <div
-                key={step.index}
-                data-section-item
-                className={`relative flex items-start gap-6 md:gap-0 ${
-                  index % 2 === 0 ? "md:flex-row" : "md:flex-row-reverse"
-                }`}
-              >
-                <div className="relative z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 border-terracota/40 bg-creme font-mono text-xs font-semibold text-terracota">
-                  {step.index}
-                </div>
+            <ol className="relative space-y-8 md:space-y-10">
+              {route.steps.map((step, index) => {
+                const isActive = index <= activeIndex;
 
-                <div
-                  className={`flex-1 md:w-1/2 ${
-                    index % 2 === 0 ? "md:pr-12 md:text-right" : "md:pl-12"
-                  }`}
-                >
-                  <div className="rebrand-hover rounded-sm border border-borda/20 bg-offwhite p-5 shadow-[3px_3px_0px_rgba(26,46,60,0.06)]">
-                    <div className="mb-2 flex items-center gap-2 md:justify-end" style={index % 2 !== 0 ? { justifyContent: "flex-start" } : undefined}>
-                      <MapPinIcon className="h-4 w-4 text-terracota/60" />
-                      <h3 className="font-playfair text-base font-semibold text-azul">
-                        {step.title}
-                      </h3>
+                return (
+                  <li key={step.index} className="relative flex gap-5 md:gap-6">
+                    <div
+                      className={cn(
+                        "relative z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-full",
+                        "border-2 transition-colors duration-300 motion-reduce:transition-none",
+                        isActive
+                          ? "border-terracotta bg-terracotta text-off-white"
+                          : "border-ink-ghost/60 bg-off-white text-ink-muted"
+                      )}
+                    >
+                      <span className="ui-type-mono text-[0.6875rem] font-medium">
+                        {step.index}
+                      </span>
                     </div>
-                    <p className="font-inter text-sm leading-relaxed text-texto-sec">
-                      {step.body}
-                    </p>
-                  </div>
-                </div>
 
-                <div className="hidden md:block md:w-1/2" />
-              </div>
-            ))}
+                    <article
+                      ref={(element) => {
+                        stepRefs.current[index] = element;
+                      }}
+                      className="min-w-0 flex-1 rounded-[5px] border-dotted-cartography bg-off-white p-5 shadow-cartography"
+                    >
+                      <Text as="h3" variant="heading" className="mb-2 text-deep-blue">
+                        {step.title}
+                      </Text>
+                      <Text as="p" variant="body" className="text-ink-muted">
+                        {step.body}
+                      </Text>
+                    </article>
+                  </li>
+                );
+              })}
+            </ol>
           </div>
-        </div>
-      </Container>
+        </Container>
+      </CartographySurface>
     </section>
   );
 }
