@@ -4,7 +4,7 @@ export const appMessagesPt: AppMessages = {
   shell: {
     nav: {
       generate: "Gerar",
-      history: "Histórico",
+      history: "Caderno de bordo",
       voice: "Voz",
       settings: "Configurações",
       plans: "Planos",
@@ -143,20 +143,20 @@ export const appMessagesPt: AppMessages = {
     }
   },
   history: {
-    title: "Histórico de gerações",
-    subtitle: "Suas gerações anteriores.",
-    empty: "Nenhuma geração ainda. Comece escrevendo seu primeiro texto.",
-    emptyAction: "Ir para Geração",
-    error: "Não foi possível carregar o histórico.",
+    title: "Caderno de bordo",
+    subtitle: "Todas as suas expedições em um só lugar.",
+    empty: "Nenhuma expedição registrada. Comece traçando sua primeira rota.",
+    emptyAction: "Nova expedição",
+    error: "Não foi possível carregar o caderno de bordo.",
     retry: "Tentar novamente",
     filters: {
       period: "Período",
       status: "Status",
       contentType: "Formato",
-      period7d: "7 dias",
-      period30d: "30 dias",
-      period90d: "90 dias",
-      periodAll: "Tudo",
+      period7d: "Últimos 7 dias",
+      period30d: "Últimos 30 dias",
+      period90d: "Últimos 90 dias",
+      periodAll: "Todo o período",
       statusAll: "Todos",
       statusDone: "Concluídas",
       statusFailed: "Falhas",
@@ -165,24 +165,24 @@ export const appMessagesPt: AppMessages = {
       contentTypeAll: "Todos os formatos"
     },
     columns: {
-      format: "Formato",
-      date: "Data",
+      format: "Expedição",
+      date: "Data de partida",
       mode: "Modo",
       credits: "Créditos",
       status: "Status"
     },
     detail: {
       copy: "Copiar",
-      regenerate: "Regenerar",
-      details: "Detalhes",
-      executionId: "ID da execução",
-      createdAt: "Criado em",
-      completedAt: "Concluído em",
+      regenerate: "Nova expedição",
+      details: "Detalhes da rota",
+      executionId: "ID da expedição",
+      createdAt: "Partida",
+      completedAt: "Retorno",
       voiceConfidence: "Confiança da voz",
       adaptationMode: "Modo de adaptação",
       progressSteps: "Etapas",
-      loading: "Carregando execução…",
-      notFound: "Execução não encontrada."
+      loading: "Carregando expedição…",
+      notFound: "Expedição não encontrada."
     }
   },
   voice: {
