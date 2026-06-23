@@ -10,6 +10,12 @@ export { Input, type InputProps } from "./primitives/Input.js";
 export { Grid, type GridProps } from "./primitives/Grid.js";
 export { PressMark, type PressMarkProps } from "./primitives/PressMark.js";
 export type { PressMarkVariant } from "./primitives/press-mark-geometry.js";
+export { CompassMark, type CompassMarkProps } from "./primitives/CompassMark.js";
+export type {
+  CompassMarkColor,
+  CompassMarkVariant,
+  CardinalDirection
+} from "./primitives/compass-mark-geometry.js";
 export { PaperSurface } from "./primitives/PaperSurface.js";
 export { ReadingSurface } from "./primitives/ReadingSurface.js";
 export { InkBleed, type InkBleedProps } from "./primitives/InkBleed.js";

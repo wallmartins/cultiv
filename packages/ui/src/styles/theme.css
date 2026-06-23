@@ -581,4 +581,25 @@
     letter-spacing: 0.015em;
     font-style: italic;
   }
+
+  @keyframes compass-breath {
+    0%,
+    100% {
+      transform: scale(1);
+    }
+
+    50% {
+      transform: scale(1.02);
+    }
+  }
+
+  [data-animate-breath="true"] {
+    animation: compass-breath 4s ease-in-out infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    [data-animate-breath="true"] {
+      animation: none;
+    }
+  }
 }
