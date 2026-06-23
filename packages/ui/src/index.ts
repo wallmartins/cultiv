@@ -19,6 +19,14 @@ export type {
 export { PaperSurface } from "./primitives/PaperSurface.js";
 export { ReadingSurface } from "./primitives/ReadingSurface.js";
 export { InkBleed, type InkBleedProps } from "./primitives/InkBleed.js";
+export {
+  CartographySurface,
+  type CartographySurfaceProps
+} from "./primitives/CartographySurface.js";
+export { RouteLine, type RouteLineProps } from "./primitives/RouteLine.js";
+export { CoordinateLabel, type CoordinateLabelProps } from "./primitives/CoordinateLabel.js";
+export { ExpeditionCard, type ExpeditionCardProps } from "./primitives/ExpeditionCard.js";
+export { LogbookProse } from "./primitives/LogbookProse.js";
 
 export { Label, type LabelProps } from "./patterns/Label.js";
 export { SectionHeader, type SectionHeaderProps } from "./patterns/SectionHeader.js";

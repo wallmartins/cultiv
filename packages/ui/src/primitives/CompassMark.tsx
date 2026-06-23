@@ -107,7 +107,6 @@ export function CompassMark({
         className={className}
         role="img"
         aria-label="Cultiv"
-        {...props}
       />
     );
   }
