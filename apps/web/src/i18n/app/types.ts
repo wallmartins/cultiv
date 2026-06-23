@@ -57,6 +57,7 @@ export type AppIntentWizardMessages = {
   readonly changeIntent: string;
   readonly catalogLoadError: string;
   readonly catalogRetry: string;
+  readonly stepIndicator: string;
 };
 
 export type AppGenerateMessages = {

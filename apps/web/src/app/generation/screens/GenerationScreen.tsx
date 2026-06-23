@@ -50,6 +50,51 @@ import { HelpTooltip } from "~/platform/ui/HelpTooltip";
 
 const QUALITY_MODES: readonly QualityMode[] = ["fast", "balanced", "strict"];
 
+function StepIndicator({ current, total, labels }: { readonly current: number; readonly total: number; readonly labels: string[] }) {
+  return (
+    <div className="flex items-center gap-3 mb-6">
+      {labels.map((label, index) => {
+        const stepNum = index + 1;
+        const isActive = stepNum === current;
+        const isDone = stepNum < current;
+        return (
+          <div key={index} className="flex items-center gap-2">
+            <div
+              className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-2 font-mono text-xs font-bold transition-colors duration-300 ${
+                isDone
+                  ? "border-musgo bg-musgo text-white"
+                  : isActive
+                    ? "border-terracota bg-terracota/10 text-terracota"
+                    : "border-borda/30 bg-creme text-borda"
+              }`}
+            >
+              {isDone ? (
+                <svg viewBox="0 0 20 20" fill="currentColor" className="h-3.5 w-3.5">
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                </svg>
+              ) : (
+                stepNum
+              )}
+            </div>
+            <span
+              className={`font-inter text-xs font-medium hidden sm:inline transition-colors duration-300 ${
+                isActive ? "text-azul" : isDone ? "text-musgo" : "text-borda"
+              }`}
+            >
+              {label}
+            </span>
+            {index < labels.length - 1 && (
+              <div className={`w-8 h-px mx-1 hidden sm:block ${
+                isDone ? "bg-musgo/40" : "bg-borda/20"
+              }`} />
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 export function GenerationScreen() {
   const { user } = useAuth0();
   const { locale, messages } = useAppLocale();
@@ -254,6 +299,12 @@ export function GenerationScreen() {
   const showWizard = !useLegacyFlow && wizard.step < 3;
   const catalogReady = intentsStatus !== "loading" || intentItems.length > 0;
 
+  const stepLabels = [
+    messages.intentWizard.stepObjectiveTitle,
+    messages.intentWizard.stepScopeTitle,
+    messages.generate.briefing
+  ];
+
   return (
     <div className="px-[var(--spacing-gutter)] py-8 md:py-10">
       {showReminder ? (
@@ -270,7 +321,7 @@ export function GenerationScreen() {
         </div>
       ) : null}
 
-      <Text as="h1" variant="h1" className="mb-3">
+      <Text as="h1" variant="h1" className="mb-3 font-playfair text-azul">
         {messages.generate.title}
       </Text>
 
@@ -342,7 +393,7 @@ export function GenerationScreen() {
       ) : null}
 
       <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(280px,22rem)] lg:items-start lg:gap-8">
-        <div className="workspace-stagger-group space-y-6">
+        <div className="space-y-6">
           {showWizard ? (
             <IntentWizard
               wizard={wizard}
@@ -356,13 +407,15 @@ export function GenerationScreen() {
 
           {showComposeStep ? (
             <>
+              <StepIndicator current={3} total={3} labels={stepLabels} />
+
               <BriefingGuidancePanel
                 locale={locale}
                 item={formSelection.catalogItem}
                 guidanceSource={formSelection.mode === "intent" ? "intent" : "content-type"}
               />
               <AppCard>
-                <Text as="h2" variant="label" className="mb-4 block">
+                <Text as="h2" variant="label" className="mb-4 block font-playfair text-azul">
                   {messages.generate.briefing}
                 </Text>
                 <BriefingForm
