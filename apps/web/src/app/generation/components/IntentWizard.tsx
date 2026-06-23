@@ -21,6 +21,7 @@ import { AppSegmentedControl } from "~/platform/ui/AppSegmentedControl";
 import { AppSelect } from "~/platform/ui/AppSelect";
 import { AppSkeleton } from "~/platform/ui/AppSkeleton";
 import { HelpTooltip } from "~/platform/ui/HelpTooltip";
+
 import { useState } from "react";
 
 type WizardState = ReturnType<typeof useGenerationWizard>;
@@ -32,6 +33,130 @@ export interface IntentWizardProps {
   readonly status: GenerationIntentsStatus;
   readonly catalogError: unknown;
   readonly onRetry: () => void;
+}
+
+const intentIcons: Record<string, { readonly path: string; readonly color: string }> = {
+  "share-idea": {
+    path: "M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z",
+    color: "terracota"
+  },
+  "explain-deeply": {
+    path: "M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253",
+    color: "azul"
+  },
+  "engage-audience": {
+    path: "M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z",
+    color: "ocre"
+  },
+  "tell-story": {
+    path: "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z",
+    color: "musgo"
+  },
+  "update-subscribers": {
+    path: "M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z",
+    color: "ocre"
+  },
+  "document-decision": {
+    path: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4",
+    color: "azul"
+  }
+};
+
+const colorMap: Record<string, { bg: string; border: string; text: string; ring: string }> = {
+  terracota: {
+    bg: "bg-terracota/5",
+    border: "border-terracota/20",
+    text: "text-terracota",
+    ring: "ring-terracota/30"
+  },
+  azul: {
+    bg: "bg-azul/5",
+    border: "border-azul/15",
+    text: "text-azul",
+    ring: "ring-azul/30"
+  },
+  ocre: {
+    bg: "bg-ocre/10",
+    border: "border-ocre/25",
+    text: "text-ocre",
+    ring: "ring-ocre/30"
+  },
+  musgo: {
+    bg: "bg-musgo/5",
+    border: "border-musgo/20",
+    text: "text-musgo",
+    ring: "ring-musgo/30"
+  }
+};
+
+function IntentOptionCard({
+  item,
+  selected,
+  helpLabel,
+  onSelect
+}: {
+  readonly item: GenerationIntentCatalogItemView;
+  readonly selected: boolean;
+  readonly helpLabel: string;
+  readonly onSelect: () => void;
+}) {
+  const iconConfig = intentIcons[item.id];
+  const colors = iconConfig ? colorMap[iconConfig.color] : colorMap.azul;
+
+  return (
+    <button type="button" className="w-full text-left group" onClick={onSelect}>
+      <div
+        className={cn(
+          "relative h-full rounded-[var(--radius-press)] border p-5 transition-all duration-300 overflow-hidden",
+          selected
+            ? `ring-2 ${colors.ring} ring-offset-2 ring-offset-paper ${colors.border} ${colors.bg} shadow-[4px_4px_0px_rgba(26,46,60,0.08)]`
+            : `border-borda/20 bg-offwhite hover:border-borda/30 hover:shadow-[3px_3px_0px_rgba(26,46,60,0.05)]`
+        )}
+      >
+        <div className="absolute top-0 right-0 w-16 h-16 opacity-[0.03] pointer-events-none">
+          <svg viewBox="0 0 64 64" fill="none" className="w-full h-full">
+            <circle cx="32" cy="32" r="28" stroke="currentColor" strokeWidth="1" />
+            <circle cx="32" cy="32" r="16" stroke="currentColor" strokeWidth="0.5" strokeDasharray="3 3" />
+          </svg>
+        </div>
+
+        <div className="flex items-start gap-3.5">
+          {iconConfig ? (
+            <div className={cn(
+              "flex h-10 w-10 shrink-0 items-center justify-center rounded-sm border transition-colors duration-300",
+              selected ? `${colors.border} ${colors.bg}` : "border-borda/15 bg-creme group-hover:border-borda/25"
+            )}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className={cn("h-5 w-5 transition-colors duration-300", selected ? colors.text : "text-azul/60 group-hover:text-azul")}>
+                <path d={iconConfig.path} />
+              </svg>
+            </div>
+          ) : null}
+
+          <div className="min-w-0 flex-1 space-y-1">
+            <Text as="span" variant="label" className={cn("block transition-colors duration-300", selected ? colors.text : "text-azul")}>
+              {item.label}
+            </Text>
+            <Text as="span" variant="meta" className="block text-ink-muted leading-relaxed">
+              {item.description}
+            </Text>
+          </div>
+
+          {item.description ? (
+            <HelpTooltip
+              text={item.description}
+              ariaLabel={helpLabel}
+              placement="responsive-end"
+              size="wide"
+            />
+          ) : null}
+        </div>
+
+        {selected && (
+          <div className={cn("absolute bottom-0 left-0 right-0 h-0.5", colors.bg.replace('/5', '').replace('/10', ''))} style={{ background: `var(--color-${iconConfig.color === 'ocre' ? 'ocre' : iconConfig.color === 'musgo' ? 'musgo' : iconConfig.color})`, opacity: 0.3 }} />
+        )}
+      </div>
+    </button>
+  );
 }
 
 function StepIndicator({ current, total, labels }: { readonly current: number; readonly total: number; readonly labels: string[] }) {
@@ -82,52 +207,6 @@ function StepIndicator({ current, total, labels }: { readonly current: number; r
   );
 }
 
-function IntentOptionCard({
-  item,
-  selected,
-  helpLabel,
-  onSelect
-}: {
-  readonly item: GenerationIntentCatalogItemView;
-  readonly selected: boolean;
-  readonly helpLabel: string;
-  readonly onSelect: () => void;
-}) {
-  return (
-    <button type="button" className="w-full text-left" onClick={onSelect}>
-      <AppCard
-        hover
-        padding="compact"
-        className={cn(
-          "h-full transition-all duration-300",
-          selected
-            ? "border-terracota/30 bg-terracota/5 shadow-[3px_3px_0px_rgba(181,90,59,0.1)]"
-            : "hover:shadow-[3px_3px_0px_rgba(26,46,60,0.06)]"
-        )}
-      >
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0 space-y-1">
-            <Text as="span" variant="label" className={cn("block", selected && "text-terracota")}>
-              {item.label}
-            </Text>
-            <Text as="span" variant="meta" className="block text-ink-muted">
-              {item.description}
-            </Text>
-          </div>
-          {item.description ? (
-            <HelpTooltip
-              text={item.description}
-              ariaLabel={helpLabel}
-              placement="responsive-end"
-              size="wide"
-            />
-          ) : null}
-        </div>
-      </AppCard>
-    </button>
-  );
-}
-
 export function IntentWizard({
   wizard,
   featuredIntents,
@@ -144,6 +223,8 @@ export function IntentWizard({
     messages.intentWizard.stepScopeTitle,
     messages.generate.briefing
   ];
+
+  const allIntents = [...featuredIntents, ...moreIntents];
 
   if (status === "loading" && featuredIntents.length === 0) {
     return (
@@ -189,8 +270,8 @@ export function IntentWizard({
           </Text>
         </div>
 
-        <div className="grid gap-3 sm:grid-cols-2">
-          {featuredIntents.map((item) => (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {allIntents.map((item) => (
             <IntentOptionCard
               key={item.id}
               item={item}
@@ -200,31 +281,6 @@ export function IntentWizard({
             />
           ))}
         </div>
-
-        {moreIntents.length > 0 ? (
-          <div className="space-y-3">
-            <button
-              type="button"
-              className="text-sm font-medium text-pigment-terracotta underline-offset-2 hover:underline"
-              onClick={() => wizard.setShowMoreIntents((open) => !open)}
-            >
-              {messages.intentWizard.moreOptions}
-            </button>
-            {wizard.showMoreIntents ? (
-              <div className="grid gap-3 sm:grid-cols-2">
-                {moreIntents.map((item) => (
-                  <IntentOptionCard
-                    key={item.id}
-                    item={item}
-                    selected={wizard.intent === item.id}
-                    helpLabel={messages.intentWizard.intentHelp}
-                    onSelect={() => wizard.selectIntent(item.id)}
-                  />
-                ))}
-              </div>
-            ) : null}
-          </div>
-        ) : null}
       </div>
     );
   }
