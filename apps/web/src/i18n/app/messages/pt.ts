@@ -21,7 +21,9 @@ export const appMessagesPt: AppMessages = {
       statusDone: "Pronto",
       statusFailed: "A rota não pôde ser traçada.",
       copy: "Copiar",
+      export: "Exportar",
       regenerate: "Regenerar",
+      newExpedition: "Nova expedição",
       viewHistory: "Ver completo no histórico",
       retry: "Tentar de novo",
       noCreditsCharged: "Seus créditos não foram consumidos.",
@@ -53,7 +55,10 @@ export const appMessagesPt: AppMessages = {
     changeIntent: "Trocar expedição",
     catalogLoadError: "Não foi possível carregar as expedições.",
     catalogRetry: "Tentar novamente",
-    stepIndicator: "Passo {current} de {total}"
+    stepIndicator: "Passo {current} de {total}",
+    stepExplorar: "Explorar",
+    stepEscala: "Escala",
+    stepCoordenadas: "Coordenadas"
   },
   generate: {
     title: "Expedição",

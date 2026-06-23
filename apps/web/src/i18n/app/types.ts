@@ -26,7 +26,9 @@ export type AppShellMessages = {
     readonly statusDone: string;
     readonly statusFailed: string;
     readonly copy: string;
+    readonly export: string;
     readonly regenerate: string;
+    readonly newExpedition: string;
     readonly viewHistory: string;
     readonly retry: string;
     readonly noCreditsCharged: string;
@@ -59,6 +61,9 @@ export type AppIntentWizardMessages = {
   readonly catalogLoadError: string;
   readonly catalogRetry: string;
   readonly stepIndicator: string;
+  readonly stepExplorar: string;
+  readonly stepEscala: string;
+  readonly stepCoordenadas: string;
 };
 
 export type AppGenerateMessages = {

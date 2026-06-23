@@ -21,7 +21,9 @@ export const appMessagesEn: AppMessages = {
       statusDone: "Ready",
       statusFailed: "The route could not be mapped.",
       copy: "Copy",
+      export: "Export",
       regenerate: "Regenerate",
+      newExpedition: "New expedition",
       viewHistory: "View full history",
       retry: "Try again",
       noCreditsCharged: "Your credits were not used.",
@@ -53,7 +55,10 @@ export const appMessagesEn: AppMessages = {
     changeIntent: "Change expedition",
     catalogLoadError: "Could not load expeditions.",
     catalogRetry: "Try again",
-    stepIndicator: "Step {current} of {total}"
+    stepIndicator: "Step {current} of {total}",
+    stepExplorar: "Explore",
+    stepEscala: "Scale",
+    stepCoordenadas: "Coordinates"
   },
   generate: {
     title: "Expedition",
