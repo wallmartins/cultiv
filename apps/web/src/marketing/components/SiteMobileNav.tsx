@@ -1,6 +1,11 @@
 import { useEffect, useId, useState } from "react";
 import { createPortal } from "react-dom";
-import { Text, cn } from "@my-ai-orchestrator/ui";
+import {
+  ButtonLink,
+  CoordinateLabel,
+  cn
+} from "@my-ai-orchestrator/ui";
+import { BrandMark } from "~/marketing/components/BrandMark";
 import { LocaleToggle } from "~/marketing/components/LocaleToggle";
 import { rebrandNavItemClassName } from "~/marketing/components/SiteHeader";
 import { marketingNavItems } from "~/marketing/navigation/marketing-nav-items";
@@ -50,45 +55,60 @@ export function SiteMobileNav({ locale, messages }: SiteMobileNavProps) {
           <div className="fixed inset-0 z-[60] md:hidden">
             <button
               type="button"
-              className="absolute inset-0 bg-paper/80 backdrop-blur-sm"
+              className="absolute inset-0 bg-deep-blue/20 backdrop-blur-sm"
               aria-label={messages.menuCloseLabel}
               onClick={closeMenu}
             />
             <nav
               id={panelId}
               aria-label={messages.navLabel}
-              className="absolute top-[var(--site-header-height)] right-0 left-0 max-h-[calc(100dvh-var(--site-header-height))] overflow-y-auto border-b border-ink bg-paper px-[var(--spacing-gutter)] py-5 shadow-lg"
+              className="absolute inset-y-0 right-0 flex w-full max-w-sm flex-col border-l border-dotted-cartography bg-off-white shadow-cartography"
               onClick={(event) => event.stopPropagation()}
             >
-              <div className="mb-5 flex items-center justify-between gap-4">
-                <Text as="p" variant="meta" className="text-ink-muted">
-                  {messages.navLabel}
-                </Text>
+              <div className="flex items-center justify-between gap-4 border-b border-dotted-cartography px-[var(--spacing-gutter)] py-4">
+                <BrandMark locale={locale} brandLabel={messages.brand} size={28} />
                 <button
                   type="button"
-                  className="flex size-10 items-center justify-center border border-ink/20 text-lg leading-none"
+                  className="flex size-10 items-center justify-center rounded-[5px] border border-dotted-cartography text-lg leading-none text-ink"
                   aria-label={messages.menuCloseLabel}
                   onClick={closeMenu}
                 >
                   <span aria-hidden>×</span>
                 </button>
               </div>
-              <ul className="space-y-4">
-                {marketingNavItems.map((item) => (
-                  <li key={item.key}>
+
+              <ul className="flex-1 overflow-y-auto px-[var(--spacing-gutter)] py-6">
+                {marketingNavItems.map((item, index) => (
+                  <li key={item.key} className="border-b border-dotted-cartography py-4 last:border-b-0">
+                    <CoordinateLabel
+                      index={index + 1}
+                      label={messages.nav[item.key]}
+                      className="mb-2 block text-[0.6875rem] tracking-wide"
+                    />
                     <a
                       href={item.href}
-                      className={`${rebrandNavItemClassName} block py-1 text-sm`}
+                      className={`${rebrandNavItemClassName} block text-sm normal-case tracking-normal`}
                       onClick={closeMenu}
                     >
                       {messages.nav[item.key]}
                     </a>
                   </li>
                 ))}
-                <li className="pt-2">
-                  <LocaleToggle locale={locale} className="inline-block text-sm" />
+                <li className="border-b border-dotted-cartography py-4">
+                  <CoordinateLabel
+                    index="—"
+                    label={messages.localeSwitch}
+                    className="mb-2 block text-[0.6875rem] tracking-wide"
+                  />
+                  <LocaleToggle locale={locale} className="text-sm font-inter text-ink-muted" />
                 </li>
               </ul>
+
+              <div className="border-t border-dotted-cartography px-[var(--spacing-gutter)] py-5">
+                <ButtonLink href="#waitlist" className="w-full justify-center" onClick={closeMenu}>
+                  {messages.ctaWaitlist}
+                </ButtonLink>
+              </div>
             </nav>
           </div>,
           document.body
@@ -99,7 +119,7 @@ export function SiteMobileNav({ locale, messages }: SiteMobileNavProps) {
     <div className="flex items-center md:hidden">
       <button
         type="button"
-        className="flex size-10 items-center justify-center border border-ink/20"
+        className="flex size-10 items-center justify-center rounded-[5px] border border-dotted-cartography"
         aria-expanded={open}
         aria-controls={panelId}
         aria-label={open ? messages.menuCloseLabel : messages.menuOpenLabel}
@@ -120,7 +140,7 @@ export function SiteMobileNav({ locale, messages }: SiteMobileNavProps) {
           />
           <span
             className={cn(
-              "absolute left-0 h-px w-full bg-ink transition-transform duration-200",
+              "absolute left-0 h-px w-full bg-ink transition-opacity duration-200",
               open ? "top-1.5 -rotate-45" : "top-3"
             )}
           />
