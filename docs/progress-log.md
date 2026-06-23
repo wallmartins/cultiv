@@ -1,6 +1,6 @@
 # Progress Log
 
-| 2026-06-23 | refactor(ui): Task 20 — retire Cultiv Imprint, complete Cartography migration — deleted PressMark/InkBleed/PaperSurface/ReadingSurface, removed imprint-grain/press-edge/data-intensity from theme.css, enabled cartography-visual-governance, updated design-system docs and CONTEXT.md glossary |
+| 2026-06-23 | docs: Cartography redesign implemented — Task 21 QA gate: fixed migration test drift (geo llms route copy, generation intent labels, VoiceReasoningMirror voiceMessages prop, content-type labels, cartography motion tokens); 936 tests pass (28 skipped), web build pass, cartography governance + primitives pass; manual QA: governance ✓, web build ✓, full suite ✓ |
 | 2026-06-23 | feat(marketing): Cartography motion — route draw, reveal stagger, hero word fade; retired stamp reveal and scroll-pin hooks |
 | 2026-06-23 | docs: Cultiv Cartography redesign implementation plan — 21 tasks across tokens, primitives, marketing reskin, workspace shell, Imprint retirement, QA gate |
 | 2026-06-23 | docs: Cultiv Cartography complete platform redesign design spec — Atlas Editorial approach, cartography identity (compass logo, Playfair/Inter/Caveat/JetBrains Mono), marketing + workspace layout reimagined, premium contained motion, supersedes ADR 0009 Imprint |
