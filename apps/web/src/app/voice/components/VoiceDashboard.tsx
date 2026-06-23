@@ -35,6 +35,30 @@ import type { VoiceProfileScreenView } from "@my-ai-orchestrator/contracts";
 
 type DashboardStatus = "loading" | "ready" | "empty" | "error";
 
+function CompassDecoration({ className }: { readonly className?: string }) {
+  return (
+    <svg viewBox="0 0 120 120" fill="none" className={className}>
+      <circle cx="60" cy="60" r="55" stroke="currentColor" strokeWidth="0.75" opacity="0.15" />
+      <circle cx="60" cy="60" r="40" stroke="currentColor" strokeWidth="0.5" opacity="0.1" strokeDasharray="3 3" />
+      <line x1="60" y1="5" x2="60" y2="115" stroke="currentColor" strokeWidth="0.5" opacity="0.08" />
+      <line x1="5" y1="60" x2="115" y2="60" stroke="currentColor" strokeWidth="0.5" opacity="0.08" />
+      <polygon points="60,10 65,50 60,45 55,50" fill="currentColor" opacity="0.2" />
+    </svg>
+  );
+}
+
+function SectionLabel({ children }: { readonly children: React.ReactNode }) {
+  return (
+    <div className="flex items-center gap-3 mb-4">
+      <div className="h-px flex-1 bg-terracota/15" />
+      <span className="font-inter text-[0.65rem] font-semibold uppercase tracking-[0.15em] text-terracota/70">
+        {children}
+      </span>
+      <div className="h-px flex-1 bg-terracota/15" />
+    </div>
+  );
+}
+
 export function VoiceDashboard() {
   const { locale, messages } = useAppLocale();
   const client = useClientSdk();
@@ -221,63 +245,67 @@ export function VoiceDashboard() {
   );
 
   return (
-    <div className="space-y-8 px-[var(--spacing-gutter)] py-8 md:py-10">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div className="min-w-0">
-          <Text as="h1" variant="h1" className="mb-2 font-playfair text-azul">
-            {voiceMessages.dashboardTitle}
-          </Text>
-          <Text variant="meta" className="text-ink-muted">
-            {voiceMessages.dashboardSubtitle}
-          </Text>
-        </div>
-        <Link
-          to="/app/voice/examples"
-          className="rebrand-hover inline-flex items-center justify-center gap-2 rounded-sm border border-azul/20 bg-azul/5 px-4 py-2 font-inter text-sm font-medium text-azul transition-all duration-300 hover:bg-azul/10"
-        >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
-            <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-          </svg>
-          {voiceMessages.manageExamples}
-        </Link>
-      </div>
-
+    <div className="space-y-10 px-[var(--spacing-gutter)] py-8 md:py-10">
       <VoiceRebuildStatusBanner
         status={rebuildStatus}
         updatingMessage={voiceMessages.updatingBanner}
         failedMessage={voiceMessages.rebuildFailed}
       />
 
-      {profile.reasoning ? (
-        <div ref={authorityAnchorRef}>
-          <VoiceReasoningMirror
-            locale={locale}
-            messages={voiceMessages.reasoning}
-            reasoning={profile.reasoning}
-            confidenceLevel={confidenceLevel}
-            dialSubline={dialSubline}
-            dialAccessibleLabel={dialAccessibleLabel}
-            onAuthorityLinkClick={scrollToAuthority}
-          />
-        </div>
-      ) : (
-        <section className="space-y-6">
-          <div>
-            <Text as="h2" variant="h2" className="mb-2 font-playfair text-azul">
-              {voiceMessages.mirrorFallbackTitle}
+      <section className="relative">
+        <CompassDecoration className="absolute -top-6 -right-6 h-32 w-32 text-azul pointer-events-none hidden lg:block" />
+
+        <div className="flex flex-wrap items-start justify-between gap-4 mb-6">
+          <div className="min-w-0">
+            <Text as="h1" variant="h1" className="mb-2 font-playfair text-azul">
+              {voiceMessages.dashboardTitle}
             </Text>
-            <Text variant="meta" className="w-full text-ink-muted">
-              {voiceMessages.mirrorFallbackSubtitle}
+            <Text variant="meta" className="text-ink-muted">
+              {voiceMessages.dashboardSubtitle}
             </Text>
           </div>
-          <VoiceMirrorHero
-            level={confidenceLevel}
-            dialSubline={dialSubline}
-            dialAccessibleLabel={dialAccessibleLabel}
-            bodyCopy={mirrorBodyCopy}
-          />
-        </section>
-      )}
+          <Link
+            to="/app/voice/examples"
+            className="rebrand-hover inline-flex items-center justify-center gap-2 rounded-sm bg-terracota px-5 py-2.5 font-inter text-sm font-semibold text-white shadow-[3px_3px_0px_rgba(0,0,0,0.12)] transition-all duration-300 hover:bg-terracota/90"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+              <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            {voiceMessages.manageExamples}
+          </Link>
+        </div>
+
+        {profile.reasoning ? (
+          <div ref={authorityAnchorRef}>
+            <VoiceReasoningMirror
+              locale={locale}
+              messages={voiceMessages.reasoning}
+              reasoning={profile.reasoning}
+              confidenceLevel={confidenceLevel}
+              dialSubline={dialSubline}
+              dialAccessibleLabel={dialAccessibleLabel}
+              onAuthorityLinkClick={scrollToAuthority}
+            />
+          </div>
+        ) : (
+          <section className="space-y-6">
+            <div>
+              <Text as="h2" variant="h2" className="mb-2 font-playfair text-azul">
+                {voiceMessages.mirrorFallbackTitle}
+              </Text>
+              <Text variant="meta" className="w-full text-ink-muted">
+                {voiceMessages.mirrorFallbackSubtitle}
+              </Text>
+            </div>
+            <VoiceMirrorHero
+              level={confidenceLevel}
+              dialSubline={dialSubline}
+              dialAccessibleLabel={dialAccessibleLabel}
+              bodyCopy={mirrorBodyCopy}
+            />
+          </section>
+        )}
+      </section>
 
       {traitConfirmationTarget && profile.reasoning?.traitProfile ? (
         <VoiceTraitConfirmationCard
@@ -289,30 +317,36 @@ export function VoiceDashboard() {
         />
       ) : null}
 
-      <AppDisclosureGroup
-        items={[
-          ...(profile.reasoning
-            ? buildReasoningDetailItems({
-                locale,
-                messages: voiceMessages,
-                reasoning: profile.reasoning
-              })
-            : []),
-          {
-            id: "profile-health",
-            title: voiceMessages.detailLayers.profileHealth,
-            children: healthLayer
-          }
-        ]}
-      />
+      <section>
+        <SectionLabel>Camadas do mapa</SectionLabel>
+        <AppDisclosureGroup
+          items={[
+            ...(profile.reasoning
+              ? buildReasoningDetailItems({
+                  locale,
+                  messages: voiceMessages,
+                  reasoning: profile.reasoning
+                })
+              : []),
+            {
+              id: "profile-health",
+              title: voiceMessages.detailLayers.profileHealth,
+              children: healthLayer
+            }
+          ]}
+        />
+      </section>
 
-      {profile.reasoning ? (
-        <Text variant="meta" className="w-full text-ink-muted">
-          {voiceMessages.reasoning.refineHint}
-        </Text>
-      ) : null}
-
-      <VoiceNextStepPanel eyebrow={voiceMessages.nextStep.eyebrow} step={nextStep} />
+      <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+        {profile.reasoning ? (
+          <Text variant="meta" className="text-ink-muted max-w-md">
+            {voiceMessages.reasoning.refineHint}
+          </Text>
+        ) : (
+          <div />
+        )}
+        <VoiceNextStepPanel eyebrow={voiceMessages.nextStep.eyebrow} step={nextStep} />
+      </div>
     </div>
   );
 }

@@ -37,12 +37,12 @@ export function buildReasoningDetailItems({
       title: messages.detailLayers.formats,
       count: formatCount > 0 ? formatCount : undefined,
       children:
-        formatCount > 0 ? (
+          formatCount > 0 ? (
           <div className="space-y-4">
             {reasoning.formatExpressions.map((expression) => (
               <div
                 key={expression.contentType}
-                className="rounded-[var(--radius-press)] border border-ink-ghost/60 bg-paper-elevated/60 p-4"
+                className="rounded-[var(--radius-press)] border border-borda/15 bg-creme p-4"
               >
                 <Text variant="label" className="mb-2 block">
                   {getContentTypeLabel(locale, expression.contentType, expression.contentType)}
@@ -153,7 +153,7 @@ export function VoiceReasoningMirror({
   return (
     <section className="space-y-8">
       <div>
-        <Text as="h2" variant="h2" className="mb-2">
+        <Text as="h2" variant="h2" className="mb-2 font-playfair text-azul">
           {messages.title}
         </Text>
         <Text variant="meta" className="w-full text-ink-muted">
@@ -162,7 +162,7 @@ export function VoiceReasoningMirror({
       </div>
 
       <div className="space-y-4">
-        <Text variant="label" className="block text-ink-muted">
+        <Text variant="label" className="block font-inter text-xs font-semibold uppercase tracking-wider text-terracota/70">
           {messages.coreTitle}
         </Text>
         <VoiceMirrorHero
@@ -198,9 +198,9 @@ export function VoiceReasoningMirror({
       </div>
 
       {development ? (
-        <div className="space-y-4 border-t border-ink-ghost/60 pt-8">
+        <div className="space-y-4 border-t border-borda/15 pt-8">
           <div>
-            <Text variant="label" className="mb-2 block text-ink-muted">
+            <Text variant="label" className="mb-2 block font-inter text-xs font-semibold uppercase tracking-wider text-terracota/70">
               {messages.developmentTitle}
             </Text>
             <Text variant="meta" className="mb-4 w-full text-ink-muted">
@@ -224,15 +224,15 @@ export function VoiceReasoningMirror({
           </div>
 
           {development.moveLabels.length > 0 ? (
-            <div className="rounded-[var(--radius-press)] border border-ink-ghost/60 bg-paper-elevated/40 px-3 py-3">
-              <Text variant="meta" className="mb-2 block text-xs text-ink-muted">
+            <div className="rounded-[var(--radius-press)] border border-borda/15 bg-creme px-4 py-3">
+              <Text variant="meta" className="mb-2 block font-inter text-xs font-semibold uppercase tracking-wider text-texto-sec">
                 {messages.typicalMoves}
               </Text>
               <ul className="flex flex-wrap gap-2">
                 {development.moveLabels.map((move) => (
                   <li
                     key={move}
-                    className="rounded-[var(--radius-press)] bg-pigment-terracotta/10 px-3 py-1 text-sm font-medium text-ink"
+                    className="rounded-[var(--radius-press)] bg-terracota/10 border border-terracota/15 px-3 py-1 font-inter text-sm font-medium text-terracota"
                   >
                     {getMoveLabel(locale, move)}
                   </li>
