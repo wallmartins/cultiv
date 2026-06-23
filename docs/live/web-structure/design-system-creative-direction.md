@@ -1,95 +1,61 @@
-Você é um diretor de arte especializado em portfolios criativos, estúdios digitais premium e design editorial contemporâneo.
+---
+title: Design System — direção criativa
+doc_type: reference
+status: live
+domain: design-system
+last_updated: 2026-06-22
+---
 
-Sua tarefa é criar um Design System completo inspirado na qualidade visual do site GlyphsLabs.
+# Cultiv Imprint — direção criativa
 
-IMPORTANTE:
-- Não copie conteúdo, textos, imagens ou identidade da GlyphsLabs.
-- Apenas reproduza o mesmo nível de sofisticação visual, estrutura editorial, espaçamento, tipografia e experiência.
+## Promessa de marca
 
-Objetivos:
+*Tecnologia de ponta, feita com alma de artesão.*
 
-Criar uma linguagem visual que transmita:
+A voz do autor deixa uma **marca material** — como letterpress, carimbo ou tinta no papel. A IA **registra**; não apaga. O Imprint traduz esse ato em forma, textura e movimento.
 
-- Estúdio criativo premium
-- Design-first
-- Minimalismo editorial
-- Tecnologia + arte
-- Sofisticação
-- Movimento discreto
-- Forte hierarquia tipográfica
+## Três movimentos (ordem de decisão)
 
-Defina:
+Toda escolha visual responde, nesta ordem:
 
-1. Tokens de Design
+1. **Modernismo** — É funcional e preciso? Se não, remova.
+2. **Arts and Crafts** — Transmite cuidado e autenticidade? Se não, acrescente textura ou calor.
+3. **Minimalismo** — Desaparece quando o texto deve ser protagonista? Se não, simplifique.
 
-- spacing scale
-- typography scale
-- border radius
-- shadows
-- z-index
-- transitions
-- motion tokens
+## Metáfora Imprint
 
-2. Sistema Tipográfico
+| Material | Tradução visual |
+|----------|-----------------|
+| Papel | `paper`, grain sutil |
+| Impressão | press edge, `PressMark` |
+| Tinta | pigmentos terracotta / indigo / ochre |
+| Leitura | Source Serif 4 em superfícies de conteúdo |
 
-Criar:
+Elementos legados — Playfair, Caveat, ilustrações botânicas, frames editoriais, paleta moss/golden — foram retirados. ADR 0003 (Jardim de Vidro) está **supersedido**.
 
-- Display
-- H1
-- H2
-- H3
-- Body Large
-- Body
-- Caption
+## Tipografia
 
-Definir:
+*Sans conduz, serif imprime, leitura respira.*
 
-- font-size
-- line-height
-- letter-spacing
-- font-weight
+- **Condução** (Bricolage Grotesque): ~85% da interface.
+- **Impressão** (Fraunces): no máximo 1–2 ocorrências por viewport.
+- **Leitura** (Source Serif 4): 100% das superfícies de conteúdo gerado.
 
-3. Paleta de cores
+## Intensidade
 
-Criar:
+Marketing e app compartilham tokens e primitives. Só o volume muda:
 
-- background
-- foreground
-- muted
-- accent
-- border
+- **`expressive`** — marketing: grain mais visível, ink bleed, scroll reveal, mais pigmento.
+- **`quiet`** — `/app/*`: leitura em primeiro lugar, cromia contida, motion contida.
 
-Inspirado em:
+## Reconhecimento sem logo
 
-- off-white
-- warm gray
-- charcoal black
+Um card Cultiv isolado deve ler: papel + grain, press edge, título em Bricolage, corpo em Source Serif 4, um acento terracotta. Sem botânica, sem gradiente funcional.
 
-Evitar cores vibrantes.
+## Especificação completa
 
-4. Layout System
+Tokens, escala tipográfica, motion, rollout e inventário de componentes:
 
-Definir:
+**[Cultiv Imprint — Unified Visual Identity (design spec)](../../superpowers/specs/2026-06-22-cultiv-imprint-identity-design.md)**
 
-- max-width
-- grid
-- gutters
-- breakpoints
-
-Utilizar abordagem editorial.
-
-5. Motion Language
-
-Criar regras para:
-
-- scroll reveal
-- fade
-- stagger
-- image reveal
-- hover interactions
-
-Movimentos devem ser elegantes e discretos.
-
-Resultado esperado:
-
-Um documento técnico detalhado que possa ser utilizado diretamente por desenvolvedores.
+Decisão arquitetural: **[ADR 0009 — Cultiv Imprint unified identity](../../adr/0009-cultiv-imprint-identity.md)**

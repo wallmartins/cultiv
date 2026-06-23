@@ -8,7 +8,7 @@ export interface AuthLoadingProps {
 export function AuthLoading({ message = "Entrando…" }: AuthLoadingProps) {
   return (
     <Container className="flex min-h-[50vh] items-center justify-center py-16">
-      <Text variant="body" className="text-muted-foreground">
+      <Text variant="body" className="text-ink-muted">
         {message}
       </Text>
     </Container>

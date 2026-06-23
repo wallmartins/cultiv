@@ -16,20 +16,20 @@ export function ProgressSteps({ progress, locale, messages }: ProgressStepsProps
   return (
     <div className="space-y-3">
       <div className="space-y-1">
-        <Text variant="label" className="text-foreground">
+        <Text variant="label" className="text-ink">
           {step.label}
         </Text>
-        <Text variant="meta" className="text-muted-foreground">
+        <Text variant="meta" className="text-ink-muted">
           {step.summary}
         </Text>
-        <Text variant="meta" className="text-muted-foreground">
+        <Text variant="meta" className="text-ink-muted">
           {messages.history.detail.progressSteps} {progress.stepIndex + 1}/{progress.totalSteps} ·{" "}
           {progress.percent}%
         </Text>
       </div>
-      <div className="h-2 w-full overflow-hidden rounded-full bg-soft-loam">
+      <div className="h-2 w-full overflow-hidden rounded-full bg-paper-pressed">
         <div
-          className="h-full bg-moss transition-[width] duration-300"
+          className="h-full bg-pigment-terracotta transition-[width] duration-300"
           style={{ width: `${Math.min(100, Math.max(0, progress.percent))}%` }}
           role="progressbar"
           aria-valuenow={progress.percent}

@@ -72,7 +72,7 @@ export function VoiceDashboard() {
           <Text as="h1" variant="h1" className="mb-3">
             {messages.voice.dashboardTitle}
           </Text>
-          <Text variant="body" className="text-muted-foreground">
+          <Text variant="body" className="text-ink-muted">
             {messages.voice.dashboardEmpty}
           </Text>
         </div>
@@ -149,10 +149,10 @@ export function VoiceDashboard() {
         <Text variant="label" className="mb-2 block">
           {voiceMessages.confidence}
         </Text>
-        <Text variant="body" className="mb-1 font-medium text-foreground">
+        <Text variant="body" className="mb-1 font-medium text-ink">
           {confidenceLabel}
         </Text>
-        <Text variant="meta" className="w-full text-muted-foreground">
+        <Text variant="meta" className="w-full text-ink-muted">
           {getVoiceConfidencePanelMessage(profile.profile, voiceMessages, { detailed: false })}
         </Text>
       </div>
@@ -160,10 +160,10 @@ export function VoiceDashboard() {
         <Text variant="label" className="mb-2 block">
           {voiceMessages.adaptationMode}
         </Text>
-        <Text variant="body" className="mb-1 font-medium text-foreground">
+        <Text variant="body" className="mb-1 font-medium text-ink">
           {adaptationMode.label}
         </Text>
-        <Text variant="meta" className="w-full text-muted-foreground">
+        <Text variant="meta" className="w-full text-ink-muted">
           {adaptationMode.description}
         </Text>
       </div>
@@ -171,7 +171,7 @@ export function VoiceDashboard() {
         <Text variant="label" className="mb-2 block">
           {voiceMessages.diagnostics}
         </Text>
-        <Text variant="body" className="w-full text-muted-foreground">
+        <Text variant="body" className="w-full text-ink-muted">
           {getVoiceDiagnosticsText(
             profile.diagnostics,
             profile.profile.confidence,
@@ -184,13 +184,13 @@ export function VoiceDashboard() {
           {voiceMessages.coverage}
         </Text>
         {coverageComplete ? (
-          <Text variant="body" className="w-full text-muted-foreground">
+          <Text variant="body" className="w-full text-ink-muted">
             {voiceMessages.coverageComplete}
           </Text>
         ) : (
           <div className="space-y-2">
             {missingFormats.length > 0 ? (
-              <Text variant="body" className="w-full text-muted-foreground">
+              <Text variant="body" className="w-full text-ink-muted">
                 {voiceMessages.coverageMissingFormats}{" "}
                 {missingFormats
                   .map((format) => getContentTypeLabel(locale, format, format))
@@ -198,7 +198,7 @@ export function VoiceDashboard() {
               </Text>
             ) : null}
             {underrepresentedFormats.length > 0 ? (
-              <Text variant="body" className="w-full text-muted-foreground">
+              <Text variant="body" className="w-full text-ink-muted">
                 {voiceMessages.underrepresented}{" "}
                 {underrepresentedFormats
                   .map((format) => getContentTypeLabel(locale, format, format))
@@ -218,7 +218,7 @@ export function VoiceDashboard() {
           <Text as="h1" variant="h1" className="mb-2">
             {voiceMessages.dashboardTitle}
           </Text>
-          <Text variant="meta" className="text-muted-foreground">
+          <Text variant="meta" className="text-ink-muted">
             {voiceMessages.dashboardSubtitle}
           </Text>
         </div>
@@ -253,7 +253,7 @@ export function VoiceDashboard() {
             <Text as="h2" variant="h2" className="mb-2">
               {voiceMessages.mirrorFallbackTitle}
             </Text>
-            <Text variant="meta" className="w-full text-muted-foreground">
+            <Text variant="meta" className="w-full text-ink-muted">
               {voiceMessages.mirrorFallbackSubtitle}
             </Text>
           </div>
@@ -294,7 +294,7 @@ export function VoiceDashboard() {
       />
 
       {profile.reasoning ? (
-        <Text variant="meta" className="w-full text-muted-foreground">
+        <Text variant="meta" className="w-full text-ink-muted">
           {voiceMessages.reasoning.refineHint}
         </Text>
       ) : null}

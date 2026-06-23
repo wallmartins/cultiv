@@ -22,7 +22,7 @@ export type AppFieldTextareaProps = BaseFieldProps &
 export type AppFieldProps = AppFieldInputProps | AppFieldTextareaProps;
 
 const controlClassName =
-  "workspace-field-control w-full px-4 py-3 font-body text-base text-foreground placeholder:text-muted";
+  "workspace-field-control w-full px-4 py-3 font-body text-base text-ink placeholder:text-ink-muted";
 
 export function AppField(props: AppFieldProps) {
   const { label, hint, error, className, id, multiline, ...rest } = props;
@@ -30,7 +30,7 @@ export function AppField(props: AppFieldProps) {
 
   return (
     <div className={cn("space-y-2", className)}>
-      <label htmlFor={fieldId} className="block font-body text-[0.6875rem] font-semibold uppercase tracking-editorial-wide text-foreground/80">
+      <label htmlFor={fieldId} className="block font-body text-[0.6875rem] font-semibold uppercase tracking-editorial-wide text-ink/80">
         {label}
       </label>
       {multiline ? (
@@ -48,7 +48,7 @@ export function AppField(props: AppFieldProps) {
           {error}
         </Text>
       ) : hint ? (
-        <Text variant="meta" className="text-muted-foreground">
+        <Text variant="meta" className="text-ink-muted">
           {hint}
         </Text>
       ) : null}
@@ -67,7 +67,7 @@ export function AppFieldSlot({
   return (
     <div className={cn("space-y-2", className)}>
       <div className="flex items-center gap-2">
-        <Text variant="label" className="text-foreground/80">
+        <Text variant="label" className="text-ink/80">
           {label}
         </Text>
         {labelAccessory}
@@ -78,7 +78,7 @@ export function AppFieldSlot({
           {error}
         </Text>
       ) : hint ? (
-        <Text variant="meta" className="text-muted-foreground">
+        <Text variant="meta" className="text-ink-muted">
           {hint}
         </Text>
       ) : null}

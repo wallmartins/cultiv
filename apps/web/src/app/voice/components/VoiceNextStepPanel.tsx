@@ -23,7 +23,7 @@ export function VoiceNextStepPanel({ eyebrow, step }: VoiceNextStepPanelProps) {
         <Text id="voice-next-step-heading" variant="label" className="mb-2 block">
           {eyebrow}
         </Text>
-        <Text variant="body-lg" className="w-full leading-relaxed text-foreground">
+        <Text variant="body-lg" className="w-full leading-relaxed text-ink">
           {step.message}
         </Text>
       </div>

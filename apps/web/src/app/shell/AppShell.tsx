@@ -21,7 +21,7 @@ function AppShellFrame({ children }: AppShellProps) {
   const { items, inFlightCount } = useActiveExecutions();
 
   return (
-    <div className="min-h-screen bg-surface text-foreground organic-glow-workspace" data-surface="workspace">
+    <div className="imprint-grain min-h-screen bg-paper text-ink" data-intensity="quiet">
       <AppHeader
         messages={messages}
         creditStatus={client ? status : "loading"}

@@ -1,42 +1,46 @@
-import { Container, SectionHeader } from "@my-ai-orchestrator/ui";
+import { Container } from "@my-ai-orchestrator/ui";
 import { useSectionReveal } from "~/marketing/animations/use-section-reveal";
-import { ProblemPerspectiveRow } from "~/marketing/components/ProblemPerspectiveRow";
-import { FullScreenSection } from "~/marketing/components/FullScreenSection";
 import { getLocaleMessages } from "~/i18n/marketing/get-locale";
 import type { MarketingLocale } from "~/i18n/marketing/types";
-import { FallingLeavesLayer } from "~/marketing/visual/FallingLeavesLayer";
-import { FragilePromptCollage } from "~/marketing/visual/scenes/FragilePromptCollage";
-import { GenericOutputStack } from "~/marketing/visual/scenes/GenericOutputStack";
+import { SectionHeader } from "~/marketing/components/icons";
 
 export interface ProblemSectionProps {
   readonly locale: MarketingLocale;
 }
 
 export function ProblemSection({ locale }: ProblemSectionProps) {
-  const { problem, scenes } = getLocaleMessages(locale);
+  const { territory } = getLocaleMessages(locale);
   const sectionRef = useSectionReveal("[data-section-item]");
 
   return (
-    <FullScreenSection id="problema" className="editorial-rule relative overflow-hidden">
-      <FallingLeavesLayer density="sparse" className="z-[2]" />
-      <Container ref={sectionRef} className="relative z-[3] space-y-16 md:space-y-24">
-        <div data-section-item>
-          <SectionHeader eyebrow={problem.eyebrow} title={problem.title} className="mb-0" />
+    <section
+      id="territorio"
+      className="relative overflow-hidden bg-offwhite border-b border-borda/15 py-[var(--spacing-section-sm)] md:py-[var(--spacing-section)]"
+    >
+      <Container ref={sectionRef} className="relative z-10">
+        <SectionHeader eyebrow={territory.eyebrow} title={territory.title} />
+
+        <div className="grid gap-6 md:grid-cols-3" data-section-item>
+          {territory.cards.map((card, index) => (
+            <div
+              key={index}
+              className="rebrand-hover group relative rounded-sm border border-borda/25 bg-creme p-6 md:p-8 shadow-[3px_3px_0px_rgba(26,46,60,0.08)] transition-all duration-300"
+            >
+              <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-full border border-terracota/30 bg-terracota/5">
+                <span className="font-caveat text-lg text-terracota">
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+              </div>
+              <h3 className="font-playfair text-lg font-semibold text-azul mb-3">
+                {card.title}
+              </h3>
+              <p className="font-inter text-sm leading-relaxed text-texto-sec">
+                {card.body}
+              </p>
+            </div>
+          ))}
         </div>
-        <ProblemPerspectiveRow
-          index={problem.perspectives[0].index}
-          title={problem.perspectives[0].title}
-          body={problem.perspectives[0].body}
-          visual={<GenericOutputStack copy={scenes.genericOutput} />}
-        />
-        <ProblemPerspectiveRow
-          index={problem.perspectives[1].index}
-          title={problem.perspectives[1].title}
-          body={problem.perspectives[1].body}
-          visual={<FragilePromptCollage copy={scenes.fragilePrompt} />}
-          reverse
-        />
       </Container>
-    </FullScreenSection>
+    </section>
   );
 }

@@ -71,7 +71,7 @@ export function ActiveExecutionDrawer() {
     <div className="fixed inset-0 z-[70]">
       <button
         type="button"
-        className="absolute inset-0 bg-rich-soil/25 backdrop-blur-sm transition-opacity"
+        className="absolute inset-0 bg-ink/25 transition-opacity"
         aria-label={messages.shell.activeExecutions.closeDrawer}
         onClick={closeDrawer}
       />
@@ -79,11 +79,11 @@ export function ActiveExecutionDrawer() {
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="workspace-drawer-panel absolute inset-0 flex max-h-dvh min-h-0 flex-col border-border-subtle/60 bg-surface/95 backdrop-blur-xl md:inset-auto md:top-0 md:right-0 md:bottom-0 md:h-dvh md:w-full md:max-w-[32.5rem] md:border-l md:shadow-[var(--workspace-shadow-card)]"
+        className="workspace-drawer-panel absolute inset-0 flex max-h-dvh min-h-0 flex-col border-ink-ghost/60 bg-paper md:inset-auto md:top-0 md:right-0 md:bottom-0 md:h-dvh md:w-full md:max-w-[32.5rem] md:border-l md:shadow-[var(--shadow-press-edge)]"
         onClick={(event) => event.stopPropagation()}
       >
-        <div className="sticky top-0 z-10 flex items-center justify-between gap-4 border-b border-border-subtle/50 bg-surface/90 px-[var(--spacing-gutter)] py-4 backdrop-blur-md">
-          <Text id={titleId} as="h2" variant="label" className="text-foreground">
+        <div className="sticky top-0 z-10 flex items-center justify-between gap-4 border-b border-ink-ghost/50 bg-paper px-[var(--spacing-gutter)] py-4">
+          <Text id={titleId} as="h2" variant="label" className="text-ink">
             {item?.contentTypeLabel ?? messages.shell.activeExecutions.title}
           </Text>
           <button
@@ -111,7 +111,7 @@ export function ActiveExecutionDrawer() {
 
         {item && (item.status === "running" || item.status === "queued") ? (
           <div className="space-y-4">
-            <Text variant="meta" className="rounded-xl border border-border-subtle/70 bg-soft-loam/40 px-3 py-3 text-muted-foreground">
+            <Text variant="meta" className="rounded-[var(--radius-press)] border border-ink-ghost/70 bg-paper-pressed/40 px-3 py-3 text-ink-muted">
               {messages.shell.activeExecutions.hybridHint}
             </Text>
             {item.progress ? (
@@ -145,7 +145,7 @@ export function ActiveExecutionDrawer() {
             <Link
               to="/app/history/$executionId"
               params={{ executionId: item.id }}
-              className="text-sm font-medium text-moss underline-offset-2 hover:underline"
+              className="text-sm font-medium text-pigment-terracotta underline-offset-2 hover:underline"
               onClick={closeDrawer}
             >
               {messages.shell.activeExecutions.viewHistory}
@@ -158,7 +158,7 @@ export function ActiveExecutionDrawer() {
             <Text variant="meta" className="text-red-700">
               {item.error?.message ?? messages.shell.activeExecutions.statusFailed}
             </Text>
-            <Text variant="meta" className="text-muted-foreground">
+            <Text variant="meta" className="text-ink-muted">
               {messages.shell.activeExecutions.noCreditsCharged}
             </Text>
             <Button type="button" size="compact" onClick={handleRegenerate}>
@@ -185,7 +185,7 @@ export function ActiveExecutionMobileTrigger({
   return (
     <button
       type="button"
-      className="relative flex size-10 items-center justify-center rounded-full border border-border-subtle/70 bg-surface-elevated/80 shadow-[0_4px_20px_color-mix(in_srgb,var(--color-rich-soil)_8%,transparent)] backdrop-blur-sm"
+      className="relative flex size-10 items-center justify-center rounded-full border border-ink-ghost/70 bg-paper-elevated shadow-[0_4px_20px_color-mix(in_srgb,var(--color-ink)_8%,transparent)]"
       aria-label={messages.shell.activeExecutions.openDrawer}
       onClick={onOpen}
     >
@@ -193,7 +193,7 @@ export function ActiveExecutionMobileTrigger({
         ⧗
       </span>
       {inFlightCount > 0 ? (
-        <span className="absolute -top-1 -right-1 flex min-w-5 items-center justify-center rounded-full bg-moss px-1 text-[0.65rem] font-medium text-surface">
+        <span className="absolute -top-1 -right-1 flex min-w-5 items-center justify-center rounded-full bg-pigment-terracotta px-1 text-[0.65rem] font-medium text-paper-elevated">
           {inFlightCount}
         </span>
       ) : null}

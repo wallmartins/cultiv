@@ -1,0 +1,18 @@
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" role="img">
+  <title>Cultiv — Registro + Sulco (balanced)</title>
+  <defs>
+    <linearGradient id="a-paper" x1="0.1" y1="0" x2="0.95" y2="1">
+      <stop offset="0%" stop-color="#FAF8F4"/>
+      <stop offset="55%" stop-color="#F3F0EA"/>
+      <stop offset="100%" stop-color="#E8E4DC"/>
+    </linearGradient>
+  </defs>
+  <path d="M8 12 L52 10 L56 28 L54 52 L12 54 L6 34 Z" fill="url(#a-paper)" stroke="#C8C4BC" stroke-width="0.65"/>
+  <path d="M11 15 L49 13 L53 27 L51 49 L14 51 L9 35 Z" fill="none" stroke="#1A1A18" stroke-width="0.35" opacity="0.1"/>
+  <path d="M14 16 H22 M14 16 V24" stroke="#C4705A" stroke-width="1.05" stroke-linecap="square" opacity="0.62"/>
+  <path d="M44 40 H36 M44 40 V48" stroke="#C4705A" stroke-width="1.05" stroke-linecap="square" opacity="0.62"/>
+  <path d="M18 30 C26 20 36 22 44 30 C38 38 28 40 20 36" fill="none" stroke="#C4705A" stroke-width="3" stroke-linecap="round" opacity="0.22" transform="translate(1.4 1.2)"/>
+  <path d="M18 30 C26 20 36 22 44 30 C38 38 28 40 20 36" fill="none" stroke="#1A1A18" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="22" cy="38" r="2.2" fill="#C4705A" opacity="0.88"/>
+  <circle cx="22" cy="38" r="4.5" fill="#C4705A" opacity="0.13"/>
+</svg>

@@ -43,13 +43,13 @@ export function VoiceDevelopmentTraitsStrip({
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
-        <Text variant="meta" className="text-muted-foreground">
+        <Text variant="meta" className="text-ink-muted">
           {traitMessages.authorityLinkLabel}
         </Text>
         <button
           type="button"
           onClick={onAuthorityLinkClick}
-          className="rounded-[var(--workspace-radius-sm)] bg-moss/10 px-3 py-2 text-sm font-medium text-foreground underline-offset-2 hover:underline"
+          className="rounded-[var(--radius-press)] bg-pigment-terracotta/10 px-3 py-2 text-sm font-medium text-ink underline-offset-2 hover:underline"
         >
           {traitMessages.authorityLinkAction}
         </button>
@@ -75,17 +75,17 @@ function TraitStripCell({
   const confidence = developmentImmature && record?.confidence === "high" ? "medium" : record?.confidence;
 
   return (
-    <div className="rounded-[var(--workspace-radius-sm)] border border-border-subtle/60 bg-surface-elevated/40 px-3 py-3">
-      <Text variant="meta" className="mb-1 block text-xs text-muted-foreground">
+    <div className="rounded-[var(--radius-press)] border border-ink-ghost/60 bg-paper-elevated/40 px-3 py-3">
+      <Text variant="meta" className="mb-1 block text-xs text-ink-muted">
         {label}
       </Text>
       <div className="flex items-center justify-between gap-3">
         {isUnknown ? (
-          <Text variant="body" className="text-sm text-muted-foreground">
+          <Text variant="body" className="text-sm text-ink-muted">
             — {unknownCopy}
           </Text>
         ) : (
-          <Text variant="body" className="text-sm font-medium text-foreground">
+          <Text variant="body" className="text-sm font-medium text-ink">
             {enumLabel}
           </Text>
         )}
@@ -99,7 +99,7 @@ export function TraitConfidenceDots({ confidence }: { readonly confidence: Trait
   const filled = confidence === "high" ? 3 : confidence === "medium" ? 2 : 1;
 
   return (
-    <span className="text-xs tracking-widest text-moss" aria-hidden="true">
+    <span className="text-xs tracking-widest text-pigment-terracotta" aria-hidden="true">
       {[0, 1, 2].map((index) => (
         <span key={index} className={index < filled ? "opacity-100" : "opacity-25"}>
           ●

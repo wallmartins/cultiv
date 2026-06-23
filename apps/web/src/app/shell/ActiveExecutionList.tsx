@@ -43,12 +43,12 @@ export function ActiveExecutionList({
       className={cn("flex min-h-0 flex-col", className)}
       aria-label={messages.shell.activeExecutions.title}
     >
-      <Text as="h2" variant="label" className="mb-3 px-1 text-muted-foreground">
+      <Text as="h2" variant="label" className="mb-3 px-1 text-ink-muted">
         {messages.shell.activeExecutions.title}
       </Text>
 
       {items.length === 0 ? (
-        <Text variant="meta" className="px-1 text-muted-foreground">
+        <Text variant="meta" className="px-1 text-ink-muted">
           {messages.shell.activeExecutions.empty}
         </Text>
       ) : (
@@ -57,13 +57,13 @@ export function ActiveExecutionList({
             <li key={item.id}>
               <button
                 type="button"
-                className="w-full rounded-xl border border-border-subtle bg-surface-elevated px-3 py-2 text-left transition-colors hover:bg-soft-loam"
+                className="w-full rounded-[var(--radius-press)] border border-ink-ghost bg-paper-elevated px-3 py-2 text-left transition-colors hover:bg-paper-pressed"
                 onClick={() => onSelect?.(item.id)}
               >
                 <Text variant="meta" className="block font-medium">
                   {item.contentTypeLabel}
                 </Text>
-                <Text variant="meta" className="text-muted-foreground">
+                <Text variant="meta" className="text-ink-muted">
                   {formatStatus(item, locale, messages)}
                 </Text>
               </button>

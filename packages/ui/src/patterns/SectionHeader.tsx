@@ -23,34 +23,38 @@ export function SectionHeader({
   return (
     <header className={cn("mb-12 max-w-5xl space-y-5 md:mb-16", className)}>
       {eyebrow ? (
-        <Text as="p" variant="meta" className={invert ? "text-showcase-muted" : "text-moss"}>
+        <Text
+          as="p"
+          variant="meta"
+          className={invert ? "text-paper/70" : "text-ink-muted"}
+        >
           {eyebrow}
         </Text>
       ) : null}
       <Text
         as="h2"
-        variant="chapter"
+        variant="display"
         className={cn(
-          invert ? "text-showcase-foreground" : "text-foreground",
+          invert ? "text-paper" : "text-ink",
           "max-w-5xl overflow-hidden"
         )}
       >
         {titleParts ? (
           <>
             {titleParts[0]}
-            <span className="text-golden">{highlight}</span>
+            <span className="text-pigment-terracotta">{highlight}</span>
             {titleParts[1]}
           </>
         ) : (
           title
         )}
-        <span className={invert ? "text-showcase-muted" : "text-muted"}>.</span>
+        <span className={invert ? "text-paper/70" : "text-ink-muted"}>.</span>
       </Text>
       {description ? (
         <Text
           as="p"
           variant="body-lg"
-          className={invert ? "max-w-2xl text-showcase-muted" : "max-w-2xl text-muted"}
+          className={invert ? "max-w-2xl text-paper/70" : "max-w-2xl text-ink-muted"}
         >
           {description}
         </Text>

@@ -93,12 +93,12 @@ export function PlansScreen() {
       <Text as="h1" variant="h1" className="mb-3">
         {messages.plans.title}
       </Text>
-      <Text variant="body" className="mb-8 max-w-2xl text-muted-foreground">
+      <Text variant="body" className="mb-8 max-w-2xl text-ink-muted">
         {messages.plans.subtitle}
       </Text>
 
       {statusBanner ? (
-        <AppCard className="mb-6 border-moss/30 bg-moss/5">
+        <AppCard className="mb-6 border-pigment-terracotta/30 bg-pigment-terracotta/5">
           <Text variant="body">{statusBanner}</Text>
         </AppCard>
       ) : null}
@@ -109,18 +109,18 @@ export function PlansScreen() {
             {messages.plans.currentPlan}
           </Text>
           {loadError ? (
-            <Text variant="meta" className="text-muted-foreground">
+            <Text variant="meta" className="text-ink-muted">
               {messages.plans.loadError}
             </Text>
           ) : entitlement ? (
             <div className="space-y-2">
               <Text variant="body">{currentPlanLabel}</Text>
-              <Text variant="meta" className="text-muted-foreground">
+              <Text variant="meta" className="text-ink-muted">
                 {messages.plans.usageHint}
               </Text>
             </div>
           ) : (
-            <Text variant="meta" className="text-muted-foreground">
+            <Text variant="meta" className="text-ink-muted">
               …
             </Text>
           )}
@@ -132,7 +132,7 @@ export function PlansScreen() {
           <Text variant="label" className="mb-2 block">
             {messages.plans.changePlan}
           </Text>
-          <Text variant="meta" className="mb-4 text-muted-foreground">
+          <Text variant="meta" className="mb-4 text-ink-muted">
             {messages.plans.changePlanDescription}
           </Text>
 
@@ -189,11 +189,11 @@ export function PlansScreen() {
                 />
               </div>
               {paymentMethod === "pix" ? (
-                <Text variant="meta" className="mb-4 text-muted-foreground">
+                <Text variant="meta" className="mb-4 text-ink-muted">
                   {messages.plans.pixOnlyBrl}
                 </Text>
               ) : billingPeriod === "annual" ? (
-                <Text variant="meta" className="mb-4 text-muted-foreground">
+                <Text variant="meta" className="mb-4 text-ink-muted">
                   {messages.plans.annualInstallments}
                 </Text>
               ) : null}
@@ -223,7 +223,7 @@ export function PlansScreen() {
               </Button>
             </div>
           ) : (
-            <Text variant="meta" className="text-muted-foreground">
+            <Text variant="meta" className="text-ink-muted">
               {messages.plans.alreadyPro}
             </Text>
           )}
@@ -235,7 +235,7 @@ export function PlansScreen() {
           <Text variant="label" className="mb-2 block">
             {messages.plans.topUp}
           </Text>
-          <Text variant="meta" className="mb-4 text-muted-foreground">
+          <Text variant="meta" className="mb-4 text-ink-muted">
             {messages.plans.topUpDescription}
           </Text>
           <Button
@@ -264,8 +264,8 @@ function ToggleButton(props: { readonly active: boolean; readonly label: string;
       type="button"
       className={
         props.active
-          ? "rounded-full border border-moss/40 bg-moss/10 px-4 py-1.5 text-sm font-medium text-foreground"
-          : "rounded-full border border-border-subtle/70 px-4 py-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+          ? "rounded-full border border-pigment-terracotta/40 bg-pigment-terracotta/10 px-4 py-1.5 text-sm font-medium text-ink"
+          : "rounded-full border border-ink-ghost/70 px-4 py-1.5 text-sm text-ink-muted transition-colors hover:text-ink"
       }
       aria-pressed={props.active}
       onClick={props.onClick}

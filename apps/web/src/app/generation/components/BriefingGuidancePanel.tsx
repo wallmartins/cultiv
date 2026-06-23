@@ -22,7 +22,7 @@ export function BriefingGuidancePanel({
       : getBriefingGuidance(locale, item.id, item.briefingGuidance);
 
   return (
-    <AppCard className="bg-soft-loam/30">
+    <AppCard className="bg-paper-pressed/30">
       <Text as="h2" variant="label" className="mb-2">
         {messages.generate.guidanceTitle}
       </Text>

@@ -1,0 +1,18 @@
+<svg width="280" height="120" viewBox="0 0 280 120" xmlns="http://www.w3.org/2000/svg" role="img">
+  <title>Cultiv � Registro + Sulco (final)</title>
+  <rect width="280" height="120" fill="#F3F0EA"/>
+  <text x="140" y="18" text-anchor="middle" font-family="system-ui,sans-serif" font-size="10" fill="#6B6860" letter-spacing="0.06em">REGISTRO + SULCO � VARIA��ES FINAIS</text>
+
+  <g transform="translate(48 68)">
+    <text x="0" y="-34" text-anchor="middle" font-size="8" fill="#6B6860">OPEN � ?32px</text>
+    <image href="/brand-explorations/symbol-a-open.svg" x="-16" y="-16" width="32" height="32"/>
+  </g>
+  <g transform="translate(140 68)">
+    <text x="0" y="-34" text-anchor="middle" font-size="8" fill="#6B6860">BALANCED � padr�o</text>
+    <image href="/brand-explorations/symbol-a-registro-sulco.svg" x="-24" y="-24" width="48" height="48"/>
+  </g>
+  <g transform="translate(232 68)">
+    <text x="0" y="-34" text-anchor="middle" font-size="8" fill="#6B6860">BOLD � hero/OG</text>
+    <image href="/brand-explorations/symbol-a-bold.svg" x="-24" y="-24" width="48" height="48"/>
+  </g>
+</svg>

@@ -8,7 +8,7 @@ type NavIconProps = {
 const iconClassName = (active: boolean, className?: string) =>
   cn(
     "size-[1.125rem] shrink-0 transition-colors duration-200",
-    active ? "text-moss" : "text-muted-foreground",
+    active ? "text-pigment-terracotta" : "text-ink-muted",
     className
   );
 

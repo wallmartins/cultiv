@@ -1,3 +1,4 @@
+import { ReadingSurface } from "../primitives/ReadingSurface.js";
 import { Text } from "../primitives/Text.js";
 
 export interface ComparisonCardProps {
@@ -20,39 +21,39 @@ export function ComparisonCard({
   voiceLabel
 }: ComparisonCardProps) {
   return (
-    <article className="editorial-rule">
+    <article className="border-t border-ink-ghost">
       <div className="flex flex-col gap-4 py-6 md:flex-row md:items-end md:justify-between md:py-8">
         <div className="space-y-3">
-          <Text as="p" variant="meta" className="text-foreground">
+          <Text as="p" variant="meta" className="text-ink">
             [{index}]
           </Text>
-          <Text as="h3" variant="display-sm" className="max-w-2xl">
+          <Text as="h3" variant="display-sm" className="max-w-2xl text-ink">
             {contentTypeLabel}
           </Text>
         </div>
       </div>
 
-      <Text as="p" variant="body-lg" className="max-w-3xl pb-8 text-muted">
+      <Text as="p" variant="body-lg" className="max-w-3xl pb-8 text-ink-muted">
         {briefing}
       </Text>
 
-      <div className="grid border-t border-foreground md:grid-cols-2">
-        <div className="space-y-4 border-b border-foreground p-6 md:border-r md:border-b-0 md:p-8">
+      <div className="grid border-t border-ink-ghost md:grid-cols-2">
+        <ReadingSurface className="space-y-4 border-b border-ink-ghost md:border-r md:border-b-0">
           <Text as="p" variant="caption">
             {genericLabel}
           </Text>
-          <Text as="p" variant="body" className="text-muted">
+          <Text as="p" variant="reading" className="text-ink-muted">
             {genericOutput}
           </Text>
-        </div>
-        <div className="space-y-4 bg-surface-elevated p-6 md:p-8">
+        </ReadingSurface>
+        <ReadingSurface className="space-y-4 bg-paper-elevated">
           <Text as="p" variant="caption">
             {voiceLabel}
           </Text>
-          <Text as="p" variant="body">
+          <Text as="p" variant="reading">
             {voiceOutput}
           </Text>
-        </div>
+        </ReadingSurface>
       </div>
     </article>
   );

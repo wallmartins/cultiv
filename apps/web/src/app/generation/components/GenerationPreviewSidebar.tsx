@@ -1,5 +1,5 @@
 import type { GenerationPreviewResponse } from "@my-ai-orchestrator/contracts";
-import { Button, Text } from "@my-ai-orchestrator/ui";
+import { Button, ReadingSurface, Text } from "@my-ai-orchestrator/ui";
 import type { AppLocale } from "~/i18n/app/types";
 import type { AppMessages } from "~/i18n/app/types";
 import { getPreviewRecommendationExplanation } from "~/i18n/app/preview-recommendation";
@@ -104,13 +104,13 @@ export function GenerationPreviewSidebar({
           <AppSkeleton className="h-10 w-full" />
         ) : null}
         {fullPreview && (previewRecommendation || recommendationStale) ? (
-          <div
-            className={`space-y-2 transition-opacity duration-300 ease-out ${
+          <ReadingSurface
+            className={`rounded-[var(--radius-press)] px-4 py-5 transition-opacity duration-300 ease-out ${
               fullRefreshing ? "opacity-55" : "opacity-100"
             }`}
           >
             {previewRecommendation ? (
-              <Text variant="meta" className="text-muted-foreground">
+              <Text variant="reading" className="text-ink-muted">
                 {getPreviewRecommendationExplanation(locale, previewRecommendation, {
                   fast: messages.qualityModes.fast,
                   balanced: messages.qualityModes.balanced,
@@ -119,16 +119,16 @@ export function GenerationPreviewSidebar({
               </Text>
             ) : null}
             {recommendationStale ? (
-              <Text variant="meta" className="text-muted-foreground">
+              <Text variant="reading" className="text-ink-muted">
                 {messages.generate.previewRecommendationStale}
               </Text>
             ) : null}
-          </div>
+          </ReadingSurface>
         ) : null}
         {briefingComplete ? (
           <button
             type="button"
-            className="text-sm font-medium text-moss underline-offset-2 hover:underline disabled:opacity-50"
+            className="text-sm font-medium text-pigment-terracotta underline-offset-2 hover:underline disabled:opacity-50"
             disabled={fullStatus === "loading"}
             onClick={onRefreshRecommendation}
           >
@@ -146,7 +146,7 @@ export function GenerationPreviewSidebar({
           </Text>
         ) : null}
         {showCommercialCalculating ? (
-          <Text variant="meta" className="text-muted-foreground">
+          <Text variant="meta" className="text-ink-muted">
             {messages.generate.calculating}
           </Text>
         ) : null}

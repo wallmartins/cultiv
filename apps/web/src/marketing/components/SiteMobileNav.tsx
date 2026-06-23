@@ -1,7 +1,8 @@
 import { useEffect, useId, useState } from "react";
 import { createPortal } from "react-dom";
 import { Text, cn } from "@my-ai-orchestrator/ui";
-import { LocaleToggle, navItemClassName } from "~/marketing/components/LocaleToggle";
+import { LocaleToggle } from "~/marketing/components/LocaleToggle";
+import { rebrandNavItemClassName } from "~/marketing/components/SiteHeader";
 import { marketingNavItems } from "~/marketing/navigation/marketing-nav-items";
 import type { LocaleMessages, MarketingLocale } from "~/i18n/marketing/types";
 
@@ -49,23 +50,23 @@ export function SiteMobileNav({ locale, messages }: SiteMobileNavProps) {
           <div className="fixed inset-0 z-[60] md:hidden">
             <button
               type="button"
-              className="absolute inset-0 bg-surface/80 backdrop-blur-sm"
+              className="absolute inset-0 bg-paper/80 backdrop-blur-sm"
               aria-label={messages.menuCloseLabel}
               onClick={closeMenu}
             />
             <nav
               id={panelId}
               aria-label={messages.navLabel}
-              className="absolute top-[var(--site-header-height)] right-0 left-0 max-h-[calc(100dvh-var(--site-header-height))] overflow-y-auto border-b border-foreground bg-surface px-[var(--spacing-gutter)] py-5 shadow-lg"
+              className="absolute top-[var(--site-header-height)] right-0 left-0 max-h-[calc(100dvh-var(--site-header-height))] overflow-y-auto border-b border-ink bg-paper px-[var(--spacing-gutter)] py-5 shadow-lg"
               onClick={(event) => event.stopPropagation()}
             >
               <div className="mb-5 flex items-center justify-between gap-4">
-                <Text as="p" variant="meta" className="text-moss">
+                <Text as="p" variant="meta" className="text-ink-muted">
                   {messages.navLabel}
                 </Text>
                 <button
                   type="button"
-                  className="flex size-10 items-center justify-center border border-foreground/20 text-lg leading-none"
+                  className="flex size-10 items-center justify-center border border-ink/20 text-lg leading-none"
                   aria-label={messages.menuCloseLabel}
                   onClick={closeMenu}
                 >
@@ -77,7 +78,7 @@ export function SiteMobileNav({ locale, messages }: SiteMobileNavProps) {
                   <li key={item.key}>
                     <a
                       href={item.href}
-                      className={`${navItemClassName} block py-1 text-sm`}
+                      className={`${rebrandNavItemClassName} block py-1 text-sm`}
                       onClick={closeMenu}
                     >
                       {messages.nav[item.key]}
@@ -98,7 +99,7 @@ export function SiteMobileNav({ locale, messages }: SiteMobileNavProps) {
     <div className="flex items-center md:hidden">
       <button
         type="button"
-        className="flex size-10 items-center justify-center border border-foreground/20"
+        className="flex size-10 items-center justify-center border border-ink/20"
         aria-expanded={open}
         aria-controls={panelId}
         aria-label={open ? messages.menuCloseLabel : messages.menuOpenLabel}
@@ -107,19 +108,19 @@ export function SiteMobileNav({ locale, messages }: SiteMobileNavProps) {
         <span className="relative block h-3.5 w-4">
           <span
             className={cn(
-              "absolute left-0 h-px w-full bg-foreground transition-transform duration-200",
+              "absolute left-0 h-px w-full bg-ink transition-transform duration-200",
               open ? "top-1.5 rotate-45" : "top-0"
             )}
           />
           <span
             className={cn(
-              "absolute left-0 top-1.5 h-px w-full bg-foreground transition-opacity duration-200",
+              "absolute left-0 top-1.5 h-px w-full bg-ink transition-opacity duration-200",
               open && "opacity-0"
             )}
           />
           <span
             className={cn(
-              "absolute left-0 h-px w-full bg-foreground transition-transform duration-200",
+              "absolute left-0 h-px w-full bg-ink transition-transform duration-200",
               open ? "top-1.5 -rotate-45" : "top-3"
             )}
           />

@@ -52,12 +52,12 @@ export function AppDisclosureGroup({ items, className }: AppDisclosureGroupProps
               className="flex w-full items-center justify-between gap-3 px-5 py-4 text-left"
               onClick={() => toggle(item.id)}
             >
-              <Text as="span" variant="body" className="font-medium text-foreground">
+              <Text as="span" variant="body" className="font-medium text-ink">
                 {formatTitle(item.title, item.count)}
               </Text>
               <span
                 aria-hidden
-                className="shrink-0 font-body text-lg leading-none text-muted transition-transform duration-200"
+                className="shrink-0 font-body text-lg leading-none text-ink-muted transition-transform duration-200"
               >
                 {isOpen ? "−" : "+"}
               </span>
@@ -65,7 +65,7 @@ export function AppDisclosureGroup({ items, className }: AppDisclosureGroupProps
             <div
               id={panelId}
               className={cn(
-                "border-t border-border-subtle/60 px-5 pb-5 pt-4",
+                "border-t border-ink-ghost/60 px-5 pb-5 pt-4",
                 isOpen ? "block" : "hidden"
               )}
             >

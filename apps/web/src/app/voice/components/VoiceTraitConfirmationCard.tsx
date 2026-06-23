@@ -26,7 +26,7 @@ export function VoiceTraitConfirmationCard({
         <Text variant="label" className="mb-2 block">
           {messages.title}
         </Text>
-        <Text variant="body" className="w-full text-foreground">
+        <Text variant="body" className="w-full text-ink">
           {prompt}
         </Text>
       </div>

@@ -1,0 +1,28 @@
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" role="img">
+  <title>Cultiv  Symbol C: Sulco duplo</title>
+  <defs>
+    <linearGradient id="c-paper" x1="0.1" y1="0" x2="0.95" y2="1">
+      <stop offset="0%" stop-color="#FAF8F4"/>
+      <stop offset="100%" stop-color="#E8E4DC"/>
+    </linearGradient>
+  </defs>
+  <path d="M10 13 L50 11 L54 27 L52 51 L14 53 L8 35 Z" fill="url(#c-paper)" stroke="#C8C4BC" stroke-width="0.65"/>
+  <path d="M14 17 H20 M14 17 V23" stroke="#3D4F7C" stroke-width="0.85" stroke-linecap="square" opacity="0.5"/>
+  <path
+    d="M16 28 C24 22 34 24 42 28"
+    fill="none"
+    stroke="#C4705A"
+    stroke-width="2.2"
+    stroke-linecap="round"
+    opacity="0.42"
+    transform="translate(1 1.2)"
+  />
+  <path
+    d="M16 34 C24 28 34 30 42 34"
+    fill="none"
+    stroke="#1A1A18"
+    stroke-width="2.4"
+    stroke-linecap="round"
+  />
+  <circle cx="38" cy="44" r="2" fill="#C4705A" opacity="0.85"/>
+</svg>

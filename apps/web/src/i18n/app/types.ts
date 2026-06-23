@@ -393,6 +393,7 @@ export type AppOnboardingMessages = {
   readonly step1Title: string;
   readonly step1Subtitle: string;
   readonly step2Title: string;
+  readonly step2Subtitle: string;
   readonly skip: string;
   readonly continue: string;
   readonly goGenerate: string;

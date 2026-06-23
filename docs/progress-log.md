@@ -1,5 +1,18 @@
 # Progress Log
 
+| 2026-06-22 | fix(web): Imprint visual depth — craft Press Mark, scene mats, hero split + HeroImprintArt, restore problem/differentiator SVG scenes, stronger grain/ink/type |
+| 2026-06-22 | docs: Cultiv Imprint identity marked implemented — Task 15 quality verification: 920 tests pass (28 skipped), `pnpm --filter web build` pass, `imprint-visual-governance` pass; Lighthouse not run in CI — manual checklist: (1) Lighthouse mobile on `/` — Performance ≥ 90, Accessibility ≥ 90; (2) `prefers-reduced-motion: reduce` — no Lenis/GSAP transforms, stamp/static render; (3) isolated `PaperSurface` + `ComparisonCard` screenshot — Cultiv signature without logo |
+| 2026-06-22 | docs: Cultiv Imprint implementation complete — design-system reference, creative direction, CONTEXT.md glossary (Imprint typography/surface/intensity), ADR 0009 (Task 14) |
+| 2026-06-22 | feat(app): Imprint generation preview, execution drawer, and voice accents — ReadingSurface preview, terracotta/ochre pigments across app surfaces (Task 12) |
+| 2026-06-22 | feat(app): Imprint quiet shell and navigation — paper grain shell, press-edge nav dock, terracotta active state, compact PressMark header, workspace CSS migrated to Imprint tokens (Task 11) |
+| 2026-06-22 | feat(marketing): reskin all showcase sections to Imprint — SectionHeader/ComparisonCard patterns, PaperSurface sections, numbered product flow, InkBleed waitlist (Task 10) |
+| 2026-06-22 | feat(marketing): Imprint hero, header, and footer — PaperSurface hero with stamp reveal, PressMark BrandMark, ink/terracotta chrome (Task 9) |
+| 2026-06-22 | refactor(web): replace workspace surface fork with Imprint intensity modes — `data-intensity` on marketing/app shells, remove ADR 0003 CSS overrides (Task 7) |
+| 2026-06-22 | feat(ui): rebuild Button, Text, and Input for Imprint identity — terracotta/ink variants, Conducão typography scale, press-edge inputs (Task 6) |
+| 2026-06-22 | feat(ui): add PaperSurface, ReadingSurface, and InkBleed primitives — grain/press wrapper, immersive reading shell, decorative pigment bleed (Task 5) |
+| 2026-06-22 | feat(ui): add Press Mark logo primitive and brand SVGs — PressMark component, favicon/OG SVGs, RTL/jsdom test setup (Task 4) |
+| 2026-06-22 | feat(ui): Cultiv Imprint design tokens and motion scale — paper/ink palette, Imprint typography utilities, press/reveal motion tokens (Task 2) |
+| 2026-06-22 | docs: Cultiv Imprint unified visual identity design spec — Modernism + Arts and Crafts + Minimalism synthesis, Press Mark brand, typography/color/motion tokens, supersedes ADR 0003 |
 | 2026-06-22 | refactor(web): rename billing screen to Plans (`/app/plans`) — upgrade/checkout focus; `/app/billing` redirects |
 | 2026-06-22 | feat(billing): policy `2026-06-22` — step-planner COGS-calibrated `pricesByPlan`; plan grants 20/150 monthly credits |
 | 2026-06-19 | test(step-planner): integration coverage, COGS variance harness, planner telemetry — Phase 3 Tasks 8–10 |
@@ -480,7 +493,18 @@ Key outcomes:
 - Mobile pass: menu hamburger (`SiteMobileNav`); showcase empilhado abaixo de `md` com botão de amostra completa; carrossel horizontal só desktop
 - Issue 05 done: Privacy and terms pages (`/privacy`, `/terms`, `/en/*`)
 - Issue 06 done: Waitlist via `submitWaitlistAction` + `POST /api/waitlist` → Loops; governance excludes server-only paths
-- Issue 07 done: Lenis + GSAP ScrollTrigger, scroll reveal/stagger hooks, `motion-hover` utility, reduced-motion guards
+
+### 2026-06-22 — Marketing sections Imprint rebrand (pós-FAQ)
+
+- **Padrão unificado:** `ImprintSectionLead` + grid `.imprint-section-grid` (aside sticky + corpo com régua vertical) em Problem, SolutionBreath, UseCases, ProductFlow, FAQ
+- **Materialidade:** `InkBleed` por seção, cards `press-edge`, `imprint-copy-card` com barra terracotta, índices `imprint-index-node`
+- **Waitlist:** ilha de formulário `imprint-form-island`, título Fraunces, PressMark, grain
+- **Differentiators mobile:** mesmo lead Imprint; capítulos com nós de índice; desktop `ChapterPanel` atualizado
+- **i18n:** `stampLabel`, `sideNote`, `perspectiveLabel`, `chapterLabel` por seção (pt/en)
+
+- **FAQ:** layout two-column com PressMark, StampBadge, InkBleed; Accordion em cards press-edge com índice terracotta
+- **Copy:** `handwrittenNote` → `imprintNote`; linguagem botânica/editorial trocada por Imprint (registro, marca, atelier) em pt/en
+- **Logo:** Press Mark redesenhado — chapa letterpress hexagonal, C tipográfico slab-serif (wood type), dupla impressão desalinhada, sulcos de voz no counter, tick de registro, borda deckle + bleed terracotta; SVGs favicon/OG atualizados
 - Issue 08 (code complete, HITL pending): SEO + GEO package — JSON-LD (Organization, WebSite, SoftwareApplication, FAQPage, WebPage); `llms.txt` / `llms-full.txt` (pt/en); AI crawler policy in robots; `GeoCitationBlock`; Vercel/Nitro config; tests `seo-meta` + `geo` — awaiting Loops keys, prod deploy, Lighthouse ≥90, DNS smoke test
 - UI pass (Glyphs Labs editorial): paper surface, black grid rules, hero decor grid, nav/badge, stat cells, showcase rows, inverted waitlist band, three-column footer
 - Glossary updates: `CONTEXT.md` (Marketing Surface, Showcase Sample, Waitlist, Cultiv, etc.)

@@ -1,7 +1,9 @@
-import { cn, Container, SectionHeader, Text } from "@my-ai-orchestrator/ui";
+import { Container } from "@my-ai-orchestrator/ui";
+import { useState } from "react";
 import { useSectionReveal } from "~/marketing/animations/use-section-reveal";
 import { getLocaleMessages } from "~/i18n/marketing/get-locale";
 import type { MarketingLocale } from "~/i18n/marketing/types";
+import { ChevronIcon, SectionHeader } from "~/marketing/components/icons";
 
 export interface FaqSectionProps {
   readonly locale: MarketingLocale;
@@ -10,49 +12,41 @@ export interface FaqSectionProps {
 export function FaqSection({ locale }: FaqSectionProps) {
   const { faq } = getLocaleMessages(locale);
   const sectionRef = useSectionReveal("[data-section-item]");
-  const lastIndex = faq.items.length - 1;
+  const [openId, setOpenId] = useState<string | null>(null);
 
   return (
     <section
-      id="faq"
-      className="editorial-rule relative isolate bg-surface pt-[var(--spacing-section-sm)] pb-[calc(var(--spacing-section-sm)+2rem)] md:pt-[var(--spacing-section)] md:pb-[calc(var(--spacing-section)+2.5rem)]"
+      id="perguntas"
+      className="relative overflow-hidden bg-offwhite border-b border-borda/15 py-[var(--spacing-section-sm)] md:py-[var(--spacing-section)]"
     >
-      <Container ref={sectionRef}>
-        <div data-section-item>
-          <SectionHeader
-            eyebrow={faq.eyebrow}
-            title={faq.title}
-            description={faq.description}
-            className="mb-8 md:mb-10"
-          />
-        </div>
-        <div className="grid gap-0 border border-foreground md:grid-cols-2">
-          {faq.items.map((item, index) => {
-            const isLast = index === lastIndex;
-            const isRightColumn = index % 2 === 1;
+      <Container ref={sectionRef} className="relative z-10">
+        <SectionHeader eyebrow={faq.eyebrow} title={faq.title} />
 
+        <div className="mx-auto max-w-2xl space-y-3" data-section-item>
+          {faq.items.map((item) => {
+            const isOpen = openId === item.id;
             return (
-              <article
+              <div
                 key={item.id}
-                className={cn(
-                  "flex flex-col p-6 md:p-8",
-                  !isLast && "border-b border-foreground",
-                  isLast && "md:col-span-2",
-                  !isRightColumn && !isLast && "md:border-r md:border-foreground"
-                )}
+                className="rounded-sm border border-borda/20 bg-creme overflow-hidden"
               >
-                <div className="space-y-4">
-                  <Text as="p" variant="meta" className="text-moss">
-                    [{String(index + 1).padStart(2, "0")}]
-                  </Text>
-                  <Text as="h3" variant="h3" className="text-lg md:text-xl">
+                <button
+                  onClick={() => setOpenId(isOpen ? null : item.id)}
+                  className="flex w-full items-center justify-between gap-4 p-5 text-left"
+                >
+                  <span className="font-inter text-sm font-semibold text-azul">
                     {item.question}
-                  </Text>
-                  <Text as="p" variant="body" className="text-muted">
-                    {item.answer}
-                  </Text>
-                </div>
-              </article>
+                  </span>
+                  <ChevronIcon open={isOpen} />
+                </button>
+                {isOpen && (
+                  <div className="px-5 pb-5 pt-0">
+                    <p className="font-inter text-sm leading-relaxed text-texto-sec">
+                      {item.answer}
+                    </p>
+                  </div>
+                )}
+              </div>
             );
           })}
         </div>

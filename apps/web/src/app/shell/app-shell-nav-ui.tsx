@@ -14,10 +14,10 @@ const navIcons: Record<AppShellNavKey, ComponentType<{ readonly active: boolean 
 };
 
 const dockClassName =
-  "relative rounded-[1.35rem] border border-border-subtle/60 bg-surface/78 p-1 shadow-[0_12px_48px_color-mix(in_srgb,var(--color-rich-soil)_12%,transparent)] backdrop-blur-xl";
+  "relative rounded-[var(--radius-press)] border border-ink-ghost bg-paper-elevated p-1 press-edge";
 
 const pillClassName =
-  "app-shell-nav-pill pointer-events-none absolute rounded-[1.1rem] bg-moss/16 shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--color-moss)_30%,transparent)]";
+  "app-shell-nav-pill pointer-events-none absolute rounded-[var(--radius-press)] bg-pigment-terracotta/16 shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--color-pigment-terracotta)_30%,transparent)]";
 
 function pillStyle(
   orientation: AppShellNavOrientation,
@@ -110,11 +110,11 @@ export function AppShellNavItem({
           "max-w-full truncate leading-none transition-all duration-200",
           active
             ? isHorizontal
-              ? "font-body text-[0.625rem] font-semibold text-foreground"
-              : "font-body text-sm font-semibold text-foreground"
+              ? "font-body text-[0.625rem] font-semibold text-pigment-terracotta"
+              : "font-body text-sm font-semibold text-pigment-terracotta"
             : isHorizontal
-              ? "font-body text-[0.625rem] font-medium tracking-wide text-muted-foreground"
-              : "font-body text-sm font-medium text-muted-foreground"
+              ? "font-body text-[0.625rem] font-medium tracking-wide text-ink-muted"
+              : "font-body text-sm font-medium text-ink-muted"
         )}
       >
         {item.label}
@@ -136,7 +136,7 @@ export function AppShellNavExpandableItem({
     <Link
       to={item.to}
       aria-current={active ? "page" : undefined}
-      className="relative z-10 flex h-11 w-full min-w-0 items-center overflow-hidden rounded-[1.1rem] transition-transform duration-150 ease-out active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-moss"
+      className="relative z-10 flex h-11 w-full min-w-0 items-center overflow-hidden rounded-[var(--radius-press)] transition-transform duration-150 ease-out active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pigment-terracotta"
     >
       <span className="flex size-11 shrink-0 items-center justify-center">
         <Icon active={active} />
@@ -147,8 +147,8 @@ export function AppShellNavExpandableItem({
           "max-w-0 opacity-0 group-hover/dock:max-w-[9rem] group-hover/dock:opacity-100",
           "group-focus-within/dock:max-w-[9rem] group-focus-within/dock:opacity-100",
           active
-            ? "font-body text-sm font-semibold text-foreground"
-            : "font-body text-sm font-medium text-muted-foreground"
+            ? "font-body text-sm font-semibold text-pigment-terracotta"
+            : "font-body text-sm font-medium text-ink-muted"
         )}
       >
         {item.label}

@@ -85,8 +85,8 @@ export const appMessagesEn: AppMessages = {
     guidanceTitle: "How to fill in",
     guidanceTips: "Tips",
     guidanceMistakes: "Avoid",
-    reminderBanner: "Your voice has not been taught yet. Add examples to improve results.",
-    reminderBannerAction: "Teach my voice",
+    reminderBanner: "Your voice atelier is empty. Add raw material to train Cultiv.",
+    reminderBannerAction: "Cultivate my voice",
     blockedReasons: {
       planRestriction: "Unavailable on your plan",
       featureFlagDisabled: "Feature temporarily unavailable",
@@ -121,30 +121,30 @@ export const appMessagesEn: AppMessages = {
       summary: "We're processing this step of the generation."
     },
     queued: {
-      label: "Queued",
-      summary: "Your request is queued and will start processing shortly."
+      label: "In the press",
+      summary: "Your request is in the press and is waiting to be engraved."
     },
     analyze: {
-      label: "Briefing analysis",
-      summary: "We organize topic, goal, and reference material to guide the draft."
+      label: "Preparing the molds",
+      summary: "We structure the briefing guidelines and shape the raw material."
     },
     draft: {
-      label: "Draft",
-      summary: "We generate the first version aligned with your voice profile and format."
+      label: "First print",
+      summary: "We engrave the first version aligned with your voice profile and format."
     },
     refine: {
-      label: "Refinement",
-      summary: "We tune tone, clarity, and voice alignment before the final pass."
+      label: "Afinement",
+      summary: "We tune texture, clarity, and authorial alignment before the final pass."
     },
     sanitize: {
       label: "Final review",
-      summary: "We run safety and consistency checks before delivering the result."
+      summary: "We apply final polishing and consistency checks before delivering the result."
     }
   },
   history: {
-    title: "History",
+    title: "Generation history",
     subtitle: "Your past generations.",
-    empty: "No generations yet.",
+    empty: "No generations yet. Start by writing your first text.",
     emptyAction: "Go to Generate",
     error: "Could not load history.",
     retry: "Try again",
@@ -185,15 +185,15 @@ export const appMessagesEn: AppMessages = {
     }
   },
   voice: {
-    dashboardTitle: "Voice",
-    dashboardSubtitle: "How Cultiv reads your writing and what to cultivate next.",
+    dashboardTitle: "Your voice profile",
+    dashboardSubtitle: "The digital archive of your authorial imprints and writing evolution.",
     dashboardEmpty:
-      "You do not have a voice profile yet. Add samples of your writing so the AI can learn how you write.",
+      "Your voice atelier is silent. Add the first examples to shape your digital identity.",
     dashboardEmptyAction: "Add your first example",
     manageExamples: "Manage examples",
     mirrorFallbackTitle: "Your voice today",
     mirrorFallbackSubtitle:
-      "With more examples, Cultiv will also describe how you think and argue.",
+      "With more raw material, Cultiv will also map your cognitive and argument patterns.",
     detailLayers: {
       formats: "By format",
       antiPatterns: "What to avoid",
@@ -328,13 +328,13 @@ export const appMessagesEn: AppMessages = {
       saving: "Saving…"
     },
     reasoning: {
-      title: "How Cultiv reads you",
+      title: "How you think",
       subtitle: "Patterns of observation, argument, and conclusion inferred from your examples.",
       rebuilding: "Updating inferred reasoning from your latest examples.",
       failedKeepLast:
         "The latest extraction failed, but your previous reasoning snapshot remains active. Add examples or try updating again.",
-      coreTitle: "How I think",
-      developmentTitle: "How I develop a text",
+      coreTitle: "Core reasoning",
+      developmentTitle: "How you develop a text",
       developmentSubtitle:
         "Argumentative path, epistemic posture, and typical moves inferred from your examples.",
       developmentImmature: "With at least three active examples, this mirror becomes more stable.",
@@ -444,22 +444,23 @@ export const appMessagesEn: AppMessages = {
   onboarding: {
     stepLabel: "Step {current} of {total}",
     step1Title: "Teach your voice",
-    step1Subtitle: "Paste your writing so the AI learns how you write.",
-    step2Title: "You're ready to generate",
+    step1Subtitle: "Paste 1-3 examples of your real writing. The more natural, the better.",
+    step2Title: "Ready to create",
+    step2Subtitle: "Your voice profile is being built. You can already start generating texts.",
     skip: "Skip",
     continue: "Continue",
-    goGenerate: "Go to Generate",
+    goGenerate: "Start generating",
     confidence: "Voice confidence",
     credits: "Available credits"
   },
   settings: {
     title: "Settings",
-    profile: "Profile",
+    profile: "Account",
     email: "Email",
-    locale: "App language",
-    localePt: "Portuguese (Brazil)",
+    locale: "Interface language",
+    localePt: "Português (Brasil)",
     localeEn: "English",
-    privacy: "Voice privacy",
+    privacy: "Voice training consent",
     consentActive: "Consent active",
     consentMissing: "Not granted",
     revokeConsent: "Revoke consent",

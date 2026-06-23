@@ -8,7 +8,7 @@
   ::before,
   ::backdrop,
   ::file-selector-button {
-    border-color: var(--color-border, currentcolor);
+    border-color: var(--color-ink-ghost, currentcolor);
   }
 
   :root {
@@ -18,60 +18,14 @@
     --app-bottom-nav-offset: calc(
       var(--app-bottom-nav-height) + var(--app-bottom-nav-gap) + env(safe-area-inset-bottom)
     );
+    --app-motion-duration-fast: 200ms;
+    --app-motion-duration-normal: 350ms;
+    --app-motion-duration-slow: 600ms;
+    --app-motion-ease: cubic-bezier(0.25, 0.46, 0.45, 0.94);
   }
 
   html {
     scroll-behavior: auto;
-  }
-
-  [data-surface="workspace"] {
-    --workspace-radius-sm: 0.5rem;
-    --workspace-radius-md: 0.75rem;
-    --workspace-radius-lg: 1rem;
-    --workspace-shadow-card:
-      0 1px 2px color-mix(in srgb, var(--color-rich-soil) 5%, transparent),
-      0 12px 40px color-mix(in srgb, var(--color-rich-soil) 9%, transparent);
-    --workspace-motion-duration-fast: 180ms;
-    --workspace-motion-duration-normal: 200ms;
-    --workspace-motion-duration-slow: 320ms;
-    --workspace-motion-ease: cubic-bezier(0.22, 1, 0.36, 1);
-  }
-
-  [data-surface="workspace"] .ui-type-h1 {
-    font-family: var(--font-body);
-    font-size: clamp(1.75rem, 4vw, 2.25rem);
-    font-style: normal;
-    font-weight: 600;
-    line-height: 1.15;
-    letter-spacing: -0.02em;
-    text-wrap: balance;
-  }
-
-  [data-surface="workspace"] .ui-type-h2 {
-    font-family: var(--font-body);
-    font-size: clamp(1.375rem, 3vw, 1.75rem);
-    font-style: normal;
-    font-weight: 600;
-    line-height: 1.2;
-    letter-spacing: -0.015em;
-  }
-
-  [data-surface="workspace"] .ui-type-h3 {
-    font-family: var(--font-body);
-    font-size: clamp(1.125rem, 2.5vw, 1.375rem);
-    font-style: normal;
-    font-weight: 600;
-    line-height: 1.3;
-    letter-spacing: -0.01em;
-  }
-
-  [data-surface="workspace"] .ui-type-handwritten,
-  [data-surface="workspace"] .ui-type-display,
-  [data-surface="workspace"] .ui-type-display-sm {
-    font-family: var(--font-body);
-    font-style: normal;
-    font-weight: 600;
-    letter-spacing: -0.02em;
   }
 
   @keyframes workspace-fade-up {
@@ -136,7 +90,7 @@
 @layer utilities {
   .showcase-output-scroll {
     overscroll-behavior: contain;
-    scrollbar-color: color-mix(in oklab, var(--color-showcase-foreground) 35%, transparent) transparent;
+    scrollbar-color: color-mix(in oklab, var(--color-paper) 35%, transparent) transparent;
     scrollbar-width: thin;
   }
 
@@ -146,25 +100,18 @@
 
   .showcase-output-scroll::-webkit-scrollbar-thumb {
     border-radius: 9999px;
-    background-color: color-mix(in oklab, var(--color-showcase-foreground) 35%, transparent);
+    background-color: color-mix(in oklab, var(--color-paper) 35%, transparent);
   }
 
   .app-bottom-nav-shell {
     padding-bottom: max(var(--app-bottom-nav-gap), env(safe-area-inset-bottom));
   }
 
-  .organic-glow-workspace {
-    background:
-      radial-gradient(circle at 12% 8%, color-mix(in srgb, var(--color-moss) 7%, transparent), transparent 42%),
-      radial-gradient(circle at 88% 92%, color-mix(in srgb, var(--color-golden) 5%, transparent), transparent 38%);
-  }
-
   .workspace-card {
-    border-radius: var(--workspace-radius-md);
-    border: 1px solid color-mix(in srgb, var(--color-border-subtle) 75%, transparent);
-    background: color-mix(in srgb, var(--color-surface-elevated) 88%, transparent);
-    box-shadow: var(--workspace-shadow-card);
-    backdrop-filter: blur(16px);
+    border-radius: var(--radius-press);
+    border: 1px solid var(--color-ink-ghost);
+    background: var(--color-paper-elevated);
+    box-shadow: var(--shadow-press-edge);
   }
 
   .workspace-card:has([data-app-select-open="true"]) {
@@ -174,40 +121,38 @@
 
   .workspace-card--hover {
     transition:
-      transform var(--workspace-motion-duration-fast) var(--workspace-motion-ease),
-      box-shadow var(--workspace-motion-duration-fast) var(--workspace-motion-ease);
+      transform var(--app-motion-duration-fast) var(--app-motion-ease),
+      box-shadow var(--app-motion-duration-fast) var(--app-motion-ease);
   }
 
   .workspace-card--hover:hover {
     transform: translateY(-1px);
     box-shadow:
-      0 2px 4px color-mix(in srgb, var(--color-rich-soil) 6%, transparent),
-      0 16px 48px color-mix(in srgb, var(--color-rich-soil) 11%, transparent);
+      var(--shadow-press-edge),
+      0 4px 16px color-mix(in srgb, var(--color-ink) 8%, transparent);
   }
 
   .workspace-field-control {
-    border-radius: var(--workspace-radius-sm);
-    border: 1px solid color-mix(in srgb, var(--color-border-subtle) 85%, transparent);
-    background: var(--color-surface-elevated);
+    border-radius: var(--radius-press);
+    border: 1px solid var(--color-ink-ghost);
+    background: var(--color-paper-elevated);
     transition:
-      border-color var(--workspace-motion-duration-fast) var(--workspace-motion-ease),
-      box-shadow var(--workspace-motion-duration-fast) var(--workspace-motion-ease);
+      border-color var(--app-motion-duration-fast) var(--app-motion-ease),
+      box-shadow var(--app-motion-duration-fast) var(--app-motion-ease);
   }
 
   .workspace-field-control:focus-visible {
     outline: none;
-    border-color: color-mix(in srgb, var(--color-moss) 55%, transparent);
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-moss) 14%, transparent);
+    border-color: color-mix(in srgb, var(--color-pigment-terracotta) 55%, transparent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-pigment-terracotta) 14%, transparent);
   }
 
   .workspace-overlay {
-    border-radius: var(--workspace-radius-md);
-    border: 1px solid color-mix(in srgb, var(--color-border-subtle) 80%, transparent);
-    background: var(--color-surface-elevated);
-    box-shadow:
-      0 2px 4px color-mix(in srgb, var(--color-rich-soil) 8%, transparent),
-      0 16px 48px color-mix(in srgb, var(--color-rich-soil) 14%, transparent);
-    animation: workspace-fade-up var(--workspace-motion-duration-fast) var(--workspace-motion-ease);
+    border-radius: var(--radius-press);
+    border: 1px solid var(--color-ink-ghost);
+    background: var(--color-paper-elevated);
+    box-shadow: var(--shadow-press-edge);
+    animation: workspace-fade-up var(--app-motion-duration-fast) var(--app-motion-ease);
   }
 
   .workspace-overlay-item {
@@ -215,32 +160,32 @@
     width: 100%;
     align-items: center;
     gap: 0.625rem;
-    border-radius: calc(var(--workspace-radius-md) - 0.2rem);
+    border-radius: var(--radius-press);
     padding: 0.5rem 0.75rem;
     text-align: left;
     font-size: 0.875rem;
     line-height: 1.25;
-    color: var(--color-foreground);
+    color: var(--color-ink);
     text-decoration: none;
     transition:
-      background-color var(--workspace-motion-duration-fast) var(--workspace-motion-ease),
-      color var(--workspace-motion-duration-fast) var(--workspace-motion-ease);
+      background-color var(--app-motion-duration-fast) var(--app-motion-ease),
+      color var(--app-motion-duration-fast) var(--app-motion-ease);
   }
 
   .workspace-overlay-item:hover,
   .workspace-overlay-item:focus-visible {
     outline: none;
-    background: color-mix(in srgb, var(--color-moss) 10%, transparent);
+    background: color-mix(in srgb, var(--color-pigment-terracotta) 10%, transparent);
   }
 
   .workspace-overlay-item--muted {
-    color: color-mix(in srgb, var(--color-foreground) 72%, transparent);
+    color: color-mix(in srgb, var(--color-ink) 72%, transparent);
   }
 
   .workspace-overlay-divider {
     margin: 0.25rem 0.5rem;
     height: 1px;
-    background: color-mix(in srgb, var(--color-border-subtle) 65%, transparent);
+    background: color-mix(in srgb, var(--color-ink-ghost) 65%, transparent);
   }
 
   .workspace-tooltip-trigger {
@@ -251,63 +196,61 @@
     align-items: center;
     justify-content: center;
     border-radius: 9999px;
-    border: 1px solid color-mix(in srgb, var(--color-border-subtle) 80%, transparent);
-    background: color-mix(in srgb, var(--color-surface-elevated) 90%, transparent);
+    border: 1px solid var(--color-ink-ghost);
+    background: var(--color-paper-elevated);
     font-size: 0.625rem;
     font-weight: 600;
     line-height: 1;
-    color: color-mix(in srgb, var(--color-foreground) 55%, transparent);
+    color: color-mix(in srgb, var(--color-ink) 55%, transparent);
     transition:
-      border-color var(--workspace-motion-duration-fast) var(--workspace-motion-ease),
-      background-color var(--workspace-motion-duration-fast) var(--workspace-motion-ease),
-      color var(--workspace-motion-duration-fast) var(--workspace-motion-ease),
-      box-shadow var(--workspace-motion-duration-fast) var(--workspace-motion-ease);
+      border-color var(--app-motion-duration-fast) var(--app-motion-ease),
+      background-color var(--app-motion-duration-fast) var(--app-motion-ease),
+      color var(--app-motion-duration-fast) var(--app-motion-ease),
+      box-shadow var(--app-motion-duration-fast) var(--app-motion-ease);
   }
 
   .workspace-tooltip-trigger:hover {
-    border-color: color-mix(in srgb, var(--color-moss) 40%, transparent);
-    background: color-mix(in srgb, var(--color-moss) 8%, transparent);
-    color: var(--color-foreground);
+    border-color: color-mix(in srgb, var(--color-pigment-terracotta) 40%, transparent);
+    background: color-mix(in srgb, var(--color-pigment-terracotta) 8%, transparent);
+    color: var(--color-ink);
   }
 
   .workspace-tooltip-trigger:focus-visible {
     outline: none;
-    border-color: color-mix(in srgb, var(--color-moss) 55%, transparent);
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-moss) 14%, transparent);
+    border-color: color-mix(in srgb, var(--color-pigment-terracotta) 55%, transparent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-pigment-terracotta) 14%, transparent);
   }
 
   .workspace-tooltip-panel {
     position: relative;
     width: max-content;
     max-width: 16rem;
-    border-radius: var(--workspace-radius-md);
-    border: 1px solid color-mix(in srgb, var(--color-border-subtle) 80%, transparent);
-    background: var(--color-surface-elevated);
+    border-radius: var(--radius-press);
+    border: 1px solid var(--color-ink-ghost);
+    background: var(--color-paper-elevated);
     padding: 0.625rem 0.75rem;
     font-size: 0.75rem;
     line-height: 1.55;
-    color: var(--color-foreground);
+    color: var(--color-ink);
     white-space: pre-line;
-    box-shadow:
-      0 2px 4px color-mix(in srgb, var(--color-rich-soil) 8%, transparent),
-      0 16px 40px color-mix(in srgb, var(--color-rich-soil) 14%, transparent);
+    box-shadow: var(--shadow-press-edge);
     pointer-events: none;
-    animation: workspace-fade-up var(--workspace-motion-duration-fast) var(--workspace-motion-ease);
+    animation: workspace-fade-up var(--app-motion-duration-fast) var(--app-motion-ease);
   }
 
   .workspace-tooltip-panel--anchor-bottom {
     translate: -50% 0;
-    animation: workspace-fade-up var(--workspace-motion-duration-fast) var(--workspace-motion-ease);
+    animation: workspace-fade-up var(--app-motion-duration-fast) var(--app-motion-ease);
   }
 
   .workspace-tooltip-panel--anchor-top {
     translate: -50% -100%;
-    animation: workspace-fade-down var(--workspace-motion-duration-fast) var(--workspace-motion-ease);
+    animation: workspace-fade-down var(--app-motion-duration-fast) var(--app-motion-ease);
   }
 
   .workspace-tooltip-panel--anchor-end {
     translate: 0 -50%;
-    animation: workspace-fade-in-end var(--workspace-motion-duration-fast) var(--workspace-motion-ease);
+    animation: workspace-fade-in-end var(--app-motion-duration-fast) var(--app-motion-ease);
   }
 
   .workspace-tooltip-panel--anchor-bottom::before {
@@ -319,9 +262,9 @@
     height: 0.55rem;
     translate: -50% 0;
     rotate: 45deg;
-    border-top: 1px solid color-mix(in srgb, var(--color-border-subtle) 80%, transparent);
-    border-left: 1px solid color-mix(in srgb, var(--color-border-subtle) 80%, transparent);
-    background: var(--color-surface-elevated);
+    border-top: 1px solid var(--color-ink-ghost);
+    border-left: 1px solid var(--color-ink-ghost);
+    background: var(--color-paper-elevated);
   }
 
   .workspace-tooltip-panel--anchor-top::before {
@@ -333,9 +276,9 @@
     height: 0.55rem;
     translate: -50% 0;
     rotate: 45deg;
-    border-bottom: 1px solid color-mix(in srgb, var(--color-border-subtle) 80%, transparent);
-    border-right: 1px solid color-mix(in srgb, var(--color-border-subtle) 80%, transparent);
-    background: var(--color-surface-elevated);
+    border-bottom: 1px solid var(--color-ink-ghost);
+    border-right: 1px solid var(--color-ink-ghost);
+    background: var(--color-paper-elevated);
   }
 
   .workspace-tooltip-panel--anchor-end::before {
@@ -347,9 +290,9 @@
     height: 0.55rem;
     translate: 0 -50%;
     rotate: 45deg;
-    border-bottom: 1px solid color-mix(in srgb, var(--color-border-subtle) 80%, transparent);
-    border-right: 1px solid color-mix(in srgb, var(--color-border-subtle) 80%, transparent);
-    background: var(--color-surface-elevated);
+    border-bottom: 1px solid var(--color-ink-ghost);
+    border-right: 1px solid var(--color-ink-ghost);
+    background: var(--color-paper-elevated);
   }
 
   .workspace-tooltip-panel--wide {
@@ -366,12 +309,12 @@
     padding: 0.75rem 0.875rem 0.625rem;
     font-size: 0.75rem;
     line-height: 1.55;
-    color: color-mix(in srgb, var(--color-foreground) 88%, transparent);
+    color: color-mix(in srgb, var(--color-ink) 88%, transparent);
   }
 
   .workspace-tooltip-divider {
     height: 1px;
-    background: color-mix(in srgb, var(--color-border-subtle) 75%, transparent);
+    background: color-mix(in srgb, var(--color-ink-ghost) 75%, transparent);
   }
 
   .workspace-tooltip-detail {
@@ -384,36 +327,36 @@
     font-weight: 600;
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    color: color-mix(in srgb, var(--color-moss) 90%, transparent);
+    color: color-mix(in srgb, var(--color-pigment-terracotta) 90%, transparent);
   }
 
   .workspace-tooltip-detail-body {
     font-size: 0.75rem;
     line-height: 1.55;
-    color: var(--color-foreground);
+    color: var(--color-ink);
   }
 
   .workspace-tooltip-footnote {
     margin-top: 0.5rem;
     font-size: 0.6875rem;
     line-height: 1.45;
-    color: color-mix(in srgb, var(--color-foreground) 70%, transparent);
+    color: color-mix(in srgb, var(--color-ink) 70%, transparent);
   }
 
   .workspace-skeleton {
-    border-radius: var(--workspace-radius-sm);
+    border-radius: var(--radius-press);
     background: linear-gradient(
       90deg,
-      color-mix(in srgb, var(--color-soft-loam) 80%, transparent) 0%,
-      color-mix(in srgb, var(--color-surface-elevated) 95%, transparent) 50%,
-      color-mix(in srgb, var(--color-soft-loam) 80%, transparent) 100%
+      color-mix(in srgb, var(--color-paper-pressed) 80%, transparent) 0%,
+      color-mix(in srgb, var(--color-paper-elevated) 95%, transparent) 50%,
+      color-mix(in srgb, var(--color-paper-pressed) 80%, transparent) 100%
     );
     background-size: 200% 100%;
     animation: workspace-shimmer 1.4s ease-in-out infinite;
   }
 
   .workspace-stagger-group > * {
-    animation: workspace-fade-up var(--workspace-motion-duration-normal) var(--workspace-motion-ease) backwards;
+    animation: workspace-fade-up var(--app-motion-duration-normal) var(--app-motion-ease) backwards;
   }
 
   .workspace-stagger-group > *:nth-child(1) {
@@ -449,7 +392,7 @@
   }
 
   .workspace-drawer-panel {
-    animation: workspace-drawer-in var(--workspace-motion-duration-slow) var(--workspace-motion-ease);
+    animation: workspace-drawer-in var(--app-motion-duration-slow) var(--app-motion-ease);
   }
 
   .workspace-result-text {
@@ -466,13 +409,13 @@
 
   .app-shell-nav-pill {
     transition:
-      transform 280ms var(--workspace-motion-ease),
-      width 280ms var(--workspace-motion-ease),
-      height 280ms var(--workspace-motion-ease);
+      transform 280ms var(--app-motion-ease),
+      width 280ms var(--app-motion-ease),
+      height 280ms var(--app-motion-ease);
   }
 
   .app-shell-dock-expandable {
-    transition: width 300ms var(--workspace-motion-ease);
+    transition: width 300ms var(--app-motion-ease);
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -498,5 +441,141 @@
     .workspace-drawer-panel {
       animation: none;
     }
+  }
+}
+
+.rebrand {
+  --color-paper: var(--color-creme);
+  --color-paper-elevated: var(--color-offwhite);
+  --color-paper-pressed: #EDE8DC;
+  --color-ink: var(--color-texto);
+  --color-ink-muted: var(--color-texto-sec);
+  --color-ink-ghost: var(--color-borda);
+  --color-pigment-terracotta: var(--color-terracota);
+  --color-pigment-indigo: var(--color-azul);
+  --color-pigment-ochre: var(--color-ocre);
+  color-scheme: light;
+}
+
+@layer utilities {
+  .font-playfair {
+    font-family: var(--font-playfair);
+  }
+
+  .font-caveat {
+    font-family: var(--font-caveat);
+  }
+
+  .font-inter {
+    font-family: var(--font-inter);
+  }
+
+  .rebrand-shadow {
+    box-shadow: 4px 4px 0px rgba(26, 46, 60, 0.1);
+  }
+
+  .rebrand-shadow-lg {
+    box-shadow: 6px 6px 0px rgba(26, 46, 60, 0.12);
+  }
+
+  .rebrand-border-double {
+    border: 3px double var(--color-borda);
+  }
+
+  .rebrand-border-dotted {
+    border: 2px dotted var(--color-borda);
+  }
+
+  .rebrand-paper-texture {
+    position: relative;
+  }
+
+  .rebrand-paper-texture::after {
+    content: "";
+    pointer-events: none;
+    position: absolute;
+    inset: 0;
+    opacity: 0.06;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+  }
+
+  .rebrand-vignette {
+    background: radial-gradient(ellipse at center, transparent 50%, rgba(26, 46, 60, 0.04) 100%);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .rebrand-hover {
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+    }
+
+    .rebrand-hover:hover {
+      transform: translateY(-3px);
+      box-shadow: 6px 6px 0px rgba(26, 46, 60, 0.12);
+    }
+
+    .rebrand-nav-hover {
+      position: relative;
+      transition: color 0.25s ease;
+    }
+
+    .rebrand-nav-hover::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: -2px;
+      width: 0;
+      height: 1.5px;
+      background: var(--color-terracota);
+      border-radius: 1px;
+      transition: width 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .rebrand-nav-hover:hover::after {
+      width: 100%;
+    }
+
+    .rebrand-nav-hover:hover {
+      color: var(--color-terracota);
+    }
+
+    .rebrand-logo-breathe {
+      animation: logo-breathe 4s ease-in-out infinite;
+    }
+
+    .rebrand-logo-hover {
+      transition: opacity 0.25s ease;
+    }
+
+    .rebrand-logo-hover .rebrand-logo-icon {
+      transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .rebrand-logo-hover .rebrand-logo-text {
+      transition: letter-spacing 0.3s ease;
+    }
+
+    .rebrand-logo-hover:hover .rebrand-logo-icon {
+      transform: rotate(15deg) scale(1.05);
+    }
+
+    .rebrand-logo-hover:hover .rebrand-logo-text {
+      letter-spacing: 0.02em;
+    }
+  }
+}
+
+@keyframes logo-breathe {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+@keyframes rebrand-fade-in {
+  from {
+    opacity: 0;
+    transform: rotate(-0.5deg) translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(0deg) translateY(0);
   }
 }

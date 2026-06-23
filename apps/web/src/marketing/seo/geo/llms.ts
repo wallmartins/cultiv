@@ -63,9 +63,9 @@ export function buildLlmsFullTxt(locale: MarketingLocale): string {
   const summary = buildLlmsTxt(locale);
   const contentTypes = getMarketingContentTypes(locale, messages.contentTypes);
 
-  const productFlowSection = formatSection(
+  const routeSection = formatSection(
     llms.sections.productFlow,
-    messages.productFlow.steps.map((step) => {
+    messages.route.steps.map((step) => {
       return `### ${step.index}, ${step.title}\n\n${step.body}`;
     })
   );
@@ -76,9 +76,7 @@ export function buildLlmsFullTxt(locale: MarketingLocale): string {
   );
 
   const overviewSection = formatSection(llms.sections.overview, [
-    messages.hero.subheadline,
-    "",
-    messages.socialProof.body
+    messages.hero.subheadline
   ]);
 
   const formatsDetail = formatSection(
@@ -89,12 +87,6 @@ export function buildLlmsFullTxt(locale: MarketingLocale): string {
     )
   );
 
-  const showcaseSection = formatSection(llms.sections.showcase, [
-    messages.differentiators.chapters[0].body,
-    "",
-    llms.showcaseNote
-  ]);
-
   return [
     summary.replace(llms.citationNote, "").trimEnd(),
     "",
@@ -104,11 +96,9 @@ export function buildLlmsFullTxt(locale: MarketingLocale): string {
     "",
     overviewSection.trimEnd(),
     "",
-    productFlowSection.trimEnd(),
+    routeSection.trimEnd(),
     "",
     formatsDetail.trimEnd(),
-    "",
-    showcaseSection.trimEnd(),
     "",
     faqSection.trimEnd(),
     "",

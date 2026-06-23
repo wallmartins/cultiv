@@ -52,7 +52,7 @@ function IntentOptionCard({
         padding="compact"
         className={cn(
           "h-full transition-shadow",
-          selected && "ring-2 ring-moss/30 ring-offset-2 ring-offset-surface"
+          selected && "ring-2 ring-pigment-terracotta/30 ring-offset-2 ring-offset-paper"
         )}
       >
         <div className="flex items-start justify-between gap-3">
@@ -60,7 +60,7 @@ function IntentOptionCard({
             <Text as="span" variant="label" className="block">
               {item.label}
             </Text>
-            <Text as="span" variant="meta" className="block text-muted-foreground">
+            <Text as="span" variant="meta" className="block text-ink-muted">
               {item.description}
             </Text>
           </div>
@@ -101,7 +101,7 @@ export function IntentWizard({
 
   if (status === "error" && featuredIntents.length === 0) {
     return (
-      <div className="rounded-2xl border border-red-700/30 bg-red-700/10 px-4 py-4">
+      <div className="rounded-[var(--radius-press)] border border-red-700/30 bg-red-700/10 px-4 py-4">
         <Text variant="body" className="mb-2 text-red-800">
           {messages.intentWizard.catalogLoadError}
         </Text>
@@ -110,7 +110,7 @@ export function IntentWizard({
         </Text>
         <button
           type="button"
-          className="text-sm font-medium text-foreground underline-offset-2 hover:underline"
+          className="text-sm font-medium text-ink underline-offset-2 hover:underline"
           onClick={onRetry}
         >
           {messages.intentWizard.catalogRetry}
@@ -126,7 +126,7 @@ export function IntentWizard({
           <Text as="h2" variant="h2" className="mb-2">
             {messages.intentWizard.stepObjectiveTitle}
           </Text>
-          <Text variant="body" className="text-muted-foreground">
+          <Text variant="body" className="text-ink-muted">
             {messages.intentWizard.stepObjectiveSubtitle}
           </Text>
         </div>
@@ -147,7 +147,7 @@ export function IntentWizard({
           <div className="space-y-3">
             <button
               type="button"
-              className="text-sm font-medium text-moss underline-offset-2 hover:underline"
+              className="text-sm font-medium text-pigment-terracotta underline-offset-2 hover:underline"
               onClick={() => wizard.setShowMoreIntents((open) => !open)}
             >
               {messages.intentWizard.moreOptions}
@@ -181,23 +181,23 @@ export function IntentWizard({
           <Text as="h2" variant="h2" className="mb-2">
             {messages.intentWizard.stepScopeTitle}
           </Text>
-          <Text variant="body" className="text-muted-foreground">
+          <Text variant="body" className="text-ink-muted">
             {messages.intentWizard.stepScopeSubtitle}
           </Text>
         </div>
 
         {wizard.selectedIntent ? (
-          <AppCard padding="compact" className="border-moss/20 bg-moss/5">
+          <AppCard padding="compact" className="border-pigment-terracotta/20 bg-pigment-terracotta/5">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
-                <Text variant="meta" className="mb-1 block text-muted-foreground">
+                <Text variant="meta" className="mb-1 block text-ink-muted">
                   {messages.intentWizard.stepObjectiveTitle}
                 </Text>
                 <Text variant="label">{wizard.selectedIntent.label}</Text>
               </div>
               <button
                 type="button"
-                className="text-sm font-medium text-moss underline-offset-2 hover:underline"
+                className="text-sm font-medium text-pigment-terracotta underline-offset-2 hover:underline"
                 onClick={wizard.changeIntent}
               >
                 {messages.intentWizard.changeIntent}
@@ -225,7 +225,7 @@ export function IntentWizard({
           <div className="space-y-3">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <Text variant="label">{messages.intentWizard.channel}</Text>
-              <Text variant="meta" className="text-muted-foreground">
+              <Text variant="meta" className="text-ink-muted">
                 {messages.intentWizard.channelOptional}
               </Text>
             </div>
@@ -244,14 +244,14 @@ export function IntentWizard({
             ) : (
               <button
                 type="button"
-                className="text-sm font-medium text-moss underline-offset-2 hover:underline"
+                className="text-sm font-medium text-pigment-terracotta underline-offset-2 hover:underline"
                 onClick={() => setChannelExpanded(true)}
               >
                 {messages.intentWizard.channelExpand}
               </button>
             )}
             {channelExpanded && getChannelDescription(locale, activeChannel) ? (
-              <Text variant="meta" className="text-muted-foreground">
+              <Text variant="meta" className="text-ink-muted">
                 {getChannelDescription(locale, activeChannel)}
               </Text>
             ) : null}

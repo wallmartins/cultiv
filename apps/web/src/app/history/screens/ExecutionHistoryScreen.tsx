@@ -32,7 +32,7 @@ export function ExecutionHistoryScreen() {
       <Text as="h1" variant="h1" className="mb-3">
         {messages.history.title}
       </Text>
-      <Text variant="body" className="mb-6 text-muted-foreground">
+      <Text variant="body" className="mb-6 text-ink-muted">
         {messages.history.subtitle}
       </Text>
 
@@ -97,7 +97,7 @@ export function ExecutionHistoryScreen() {
           <Text variant="meta">{messages.history.empty}</Text>
           <Link
             to="/app/generate"
-            className="text-sm font-medium text-moss underline-offset-2 hover:underline"
+            className="text-sm font-medium text-pigment-terracotta underline-offset-2 hover:underline"
           >
             {messages.history.emptyAction}
           </Link>
@@ -107,7 +107,7 @@ export function ExecutionHistoryScreen() {
       {items.length > 0 ? (
         <AppCard padding="none" className="overflow-hidden">
           <table className="min-w-full text-left text-sm">
-            <thead className="border-b border-border-subtle/70 bg-surface-elevated/70">
+            <thead className="border-b border-ink-ghost/70 bg-paper-elevated/70">
               <tr>
                 <th className="px-4 py-3">{messages.history.columns.format}</th>
                 <th className="px-4 py-3">{messages.history.columns.date}</th>
@@ -118,7 +118,7 @@ export function ExecutionHistoryScreen() {
               {items.map((item) => (
                 <tr
                   key={item.jobId}
-                  className="workspace-card--hover border-b border-border-subtle/50 transition-colors last:border-b-0 hover:bg-surface-elevated/40"
+                  className="workspace-card--hover border-b border-ink-ghost/50 transition-colors last:border-b-0 hover:bg-paper-elevated/40"
                 >
                   <td className="px-4 py-3">
                     <Link
@@ -129,7 +129,7 @@ export function ExecutionHistoryScreen() {
                       {getContentTypeLabel(locale, item.contentType, item.contentType)}
                     </Link>
                   </td>
-                  <td className="px-4 py-3 text-muted-foreground">
+                  <td className="px-4 py-3 text-ink-muted">
                     {new Date(item.createdAt).toLocaleString(locale === "en" ? "en-US" : "pt-BR")}
                   </td>
                   <td className="px-4 py-3">
@@ -156,15 +156,15 @@ export function ExecutionHistoryScreen() {
 function HistoryStatus({ status }: { readonly status: string }) {
   const dotClass =
     status === "done"
-      ? "bg-moss"
+      ? "bg-pigment-terracotta"
       : status === "failed"
         ? "bg-red-700"
         : status === "running" || status === "queued"
-          ? "bg-golden"
-          : "bg-muted";
+          ? "bg-pigment-ochre"
+          : "bg-ink-muted";
 
   return (
-    <span className="inline-flex items-center gap-2 capitalize text-muted-foreground">
+    <span className="inline-flex items-center gap-2 capitalize text-ink-muted">
       <span aria-hidden className={`size-2 rounded-full ${dotClass}`} />
       {status}
     </span>

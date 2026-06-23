@@ -85,8 +85,8 @@ export const appMessagesPt: AppMessages = {
     guidanceTitle: "Como preencher",
     guidanceTips: "Dicas",
     guidanceMistakes: "Evite",
-    reminderBanner: "Sua voz ainda não foi ensinada. Adicione exemplos para melhorar os resultados.",
-    reminderBannerAction: "Ensinar minha voz",
+    reminderBanner: "O seu atelier de voz ainda está vazio. Adicione matéria-prima para treinar o Cultiv.",
+    reminderBannerAction: "Cultivar minha voz",
     blockedReasons: {
       planRestriction: "Indisponível no seu plano",
       featureFlagDisabled: "Recurso temporariamente indisponível",
@@ -121,30 +121,30 @@ export const appMessagesPt: AppMessages = {
       summary: "Estamos processando esta etapa da geração."
     },
     queued: {
-      label: "Na fila",
-      summary: "Sua solicitação entrou na fila e será processada em instantes."
+      label: "Na prensa",
+      summary: "Seu pedido entrou na prensa e aguarda o início do entalhe."
     },
     analyze: {
-      label: "Análise do briefing",
-      summary: "Organizamos tema, objetivo e material de referência para orientar o rascunho."
+      label: "Preparação dos moldes",
+      summary: "Estruturamos as diretrizes do briefing e moldamos a matéria-prima."
     },
     draft: {
-      label: "Rascunho",
-      summary: "Geramos o texto inicial alinhado ao seu perfil de voz e ao formato escolhido."
+      label: "Primeira impressão",
+      summary: "Gravamos as primeiras palavras alinhadas à cadência e voz do seu perfil."
     },
     refine: {
-      label: "Refinamento",
-      summary: "Ajustamos tom, clareza e aderência à sua voz antes da revisão final."
+      label: "Afinamento",
+      summary: "Afinamos a textura e a aderência autoral antes do acabamento."
     },
     sanitize: {
       label: "Revisão final",
-      summary: "Aplicamos checagens de segurança e consistência antes de liberar o resultado."
+      summary: "Realizamos o polimento final e checagens de integridade antes da entrega."
     }
   },
   history: {
-    title: "Histórico",
+    title: "Histórico de gerações",
     subtitle: "Suas gerações anteriores.",
-    empty: "Nenhuma geração ainda.",
+    empty: "Nenhuma geração ainda. Comece escrevendo seu primeiro texto.",
     emptyAction: "Ir para Geração",
     error: "Não foi possível carregar o histórico.",
     retry: "Tentar novamente",
@@ -185,15 +185,15 @@ export const appMessagesPt: AppMessages = {
     }
   },
   voice: {
-    dashboardTitle: "Voz",
-    dashboardSubtitle: "Como o Cultiv lê sua escrita e o que cultivar em seguida.",
+    dashboardTitle: "Seu perfil de voz",
+    dashboardSubtitle: "O arquivo digital das suas impressões autorais e evolução da escrita.",
     dashboardEmpty:
-      "Você ainda não tem um perfil de voz. Adicione textos seus para a IA aprender como você escreve.",
+      "Seu atelier de voz está silencioso. Adicione os primeiros exemplos para moldar sua identidade digital.",
     dashboardEmptyAction: "Adicionar primeiro exemplo",
     manageExamples: "Gerenciar exemplos",
     mirrorFallbackTitle: "Sua voz hoje",
     mirrorFallbackSubtitle:
-      "Com mais exemplos, o Cultiv passa a descrever também como você pensa e argumenta.",
+      "Com mais matéria-prima, o Cultiv passa a mapear também seus padrões cognitivos e argumentativos.",
     detailLayers: {
       formats: "Por formato",
       antiPatterns: "O que evitar",
@@ -330,13 +330,13 @@ export const appMessagesPt: AppMessages = {
       saving: "Salvando…"
     },
     reasoning: {
-      title: "Como o Cultiv te lê",
+      title: "Como você pensa",
       subtitle: "Padrões de observação, argumento e conclusão inferidos dos seus exemplos.",
       rebuilding: "Atualizando o raciocínio inferido a partir dos exemplos mais recentes.",
       failedKeepLast:
         "A última extração falhou, mas o raciocínio anterior continua válido. Adicione exemplos ou tente atualizar de novo.",
-      coreTitle: "Como penso",
-      developmentTitle: "Como desenvolvo um texto",
+      coreTitle: "Raciocínio central",
+      developmentTitle: "Como você desenvolve um texto",
       developmentSubtitle: "Caminho argumentativo, postura epistêmica e movimentos típicos inferidos dos seus exemplos.",
       developmentImmature: "Com pelo menos três exemplos ativos, este espelho fica mais estável.",
       epistemicPosture: "Postura epistêmica",
@@ -445,22 +445,23 @@ export const appMessagesPt: AppMessages = {
   onboarding: {
     stepLabel: "Passo {current} de {total}",
     step1Title: "Ensine sua voz",
-    step1Subtitle: "Cole textos seus para a IA aprender como você escreve.",
-    step2Title: "Você está pronto para gerar",
+    step1Subtitle: "Cole 1-3 exemplos da sua escrita real. Quanto mais natural, melhor.",
+    step2Title: "Pronto para criar",
+    step2Subtitle: "Seu perfil de voz está sendo construído. Você já pode começar a gerar textos.",
     skip: "Pular",
     continue: "Continuar",
-    goGenerate: "Ir para Geração",
+    goGenerate: "Começar a gerar",
     confidence: "Confiança da voz",
     credits: "Créditos disponíveis"
   },
   settings: {
     title: "Configurações",
-    profile: "Perfil",
+    profile: "Conta",
     email: "Email",
-    locale: "Idioma do app",
+    locale: "Idioma da interface",
     localePt: "Português (Brasil)",
     localeEn: "English",
-    privacy: "Privacidade de voz",
+    privacy: "Consentimento de treinamento de voz",
     consentActive: "Consentimento ativo",
     consentMissing: "Não concedido",
     revokeConsent: "Revogar consentimento",
