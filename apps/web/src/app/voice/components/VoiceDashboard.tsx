@@ -1,4 +1,4 @@
-import { Button, Text } from "@my-ai-orchestrator/ui";
+import { Button, cn, Text } from "@my-ai-orchestrator/ui";
 import { Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import type { TraitConfirmationInput } from "@my-ai-orchestrator/contracts";
@@ -69,7 +69,7 @@ export function VoiceDashboard() {
     return (
       <div className="space-y-6 px-[var(--spacing-gutter)] py-8 md:py-10">
         <div>
-          <Text as="h1" variant="h1" className="mb-3">
+          <Text as="h1" variant="h1" className="mb-3 font-playfair text-azul">
             {messages.voice.dashboardTitle}
           </Text>
           <Text variant="body" className="text-ink-muted">
@@ -85,9 +85,18 @@ export function VoiceDashboard() {
 
   if (status === "error" || !profile) {
     return (
-      <Text variant="meta" className="px-[var(--spacing-gutter)] py-8 text-red-700">
-        {messages.errors.default.message}
-      </Text>
+      <div className="px-[var(--spacing-gutter)] py-8">
+        <AppCard className="text-center">
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full border border-terracota/20 bg-terracota/5">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6 text-terracota">
+              <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4.5c-.77-.833-2.694-.833-3.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
+            </svg>
+          </div>
+          <Text variant="meta" className="text-terracota">
+            {messages.errors.default.message}
+          </Text>
+        </AppCard>
+      </div>
     );
   }
 
@@ -146,7 +155,7 @@ export function VoiceDashboard() {
   const healthLayer = (
     <div className="space-y-4">
       <div>
-        <Text variant="label" className="mb-2 block">
+        <Text variant="label" className="mb-2 block font-inter text-xs font-semibold uppercase tracking-wider text-texto-sec">
           {voiceMessages.confidence}
         </Text>
         <Text variant="body" className="mb-1 font-medium text-ink">
@@ -157,7 +166,7 @@ export function VoiceDashboard() {
         </Text>
       </div>
       <div>
-        <Text variant="label" className="mb-2 block">
+        <Text variant="label" className="mb-2 block font-inter text-xs font-semibold uppercase tracking-wider text-texto-sec">
           {voiceMessages.adaptationMode}
         </Text>
         <Text variant="body" className="mb-1 font-medium text-ink">
@@ -168,7 +177,7 @@ export function VoiceDashboard() {
         </Text>
       </div>
       <div>
-        <Text variant="label" className="mb-2 block">
+        <Text variant="label" className="mb-2 block font-inter text-xs font-semibold uppercase tracking-wider text-texto-sec">
           {voiceMessages.diagnostics}
         </Text>
         <Text variant="body" className="w-full text-ink-muted">
@@ -180,7 +189,7 @@ export function VoiceDashboard() {
         </Text>
       </div>
       <div>
-        <Text variant="label" className="mb-2 block">
+        <Text variant="label" className="mb-2 block font-inter text-xs font-semibold uppercase tracking-wider text-texto-sec">
           {voiceMessages.coverage}
         </Text>
         {coverageComplete ? (
@@ -212,20 +221,24 @@ export function VoiceDashboard() {
   );
 
   return (
-    <div className="workspace-stagger-group space-y-8 px-[var(--spacing-gutter)] py-8 md:py-10">
+    <div className="space-y-8 px-[var(--spacing-gutter)] py-8 md:py-10">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0">
-          <Text as="h1" variant="h1" className="mb-2">
+          <Text as="h1" variant="h1" className="mb-2 font-playfair text-azul">
             {voiceMessages.dashboardTitle}
           </Text>
           <Text variant="meta" className="text-ink-muted">
             {voiceMessages.dashboardSubtitle}
           </Text>
         </div>
-        <Link to="/app/voice/examples">
-          <Button type="button" variant="ghost">
-            {voiceMessages.manageExamples}
-          </Button>
+        <Link
+          to="/app/voice/examples"
+          className="rebrand-hover inline-flex items-center justify-center gap-2 rounded-sm border border-azul/20 bg-azul/5 px-4 py-2 font-inter text-sm font-medium text-azul transition-all duration-300 hover:bg-azul/10"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+            <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          {voiceMessages.manageExamples}
         </Link>
       </div>
 
@@ -250,7 +263,7 @@ export function VoiceDashboard() {
       ) : (
         <section className="space-y-6">
           <div>
-            <Text as="h2" variant="h2" className="mb-2">
+            <Text as="h2" variant="h2" className="mb-2 font-playfair text-azul">
               {voiceMessages.mirrorFallbackTitle}
             </Text>
             <Text variant="meta" className="w-full text-ink-muted">

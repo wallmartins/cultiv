@@ -5,7 +5,7 @@ export const appMessagesEn: AppMessages = {
     nav: {
       generate: "Generate",
       history: "Logbook",
-      voice: "Voice",
+      voice: "Voice map",
       settings: "Settings",
       plans: "Plans",
       logout: "Sign out"
@@ -186,25 +186,25 @@ export const appMessagesEn: AppMessages = {
     }
   },
   voice: {
-    dashboardTitle: "Your voice profile",
-    dashboardSubtitle: "The digital archive of your authorial imprints and writing evolution.",
+    dashboardTitle: "Your voice map",
+    dashboardSubtitle: "How you navigate, how you map routes — and how to improve.",
     dashboardEmpty:
-      "Your voice atelier is silent. Add the first examples to shape your digital identity.",
-    dashboardEmptyAction: "Add your first example",
-    manageExamples: "Manage examples",
-    mirrorFallbackTitle: "Your voice today",
+      "Your voice map is still empty. Add the first texts to start mapping your identity.",
+    dashboardEmptyAction: "Add your first text",
+    manageExamples: "Manage texts",
+    mirrorFallbackTitle: "Your map today",
     mirrorFallbackSubtitle:
-      "With more raw material, Cultiv will also map your cognitive and argument patterns.",
+      "With more reference texts, Cultiv will also map your cognitive and argument patterns.",
     detailLayers: {
-      formats: "By format",
-      antiPatterns: "What to avoid",
-      profileHealth: "Profile health"
+      formats: "Routes by territory",
+      antiPatterns: "Terrains to avoid",
+      profileHealth: "Expedition health"
     },
     nextStep: {
-      eyebrow: "Next step",
+      eyebrow: "Next route",
       matureMessage:
-        "Your voice is well represented. The natural next step is to generate content with it.",
-      generateCta: "Generate content",
+        "Your voice map is complete. The natural next step is to chart a new expedition.",
+      generateCta: "New expedition",
       messages: {
         add_more_examples:
           "More examples make your voice more predictable and consistent in generations.",
@@ -228,8 +228,8 @@ export const appMessagesEn: AppMessages = {
         upgrade_plan: "Coming soon"
       }
     },
-    confidence: "Confidence",
-    confidencePanelTitle: "Confidence in your voice",
+    confidence: "Map confidence",
+    confidencePanelTitle: "Voice map confidence",
     confidenceDialEyebrow: "Confidence",
     confidenceDialSubline: {
       high: "strong roots",
@@ -280,48 +280,48 @@ export const appMessagesEn: AppMessages = {
       conservative: "Conservative adaptation: Cultiv prefers to stay very close to your examples.",
       standard: "Balanced adaptation between staying faithful to examples and flexing across formats."
     },
-    diagnostics: "Diagnostics",
+    diagnostics: "Expedition diagnosis",
     reasonCodeMessages: {
       insufficient_examples:
-        "There are not enough examples yet to build a strong, predictable voice. Each new sample brings the profile closer to your real style.",
+        "There are not enough reference texts yet to build a strong, predictable map. Each new text brings the map closer to your real style.",
       insufficient_diversity:
-        "There is enough base material, but more format and context diversity is needed to stabilize your voice in generations.",
+        "There is enough base material, but more territory and context diversity is needed to stabilize the map in generations.",
       language_conflict:
-        "Examples mix languages, which reduces consistency. Prefer one primary language or keep texts separated by language."
+        "Texts mix languages, which reduces consistency. Prefer one primary language or keep texts separated by language."
     },
     diagnosticsHealthy: {
       highMultiFormat:
-        "Your voice is well represented across more than one content type. The profile is ready for firmer adaptations.",
-      high: "Your voice is well represented and ready for firmer adaptations in generations.",
-      default: "The current profile is usable, but it can become more representative with new examples."
+        "Your map is well represented across more than one territory. The expedition is ready for firm routes.",
+      high: "Your map is well represented and ready for firmer adaptations in generations.",
+      default: "The current map is usable, but it can become more representative with new texts."
     },
-    coverage: "Format coverage",
-    coverageMissingFormats: "Examples still missing in these formats:",
+    coverage: "Mapped territories",
+    coverageMissingFormats: "Texts still missing in these territories:",
     coverageComplete:
-      "You have covered every recommended format. Great work — your voice is well distributed across the content types Cultiv supports.",
-    underrepresented: "Formats with few examples:",
-    examplesTitle: "Examples",
-    examplesEmpty: "No examples yet.",
-    examplesEmptyAction: "Add example",
-    addExamples: "Add examples",
-    newExampleTitle: "New example",
-    editExampleTitle: "Edit example",
-    updatingBanner: "Updating your voice…",
-    rebuildFailed: "The last profile update failed.",
+      "You have covered every recommended territory. Great work — your voice is well distributed across the content types Cultiv supports.",
+    underrepresented: "Territories with few texts:",
+    examplesTitle: "Reference texts",
+    examplesEmpty: "No reference texts yet.",
+    examplesEmptyAction: "Add text",
+    addExamples: "Add texts",
+    newExampleTitle: "New reference text",
+    editExampleTitle: "Edit reference text",
+    updatingBanner: "Rebuilding your map…",
+    rebuildFailed: "The last map rebuild failed.",
     upgradeSoon: "Coming soon",
     composer: {
-      addSlot: "Add another example",
-      save: "Save examples",
+      addSlot: "Add another text",
+      save: "Save texts",
       advanced: "Advanced options",
       removeSlot: "Remove",
-      slotTitle: "Example {n}",
+      slotTitle: "Text {n}",
       text: "Text",
       format: "Format",
       formatHelp: "About this format",
       language: "Language",
       context: "Context",
       antiPatterns: "Anti-patterns",
-      pinned: "Pin this example",
+      pinned: "Pin this text",
       required: "Required",
       tooShort: "Too short to learn your voice",
       formatRequired: "Select a format",
