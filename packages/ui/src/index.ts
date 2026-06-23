@@ -27,6 +27,20 @@ export { RouteLine, type RouteLineProps } from "./primitives/RouteLine.js";
 export { CoordinateLabel, type CoordinateLabelProps } from "./primitives/CoordinateLabel.js";
 export { ExpeditionCard, type ExpeditionCardProps } from "./primitives/ExpeditionCard.js";
 export { LogbookProse } from "./primitives/LogbookProse.js";
+export {
+  IconCompass,
+  IconMap,
+  IconRoute,
+  IconPin,
+  IconPen,
+  IconScroll,
+  IconLetter,
+  IconFire,
+  IconBrokenCompass,
+  IconBlurredMap,
+  IconWarning,
+  type CartographyIconProps
+} from "./primitives/icons/cartography-icons.js";
 
 export { Label, type LabelProps } from "./patterns/Label.js";
 export { SectionHeader, type SectionHeaderProps } from "./patterns/SectionHeader.js";
