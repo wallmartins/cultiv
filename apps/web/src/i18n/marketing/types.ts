@@ -72,22 +72,6 @@ export type LocaleMessages = {
     readonly eyebrow: string;
     readonly title: string;
     readonly subtitle: string;
-    readonly step1Label: string;
-    readonly step1Title: string;
-    readonly intentions: ReadonlyArray<{
-      readonly title: string;
-      readonly description: string;
-    }>;
-    readonly step2Label: string;
-    readonly step2Title: string;
-    readonly sizeLabel: string;
-    readonly channelLabel: string;
-    readonly sizes: ReadonlyArray<string>;
-    readonly channels: ReadonlyArray<string>;
-    readonly step3Label: string;
-    readonly step3Title: string;
-    readonly step3Description: string;
-    readonly briefingFields: ReadonlyArray<string>;
   };
   readonly comparison: {
     readonly eyebrow: string;

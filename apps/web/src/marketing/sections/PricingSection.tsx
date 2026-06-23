@@ -20,7 +20,12 @@ export function PricingSection({ locale }: PricingSectionProps) {
       <Container ref={sectionRef} className="relative z-10">
         <SectionHeader eyebrow={pricing.eyebrow} title={pricing.title} />
 
-        <div className="mx-auto grid max-w-5xl gap-5 lg:grid-cols-3" data-section-item>
+        <div
+          className={`mx-auto grid max-w-5xl gap-5 ${
+            pricing.plans.length === 1 ? "max-w-md" : "lg:grid-cols-3"
+          }`}
+          data-section-item
+        >
           {pricing.plans.map((plan) => {
             const isRecommended = plan.recommended === true;
             return (

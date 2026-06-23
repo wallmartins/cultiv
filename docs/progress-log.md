@@ -1,5 +1,6 @@
 # Progress Log
 
+| 2026-06-23 | feat(i18n): Cartography marketing copy pt-BR and en — territory/route/tools vocabulary, six format cards, credit pricing, SEO tagline |
 | 2026-06-23 | docs: Cultiv Cartography redesign implementation plan — 21 tasks across tokens, primitives, marketing reskin, workspace shell, Imprint retirement, QA gate |
 | 2026-06-23 | docs: Cultiv Cartography complete platform redesign design spec — Atlas Editorial approach, cartography identity (compass logo, Playfair/Inter/Caveat/JetBrains Mono), marketing + workspace layout reimagined, premium contained motion, supersedes ADR 0009 Imprint |
 | 2026-06-22 | fix(web): Imprint visual depth — craft Press Mark, scene mats, hero split + HeroImprintArt, restore problem/differentiator SVG scenes, stronger grain/ink/type |
