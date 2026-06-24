@@ -1,7 +1,7 @@
-import { useAuth0 } from "@auth0/auth0-react";
 import { Button, Text } from "@my-ai-orchestrator/ui";
-import { type ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import { AuthLoading } from "~/app/auth/components/AuthLoading";
+import { useRelogin } from "~/app/auth/lib/use-relogin";
 import { useAppLocale } from "~/i18n/app/use-app-locale";
 import { useRetrySdkSession, useSdkSessionStatus } from "~/platform/runtime/client-sdk-context";
 
@@ -10,13 +10,23 @@ export interface AppSdkGateProps {
 }
 
 export function AppSdkGate({ children }: AppSdkGateProps) {
-  const { logout } = useAuth0();
+  const relogin = useRelogin();
   const { messages } = useAppLocale();
   const sessionStatus = useSdkSessionStatus();
   const retrySession = useRetrySdkSession();
 
+  useEffect(() => {
+    if (sessionStatus === "auth_expired") {
+      relogin();
+    }
+  }, [relogin, sessionStatus]);
+
   if (sessionStatus === "preparing" || sessionStatus === "idle") {
     return <AuthLoading message={messages.auth.preparingSession} />;
+  }
+
+  if (sessionStatus === "auth_expired") {
+    return <AuthLoading message={messages.auth.redirectingToLogin} />;
   }
 
   if (sessionStatus === "failed") {
@@ -29,19 +39,8 @@ export function AppSdkGate({ children }: AppSdkGateProps) {
           <Button type="button" size="compact" onClick={retrySession}>
             {messages.shell.sdk.retry}
           </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            size="compact"
-            onClick={() =>
-              void logout({
-                logoutParams: {
-                  returnTo: `${window.location.origin}/login`
-                }
-              })
-            }
-          >
-            {messages.auth.logoutAndSignInAgain}
+          <Button type="button" variant="ghost" size="compact" onClick={relogin}>
+            {messages.errors.authenticationExpired.action}
           </Button>
         </div>
       </div>

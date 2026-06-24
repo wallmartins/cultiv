@@ -5,6 +5,7 @@ import { AuthLoading } from "~/app/auth/components/AuthLoading";
 import { AuthNotConfigured } from "~/app/auth/components/AuthNotConfigured";
 import { isWebAuthConfigured } from "~/app/auth/lib/auth-config";
 import { resolvePostLoginNavigation } from "~/app/auth/lib/resolve-post-login-navigation";
+import { useRelogin } from "~/app/auth/lib/use-relogin";
 import { useAppLocale } from "~/i18n/app/use-app-locale";
 import { useOptionalClientSdk, useSdkSessionStatus } from "~/platform/runtime/client-sdk-context";
 
@@ -25,11 +26,17 @@ function LoginPageContent() {
   const { messages } = useAppLocale();
   const client = useOptionalClientSdk();
   const sessionStatus = useSdkSessionStatus();
+  const relogin = useRelogin();
   const navigate = useNavigate();
   const redirected = useRef(false);
 
   useEffect(() => {
     if (isLoading) {
+      return;
+    }
+
+    if (sessionStatus === "auth_expired") {
+      relogin();
       return;
     }
 
@@ -52,7 +59,11 @@ function LoginPageContent() {
         }
       });
     }
-  }, [client, isAuthenticated, isLoading, loginWithRedirect, navigate, user?.sub]);
+  }, [client, isAuthenticated, isLoading, loginWithRedirect, navigate, relogin, sessionStatus, user?.sub]);
+
+  if (sessionStatus === "auth_expired") {
+    return <AuthLoading message={messages.auth.redirectingToLogin} />;
+  }
 
   if (isAuthenticated && sessionStatus === "failed") {
     return <AuthLoading message={messages.auth.sessionPrepareFailedLogin} />;
