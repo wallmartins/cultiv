@@ -20,20 +20,20 @@ export function TestimonialSection({ locale }: TestimonialSectionProps) {
       <CartographySurface className="bg-off-white">
         <Container
           ref={sectionRef}
-          className="py-[var(--spacing-section-sm)] md:py-[var(--spacing-section)]"
+          className="py-16 md:py-24 lg:py-28"
         >
-          <figure className="mx-auto max-w-[640px] text-center" data-section-item>
+          <figure className="mx-auto max-w-4xl text-center" data-section-item>
             <Text
               as="blockquote"
-              variant="display-sm"
-              className="italic text-deep-blue"
+              variant="display"
+              className="text-balance italic text-deep-blue"
             >
               &ldquo;{testimonial.quote}&rdquo;
             </Text>
             <Text
               as="figcaption"
               variant="margem"
-              className="mt-6 block text-right text-terracotta"
+              className="mt-8 block text-right text-[clamp(1.125rem,2.5vw,1.5rem)] text-terracotta"
             >
               {testimonial.ps}
             </Text>
