@@ -256,6 +256,11 @@ export type AppVoiceMessages = {
   readonly mirrorFallbackTitle: string;
   readonly mirrorFallbackSubtitle: string;
   readonly mapLayersTitle: string;
+  readonly dashboardTabs: {
+    readonly overview: string;
+    readonly layers: string;
+    readonly health: string;
+  };
   readonly detailLayers: {
     readonly formats: string;
     readonly antiPatterns: string;

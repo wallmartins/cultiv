@@ -202,6 +202,11 @@ export const appMessagesEn: AppMessages = {
     mirrorFallbackSubtitle:
       "With more reference texts, Cultiv will also map your cognitive and argument patterns.",
     mapLayersTitle: "Map layers",
+    dashboardTabs: {
+      overview: "Overview",
+      layers: "Layers",
+      health: "Map health"
+    },
     detailLayers: {
       formats: "Routes by territory",
       antiPatterns: "Terrains to avoid",
@@ -239,10 +244,10 @@ export const appMessagesEn: AppMessages = {
     confidencePanelTitle: "Voice map confidence",
     confidenceDialEyebrow: "Confidence",
     confidenceDialSubline: {
-      high: "strong roots",
-      medium: "taking shape",
-      low: "sprouting",
-      none: "seeding"
+      high: "charted terrain",
+      medium: "contours forming",
+      low: "incipient routes",
+      none: "blank map"
     },
     confidenceLabels: {
       high: "High",

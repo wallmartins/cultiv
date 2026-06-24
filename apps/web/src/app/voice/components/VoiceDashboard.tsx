@@ -3,6 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import type { TraitConfirmationInput } from "@my-ai-orchestrator/contracts";
 import type { AppDisclosureItem } from "~/platform/ui/AppDisclosure";
+import { AppSegmentedControl } from "~/platform/ui/AppSegmentedControl";
 import { AppSkeleton } from "~/platform/ui/AppSkeleton";
 import { toVoiceConfidenceLevel } from "~/app/voice/components/VoiceConfidenceRing";
 import { VoiceMirrorHero } from "~/app/voice/components/VoiceMirrorHero";
@@ -24,7 +25,6 @@ import {
   getVoiceConfidenceDialSubline,
   getVoiceConfidencePanelMessage,
   getVoiceDiagnosticsText,
-  getVoiceDashboardSectionTitles,
   resolveVoiceNextStepFromDiagnostics
 } from "~/app/voice/lib/voice-dashboard-copy";
 import { useAppLocale } from "~/i18n/app/use-app-locale";
@@ -34,6 +34,9 @@ import { useClientSdk } from "~/platform/runtime/client-sdk-context";
 import type { VoiceProfileScreenView } from "@my-ai-orchestrator/contracts";
 
 type DashboardStatus = "loading" | "ready" | "empty" | "error";
+type VoiceDashboardTab = "overview" | "layers" | "health";
+
+const voiceLogbookClassName = "border-0 bg-off-white shadow-cartography";
 
 function formatLayerTitle(title: string, count: number | undefined): string {
   if (count === undefined) {
@@ -72,7 +75,7 @@ function NumberedMapLayerAccordion({
         return (
           <div
             key={item.id}
-            className="overflow-hidden rounded-[5px] border border-dotted-cartography bg-off-white shadow-cartography"
+            className="overflow-hidden rounded-[5px] bg-off-white shadow-cartography"
           >
             <button
               type="button"
@@ -98,7 +101,7 @@ function NumberedMapLayerAccordion({
             <div
               id={panelId}
               className={cn(
-                "border-t border-dotted-cartography px-5 pb-5 pt-4",
+                "border-t border-ink-ghost/20 px-5 pb-5 pt-4",
                 isOpen ? "block" : "hidden"
               )}
             >
@@ -133,8 +136,8 @@ export function VoiceDashboard() {
   const [profile, setProfile] = useState<VoiceProfileScreenView | null>(null);
   const [confirmationDismissed, setConfirmationDismissed] = useState(false);
   const [confirmationSubmitting, setConfirmationSubmitting] = useState(false);
+  const [activeTab, setActiveTab] = useState<VoiceDashboardTab>("overview");
   const authorityAnchorRef = useRef<HTMLDivElement | null>(null);
-  const sectionTitles = getVoiceDashboardSectionTitles(messages.voice);
 
   useEffect(() => {
     void client
@@ -240,7 +243,7 @@ export function VoiceDashboard() {
   };
 
   const healthLayer = (
-    <LogbookProse className="space-y-5 p-4">
+    <LogbookProse className={cn(voiceLogbookClassName, "space-y-5 p-4")}>
       <HealthStat label={voiceMessages.confidence}>
         <Text variant="body" className="font-medium text-ink">
           {confidenceLabel}
@@ -295,23 +298,22 @@ export function VoiceDashboard() {
     </LogbookProse>
   );
 
-  const mapLayerItems: ReadonlyArray<AppDisclosureItem> = [
-    ...(profile.reasoning
-      ? buildReasoningDetailItems({
-          locale,
-          messages: voiceMessages,
-          reasoning: profile.reasoning
-        })
-      : []),
-    {
-      id: "profile-health",
-      title: voiceMessages.detailLayers.profileHealth,
-      children: healthLayer
-    }
+  const mapLayerItems: ReadonlyArray<AppDisclosureItem> = profile.reasoning
+    ? buildReasoningDetailItems({
+        locale,
+        messages: voiceMessages,
+        reasoning: profile.reasoning
+      })
+    : [];
+
+  const dashboardTabs: readonly { readonly value: VoiceDashboardTab; readonly label: string }[] = [
+    { value: "overview", label: voiceMessages.dashboardTabs.overview },
+    { value: "layers", label: voiceMessages.dashboardTabs.layers },
+    { value: "health", label: voiceMessages.dashboardTabs.health }
   ];
 
   return (
-    <div className="space-y-10 px-[var(--spacing-gutter)] py-8 md:py-10">
+    <div className="mx-auto max-w-6xl space-y-10 px-[var(--spacing-gutter)] py-8 md:py-10">
       <VoiceRebuildStatusBanner
         status={rebuildStatus}
         updatingMessage={voiceMessages.updatingBanner}
@@ -340,60 +342,82 @@ export function VoiceDashboard() {
           </div>
         </div>
 
-        {profile.reasoning ? (
-          <div ref={authorityAnchorRef}>
-            <VoiceReasoningMirror
-              locale={locale}
-              messages={voiceMessages.reasoning}
-              voiceMessages={voiceMessages}
-              reasoning={profile.reasoning}
-              confidenceLevel={confidenceLevel}
-              dialSubline={dialSubline}
-              dialAccessibleLabel={dialAccessibleLabel}
-              onAuthorityLinkClick={scrollToAuthority}
-            />
-          </div>
-        ) : (
-          <section className="space-y-6">
-            <div className="space-y-2">
-              <Text as="h2" variant="h2" className="font-playfair text-ink">
-                {voiceMessages.mirrorFallbackTitle}
-              </Text>
-              <Text variant="meta" className="w-full text-ink-muted">
-                {voiceMessages.mirrorFallbackSubtitle}
-              </Text>
-            </div>
-            <VoiceMirrorHero
-              level={confidenceLevel}
-              dialSubline={dialSubline}
-              dialAccessibleLabel={dialAccessibleLabel}
-              bodyCopy={mirrorBodyCopy}
-              healthLabel={voiceMessages.detailLayers.profileHealth}
-            />
-          </section>
-        )}
+        <AppSegmentedControl
+          name="voice-dashboard-tab"
+          value={activeTab}
+          onChange={(value) => setActiveTab(value as VoiceDashboardTab)}
+          options={dashboardTabs.map((tab) => ({
+            value: tab.value,
+            label: tab.label
+          }))}
+          className="max-w-xl"
+        />
       </section>
 
-      {traitConfirmationTarget && profile.reasoning?.traitProfile ? (
-        <VoiceTraitConfirmationCard
-          messages={voiceMessages.reasoning.traitConfirmation}
-          traitKey={traitConfirmationTarget}
-          traitProfile={profile.reasoning.traitProfile}
-          submitting={confirmationSubmitting}
-          onConfirm={handleTraitConfirmation}
-        />
+      {activeTab === "overview" ? (
+        <section className="space-y-6">
+          {profile.reasoning ? (
+            <div ref={authorityAnchorRef}>
+              <VoiceReasoningMirror
+                locale={locale}
+                messages={voiceMessages.reasoning}
+                voiceMessages={voiceMessages}
+                reasoning={profile.reasoning}
+                confidenceLevel={confidenceLevel}
+                dialSubline={dialSubline}
+                dialAccessibleLabel={dialAccessibleLabel}
+                onAuthorityLinkClick={scrollToAuthority}
+              />
+            </div>
+          ) : (
+            <section className="space-y-6">
+              <div className="space-y-2">
+                <Text as="h2" variant="h2" className="font-playfair text-ink">
+                  {voiceMessages.mirrorFallbackTitle}
+                </Text>
+                <Text variant="meta" className="w-full text-ink-muted">
+                  {voiceMessages.mirrorFallbackSubtitle}
+                </Text>
+              </div>
+              <VoiceMirrorHero
+                level={confidenceLevel}
+                dialSubline={dialSubline}
+                dialAccessibleLabel={dialAccessibleLabel}
+                bodyCopy={mirrorBodyCopy}
+                healthLabel={voiceMessages.detailLayers.profileHealth}
+              />
+            </section>
+          )}
+
+          {traitConfirmationTarget && profile.reasoning?.traitProfile ? (
+            <VoiceTraitConfirmationCard
+              messages={voiceMessages.reasoning.traitConfirmation}
+              traitKey={traitConfirmationTarget}
+              traitProfile={profile.reasoning.traitProfile}
+              submitting={confirmationSubmitting}
+              onConfirm={handleTraitConfirmation}
+            />
+          ) : null}
+        </section>
       ) : null}
 
-      <section>
-        <CoordinateLabel
-          index={0}
-          label={sectionTitles.mapLayers}
-          className="mb-4 block"
-        />
-        <NumberedMapLayerAccordion items={mapLayerItems} />
-      </section>
+      {activeTab === "layers" ? (
+        <section>
+          {mapLayerItems.length > 0 ? (
+            <NumberedMapLayerAccordion items={mapLayerItems} />
+          ) : (
+            <LogbookProse className={cn(voiceLogbookClassName, "p-5")}>
+              <Text variant="body" className="w-full text-ink-muted">
+                {voiceMessages.mirrorFallbackSubtitle}
+              </Text>
+            </LogbookProse>
+          )}
+        </section>
+      ) : null}
 
-      <div className="flex flex-col gap-6 border-t border-dotted-cartography pt-8 sm:flex-row sm:items-center sm:justify-between">
+      {activeTab === "health" ? <section>{healthLayer}</section> : null}
+
+      <div className="flex flex-col gap-6 border-t border-ink-ghost/20 pt-8 sm:flex-row sm:items-center sm:justify-between">
         {profile.reasoning ? (
           <Text variant="meta" className="max-w-md text-ink-muted">
             {voiceMessages.reasoning.refineHint}

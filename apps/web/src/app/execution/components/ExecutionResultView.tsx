@@ -12,8 +12,8 @@ export function ExecutionResultView({ content, embedInScrollParent = false }: Ex
     <LogbookProse
       className={
         embedInScrollParent
-          ? "whitespace-pre-wrap rounded-[var(--radius-cartography)] px-4 py-5"
-          : `max-h-[min(70vh,40rem)] overflow-y-auto whitespace-pre-wrap rounded-[var(--radius-cartography)] px-4 py-5 ${lenisScrollRegionClassName}`
+          ? "border-0 bg-transparent whitespace-pre-wrap rounded-[var(--radius-cartography)] px-4 py-5"
+          : `border-0 bg-transparent max-h-[min(70vh,40rem)] overflow-y-auto whitespace-pre-wrap rounded-[var(--radius-cartography)] px-4 py-5 ${lenisScrollRegionClassName}`
       }
       {...(embedInScrollParent ? {} : lenisScrollRegionProps)}
     >

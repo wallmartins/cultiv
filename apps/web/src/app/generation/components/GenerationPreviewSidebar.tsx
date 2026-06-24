@@ -60,7 +60,7 @@ export function GenerationPreviewSidebar({
   return (
     <aside className="mt-8 lg:mt-0 lg:sticky lg:top-[calc(var(--app-header-height)+1.5rem)] lg:self-start">
       <LogbookProse className="space-y-4 p-5">
-        <div className="space-y-1 border-b border-dotted-cartography pb-4">
+        <div className="space-y-1 pb-4">
           <Text as="h2" variant="label" className="font-playfair text-deep-blue">
             {messages.generate.previewTitle}
           </Text>
