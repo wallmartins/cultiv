@@ -6,6 +6,7 @@ import {
   createBackendAppTestApp,
   createBackendAppTestConfig,
   createBackendAppTestServices,
+  expectedVoiceProfileSnapshotId,
   seedExecutionVoiceState,
   waitForJobStatus
 } from "./backend-app.fixtures.js";
@@ -43,7 +44,7 @@ describe("backend app execution surface", () => {
     expect(decodedFirst.content).toContain("provider:gemini:");
     expect(decodedFirst.trace).toBeDefined();
     expect(decodedFirst.voice?.voiceProfileSnapshotId).toBe(
-      "voice-profile-snapshot:user_1:v2:validation-post:2026-05-11T00:00:00.000Z"
+      expectedVoiceProfileSnapshotId("user_1", 2, "validation-post")
     );
 
     const secondResponse = await app.request("/me/executions/run", {

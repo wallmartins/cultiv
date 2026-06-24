@@ -4,9 +4,21 @@ import { createBackendApp } from "../../apps/backend";
 import type { BackendConfig } from "../../apps/backend";
 import { createBackendProductServices } from "../../apps/backend";
 import { createBackendTestAuthorizationHeader } from "../../apps/backend/src/auth/index.js";
+import { buildVoiceProfileSnapshotId } from "../../apps/backend/src/product/voice/voice-resolution-helpers.js";
 
 export const backendAppTestStartedAt = new Date("2026-05-11T00:00:00.000Z");
 export const backendAppTestNow = new Date("2026-05-11T00:00:05.000Z");
+
+export const voiceProfileSnapshotIdPattern = /^vps:[a-f0-9]{32}$/;
+
+export function expectedVoiceProfileSnapshotId(
+  userId: string,
+  profileVersion: number,
+  contentType: string,
+  at: Date = backendAppTestStartedAt
+): string {
+  return buildVoiceProfileSnapshotId(userId, profileVersion, contentType, at);
+}
 
 export const backendAppBaseConfig: BackendConfig = {
   environment: "test",

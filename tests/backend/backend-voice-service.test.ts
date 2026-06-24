@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { VoicePinnedLimitExceededError } from "@my-ai-orchestrator/domain";
 import type { BackendConfig } from "../../apps/backend";
 import { createBackendProductServices } from "../../apps/backend";
+import { buildVoiceProfileSnapshotId } from "../../apps/backend/src/product/voice/voice-resolution-helpers.js";
 
 const config: BackendConfig = {
   environment: "test",
@@ -236,8 +237,13 @@ describe("backend voice service", () => {
 
     expect(effective?.metadata.voiceAdaptationMode).toBe("conservative");
     expect(effective?.metadata.voiceProfileConfidence).toBe("low");
-    expect(effective?.metadata.voiceProfileSnapshotId).toMatch(
-      /^voice-profile-snapshot:user_1:v\d+:linkedin-post:/
+    expect(effective?.metadata.voiceProfileSnapshotId).toBe(
+      buildVoiceProfileSnapshotId(
+        "user_1",
+        effective!.metadata.voiceProfileVersionUsed,
+        "linkedin-post",
+        new Date("2026-05-14T00:00:00.000Z")
+      )
     );
     expect(effective?.voiceHints.styleMarkers).toContain("first-person narrative");
     expect(effective?.voiceHints.constraints).toContain("prefer_conservative_voice_adaptation");

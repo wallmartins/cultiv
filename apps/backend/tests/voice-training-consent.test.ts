@@ -5,6 +5,7 @@ import { BackendVoiceTrainingConsentRequiredError } from "../src/http/errors.js"
 import { createBackendVoiceConsentService } from "../src/safety/voice-consent.js";
 import { createBackendProductServices } from "../src/product/core/services.js";
 import type { BackendConfig } from "../src/config/config.js";
+import { buildVoiceProfileSnapshotId } from "../src/product/voice/voice-resolution-helpers.js";
 
 const config: BackendConfig = {
   environment: "test",
@@ -225,7 +226,14 @@ describe("Voice training consent-gated ingestion", () => {
     expect(effective).toBeDefined();
     expect(effective?.metadata.voiceProfileVersionUsed).toBe(2);
     expect(effective?.voiceHints.tone).toBe("informal");
-    expect(effective?.metadata.voiceProfileSnapshotId).toMatch(/^voice-profile-snapshot:user_6:/);
+    expect(effective?.metadata.voiceProfileSnapshotId).toBe(
+      buildVoiceProfileSnapshotId(
+        "user_6",
+        effective!.metadata.voiceProfileVersionUsed,
+        "linkedin-post",
+        new Date("2026-05-14T00:00:00.000Z")
+      )
+    );
   });
 
   it("fails closed on consent service internal failure", () => {

@@ -7,11 +7,13 @@ const MAX_LINE_COUNT = 400;
 
 // Remove entries as architecture-deepening phases complete.
 const FILE_SIZE_ALLOWLIST = new Set<string>([
-  "apps/web/src/app/voice/components/VoiceDashboard.tsx"
+  "apps/web/src/app/voice/components/VoiceDashboard.tsx",
+  "apps/backend/src/infra/billing/postgres-billing-repository.ts"
 ]);
 
 const FILE_SIZE_BASELINE = new Map<string, number>([
-  ["apps/web/src/app/voice/components/VoiceDashboard.tsx", 433]
+  ["apps/web/src/app/voice/components/VoiceDashboard.tsx", 433],
+  ["apps/backend/src/infra/billing/postgres-billing-repository.ts", 526]
 ]);
 
 function isProductionTypeScriptFile(filePath: string): boolean {

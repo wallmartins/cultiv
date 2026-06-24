@@ -8,6 +8,7 @@ import {
   decodeSyncExecutionView
 } from "@my-ai-orchestrator/contracts";
 import { createExecutionApp } from "./backend-app-executions.shared.js";
+import { expectedVoiceProfileSnapshotId } from "./backend-app.fixtures.js";
 
 describe("backend app execution surface", () => {
   it("exposes execution routes through the canonical /me surface", async () => {
@@ -29,7 +30,7 @@ describe("backend app execution surface", () => {
     expect(syncResponse.status).toBe(200);
     const decodedSync = await Effect.runPromise(decodeSyncExecutionView(await syncResponse.json()));
     expect(decodedSync.voice.voiceProfileSnapshotId).toBe(
-      "voice-profile-snapshot:user_1:v2:linkedin-post:2026-05-11T00:00:00.000Z"
+      expectedVoiceProfileSnapshotId("user_1", 2, "linkedin-post")
     );
 
     const { app: asyncApp } = createExecutionApp("async");
@@ -47,25 +48,20 @@ describe("backend app execution surface", () => {
 
     expect(asyncResponse.status).toBe(202);
     const decodedQueued = await Effect.runPromise(decodeQueuedExecutionView(await asyncResponse.json()));
-    expect(decodedQueued.voice.voiceProfileSnapshotId).toBe(
-      "voice-profile-snapshot:user_1:v2:newsletter:2026-05-11T00:00:00.000Z"
-    );
+    const newsletterSnapshotId = expectedVoiceProfileSnapshotId("user_1", 2, "newsletter");
+    expect(decodedQueued.voice.voiceProfileSnapshotId).toBe(newsletterSnapshotId);
 
     const listResponse = await asyncApp.request("/me/executions?limit=10&offset=0");
     expect(listResponse.status).toBe(200);
     const decodedList = await Effect.runPromise(decodeExecutionsPageView(await listResponse.json()));
     expect(decodedList.total).toBeGreaterThanOrEqual(1);
-    expect(decodedList.items[0]?.voice?.voiceProfileSnapshotId).toBe(
-      "voice-profile-snapshot:user_1:v2:newsletter:2026-05-11T00:00:00.000Z"
-    );
+    expect(decodedList.items[0]?.voice?.voiceProfileSnapshotId).toBe(newsletterSnapshotId);
 
     const executionId = decodedQueued.jobId;
     const statusResponse = await asyncApp.request(`/me/executions/${executionId}`);
     expect(statusResponse.status).toBe(200);
     const decodedStatus = await Effect.runPromise(decodeExecutionStatusView(await statusResponse.json()));
-    expect(decodedStatus.voice?.voiceProfileSnapshotId).toBe(
-      "voice-profile-snapshot:user_1:v2:newsletter:2026-05-11T00:00:00.000Z"
-    );
+    expect(decodedStatus.voice?.voiceProfileSnapshotId).toBe(newsletterSnapshotId);
 
     const eventsResponse = await asyncApp.request(`/me/executions/${executionId}/events`);
     expect(eventsResponse.status).toBe(200);
