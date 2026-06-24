@@ -10,11 +10,12 @@ import {
 import { useAuth0 } from "@auth0/auth0-react";
 import { createClientSdk, type ClientSdk } from "@my-ai-orchestrator/client-sdk";
 import type { WebAuthConfig } from "~/app/auth/lib/auth-config";
+import { isAuthSessionExpiredError } from "~/app/auth/lib/is-auth-session-expired";
 import { useApiAccessToken } from "~/app/auth/lib/use-api-access-token";
 
 const SESSION_PREP_TIMEOUT_MS = 15_000;
 
-export type SdkSessionStatus = "idle" | "preparing" | "ready" | "failed";
+export type SdkSessionStatus = "idle" | "preparing" | "ready" | "failed" | "auth_expired";
 
 export interface ClientSdkContextValue {
   readonly client: ClientSdk | null;
@@ -65,10 +66,10 @@ export function ClientSdkProvider({ config, children }: ClientSdkProviderProps) 
           setSessionStatus("ready");
         }
       })
-      .catch(() => {
+      .catch((error: unknown) => {
         if (!cancelled) {
           window.clearTimeout(timeoutId);
-          setSessionStatus("failed");
+          setSessionStatus(isAuthSessionExpiredError(error) ? "auth_expired" : "failed");
         }
       });
 
