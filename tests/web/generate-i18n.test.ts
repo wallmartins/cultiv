@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { MARKETING_CONTENT_TYPE_IDS } from "../../apps/web/src/marketing/content/content-types/catalog.js";
+import { resolveIntentBriefingFieldLabelKey } from "../../apps/web/src/app/generation/lib/intent-field-label-key.js";
 import { getBriefingGuidance } from "../../apps/web/src/i18n/app/briefing-guidance.js";
 import { getFieldHelpText, getFieldLabel, hasFieldCopy } from "../../apps/web/src/i18n/app/field-labels.js";
 import { getGenerationLanguageLabel } from "../../apps/web/src/i18n/app/generation-languages.js";
@@ -46,6 +47,15 @@ describe("generate screen i18n overlays", () => {
   it("localizes generation language options", () => {
     expect(getGenerationLanguageLabel("pt", "pt-BR")).toBe("Português (Brasil)");
     expect(getGenerationLanguageLabel("pt", "en-US")).toBe("Inglês (EUA)");
+  });
+
+  it("localizes engage-audience briefing fields via validation-post labels regardless of length tier", () => {
+    const fieldLabelKey = resolveIntentBriefingFieldLabelKey("engage-audience");
+
+    expect(fieldLabelKey).toBe("validation-post");
+    expect(getFieldLabel("pt", fieldLabelKey, "hypothesis", "Hypothesis")).toBe("Hipótese");
+    expect(getFieldLabel("pt", fieldLabelKey, "evidence", "Evidence")).toBe("Pontos de prova");
+    expect(getFieldLabel("pt", fieldLabelKey, "question", "Question")).toBe("Pergunta");
   });
 
   it("localizes preview recommendation explanations", () => {

@@ -1,6 +1,6 @@
 import type { ContentTypeCatalogView } from "@my-ai-orchestrator/contracts";
 import { useMemo, useState } from "react";
-import { resolveLegacyContentTypeId } from "~/app/generation/lib/generate-prefill";
+import { resolveIntentBriefingFieldLabelKey } from "~/app/generation/lib/intent-field-label-key";
 import type { GenerationFormSelection } from "~/app/generation/hooks/useGenerationForm";
 import type { useGenerationWizard } from "~/app/generation/hooks/useGenerationWizard";
 
@@ -38,7 +38,7 @@ export function useGenerationFormSelection(
         intent: wizard.intent,
         scope: wizard.scope,
         catalogItem: wizard.selectedIntent,
-        fieldLabelKey: resolveLegacyContentTypeId(wizard.intent, wizard.scope.lengthTier)
+        fieldLabelKey: resolveIntentBriefingFieldLabelKey(wizard.intent)
       };
     }
 

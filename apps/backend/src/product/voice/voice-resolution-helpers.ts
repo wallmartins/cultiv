@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import type {
   ExecutionVoiceMetadataView,
   FallbackReasonCode,
@@ -110,5 +111,6 @@ export function buildVoiceProfileSnapshotId(
   contentType: string,
   timestamp: Date
 ): string {
-  return `voice-profile-snapshot:${userId}:v${profileVersion}:${contentType}:${timestamp.toISOString()}`;
+  const canonical = `${userId}:v${profileVersion}:${contentType}:${timestamp.toISOString()}`;
+  return `vps:${createHash("sha256").update(canonical).digest("hex").slice(0, 32)}`;
 }
