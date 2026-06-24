@@ -20,7 +20,7 @@ coverage/
 .output/
 .vercel/
 .nitro/
-dist.bak/
+apps/backend/dist.bak.*/
 apps/web/.output/
 apps/web/.vercel/
 apps/web/.nitro/
