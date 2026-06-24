@@ -56,11 +56,15 @@ export function HeroSection({ locale }: HeroSectionProps) {
         className="w-full px-[clamp(1.75rem,5.5vw,4rem)] py-6 md:py-10"
       >
         <div className="mx-auto flex max-w-4xl flex-col gap-6 md:gap-8">
-          <div data-hero-item className="space-y-3">
-            <CoordinateLabel index={0} label={heroCoordinateLabels[locale]} />
+          <div data-hero-item className="flex flex-col gap-3">
+            <CoordinateLabel
+              index={0}
+              label={heroCoordinateLabels[locale]}
+              className="block"
+            />
             <span
               className={cn(
-                "inline-block rounded-[5px] border-dotted-cartography bg-off-white px-3 py-1.5",
+                "w-fit rounded-[5px] border-dotted-cartography bg-off-white px-3 py-1.5",
                 "ui-type-mono text-[0.6875rem] uppercase tracking-widest text-ink-muted"
               )}
             >
@@ -72,7 +76,7 @@ export function HeroSection({ locale }: HeroSectionProps) {
             <HeroHeadline text={hero.headline} />
           </div>
 
-          <div data-hero-item className="w-full">
+          <div data-hero-item className="mt-2 w-full md:mt-8">
             <HeroComparisonFrame messages={hero} />
           </div>
 
