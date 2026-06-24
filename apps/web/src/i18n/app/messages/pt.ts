@@ -469,6 +469,7 @@ export const appMessagesPt: AppMessages = {
   },
   settings: {
     title: "Ajustes de navegação",
+    subtitle: "Ajustes finos do mapa e da bússola.",
     profile: "Identidade do explorador",
     email: "Email",
     locale: "Idioma do mapa",
@@ -493,6 +494,10 @@ export const appMessagesPt: AppMessages = {
     planPro: "Pro",
     planCriador: "Criador",
     planFree: "Gratuito",
+    planFreeDescription: "Para começar a explorar com o essencial.",
+    planCriadorDescription: "Para quem publica com regularidade.",
+    planProDescription: "Mais cota, todos os modos e prioridade no rollout.",
+    planCurrentBadge: "Atual",
     upgradeCriador: "Assinar Criador",
     upgradePro: "Assinar Pro",
     alreadyPro: "Você já está no plano Pro.",

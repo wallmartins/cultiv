@@ -1,23 +1,9 @@
 import { useAuth0 } from "@auth0/auth0-react";
-import { Button, CoordinateLabel, LogbookProse, Text } from "@my-ai-orchestrator/ui";
+import { Button, cn, CoordinateLabel, Text } from "@my-ai-orchestrator/ui";
 import { useState } from "react";
 import { useAppLocale } from "~/i18n/app/use-app-locale";
 import { hasVoiceConsent } from "~/app/voice/lib/voice-consent-storage";
-
-function SettingsRow({
-  label,
-  children
-}: {
-  readonly label: string;
-  readonly children: React.ReactNode;
-}) {
-  return (
-    <div className="border-b border-dotted-cartography py-5 last:border-b-0">
-      <CoordinateLabel index={0} label={label} className="mb-3 block" />
-      {children}
-    </div>
-  );
-}
+import { AppCard } from "~/platform/ui/AppCard";
 
 function DeleteFootprintsModal({
   open,
@@ -43,7 +29,7 @@ function DeleteFootprintsModal({
       <div
         role="dialog"
         aria-modal="true"
-        className="w-full max-w-md rounded-[5px] border border-dotted-cartography bg-off-white p-6 shadow-cartography"
+        className="w-full max-w-md rounded-[5px] border border-ink-ghost/25 bg-off-white p-6 shadow-cartography"
       >
         <Text as="h2" variant="h2" className="mb-3 font-playfair text-ink">
           {messages.title}
@@ -75,76 +61,74 @@ export function SettingsScreen() {
   const consentActive = hasVoiceConsent(user?.sub);
 
   return (
-    <div className="mx-auto max-w-[560px] px-[var(--spacing-gutter)] py-8 md:py-10">
-      <div className="mb-8">
+    <div className="mx-auto max-w-4xl space-y-4 px-[var(--spacing-gutter)] py-8 md:py-10">
+      <div className="mb-4">
         <Text as="h1" variant="h1" className="mb-2 font-playfair text-ink">
           {messages.settings.title}
         </Text>
         <Text variant="body" className="text-ink-muted">
-          Ajustes finos do mapa e da bússola.
+          {messages.settings.subtitle}
         </Text>
       </div>
 
-      <LogbookProse className="px-5 py-1">
-        <SettingsRow label={messages.settings.profile}>
-          <Text variant="meta" className="mb-1 block text-ink-muted">
-            {messages.settings.email}
-          </Text>
-          <Text variant="body" className="font-inter text-ink">
-            {user?.email ?? "—"}
-          </Text>
-        </SettingsRow>
+      <AppCard className="space-y-3">
+        <CoordinateLabel index={1} label={messages.settings.profile} className="block" />
+        <Text variant="meta" className="block text-ink-muted">
+          {messages.settings.email}
+        </Text>
+        <Text variant="body" className="font-inter text-ink">
+          {user?.email ?? "—"}
+        </Text>
+      </AppCard>
 
-        <SettingsRow label={messages.settings.locale}>
-          <div className="space-y-3">
-            <LocaleOption
-              name="app-locale"
-              checked={locale === "pt"}
-              label={messages.settings.localePt}
-              onSelect={() => setLocale("pt")}
+      <AppCard className="space-y-4">
+        <CoordinateLabel index={2} label={messages.settings.locale} className="block" />
+        <div className="space-y-3">
+          <LocaleOption
+            name="app-locale"
+            checked={locale === "pt"}
+            label={messages.settings.localePt}
+            onSelect={() => setLocale("pt")}
+          />
+          <LocaleOption
+            name="app-locale"
+            checked={locale === "en"}
+            label={messages.settings.localeEn}
+            onSelect={() => setLocale("en")}
+          />
+        </div>
+      </AppCard>
+
+      <AppCard className="space-y-4">
+        <CoordinateLabel index={3} label={messages.settings.privacy} className="block" />
+        <div className="flex items-center gap-3">
+          <span
+            className={cn(
+              "flex size-8 shrink-0 items-center justify-center rounded-full border",
+              consentActive ? "border-moss/30 bg-moss/10" : "border-ink-ghost/30 bg-cream"
+            )}
+          >
+            <span
+              className={cn("size-2 rounded-full", consentActive ? "bg-moss" : "bg-ink-ghost")}
+              aria-hidden
             />
-            <LocaleOption
-              name="app-locale"
-              checked={locale === "en"}
-              label={messages.settings.localeEn}
-              onSelect={() => setLocale("en")}
-            />
-          </div>
-        </SettingsRow>
+          </span>
+          <Text variant="body" className="font-inter text-sm">
+            {consentActive ? messages.settings.consentActive : messages.settings.consentMissing}
+          </Text>
+        </div>
 
-        <SettingsRow label={messages.settings.privacy}>
-          <div className="space-y-4">
-            <div className="flex items-center gap-3">
-              <span
-                className={`flex size-8 shrink-0 items-center justify-center rounded-full border ${
-                  consentActive
-                    ? "border-moss/30 bg-moss/10"
-                    : "border-dotted-cartography bg-cream"
-                }`}
-              >
-                <span
-                  className={`size-2 rounded-full ${consentActive ? "bg-moss" : "bg-ink-ghost"}`}
-                  aria-hidden
-                />
-              </span>
-              <Text variant="body" className="font-inter text-sm">
-                {consentActive ? messages.settings.consentActive : messages.settings.consentMissing}
-              </Text>
-            </div>
+        <Button
+          type="button"
+          variant="ghost"
+          className="text-red-700 hover:text-red-700/80"
+          onClick={() => setDeleteModalOpen(true)}
+        >
+          {messages.settings.revokeConsent}
+        </Button>
+      </AppCard>
 
-            <Button
-              type="button"
-              variant="ghost"
-              className="text-red-700 hover:text-red-700/80"
-              onClick={() => setDeleteModalOpen(true)}
-            >
-              {messages.settings.revokeConsent}
-            </Button>
-          </div>
-        </SettingsRow>
-      </LogbookProse>
-
-      <div className="mt-8 border-t border-dotted-cartography pt-6">
+      <div className="pt-4">
         <Button
           type="button"
           variant="ghost"
@@ -190,11 +174,12 @@ function LocaleOption({
   return (
     <label className="group flex cursor-pointer items-center gap-3">
       <span
-        className={`flex size-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors duration-200 ${
+        className={cn(
+          "flex size-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors duration-200",
           checked
             ? "border-terracotta bg-terracotta"
-            : "border-dotted-cartography bg-cream group-hover:border-terracotta/40"
-        }`}
+            : "border-ink-ghost/40 bg-cream group-hover:border-terracotta/40"
+        )}
       >
         {checked ? <span className="size-2 rounded-full bg-off-white" /> : null}
       </span>

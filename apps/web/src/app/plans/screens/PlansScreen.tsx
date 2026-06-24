@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { useSearch } from "@tanstack/react-router";
-import { Button, CoordinateLabel, LogbookProse, Text } from "@my-ai-orchestrator/ui";
+import { Button, CoordinateLabel, Text } from "@my-ai-orchestrator/ui";
 import type { BillingCheckoutPeriod, BillingCurrency, BillingPaymentMethod } from "@my-ai-orchestrator/contracts";
 import { useAppLocale } from "~/i18n/app/use-app-locale";
 import { useClientSdk } from "~/platform/runtime/client-sdk-context";
+import { AppCard } from "~/platform/ui/AppCard";
 
 type CheckoutStatus = "success" | "cancel" | undefined;
 
@@ -14,7 +15,7 @@ function ToggleButton(props: { readonly active: boolean; readonly label: string;
       className={
         props.active
           ? "rounded-full border border-terracotta/40 bg-terracotta/10 px-4 py-1.5 font-inter text-sm font-medium text-terracotta"
-          : "rounded-full border border-dotted-cartography px-4 py-1.5 font-inter text-sm text-ink-muted transition-colors hover:border-terracotta/25 hover:text-ink"
+          : "rounded-full border border-ink-ghost/40 px-4 py-1.5 font-inter text-sm text-ink-muted transition-colors hover:border-terracotta/25 hover:text-ink"
       }
       aria-pressed={props.active}
       onClick={props.onClick}
@@ -27,53 +28,44 @@ function ToggleButton(props: { readonly active: boolean; readonly label: string;
 function PlanCard({
   name,
   description,
-  features,
   isCurrent,
   cta,
   onCta,
-  loading
+  loading,
+  currentLabel
 }: {
   readonly name: string;
   readonly description: string;
-  readonly features: readonly string[];
   readonly isCurrent: boolean;
   readonly cta: string;
   readonly onCta: () => void;
   readonly loading: boolean;
+  readonly currentLabel: string;
 }) {
   return (
-    <LogbookProse className="space-y-4 p-5">
+    <AppCard className="flex h-full flex-col justify-between gap-5">
       <div className="flex items-start justify-between gap-3">
-        <div>
+        <div className="min-w-0">
           <Text as="h3" variant="label" className="font-playfair text-lg text-ink">
             {name}
           </Text>
-          <Text variant="meta" className="mt-1 text-ink-muted">
+          <Text variant="meta" className="mt-2 text-ink-muted">
             {description}
           </Text>
         </div>
         {isCurrent ? (
           <span className="shrink-0 rounded-[5px] border border-terracotta/30 bg-terracotta/10 px-2 py-0.5 font-inter text-[0.65rem] font-semibold uppercase tracking-wider text-terracotta">
-            Atual
+            {currentLabel}
           </span>
         ) : null}
       </div>
-
-      <ul className="space-y-2">
-        {features.map((feature, index) => (
-          <li key={index} className="flex items-start gap-2">
-            <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-moss" aria-hidden />
-            <span className="font-inter text-sm text-ink-muted">{feature}</span>
-          </li>
-        ))}
-      </ul>
 
       {!isCurrent ? (
         <Button type="button" disabled={loading} onClick={onCta} className="w-full sm:w-auto">
           {loading ? "…" : cta}
         </Button>
       ) : null}
-    </LogbookProse>
+    </AppCard>
   );
 }
 
@@ -157,32 +149,8 @@ export function PlansScreen() {
         ? messages.plans.checkoutCancel
         : null;
 
-  const freeFeatures = [
-    "Acesso à plataforma",
-    "Mapa de voz básico",
-    "Todos os objetivos de escrita",
-    "Modo rápido de geração",
-    "Prévia antes de gerar"
-  ];
-
-  const creatorFeatures = [
-    "Tudo do Gratuito",
-    "Mais gerações por mês",
-    "Modos rápido e equilibrado",
-    "Perfil de voz mais robusto",
-    "Suporte a textos de médio e longo alcance"
-  ];
-
-  const proFeatures = [
-    "Tudo do Criador",
-    "Cota bem mais generosa de gerações",
-    "Todos os modos de geração",
-    "Acesso antecipado a novidades",
-    "Prioridade no rollout"
-  ];
-
   return (
-    <div className="mx-auto max-w-3xl space-y-6 px-[var(--spacing-gutter)] py-8 md:py-10">
+    <div className="mx-auto max-w-6xl space-y-6 px-[var(--spacing-gutter)] py-8 md:py-10">
       <div>
         <Text as="h1" variant="h1" className="mb-2 font-playfair text-ink">
           {messages.plans.title}
@@ -193,20 +161,20 @@ export function PlansScreen() {
       </div>
 
       {statusBanner ? (
-        <LogbookProse className="border-terracotta/30 bg-terracotta/5 p-4">
+        <AppCard className="border-terracotta/30 bg-terracotta/5">
           <Text variant="body" className="text-terracotta">{statusBanner}</Text>
-        </LogbookProse>
+        </AppCard>
       ) : null}
 
       {checkoutError ? (
-        <LogbookProse className="border-red-700/30 bg-red-700/5 p-4">
+        <AppCard className="border-red-700/30 bg-red-700/5">
           <Text variant="meta" className="text-terracotta">
             {messages.plans.checkoutError}
           </Text>
-        </LogbookProse>
+        </AppCard>
       ) : null}
 
-      <LogbookProse className="space-y-4 border-terracotta/40 p-5">
+      <AppCard className="space-y-4 border-terracotta/25">
         <CoordinateLabel index={1} label={messages.plans.currentPlan} className="block" />
         {loadError ? (
           <Text variant="meta" className="text-terracotta">
@@ -224,15 +192,17 @@ export function PlansScreen() {
         ) : (
           <Text variant="meta" className="text-ink-muted">…</Text>
         )}
-      </LogbookProse>
+      </AppCard>
 
-      <LogbookProse className="space-y-5 p-5">
-        <CoordinateLabel index={2} label={messages.plans.changePlan} className="block" />
-        <Text variant="meta" className="text-ink-muted">
-          {messages.plans.changePlanDescription}
-        </Text>
+      <AppCard className="space-y-6">
+        <div className="space-y-2">
+          <CoordinateLabel index={2} label={messages.plans.changePlan} className="block" />
+          <Text variant="meta" className="text-ink-muted">
+            {messages.plans.changePlanDescription}
+          </Text>
+        </div>
 
-        <div className="space-y-4 border-t border-dotted-cartography pt-4">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           <div>
             <Text variant="label" className="mb-3 block font-inter text-xs font-semibold uppercase tracking-wider text-ink-muted">
               {messages.plans.currencyLabel}
@@ -302,48 +272,43 @@ export function PlansScreen() {
           ) : null}
         </div>
 
-        <div className="grid gap-4 border-t border-dotted-cartography pt-4 lg:grid-cols-3">
+        <div className="grid gap-4 lg:grid-cols-3">
           <PlanCard
             name={messages.plans.planFree}
-            description="Equipamento básico para começar a explorar."
-            features={freeFeatures}
+            description={messages.plans.planFreeDescription}
             isCurrent={!isPro && !isCriador}
             cta={messages.plans.upgradeCriador}
             onCta={() => void startCheckout("subscription", "criador", billingPeriod)}
             loading={loadingCheckout === "criador"}
+            currentLabel={messages.plans.planCurrentBadge}
           />
           <PlanCard
             name={messages.plans.planCriador}
-            description="Para quem publica com regularidade."
-            features={creatorFeatures}
+            description={messages.plans.planCriadorDescription}
             isCurrent={isCriador}
             cta={messages.plans.upgradePro}
             onCta={() => void startCheckout("subscription", "pro", billingPeriod)}
             loading={loadingCheckout === "pro"}
+            currentLabel={messages.plans.planCurrentBadge}
           />
           <PlanCard
             name={messages.plans.planPro}
-            description="O máximo de controle e qualidade."
-            features={proFeatures}
+            description={messages.plans.planProDescription}
             isCurrent={isPro}
             cta={messages.plans.upgradePro}
             onCta={() => void startCheckout("subscription", "pro", billingPeriod)}
             loading={loadingCheckout === "pro"}
+            currentLabel={messages.plans.planCurrentBadge}
           />
         </div>
-      </LogbookProse>
+      </AppCard>
 
-      <LogbookProse className="space-y-4 p-5">
+      <AppCard className="space-y-4">
         <CoordinateLabel index={3} label={messages.plans.topUp} className="block" />
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <Text variant="label" className="mb-1 block font-playfair text-ink">
-              Suprimentos de geração
-            </Text>
-            <Text variant="meta" className="text-ink-muted">
-              {messages.plans.topUpDescription}
-            </Text>
-          </div>
+          <Text variant="meta" className="max-w-xl text-ink-muted">
+            {messages.plans.topUpDescription}
+          </Text>
           <Button
             type="button"
             variant="ghost"
@@ -353,7 +318,7 @@ export function PlansScreen() {
             {loadingCheckout === "topup" ? messages.plans.redirecting : messages.plans.topUpCta}
           </Button>
         </div>
-      </LogbookProse>
+      </AppCard>
     </div>
   );
 }

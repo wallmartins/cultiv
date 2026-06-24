@@ -416,6 +416,7 @@ export type AppOnboardingMessages = {
 
 export type AppSettingsMessages = {
   readonly title: string;
+  readonly subtitle: string;
   readonly profile: string;
   readonly email: string;
   readonly locale: string;
@@ -441,6 +442,10 @@ export type AppPlansMessages = {
   readonly planPro: string;
   readonly planCriador: string;
   readonly planFree: string;
+  readonly planFreeDescription: string;
+  readonly planCriadorDescription: string;
+  readonly planProDescription: string;
+  readonly planCurrentBadge: string;
   readonly upgradeCriador: string;
   readonly upgradePro: string;
   readonly alreadyPro: string;
