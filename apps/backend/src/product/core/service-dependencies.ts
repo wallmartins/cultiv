@@ -90,7 +90,17 @@ export function createBackendProductDependencies(
     const protectedDatabase = createProtectedVoiceTrainingDatabaseClient(database, voiceFieldProtection);
 
     yield* registerBackendBillingPlans(billing);
-    yield* seedBillingState(billing, config, now);
+    yield* seedBillingState(
+      billing,
+      {
+        billingUserId: config.billingUserId,
+        billingPlanId: config.billingPlanId,
+        databaseUrl: config.databaseUrl,
+        serviceName: config.serviceName,
+        version: config.version
+      },
+      now
+    );
 
     return {
       database: protectedDatabase,

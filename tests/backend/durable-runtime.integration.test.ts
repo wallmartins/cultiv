@@ -152,7 +152,8 @@ describeIfDurable("durable runtime integration", () => {
       helpers.saveBillingRepository(
         context.postgres.db,
         context.billingRepository,
-        new Date().toISOString()
+        new Date().toISOString(),
+        { allowDestructiveReplace: true }
       )
     );
 
@@ -210,7 +211,8 @@ describeIfDurable("durable runtime integration", () => {
       helpers.saveBillingRepository(
         context.postgres.db,
         context.billingRepository,
-        new Date().toISOString()
+        new Date().toISOString(),
+        { allowDestructiveReplace: true }
       )
     );
 
@@ -303,7 +305,8 @@ describeIfDurable("durable runtime integration", () => {
       helpers.saveBillingRepository(
         context.postgres.db,
         context.billingRepository,
-        new Date().toISOString()
+        new Date().toISOString(),
+        { allowDestructiveReplace: true }
       )
     );
 

@@ -73,7 +73,7 @@ export function backfillBillingSnapshotIntoRelationalTables(
     }
 
     yield* Effect.tryPromise({
-      try: () => persistPostgresBillingRepositoryInTransaction(db, repository),
+      try: () => persistPostgresBillingRepositoryInTransaction(db, repository, { allowDestructiveReplace: true }),
       catch: (error) => (error instanceof Error ? error : new Error(String(error)))
     });
     return true;

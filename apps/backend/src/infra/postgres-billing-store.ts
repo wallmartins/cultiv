@@ -9,10 +9,15 @@ export {
   loadPostgresBillingCatalog,
   loadPostgresBillingRepository,
   persistPostgresBillingRepositoryInTransaction,
+  BillingDestructivePersistBlockedError,
+  persistPostgresBillingUserSlice,
+  persistPostgresBillingUserSliceInTransaction,
   reloadPostgresBillingRepositoryInto,
   reloadPostgresBillingUserInto,
   loadPostgresBillingUserSlice,
   savePostgresBillingRepository,
+  upsertPostgresBillingPlans,
+  upsertPostgresBillingTopUpPackages,
   writePostgresBillingRepository,
   type BillingDbExecutor
 } from "./billing/postgres-billing-repository.js";

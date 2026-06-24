@@ -65,7 +65,7 @@ describeIfPostgres("billing postgres persistence", () => {
       })
     );
 
-    await Effect.runPromise(saveBillingRepository(postgres.db, repository, now().toISOString()));
+    await Effect.runPromise(saveBillingRepository(postgres.db, repository, now().toISOString(), { allowDestructiveReplace: true }));
 
     const reloaded = await Effect.runPromise(loadPostgresBillingRepository(postgres.db));
 
@@ -191,7 +191,7 @@ describeIfPostgres("billing postgres persistence", () => {
       startedAt: "2026-06-14T12:00:00.000Z"
     });
 
-    await Effect.runPromise(saveBillingRepository(postgres.db, repository, "2026-06-14T12:00:00.000Z"));
+    await Effect.runPromise(saveBillingRepository(postgres.db, repository, "2026-06-14T12:00:00.000Z", { allowDestructiveReplace: true }));
 
     await postgres.db
       .insertInto("billing_snapshots")
@@ -264,7 +264,7 @@ describeIfPostgres("billing postgres persistence", () => {
       })
     );
 
-    await Effect.runPromise(saveBillingRepository(postgres.db, repository, now().toISOString()));
+    await Effect.runPromise(saveBillingRepository(postgres.db, repository, now().toISOString(), { allowDestructiveReplace: true }));
 
     const reloaded = await Effect.runPromise(loadPostgresBillingRepository(postgres.db));
     const subscriptionId = "user-jit-free:free:subscription";

@@ -3,8 +3,15 @@ import type { Kysely, Transaction } from "kysely";
 import {
   createBillingRepository,
   type BillingOperationResult,
-  type BillingRepository
+  type BillingRepository,
+  type BillingSubscription,
+  type BillingUsageRecord
 } from "@my-ai-orchestrator/payments";
+import type {
+  BillingCycleState,
+  BillingGenerationReservation,
+  BillingLedgerEntry
+} from "@my-ai-orchestrator/contracts";
 import type { DatabaseTables } from "../postgres-tables.js";
 import {
   mergeBillingUserSliceInto,
@@ -31,6 +38,16 @@ import {
 } from "./billing-row-mappers.js";
 
 export type BillingDbExecutor = Kysely<DatabaseTables> | Transaction<DatabaseTables>;
+
+/** Runtime must never replace billing tables from in-memory snapshots. Tests/migrations opt in explicitly. */
+export class BillingDestructivePersistBlockedError extends Error {
+  constructor() {
+    super(
+      "Blocked full billing table replace: PostgreSQL is the source of truth; use scoped upsert persistence instead"
+    );
+    this.name = "BillingDestructivePersistBlockedError";
+  }
+}
 
 export function hasPostgresBillingTables(db: Kysely<DatabaseTables>): Effect.Effect<boolean, never> {
   return Effect.tryPromise({
@@ -196,8 +213,13 @@ async function persistPostgresBillingRepositoryNow(
 
 export async function writePostgresBillingRepository(
   db: Kysely<DatabaseTables>,
-  repository: BillingRepository
+  repository: BillingRepository,
+  options: { readonly allowDestructiveReplace?: boolean } = {}
 ): Promise<void> {
+  if (!options.allowDestructiveReplace) {
+    throw new BillingDestructivePersistBlockedError();
+  }
+
   await db.transaction().execute((trx) => persistPostgresBillingRepositoryNow(trx, repository));
 }
 
@@ -214,8 +236,13 @@ export function savePostgresBillingRepository(
 
 export function persistPostgresBillingRepositoryInTransaction(
   trx: BillingDbExecutor,
-  repository: BillingRepository
+  repository: BillingRepository,
+  options: { readonly allowDestructiveReplace?: boolean } = {}
 ): Promise<void> {
+  if (!options.allowDestructiveReplace) {
+    return Promise.reject(new BillingDestructivePersistBlockedError());
+  }
+
   return persistPostgresBillingRepositoryNow(trx, repository);
 }
 
@@ -278,4 +305,221 @@ export function reloadPostgresBillingUserInto(
     const slice = yield* loadPostgresBillingUserSlice(db, userId);
     mergeBillingUserSliceInto(target, userId, slice);
   });
+}
+
+function userAccountPrefix(userId: string): string {
+  return `${userId}:`;
+}
+
+export async function upsertPostgresBillingPlans(
+  db: Kysely<DatabaseTables>,
+  repository: BillingRepository
+): Promise<void> {
+  for (const [id, plan] of repository.plans) {
+    const row = mapBillingPlanToRow(id, plan);
+    await db
+      .insertInto("billing_plans")
+      .values(row)
+      .onConflict((oc) => oc.column("id").doUpdateSet({ data: row.data }))
+      .execute();
+  }
+}
+
+export async function upsertPostgresBillingTopUpPackages(
+  db: Kysely<DatabaseTables>,
+  repository: BillingRepository
+): Promise<void> {
+  for (const pkg of repository.topUpPackages.values()) {
+    const row = mapBillingTopUpPackageToRow(pkg);
+    await db
+      .insertInto("billing_top_up_packages")
+      .values(row)
+      .onConflict((oc) =>
+        oc.column("id").doUpdateSet({
+          credits: row.credits,
+          price_cents: row.price_cents,
+          currency: row.currency,
+          description: row.description
+        })
+      )
+      .execute();
+  }
+}
+
+async function upsertBillingSubscriptionRow(
+  executor: BillingDbExecutor,
+  subscription: BillingSubscription
+): Promise<void> {
+  const row = mapBillingSubscriptionToRow(subscription);
+  await executor
+    .insertInto("billing_subscriptions")
+    .values(row)
+    .onConflict((oc) =>
+      oc.column("id").doUpdateSet({
+        user_id: row.user_id,
+        plan_id: row.plan_id,
+        status: row.status,
+        started_at: row.started_at,
+        renewed_at: row.renewed_at,
+        expires_at: row.expires_at
+      })
+    )
+    .execute();
+}
+
+async function upsertBillingUsageRow(executor: BillingDbExecutor, entry: BillingUsageRecord): Promise<void> {
+  const row = mapBillingUsageToRow(entry);
+  await executor
+    .insertInto("billing_usage_records")
+    .values(row)
+    .onConflict((oc) =>
+      oc.column("id").doUpdateSet({
+        user_id: row.user_id,
+        plan_id: row.plan_id,
+        subscription_id: row.subscription_id,
+        kind: row.kind,
+        amount: row.amount,
+        credits: row.credits,
+        created_at: row.created_at,
+        metadata: row.metadata
+      })
+    )
+    .execute();
+}
+
+async function upsertBillingLedgerRow(executor: BillingDbExecutor, entry: BillingLedgerEntry): Promise<void> {
+  const row = mapBillingLedgerToRow(entry);
+  await executor
+    .insertInto("billing_ledger_entries")
+    .values(row)
+    .onConflict((oc) => oc.column("idempotency_key").doNothing())
+    .execute();
+}
+
+async function upsertBillingReservationRow(
+  executor: BillingDbExecutor,
+  reservation: BillingGenerationReservation
+): Promise<void> {
+  const row = mapBillingReservationToRow(reservation);
+  await executor
+    .insertInto("billing_reservations")
+    .values(row)
+    .onConflict((oc) =>
+      oc.column("reservation_id").doUpdateSet({
+        generation_cycle_id: row.generation_cycle_id,
+        subscription_id: row.subscription_id,
+        account_id: row.account_id,
+        quality_mode: row.quality_mode,
+        retry_count: row.retry_count,
+        reserved_credits: row.reserved_credits,
+        status: row.status,
+        idempotency_key: row.idempotency_key,
+        metadata: row.metadata,
+        created_at: row.created_at,
+        updated_at: row.updated_at
+      })
+    )
+    .execute();
+}
+
+async function upsertBillingCycleStateRow(executor: BillingDbExecutor, state: BillingCycleState): Promise<void> {
+  const row = mapBillingCycleStateToRow(state);
+  await executor
+    .insertInto("billing_cycle_states")
+    .values(row)
+    .onConflict((oc) =>
+      oc.column("account_id").doUpdateSet({
+        cycle_id: row.cycle_id,
+        subscription_id: row.subscription_id,
+        opened_at: row.opened_at,
+        closed_at: row.closed_at,
+        rollover_credits: row.rollover_credits,
+        granted_credits: row.granted_credits,
+        expired_credits: row.expired_credits
+      })
+    )
+    .execute();
+}
+
+async function upsertBillingIdempotencyRow(
+  executor: BillingDbExecutor,
+  operationKey: string,
+  result: BillingOperationResult<unknown>
+): Promise<void> {
+  const row = mapBillingIdempotencyToRow(operationKey, result);
+  await executor
+    .insertInto("billing_operation_idempotency")
+    .values(row)
+    .onConflict((oc) => oc.column("operation_key").doUpdateSet({ result: row.result }))
+    .execute();
+}
+
+/** ponytail: upsert-only — never DELETE user billing rows; DB remains source of truth */
+export async function persistPostgresBillingUserSlice(
+  executor: BillingDbExecutor,
+  repository: BillingRepository,
+  userId: string
+): Promise<void> {
+  const accountPrefix = userAccountPrefix(userId);
+  const subscriptions = Array.from(repository.subscriptions.values()).filter(
+    (subscription) => subscription.userId === userId
+  );
+  const usage = repository.usage.filter((entry) => entry.userId === userId);
+  const ledger = repository.ledger.filter((entry) => entry.accountId.startsWith(accountPrefix));
+  const reservations = Array.from(repository.reservations.values()).filter((reservation) =>
+    reservation.accountId.startsWith(accountPrefix)
+  );
+  const cycleStates = Array.from(repository.cycleStates.values()).filter((state) =>
+    state.accountId.startsWith(accountPrefix)
+  );
+  const idempotency = Array.from(repository.idempotency.entries()).filter(([operationKey]) =>
+    operationKey.includes(userId)
+  );
+
+  for (const subscription of subscriptions) {
+    await upsertBillingSubscriptionRow(executor, subscription);
+  }
+
+  for (const entry of usage) {
+    await upsertBillingUsageRow(executor, entry);
+  }
+
+  for (const entry of ledger) {
+    await upsertBillingLedgerRow(executor, entry);
+  }
+
+  for (const reservation of reservations) {
+    await upsertBillingReservationRow(executor, reservation);
+  }
+
+  for (const state of cycleStates) {
+    await upsertBillingCycleStateRow(executor, state);
+  }
+
+  const planIds = [...new Set(subscriptions.map((subscription) => subscription.planId))];
+  for (const planId of planIds) {
+    const plan = repository.plans.get(planId);
+    if (!plan) {
+      continue;
+    }
+
+    const row = mapBillingPlanToRow(planId, plan);
+    await executor
+      .insertInto("billing_plans")
+      .values(row)
+      .onConflict((oc) => oc.column("id").doUpdateSet({ data: row.data }))
+      .execute();
+  }
+
+  for (const [operationKey, result] of idempotency) {
+    await upsertBillingIdempotencyRow(executor, operationKey, result);
+  }
+}
+
+export async function persistPostgresBillingUserSliceInTransaction(
+  db: Kysely<DatabaseTables>,
+  repository: BillingRepository,
+  userId: string
+): Promise<void> {
+  await db.transaction().execute((trx) => persistPostgresBillingUserSlice(trx, repository, userId));
 }

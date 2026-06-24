@@ -40,11 +40,17 @@ export function seedBillingState(
   config: {
     readonly billingUserId?: string;
     readonly billingPlanId?: string;
+    readonly databaseUrl?: string;
     readonly serviceName: string;
     readonly version: string;
   },
   now: () => Date
 ): Effect.Effect<void, never> {
+  // ponytail: with PostgreSQL, entitlements live in the DB; env seed on boot can clobber paid plans after lazy catalog load
+  if (config.databaseUrl) {
+    return Effect.void;
+  }
+
   const userId = config.billingUserId ?? config.serviceName;
   return seedUserBillingState(billing, config, userId, now);
 }

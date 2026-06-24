@@ -152,7 +152,7 @@ export async function openDurableTestContext(
 
   await Effect.runPromise(registerBackendBillingPlans(billing));
   await Effect.runPromise(seedUserBillingState(billing, config, config.billingUserId!, now));
-  await Effect.runPromise(saveBillingRepository(postgres.db, billingRepository, now().toISOString()));
+  await Effect.runPromise(saveBillingRepository(postgres.db, billingRepository, now().toISOString(), { allowDestructiveReplace: true }));
   await drainBillingRepositoryPersistQueue();
 
   return {
@@ -186,7 +186,9 @@ export async function resetDurableTestState(context: DurableTestContext): Promis
     seedUserBillingState(context.billing, context.config, context.config.billingUserId!, () => new Date())
   );
   await Effect.runPromise(
-    saveBillingRepository(context.postgres.db, context.billingRepository, new Date().toISOString())
+    saveBillingRepository(context.postgres.db, context.billingRepository, new Date().toISOString(), {
+      allowDestructiveReplace: true
+    })
   );
   await drainBillingRepositoryPersistQueue();
 }

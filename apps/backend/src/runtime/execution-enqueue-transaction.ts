@@ -14,7 +14,7 @@ import type { BackendConfig } from "../config/config.js";
 import type { ResolvedPricingEnvelope } from "../product/ai-policy/ai-policy-types.js";
 import type { BackendJobEvent } from "../jobs/job-store.js";
 import type { DatabaseTables } from "../infra/postgres-tables.js";
-import { insertOutboxEvent, saveBillingRepositoryInTransaction } from "../infra/durable-store.js";
+import { insertOutboxEvent, persistBillingUserSliceInTransaction } from "../infra/durable-store.js";
 import {
   reserveBackendExecutionCredits,
   resolveBackendBillingIdentity,
@@ -200,7 +200,7 @@ export async function runExecutionEnqueueTransaction(
       );
       creditReservationId = reservation.reservationId;
       await Effect.runPromise(
-        saveBillingRepositoryInTransaction(trx, deps.billingRepository, input.createdAt)
+        persistBillingUserSliceInTransaction(trx, deps.billingRepository, userId)
       );
     }
 

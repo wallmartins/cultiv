@@ -5,7 +5,7 @@ import { replaceBillingRepositoryContents } from "./billing-repository-sync.js";
 import {
   hasPostgresBillingTables,
   loadPostgresBillingCatalog,
-  persistPostgresBillingRepositoryInTransaction,
+  persistPostgresBillingUserSlice,
   reloadPostgresBillingRepositoryInto,
   reloadPostgresBillingUserInto,
   runBillingRepositoryPersistSerialized,
@@ -140,13 +140,14 @@ function loadBillingSnapshotRepository(
 export function saveBillingRepositoryUnqueued(
   db: Kysely<DatabaseTables>,
   repository: BillingRepository,
-  updatedAt: string
+  updatedAt: string,
+  options: { readonly allowDestructiveReplace?: boolean } = {}
 ): Effect.Effect<void, Error> {
   return Effect.gen(function* () {
     const relationalEnabled = yield* hasPostgresBillingTables(db);
     if (relationalEnabled) {
       yield* Effect.tryPromise({
-        try: () => writePostgresBillingRepository(db, repository),
+        try: () => writePostgresBillingRepository(db, repository, options),
         catch: (error) => (error instanceof Error ? error : new Error(String(error)))
       });
       return;
@@ -187,33 +188,26 @@ export function saveBillingRepositoryUnqueued(
 export function saveBillingRepository(
   db: Kysely<DatabaseTables>,
   repository: BillingRepository,
-  updatedAt: string
+  updatedAt: string,
+  options: { readonly allowDestructiveReplace?: boolean } = {}
 ): Effect.Effect<void, Error> {
   return Effect.tryPromise({
     try: () =>
       runBillingRepositoryPersistSerialized(() =>
-        Effect.runPromise(saveBillingRepositoryUnqueued(db, repository, updatedAt))
+        Effect.runPromise(saveBillingRepositoryUnqueued(db, repository, updatedAt, options))
       ),
     catch: (error) => (error instanceof Error ? error : new Error(String(error)))
   });
 }
 
-export function saveBillingRepositoryInTransaction(
+export function persistBillingUserSliceInTransaction(
   trx: BillingDbExecutor,
   repository: BillingRepository,
-  updatedAt: string
+  userId: string
 ): Effect.Effect<void, Error> {
-  return Effect.gen(function* () {
-    const relationalEnabled = yield* hasPostgresBillingTables(trx);
-    if (relationalEnabled) {
-      yield* Effect.tryPromise({
-        try: () => persistPostgresBillingRepositoryInTransaction(trx, repository),
-        catch: (error) => (error instanceof Error ? error : new Error(String(error)))
-      });
-      return;
-    }
-
-    yield* saveBillingRepository(trx, repository, updatedAt);
+  return Effect.tryPromise({
+    try: () => persistPostgresBillingUserSlice(trx, repository, userId),
+    catch: (error) => (error instanceof Error ? error : new Error(String(error)))
   });
 }
 

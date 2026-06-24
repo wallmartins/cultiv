@@ -1,5 +1,6 @@
 # Progress Log
 
+| 2026-06-24 | fix(backend): billing PG is source of truth — block full-table replace at runtime, upsert-only per-user persist, enqueue uses scoped persist; skip BILLING_PLAN_ID env seed when DATABASE_URL is set |
 | 2026-06-24 | fix(web): generation preview — header quota sync (store quotaRemaining not raw credits), projected remaining after cost in sidebar, remove credits from CTA; PT tooltip for engage-audience question field |
 | 2026-06-24 | fix(backend): billing entitlement backfill for existing users without subscription (`ensureUserEntitlement` on GET `/me/billing/entitlement`); map `BillingGatewayError` to 503 on checkout instead of opaque 500 |
 | 2026-06-24 | fix(web): expired Auth0 session relogin — detect auth token failures (`auth_expired`), auto `loginWithRedirect` with `prompt: login` instead of broken `logout` to `/login`; `useRelogin` hook; AppSdkGate/login/callback updated |

@@ -236,7 +236,9 @@ async function seedHitlUser(databaseUrl: string): Promise<string> {
   const postgresClient = getPostgresDatabase(services.rawDatabase);
   if (postgresClient) {
     await Effect.runPromise(
-      saveBillingRepository(postgresClient, services.billingRepository, nowIso)
+      saveBillingRepository(postgresClient, services.billingRepository, nowIso, {
+        allowDestructiveReplace: true
+      })
     );
   }
 
