@@ -8,6 +8,7 @@ import { mapResourceError } from "../error-mappers/error-map-resource.js";
 import { mapSafetyError } from "../error-mappers/error-map-safety.js";
 import { mapVoiceError } from "../error-mappers/error-map-voice.js";
 import { mapBillingError } from "../error-mappers/error-map-billing.js";
+import { mapDatabaseError } from "../error-mappers/error-map-database.js";
 
 export { createHttpErrorResponse };
 export type { HttpErrorResponse };
@@ -15,6 +16,9 @@ export type { HttpErrorResponse };
 export function mapErrorToHttp(error: unknown, path: string): HttpErrorResponse {
   const authResult = mapAuthError(error, path);
   if (authResult) return authResult;
+
+  const databaseResult = mapDatabaseError(error, path);
+  if (databaseResult) return databaseResult;
 
   const resourceResult = mapResourceError(error, path);
   if (resourceResult) return resourceResult;

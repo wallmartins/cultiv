@@ -122,6 +122,95 @@ describe("database jobs", () => {
     expect(job?.progressHistory[2]?.progress.percent).toBe(50);
   });
 
+  it("scopes listByUser and countByUser to the requested user", () => {
+    const database = createDatabase();
+    const createdAt = "2026-05-09T00:00:00.000Z";
+
+    const createJobForUser = (id: string, userId: string) =>
+      database.jobs.create(
+        {
+          id,
+          status: "queued",
+          executionMode: "async",
+          contentType: "newsletter",
+          createdAt,
+          completedAt: null
+        },
+        {
+          history: [
+            {
+              type: "created",
+              at: createdAt,
+              payload: {
+                runtime: { userId }
+              }
+            }
+          ]
+        }
+      );
+
+    Effect.runSync(createJobForUser("job_user_a", "user-a"));
+    Effect.runSync(createJobForUser("job_user_b", "user-b"));
+    Effect.runSync(createJobForUser("job_user_a2", "user-a"));
+
+    const userAList = Effect.runSync(database.jobs.listByUser("user-a", 10, 0));
+    expect(userAList.map((job) => job.id).sort()).toEqual(["job_user_a", "job_user_a2"].sort());
+    expect(Effect.runSync(database.jobs.countByUser("user-a"))).toBe(2);
+    expect(Effect.runSync(database.jobs.countByUser("user-b"))).toBe(1);
+    expect(Effect.runSync(database.jobs.listByUser("user-c", 10, 0))).toHaveLength(0);
+
+    const paged = Effect.runSync(database.jobs.listByUser("user-a", 1, 1));
+    expect(paged).toHaveLength(1);
+    expect(Effect.runSync(database.jobs.countByUser("user-a"))).toBe(2);
+  });
+
+  it("applies list filters before pagination and count", () => {
+    const database = createDatabase();
+    const createJob = (id: string, status: "queued" | "done", createdAt: string, contentType: string) =>
+      Effect.runSync(
+        database.jobs.create(
+          {
+            id,
+            status,
+            executionMode: "async",
+            contentType,
+            createdAt,
+            completedAt: status === "done" ? createdAt : null
+          },
+          {
+            history: [
+              {
+                type: "created",
+                at: createdAt,
+                payload: { runtime: { userId: "user-a" } }
+              }
+            ]
+          }
+        )
+      );
+
+    createJob("old-done", "done", "2026-05-01T00:00:00.000Z", "newsletter");
+    createJob("recent-failed", "queued", "2026-06-20T00:00:00.000Z", "twitter-thread");
+    Effect.runSync(
+      database.jobs.fail(
+        "recent-failed",
+        { message: "boom" },
+        "2026-06-20T01:00:00.000Z"
+      )
+    );
+
+    const filters = {
+      period: "30d" as const,
+      status: "failed" as const,
+      contentType: "twitter-thread"
+    };
+
+    expect(Effect.runSync(database.jobs.countByUser("user-a", filters))).toBe(1);
+    expect(Effect.runSync(database.jobs.listByUser("user-a", 10, 0, filters)).map((job) => job.id)).toEqual([
+      "recent-failed"
+    ]);
+  });
+
   it("throws typed errors for duplicate and missing jobs", () => {
     const database = createDatabase();
     Effect.runSync(database.jobs.create({

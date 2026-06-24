@@ -1,4 +1,5 @@
 import { Effect } from "effect";
+import type { DatabaseError } from "@my-ai-orchestrator/database";
 
 export interface BackendOperator {
   readonly id: string;
@@ -10,7 +11,7 @@ export interface BackendOperator {
 export interface BackendOperatorRepository {
   readonly findById: (
     id: string
-  ) => Effect.Effect<BackendOperator | undefined, never>;
+  ) => Effect.Effect<BackendOperator | undefined, DatabaseError>;
 
   readonly create: (
     args: {
@@ -19,5 +20,5 @@ export interface BackendOperatorRepository {
       readonly roles?: readonly string[];
       readonly status?: BackendOperator["status"];
     }
-  ) => Effect.Effect<BackendOperator, never>;
+  ) => Effect.Effect<BackendOperator, DatabaseError>;
 }

@@ -78,7 +78,7 @@ describe("Public Auth JIT Provisioning", () => {
     const actor = await Effect.runPromise(
       resolveBackendPublicAuthenticatedActor({
         config,
-        route: "POST /api/run",
+        route: "POST /me/executions/run",
         readHeader: (name) => (name.toLowerCase() === "authorization" ? `Bearer ${token}` : undefined)
       }).pipe(
         Effect.provide(createApplicationUserServiceLayer(repo))
@@ -102,7 +102,7 @@ describe("Public Auth JIT Provisioning", () => {
     const first = await Effect.runPromise(
       resolveBackendPublicAuthenticatedActor({
         config,
-        route: "POST /api/run",
+        route: "POST /me/executions/run",
         readHeader: (name) => (name.toLowerCase() === "authorization" ? `Bearer ${token}` : undefined)
       }).pipe(
         Effect.provide(createApplicationUserServiceLayer(repo))
@@ -112,7 +112,7 @@ describe("Public Auth JIT Provisioning", () => {
     const second = await Effect.runPromise(
       resolveBackendPublicAuthenticatedActor({
         config,
-        route: "POST /api/run",
+        route: "POST /me/executions/run",
         readHeader: (name) => (name.toLowerCase() === "authorization" ? `Bearer ${token}` : undefined)
       }).pipe(
         Effect.provide(createApplicationUserServiceLayer(repo))
@@ -135,7 +135,7 @@ describe("Public Auth JIT Provisioning", () => {
     const actorA = await Effect.runPromise(
       resolveBackendPublicAuthenticatedActor({
         config,
-        route: "POST /api/run",
+        route: "POST /me/executions/run",
         readHeader: (name) => (name.toLowerCase() === "authorization" ? `Bearer ${tokenA}` : undefined)
       }).pipe(
         Effect.provide(createApplicationUserServiceLayer(repo))
@@ -145,7 +145,7 @@ describe("Public Auth JIT Provisioning", () => {
     const actorB = await Effect.runPromise(
       resolveBackendPublicAuthenticatedActor({
         config,
-        route: "POST /api/run",
+        route: "POST /me/executions/run",
         readHeader: (name) => (name.toLowerCase() === "authorization" ? `Bearer ${tokenB}` : undefined)
       }).pipe(
         Effect.provide(createApplicationUserServiceLayer(repo))
@@ -168,7 +168,7 @@ describe("Public Auth JIT Provisioning", () => {
       Effect.either(
         resolveBackendPublicAuthenticatedActor({
           config,
-          route: "POST /api/run",
+          route: "POST /me/executions/run",
           readHeader: (name) => (name.toLowerCase() === "authorization" ? `Bearer ${token}` : undefined)
         }).pipe(
           Effect.provide(createApplicationUserServiceLayer(repo))
@@ -197,7 +197,7 @@ describe("Public Auth JIT Provisioning", () => {
     const actor = await Effect.runPromise(
       resolveBackendPublicAuthenticatedActor({
         config,
-        route: "POST /api/run",
+        route: "POST /me/executions/run",
         readHeader: (name) => (name.toLowerCase() === "authorization" ? `Bearer ${token}` : undefined)
       }).pipe(
         Effect.provide(createApplicationUserServiceLayer(repo))

@@ -1,7 +1,7 @@
 import type { Context } from "hono";
 import { Effect } from "effect";
-import { ensureDefaultFreeSubscription } from "@my-ai-orchestrator/payments";
 import type { BackendConfig } from "../config/config.js";
+import { getPostgresDatabase } from "../infra/postgres-client.js";
 import { resolveBackendPublicAuthenticatedActor } from "./index.js";
 import { createApplicationUserServiceLayer } from "./application-user-service.js";
 import { resolveBackendOperationalActor } from "./operational-auth.js";
@@ -15,24 +15,19 @@ export async function resolvePublicActor(
   route: string,
   services: BackendProductServices
 ) {
-  const actor = await runEffectOrThrow(
+  const postgres = getPostgresDatabase(services.database);
+  return runEffectOrThrow(
     resolveBackendPublicAuthenticatedActor({
       config,
       route,
-      readHeader: (name: string) => c.req.header(name)
+      readHeader: (name: string) => c.req.header(name),
+      billing: services.billing,
+      billingRepository: services.billingRepository,
+      postgres
     }).pipe(
       Effect.provide(createApplicationUserServiceLayer(services.users))
     )
   );
-
-  await runEffectOrThrow(
-    ensureDefaultFreeSubscription(services.billing, actor.userId, {
-      now: () => new Date(),
-      idempotencyNamespace: config.serviceName
-    })
-  );
-
-  return actor;
 }
 
 export async function resolveOperationalActor(

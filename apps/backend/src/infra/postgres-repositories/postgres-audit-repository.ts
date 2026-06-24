@@ -2,6 +2,7 @@ import { Effect } from "effect";
 import { Kysely } from "kysely";
 import type { AuditRecord, AuditRepository } from "@my-ai-orchestrator/database";
 import type { DatabaseTables } from "../postgres-tables.js";
+import { postgresTryPromise } from "./postgres-try-promise.js";
 
 type AuditRecordRow = {
   id: string;
@@ -64,68 +65,58 @@ export function createPostgresAuditRepository(
   return {
     putIfAbsent(record) {
       return Effect.gen(function* () {
-        const existing = yield* Effect.tryPromise({
-          try: () =>
-            db.selectFrom("audit_records")
-              .where("logical_key", "=", record.logicalKey)
-              .selectAll()
-              .executeTakeFirst(),
-          catch: () => undefined
-        }).pipe(Effect.catchAll(() => Effect.succeed(undefined)));
+        const existing = yield* postgresTryPromise("audit_records.putIfAbsent.lookup", () =>
+          db.selectFrom("audit_records")
+            .where("logical_key", "=", record.logicalKey)
+            .selectAll()
+            .executeTakeFirst()
+        );
 
         if (existing) {
           return parseRow(existing);
         }
 
         const row = toRow(record);
-        yield* Effect.tryPromise({
-          try: () =>
-            db.insertInto("audit_records")
-              .values(row)
-              .onConflict((conflict) => conflict.column("logical_key").doNothing())
-              .execute(),
-          catch: () => undefined
-        }).pipe(Effect.catchAll(() => Effect.succeed(undefined)));
+        yield* postgresTryPromise("audit_records.putIfAbsent.insert", () =>
+          db.insertInto("audit_records")
+            .values(row)
+            .onConflict((conflict) => conflict.column("logical_key").doNothing())
+            .execute()
+        );
 
-        const stored = yield* Effect.tryPromise({
-          try: () =>
-            db.selectFrom("audit_records")
-              .where("logical_key", "=", record.logicalKey)
-              .selectAll()
-              .executeTakeFirst(),
-          catch: () => undefined
-        }).pipe(Effect.catchAll(() => Effect.succeed(undefined)));
+        const stored = yield* postgresTryPromise("audit_records.putIfAbsent.readback", () =>
+          db.selectFrom("audit_records")
+            .where("logical_key", "=", record.logicalKey)
+            .selectAll()
+            .executeTakeFirst()
+        );
 
         return stored ? parseRow(stored) : record;
-      }).pipe(Effect.orDie);
+      });
     },
     getByLogicalKey(logicalKey) {
       return Effect.gen(function* () {
-        const row = yield* Effect.tryPromise({
-          try: () =>
-            db.selectFrom("audit_records")
-              .where("logical_key", "=", logicalKey)
-              .selectAll()
-              .executeTakeFirst(),
-          catch: () => undefined
-        }).pipe(Effect.catchAll(() => Effect.succeed(undefined)));
+        const row = yield* postgresTryPromise("audit_records.getByLogicalKey", () =>
+          db.selectFrom("audit_records")
+            .where("logical_key", "=", logicalKey)
+            .selectAll()
+            .executeTakeFirst()
+        );
 
         return row ? parseRow(row) : undefined;
-      }).pipe(Effect.orDie);
+      });
     },
     list() {
       return Effect.gen(function* () {
-        const rows = yield* Effect.tryPromise({
-          try: () =>
-            db.selectFrom("audit_records")
-              .selectAll()
-              .orderBy("occurred_at", "asc")
-              .execute(),
-          catch: () => [] as AuditRecordRow[]
-        }).pipe(Effect.catchAll(() => Effect.succeed([])));
+        const rows = yield* postgresTryPromise("audit_records.list", () =>
+          db.selectFrom("audit_records")
+            .selectAll()
+            .orderBy("occurred_at", "asc")
+            .execute()
+        );
 
         return rows.map(parseRow);
-      }).pipe(Effect.orDie);
+      });
     }
   };
 }

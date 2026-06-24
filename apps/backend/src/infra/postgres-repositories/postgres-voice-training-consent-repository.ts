@@ -5,6 +5,7 @@ import type { VoiceTrainingConsentRecord, VoiceTrainingConsentRepository } from 
 import { toVoiceTrainingConsentRecord } from "@my-ai-orchestrator/database";
 import type { DatabaseTables } from "../postgres-tables.js";
 import { parseStoredJsonRecord } from "./json-column.js";
+import { postgresTryPromise } from "./postgres-try-promise.js";
 
 function toRow(record: VoiceTrainingConsentRecord) {
   return {
@@ -41,14 +42,12 @@ export function createPostgresVoiceTrainingConsentRepository(
       return Effect.gen(function* () {
         const next = toVoiceTrainingConsentRecord(record, version);
 
-        yield* Effect.tryPromise({
-          try: () =>
-            db.insertInto("voice_training_consents")
-              .values(toRow(next))
-              .onConflict((oc) => oc.column("user_id").doUpdateSet(toRow(next)))
-              .execute(),
-          catch: () => undefined
-        }).pipe(Effect.catchAll(() => Effect.succeed(undefined)));
+        yield* postgresTryPromise("voice_training_consents.put", () =>
+          db.insertInto("voice_training_consents")
+            .values(toRow(next))
+            .onConflict((oc) => oc.column("user_id").doUpdateSet(toRow(next)))
+            .execute()
+        );
 
         return next;
       });
@@ -56,14 +55,12 @@ export function createPostgresVoiceTrainingConsentRepository(
 
     getByUser(userId) {
       return Effect.gen(function* () {
-        const row = yield* Effect.tryPromise({
-          try: () =>
-            db.selectFrom("voice_training_consents")
-              .where("user_id", "=", userId)
-              .selectAll()
-              .executeTakeFirst(),
-          catch: () => undefined
-        }).pipe(Effect.catchAll(() => Effect.succeed(undefined)));
+        const row = yield* postgresTryPromise("voice_training_consents.getByUser", () =>
+          db.selectFrom("voice_training_consents")
+            .where("user_id", "=", userId)
+            .selectAll()
+            .executeTakeFirst()
+        );
 
         return row ? parseRow(row) : undefined;
       });

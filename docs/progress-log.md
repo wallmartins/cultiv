@@ -1,5 +1,16 @@
 # Progress Log
 
+| 2026-06-24 | fix(backend): lint/typecheck — propagate `DatabaseError` through repo contracts, auth JWT `sub` narrowing, `postgresTryPromise`/`billing-repository-sync`/`public-route` fixes; `pnpm lint` green across monorepo |
+| 2026-06-24 | perf(backend): Issue 107 — billing API boot loads catalog only (`loadPostgresBillingCatalog`); per-user slice hydrates on `resolvePublicActor`; `loadPostgresBillingRepository` kept for explicit full reload paths |
+| 2026-06-24 | refactor(backend): Issue 100 — remove duplicate GET `/api/internal/policies/active`; voice routes use `Routes.*`; async enqueue returns voice inline (drops post-enqueue `getJobStatus`); `dist.bak.*` already gitignored |
+| 2026-06-24 | test(web): Issue 103 — RTL component tests for RequireAuth, AppSdkGate, AppModal (focus trap/Escape), useExecutionsList hasMore; `render-with-router` helper + vitest aliases for web auth/router deps; 128 web tests pass |
+| 2026-06-24 | refactor(backend): Issue 99 — `createPublicRouteHandler` (auth → decode → handler → validate); pilot routes billing checkout, voice profile GET, executions list; shared `authenticateBackendBearerJwt` dedupes public/operational JWT parsing |
+| 2026-06-24 | fix(backend): Issue 89 — worker targeted billing reload per execution user (`reloadBillingRepositoryForUserInto`); PG slice merge for subscriptions/reservations/ledger/cycle state; worker + enqueue rollback paths updated |
+| 2026-06-24 | fix(database): Issue 97 — `listByUser`/`countByUser` filter by userId via `jobUserId` helper; governance test aligned with text-quality deps; `database-jobs.test.ts` user-scoping test |
+| 2026-06-24 | feat(platform): issues 95, 105, 107 — Auth0 memory token cache; TextQualityVoiceProfile canonical in contracts + domain mappers; billing catalog-only API boot + per-user hydration on auth |
+| 2026-06-24 | feat(platform): Code Quality & Scale Readiness Sprint 1–4 — issues 88–106 (except HITL 95/105): PG DatabaseError propagation, JIT billing on provision only, worker per-user billing reload, execution history server filters, auth i18n + document.lang, AppModal a11y, GenerationScreen split (210 lines), text-quality lane cap (3), database listByUser fix, AI provider factory, createPublicRouteHandler, route cleanup + 410 /api/run, React.lazy app routes, useSdkQuery, component tests, webhook tests, web file-size governance; 981 tests pass |
+| 2026-06-24 | docs: issues 107–108 — billing API boot lazy-load, web file-size governance (promoted from backlog) |
+| 2026-06-24 | docs: Code Quality & Scale Readiness program — PRD, implementation plan (8 phases), parent issue, vertical slices 88–106 from full-stack code review |
 | 2026-06-23 | fix(marketing): Cartography landing polish — section rail with scroll highlight, hero vertical center, lucide territory icons, route without dashed line, compositor 3-step tools section, Explorador/Criador/Pro pricing cards |
 | 2026-06-23 | fix(app): plans and settings layout — wider sections, simplified plan cards, numbered settings cards, no dotted borders |
 | 2026-06-23 | fix(app): workspace UX polish — sidebar logo z-index + collapse on navigate; generation layout max-width; history filters grid; voice dashboard tabs; remove dotted borders on voice/history detail |
@@ -512,7 +523,9 @@ Key outcomes:
 - **FAQ:** layout two-column com PressMark, StampBadge, InkBleed; Accordion em cards press-edge com índice terracotta
 - **Copy:** `handwrittenNote` → `imprintNote`; linguagem botânica/editorial trocada por Imprint (registro, marca, atelier) em pt/en
 - **Logo:** Press Mark redesenhado — chapa letterpress hexagonal, C tipográfico slab-serif (wood type), dupla impressão desalinhada, sulcos de voz no counter, tick de registro, borda deckle + bleed terracotta; SVGs favicon/OG atualizados
+- Issue 91: execution history server-side filters — `ExecutionsListQuery` contract + decoder; Postgres/Kysely + in-memory job filters; `executions.list` SDK + `useExecutionsList` API refetch; `hasMore` uses filtered total; backend + hook tests
 - Issue 08 (code complete, HITL pending): SEO + GEO package — JSON-LD (Organization, WebSite, SoftwareApplication, FAQPage, WebPage); `llms.txt` / `llms-full.txt` (pt/en); AI crawler policy in robots; `GeoCitationBlock`; Vercel/Nitro config; tests `seo-meta` + `geo` — awaiting Loops keys, prod deploy, Lighthouse ≥90, DNS smoke test
 - UI pass (Glyphs Labs editorial): paper surface, black grid rules, hero decor grid, nav/badge, stat cells, showcase rows, inverted waitlist band, three-column footer
 - Glossary updates: `CONTEXT.md` (Marketing Surface, Showcase Sample, Waitlist, Cultiv, etc.)
 - Visual system (illustration + typography): Playfair/Caveat/Inter/JetBrains tokens; botanical SVG illustrations with paper grain + stroke-draw/upright animations; `LetterReveal`, `HandwrittenNote`, `StampBadge`, `TypeVine`; integrated across Hero, About, Formats, Showcase, Waitlist sections
+- Issue 94: `GenerationScreen.tsx` decomposed to 210 lines — extracted `GenerationComposeStep`, `LegacyContentTypeSection`, and hooks `useGenerationFormSelection`, `useGenerationPrefill`, `useGenerationSubmit`; generation tests pass

@@ -131,6 +131,11 @@ export function mapStripeEvent(event: Stripe.Event): GatewayWebhookEvent | null 
   }
 }
 
+export function signStripeTestWebhook(payload: string, webhookSecret: string): string {
+  const stripe = new Stripe("sk_test_signing_only");
+  return stripe.webhooks.generateTestHeaderString({ payload, secret: webhookSecret });
+}
+
 export function createStripeGatewayAdapter(options: StripeGatewayAdapterOptions): BillingGatewayAdapter {
   const stripe = new Stripe(options.secretKey);
 

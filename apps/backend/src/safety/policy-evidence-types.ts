@@ -1,4 +1,5 @@
 import { Effect } from "effect";
+import type { DatabaseError } from "@my-ai-orchestrator/database";
 
 export type PolicyEvidenceBoundary = "input" | "scope" | "output" | "consent" | "override";
 
@@ -100,5 +101,7 @@ export interface BackendPolicyEvidenceService {
     readonly occurredAt: string;
   }) => Effect.Effect<void, never>;
 
-  readonly listOperationalEvidence: (filter: PolicyEvidenceFilter) => Effect.Effect<readonly PolicyEvidenceReadModelEntry[]>;
+  readonly listOperationalEvidence: (
+    filter: PolicyEvidenceFilter
+  ) => Effect.Effect<readonly PolicyEvidenceReadModelEntry[], DatabaseError>;
 }

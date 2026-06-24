@@ -1,5 +1,6 @@
 import type { JobProgress, PipelineRequest, SyncRunResponse } from "@my-ai-orchestrator/contracts";
 import type { CorpusManager, MemoryManager } from "@my-ai-orchestrator/core";
+import type { DatabaseError } from "@my-ai-orchestrator/database";
 import type { OrchestrationPlan } from "@my-ai-orchestrator/orchestrator";
 import type { BackendConfig } from "../config/config.js";
 import type { BackendProductServices } from "../product.js";
@@ -17,7 +18,7 @@ export interface ExecutePipelineOptions {
   readonly includeTrace: boolean;
   readonly services: BackendProductServices;
   readonly providerTransport?: BackendProviderTransport;
-  readonly memory?: MemoryManager;
+  readonly memory?: MemoryManager<DatabaseError>;
   readonly corpus?: CorpusManager;
   readonly onProgress?: (progress: JobProgress) => void;
   readonly existingCreditReservationId?: string;

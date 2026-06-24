@@ -60,6 +60,7 @@ export {
   createStripeGatewayAdapter,
   createAsaasGatewayAdapter,
   mapStripeEvent,
+  signStripeTestWebhook,
   mapAsaasWebhookEvent,
   resolveGatewayForCurrency,
   dispatchGatewayWebhookEvent

@@ -1,6 +1,6 @@
 import { Effect } from "effect";
 import { describe, expect, it } from "vitest";
-import { decodeRunResponse } from "@my-ai-orchestrator/contracts";
+import { decodeSyncExecutionView } from "@my-ai-orchestrator/contracts";
 import { createBackendApp } from "../../apps/backend";
 import type { BackendConfig } from "../../apps/backend";
 import { createBackendProductServices } from "../../apps/backend";
@@ -27,20 +27,17 @@ describe("backend product bundle", () => {
 
     const app = createBackendAppTestApp(config, services);
 
-    const response = await app.request("/api/run", {
+    const response = await app.request("/me/executions/run", {
       method: "POST",
       headers: {
         "content-type": "application/json"
       },
       body: JSON.stringify({
-        userId: "user_1",
-        pipelineType: "validation-post",
         contentType: "validation-post",
         briefing: {
           topic: "Product integration",
           keyPoints: ["database", "adapters", "feature flags"]
         },
-        adapter: "openai",
         model: "gpt-4.1",
         includeTrace: true,
         idempotencyKey: "product-m2d"
@@ -49,7 +46,7 @@ describe("backend product bundle", () => {
 
     const body = await response.json();
     expect(response.status).toBe(200);
-    const decoded = await Effect.runPromise(decodeRunResponse(body));
+    const decoded = await Effect.runPromise(decodeSyncExecutionView(body));
     expect(decoded.telemetry?.cost?.estimatedUsdCost).toBeGreaterThan(0);
     expect(decoded.telemetry?.selection?.reason).toBe("request");
     expect(decoded.telemetry?.billing?.planId).toBe("pro");

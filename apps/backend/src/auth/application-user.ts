@@ -1,4 +1,5 @@
 import { Effect } from "effect";
+import type { DatabaseError } from "@my-ai-orchestrator/database";
 
 export interface BackendApplicationUser {
   readonly id: string;
@@ -11,7 +12,7 @@ export interface BackendApplicationUser {
 export interface BackendApplicationUserRepository {
   readonly findByExternalSubject: (
     externalSubject: string
-  ) => Effect.Effect<BackendApplicationUser | undefined, never>;
+  ) => Effect.Effect<BackendApplicationUser | undefined, DatabaseError>;
 
   readonly create: (
     args: {
@@ -21,9 +22,9 @@ export interface BackendApplicationUserRepository {
       readonly createdAt?: Date;
       readonly updatedAt?: Date;
     }
-  ) => Effect.Effect<BackendApplicationUser, never>;
+  ) => Effect.Effect<BackendApplicationUser, DatabaseError>;
 
   readonly findById: (
     id: string
-  ) => Effect.Effect<BackendApplicationUser | undefined, never>;
+  ) => Effect.Effect<BackendApplicationUser | undefined, DatabaseError>;
 }

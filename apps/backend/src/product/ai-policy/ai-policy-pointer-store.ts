@@ -1,5 +1,5 @@
 import { Effect } from "effect";
-import type { DatabaseClient } from "@my-ai-orchestrator/database";
+import type { DatabaseClient, DatabaseError } from "@my-ai-orchestrator/database";
 import { swallowWithDiagnostic } from "../../effects/non-blocking-diagnostics.js";
 import type {
   ActivePolicyPointerRecord,
@@ -21,7 +21,7 @@ export function loadActivePolicyPointer(args: {
   readonly namespace: string;
   readonly defaultPolicyVersion: string;
   readonly now: () => Date;
-}): Effect.Effect<ActivePolicyPointerRecord, never> {
+}): Effect.Effect<ActivePolicyPointerRecord, DatabaseError> {
   return Effect.gen(function* () {
     const existing = yield* args.database.memories.get(POLICY_POINTER_USER_ID, pointerKey(args.namespace));
     const parsed = toActivePolicyPointerRecord(existing?.value);
@@ -52,7 +52,7 @@ export function recordPolicyDegradationSignal(args: {
   readonly database: DatabaseClient;
   readonly namespace: string;
   readonly signal: DegradationSignalRecord;
-}): Effect.Effect<void, never> {
+}): Effect.Effect<void, DatabaseError> {
   return Effect.gen(function* () {
     const existing = yield* args.database.memories.get(POLICY_POINTER_USER_ID, degradationKey(args.namespace));
     const current = toDegradationSignals(existing?.value);
@@ -69,7 +69,7 @@ export function loadPolicyDegradationRecommendation(args: {
   readonly namespace: string;
   readonly activePolicyVersion: string;
   readonly policyVersions: readonly ResolvedAIPolicyVersion[];
-}): Effect.Effect<BackendAIPolicyDegradationRecommendation | undefined, never> {
+}): Effect.Effect<BackendAIPolicyDegradationRecommendation | undefined, DatabaseError> {
   return Effect.gen(function* () {
     const existing = yield* args.database.memories.get(POLICY_POINTER_USER_ID, degradationKey(args.namespace));
     const signals = toDegradationSignals(existing?.value);

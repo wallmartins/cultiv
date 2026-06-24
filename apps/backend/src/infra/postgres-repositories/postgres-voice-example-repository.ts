@@ -7,6 +7,7 @@ import {
 } from "@my-ai-orchestrator/database";
 import type { DatabaseTables } from "../postgres-tables.js";
 import { parseStoredJsonRecord } from "./json-column.js";
+import { postgresTryPromise } from "./postgres-try-promise.js";
 
 function toRow(record: VoiceExampleRecord) {
   return {
@@ -38,10 +39,9 @@ export function createPostgresVoiceExampleRepository(
   return {
     create(record, version = 1) {
       return Effect.gen(function* () {
-        const existing = yield* Effect.tryPromise({
-          try: () => db.selectFrom("voice_examples").where("id", "=", record.id).selectAll().executeTakeFirst(),
-          catch: () => undefined
-        }).pipe(Effect.catchAll(() => Effect.succeed(undefined)));
+        const existing = yield* postgresTryPromise("voice_examples.create.lookup", () =>
+          db.selectFrom("voice_examples").where("id", "=", record.id).selectAll().executeTakeFirst()
+        );
 
         if (existing) {
           return yield* Effect.fail(new DatabaseVoiceExampleAlreadyExistsError({ exampleId: record.id }));
@@ -49,10 +49,9 @@ export function createPostgresVoiceExampleRepository(
 
         const next = { ...record, version };
 
-        yield* Effect.tryPromise({
-          try: () => db.insertInto("voice_examples").values(toRow(next)).execute(),
-          catch: (e) => new DatabaseVoiceExampleAlreadyExistsError({ exampleId: record.id })
-        });
+        yield* postgresTryPromise("voice_examples.create.insert", () =>
+          db.insertInto("voice_examples").values(toRow(next)).execute()
+        );
 
         return next;
       });
@@ -60,10 +59,9 @@ export function createPostgresVoiceExampleRepository(
 
     save(record) {
       return Effect.gen(function* () {
-        const existing = yield* Effect.tryPromise({
-          try: () => db.selectFrom("voice_examples").where("id", "=", record.id).selectAll().executeTakeFirst(),
-          catch: () => undefined
-        }).pipe(Effect.catchAll(() => Effect.succeed(undefined)));
+        const existing = yield* postgresTryPromise("voice_examples.save.lookup", () =>
+          db.selectFrom("voice_examples").where("id", "=", record.id).selectAll().executeTakeFirst()
+        );
 
         if (!existing) {
           return yield* Effect.fail(new DatabaseVoiceExampleNotFoundError({ exampleId: record.id }));
@@ -71,10 +69,9 @@ export function createPostgresVoiceExampleRepository(
 
         const next = { ...record, version: record.version + 1 };
 
-        yield* Effect.tryPromise({
-          try: () => db.updateTable("voice_examples").set(toRow(next)).where("id", "=", record.id).execute(),
-          catch: (e) => new DatabaseVoiceExampleNotFoundError({ exampleId: record.id })
-        });
+        yield* postgresTryPromise("voice_examples.save.update", () =>
+          db.updateTable("voice_examples").set(toRow(next)).where("id", "=", record.id).execute()
+        );
 
         return next;
       });
@@ -82,10 +79,9 @@ export function createPostgresVoiceExampleRepository(
 
     get(id) {
       return Effect.gen(function* () {
-        const row = yield* Effect.tryPromise({
-          try: () => db.selectFrom("voice_examples").where("id", "=", id).selectAll().executeTakeFirst(),
-          catch: () => undefined
-        }).pipe(Effect.catchAll(() => Effect.succeed(undefined)));
+        const row = yield* postgresTryPromise("voice_examples.get", () =>
+          db.selectFrom("voice_examples").where("id", "=", id).selectAll().executeTakeFirst()
+        );
 
         return row ? parseRow(row) : undefined;
       });
@@ -93,10 +89,9 @@ export function createPostgresVoiceExampleRepository(
 
     listByUser(userId) {
       return Effect.gen(function* () {
-        const rows = yield* Effect.tryPromise({
-          try: () => db.selectFrom("voice_examples").where("user_id", "=", userId).selectAll().execute(),
-          catch: () => [] as { id: string; user_id: string; data: string; version: number; created_at: string }[]
-        }).pipe(Effect.catchAll(() => Effect.succeed([] as { id: string; user_id: string; data: string; version: number; created_at: string }[])));
+        const rows = yield* postgresTryPromise("voice_examples.listByUser", () =>
+          db.selectFrom("voice_examples").where("user_id", "=", userId).selectAll().execute()
+        );
 
         return rows.map(parseRow);
       });
@@ -104,20 +99,18 @@ export function createPostgresVoiceExampleRepository(
 
     remove(id) {
       return Effect.gen(function* () {
-        const result = yield* Effect.tryPromise({
-          try: () => db.deleteFrom("voice_examples").where("id", "=", id).executeTakeFirst(),
-          catch: () => ({ numDeletedRows: 0n })
-        }).pipe(Effect.catchAll(() => Effect.succeed({ numDeletedRows: 0n })));
+        const result = yield* postgresTryPromise("voice_examples.remove", () =>
+          db.deleteFrom("voice_examples").where("id", "=", id).executeTakeFirst()
+        );
 
         return result.numDeletedRows > 0n;
       });
     },
     removeByUser(userId) {
       return Effect.gen(function* () {
-        const result = yield* Effect.tryPromise({
-          try: () => db.deleteFrom("voice_examples").where("user_id", "=", userId).executeTakeFirst(),
-          catch: () => ({ numDeletedRows: 0n })
-        }).pipe(Effect.catchAll(() => Effect.succeed({ numDeletedRows: 0n })));
+        const result = yield* postgresTryPromise("voice_examples.removeByUser", () =>
+          db.deleteFrom("voice_examples").where("user_id", "=", userId).executeTakeFirst()
+        );
 
         return Number(result.numDeletedRows);
       });

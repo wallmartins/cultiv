@@ -234,7 +234,10 @@ export async function closeDurableRuntime(
 }
 
 export async function reloadBillingRepository(context: DurableTestContext) {
-  return Effect.runPromise(loadBillingRepository(context.postgres.db));
+  const { loadPostgresBillingRepository } = await import(
+    "../../apps/backend/src/infra/postgres-billing-store.js"
+  );
+  return Effect.runPromise(loadPostgresBillingRepository(context.postgres.db));
 }
 
 export { saveBillingRepository };

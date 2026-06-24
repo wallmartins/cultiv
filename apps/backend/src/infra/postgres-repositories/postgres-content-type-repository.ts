@@ -3,6 +3,7 @@ import { Kysely } from "kysely";
 import type { ContentTypeRecord, ContentTypeRepository } from "@my-ai-orchestrator/database";
 import type { DatabaseTables } from "../postgres-tables.js";
 import { parseStoredJsonRecord } from "./json-column.js";
+import { postgresTryPromise } from "./postgres-try-promise.js";
 
 function toRow(record: ContentTypeRecord) {
   return {
@@ -29,14 +30,12 @@ export function createPostgresContentTypeRepository(
       return Effect.gen(function* () {
         const next = { ...record, version, updatedAt };
 
-        yield* Effect.tryPromise({
-          try: () =>
-            db.insertInto("content_types")
-              .values(toRow(next))
-              .onConflict((oc) => oc.column("id").doUpdateSet(toRow(next)))
-              .execute(),
-          catch: () => undefined
-        }).pipe(Effect.catchAll(() => Effect.succeed(undefined)));
+        yield* postgresTryPromise("content_types.put", () =>
+          db.insertInto("content_types")
+            .values(toRow(next))
+            .onConflict((oc) => oc.column("id").doUpdateSet(toRow(next)))
+            .execute()
+        );
 
         return next;
       });
@@ -44,14 +43,12 @@ export function createPostgresContentTypeRepository(
 
     get(id) {
       return Effect.gen(function* () {
-        const row = yield* Effect.tryPromise({
-          try: () =>
-            db.selectFrom("content_types")
-              .where("id", "=", id)
-              .selectAll()
-              .executeTakeFirst(),
-          catch: () => undefined
-        }).pipe(Effect.catchAll(() => Effect.succeed(undefined)));
+        const row = yield* postgresTryPromise("content_types.get", () =>
+          db.selectFrom("content_types")
+            .where("id", "=", id)
+            .selectAll()
+            .executeTakeFirst()
+        );
 
         return row ? parseRow(row) : undefined;
       });
@@ -59,10 +56,9 @@ export function createPostgresContentTypeRepository(
 
     list() {
       return Effect.gen(function* () {
-        const rows = yield* Effect.tryPromise({
-          try: () => db.selectFrom("content_types").selectAll().execute(),
-          catch: () => [] as { id: string; data: string; version: number; updated_at: string }[]
-        }).pipe(Effect.catchAll(() => Effect.succeed([] as { id: string; data: string; version: number; updated_at: string }[])));
+        const rows = yield* postgresTryPromise("content_types.list", () =>
+          db.selectFrom("content_types").selectAll().execute()
+        );
 
         return rows.map(parseRow);
       });

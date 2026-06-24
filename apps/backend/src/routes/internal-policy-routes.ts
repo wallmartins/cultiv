@@ -51,15 +51,9 @@ export interface InternalPolicyRouteOptions {
 }
 
 export function registerInternalPolicyRoutes(app: Hono, options: InternalPolicyRouteOptions): void {
+  // Canonical list route; GET /api/internal/policies/active was removed (duplicate handler).
   app.get("/api/internal/policies", async (c) => {
     const actor = await resolveOperationalActor(c, options.config, Routes.GetInternalPolicies, options.services);
-    await runEffectOrThrow(requireBackendPermission(actor, Permissions.AiPolicyActivate));
-    const response = await buildPolicyActivationResponse(options.services.aiPolicy);
-    return c.json(response);
-  });
-
-  app.get("/api/internal/policies/active", async (c) => {
-    const actor = await resolveOperationalActor(c, options.config, Routes.GetInternalPoliciesActive, options.services);
     await runEffectOrThrow(requireBackendPermission(actor, Permissions.AiPolicyActivate));
     const response = await buildPolicyActivationResponse(options.services.aiPolicy);
     return c.json(response);

@@ -11,7 +11,7 @@ import { laneCountForQualityMode } from "../quality/quality-lanes.js";
 export function executeRuntimeAttemptLoop(
   options: ExecutePipelineOptions,
   context: RuntimeSelectionContext
-): Effect.Effect<SyncRunResponse, BackendExecutionFailedError> {
+): Effect.Effect<SyncRunResponse, BackendExecutionFailedError | import("@my-ai-orchestrator/database").DatabaseError> {
   return Effect.gen(function* () {
     const providerTransport = options.providerTransport ?? createBackendProviderTransport(options.config);
     const initialState: RuntimeAttemptState = {

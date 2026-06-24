@@ -1,15 +1,19 @@
 import { Hono } from "hono";
+import { Schema } from "effect";
 import {
+  type BillingCheckoutRequest,
+  type BillingCheckoutResponse,
   BillingCheckoutResponseSchema,
   BillingEntitlementViewSchema,
   decodeBillingCheckoutRequest
 } from "@my-ai-orchestrator/contracts";
 import { resolveQuotaLimit, resolveQuotaRemaining } from "@my-ai-orchestrator/payments";
-import { resolvePublicActor } from "../auth/auth-middleware.js";
 import { Routes } from "../app/route-definitions.js";
 import type { BackendConfig } from "../config/config.js";
 import { BackendBillingNotConfiguredError } from "../http/errors.js";
-import { readJsonBody, runEffectOrThrow, validateResponseBody } from "../http/http.js";
+import { createPublicRouteHandler } from "../http/public-route.js";
+import { resolvePublicActor } from "../auth/auth-middleware.js";
+import { runEffectOrThrow, validateResponseBody } from "../http/http.js";
 import type { BackendProductServices } from "../product.js";
 
 export interface BillingRouteOptions {
@@ -18,46 +22,42 @@ export interface BillingRouteOptions {
 }
 
 export function registerBillingRoutes(app: Hono, options: BillingRouteOptions): void {
-  app.post("/me/billing/checkout", async (c) => {
-    const actor = await resolvePublicActor(
-      c,
-      options.config,
-      Routes.PostMeBillingCheckout,
-      options.services
-    );
-    if (!options.services.billingCheckout) {
-      throw new BackendBillingNotConfiguredError({ route: Routes.PostMeBillingCheckout });
-    }
+  app.post(
+    "/me/billing/checkout",
+    createPublicRouteHandler<BillingCheckoutRequest, BillingCheckoutResponse>({
+      route: Routes.PostMeBillingCheckout,
+      config: options.config,
+      services: options.services,
+      decodeInput: decodeBillingCheckoutRequest,
+      responseSchema: BillingCheckoutResponseSchema as Schema.Schema<BillingCheckoutResponse, unknown, any>,
+      responseSchemaName: "BillingCheckoutResponse",
+      handler: async ({ actor, input }) => {
+        if (!options.services.billingCheckout) {
+          throw new BackendBillingNotConfiguredError({ route: Routes.PostMeBillingCheckout });
+        }
 
-    const rawBody = await readJsonBody(c, Routes.PostMeBillingCheckout);
-    const request = await runEffectOrThrow(decodeBillingCheckoutRequest(rawBody));
-    if (request.internalRef === "free") {
-      throw new BackendBillingNotConfiguredError({
-        route: Routes.PostMeBillingCheckout,
-        message: "free plan does not require checkout"
-      });
-    }
+        if (input.internalRef === "free") {
+          throw new BackendBillingNotConfiguredError({
+            route: Routes.PostMeBillingCheckout,
+            message: "free plan does not require checkout"
+          });
+        }
 
-    const email = `${actor.userId}@users.cultiv.app`;
-    const response = await runEffectOrThrow(
-      options.services.billingCheckout.createCheckout({
-        userId: actor.userId,
-        email,
-        productKind: request.productKind,
-        internalRef: request.internalRef,
-        currency: request.currency,
-        billingPeriod: request.billingPeriod,
-        paymentMethod: request.paymentMethod
-      })
-    );
-
-    const validated = await validateResponseBody(
-      BillingCheckoutResponseSchema,
-      response,
-      "BillingCheckoutResponse"
-    );
-    return c.json(validated);
-  });
+        const email = `${actor.userId}@users.cultiv.app`;
+        return runEffectOrThrow(
+          options.services.billingCheckout.createCheckout({
+            userId: actor.userId,
+            email,
+            productKind: input.productKind,
+            internalRef: input.internalRef,
+            currency: input.currency,
+            billingPeriod: input.billingPeriod,
+            paymentMethod: input.paymentMethod
+          })
+        );
+      }
+    })
+  );
 
   app.get("/me/billing/entitlement", async (c) => {
     const actor = await resolvePublicActor(

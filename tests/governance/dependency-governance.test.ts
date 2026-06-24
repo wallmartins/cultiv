@@ -32,7 +32,6 @@ describe("dependency governance", () => {
       ]),
       "text-quality": new Set([
         "@my-ai-orchestrator/contracts",
-        "@my-ai-orchestrator/skills",
         "effect"
       ])
     } as const;

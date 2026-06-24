@@ -472,9 +472,23 @@ export type AppPlansMessages = {
   readonly loadError: string;
 };
 
+export type AppAuthMessages = {
+  readonly signingIn: string;
+  readonly redirectingToLogin: string;
+  readonly preparingSession: string;
+  readonly sessionPrepareFailed: string;
+  readonly logoutAndSignInAgain: string;
+  readonly sessionPrepareFailedLogin: string;
+  readonly openingLogin: string;
+  readonly loginFailed: string;
+  readonly sessionPrepareFailedCallback: string;
+  readonly finishingLogin: string;
+};
+
 export type AppNotificationMessages = {
   readonly readyTitle: string;
   readonly readyAction: string;
+  readonly dismiss: string;
 };
 
 export type AppErrorMessages = {
@@ -505,6 +519,7 @@ export type AppExecutionStepsMessages = {
 };
 
 export type AppMessages = {
+  readonly auth: AppAuthMessages;
   readonly shell: AppShellMessages;
   readonly intentWizard: AppIntentWizardMessages;
   readonly generate: AppGenerateMessages;

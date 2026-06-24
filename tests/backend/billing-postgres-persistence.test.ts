@@ -1,13 +1,11 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { Effect } from "effect";
 import { createBillingRepository } from "@my-ai-orchestrator/payments";
-import {
-  loadBillingRepository,
-  saveBillingRepository
-} from "../../apps/backend/src/infra/durable-store.js";
+import { loadBillingRepository, saveBillingRepository } from "../../apps/backend/src/infra/durable-store.js";
 import {
   backfillBillingSnapshotIntoRelationalTables,
-  hasPostgresBillingTables
+  hasPostgresBillingTables,
+  loadPostgresBillingRepository
 } from "../../apps/backend/src/infra/postgres-billing-store.js";
 import { registerBackendBillingPlans } from "../../apps/backend/src/product/billing/billing-bootstrap.js";
 import { createPersistingBillingService } from "../../apps/backend/src/product/billing/durable-billing.js";
@@ -69,7 +67,7 @@ describeIfPostgres("billing postgres persistence", () => {
 
     await Effect.runPromise(saveBillingRepository(postgres.db, repository, now().toISOString()));
 
-    const reloaded = await Effect.runPromise(loadBillingRepository(postgres.db));
+    const reloaded = await Effect.runPromise(loadPostgresBillingRepository(postgres.db));
 
     expect(reloaded.subscriptions.has("user-relational:pro:subscription")).toBe(true);
     expect(reloaded.plans.size).toBeGreaterThan(0);
@@ -240,8 +238,11 @@ describeIfPostgres("billing postgres persistence", () => {
       )
       .execute();
 
-    const loaded = await Effect.runPromise(loadBillingRepository(postgres.db));
+    const bootLoaded = await Effect.runPromise(loadBillingRepository(postgres.db));
+    expect(bootLoaded.subscriptions.has("user-prefer:pro:subscription")).toBe(false);
+    expect(bootLoaded.subscriptions.has("stale:free:subscription")).toBe(false);
 
+    const loaded = await Effect.runPromise(loadPostgresBillingRepository(postgres.db));
     expect(loaded.subscriptions.has("user-prefer:pro:subscription")).toBe(true);
     expect(loaded.subscriptions.has("stale:free:subscription")).toBe(false);
 
@@ -265,7 +266,7 @@ describeIfPostgres("billing postgres persistence", () => {
 
     await Effect.runPromise(saveBillingRepository(postgres.db, repository, now().toISOString()));
 
-    const reloaded = await Effect.runPromise(loadBillingRepository(postgres.db));
+    const reloaded = await Effect.runPromise(loadPostgresBillingRepository(postgres.db));
     const subscriptionId = "user-jit-free:free:subscription";
 
     expect(reloaded.subscriptions.has(subscriptionId)).toBe(true);

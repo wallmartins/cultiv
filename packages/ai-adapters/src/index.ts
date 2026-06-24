@@ -38,5 +38,7 @@ export {
   createGroqAdapter,
   createDeepSeekAdapter,
   createOllamaAdapter,
+  createOpenAiCompatibleProvider,
   registerDefaultAIProviders
 } from "./providers/index.js";
+export type { OpenAiCompatibleProviderConfig } from "./providers/index.js";

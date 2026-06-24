@@ -15,7 +15,9 @@ import {
   createMemoryRecord,
   createPipeline,
   isTerminalJobStatus,
-  nextActionCodesForReason
+  nextActionCodesForReason,
+  toTextQualityVoiceProfile,
+  toVoiceProfileView
 } from "../../packages/domain/src/index.js";
 
 describe('domain package', () => {
@@ -143,5 +145,37 @@ describe('domain package', () => {
     expect(rebuildFailure.reasonCode).toBe('insufficient_diversity');
     expect(pinnedLimit.pinnedLimit).toBe(2);
     expect(unavailable.reasonCode).toBe('plan_restriction');
+  });
+
+  it('maps DerivedVoiceProfile to contract views', () => {
+    const derived = {
+      id: 'vp_1',
+      userId: 'user_1',
+      version: 2,
+      snapshotId: 'snap_1',
+      confidence: 'high' as const,
+      adaptationMode: 'standard' as const,
+      primaryLanguage: 'pt-BR',
+      tone: 'direct',
+      cadence: 'short',
+      lexicon: ['pipeline'],
+      constraints: ['no jargon'],
+      styleMarkers: ['questions'],
+      rules: ['active voice'],
+      antiPatterns: ['buzzwords'],
+      createdAt: '2026-01-01T00:00:00.000Z',
+      updatedAt: '2026-01-02T00:00:00.000Z'
+    };
+
+    const view = toVoiceProfileView(derived);
+    expect(view.userId).toBe('user_1');
+    expect(view.tone).toBe('direct');
+
+    const pipelineProfile = toTextQualityVoiceProfile(derived, {
+      examples: ['sample'],
+      userLabels: ['mentor']
+    });
+    expect(pipelineProfile.examples).toEqual(['sample']);
+    expect(pipelineProfile.userLabels).toEqual(['mentor']);
   });
 });

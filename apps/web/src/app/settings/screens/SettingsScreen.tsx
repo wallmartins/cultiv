@@ -1,17 +1,20 @@
 import { useAuth0 } from "@auth0/auth0-react";
 import { Button, cn, CoordinateLabel, Text } from "@my-ai-orchestrator/ui";
-import { useState } from "react";
+import { useId, useRef, useState, type RefObject } from "react";
 import { useAppLocale } from "~/i18n/app/use-app-locale";
 import { hasVoiceConsent } from "~/app/voice/lib/voice-consent-storage";
 import { AppCard } from "~/platform/ui/AppCard";
+import { AppModal } from "~/platform/ui/AppModal";
 
 function DeleteFootprintsModal({
   open,
   onClose,
+  returnFocusRef,
   messages
 }: {
   readonly open: boolean;
   readonly onClose: () => void;
+  readonly returnFocusRef: RefObject<HTMLButtonElement | null>;
   readonly messages: {
     readonly title: string;
     readonly body: string;
@@ -20,36 +23,35 @@ function DeleteFootprintsModal({
     readonly disabled: string;
   };
 }) {
-  if (!open) {
-    return null;
-  }
+  const titleId = useId();
 
   return (
-    <div className="fixed inset-0 z-[90] flex items-center justify-center bg-cream/80 p-4">
-      <div
-        role="dialog"
-        aria-modal="true"
-        className="w-full max-w-md rounded-[5px] border border-ink-ghost/25 bg-off-white p-6 shadow-cartography"
-      >
-        <Text as="h2" variant="h2" className="mb-3 font-playfair text-ink">
-          {messages.title}
-        </Text>
-        <Text variant="body" className="mb-2 text-ink-muted">
-          {messages.body}
-        </Text>
-        <Text variant="meta" className="mb-6 text-ink-muted">
-          {messages.disabled}
-        </Text>
-        <div className="flex justify-end gap-2">
-          <Button type="button" variant="ghost" onClick={onClose}>
-            {messages.cancel}
-          </Button>
-          <Button type="button" disabled>
-            {messages.confirm}
-          </Button>
-        </div>
+    <AppModal
+      open={open}
+      onClose={onClose}
+      titleId={titleId}
+      returnFocusRef={returnFocusRef}
+      overlayClassName="bg-cream/80"
+      panelClassName="w-full max-w-md rounded-[5px] border border-ink-ghost/25 bg-off-white p-6 shadow-cartography"
+    >
+      <Text as="h2" variant="h2" className="mb-3 font-playfair text-ink" id={titleId}>
+        {messages.title}
+      </Text>
+      <Text variant="body" className="mb-2 text-ink-muted">
+        {messages.body}
+      </Text>
+      <Text variant="meta" className="mb-6 text-ink-muted">
+        {messages.disabled}
+      </Text>
+      <div className="flex justify-end gap-2">
+        <Button type="button" variant="ghost" data-app-modal-initial-focus onClick={onClose}>
+          {messages.cancel}
+        </Button>
+        <Button type="button" disabled>
+          {messages.confirm}
+        </Button>
       </div>
-    </div>
+    </AppModal>
   );
 }
 
@@ -57,6 +59,7 @@ export function SettingsScreen() {
   const { user, logout } = useAuth0();
   const { locale, messages, setLocale } = useAppLocale();
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const revokeConsentTriggerRef = useRef<HTMLButtonElement>(null);
 
   const consentActive = hasVoiceConsent(user?.sub);
 
@@ -119,6 +122,7 @@ export function SettingsScreen() {
         </div>
 
         <Button
+          ref={revokeConsentTriggerRef}
           type="button"
           variant="ghost"
           className="text-red-700 hover:text-red-700/80"
@@ -148,6 +152,7 @@ export function SettingsScreen() {
       <DeleteFootprintsModal
         open={deleteModalOpen}
         onClose={() => setDeleteModalOpen(false)}
+        returnFocusRef={revokeConsentTriggerRef}
         messages={{
           title: messages.settings.privacy,
           body: messages.voice.consent.body,

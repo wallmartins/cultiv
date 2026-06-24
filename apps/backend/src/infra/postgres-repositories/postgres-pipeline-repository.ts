@@ -3,6 +3,7 @@ import { Kysely } from "kysely";
 import type { PipelineRecord, PipelineRepository } from "@my-ai-orchestrator/database";
 import type { DatabaseTables } from "../postgres-tables.js";
 import { parseStoredJsonRecord } from "./json-column.js";
+import { postgresTryPromise } from "./postgres-try-promise.js";
 
 function toRow(record: PipelineRecord) {
   return {
@@ -29,14 +30,12 @@ export function createPostgresPipelineRepository(
       return Effect.gen(function* () {
         const next = { ...record, version, updatedAt };
 
-        yield* Effect.tryPromise({
-          try: () =>
-            db.insertInto("pipelines")
-              .values(toRow(next))
-              .onConflict((oc) => oc.column("id").doUpdateSet(toRow(next)))
-              .execute(),
-          catch: () => undefined
-        }).pipe(Effect.catchAll(() => Effect.succeed(undefined)));
+        yield* postgresTryPromise("pipelines.put", () =>
+          db.insertInto("pipelines")
+            .values(toRow(next))
+            .onConflict((oc) => oc.column("id").doUpdateSet(toRow(next)))
+            .execute()
+        );
 
         return next;
       });
@@ -44,14 +43,12 @@ export function createPostgresPipelineRepository(
 
     get(id) {
       return Effect.gen(function* () {
-        const row = yield* Effect.tryPromise({
-          try: () =>
-            db.selectFrom("pipelines")
-              .where("id", "=", id)
-              .selectAll()
-              .executeTakeFirst(),
-          catch: () => undefined
-        }).pipe(Effect.catchAll(() => Effect.succeed(undefined)));
+        const row = yield* postgresTryPromise("pipelines.get", () =>
+          db.selectFrom("pipelines")
+            .where("id", "=", id)
+            .selectAll()
+            .executeTakeFirst()
+        );
 
         return row ? parseRow(row) : undefined;
       });
@@ -59,10 +56,9 @@ export function createPostgresPipelineRepository(
 
     list() {
       return Effect.gen(function* () {
-        const rows = yield* Effect.tryPromise({
-          try: () => db.selectFrom("pipelines").selectAll().execute(),
-          catch: () => [] as { id: string; data: string; version: number; updated_at: string }[]
-        }).pipe(Effect.catchAll(() => Effect.succeed([] as { id: string; data: string; version: number; updated_at: string }[])));
+        const rows = yield* postgresTryPromise("pipelines.list", () =>
+          db.selectFrom("pipelines").selectAll().execute()
+        );
 
         return rows.map(parseRow);
       });

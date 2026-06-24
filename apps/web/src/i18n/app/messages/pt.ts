@@ -1,6 +1,19 @@
 import type { AppMessages } from "../types";
 
 export const appMessagesPt: AppMessages = {
+  auth: {
+    signingIn: "Entrando…",
+    redirectingToLogin: "Redirecionando para o login…",
+    preparingSession: "Preparando sessão…",
+    sessionPrepareFailed:
+      "Não foi possível preparar a sessão com o backend. Verifique se o servidor está em execução e se o audience do Auth0 está correto.",
+    logoutAndSignInAgain: "Sair e entrar de novo",
+    sessionPrepareFailedLogin: "Não foi possível preparar a sessão. Tente /login novamente.",
+    openingLogin: "Abrindo login…",
+    loginFailed: "Não foi possível concluir o login. Tente novamente em /login.",
+    sessionPrepareFailedCallback: "Não foi possível preparar a sessão. Volte para /login e tente novamente.",
+    finishingLogin: "Finalizando login…"
+  },
   shell: {
     nav: {
       generate: "Gerar",
@@ -525,7 +538,8 @@ export const appMessagesPt: AppMessages = {
   },
   notifications: {
     readyTitle: "Rota concluída. Seu texto está pronto.",
-    readyAction: "Ver resultado"
+    readyAction: "Ver resultado",
+    dismiss: "Dispensar"
   },
   errors: {
     safetyInputBlocked: {

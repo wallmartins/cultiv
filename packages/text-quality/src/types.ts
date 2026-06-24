@@ -1,30 +1,8 @@
 import type { Effect } from "effect";
-import type { PipelineRequest } from "@my-ai-orchestrator/contracts";
-import type {
-  ArgumentDevelopmentSignature,
-  CoreReasoningSignature,
-  FormatExpressionProfile
-} from "@my-ai-orchestrator/contracts";
+import type { PipelineRequest, TextQualityVoiceProfile } from "@my-ai-orchestrator/contracts";
 import type { GenerationContext } from "./domain/generation-context.js";
 
-export type VoiceProfile = {
-  readonly userId: string;
-  readonly tone: string;
-  readonly cadence: string;
-  readonly description?: string;
-  readonly lexicon: readonly string[];
-  readonly constraints: readonly string[];
-  readonly examples: readonly string[];
-  readonly antiPatterns: readonly string[];
-  readonly antiPatternsExplicit: readonly string[];
-  readonly rules: readonly string[];
-  readonly styleMarkers: readonly string[];
-  readonly userLabels: readonly string[];
-  readonly coreReasoningSignature?: CoreReasoningSignature;
-  readonly argumentDevelopmentSignature?: ArgumentDevelopmentSignature;
-  readonly formatExpressionProfile?: FormatExpressionProfile;
-  readonly derivedAntiPatterns?: readonly string[];
-};
+export type VoiceProfile = TextQualityVoiceProfile;
 
 export type QualityLaneStrategy = "conservative" | "balanced" | "creative";
 
@@ -54,6 +32,8 @@ export interface TextQualityContext {
   readonly lexicalQualityV2?: boolean;
 }
 
+export const DEFAULT_LANE_CONCURRENCY_CAP = 3;
+
 export interface TextQualityRequest {
   readonly request: PipelineRequest;
   readonly userId: string;
@@ -64,6 +44,7 @@ export interface TextQualityRequest {
   readonly generationContext?: GenerationContext;
   readonly lexicalQualityV2?: boolean;
   readonly reasoningEvaluationEnabled?: boolean;
+  readonly laneConcurrencyCap?: number;
   readonly onLaneProgress?: (progress: LaneProgress) => Effect.Effect<void>;
 }
 

@@ -2,11 +2,12 @@ import type {
   GenerationIntentCatalogItem,
   GenerationIntentCatalogView
 } from "@my-ai-orchestrator/contracts";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
 import { getIntentDescription, getIntentLabel } from "~/i18n/app/generation-intents";
 import type { AppLocale } from "~/i18n/app/types";
 import { useAppLocale } from "~/i18n/app/use-app-locale";
 import { useClientSdk } from "~/platform/runtime/client-sdk-context";
+import { useSdkQuery } from "~/platform/sdk/use-sdk-query";
 
 export type GenerationIntentsStatus = "loading" | "ready" | "error";
 
@@ -29,39 +30,13 @@ export function localizeIntentCatalogItem(
 export function useGenerationIntents() {
   const client = useClientSdk();
   const { locale } = useAppLocale();
-  const [status, setStatus] = useState<GenerationIntentsStatus>("loading");
-  const [catalog, setCatalog] = useState<GenerationIntentCatalogView | null>(null);
-  const [error, setError] = useState<unknown>(null);
-  const [attempt, setAttempt] = useState(0);
 
-  const retry = useCallback(() => {
-    setAttempt((value) => value + 1);
-  }, []);
+  const { status, data, error, retry } = useSdkQuery(
+    ["generationIntents"],
+    useCallback((signal) => client.toPromise(client.generationIntents.list({ signal })), [client])
+  );
 
-  useEffect(() => {
-    let cancelled = false;
-    setStatus("loading");
-    setError(null);
-
-    void client
-      .toPromise(client.generationIntents.list())
-      .then((next) => {
-        if (!cancelled) {
-          setCatalog(next);
-          setStatus("ready");
-        }
-      })
-      .catch((nextError: unknown) => {
-        if (!cancelled) {
-          setError(nextError);
-          setStatus("error");
-        }
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [client, attempt]);
+  const catalog = data ?? null;
 
   const items = useMemo(
     () => (catalog?.items ?? []).map((item) => localizeIntentCatalogItem(locale, item)),

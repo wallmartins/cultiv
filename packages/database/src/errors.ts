@@ -1,5 +1,11 @@
 import { Data } from "effect";
 
+export class DatabaseError extends Data.TaggedError("DatabaseError")<{
+  readonly operation: string;
+  readonly message: string;
+  readonly cause?: unknown;
+}> {}
+
 export class DatabaseJobAlreadyExistsError extends Data.TaggedError("DatabaseJobAlreadyExistsError")<{
   readonly jobId: string;
 }> {}

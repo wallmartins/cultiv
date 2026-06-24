@@ -6,7 +6,11 @@ import {
   type BillingRepository
 } from "@my-ai-orchestrator/payments";
 import type { DatabaseTables } from "../postgres-tables.js";
-import { replaceBillingRepositoryContents } from "../billing-repository-sync.js";
+import {
+  mergeBillingUserSliceInto,
+  replaceBillingRepositoryContents,
+  type BillingUserSlice
+} from "../billing-repository-sync.js";
 import { runBillingRepositoryPersistSerialized } from "./billing-persist-queue.js";
 import {
   mapBillingCycleStateFromRow,
@@ -36,6 +40,25 @@ export function hasPostgresBillingTables(db: Kysely<DatabaseTables>): Effect.Eff
     },
     catch: () => false
   }).pipe(Effect.orElseSucceed(() => false));
+}
+
+export function loadPostgresBillingCatalog(
+  db: Kysely<DatabaseTables>
+): Effect.Effect<BillingRepository, Error> {
+  return Effect.tryPromise({
+    try: async () => {
+      const [plans, topUpPackages] = await Promise.all([
+        db.selectFrom("billing_plans").selectAll().execute(),
+        db.selectFrom("billing_top_up_packages").selectAll().execute()
+      ]);
+
+      return createBillingRepository({
+        plans: plans.map((row) => mapBillingPlanFromRow(row)),
+        topUpPackages: topUpPackages.map((row) => mapBillingTopUpPackageFromRow(row))
+      });
+    },
+    catch: (error) => (error instanceof Error ? error : new Error(String(error)))
+  });
 }
 
 export function loadPostgresBillingRepository(
@@ -203,5 +226,56 @@ export function reloadPostgresBillingRepositoryInto(
   return Effect.gen(function* () {
     const loaded = yield* loadPostgresBillingRepository(db);
     replaceBillingRepositoryContents(target, loaded);
+  });
+}
+
+export function loadPostgresBillingUserSlice(
+  db: Kysely<DatabaseTables>,
+  userId: string
+): Effect.Effect<BillingUserSlice, Error> {
+  return Effect.tryPromise({
+    try: async () => {
+      const accountPrefix = `${userId}:%`;
+
+      const [subscriptions, usage, ledger, reservations, cycleStates] = await Promise.all([
+        db.selectFrom("billing_subscriptions").selectAll().where("user_id", "=", userId).execute(),
+        db.selectFrom("billing_usage_records").selectAll().where("user_id", "=", userId).execute(),
+        db
+          .selectFrom("billing_ledger_entries")
+          .selectAll()
+          .where("account_id", "like", accountPrefix)
+          .orderBy("id", "asc")
+          .execute(),
+        db.selectFrom("billing_reservations").selectAll().where("account_id", "like", accountPrefix).execute(),
+        db.selectFrom("billing_cycle_states").selectAll().where("account_id", "like", accountPrefix).execute()
+      ]);
+
+      const planIds = [...new Set(subscriptions.map((row) => row.plan_id))];
+      const plans =
+        planIds.length > 0
+          ? await db.selectFrom("billing_plans").selectAll().where("id", "in", planIds).execute()
+          : [];
+
+      return {
+        subscriptions: subscriptions.map((row) => mapBillingSubscriptionFromRow(row)),
+        usage: usage.map((row) => mapBillingUsageFromRow(row)),
+        ledger: ledger.map((row) => mapBillingLedgerFromRow(row)),
+        reservations: reservations.map((row) => mapBillingReservationFromRow(row)),
+        cycleStates: cycleStates.map((row) => mapBillingCycleStateFromRow(row)),
+        plans: plans.map((row) => [row.id, mapBillingPlanFromRow(row)] as const)
+      };
+    },
+    catch: (error) => (error instanceof Error ? error : new Error(String(error)))
+  });
+}
+
+export function reloadPostgresBillingUserInto(
+  db: Kysely<DatabaseTables>,
+  target: BillingRepository,
+  userId: string
+): Effect.Effect<void, Error> {
+  return Effect.gen(function* () {
+    const slice = yield* loadPostgresBillingUserSlice(db, userId);
+    mergeBillingUserSliceInto(target, userId, slice);
   });
 }

@@ -1,4 +1,5 @@
 import { Effect } from "effect";
+import type { DatabaseError } from "@my-ai-orchestrator/database";
 import type { AppLogger } from "@my-ai-orchestrator/core";
 import type { BackendObservabilityService } from "../core/observability-types.js";
 
@@ -13,7 +14,7 @@ export interface VoiceRebuildQueueDeps {
   readonly observability: BackendObservabilityService;
   readonly logger?: AppLogger;
   readonly processUserRebuild: (userId: string) => Effect.Effect<void>;
-  readonly markRebuildQueued: (userId: string) => Effect.Effect<void>;
+  readonly markRebuildQueued: (userId: string) => Effect.Effect<void, DatabaseError>;
 }
 
 export function createVoiceRebuildQueue(deps: VoiceRebuildQueueDeps) {

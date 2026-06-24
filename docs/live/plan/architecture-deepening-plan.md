@@ -145,6 +145,20 @@ Fechar allowlist de módulos transversais e reforçar confiabilidade.
 
 ---
 
+### Fase 7 — Web file-size governance ✅ CONCLUÍDA
+
+Estender o orçamento de 400 linhas para `apps/web/src/**/*.ts` e `*.tsx`.
+
+**Entregas:**
+
+- Escopo web adicionado ao `file-size-governance.test.ts` (exclui `*.gen.ts`, `routeTree.gen.ts`, catálogos `i18n/`)
+- Allowlist inicial com violadores atuais + baselines anti-regressão
+- `GenerationScreen` modularizado (issue 94) — fora da allowlist
+
+**Status:** done (2026-06-24)
+
+---
+
 ## 3. Allowlist de governança
 
 Fonte de verdade: [`tests/governance/file-size-governance.test.ts`](../../../tests/governance/file-size-governance.test.ts)
@@ -164,10 +178,11 @@ Cada entrada deve ser **removida da allowlist** (e do `FILE_SIZE_BASELINE`) quan
 | ~~`packages/contracts/src/execution.ts`~~ | ~~476~~ | **6** — removido (1 linha barrel) |
 | ~~`apps/backend/src/config/config.ts`~~ | ~~413~~ | **6** — removido (44 linhas facade) |
 | ~~`packages/payments/src/service.ts`~~ | ~~520~~ | **1** — removido (240 linhas facade; `billing-generation-credits`, `billing-cycle-operations`, `billing-service-runtime`) |
+| `apps/web/src/app/voice/components/VoiceDashboard.tsx` | 433 | **7** — split voice dashboard |
 
 **Regra anti-regressão:** enquanto na allowlist, o arquivo **não pode crescer** além do baseline registrado.
 
-**Meta:** allowlist vazia — restam 2 entradas voice-rebuild.
+**Meta:** allowlist vazia — restam 1 entrada web (`VoiceDashboard.tsx`) + voice-rebuild backend se ainda aplicável.
 
 ---
 

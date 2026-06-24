@@ -4,8 +4,6 @@ export const Routes = {
   Ready: "GET /ready",
   ApiReady: "GET /api/ready",
 
-  PostApiRun: "POST /api/run",
-
   GetMeContentTypes: "GET /me/content-types",
   GetMeGenerationIntents: "GET /me/generation-intents",
 
@@ -17,6 +15,7 @@ export const Routes = {
   GetMeVoiceTrainingConsent: "GET /me/voice-training-consent",
   PostMeVoiceTrainingConsent: "POST /me/voice-training-consent",
   GetMeVoiceProfile: "GET /me/voice-profile",
+  PostMeVoiceProfileTraitConfirmations: "POST /me/voice-profile/trait-confirmations",
   GetMeVoiceProfileExamples: "GET /me/voice-profile/examples",
   PostMeVoiceProfileExamples: "POST /me/voice-profile/examples",
   PatchMeVoiceProfileExample: "PATCH /me/voice-profile/examples/:exampleId",
@@ -30,7 +29,6 @@ export const Routes = {
   PostApiGenerationPreview: "POST /api/generation-preview",
 
   GetInternalPolicies: "GET /api/internal/policies",
-  GetInternalPoliciesActive: "GET /api/internal/policies/active",
   PostInternalPoliciesActivate: "POST /api/internal/policies/activate",
   PostInternalPoliciesReload: "POST /api/internal/policies/reload",
   PostInternalExperimentalRun: "POST /api/internal/experimental/run",

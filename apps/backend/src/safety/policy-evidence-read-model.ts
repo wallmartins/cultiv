@@ -1,3 +1,4 @@
+import type { DatabaseError } from "@my-ai-orchestrator/database";
 import { Effect } from "effect";
 import type { DatabaseClient } from "@my-ai-orchestrator/database";
 import type {
@@ -11,7 +12,7 @@ export function listOperationalPolicyEvidence(args: {
   readonly database: DatabaseClient;
   readonly redaction: BackendRedactionService;
   readonly filter: PolicyEvidenceFilter;
-}): Effect.Effect<readonly PolicyEvidenceReadModelEntry[]> {
+}): Effect.Effect<readonly PolicyEvidenceReadModelEntry[], DatabaseError> {
   return Effect.gen(function* () {
     const all = yield* args.database.audit.list();
     const evidence = all.filter((record) =>

@@ -1,23 +1,14 @@
-import { Hono, type Context } from "hono";
-import { Effect } from "effect";
+import { Hono } from "hono";
 import {
   type HealthCheckResponse,
-  type JobCreatedResponse,
-  type PipelineRequest,
   type ReadinessResponse,
-  type RunResponse,
   HealthCheckResponseSchema,
-  JobCreatedResponseSchema,
-  ReadinessResponseSchema,
-  RunResponseSchema,
-  decodePipelineRequest
+  ReadinessResponseSchema
 } from "@my-ai-orchestrator/contracts";
 import type { BackendConfig } from "../config/config.js";
 import type { BackendProductServices } from "../product.js";
-import { createErrorBody, readJsonBody, runEffectOrThrow, validateResponseBody } from "../http/http.js";
+import { createErrorBody, runEffectOrThrow, validateResponseBody } from "../http/http.js";
 import type { BackendJobStoreServiceContract } from "../jobs/job-store.js";
-import { assertQuoteConsistency, resolveExecutionPricingSnapshot } from "../product/billing/generation-pricing-snapshot.js";
-import { resolvePublicActor } from "../auth/auth-middleware.js";
 import { registerExecutionRoutes } from "../routes/execution-routes.js";
 import { registerContentTypeRoutes } from "../routes/content-type-routes.js";
 import { registerGenerationIntentRoutes } from "../routes/generation-intent-routes.js";
@@ -29,8 +20,6 @@ import { registerVoiceRoutes } from "../routes/voice-routes.js";
 import { registerDevShowcaseRoutes } from "../routes/dev-showcase-routes.js";
 import { registerBillingRoutes } from "../routes/billing-routes.js";
 import { registerBillingWebhookRoutes } from "../routes/billing-webhook-routes.js";
-import { Routes } from "./route-definitions.js";
-
 export interface BackendRouteOptions {
   readonly config: BackendConfig;
   readonly startedAt: Date;
@@ -41,10 +30,6 @@ export interface BackendRouteOptions {
   readonly execution: import("../execution.js").BackendExecutionService;
   readonly hardening: import("./production-hardening.js").BackendHardeningContract;
 }
-
-type AuthenticatedPipelineRequest = PipelineRequest & {
-  readonly userId: string;
-};
 
 export function registerBackendRoutes(app: Hono, options: BackendRouteOptions): void {
   const api = new Hono();
@@ -76,47 +61,20 @@ export function registerBackendRoutes(app: Hono, options: BackendRouteOptions): 
     return c.json(response, response.status === "ready" ? 200 : 503);
   });
 
-  const runHandler = async (c: Context) => {
-    const actor = await resolvePublicActor(c, options.config, Routes.PostApiRun, options.services);
-    const rawBody = await readJsonBody(c, Routes.PostApiRun);
-    const request = await runEffectOrThrow(decodePipelineRequest(shapePublicPipelineRequest(rawBody, actor.userId)));
-    const authenticatedRequest = toAuthenticatedPipelineRequest(request, actor.userId);
-    const sanitizedInput = await runEffectOrThrow(options.services.inputSafety.authorizeGenerationInput(authenticatedRequest));
-    const approvedRequest = { ...authenticatedRequest, ...sanitizedInput } satisfies AuthenticatedPipelineRequest;
-    if ("quoteId" in approvedRequest && approvedRequest.quoteId) {
-      const pricingSnapshot = await runEffectOrThrow(
-        resolveExecutionPricingSnapshot({
-          userId: approvedRequest.userId,
-          request: approvedRequest,
-          config: options.config,
-          billing: options.services.billing,
-          aiPolicy: options.services.aiPolicy
-        })
-      );
-      await runEffectOrThrow(
-        assertQuoteConsistency({
-          providedQuoteId: approvedRequest.quoteId,
-          pricingSnapshot
-        })
-      );
-    }
-    await runEffectOrThrow(options.services.aiPolicy.validatePipelineRequest(approvedRequest));
-    const response = await runEffectOrThrow(options.execution.execute(approvedRequest));
+  api.post("/run", async (c) => {
+    const response = await createErrorBody({
+      status: 410,
+      code: "invalid_request",
+      category: "not_found",
+      message: "POST /api/run was removed. Use POST /me/executions/run instead.",
+      retryable: false,
+      details: {
+        migration: "POST /me/executions/run"
+      }
+    });
 
-    if ("jobId" in response) {
-      const validatedJob = await validateResponseBody(
-        JobCreatedResponseSchema,
-        response satisfies JobCreatedResponse,
-        "JobCreatedResponse"
-      );
-      return c.json(validatedJob, 202);
-    }
-
-    const validatedRun = await validateResponseBody(RunResponseSchema, response satisfies RunResponse, "RunResponse");
-    return c.json(validatedRun);
-  };
-
-  api.post("/run", runHandler);
+    return c.json(response, 410);
+  });
   registerVoiceRoutes(app, {
     config: options.config,
     services: options.services
@@ -187,23 +145,4 @@ export function registerBackendRoutes(app: Hono, options: BackendRouteOptions): 
 
     return c.json(response, 404);
   });
-}
-
-function toAuthenticatedPipelineRequest(request: PipelineRequest, userId: string): AuthenticatedPipelineRequest {
-  return { ...request, userId };
-}
-
-function shapePublicPipelineRequest(rawBody: unknown, userId: string): unknown {
-  if (!rawBody || typeof rawBody !== "object" || Array.isArray(rawBody)) {
-    return rawBody;
-  }
-
-  if ("pipeline" in rawBody) {
-    return rawBody;
-  }
-
-  return {
-    ...(rawBody as Record<string, unknown>),
-    userId
-  };
 }

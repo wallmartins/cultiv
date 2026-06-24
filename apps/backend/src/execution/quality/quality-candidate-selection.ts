@@ -33,7 +33,7 @@ export interface BackendQualitySelectionResult extends ExecutePipelineAttemptRes
 
 export function executeQualitySelectionAttempt(
   options: ExecutePipelineAttemptArgs & { readonly billingIdentity: ReturnType<typeof resolveBackendBillingIdentity> }
-): Effect.Effect<BackendQualitySelectionResult, import("../../http/errors.js").BackendExecutionFailedError> {
+): Effect.Effect<BackendQualitySelectionResult, import("../../http/errors.js").BackendExecutionFailedError | import("@my-ai-orchestrator/database").DatabaseError> {
   const candidateRuns = new Map<string, ExecutePipelineAttemptResult>();
   const laneCount = laneCountForQualityMode(options.qualityMode);
   const runtimeLanes = buildRuntimeQualityLanes(options, laneCount, candidateRuns);

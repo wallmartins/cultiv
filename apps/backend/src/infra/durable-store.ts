@@ -1,11 +1,13 @@
+import { DatabaseError } from "@my-ai-orchestrator/database";
 import { Effect } from "effect";
 import { sql, type Kysely, type Transaction } from "kysely";
 import { replaceBillingRepositoryContents } from "./billing-repository-sync.js";
 import {
   hasPostgresBillingTables,
-  loadPostgresBillingRepository,
+  loadPostgresBillingCatalog,
   persistPostgresBillingRepositoryInTransaction,
   reloadPostgresBillingRepositoryInto,
+  reloadPostgresBillingUserInto,
   runBillingRepositoryPersistSerialized,
   savePostgresBillingRepository,
   writePostgresBillingRepository
@@ -37,12 +39,10 @@ export function loadBillingRepository(
   return Effect.gen(function* () {
     const relationalEnabled = yield* hasPostgresBillingTables(db);
     if (relationalEnabled) {
-      const relational = yield* loadPostgresBillingRepository(db).pipe(
+      // ponytail: catalog-only at boot; per-user slices hydrate on auth (issue 107)
+      return yield* loadPostgresBillingCatalog(db).pipe(
         Effect.catchAll(() => Effect.succeed(createBillingRepository()))
       );
-      if (repositoryHasBillingData(relational)) {
-        return relational;
-      }
     }
 
     return yield* loadBillingSnapshotRepository(db);
@@ -58,7 +58,7 @@ function repositoryHasBillingData(repository: BillingRepository): boolean {
   );
 }
 
-export { replaceBillingRepositoryContents } from "./billing-repository-sync.js";
+export { replaceBillingRepositoryContents, mergeBillingUserSliceInto, type BillingUserSlice } from "./billing-repository-sync.js";
 
 export function reloadBillingRepositoryInto(
   db: Kysely<DatabaseTables>,
@@ -76,6 +76,34 @@ export function reloadBillingRepositoryInto(
     const loaded = yield* loadBillingSnapshotRepository(db);
     replaceBillingRepositoryContents(target, loaded);
   });
+}
+
+// ponytail: merges one user's PG slice into the in-memory repo; other users' cached rows may be stale until their job runs
+export function reloadBillingRepositoryForUserInto(
+  db: Kysely<DatabaseTables>,
+  target: BillingRepository,
+  userId: string
+): Effect.Effect<void, DatabaseError> {
+  return Effect.gen(function* () {
+    const relationalEnabled = yield* hasPostgresBillingTables(db);
+    if (relationalEnabled) {
+      yield* reloadPostgresBillingUserInto(db, target, userId);
+      return;
+    }
+
+    const loaded = yield* loadBillingSnapshotRepository(db);
+    replaceBillingRepositoryContents(target, loaded);
+  }).pipe(
+    Effect.mapError((cause) =>
+      cause instanceof DatabaseError
+        ? cause
+        : new DatabaseError({
+            operation: "reloadBillingRepositoryForUserInto",
+            message: cause instanceof Error ? cause.message : String(cause),
+            cause
+          })
+    )
+  );
 }
 
 function loadBillingSnapshotRepository(

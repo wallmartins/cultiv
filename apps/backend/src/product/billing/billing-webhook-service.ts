@@ -89,20 +89,14 @@ export function createBillingWebhookService(deps: {
     });
 
   return {
-    handleStripeWebhook: (rawBody, signature) =>
-      handleWebhook(deps.stripeAdapter, rawBody, signature).pipe(Effect.mapError(toError)),
-    handleAsaasWebhook: (rawBody, token) =>
-      handleWebhook(deps.asaasAdapter, rawBody, token).pipe(Effect.mapError(toError))
+    handleStripeWebhook: (rawBody, signature) => handleWebhook(deps.stripeAdapter, rawBody, signature),
+    handleAsaasWebhook: (rawBody, token) => handleWebhook(deps.asaasAdapter, rawBody, token)
   };
 }
 
 function hashPayload(payload: unknown): string {
   const raw = typeof payload === "string" ? payload : JSON.stringify(payload);
   return createHash("sha256").update(raw).digest("hex");
-}
-
-function toError(error: unknown): Error {
-  return error instanceof Error ? error : new Error(String(error));
 }
 
 function resolveWebhookEvent(

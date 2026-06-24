@@ -2,6 +2,7 @@ import { Effect } from "effect";
 import { Kysely } from "kysely";
 import type { BackendOperator, BackendOperatorRepository } from "../../auth/operator.js";
 import type { DatabaseTables } from "../postgres-tables.js";
+import { postgresTryPromise } from "./postgres-try-promise.js";
 
 type OperatorRow = {
   id: string;
@@ -36,17 +37,15 @@ export function createPostgresOperatorRepository(
   return {
     findById(id) {
       return Effect.gen(function* () {
-        const row = yield* Effect.tryPromise({
-          try: () =>
-            db.selectFrom("operators")
-              .where("id", "=", id)
-              .selectAll()
-              .executeTakeFirst(),
-          catch: () => undefined
-        }).pipe(Effect.catchAll(() => Effect.succeed(undefined)));
+        const row = yield* postgresTryPromise("operators.findById", () =>
+          db.selectFrom("operators")
+            .where("id", "=", id)
+            .selectAll()
+            .executeTakeFirst()
+        );
 
         return row ? parseOperator(row) : undefined;
-      }).pipe(Effect.orDie);
+      });
     },
 
     create(args) {
@@ -59,23 +58,21 @@ export function createPostgresOperatorRepository(
           status: args.status ?? "active"
         };
 
-        yield* Effect.tryPromise({
-          try: () =>
-            db.insertInto("operators")
-              .values({
-                id: operator.id,
-                permissions: JSON.stringify(operator.permissions),
-                roles: JSON.stringify(operator.roles),
-                status: operator.status,
-                created_at: now,
-                updated_at: now
-              })
-              .execute(),
-          catch: (error) => error
-        }).pipe(Effect.orDie);
+        yield* postgresTryPromise("operators.create", () =>
+          db.insertInto("operators")
+            .values({
+              id: operator.id,
+              permissions: JSON.stringify(operator.permissions),
+              roles: JSON.stringify(operator.roles),
+              status: operator.status,
+              created_at: now,
+              updated_at: now
+            })
+            .execute()
+        );
 
         return operator;
-      }).pipe(Effect.orDie);
+      });
     }
   };
 }

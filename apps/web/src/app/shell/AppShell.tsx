@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { AppLocaleProvider, useAppLocale } from "~/i18n/app/use-app-locale";
+import { useAppLocale } from "~/i18n/app/use-app-locale";
 import { ActiveExecutionProvider, useActiveExecutions } from "~/platform/active-executions/active-execution-store";
 import { useCreditBalance } from "~/platform/credits/use-credit-balance";
 import { NotificationProvider } from "~/platform/notifications/notification-store";
@@ -52,12 +52,10 @@ function AppShellFrame({ children }: AppShellProps) {
 
 export function AppShell({ children }: AppShellProps) {
   return (
-    <AppLocaleProvider>
-      <NotificationProvider>
-        <ActiveExecutionProvider>
-          <AppShellFrame>{children}</AppShellFrame>
-        </ActiveExecutionProvider>
-      </NotificationProvider>
-    </AppLocaleProvider>
+    <NotificationProvider>
+      <ActiveExecutionProvider>
+        <AppShellFrame>{children}</AppShellFrame>
+      </ActiveExecutionProvider>
+    </NotificationProvider>
   );
 }

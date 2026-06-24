@@ -5,7 +5,12 @@ import { CandidateSelector } from "../services/CandidateSelector.js";
 import { buildTextQualityContext, resolveVoiceProfile } from "../voice/voice-resolution.js";
 import { runQualityLane } from "../candidate/lane-runner.js";
 import { resolveContentTypeQualityProfile } from "../quality/content-type-quality-profile.js";
-import type { TextQualityRequest, TextQualityResult, TextQualityContext } from "../types.js";
+import {
+  DEFAULT_LANE_CONCURRENCY_CAP,
+  type TextQualityRequest,
+  type TextQualityResult,
+  type TextQualityContext
+} from "../types.js";
 import type { TextQualityError } from "../errors.js";
 
 export function runTextQualityPipeline(
@@ -63,7 +68,8 @@ export function runTextQualityPipeline(
             score: scored
           };
         }),
-      { concurrency: "unbounded" }
+      // ponytail: request-scoped cap; upgrade path is per-plan limits from billing tier
+      { concurrency: request.laneConcurrencyCap ?? DEFAULT_LANE_CONCURRENCY_CAP }
     );
 
     const bestCandidate = yield* selector.select(candidates, {

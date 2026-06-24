@@ -1,6 +1,6 @@
 import { Effect } from "effect";
 import { describe, expect, it } from "vitest";
-import { decodeExecutionStatusView, decodeJobCreatedResponse } from "@my-ai-orchestrator/contracts";
+import { decodeExecutionStatusView, decodeQueuedExecutionView } from "@my-ai-orchestrator/contracts";
 import { createBackendApp } from "../../apps/backend";
 import type { BackendConfig } from "../../apps/backend";
 import { createBackendExecutionService } from "../../apps/backend";
@@ -38,14 +38,12 @@ describe("backend async flow", () => {
       services
     );
 
-    const response = await app.request("/api/run", {
+    const response = await app.request("/me/executions/run", {
       method: "POST",
       headers: {
         "content-type": "application/json"
       },
       body: JSON.stringify({
-        userId: "user_1",
-        pipelineType: "validation-post",
         contentType: "validation-post",
         briefing: {
           topic: "SSE replay",
@@ -55,7 +53,7 @@ describe("backend async flow", () => {
     });
 
     const body = await response.json();
-    const created = await Effect.runPromise(decodeJobCreatedResponse(body));
+    const created = await Effect.runPromise(decodeQueuedExecutionView(body));
     const completed = await waitForJobStatus(app, created.jobId, "done");
 
     expect(completed.status).toBe("done");

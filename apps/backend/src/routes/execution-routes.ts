@@ -1,17 +1,21 @@
 import { Hono } from "hono";
+import { Schema } from "effect";
+import { resolvePublicActor } from "../auth/auth-middleware.js";
+import type { BackendConfig } from "../config/config.js";
 import {
   type ExecutionStatusView,
   ExecutionStatusViewSchema,
+  type ExecutionVoiceMetadataView,
   type ExecutionsPageView,
   ExecutionsPageViewSchema,
+  decodeExecutionsListQuery,
   decodeMeExecutionRequest,
+  normalizeExecutionsListFilters,
   type QueuedExecutionView,
   QueuedExecutionViewSchema,
   type SyncExecutionView,
   SyncExecutionViewSchema
 } from "@my-ai-orchestrator/contracts";
-import { resolvePublicActor } from "../auth/auth-middleware.js";
-import type { BackendConfig } from "../config/config.js";
 import {
   BackendAuthorizationError,
   BackendExecutionFailedError,
@@ -22,6 +26,7 @@ import { createJobEventStream } from "../jobs/job-events.js";
 import type { BackendProductServices } from "../product.js";
 import { createBackendPublicGenerationService } from "../product/generation/public-generation.js";
 import { readJsonBody, runEffectOrThrow, validateResponseBody } from "../http/http.js";
+import { createPublicRouteHandler } from "../http/public-route.js";
 import { Routes } from "../app/route-definitions.js";
 
 export interface ExecutionRouteOptions {
@@ -45,26 +50,22 @@ export function registerExecutionRoutes(app: Hono, options: ExecutionRouteOption
     const response = await runEffectOrThrow(publicGeneration.execute({ userId: actor.userId, ...input }));
 
     if ("jobId" in response) {
-      const queued = await runEffectOrThrow(options.jobs.getJobStatus(response.jobId));
-      if (!queued) {
-        throw new BackendExecutionNotFoundError({ executionId: response.jobId, userId: actor.userId });
-      }
-      if (!queued.voice) {
+      const voice = (response as { readonly voice?: ExecutionVoiceMetadataView }).voice;
+      if (!voice) {
         throw new BackendExecutionFailedError({
           message: `Queued execution "${response.jobId}" is missing voice metadata`,
           reason: "Voice profile unavailable"
         });
       }
 
-      const voice = queued.voice;
-      const queuedExecution = {
+      const queuedExecution: QueuedExecutionView = {
         ...response,
-        status: "queued" as const,
+        status: "queued",
         voice
       };
       const validated = await validateResponseBody(
         QueuedExecutionViewSchema,
-        queuedExecution satisfies QueuedExecutionView,
+        queuedExecution,
         "QueuedExecutionView"
       );
       return c.json(validated, 202);
@@ -86,19 +87,28 @@ export function registerExecutionRoutes(app: Hono, options: ExecutionRouteOption
     return c.json(validated);
   });
 
-  app.get("/me/executions", async (c) => {
-    const actor = await resolvePublicActor(c, options.config, Routes.GetMeExecutions, options.services);
-    const { limit, offset } = parsePageQuery(c);
-    const pageResult = await runEffectOrThrow(options.jobs.listJobsForUser(actor.userId, limit, offset));
-    const page = {
-      items: pageResult.items,
-      total: pageResult.total,
-      limit,
-      offset
-    };
-    const validated = await validateResponseBody(ExecutionsPageViewSchema, page satisfies ExecutionsPageView, "ExecutionsPageView");
-    return c.json(validated);
-  });
+  app.get(
+    "/me/executions",
+    createPublicRouteHandler<ExecutionsPageView>({
+      route: Routes.GetMeExecutions,
+      config: options.config,
+      services: options.services,
+      responseSchema: ExecutionsPageViewSchema as Schema.Schema<ExecutionsPageView, unknown, any>,
+      responseSchemaName: "ExecutionsPageView",
+      handler: async ({ actor, c }) => {
+        const { limit, offset, filters } = await parseExecutionsListQuery(c);
+        const pageResult = await runEffectOrThrow(
+          options.jobs.listJobsForUser(actor.userId, limit, offset, filters)
+        );
+        return {
+          items: pageResult.items,
+          total: pageResult.total,
+          limit,
+          offset
+        } satisfies ExecutionsPageView;
+      }
+    })
+  );
 
   app.get("/me/executions/:executionId", async (c) => {
     const actor = await resolvePublicActor(c, options.config, Routes.GetMeExecution, options.services);
@@ -145,13 +155,25 @@ export function registerExecutionRoutes(app: Hono, options: ExecutionRouteOption
 }
 
 
-function parsePageQuery(c: import("hono").Context): { readonly limit: number; readonly offset: number } {
-  const route = "GET /me/executions";
+function parseExecutionsListQuery(
+  c: import("hono").Context
+): Promise<{ readonly limit: number; readonly offset: number; readonly filters: ReturnType<typeof normalizeExecutionsListFilters> }> {
+  const route = Routes.GetMeExecutions;
   const query = c.req.query();
-  return {
-    limit: parseNonNegativeInteger(query.limit, 20, "limit", route),
-    offset: parseNonNegativeInteger(query.offset, 0, "offset", route)
-  };
+  const limit = parseNonNegativeInteger(query.limit, 20, "limit", route);
+  const offset = parseNonNegativeInteger(query.offset, 0, "offset", route);
+
+  return runEffectOrThrow(
+    decodeExecutionsListQuery({
+      ...(query.period ? { period: query.period } : {}),
+      ...(query.status ? { status: query.status } : {}),
+      ...(query.contentType ? { contentType: query.contentType } : {})
+    })
+  ).then((decoded) => ({
+    limit,
+    offset,
+    filters: normalizeExecutionsListFilters(decoded)
+  }));
 }
 
 function parseNonNegativeInteger(value: string | undefined, fallback: number, field: string, route: string): number {

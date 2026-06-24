@@ -1,6 +1,6 @@
 import { Effect } from "effect";
 import { describe, expect, it } from "vitest";
-import { decodeApiErrorResponse, decodeJobCreatedResponse, decodeRunResponse } from "@my-ai-orchestrator/contracts";
+import { decodeApiErrorResponse, decodeQueuedExecutionView, decodeSyncExecutionView } from "@my-ai-orchestrator/contracts";
 import { createBackendTestAuthorizationHeader } from "../../apps/backend/src/auth/index.js";
 import {
   createBackendAppTestApp,
@@ -12,14 +12,12 @@ import {
 
 describe("backend app execution surface", () => {
   it("executes the main pipeline flow through the Effect service and preserves idempotency", async () => {
-    const config = createBackendAppTestConfig({ billingUserId: "user_1" });
+    const config = createBackendAppTestConfig({ billingUserId: "user_1", billingPlanId: "pro" });
     const services = createBackendAppTestServices(config);
     seedExecutionVoiceState(services);
     const app = createBackendAppTestApp(config, services);
 
     const payload = {
-      userId: "user_1",
-      pipelineType: "validation-post",
       contentType: "validation-post",
       briefing: {
         topic: "Monorepo migration",
@@ -29,7 +27,7 @@ describe("backend app execution surface", () => {
       idempotencyKey: "idem-run-1"
     };
 
-    const firstResponse = await app.request("/api/run", {
+    const firstResponse = await app.request("/me/executions/run", {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify(payload)
@@ -38,7 +36,7 @@ describe("backend app execution surface", () => {
     expect(firstResponse.status).toBe(200);
 
     const firstBody = await firstResponse.json();
-    const decodedFirst = await Effect.runPromise(decodeRunResponse(firstBody));
+    const decodedFirst = await Effect.runPromise(decodeSyncExecutionView(firstBody));
     expect(decodedFirst.mode).toBe("sync");
     expect(decodedFirst.contentType).toBe("validation-post");
     expect(decodedFirst.pipelineName).toBe("validation-post");
@@ -48,7 +46,7 @@ describe("backend app execution surface", () => {
       "voice-profile-snapshot:user_1:v2:validation-post:2026-05-11T00:00:00.000Z"
     );
 
-    const secondResponse = await app.request("/api/run", {
+    const secondResponse = await app.request("/me/executions/run", {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify(payload)
@@ -57,26 +55,25 @@ describe("backend app execution surface", () => {
     expect(secondResponse.status).toBe(200);
 
     const secondBody = await secondResponse.json();
-    const decodedSecond = await Effect.runPromise(decodeRunResponse(secondBody));
+    const decodedSecond = await Effect.runPromise(decodeSyncExecutionView(secondBody));
     expect(decodedSecond).toEqual(decodedFirst);
   });
 
   it("returns a queued job when the backend strategy is async", async () => {
     const config = createBackendAppTestConfig({
       billingUserId: "user_1",
+      billingPlanId: "pro",
       executionMode: "async"
     });
     const services = createBackendAppTestServices(config);
     seedExecutionVoiceState(services);
     const app = createBackendAppTestApp(config, services);
 
-    const response = await app.request("/api/run", {
+    const response = await app.request("/me/executions/run", {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
-        userId: "user_1",
-        pipelineType: "architecture-post",
-        contentType: "architecture-post",
+        contentType: "newsletter",
         briefing: {
           topic: "Architecture async"
         }
@@ -86,9 +83,9 @@ describe("backend app execution surface", () => {
     expect(response.status).toBe(202);
 
     const body = await response.json();
-    const decoded = await Effect.runPromise(decodeJobCreatedResponse(body));
+    const decoded = await Effect.runPromise(decodeQueuedExecutionView(body));
     expect(decoded.status).toBe("queued");
-    expect(decoded.contentType).toBe("architecture-post");
+    expect(decoded.contentType).toBe("newsletter");
     expect(decoded.jobId).toMatch(/^[0-9a-f-]{36}$/);
 
     const completed = await waitForJobStatus(app, decoded.jobId, "done");

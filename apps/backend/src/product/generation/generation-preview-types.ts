@@ -1,4 +1,5 @@
 import { Effect } from "effect";
+import type { DatabaseError } from "@my-ai-orchestrator/database";
 import type { GenerationPreviewRequest, GenerationPreviewResponse } from "@my-ai-orchestrator/contracts";
 import type {
   BackendAIPolicyCatalogError,
@@ -21,6 +22,7 @@ export interface BackendGenerationPreviewService {
     | BackendInputSafetyPolicyError
     | BackendSafetyPolicyDefinitionError
     | BackendValidationError
+    | DatabaseError
   >;
 }
 

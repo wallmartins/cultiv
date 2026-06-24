@@ -1,4 +1,5 @@
 import { Context, Effect, Layer } from "effect";
+import type { DatabaseError } from "@my-ai-orchestrator/database";
 import type { PipelineDefinition, PipelineRequest, PipelineType, QualityMode } from "@my-ai-orchestrator/contracts";
 import type { OrchestrationCatalog } from "@my-ai-orchestrator/orchestrator";
 import type { OrchestrationPlan } from "@my-ai-orchestrator/orchestrator";
@@ -130,8 +131,8 @@ export interface BackendAIPolicyDegradationRecommendation {
 }
 
 export interface BackendAIPolicyServiceContract {
-  readonly getActivePolicy: () => Effect.Effect<ResolvedAIPolicyVersion, never>;
-  readonly getActivePolicyPointer: () => Effect.Effect<ActivePolicyPointerRecord, never>;
+  readonly getActivePolicy: () => Effect.Effect<ResolvedAIPolicyVersion, DatabaseError>;
+  readonly getActivePolicyPointer: () => Effect.Effect<ActivePolicyPointerRecord, DatabaseError>;
   readonly getActiveOrchestrationCatalog: () => OrchestrationCatalog;
   readonly listPolicyVersions: () => readonly BackendAIPolicyVersionSummary[];
   readonly activatePolicyVersion: (args: {
@@ -139,19 +140,25 @@ export interface BackendAIPolicyServiceContract {
     readonly actor: string;
     readonly approvedAt?: string;
   }) => Effect.Effect<ActivePolicyPointerRecord, BackendAIPolicyPricingError>;
-  readonly reloadActivePolicyPointer: () => Effect.Effect<ActivePolicyPointerRecord, BackendAIPolicyPricingError>;
+  readonly reloadActivePolicyPointer: () => Effect.Effect<
+    ActivePolicyPointerRecord,
+    BackendAIPolicyPricingError | DatabaseError
+  >;
   readonly recordDegradationSignal: (args: {
     readonly policyVersion: string;
     readonly provider: string;
     readonly occurredAt: string;
     readonly failureCount: number;
-  }) => Effect.Effect<void, never>;
-  readonly recommendFuturePolicyVersion: () => Effect.Effect<BackendAIPolicyDegradationRecommendation | undefined, never>;
+  }) => Effect.Effect<void, DatabaseError>;
+  readonly recommendFuturePolicyVersion: () => Effect.Effect<
+    BackendAIPolicyDegradationRecommendation | undefined,
+    DatabaseError
+  >;
   readonly listContentTypes: () => readonly AIPolicyContentTypeDefinition[];
   readonly getCanonicalCreditCost: () => number;
   readonly validatePipelineRequest: (
     request: PipelineRequest
-  ) => Effect.Effect<void, BackendAIPolicyCatalogError>;
+  ) => Effect.Effect<void, BackendAIPolicyCatalogError | DatabaseError>;
   readonly resolvePricingEnvelope: (
     args: {
       readonly planTier: BillingPlanTier;
@@ -161,7 +168,10 @@ export interface BackendAIPolicyServiceContract {
       readonly lengthTier?: import("@my-ai-orchestrator/contracts").GenerationLengthTier;
       readonly attachedPolicyVersion?: string;
     }
-  ) => Effect.Effect<ResolvedPricingEnvelope, BackendAIPolicyCatalogError | BackendAIPolicyPricingError>;
+  ) => Effect.Effect<
+    ResolvedPricingEnvelope,
+    BackendAIPolicyCatalogError | BackendAIPolicyPricingError | DatabaseError
+  >;
   readonly resolveExecutionSnapshot: (
     args: {
       readonly request: PipelineRequest;
@@ -173,14 +183,15 @@ export interface BackendAIPolicyServiceContract {
     }
   ) => Effect.Effect<
     ResolvedExecutionSnapshot,
-    BackendAIPolicyCatalogError | BackendAIPolicyPricingError
+    BackendAIPolicyCatalogError | BackendAIPolicyPricingError | DatabaseError
   >;
 }
 
 export type BackendAIPolicyBootstrapError =
   | BackendAIPolicyLoadError
   | BackendAIPolicyValidationError
-  | BackendAIPolicyCatalogError;
+  | BackendAIPolicyCatalogError
+  | DatabaseError;
 
 export class BackendAIPolicyServiceTag extends Context.Tag("BackendAIPolicyService")<
   BackendAIPolicyServiceTag,
