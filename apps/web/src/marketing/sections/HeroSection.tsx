@@ -55,47 +55,44 @@ export function HeroSection({ locale }: HeroSectionProps) {
         ref={sectionRef}
         className="w-full px-[clamp(1.75rem,5.5vw,4rem)] py-6 md:py-10"
       >
-        <div className="mx-auto grid max-w-6xl items-start gap-8 lg:grid-cols-2 lg:gap-10 xl:max-w-[68rem]">
-          <div className="flex flex-col gap-5">
-            <div
-              data-hero-item
-              className="flex flex-wrap items-baseline gap-x-4 gap-y-2"
+        <div className="mx-auto flex max-w-4xl flex-col gap-6 md:gap-8">
+          <div data-hero-item className="space-y-3">
+            <CoordinateLabel index={0} label={heroCoordinateLabels[locale]} />
+            <span
+              className={cn(
+                "inline-block rounded-[5px] border-dotted-cartography bg-off-white px-3 py-1.5",
+                "ui-type-mono text-[0.6875rem] uppercase tracking-widest text-ink-muted"
+              )}
             >
-              <CoordinateLabel index={0} label={heroCoordinateLabels[locale]} />
-              <span
-                className={cn(
-                  "inline-block rounded-[5px] border-dotted-cartography bg-off-white px-3 py-1.5",
-                  "ui-type-mono text-[0.6875rem] uppercase tracking-widest text-ink-muted"
-                )}
-              >
-                {hero.badge}
-              </span>
-            </div>
+              {hero.badge}
+            </span>
+          </div>
 
+          <div data-hero-item>
             <HeroHeadline text={hero.headline} />
-
-            <Text
-              as="p"
-              variant="body-lg"
-              data-hero-item
-              className="max-w-lg text-ink-muted"
-            >
-              {hero.subheadline}
-            </Text>
-
-            <div
-              data-hero-item
-              className="flex flex-col gap-3 sm:flex-row sm:items-center"
-            >
-              <ButtonLink href="#waitlist">{hero.ctaPrimary}</ButtonLink>
-              <ButtonLink href="#rota" variant="ghost">
-                {hero.ctaSecondary}
-              </ButtonLink>
-            </div>
           </div>
 
           <div data-hero-item className="w-full">
             <HeroComparisonFrame messages={hero} />
+          </div>
+
+          <Text
+            as="p"
+            variant="body-lg"
+            data-hero-item
+            className="max-w-3xl text-ink-muted"
+          >
+            {hero.subheadline}
+          </Text>
+
+          <div
+            data-hero-item
+            className="flex flex-col gap-3 sm:flex-row sm:items-center"
+          >
+            <ButtonLink href="#waitlist">{hero.ctaPrimary}</ButtonLink>
+            <ButtonLink href="#rota" variant="ghost">
+              {hero.ctaSecondary}
+            </ButtonLink>
           </div>
         </div>
       </Container>
