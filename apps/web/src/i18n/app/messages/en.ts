@@ -468,6 +468,7 @@ export const appMessagesEn: AppMessages = {
   },
   settings: {
     title: "Navigation settings",
+    subtitle: "Fine-tune your map and compass.",
     profile: "Explorer identity",
     email: "Email",
     locale: "Map language",
@@ -492,6 +493,10 @@ export const appMessagesEn: AppMessages = {
     planPro: "Pro",
     planCriador: "Creator",
     planFree: "Free",
+    planFreeDescription: "Start exploring with the essentials.",
+    planCriadorDescription: "For creators who publish on a steady rhythm.",
+    planProDescription: "More quota, every quality mode, and early access.",
+    planCurrentBadge: "Current",
     upgradeCriador: "Subscribe to Creator",
     upgradePro: "Subscribe to Pro",
     alreadyPro: "You are on the Pro plan.",
