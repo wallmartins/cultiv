@@ -22,11 +22,11 @@ export function TestimonialSection({ locale }: TestimonialSectionProps) {
           ref={sectionRef}
           className="py-16 md:py-24 lg:py-28"
         >
-          <figure className="mx-auto max-w-4xl text-center" data-section-item>
+          <figure className="mx-auto max-w-5xl text-center" data-section-item>
             <Text
               as="blockquote"
-              variant="display"
-              className="text-balance italic text-deep-blue"
+              variant="display-xl"
+              className="text-balance italic text-deep-blue text-[clamp(2.1rem,5.6vw,3.5rem)] leading-[1.1] tracking-[-0.03em]"
             >
               &ldquo;{testimonial.quote}&rdquo;
             </Text>
