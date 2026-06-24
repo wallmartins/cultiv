@@ -55,13 +55,13 @@ export function HeroSection({ locale }: HeroSectionProps) {
         ref={sectionRef}
         className="w-full px-[clamp(1.75rem,5.5vw,4rem)] py-6 md:py-10"
       >
-        <div className="grid items-center gap-10 lg:grid-cols-12 lg:gap-12">
-          <div className="flex flex-col gap-6 lg:col-span-5">
-            <div data-hero-item>
+        <div className="mx-auto grid max-w-6xl items-start gap-8 lg:grid-cols-2 lg:gap-10 xl:max-w-[68rem]">
+          <div className="flex flex-col gap-5">
+            <div
+              data-hero-item
+              className="flex flex-wrap items-baseline gap-x-4 gap-y-2"
+            >
               <CoordinateLabel index={0} label={heroCoordinateLabels[locale]} />
-            </div>
-
-            <div data-hero-item>
               <span
                 className={cn(
                   "inline-block rounded-[5px] border-dotted-cartography bg-off-white px-3 py-1.5",
@@ -78,14 +78,14 @@ export function HeroSection({ locale }: HeroSectionProps) {
               as="p"
               variant="body-lg"
               data-hero-item
-              className="max-w-xl text-ink-muted"
+              className="max-w-lg text-ink-muted"
             >
               {hero.subheadline}
             </Text>
 
             <div
               data-hero-item
-              className="flex flex-col gap-3 pt-1 sm:flex-row sm:items-center"
+              className="flex flex-col gap-3 sm:flex-row sm:items-center"
             >
               <ButtonLink href="#waitlist">{hero.ctaPrimary}</ButtonLink>
               <ButtonLink href="#rota" variant="ghost">
@@ -94,7 +94,7 @@ export function HeroSection({ locale }: HeroSectionProps) {
             </div>
           </div>
 
-          <div data-hero-item className="lg:col-span-7 lg:pl-4">
+          <div data-hero-item className="w-full">
             <HeroComparisonFrame messages={hero} />
           </div>
         </div>
