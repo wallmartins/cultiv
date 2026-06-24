@@ -42,7 +42,7 @@ export function ProblemSection({ locale }: ProblemSectionProps) {
           </header>
 
           <div
-            className="mx-auto flex max-w-5xl flex-col gap-5 md:relative md:min-h-[17rem] md:flex-row md:items-start md:justify-center md:gap-0 md:pt-2"
+            className="mx-auto grid max-w-6xl gap-5 md:grid-cols-3 md:gap-6"
             data-section-item
           >
             {territory.cards.map((card, index) => {
@@ -51,19 +51,11 @@ export function ProblemSection({ locale }: ProblemSectionProps) {
               return (
                 <article
                   key={card.title}
-                  className={cn(
-                    "rounded-[5px] border-dotted-cartography bg-off-white p-6 shadow-cartography",
-                    "transition duration-250 motion-reduce:transition-none",
-                    "hover:-translate-y-0.5 motion-reduce:hover:translate-y-0",
-                    "md:absolute md:w-[31%] md:max-w-[17.5rem]",
-                    index === 0 && "md:left-[4%] md:rotate-[-2deg]",
-                    index === 1 && "md:left-[34.5%] md:z-10 md:rotate-0",
-                    index === 2 && "md:right-[4%] md:rotate-[2deg]"
-                  )}
+                  className="flex h-full flex-col rounded-[5px] border-dotted-cartography bg-off-white p-6 shadow-cartography md:p-7"
                 >
                   <div
                     className={cn(
-                      "mb-4 flex h-10 w-10 items-center justify-center rounded-[5px]",
+                      "mb-4 flex h-10 w-10 shrink-0 items-center justify-center rounded-[5px]",
                       "border-dotted-cartography bg-cream text-terracotta"
                     )}
                   >
@@ -72,7 +64,7 @@ export function ProblemSection({ locale }: ProblemSectionProps) {
                   <Text as="h3" variant="heading" className="mb-2 text-deep-blue">
                     {card.title}
                   </Text>
-                  <Text as="p" variant="body" className="text-ink-muted">
+                  <Text as="p" variant="body" className="flex-1 text-ink-muted">
                     {card.body}
                   </Text>
                 </article>
