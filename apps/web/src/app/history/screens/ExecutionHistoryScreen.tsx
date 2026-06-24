@@ -1,6 +1,7 @@
 import { Button, cn, CompassMark, LogbookProse, Text } from "@my-ai-orchestrator/ui";
 import { Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
+import type { GenerationIntent } from "@my-ai-orchestrator/contracts";
 import { useAppLocale } from "~/i18n/app/use-app-locale";
 import {
   GENERATION_INTENT_IDS,
@@ -109,11 +110,11 @@ export function ExecutionHistoryScreen() {
   });
   const { status, items, hasMore, loadMore, retry } = useExecutionsList(filters);
 
-  const visibleIntents = useMemo(() => {
-    const fromItems = new Set(
-      items.map((item) => item.generationIntent).filter((intent): intent is string => Boolean(intent))
-    );
-    const ids = fromItems.size > 0 ? [...fromItems] : [...GENERATION_INTENT_IDS];
+  const visibleIntents = useMemo((): GenerationIntent[] => {
+    const fromItems = items
+      .map((item) => item.generationIntent)
+      .filter((intent): intent is GenerationIntent => intent !== undefined);
+    const ids = fromItems.length > 0 ? [...new Set(fromItems)] : [...GENERATION_INTENT_IDS];
     return ids.sort((left, right) =>
       getIntentLabel(locale, left, left).localeCompare(getIntentLabel(locale, right, right), locale === "pt" ? "pt-BR" : "en")
     );
