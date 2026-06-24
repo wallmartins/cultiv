@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { Effect } from "effect";
+import * as payments from "@my-ai-orchestrator/payments";
 import { resolveBackendPublicAuthenticatedActor } from "../src/auth/public-auth.js";
 import { createBackendApplicationUserMemoryRepository } from "../src/auth/application-user-memory.js";
 import { createApplicationUserServiceLayer } from "../src/auth/application-user-service.js";
@@ -15,7 +16,7 @@ describe("resolveBackendPublicAuthenticatedActor", () => {
     const users = createBackendApplicationUserMemoryRepository();
     const program = resolveBackendPublicAuthenticatedActor({
       config,
-      route: "POST /api/run",
+      route: "POST /me/executions/run",
       readHeader: () => undefined
     }).pipe(Effect.provide(createApplicationUserServiceLayer(users)));
 
@@ -31,7 +32,7 @@ describe("resolveBackendPublicAuthenticatedActor", () => {
     const users = createBackendApplicationUserMemoryRepository();
     const program = resolveBackendPublicAuthenticatedActor({
       config,
-      route: "POST /api/run",
+      route: "POST /me/executions/run",
       readHeader: (name) => (name === "authorization" ? "Bearer not-a-jwt" : undefined)
     }).pipe(Effect.provide(createApplicationUserServiceLayer(users)));
 
@@ -51,7 +52,7 @@ describe("resolveBackendPublicAuthenticatedActor", () => {
 
     const program = resolveBackendPublicAuthenticatedActor({
       config,
-      route: "POST /api/run",
+      route: "POST /me/executions/run",
       readHeader: (name) => (name === "authorization" ? `Bearer ${tamperedToken}` : undefined)
     }).pipe(Effect.provide(createApplicationUserServiceLayer(users)));
 
@@ -74,7 +75,7 @@ describe("resolveBackendPublicAuthenticatedActor", () => {
 
     const program = resolveBackendPublicAuthenticatedActor({
       config,
-      route: "POST /api/run",
+      route: "POST /me/executions/run",
       readHeader: (name) => (name === "authorization" ? `Bearer ${token}` : undefined)
     }).pipe(Effect.provide(createApplicationUserServiceLayer(users)));
 
@@ -98,7 +99,7 @@ describe("resolveBackendPublicAuthenticatedActor", () => {
 
     const program = resolveBackendPublicAuthenticatedActor({
       config,
-      route: "POST /api/run",
+      route: "POST /me/executions/run",
       readHeader: (name) => (name === "authorization" ? `Bearer ${token}` : undefined)
     }).pipe(Effect.provide(createApplicationUserServiceLayer(users)));
 
@@ -128,7 +129,7 @@ describe("resolveBackendPublicAuthenticatedActor", () => {
 
     const program = resolveBackendPublicAuthenticatedActor({
       config,
-      route: "POST /api/run",
+      route: "POST /me/executions/run",
       readHeader: (name) => (name === "authorization" ? `Bearer ${token}` : undefined)
     }).pipe(Effect.provide(createApplicationUserServiceLayer(users)));
 
@@ -154,7 +155,7 @@ describe("resolveBackendPublicAuthenticatedActor", () => {
 
     const program = resolveBackendPublicAuthenticatedActor({
       config,
-      route: "POST /api/run",
+      route: "POST /me/executions/run",
       readHeader: (name) => (name === "authorization" ? `Bearer ${token}` : undefined)
     }).pipe(Effect.provide(createApplicationUserServiceLayer(users)));
 
@@ -164,6 +165,35 @@ describe("resolveBackendPublicAuthenticatedActor", () => {
       expect(result.left._tag).toBe("BackendUserSuspendedError");
       expect(result.left.userId).toBe("suspended-id");
     }
+  });
+
+  it("provisions billing only on first auth resolution for a new user", async () => {
+    const profile = getBackendTestAuthProfile();
+    const config = createTestConfig({
+      authIssuerUrl: profile.issuerUrl,
+      authAudience: profile.audience,
+      authJwksUrl: profile.jwksUrl
+    });
+    const users = createBackendApplicationUserMemoryRepository();
+    const billing = payments.createBillingService({
+      repository: payments.createBillingRepository({ plans: payments.DEFAULT_BILLING_PLANS })
+    });
+    const token = createBackendTestAccessToken({ userId: "auth0|billing-once" });
+    const ensureSpy = vi.spyOn(payments, "ensureDefaultFreeSubscription");
+
+    const resolve = () =>
+      resolveBackendPublicAuthenticatedActor({
+        config,
+        route: "POST /me/executions/run",
+        readHeader: (name) => (name === "authorization" ? `Bearer ${token}` : undefined),
+        billing
+      }).pipe(Effect.provide(createApplicationUserServiceLayer(users)));
+
+    await Effect.runPromise(resolve());
+    await Effect.runPromise(resolve());
+
+    expect(ensureSpy).toHaveBeenCalledTimes(1);
+    ensureSpy.mockRestore();
   });
 
   it("extracts roles and permissions from token claims", async () => {
@@ -182,7 +212,7 @@ describe("resolveBackendPublicAuthenticatedActor", () => {
 
     const program = resolveBackendPublicAuthenticatedActor({
       config,
-      route: "POST /api/run",
+      route: "POST /me/executions/run",
       readHeader: (name) => (name === "authorization" ? `Bearer ${token}` : undefined)
     }).pipe(Effect.provide(createApplicationUserServiceLayer(users)));
 

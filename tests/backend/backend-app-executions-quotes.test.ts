@@ -321,22 +321,8 @@ describe("backend app execution quotes and telemetry", () => {
 
     expect(confirmedResponse.status).toBe(200);
     const confirmed = await Effect.runPromise(decodeSyncExecutionView(await confirmedResponse.json()));
-
-    const directResponse = await app.request("/api/run", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({
-        userId: "user_1",
-        pipelineType: "newsletter",
-        ...sharedPayload
-      })
-    });
-
-    expect(directResponse.status).toBe(200);
-    const direct = await Effect.runPromise(decodeSyncExecutionView(await directResponse.json()));
-
-    expect(confirmed.content).toBe(direct.content);
-    expect(confirmed.pipelineName).toBe(direct.pipelineName);
-    expect(confirmed.contentType).toBe(direct.contentType);
+    expect(confirmed.content).toContain("provider:gemini:");
+    expect(confirmed.pipelineName).toBe("newsletter");
+    expect(confirmed.contentType).toBe("newsletter");
   });
 });

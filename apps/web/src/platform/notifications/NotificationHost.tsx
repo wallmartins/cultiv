@@ -1,7 +1,9 @@
 import { Text } from "@my-ai-orchestrator/ui";
+import { useAppLocale } from "~/i18n/app/use-app-locale";
 import { useNotifications } from "~/platform/notifications/notification-store";
 
 export function NotificationHost() {
+  const { messages } = useAppLocale();
   const { notifications, dismiss } = useNotifications();
 
   if (notifications.length === 0) {
@@ -35,7 +37,7 @@ export function NotificationHost() {
             <button
               type="button"
               className="text-sm text-ink-muted"
-              aria-label="Dismiss"
+              aria-label={messages.notifications.dismiss}
               onClick={() => dismiss(notification.id)}
             >
               ×

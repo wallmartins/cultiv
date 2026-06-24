@@ -54,6 +54,8 @@ export interface TextQualityContext {
   readonly lexicalQualityV2?: boolean;
 }
 
+export const DEFAULT_LANE_CONCURRENCY_CAP = 3;
+
 export interface TextQualityRequest {
   readonly request: PipelineRequest;
   readonly userId: string;
@@ -64,6 +66,7 @@ export interface TextQualityRequest {
   readonly generationContext?: GenerationContext;
   readonly lexicalQualityV2?: boolean;
   readonly reasoningEvaluationEnabled?: boolean;
+  readonly laneConcurrencyCap?: number;
   readonly onLaneProgress?: (progress: LaneProgress) => Effect.Effect<void>;
 }
 

@@ -3,6 +3,7 @@ import { Kysely } from "kysely";
 import type { MemoryEntryRecord, MemoryRepository } from "@my-ai-orchestrator/database";
 import type { DatabaseTables } from "../postgres-tables.js";
 import { parseStoredJsonRecord } from "./json-column.js";
+import { postgresTryPromise } from "./postgres-try-promise.js";
 
 function toRow(record: MemoryEntryRecord) {
   return {
@@ -47,14 +48,12 @@ export function createPostgresMemoryRepository(
           updatedAt: record.updatedAt ?? now
         };
 
-        yield* Effect.tryPromise({
-          try: () =>
-            db.insertInto("memories")
-              .values(toRow(next))
-              .onConflict((oc) => oc.column("id").doUpdateSet(toRow(next)))
-              .execute(),
-          catch: () => undefined
-        }).pipe(Effect.catchAll(() => Effect.succeed(undefined)));
+        yield* postgresTryPromise("memories.put", () =>
+          db.insertInto("memories")
+            .values(toRow(next))
+            .onConflict((oc) => oc.column("id").doUpdateSet(toRow(next)))
+            .execute()
+        );
 
         return next;
       });
@@ -62,15 +61,13 @@ export function createPostgresMemoryRepository(
 
     get(userId, key) {
       return Effect.gen(function* () {
-        const row = yield* Effect.tryPromise({
-          try: () =>
-            db.selectFrom("memories")
-              .where("user_id", "=", userId)
-              .where("key", "=", key)
-              .selectAll()
-              .executeTakeFirst(),
-          catch: () => undefined
-        }).pipe(Effect.catchAll(() => Effect.succeed(undefined)));
+        const row = yield* postgresTryPromise("memories.get", () =>
+          db.selectFrom("memories")
+            .where("user_id", "=", userId)
+            .where("key", "=", key)
+            .selectAll()
+            .executeTakeFirst()
+        );
 
         return row ? parseRow(row) : undefined;
       });
@@ -78,14 +75,12 @@ export function createPostgresMemoryRepository(
 
     listByUser(userId) {
       return Effect.gen(function* () {
-        const rows = yield* Effect.tryPromise({
-          try: () =>
-            db.selectFrom("memories")
-              .where("user_id", "=", userId)
-              .selectAll()
-              .execute(),
-          catch: () => [] as { id: string; user_id: string; key: string; data: string; version: number; created_at: string; updated_at: string }[]
-        }).pipe(Effect.catchAll(() => Effect.succeed([] as { id: string; user_id: string; key: string; data: string; version: number; created_at: string; updated_at: string }[])));
+        const rows = yield* postgresTryPromise("memories.listByUser", () =>
+          db.selectFrom("memories")
+            .where("user_id", "=", userId)
+            .selectAll()
+            .execute()
+        );
 
         return rows.map(parseRow);
       });
@@ -93,14 +88,12 @@ export function createPostgresMemoryRepository(
 
     remove(userId, key) {
       return Effect.gen(function* () {
-        const result = yield* Effect.tryPromise({
-          try: () =>
-            db.deleteFrom("memories")
-              .where("user_id", "=", userId)
-              .where("key", "=", key)
-              .executeTakeFirst(),
-          catch: () => ({ numDeletedRows: 0n })
-        }).pipe(Effect.catchAll(() => Effect.succeed({ numDeletedRows: 0n })));
+        const result = yield* postgresTryPromise("memories.remove", () =>
+          db.deleteFrom("memories")
+            .where("user_id", "=", userId)
+            .where("key", "=", key)
+            .executeTakeFirst()
+        );
 
         return result.numDeletedRows > 0n;
       });

@@ -1,4 +1,7 @@
-import { BillingCheckoutCatalogNotFoundError } from "@my-ai-orchestrator/payments";
+import {
+  BillingCheckoutCatalogNotFoundError,
+  BillingGatewayWebhookVerificationError
+} from "@my-ai-orchestrator/payments";
 import { createHttpErrorResponse } from "../http/error-response-core.js";
 import type { HttpErrorResponse } from "../http/error-response-core.js";
 import { BackendBillingNotConfiguredError } from "../http/errors.js";
@@ -21,6 +24,13 @@ export function mapBillingError(error: unknown, path: string): HttpErrorResponse
         currency: error.currency,
         billingPeriod: error.billingPeriod
       }
+    });
+  }
+
+  if (error instanceof BillingGatewayWebhookVerificationError) {
+    return createHttpErrorResponse(400, "invalid_request", {
+      message: error.message,
+      details: { path, gateway: error.gateway }
     });
   }
 

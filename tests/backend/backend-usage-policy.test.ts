@@ -4,7 +4,8 @@ import { buildOrchestrationPlan, DEFAULT_ORCHESTRATION_CATALOG } from "@my-ai-or
 import { createBackendApp } from "../../apps/backend";
 import type { BackendConfig } from "../../apps/backend";
 import { createBackendProductServices } from "../../apps/backend";
-import { createBackendAppTestApp } from "./backend-app.fixtures.js";
+import { createBackendAppTestApp, seedExecutionVoiceState } from "./backend-app.fixtures.js";
+import { createBackendTestAuthorizationHeader } from "../../apps/backend/src/auth/index.js";
 
 function buildPlanRequest(overrides: Record<string, unknown> = {}) {
   return {
@@ -249,6 +250,7 @@ describe("backend usage policy", () => {
       billingUserId: "backend"
     };
     const services = Effect.runSync(createBackendProductServices(config, { now }));
+    seedExecutionVoiceState(services, "backend");
     const app = createBackendAppTestApp(
       createBackendApp(config, {
       startedAt: now(),
@@ -258,21 +260,21 @@ describe("backend usage policy", () => {
       services
     );
 
-    const response = await app.request("/api/run", {
+    const response = await app.request("/me/executions/run", {
       method: "POST",
       headers: {
-        "content-type": "application/json"
+        "content-type": "application/json",
+        authorization: createBackendTestAuthorizationHeader({ userId: "backend" })
       },
       body: JSON.stringify({
-        userId: "backend",
-        pipelineType: "validation-post",
-        contentType: "validation-post",
+        contentType: "linkedin-post",
+        qualityMode: "fast",
         briefing: {
           topic: "Authorization checks",
           keyPoints: ["billing", "feature flags", "limits"]
         },
         model: "claude-3-5-sonnet",
-        idempotencyKey: "http-authorization-failure"
+        idempotencyKey: "http-authorization-failure-me"
       })
     });
     const body = await response.json();

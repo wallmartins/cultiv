@@ -188,16 +188,17 @@ export function createBackendExecutionService(options: BackendExecutionOptions):
           pricingEnvelope: prepared.pricingEnvelope,
           simulateCredits: prepared.simulateCredits
         });
+        const queuedResponse = { ...response, voice };
         if (idempotencyKey) {
           yield* idempotencyStore.save(
             resolveIdempotencyUserId(prepared.request),
             idempotencyKey,
             fingerprint,
-            response,
+            queuedResponse,
             response.jobId
           );
         }
-        return response;
+        return queuedResponse;
       }
 
       const syncResponse = yield* executeSyncRun({

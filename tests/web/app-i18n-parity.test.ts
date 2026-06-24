@@ -18,4 +18,25 @@ describe("app i18n parity", () => {
     const enKeys = collectKeys(appMessagesEn).sort();
     expect(ptKeys).toEqual(enKeys);
   });
+
+  it("includes auth flow and notification dismiss keys", () => {
+    const authKeys = [
+      "auth.signingIn",
+      "auth.redirectingToLogin",
+      "auth.preparingSession",
+      "auth.sessionPrepareFailed",
+      "auth.logoutAndSignInAgain",
+      "auth.sessionPrepareFailedLogin",
+      "auth.openingLogin",
+      "auth.loginFailed",
+      "auth.sessionPrepareFailedCallback",
+      "auth.finishingLogin",
+      "notifications.dismiss"
+    ];
+
+    for (const key of authKeys) {
+      expect(collectKeys(appMessagesPt)).toContain(key);
+      expect(collectKeys(appMessagesEn)).toContain(key);
+    }
+  });
 });

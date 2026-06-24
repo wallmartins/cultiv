@@ -5,6 +5,7 @@ import type {
   BackendApplicationUserRepository
 } from "../../auth/application-user.js";
 import type { DatabaseTables } from "../postgres-tables.js";
+import { postgresTryPromise } from "./postgres-try-promise.js";
 
 type ApplicationUserRow = {
   id: string;
@@ -30,17 +31,15 @@ export function createPostgresApplicationUserRepository(
   return {
     findByExternalSubject(externalSubject) {
       return Effect.gen(function* () {
-        const row = yield* Effect.tryPromise({
-          try: () =>
-            db.selectFrom("application_users")
-              .where("external_subject", "=", externalSubject)
-              .selectAll()
-              .executeTakeFirst(),
-          catch: () => undefined
-        }).pipe(Effect.catchAll(() => Effect.succeed(undefined)));
+        const row = yield* postgresTryPromise("application_users.findByExternalSubject", () =>
+          db.selectFrom("application_users")
+            .where("external_subject", "=", externalSubject)
+            .selectAll()
+            .executeTakeFirst()
+        );
 
         return row ? parseApplicationUser(row) : undefined;
-      }).pipe(Effect.orDie);
+      });
     },
 
     create(args) {
@@ -55,28 +54,25 @@ export function createPostgresApplicationUserRepository(
           updated_at: updatedAt.toISOString()
         };
 
-        yield* Effect.tryPromise({
-          try: () => db.insertInto("application_users").values(row).execute(),
-          catch: (error) => error
-        }).pipe(Effect.orDie);
+        yield* postgresTryPromise("application_users.create", () =>
+          db.insertInto("application_users").values(row).execute()
+        );
 
         return parseApplicationUser(row);
-      }).pipe(Effect.orDie);
+      });
     },
 
     findById(id) {
       return Effect.gen(function* () {
-        const row = yield* Effect.tryPromise({
-          try: () =>
-            db.selectFrom("application_users")
-              .where("id", "=", id)
-              .selectAll()
-              .executeTakeFirst(),
-          catch: () => undefined
-        }).pipe(Effect.catchAll(() => Effect.succeed(undefined)));
+        const row = yield* postgresTryPromise("application_users.findById", () =>
+          db.selectFrom("application_users")
+            .where("id", "=", id)
+            .selectAll()
+            .executeTakeFirst()
+        );
 
         return row ? parseApplicationUser(row) : undefined;
-      }).pipe(Effect.orDie);
+      });
     }
   };
 }

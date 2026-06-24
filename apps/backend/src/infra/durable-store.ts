@@ -6,6 +6,7 @@ import {
   loadPostgresBillingRepository,
   persistPostgresBillingRepositoryInTransaction,
   reloadPostgresBillingRepositoryInto,
+  reloadPostgresBillingUserInto,
   runBillingRepositoryPersistSerialized,
   savePostgresBillingRepository,
   writePostgresBillingRepository
@@ -58,7 +59,7 @@ function repositoryHasBillingData(repository: BillingRepository): boolean {
   );
 }
 
-export { replaceBillingRepositoryContents } from "./billing-repository-sync.js";
+export { replaceBillingRepositoryContents, mergeBillingUserSliceInto, type BillingUserSlice } from "./billing-repository-sync.js";
 
 export function reloadBillingRepositoryInto(
   db: Kysely<DatabaseTables>,
@@ -71,6 +72,24 @@ export function reloadBillingRepositoryInto(
       if (repositoryHasBillingData(target)) {
         return;
       }
+    }
+
+    const loaded = yield* loadBillingSnapshotRepository(db);
+    replaceBillingRepositoryContents(target, loaded);
+  });
+}
+
+// ponytail: merges one user's PG slice into the in-memory repo; other users' cached rows may be stale until their job runs
+export function reloadBillingRepositoryForUserInto(
+  db: Kysely<DatabaseTables>,
+  target: BillingRepository,
+  userId: string
+): Effect.Effect<void, Error> {
+  return Effect.gen(function* () {
+    const relationalEnabled = yield* hasPostgresBillingTables(db);
+    if (relationalEnabled) {
+      yield* reloadPostgresBillingUserInto(db, target, userId);
+      return;
     }
 
     const loaded = yield* loadBillingSnapshotRepository(db);

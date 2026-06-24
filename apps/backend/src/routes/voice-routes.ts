@@ -29,6 +29,7 @@ import {
 } from "../http/errors.js";
 import type { BackendProductServices } from "../product.js";
 import type { ListVoiceExamplesOptions } from "../product/voice/voice-types.js";
+import { createPublicRouteHandler } from "../http/public-route.js";
 import { readJsonBody, runEffectOrThrow, validateResponseBody } from "../http/http.js";
 import { Routes } from "../app/route-definitions.js";
 
@@ -61,25 +62,28 @@ export function registerVoiceRoutes(app: Hono, options: VoiceRouteOptions): void
     return c.json(validated);
   });
 
-  app.get("/me/voice-profile", async (c) => {
-    const userId = await resolveActorUserId(c, options.config, "GET /me/voice-profile", options.services);
-    const response = await runEffectOrThrow(options.services.voice.getProfileScreen(userId));
+  app.get(
+    "/me/voice-profile",
+    createPublicRouteHandler({
+      route: Routes.GetMeVoiceProfile,
+      config: options.config,
+      services: options.services,
+      responseSchema: VoiceProfileScreenViewSchema,
+      responseSchemaName: "VoiceProfileScreenView",
+      handler: async ({ actor }) => {
+        const response = await runEffectOrThrow(options.services.voice.getProfileScreen(actor.userId));
+        if (!response) {
+          throw new BackendVoiceProfileNotFoundError({ userId: actor.userId });
+        }
 
-    if (!response) {
-      throw new BackendVoiceProfileNotFoundError({ userId });
-    }
-
-    const validated = await validateResponseBody(
-      VoiceProfileScreenViewSchema,
-      response satisfies VoiceProfileScreenView,
-      "VoiceProfileScreenView"
-    );
-    return c.json(validated);
-  });
+        return response satisfies VoiceProfileScreenView;
+      }
+    })
+  );
 
   app.post("/me/voice-profile/trait-confirmations", async (c) => {
-    const userId = await resolveActorUserId(c, options.config, "POST /me/voice-profile/trait-confirmations", options.services);
-    const rawBody = await readJsonBody(c, "POST /me/voice-profile/trait-confirmations");
+    const userId = await resolveActorUserId(c, options.config, Routes.PostMeVoiceProfileTraitConfirmations, options.services);
+    const rawBody = await readJsonBody(c, Routes.PostMeVoiceProfileTraitConfirmations);
     const input = await runEffectOrThrow(decodeTraitConfirmationInput(rawBody));
     const response = await runEffectOrThrow(options.services.voice.recordTraitConfirmation(userId, input));
 
@@ -96,7 +100,7 @@ export function registerVoiceRoutes(app: Hono, options: VoiceRouteOptions): void
   });
 
   app.get("/me/voice-profile/examples", async (c) => {
-    const userId = await resolveActorUserId(c, options.config, "GET /me/voice-profile/examples", options.services);
+    const userId = await resolveActorUserId(c, options.config, Routes.GetMeVoiceProfileExamples, options.services);
     const response = await runEffectOrThrow(options.services.voice.listExamples(userId, parseListOptions(c)));
     const validated = await validateResponseBody(
       VoiceExamplesPageViewSchema,
@@ -107,8 +111,8 @@ export function registerVoiceRoutes(app: Hono, options: VoiceRouteOptions): void
   });
 
   app.post("/me/voice-profile/examples", async (c) => {
-    const userId = await resolveActorUserId(c, options.config, "POST /me/voice-profile/examples", options.services);
-    const rawBody = await readJsonBody(c, "POST /me/voice-profile/examples");
+    const userId = await resolveActorUserId(c, options.config, Routes.PostMeVoiceProfileExamples, options.services);
+    const rawBody = await readJsonBody(c, Routes.PostMeVoiceProfileExamples);
     const input = await runEffectOrThrow(decodeVoiceExampleCreateInput(rawBody));
     const response = await runEffectOrThrow(options.services.voice.createExample(userId, input));
     const validated = await validateResponseBody(
@@ -120,13 +124,13 @@ export function registerVoiceRoutes(app: Hono, options: VoiceRouteOptions): void
   });
 
   app.patch("/me/voice-profile/examples/:exampleId", async (c) => {
-    const userId = await resolveActorUserId(c, options.config, "PATCH /me/voice-profile/examples/:exampleId", options.services);
+    const userId = await resolveActorUserId(c, options.config, Routes.PatchMeVoiceProfileExample, options.services);
     const exampleId = c.req.param("exampleId");
     if (!exampleId || exampleId.trim().length === 0) {
       throw new BackendVoiceExampleNotFoundError({ userId, exampleId: exampleId ?? "" });
     }
 
-    const rawBody = await readJsonBody(c, "PATCH /me/voice-profile/examples/:exampleId");
+    const rawBody = await readJsonBody(c, Routes.PatchMeVoiceProfileExample);
     const input = await runEffectOrThrow(decodeVoiceExampleUpdateInput(rawBody));
     const response = await runEffectOrThrow(options.services.voice.updateExample(userId, exampleId, input));
 
@@ -143,8 +147,8 @@ export function registerVoiceRoutes(app: Hono, options: VoiceRouteOptions): void
   });
 
   app.post("/me/voice-profile/example-batches", async (c) => {
-    const userId = await resolveActorUserId(c, options.config, "POST /me/voice-profile/example-batches", options.services);
-    const rawBody = await readJsonBody(c, "POST /me/voice-profile/example-batches");
+    const userId = await resolveActorUserId(c, options.config, Routes.PostMeVoiceProfileBatches, options.services);
+    const rawBody = await readJsonBody(c, Routes.PostMeVoiceProfileBatches);
     const input = await runEffectOrThrow(decodeVoiceExampleBatchCreateInput(rawBody));
     const response = await runEffectOrThrow(options.services.voice.createBatch(userId, input));
     const validated = await validateResponseBody(
@@ -156,9 +160,9 @@ export function registerVoiceRoutes(app: Hono, options: VoiceRouteOptions): void
   });
 
   app.post("/me/voice-profile/example-batches/:batchId/items", async (c) => {
-    const userId = await resolveActorUserId(c, options.config, "POST /me/voice-profile/example-batches/:batchId/items", options.services);
+    const userId = await resolveActorUserId(c, options.config, Routes.PostMeVoiceProfileBatchItems, options.services);
     const batchId = requireRouteParam(c, "batchId");
-    const rawBody = await readJsonBody(c, "POST /me/voice-profile/example-batches/:batchId/items");
+    const rawBody = await readJsonBody(c, Routes.PostMeVoiceProfileBatchItems);
     const input = await runEffectOrThrow(decodeVoiceExampleBatchItemsInput(rawBody));
     const response = await runEffectOrThrow(options.services.voice.addBatchItems(userId, batchId, input.items));
     const validated = await validateResponseBody(
@@ -170,7 +174,7 @@ export function registerVoiceRoutes(app: Hono, options: VoiceRouteOptions): void
   });
 
   app.post("/me/voice-profile/example-batches/:batchId/commit", async (c) => {
-    const userId = await resolveActorUserId(c, options.config, "POST /me/voice-profile/example-batches/:batchId/commit", options.services);
+    const userId = await resolveActorUserId(c, options.config, Routes.PostMeVoiceProfileBatchCommit, options.services);
     const batchId = requireRouteParam(c, "batchId");
     const response = await runEffectOrThrow(options.services.voice.commitBatch(userId, batchId));
     const validated = await validateResponseBody(
@@ -183,7 +187,7 @@ export function registerVoiceRoutes(app: Hono, options: VoiceRouteOptions): void
 }
 
 function parseListOptions(c: Context): ListVoiceExamplesOptions {
-  const route = "GET /me/voice-profile/examples";
+  const route = Routes.GetMeVoiceProfileExamples;
   const query = c.req.query();
 
   return {

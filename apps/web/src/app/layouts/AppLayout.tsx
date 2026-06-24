@@ -7,8 +7,12 @@ import { RequireAuth } from "~/app/auth/components/RequireAuth";
 import { isWebAuthConfigured } from "~/app/auth/lib/auth-config";
 import { isOnboardingRoute } from "~/app/auth/lib/is-onboarding-route";
 import { OnboardingLayout } from "~/app/layouts/OnboardingLayout";
+import { useDocumentLang } from "~/hooks/use-document-lang";
+import { AppLocaleProvider, useAppLocale } from "~/i18n/app/use-app-locale";
 
-export function AppLayout() {
+function AppLayoutFrame() {
+  const { locale } = useAppLocale();
+  useDocumentLang(locale);
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   const onboarding = isOnboardingRoute(pathname);
 
@@ -34,5 +38,13 @@ export function AppLayout() {
         </div>
       </AppSdkGate>
     </RequireAuth>
+  );
+}
+
+export function AppLayout() {
+  return (
+    <AppLocaleProvider>
+      <AppLayoutFrame />
+    </AppLocaleProvider>
   );
 }

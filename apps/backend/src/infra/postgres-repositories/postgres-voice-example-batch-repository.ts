@@ -7,6 +7,7 @@ import {
 } from "@my-ai-orchestrator/database";
 import type { DatabaseTables } from "../postgres-tables.js";
 import { parseStoredJsonRecord } from "./json-column.js";
+import { postgresTryPromise } from "./postgres-try-promise.js";
 
 function toRow(record: VoiceExampleBatchRecord) {
   return {
@@ -41,10 +42,9 @@ export function createPostgresVoiceExampleBatchRepository(
   return {
     create(record, version = 1) {
       return Effect.gen(function* () {
-        const existing = yield* Effect.tryPromise({
-          try: () => db.selectFrom("voice_example_batches").where("id", "=", record.id).selectAll().executeTakeFirst(),
-          catch: () => undefined
-        }).pipe(Effect.catchAll(() => Effect.succeed(undefined)));
+        const existing = yield* postgresTryPromise("voice_example_batches.create.lookup", () =>
+          db.selectFrom("voice_example_batches").where("id", "=", record.id).selectAll().executeTakeFirst()
+        );
 
         if (existing) {
           return yield* Effect.fail(new DatabaseVoiceBatchAlreadyExistsError({ batchId: record.id }));
@@ -52,10 +52,9 @@ export function createPostgresVoiceExampleBatchRepository(
 
         const next = { ...record, version };
 
-        yield* Effect.tryPromise({
-          try: () => db.insertInto("voice_example_batches").values(toRow(next)).execute(),
-          catch: (e) => new DatabaseVoiceBatchAlreadyExistsError({ batchId: record.id })
-        });
+        yield* postgresTryPromise("voice_example_batches.create.insert", () =>
+          db.insertInto("voice_example_batches").values(toRow(next)).execute()
+        );
 
         return next;
       });
@@ -63,10 +62,9 @@ export function createPostgresVoiceExampleBatchRepository(
 
     save(record) {
       return Effect.gen(function* () {
-        const existing = yield* Effect.tryPromise({
-          try: () => db.selectFrom("voice_example_batches").where("id", "=", record.id).selectAll().executeTakeFirst(),
-          catch: () => undefined
-        }).pipe(Effect.catchAll(() => Effect.succeed(undefined)));
+        const existing = yield* postgresTryPromise("voice_example_batches.save.lookup", () =>
+          db.selectFrom("voice_example_batches").where("id", "=", record.id).selectAll().executeTakeFirst()
+        );
 
         if (!existing) {
           return yield* Effect.fail(new DatabaseVoiceBatchNotFoundError({ batchId: record.id }));
@@ -74,10 +72,9 @@ export function createPostgresVoiceExampleBatchRepository(
 
         const next = { ...record, version: record.version + 1, updatedAt: new Date().toISOString() };
 
-        yield* Effect.tryPromise({
-          try: () => db.updateTable("voice_example_batches").set(toRow(next)).where("id", "=", record.id).execute(),
-          catch: (e) => new DatabaseVoiceBatchNotFoundError({ batchId: record.id })
-        });
+        yield* postgresTryPromise("voice_example_batches.save.update", () =>
+          db.updateTable("voice_example_batches").set(toRow(next)).where("id", "=", record.id).execute()
+        );
 
         return next;
       });
@@ -85,10 +82,9 @@ export function createPostgresVoiceExampleBatchRepository(
 
     get(id) {
       return Effect.gen(function* () {
-        const row = yield* Effect.tryPromise({
-          try: () => db.selectFrom("voice_example_batches").where("id", "=", id).selectAll().executeTakeFirst(),
-          catch: () => undefined
-        }).pipe(Effect.catchAll(() => Effect.succeed(undefined)));
+        const row = yield* postgresTryPromise("voice_example_batches.get", () =>
+          db.selectFrom("voice_example_batches").where("id", "=", id).selectAll().executeTakeFirst()
+        );
 
         return row ? parseRow(row) : undefined;
       });
@@ -96,10 +92,9 @@ export function createPostgresVoiceExampleBatchRepository(
 
     listByUser(userId) {
       return Effect.gen(function* () {
-        const rows = yield* Effect.tryPromise({
-          try: () => db.selectFrom("voice_example_batches").where("user_id", "=", userId).selectAll().execute(),
-          catch: () => [] as { id: string; user_id: string; data: string; version: number; created_at: string; updated_at: string }[]
-        }).pipe(Effect.catchAll(() => Effect.succeed([] as { id: string; user_id: string; data: string; version: number; created_at: string; updated_at: string }[])));
+        const rows = yield* postgresTryPromise("voice_example_batches.listByUser", () =>
+          db.selectFrom("voice_example_batches").where("user_id", "=", userId).selectAll().execute()
+        );
 
         return rows.map(parseRow);
       });
@@ -107,10 +102,9 @@ export function createPostgresVoiceExampleBatchRepository(
 
     remove(id) {
       return Effect.gen(function* () {
-        const result = yield* Effect.tryPromise({
-          try: () => db.deleteFrom("voice_example_batches").where("id", "=", id).executeTakeFirst(),
-          catch: () => ({ numDeletedRows: 0n })
-        }).pipe(Effect.catchAll(() => Effect.succeed({ numDeletedRows: 0n })));
+        const result = yield* postgresTryPromise("voice_example_batches.remove", () =>
+          db.deleteFrom("voice_example_batches").where("id", "=", id).executeTakeFirst()
+        );
 
         return result.numDeletedRows > 0n;
       });

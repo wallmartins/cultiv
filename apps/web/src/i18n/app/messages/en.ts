@@ -1,6 +1,19 @@
 import type { AppMessages } from "../types";
 
 export const appMessagesEn: AppMessages = {
+  auth: {
+    signingIn: "Signing in…",
+    redirectingToLogin: "Redirecting to sign in…",
+    preparingSession: "Preparing session…",
+    sessionPrepareFailed:
+      "Could not prepare a session with the backend. Check that the server is running and the Auth0 audience is correct.",
+    logoutAndSignInAgain: "Sign out and sign in again",
+    sessionPrepareFailedLogin: "Could not prepare the session. Try /login again.",
+    openingLogin: "Opening sign in…",
+    loginFailed: "Could not complete sign in. Try again at /login.",
+    sessionPrepareFailedCallback: "Could not prepare the session. Go back to /login and try again.",
+    finishingLogin: "Finishing sign in…"
+  },
   shell: {
     nav: {
       generate: "Generate",
@@ -524,7 +537,8 @@ export const appMessagesEn: AppMessages = {
   },
   notifications: {
     readyTitle: "Route complete. Your text is ready.",
-    readyAction: "View result"
+    readyAction: "View result",
+    dismiss: "Dismiss"
   },
   errors: {
     safetyInputBlocked: {

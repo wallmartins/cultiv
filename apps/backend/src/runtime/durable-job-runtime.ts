@@ -23,7 +23,7 @@ import {
   toJobStatusResponse
 } from "../jobs/job-status-mappers.js";
 import type { DatabaseTables } from "../infra/postgres-tables.js";
-import { reloadBillingRepositoryInto } from "../infra/durable-store.js";
+import { reloadBillingRepositoryForUserInto } from "../infra/durable-store.js";
 import { appendPersistedExecutionEvent, listPersistedExecutionEvents } from "./execution-events.js";
 import { closeExecutionEventSubscriber, subscribeExecutionEvents } from "./execution-events.js";
 import { persistContentType } from "../product/catalog/persistence-content-types.js";
@@ -125,7 +125,9 @@ export function createDurableJobRuntime(options: DurableJobRuntimeOptions): Dura
             reason: "unexpected_execution_failure"
           })
       }).pipe(
-        Effect.tapError(() => reloadBillingRepositoryInto(options.postgres, options.billingRepository))
+        Effect.tapError(() =>
+          reloadBillingRepositoryForUserInto(options.postgres, options.billingRepository, billingIdentity.userId)
+        )
       );
 
       yield* persistContentType(options.database, input.plan, createdAt).pipe(Effect.catchAll(() => Effect.void));
@@ -230,11 +232,11 @@ export function createDurableJobRuntime(options: DurableJobRuntimeOptions): Dura
         )
       );
     },
-    listJobsForUser(userId, limit, offset) {
+    listJobsForUser(userId, limit, offset, filters) {
       return Effect.gen(function* () {
         const [records, total] = yield* Effect.all([
-          options.database.jobs.listByUser(userId, limit, offset),
-          options.database.jobs.countByUser(userId)
+          options.database.jobs.listByUser(userId, limit, offset, filters),
+          options.database.jobs.countByUser(userId, filters)
         ]);
 
         return {

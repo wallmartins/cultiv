@@ -6,6 +6,7 @@ import { AuthNotConfigured } from "~/app/auth/components/AuthNotConfigured";
 import { consumeAuthReturnTo } from "~/app/auth/components/ClientAuthProviders";
 import { isWebAuthConfigured } from "~/app/auth/lib/auth-config";
 import { resolvePostLoginNavigation } from "~/app/auth/lib/resolve-post-login-navigation";
+import { useAppLocale } from "~/i18n/app/use-app-locale";
 import { useOptionalClientSdk, useSdkSessionStatus } from "~/platform/runtime/client-sdk-context";
 
 export const Route = createFileRoute("/callback")({
@@ -22,6 +23,7 @@ function CallbackPage() {
 
 function CallbackPageContent() {
   const { isAuthenticated, isLoading, error, user } = useAuth0();
+  const { messages } = useAppLocale();
   const client = useOptionalClientSdk();
   const sessionStatus = useSdkSessionStatus();
   const navigate = useNavigate();
@@ -41,16 +43,12 @@ function CallbackPageContent() {
   }, [client, isAuthenticated, isLoading, navigate, user?.sub]);
 
   if (error) {
-    return (
-      <AuthLoading message="Não foi possível concluir o login. Tente novamente em /login." />
-    );
+    return <AuthLoading message={messages.auth.loginFailed} />;
   }
 
   if (isAuthenticated && sessionStatus === "failed") {
-    return (
-      <AuthLoading message="Não foi possível preparar a sessão. Volte para /login e tente novamente." />
-    );
+    return <AuthLoading message={messages.auth.sessionPrepareFailedCallback} />;
   }
 
-  return <AuthLoading message="Finalizando login…" />;
+  return <AuthLoading message={messages.auth.finishingLogin} />;
 }

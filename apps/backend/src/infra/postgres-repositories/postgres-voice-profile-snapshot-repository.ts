@@ -3,6 +3,7 @@ import { Kysely } from "kysely";
 import type { VoiceProfileSnapshotRecord, VoiceProfileSnapshotRepository } from "@my-ai-orchestrator/database";
 import type { DatabaseTables } from "../postgres-tables.js";
 import { parseStoredJsonRecord } from "./json-column.js";
+import { postgresTryPromise } from "./postgres-try-promise.js";
 
 function toRow(record: VoiceProfileSnapshotRecord) {
   return {
@@ -36,10 +37,9 @@ export function createPostgresVoiceProfileSnapshotRepository(
       return Effect.gen(function* () {
         const next = { ...record, version };
 
-        yield* Effect.tryPromise({
-          try: () => db.insertInto("voice_profile_snapshots").values(toRow(next)).execute(),
-          catch: () => undefined
-        }).pipe(Effect.catchAll(() => Effect.succeed(undefined)));
+        yield* postgresTryPromise("voice_profile_snapshots.create", () =>
+          db.insertInto("voice_profile_snapshots").values(toRow(next)).execute()
+        );
 
         return next;
       });
@@ -47,10 +47,9 @@ export function createPostgresVoiceProfileSnapshotRepository(
 
     get(id) {
       return Effect.gen(function* () {
-        const row = yield* Effect.tryPromise({
-          try: () => db.selectFrom("voice_profile_snapshots").where("id", "=", id).selectAll().executeTakeFirst(),
-          catch: () => undefined
-        }).pipe(Effect.catchAll(() => Effect.succeed(undefined)));
+        const row = yield* postgresTryPromise("voice_profile_snapshots.get", () =>
+          db.selectFrom("voice_profile_snapshots").where("id", "=", id).selectAll().executeTakeFirst()
+        );
 
         return row ? parseRow(row) : undefined;
       });
@@ -58,20 +57,18 @@ export function createPostgresVoiceProfileSnapshotRepository(
 
     listByUser(userId) {
       return Effect.gen(function* () {
-        const rows = yield* Effect.tryPromise({
-          try: () => db.selectFrom("voice_profile_snapshots").where("user_id", "=", userId).selectAll().execute(),
-          catch: () => [] as { id: string; user_id: string; data: string; version: number; created_at: string }[]
-        }).pipe(Effect.catchAll(() => Effect.succeed([] as { id: string; user_id: string; data: string; version: number; created_at: string }[])));
+        const rows = yield* postgresTryPromise("voice_profile_snapshots.listByUser", () =>
+          db.selectFrom("voice_profile_snapshots").where("user_id", "=", userId).selectAll().execute()
+        );
 
         return rows.map(parseRow);
       });
     },
     removeByUser(userId) {
       return Effect.gen(function* () {
-        const result = yield* Effect.tryPromise({
-          try: () => db.deleteFrom("voice_profile_snapshots").where("user_id", "=", userId).executeTakeFirst(),
-          catch: () => ({ numDeletedRows: 0n })
-        }).pipe(Effect.catchAll(() => Effect.succeed({ numDeletedRows: 0n })));
+        const result = yield* postgresTryPromise("voice_profile_snapshots.removeByUser", () =>
+          db.deleteFrom("voice_profile_snapshots").where("user_id", "=", userId).executeTakeFirst()
+        );
 
         return Number(result.numDeletedRows);
       });

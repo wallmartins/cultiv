@@ -113,7 +113,7 @@ describe("backend input safety surface", () => {
     expect(error.code).toBe("safety_input_blocked");
   });
 
-  it("prevents bypass through the legacy /api/run route", async () => {
+  it("returns 410 Gone for the removed legacy /api/run route", async () => {
     const config = createBackendAppTestConfig({ billingUserId: "user_1" });
     const services = createBackendAppTestServices(config);
     seedExecutionVoiceState(services);
@@ -124,16 +124,15 @@ describe("backend input safety surface", () => {
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
         contentType: "validation-post",
-        pipelineType: "validation-post",
         briefing: {
           topic: "Publish this password=hunter2"
         }
       })
     });
 
-    expect(response.status).toBe(400);
+    expect(response.status).toBe(410);
     const error = await Effect.runPromise(decodeApiErrorResponse(await response.json()));
-    expect(error.code).toBe("safety_input_blocked");
+    expect(error.message).toContain("/me/executions/run");
   });
 
   it("fails closed when the gateway cannot complete", async () => {

@@ -9,6 +9,7 @@ import type {
   PipelineRequest,
   ExecutionVoiceMetadataView
 } from "@my-ai-orchestrator/contracts";
+import { matchesExecutionsListFilters, type ExecutionsListFilters } from "@my-ai-orchestrator/contracts";
 import { resolveContentType, resolveEstimatedSteps } from "./job-status-mappers.js";
 
 export interface StoredJob {
@@ -42,7 +43,8 @@ export interface InMemoryJobRepository {
   readonly listJobsForUser: (
     userId: string,
     limit: number,
-    offset: number
+    offset: number,
+    filters?: ExecutionsListFilters
   ) => Effect.Effect<{ readonly items: readonly StoredJob[]; readonly total: number }, never>;
   readonly claimQueuedJob: (jobId: string) => Effect.Effect<boolean, never>;
   readonly updateJobProgress: (
@@ -125,11 +127,12 @@ export function createInMemoryJobRepository(
           [...jobs.values()].sort((left, right) => right.createdAt.localeCompare(left.createdAt))
         )
       ),
-    listJobsForUser: (userId, limit, offset) =>
+    listJobsForUser: (userId, limit, offset, filters) =>
       Ref.get(jobsRef).pipe(
         Effect.map((jobs) => {
           const items = [...jobs.values()]
             .filter((job) => job.userId === userId)
+            .filter((job) => (filters ? matchesExecutionsListFilters(job, filters) : true))
             .sort((left, right) => right.createdAt.localeCompare(left.createdAt));
           return {
             items: items.slice(offset, offset + limit),

@@ -1,6 +1,5 @@
 import type { Context } from "hono";
 import { Effect } from "effect";
-import { ensureDefaultFreeSubscription } from "@my-ai-orchestrator/payments";
 import type { BackendConfig } from "../config/config.js";
 import { resolveBackendPublicAuthenticatedActor } from "./index.js";
 import { createApplicationUserServiceLayer } from "./application-user-service.js";
@@ -15,24 +14,16 @@ export async function resolvePublicActor(
   route: string,
   services: BackendProductServices
 ) {
-  const actor = await runEffectOrThrow(
+  return runEffectOrThrow(
     resolveBackendPublicAuthenticatedActor({
       config,
       route,
-      readHeader: (name: string) => c.req.header(name)
+      readHeader: (name: string) => c.req.header(name),
+      billing: services.billing
     }).pipe(
       Effect.provide(createApplicationUserServiceLayer(services.users))
     )
   );
-
-  await runEffectOrThrow(
-    ensureDefaultFreeSubscription(services.billing, actor.userId, {
-      now: () => new Date(),
-      idempotencyNamespace: config.serviceName
-    })
-  );
-
-  return actor;
 }
 
 export async function resolveOperationalActor(

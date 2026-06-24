@@ -1,6 +1,7 @@
 import type { ExecutionStatusView } from "@my-ai-orchestrator/contracts";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useClientSdk } from "~/platform/runtime/client-sdk-context";
+import { useSdkQuery } from "~/platform/sdk/use-sdk-query";
 
 export type HistoryPeriod = "7d" | "30d" | "90d" | "all";
 export type HistoryStatusFilter = "all" | ExecutionStatusView["status"];
@@ -13,68 +14,85 @@ export type HistoryFilters = {
 
 const PAGE_SIZE = 20;
 
-function isWithinPeriod(createdAt: string, period: HistoryPeriod): boolean {
-  if (period === "all") {
-    return true;
-  }
-
-  const created = new Date(createdAt).getTime();
-  const now = Date.now();
-  const days = period === "7d" ? 7 : period === "30d" ? 30 : 90;
-  return now - created <= days * 24 * 60 * 60 * 1000;
-}
-
 export function useExecutionsList(filters: HistoryFilters) {
   const client = useClientSdk();
-  const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
-  const [items, setItems] = useState<readonly ExecutionStatusView[]>([]);
-  const [offset, setOffset] = useState(0);
-  const [total, setTotal] = useState(0);
+  const [appendItems, setAppendItems] = useState<readonly ExecutionStatusView[]>([]);
+  const [loadMoreError, setLoadMoreError] = useState(false);
 
-  const load = useCallback(
-    async (nextOffset: number, append: boolean) => {
-      setStatus("loading");
-      try {
-        const page = await client.toPromise(
-          client.executions.list({ limit: PAGE_SIZE, offset: nextOffset })
-        );
-        setTotal(page.total);
-        setOffset(nextOffset);
-        setItems((current) => (append ? [...current, ...page.items] : page.items));
-        setStatus("ready");
-      } catch {
-        setStatus("error");
-      }
-    },
-    [client]
+  const apiFilters = useMemo(
+    () => ({
+      period: filters.period,
+      status: filters.status,
+      ...(filters.contentType !== "all" ? { contentType: filters.contentType } : {})
+    }),
+    [filters.period, filters.status, filters.contentType]
+  );
+
+  const { status, data, retry: retryQuery } = useSdkQuery(
+    ["executions", apiFilters],
+    useCallback(
+      (signal) =>
+        client.toPromise(
+          client.executions.list({
+            limit: PAGE_SIZE,
+            offset: 0,
+            ...apiFilters,
+            signal
+          })
+        ),
+      [client, apiFilters]
+    )
   );
 
   useEffect(() => {
-    void load(0, false);
-  }, [load]);
+    setAppendItems([]);
+    setLoadMoreError(false);
+  }, [apiFilters]);
 
-  const filteredItems = items.filter((item) => {
-    if (!isWithinPeriod(item.createdAt, filters.period)) {
-      return false;
+  const total = data?.total ?? 0;
+  const items = useMemo(
+    () => [...(data?.items ?? []), ...appendItems],
+    [appendItems, data?.items]
+  );
+  const loadedCount = items.length;
+  const hasMore = loadedCount < total;
+  const effectiveStatus = loadMoreError ? "error" : status;
+
+  const loadMore = useCallback(() => {
+    if (!data || effectiveStatus === "loading" || !hasMore) {
+      return;
     }
 
-    if (filters.status !== "all" && item.status !== filters.status) {
-      return false;
-    }
+    setLoadMoreError(false);
 
-    if (filters.contentType !== "all" && item.contentType !== filters.contentType) {
-      return false;
-    }
+    void client
+      .toPromise(
+        client.executions.list({
+          limit: PAGE_SIZE,
+          offset: loadedCount,
+          ...apiFilters
+        })
+      )
+      .then((page) => {
+        setAppendItems((current) => [...current, ...page.items]);
+      })
+      .catch(() => {
+        setLoadMoreError(true);
+      });
+  }, [apiFilters, client, data, effectiveStatus, hasMore, loadedCount]);
 
-    return true;
-  });
+  const retry = useCallback(() => {
+    setAppendItems([]);
+    setLoadMoreError(false);
+    retryQuery();
+  }, [retryQuery]);
 
   return {
-    status,
-    items: filteredItems,
+    status: effectiveStatus,
+    items,
     total,
-    hasMore: items.length < total,
-    loadMore: () => void load(offset + PAGE_SIZE, true),
-    retry: () => void load(0, false)
+    hasMore,
+    loadMore,
+    retry
   };
 }

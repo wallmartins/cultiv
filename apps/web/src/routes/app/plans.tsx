@@ -1,5 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { PlansScreen } from "~/app/plans/screens/PlansScreen";
+import { lazy, Suspense } from "react";
+import { AppSkeleton } from "~/platform/ui/AppSkeleton";
+
+const PlansScreen = lazy(async () => {
+  const module = await import("~/app/plans/screens/PlansScreen");
+  return { default: module.PlansScreen };
+});
 
 type PlansSearch = {
   readonly status?: "success" | "cancel";
@@ -14,5 +20,9 @@ export const Route = createFileRoute("/app/plans")({
 });
 
 function PlansPage() {
-  return <PlansScreen />;
+  return (
+    <Suspense fallback={<AppSkeleton className="h-64 w-full" />}>
+      <PlansScreen />
+    </Suspense>
+  );
 }

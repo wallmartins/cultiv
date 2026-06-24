@@ -6,6 +6,8 @@ import { createGroqAdapter } from "./groq.js";
 import { createOllamaAdapter } from "./ollama.js";
 import { createOpenAIAdapter } from "./openai.js";
 
+export { createOpenAiCompatibleProvider } from "./openai-compatible.js";
+export type { OpenAiCompatibleProviderConfig } from "./openai-compatible.js";
 export {
   createAnthropicAdapter,
   createDeepSeekAdapter,

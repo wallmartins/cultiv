@@ -1,5 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { ExecutionHistoryDetail } from "~/app/history/screens/ExecutionHistoryDetail";
+import { lazy, Suspense } from "react";
+import { AppSkeleton } from "~/platform/ui/AppSkeleton";
+
+const ExecutionHistoryDetail = lazy(async () => {
+  const module = await import("~/app/history/screens/ExecutionHistoryDetail");
+  return { default: module.ExecutionHistoryDetail };
+});
 
 export const Route = createFileRoute("/app/history/$executionId")({
   component: HistoryDetailPage
@@ -7,5 +13,9 @@ export const Route = createFileRoute("/app/history/$executionId")({
 
 function HistoryDetailPage() {
   const { executionId } = Route.useParams();
-  return <ExecutionHistoryDetail executionId={executionId} />;
+  return (
+    <Suspense fallback={<AppSkeleton className="h-64 w-full" />}>
+      <ExecutionHistoryDetail executionId={executionId} />
+    </Suspense>
+  );
 }

@@ -3,6 +3,7 @@ import { Kysely } from "kysely";
 import type { VoiceProfileRecord, VoiceProfileRepository } from "@my-ai-orchestrator/database";
 import type { DatabaseTables } from "../postgres-tables.js";
 import { parseStoredJsonRecord } from "./json-column.js";
+import { postgresTryPromise } from "./postgres-try-promise.js";
 
 function toRow(record: VoiceProfileRecord) {
   return {
@@ -32,14 +33,12 @@ export function createPostgresVoiceProfileRepository(
           version
         };
 
-        yield* Effect.tryPromise({
-          try: () =>
-            db.insertInto("voice_profiles")
-              .values(toRow(next))
-              .onConflict((oc) => oc.column("user_id").doUpdateSet(toRow(next)))
-              .execute(),
-          catch: () => undefined
-        }).pipe(Effect.catchAll(() => Effect.succeed(undefined)));
+        yield* postgresTryPromise("voice_profiles.put", () =>
+          db.insertInto("voice_profiles")
+            .values(toRow(next))
+            .onConflict((oc) => oc.column("user_id").doUpdateSet(toRow(next)))
+            .execute()
+        );
 
         return next;
       });
@@ -47,24 +46,21 @@ export function createPostgresVoiceProfileRepository(
 
     getByUser(userId) {
       return Effect.gen(function* () {
-        const row = yield* Effect.tryPromise({
-          try: () =>
-            db.selectFrom("voice_profiles")
-              .where("user_id", "=", userId)
-              .selectAll()
-              .executeTakeFirst(),
-          catch: () => undefined
-        }).pipe(Effect.catchAll(() => Effect.succeed(undefined)));
+        const row = yield* postgresTryPromise("voice_profiles.getByUser", () =>
+          db.selectFrom("voice_profiles")
+            .where("user_id", "=", userId)
+            .selectAll()
+            .executeTakeFirst()
+        );
 
         return row ? parseRow(row) : undefined;
       });
     },
     removeByUser(userId) {
       return Effect.gen(function* () {
-        const result = yield* Effect.tryPromise({
-          try: () => db.deleteFrom("voice_profiles").where("user_id", "=", userId).executeTakeFirst(),
-          catch: () => ({ numDeletedRows: 0n })
-        }).pipe(Effect.catchAll(() => Effect.succeed({ numDeletedRows: 0n })));
+        const result = yield* postgresTryPromise("voice_profiles.removeByUser", () =>
+          db.deleteFrom("voice_profiles").where("user_id", "=", userId).executeTakeFirst()
+        );
 
         return result.numDeletedRows > 0n;
       });

@@ -1,54 +1,35 @@
 import { randomUUID } from "node:crypto";
 import { Effect } from "effect";
+import { ensureDefaultFreeSubscription, type BillingServiceContract } from "@my-ai-orchestrator/payments";
 import type { BackendConfig } from "../config/config.js";
 import { BackendAuthenticationError, BackendUserSuspendedError } from "../http/errors.js";
 import { dedupeStrings } from "../internal/utils.js";
 import type { BackendAuthenticatedActor } from "./legacy-auth.js";
 import { ApplicationUserService } from "./application-user-service.js";
-import {
-  parseBearerToken,
-  resolveBackendAuthProfile,
-  verifyBackendJwt,
-  readStringArrayClaim
-} from "./jwt-common.js";
+import { authenticateBackendBearerJwt, readStringArrayClaim } from "./jwt-common.js";
 
 export function resolveBackendPublicAuthenticatedActor(args: {
   readonly config: BackendConfig;
   readonly route: string;
   readonly readHeader: (name: string) => string | undefined;
+  readonly billing?: BillingServiceContract;
 }): Effect.Effect<
   BackendAuthenticatedActor,
   BackendAuthenticationError | BackendUserSuspendedError,
   ApplicationUserService
 > {
   return Effect.gen(function* () {
-    const authHeader = args.readHeader("authorization");
-    const token = parseBearerToken(authHeader);
-    if (!token) {
-      return yield* Effect.fail(
-        new BackendAuthenticationError({
-          route: args.route,
-          reason: "missing_token",
-          message: "Authorization bearer token is required"
-        })
-      );
-    }
-
-    const profile = resolveBackendAuthProfile(args.config);
-    const claims = yield* verifyBackendJwt(token, profile, args.route);
-
-    if (!claims.sub || claims.sub.trim().length === 0) {
-      return yield* Effect.fail(
-        new BackendAuthenticationError({
-          route: args.route,
-          reason: "invalid_token",
-          message: "JWT is missing a subject claim"
-        })
-      );
-    }
+    const claims = yield* authenticateBackendBearerJwt(args);
 
     const users = yield* ApplicationUserService;
-    const user = yield* resolveOrProvisionApplicationUser(users, claims.sub);
+    const { user, provisioned } = yield* resolveOrProvisionApplicationUser(users, claims.sub);
+
+    if (provisioned && args.billing) {
+      yield* ensureDefaultFreeSubscription(args.billing, user.id, {
+        now: () => new Date(),
+        idempotencyNamespace: args.config.serviceName
+      });
+    }
 
     if (user.status === "suspended") {
       return yield* Effect.fail(
@@ -71,18 +52,22 @@ export function resolveBackendPublicAuthenticatedActor(args: {
 function resolveOrProvisionApplicationUser(
   users: import("./application-user.js").BackendApplicationUserRepository,
   externalSubject: string
-): Effect.Effect<import("./application-user.js").BackendApplicationUser, never> {
+): Effect.Effect<
+  { readonly user: import("./application-user.js").BackendApplicationUser; readonly provisioned: boolean },
+  never
+> {
   return Effect.gen(function* () {
     const existing = yield* users.findByExternalSubject(externalSubject);
     if (existing) {
-      return existing;
+      return { user: existing, provisioned: false };
     }
 
-    return yield* users.create({
+    const user = yield* users.create({
       id: randomUUID(),
       externalSubject,
       status: "active"
     });
+    return { user, provisioned: true };
   });
 }
 

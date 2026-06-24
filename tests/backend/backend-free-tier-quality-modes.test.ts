@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { Effect } from "effect";
 import { decodeGenerationPreviewResponse } from "@my-ai-orchestrator/contracts";
+import { createBackendApp } from "../../apps/backend";
 import { createBackendTestAuthorizationHeader } from "../../apps/backend/src/auth/test-auth.js";
 import {
+  backendAppTestNow,
   backendAppTestStartedAt,
   createBackendAppTestApp,
   createBackendAppTestConfig,
@@ -12,12 +14,13 @@ import {
 
 describe("backend free tier quality modes", () => {
   it("allows all content types but only fast quality mode on free plan", async () => {
-    const config = createBackendAppTestConfig({ billingUserId: "user_free" });
+    const userId = "user_free";
+    const config = createBackendAppTestConfig({ billingUserId: userId });
     const services = createBackendAppTestServices(config);
 
     services.billing.upsertSubscription({
       id: "sub_user_free",
-      userId: "user_free",
+      userId,
       planId: "free",
       status: "active",
       startedAt: backendAppTestStartedAt.toISOString()
@@ -25,7 +28,7 @@ describe("backend free tier quality modes", () => {
 
     await Effect.runPromise(
       services.billing.startCycle({
-        userId: "user_free",
+        userId,
         planId: "free",
         cycleId: "user_free:free:cycle:test",
         idempotencyKey: "test:user_free:free:cycle"
@@ -33,8 +36,11 @@ describe("backend free tier quality modes", () => {
     );
 
     const app = createBackendAppTestApp(config, services);
+    const authHeader = createBackendTestAuthorizationHeader({ userId });
 
-    const contentTypesResponse = await app.request("/me/content-types");
+    const contentTypesResponse = await app.request("/me/content-types", {
+      headers: { authorization: authHeader }
+    });
     expect(contentTypesResponse.status).toBe(200);
     const contentTypesBody = await contentTypesResponse.json();
     expect(contentTypesBody.items.length).toBe(6);
@@ -43,7 +49,10 @@ describe("backend free tier quality modes", () => {
 
     const previewResponse = await app.request("/api/generation-preview", {
       method: "POST",
-      headers: { "content-type": "application/json" },
+      headers: {
+        authorization: authHeader,
+        "content-type": "application/json"
+      },
       body: JSON.stringify({
         contentType: "linkedin-post",
         qualityMode: "strict",
@@ -113,19 +122,24 @@ describe("backend free tier quality modes", () => {
   it("provisions a free subscription on the first authenticated catalog request", async () => {
     const config = createBackendAppTestConfig();
     const services = createBackendAppTestServices(config);
-    const app = createBackendAppTestApp(config, services);
-    const userId = "user_jit_catalog";
-
-    expect(services.billing.getEntitlement(userId)).toBeUndefined();
+    const app = createBackendApp(config, {
+      startedAt: backendAppTestStartedAt,
+      now: () => backendAppTestNow,
+      services
+    });
+    const externalSubject = "user_jit_catalog";
 
     const response = await app.request("/me/content-types", {
       headers: {
-        authorization: createBackendTestAuthorizationHeader({ userId })
+        authorization: createBackendTestAuthorizationHeader({ userId: externalSubject })
       }
     });
     expect(response.status).toBe(200);
 
-    const entitlement = services.billing.getEntitlement(userId);
+    const provisioned = await Effect.runPromise(services.users.findByExternalSubject(externalSubject));
+    expect(provisioned).toBeDefined();
+
+    const entitlement = services.billing.getEntitlement(provisioned!.id);
     expect(entitlement?.planId).toBe("free");
     expect(entitlement?.status).toBe("active");
     expect(entitlement?.wallet.availableCredits).toBe(20);

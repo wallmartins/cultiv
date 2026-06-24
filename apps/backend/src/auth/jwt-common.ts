@@ -1,5 +1,6 @@
 export { resolveBackendAuthProfile } from "./jwt-profile.js";
 export { warmBackendAuthProfile } from "./jwt-jwks.js";
+export { authenticateBackendBearerJwt } from "./jwt-bearer-auth.js";
 export {
   parseBearerToken,
   readStringArrayClaim,

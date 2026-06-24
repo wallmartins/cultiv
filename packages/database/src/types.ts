@@ -11,7 +11,7 @@ import type {
   VoiceProfileSnapshot,
   VoiceTrainingConsent
 } from "@my-ai-orchestrator/domain";
-import type { JobError, JobProgress, JobResult } from "@my-ai-orchestrator/contracts";
+import type { JobError, JobProgress, JobResult, ExecutionsListFilters } from "@my-ai-orchestrator/contracts";
 import type {
   DatabaseJobAlreadyExistsError,
   DatabaseJobNotFoundError,
@@ -125,9 +125,10 @@ export interface JobRepository {
   listByUser: (
     userId: string,
     limit: number,
-    offset: number
+    offset: number,
+    filters?: ExecutionsListFilters
   ) => Effect.Effect<readonly JobRecord[]>;
-  countByUser: (userId: string) => Effect.Effect<number>;
+  countByUser: (userId: string, filters?: ExecutionsListFilters) => Effect.Effect<number>;
   remove: (id: string) => Effect.Effect<boolean>;
   appendHistory: (id: string, entry: DatabaseHistoryEntry) => Effect.Effect<JobRecord, DatabaseJobNotFoundError>;
   recordProgress: (id: string, progress: JobProgress, at?: string) => Effect.Effect<JobRecord, DatabaseJobNotFoundError>;

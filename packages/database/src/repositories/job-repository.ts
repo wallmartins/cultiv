@@ -1,4 +1,5 @@
 import { Effect } from "effect";
+import { matchesExecutionsListFilters } from "@my-ai-orchestrator/contracts";
 import {
   DatabaseJobAlreadyExistsError,
   DatabaseJobNotFoundError
@@ -56,14 +57,20 @@ export function createJobRepository(stateRef: StateRef): JobRepository {
     list() {
       return Effect.succeed(Object.values(stateRef.current.jobs).map(cloneRecord));
     },
-    listByUser(_userId, limit, offset) {
+    listByUser(userId, limit, offset, filters) {
       const records = Object.values(stateRef.current.jobs)
+        .filter((record) => jobUserId(record) === userId)
+        .filter((record) => (filters ? matchesExecutionsListFilters(record, filters) : true))
         .map(cloneRecord)
         .sort((left, right) => right.createdAt.localeCompare(left.createdAt));
       return Effect.succeed(records.slice(offset, offset + limit));
     },
-    countByUser(_userId) {
-      return Effect.succeed(Object.keys(stateRef.current.jobs).length);
+    countByUser(userId, filters) {
+      const count = Object.values(stateRef.current.jobs).filter(
+        (record) =>
+          jobUserId(record) === userId && (filters ? matchesExecutionsListFilters(record, filters) : true)
+      ).length;
+      return Effect.succeed(count);
     },
     remove(id) {
       if (!stateRef.current.jobs[id]) {
@@ -187,6 +194,24 @@ function updateJob(
 
     return cloneRecord(next);
   });
+}
+
+function jobUserId(record: JobRecord): string | undefined {
+  const direct = (record as JobRecord & { userId?: string }).userId;
+  if (typeof direct === "string") {
+    return direct;
+  }
+
+  const created = record.history.find((entry) => entry.type === "created");
+  const payload = created?.payload;
+  if (payload && typeof payload === "object" && "runtime" in payload) {
+    const runtime = (payload as { runtime?: { userId?: unknown } }).runtime;
+    if (runtime && typeof runtime === "object" && typeof runtime.userId === "string") {
+      return runtime.userId;
+    }
+  }
+
+  return undefined;
 }
 
 function requireJob(state: DatabaseState, id: string): Effect.Effect<JobRecord, DatabaseJobNotFoundError> {

@@ -4,6 +4,8 @@ import {
   decodeExecutionStatusView,
   decodeMeExecutionRequest,
   decodeQueuedExecutionView,
+  type ExecutionsListPeriod,
+  type ExecutionsListStatusFilter,
   type ExecutionsPageView,
   type ExecutionStatusView,
   type MeExecutionRequest,
@@ -29,6 +31,9 @@ export interface ExecutionsGetInput {
 export interface ExecutionsListInput {
   readonly limit?: number;
   readonly offset?: number;
+  readonly period?: ExecutionsListPeriod;
+  readonly status?: ExecutionsListStatusFilter;
+  readonly contentType?: string;
   readonly signal?: AbortSignal;
 }
 
@@ -86,7 +91,10 @@ export function createExecutionsClient(config: ClientSdkConfig, transport: HttpT
           path: "/me/executions",
           query: {
             limit: input.limit,
-            offset: input.offset
+            offset: input.offset,
+            period: input.period,
+            status: input.status,
+            contentType: input.contentType
           },
           signal: input.signal
         });

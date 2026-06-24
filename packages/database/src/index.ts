@@ -1,4 +1,5 @@
 export {
+  DatabaseError,
   DatabaseJobAlreadyExistsError,
   DatabaseJobNotFoundError,
   DatabaseTransactionInvariantError,

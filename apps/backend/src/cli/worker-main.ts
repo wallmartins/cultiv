@@ -5,7 +5,7 @@ import { createBackendRuntimeBundle } from "../runtime/create-runtime-bundle.js"
 import { createBackendMemoryBundleService } from "../memory/memory.js";
 import { createBackendProviderTransport } from "../execution/pipeline/provider-transport.js";
 import { getPostgresDatabase } from "../infra/postgres-client.js";
-import { reloadBillingRepositoryInto } from "../infra/durable-store.js";
+import { reloadBillingRepositoryForUserInto } from "../infra/durable-store.js";
 import { processQueuedJob } from "../jobs/worker-job.js";
 
 async function main() {
@@ -40,8 +40,10 @@ async function main() {
       return;
     }
 
-    if (postgres) {
-      await Effect.runPromise(reloadBillingRepositoryInto(postgres, services.billingRepository));
+    if (postgres && payload.userId) {
+      await Effect.runPromise(
+        reloadBillingRepositoryForUserInto(postgres, services.billingRepository, payload.userId)
+      );
     }
 
     await processQueuedJob(

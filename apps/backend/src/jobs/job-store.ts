@@ -6,7 +6,8 @@ import type {
   JobResult,
   JobStatusResponse,
   PipelineRequest,
-  ExecutionVoiceMetadataView
+  ExecutionVoiceMetadataView,
+  ExecutionsListFilters
 } from "@my-ai-orchestrator/contracts";
 import { createInMemoryJobRepository, snapshotStoredJob } from "./in-memory-job-repository.js";
 
@@ -65,7 +66,8 @@ export interface BackendJobStoreServiceContract {
   readonly listJobsForUser: (
     userId: string,
     limit: number,
-    offset: number
+    offset: number,
+    filters?: ExecutionsListFilters
   ) => Effect.Effect<{ readonly items: readonly JobStatusResponse[]; readonly total: number }, never>;
   readonly claimQueuedJob: (jobId: string) => Effect.Effect<boolean, never>;
   readonly updateJobProgress: (
@@ -158,8 +160,8 @@ export function createBackendJobStoreService(): Effect.Effect<BackendJobStoreSer
         repository.getJob(jobId).pipe(Effect.map((job) => (job ? snapshotStoredJob(job) : undefined))),
       listJobs: () =>
         repository.listJobs().pipe(Effect.map((jobs) => jobs.map(snapshotStoredJob))),
-      listJobsForUser: (userId, limit, offset) =>
-        repository.listJobsForUser(userId, limit, offset).pipe(
+      listJobsForUser: (userId, limit, offset, filters) =>
+        repository.listJobsForUser(userId, limit, offset, filters).pipe(
           Effect.map(({ items, total }) => ({
             items: items.map(snapshotStoredJob),
             total

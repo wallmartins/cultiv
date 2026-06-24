@@ -1,5 +1,5 @@
 import { Effect } from "effect";
-import { Kysely } from "kysely";
+import { Kysely, sql } from "kysely";
 import {
   DatabaseJobAlreadyExistsError,
   DatabaseJobNotFoundError,
@@ -7,8 +7,13 @@ import {
   type JobRecord,
   type JobRepository
 } from "@my-ai-orchestrator/database";
+import {
+  resolveExecutionsPeriodCutoff,
+  type ExecutionsListFilters
+} from "@my-ai-orchestrator/contracts";
 import type { DatabaseTables } from "../postgres-tables.js";
 import { parseStoredJsonRecord } from "./json-column.js";
+import { postgresTryPromise } from "./postgres-try-promise.js";
 
 function serializeJob(record: JobRecord) {
   return {
@@ -37,10 +42,9 @@ export function createPostgresJobRepository(
   return {
     create(job, options = {}) {
       return Effect.gen(function* () {
-        const existing = yield* Effect.tryPromise({
-          try: () => db.selectFrom("jobs").where("id", "=", job.id).selectAll().executeTakeFirst(),
-          catch: () => undefined
-        }).pipe(Effect.catchAll(() => Effect.succeed(undefined)));
+        const existing = yield* postgresTryPromise("jobs.create.lookup", () =>
+          db.selectFrom("jobs").where("id", "=", job.id).selectAll().executeTakeFirst()
+        );
 
         if (existing) {
           return yield* Effect.fail(new DatabaseJobAlreadyExistsError({ jobId: job.id }));
@@ -61,10 +65,9 @@ export function createPostgresJobRepository(
           completedAt: null
         };
 
-        yield* Effect.tryPromise({
-          try: () => db.insertInto("jobs").values(serializeJob(record)).execute(),
-          catch: (e) => new DatabaseJobAlreadyExistsError({ jobId: job.id })
-        });
+        yield* postgresTryPromise("jobs.create.insert", () =>
+          db.insertInto("jobs").values(serializeJob(record)).execute()
+        );
 
         return record;
       });
@@ -72,10 +75,9 @@ export function createPostgresJobRepository(
 
     save(record) {
       return Effect.gen(function* () {
-        const current = yield* Effect.tryPromise({
-          try: () => db.selectFrom("jobs").where("id", "=", record.id).selectAll().executeTakeFirst(),
-          catch: () => undefined
-        }).pipe(Effect.catchAll(() => Effect.succeed(undefined)));
+        const current = yield* postgresTryPromise("jobs.save.lookup", () =>
+          db.selectFrom("jobs").where("id", "=", record.id).selectAll().executeTakeFirst()
+        );
 
         if (!current) {
           return yield* Effect.fail(new DatabaseJobNotFoundError({ jobId: record.id }));
@@ -83,10 +85,9 @@ export function createPostgresJobRepository(
 
         const next = { ...record, version: current.version + 1 };
 
-        yield* Effect.tryPromise({
-          try: () => db.updateTable("jobs").set(serializeJob(next)).where("id", "=", record.id).execute(),
-          catch: (e) => new DatabaseJobNotFoundError({ jobId: record.id })
-        });
+        yield* postgresTryPromise("jobs.save.update", () =>
+          db.updateTable("jobs").set(serializeJob(next)).where("id", "=", record.id).execute()
+        );
 
         return next;
       });
@@ -94,10 +95,9 @@ export function createPostgresJobRepository(
 
     findById(id) {
       return Effect.gen(function* () {
-        const row = yield* Effect.tryPromise({
-          try: () => db.selectFrom("jobs").where("id", "=", id).selectAll().executeTakeFirst(),
-          catch: () => undefined
-        }).pipe(Effect.catchAll(() => Effect.succeed(undefined)));
+        const row = yield* postgresTryPromise("jobs.findById", () =>
+          db.selectFrom("jobs").where("id", "=", id).selectAll().executeTakeFirst()
+        );
 
         return row ? parseJob(row) : undefined;
       });
@@ -105,49 +105,41 @@ export function createPostgresJobRepository(
 
     list() {
       return Effect.gen(function* () {
-        const rows = yield* Effect.tryPromise({
-          try: () => db.selectFrom("jobs").selectAll().execute(),
-          catch: () => [] as { id: string; data: string; version: number; created_at: string; updated_at: string }[]
-        }).pipe(Effect.catchAll(() => Effect.succeed([] as { id: string; data: string; version: number; created_at: string; updated_at: string }[])));
-
-        return rows.map(parseJob);
-      });
-    },
-
-    listByUser(userId, limit, offset) {
-      return Effect.gen(function* () {
-        const rows = yield* Effect.tryPromise({
-          try: () =>
-            db
-              .selectFrom("jobs")
-              .selectAll()
-              .where("user_id", "=", userId)
-              .orderBy("created_at", "desc")
-              .limit(limit)
-              .offset(offset)
-              .execute(),
-          catch: () => [] as { id: string; data: unknown; version: number; created_at: string; updated_at: string }[]
-        }).pipe(
-          Effect.catchAll(() =>
-            Effect.succeed([] as { id: string; data: unknown; version: number; created_at: string; updated_at: string }[])
-          )
+        const rows = yield* postgresTryPromise("jobs.list", () =>
+          db.selectFrom("jobs").selectAll().execute()
         );
 
         return rows.map(parseJob);
       });
     },
 
-    countByUser(userId) {
+    listByUser(userId, limit, offset, filters) {
       return Effect.gen(function* () {
-        const row = yield* Effect.tryPromise({
-          try: () =>
-            db
-              .selectFrom("jobs")
-              .select((eb) => eb.fn.countAll<number>().as("count"))
-              .where("user_id", "=", userId)
-              .executeTakeFirst(),
-          catch: () => ({ count: 0 })
-        }).pipe(Effect.catchAll(() => Effect.succeed({ count: 0 })));
+        let query = db
+          .selectFrom("jobs")
+          .selectAll()
+          .where("user_id", "=", userId);
+
+        query = applyJobListFilters(query, filters);
+
+        const rows = yield* postgresTryPromise("jobs.listByUser", () =>
+          query.orderBy("created_at", "desc").limit(limit).offset(offset).execute()
+        );
+
+        return rows.map(parseJob);
+      });
+    },
+
+    countByUser(userId, filters) {
+      return Effect.gen(function* () {
+        let query = db
+          .selectFrom("jobs")
+          .select((eb) => eb.fn.countAll<number>().as("count"))
+          .where("user_id", "=", userId);
+
+        query = applyJobListFilters(query, filters);
+
+        const row = yield* postgresTryPromise("jobs.countByUser", () => query.executeTakeFirst());
 
         return Number(row?.count ?? 0);
       });
@@ -155,10 +147,9 @@ export function createPostgresJobRepository(
 
     remove(id) {
       return Effect.gen(function* () {
-        const result = yield* Effect.tryPromise({
-          try: () => db.deleteFrom("jobs").where("id", "=", id).executeTakeFirst(),
-          catch: () => ({ numDeletedRows: 0n })
-        }).pipe(Effect.catchAll(() => Effect.succeed({ numDeletedRows: 0n })));
+        const result = yield* postgresTryPromise("jobs.remove", () =>
+          db.deleteFrom("jobs").where("id", "=", id).executeTakeFirst()
+        );
 
         return result.numDeletedRows > 0n;
       });
@@ -166,10 +157,9 @@ export function createPostgresJobRepository(
 
     appendHistory(id, entry) {
       return Effect.gen(function* () {
-        const current = yield* Effect.tryPromise({
-          try: () => db.selectFrom("jobs").where("id", "=", id).selectAll().executeTakeFirst(),
-          catch: () => undefined
-        }).pipe(Effect.catchAll(() => Effect.succeed(undefined)));
+        const current = yield* postgresTryPromise("jobs.appendHistory.lookup", () =>
+          db.selectFrom("jobs").where("id", "=", id).selectAll().executeTakeFirst()
+        );
 
         if (!current) {
           return yield* Effect.fail(new DatabaseJobNotFoundError({ jobId: id }));
@@ -178,10 +168,9 @@ export function createPostgresJobRepository(
         const record = parseJob(current);
         const next = { ...record, history: [...record.history, entry], updatedAt: entry.at };
 
-        yield* Effect.tryPromise({
-          try: () => db.updateTable("jobs").set(serializeJob(next)).where("id", "=", id).execute(),
-          catch: (e) => new DatabaseJobNotFoundError({ jobId: id })
-        });
+        yield* postgresTryPromise("jobs.appendHistory.update", () =>
+          db.updateTable("jobs").set(serializeJob(next)).where("id", "=", id).execute()
+        );
 
         return next;
       });
@@ -189,10 +178,9 @@ export function createPostgresJobRepository(
 
     recordProgress(id, progress, at = new Date().toISOString()) {
       return Effect.gen(function* () {
-        const current = yield* Effect.tryPromise({
-          try: () => db.selectFrom("jobs").where("id", "=", id).selectAll().executeTakeFirst(),
-          catch: () => undefined
-        }).pipe(Effect.catchAll(() => Effect.succeed(undefined)));
+        const current = yield* postgresTryPromise("jobs.recordProgress.lookup", () =>
+          db.selectFrom("jobs").where("id", "=", id).selectAll().executeTakeFirst()
+        );
 
         if (!current) {
           return yield* Effect.fail(new DatabaseJobNotFoundError({ jobId: id }));
@@ -207,10 +195,9 @@ export function createPostgresJobRepository(
           updatedAt: at
         };
 
-        yield* Effect.tryPromise({
-          try: () => db.updateTable("jobs").set(serializeJob(next)).where("id", "=", id).execute(),
-          catch: (e) => new DatabaseJobNotFoundError({ jobId: id })
-        });
+        yield* postgresTryPromise("jobs.recordProgress.update", () =>
+          db.updateTable("jobs").set(serializeJob(next)).where("id", "=", id).execute()
+        );
 
         return next;
       });
@@ -218,10 +205,9 @@ export function createPostgresJobRepository(
 
     complete(id, result, at = new Date().toISOString()) {
       return Effect.gen(function* () {
-        const current = yield* Effect.tryPromise({
-          try: () => db.selectFrom("jobs").where("id", "=", id).selectAll().executeTakeFirst(),
-          catch: () => undefined
-        }).pipe(Effect.catchAll(() => Effect.succeed(undefined)));
+        const current = yield* postgresTryPromise("jobs.complete.lookup", () =>
+          db.selectFrom("jobs").where("id", "=", id).selectAll().executeTakeFirst()
+        );
 
         if (!current) {
           return yield* Effect.fail(new DatabaseJobNotFoundError({ jobId: id }));
@@ -239,10 +225,9 @@ export function createPostgresJobRepository(
           completedAt: at
         };
 
-        yield* Effect.tryPromise({
-          try: () => db.updateTable("jobs").set(serializeJob(next)).where("id", "=", id).execute(),
-          catch: (e) => new DatabaseJobNotFoundError({ jobId: id })
-        });
+        yield* postgresTryPromise("jobs.complete.update", () =>
+          db.updateTable("jobs").set(serializeJob(next)).where("id", "=", id).execute()
+        );
 
         return next;
       });
@@ -250,10 +235,9 @@ export function createPostgresJobRepository(
 
     fail(id, error, at = new Date().toISOString()) {
       return Effect.gen(function* () {
-        const current = yield* Effect.tryPromise({
-          try: () => db.selectFrom("jobs").where("id", "=", id).selectAll().executeTakeFirst(),
-          catch: () => undefined
-        }).pipe(Effect.catchAll(() => Effect.succeed(undefined)));
+        const current = yield* postgresTryPromise("jobs.fail.lookup", () =>
+          db.selectFrom("jobs").where("id", "=", id).selectAll().executeTakeFirst()
+        );
 
         if (!current) {
           return yield* Effect.fail(new DatabaseJobNotFoundError({ jobId: id }));
@@ -269,13 +253,37 @@ export function createPostgresJobRepository(
           completedAt: at
         };
 
-        yield* Effect.tryPromise({
-          try: () => db.updateTable("jobs").set(serializeJob(next)).where("id", "=", id).execute(),
-          catch: (e) => new DatabaseJobNotFoundError({ jobId: id })
-        });
+        yield* postgresTryPromise("jobs.fail.update", () =>
+          db.updateTable("jobs").set(serializeJob(next)).where("id", "=", id).execute()
+        );
 
         return next;
       });
     }
   };
+}
+
+function applyJobListFilters<QB extends { where: (...args: never[]) => QB }>(
+  query: QB,
+  filters?: ExecutionsListFilters
+): QB {
+  if (!filters) {
+    return query;
+  }
+
+  let next = query;
+  const cutoff = resolveExecutionsPeriodCutoff(filters.period);
+  if (cutoff) {
+    next = next.where("created_at", ">=", cutoff);
+  }
+
+  if (filters.status !== "all") {
+    next = next.where(sql`data->>'status'`, "=", filters.status);
+  }
+
+  if (filters.contentType) {
+    next = next.where(sql`data->>'contentType'`, "=", filters.contentType);
+  }
+
+  return next;
 }

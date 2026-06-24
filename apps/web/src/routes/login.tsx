@@ -5,6 +5,7 @@ import { AuthLoading } from "~/app/auth/components/AuthLoading";
 import { AuthNotConfigured } from "~/app/auth/components/AuthNotConfigured";
 import { isWebAuthConfigured } from "~/app/auth/lib/auth-config";
 import { resolvePostLoginNavigation } from "~/app/auth/lib/resolve-post-login-navigation";
+import { useAppLocale } from "~/i18n/app/use-app-locale";
 import { useOptionalClientSdk, useSdkSessionStatus } from "~/platform/runtime/client-sdk-context";
 
 export const Route = createFileRoute("/login")({
@@ -21,6 +22,7 @@ function LoginPage() {
 
 function LoginPageContent() {
   const { isAuthenticated, isLoading, loginWithRedirect, user } = useAuth0();
+  const { messages } = useAppLocale();
   const client = useOptionalClientSdk();
   const sessionStatus = useSdkSessionStatus();
   const navigate = useNavigate();
@@ -53,8 +55,8 @@ function LoginPageContent() {
   }, [client, isAuthenticated, isLoading, loginWithRedirect, navigate, user?.sub]);
 
   if (isAuthenticated && sessionStatus === "failed") {
-    return <AuthLoading message="Não foi possível preparar a sessão. Tente /login novamente." />;
+    return <AuthLoading message={messages.auth.sessionPrepareFailedLogin} />;
   }
 
-  return <AuthLoading message="Abrindo login…" />;
+  return <AuthLoading message={messages.auth.openingLogin} />;
 }

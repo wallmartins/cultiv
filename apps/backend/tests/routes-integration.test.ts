@@ -4,6 +4,12 @@ import { createBackendApplicationUserMemoryRepository } from "../src/auth/applic
 import { createBackendOperatorMemoryRepository } from "../src/auth/operator-memory.js";
 import { createBackendTestAccessToken } from "../src/auth/test-auth.js";
 import { createTestConfig, createMinimalServices, createTestApp } from "./test-helpers.js";
+import {
+  createBackendAppTestApp,
+  createBackendAppTestConfig,
+  createBackendAppTestServices,
+  seedExecutionVoiceState
+} from "../../../tests/backend/backend-app.fixtures.js";
 
 describe("Public Route Auth Integration", () => {
   it("POST /me/executions/run returns 401 when token is missing", async () => {
@@ -14,7 +20,7 @@ describe("Public Route Auth Integration", () => {
     const response = await app.request("/me/executions/run", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ contentType: "twitter-thread", briefing: "Test" })
+      body: JSON.stringify({ contentType: "linkedin-post", briefing: "Test" })
     });
 
     expect(response.status).toBe(401);
@@ -32,7 +38,7 @@ describe("Public Route Auth Integration", () => {
         "Content-Type": "application/json",
         Authorization: "Bearer invalid-token"
       },
-      body: JSON.stringify({ contentType: "twitter-thread", briefing: "Test" })
+      body: JSON.stringify({ contentType: "linkedin-post", briefing: "Test" })
     });
 
     expect(response.status).toBe(401);
@@ -56,7 +62,7 @@ describe("Public Route Auth Integration", () => {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`
       },
-      body: JSON.stringify({ contentType: "twitter-thread", briefing: "Test" })
+      body: JSON.stringify({ contentType: "linkedin-post", briefing: "Test" })
     });
 
     expect(response.status).toBe(403);
@@ -64,7 +70,7 @@ describe("Public Route Auth Integration", () => {
     expect(body.code).toBe("user_suspended");
   });
 
-  it("POST /api/run returns 401 when token is missing", async () => {
+  it("POST /api/run returns 410 Gone with migration note", async () => {
     const config = createTestConfig();
     const services = createMinimalServices();
     const app = createTestApp(config, services);
@@ -72,25 +78,29 @@ describe("Public Route Auth Integration", () => {
     const response = await app.request("/api/run", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId: "auth0|test-user", pipelineType: "twitter-thread", briefing: "Test" })
+      body: JSON.stringify({ contentType: "linkedin-post", briefing: "Test" })
     });
 
-    expect(response.status).toBe(401);
+    expect(response.status).toBe(410);
+    const body = await response.json();
+    expect(body.message).toContain("/me/executions/run");
+    expect(body.details?.migration).toBe("POST /me/executions/run");
   });
 
-  it("POST /api/run returns 200 when token is valid", async () => {
-    const config = createTestConfig();
-    const services = createMinimalServices();
-    const app = createTestApp(config, services);
+  it("POST /me/executions/run returns 200 when token is valid", async () => {
+    const config = createBackendAppTestConfig({ billingUserId: "auth0|test-user", billingPlanId: "pro" });
+    const services = createBackendAppTestServices(config);
+    seedExecutionVoiceState(services, "auth0|test-user");
+    const app = createBackendAppTestApp(config, services);
     const token = createBackendTestAccessToken({ userId: "auth0|test-user" });
 
-    const response = await app.request("/api/run", {
+    const response = await app.request("/me/executions/run", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`
       },
-      body: JSON.stringify({ userId: "auth0|test-user", pipelineType: "twitter-thread", briefing: "Test" })
+      body: JSON.stringify({ contentType: "linkedin-post", briefing: "Test" })
     });
 
     expect(response.status).toBe(200);

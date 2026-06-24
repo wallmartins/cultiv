@@ -165,7 +165,7 @@ describeIfDurable("durable runtime integration", () => {
     const { randomUUID } = await import("node:crypto");
     const { createBillingRepository } = await import("@my-ai-orchestrator/payments");
     const { registerBackendBillingPlans } = await import("../../apps/backend/src/product/billing/billing-bootstrap.js");
-    const { reloadBillingRepositoryInto } = await import("../../apps/backend/src/infra/durable-store.js");
+    const { reloadBillingRepositoryForUserInto } = await import("../../apps/backend/src/infra/durable-store.js");
     const userId = context.config.billingUserId!;
     const planId = context.config.billingPlanId!;
     const generationCycleId = `generation:validation-post:${randomUUID()}`;
@@ -216,12 +216,111 @@ describeIfDurable("durable runtime integration", () => {
 
     context.billingRepository.reservations.clear();
 
-    await Effect.runPromise(reloadBillingRepositoryInto(context.postgres.db, context.billingRepository));
+    await Effect.runPromise(
+      reloadBillingRepositoryForUserInto(context.postgres.db, context.billingRepository, userId)
+    );
 
     const capture = await Effect.runPromise(
       context.billing.captureReservedCredits({
         reservationId: reservation.value.reservationId,
         idempotencyKey: `capture:test:${generationCycleId}`,
+        metadata: {
+          pipelineName: "validation-post",
+          contentType: "validation-post",
+          qualityMode: "balanced"
+        }
+      })
+    );
+
+    expect(capture.value.status).toBe("captured");
+  });
+
+  it("targeted billing reload loads only the execution user slice", async () => {
+    const { randomUUID } = await import("node:crypto");
+    const { createBillingRepository } = await import("@my-ai-orchestrator/payments");
+    const { registerBackendBillingPlans } = await import("../../apps/backend/src/product/billing/billing-bootstrap.js");
+    const { reloadBillingRepositoryForUserInto } = await import("../../apps/backend/src/infra/durable-store.js");
+    const userA = context.config.billingUserId!;
+    const userB = "durable-test-user-b";
+    const planId = context.config.billingPlanId!;
+    const generationCycleId = `generation:validation-post:${randomUUID()}`;
+
+    for (const [key, plan] of createBillingRepository().plans) {
+      context.billingRepository.plans.set(key, plan);
+    }
+    await Effect.runPromise(registerBackendBillingPlans(context.billing));
+
+    for (const userId of [userA, userB]) {
+      context.billing.upsertSubscription({
+        id: `${userId}:${planId}:subscription`,
+        userId,
+        planId,
+        status: "active",
+        startedAt: new Date().toISOString()
+      });
+
+      await Effect.runPromise(
+        context.billing.startCycle({
+          userId,
+          planId,
+          cycleId: `${userId}:${planId}:cycle:${randomUUID()}`,
+          idempotencyKey: `targeted-reload:${userId}:${randomUUID()}`
+        })
+      );
+    }
+
+    const reservationA = await Effect.runPromise(
+      context.billing.reserveGenerationCredits({
+        userId: userA,
+        planId,
+        generationCycleId,
+        qualityMode: "balanced",
+        retryCount: 3,
+        idempotencyKey: `reserve-a:${generationCycleId}`,
+        metadata: {
+          pipelineName: "validation-post",
+          contentType: "validation-post"
+        }
+      })
+    );
+
+    const reservationB = await Effect.runPromise(
+      context.billing.reserveGenerationCredits({
+        userId: userB,
+        planId,
+        generationCycleId: `generation:validation-post:${randomUUID()}`,
+        qualityMode: "balanced",
+        retryCount: 3,
+        idempotencyKey: `reserve-b:${randomUUID()}`,
+        metadata: {
+          pipelineName: "validation-post",
+          contentType: "validation-post"
+        }
+      })
+    );
+
+    await Effect.runPromise(
+      helpers.saveBillingRepository(
+        context.postgres.db,
+        context.billingRepository,
+        new Date().toISOString()
+      )
+    );
+
+    context.billingRepository.reservations.clear();
+
+    await Effect.runPromise(
+      reloadBillingRepositoryForUserInto(context.postgres.db, context.billingRepository, userA)
+    );
+
+    const loadedReservationIds = Array.from(context.billingRepository.reservations.keys());
+    expect(loadedReservationIds).toContain(reservationA.value.reservationId);
+    expect(loadedReservationIds).not.toContain(reservationB.value.reservationId);
+
+    const capture = await Effect.runPromise(
+      context.billing.captureReservedCredits({
+        reservationId: reservationA.value.reservationId,
+        idempotencyKey: `capture:targeted:${generationCycleId}`,
         metadata: {
           pipelineName: "validation-post",
           contentType: "validation-post",
