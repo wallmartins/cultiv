@@ -102,7 +102,9 @@ export function useGenerationSubmit({
         qualityMode: form.qualityMode
       });
       openDrawer(queued.jobId);
-      setCachedCreditBalance(commercialPreview.projectedBalanceAfterGeneration);
+      setCachedCreditBalance(
+        Math.max(0, commercialPreview.quotaRemaining - commercialPreview.quotaCost)
+      );
       form.resetGenerationForm();
       wizard.resetWizard();
       setLegacyContentTypeId("");

@@ -24,7 +24,8 @@ const ptLabels: FieldLabelMap = {
   "validation-post": {
     topic: { label: "Tema", helpText: "Problema ou ideia que você quer validar." },
     hypothesis: { label: "Hipótese", helpText: "O que você quer provar ou refutar." },
-    evidence: { label: "Pontos de prova", helpText: "Fatos ou exemplos que sustentam a hipótese." }
+    evidence: { label: "Pontos de prova", helpText: "Fatos ou exemplos que sustentam a hipótese." },
+    question: { label: "Pergunta", helpText: "Formule uma pergunta para provocar discussão." }
   },
   "architecture-post": {
     systemContext: { label: "Contexto do sistema", helpText: "Arquitetura ou limites do sistema." },
@@ -60,7 +61,8 @@ const enLabels: FieldLabelMap = {
   "validation-post": {
     topic: { label: "Topic", helpText: "Describe the issue being validated." },
     hypothesis: { label: "Hypothesis", helpText: "State what you want to prove or disprove." },
-    evidence: { label: "Evidence", helpText: "List the supporting facts or examples." }
+    evidence: { label: "Evidence", helpText: "List the supporting facts or examples." },
+    question: { label: "Question", helpText: "Pose a question to spark discussion." }
   },
   "architecture-post": {
     systemContext: { label: "System context", helpText: "Describe the architecture or system boundaries." },

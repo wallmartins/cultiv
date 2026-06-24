@@ -27,7 +27,6 @@ export function GenerationPreviewSidebar({
   submitting,
   noCredits,
   selectedModeAllowed,
-  creditPrice,
   fallbackBalance,
   onRefreshRecommendation,
   onGenerate
@@ -52,7 +51,6 @@ export function GenerationPreviewSidebar({
   readonly submitting: boolean;
   readonly noCredits: boolean;
   readonly selectedModeAllowed: boolean;
-  readonly creditPrice: number | null;
   readonly fallbackBalance: number | null;
   readonly onRefreshRecommendation: () => void;
   readonly onGenerate: () => void;
@@ -79,7 +77,10 @@ export function GenerationPreviewSidebar({
               <Text variant="meta" className="ui-type-mono text-ink-muted">
                 {messages.generate.previewQuota
                   .replace("{cost}", String(commercialPreview.quotaCost))
-                  .replace("{remaining}", String(commercialPreview.quotaRemaining))
+                  .replace(
+                    "{remaining}",
+                    String(Math.max(0, commercialPreview.quotaRemaining - commercialPreview.quotaCost))
+                  )
                   .replace("{limit}", String(commercialPreview.quotaLimit))}
               </Text>
             ) : (
@@ -181,9 +182,7 @@ export function GenerationPreviewSidebar({
               ? messages.generate.noCredits
               : !briefingComplete
                 ? messages.generate.incomplete
-                : creditPrice !== null
-                  ? messages.generate.generateWithCredits.replace("{price}", String(creditPrice))
-                  : messages.generate.generate}
+                : messages.generate.generate}
         </Button>
       </LogbookProse>
     </aside>

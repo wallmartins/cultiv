@@ -73,7 +73,7 @@ export function useCommercialGenerationPreview(request: CommercialPreviewRequest
         if (!cancelled) {
           setPreview(response);
           setStatus("ready");
-          setCachedCreditBalance(response.currentBalance);
+          setCachedCreditBalance(response.quotaRemaining);
         }
       })
       .catch((nextError: unknown) => {

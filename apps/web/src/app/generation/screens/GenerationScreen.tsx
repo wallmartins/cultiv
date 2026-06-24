@@ -197,7 +197,6 @@ export function GenerationScreen() {
               submitting={submitting}
               noCredits={commercialGate.noCredits}
               selectedModeAllowed={commercialGate.selectedModeAllowed}
-              creditPrice={commercialGate.creditPrice}
               fallbackBalance={commercialGate.currentBalance}
               onRefreshRecommendation={() => form.setFullRefreshKey((key) => key + 1)}
               onGenerate={() => void handleGenerate()}

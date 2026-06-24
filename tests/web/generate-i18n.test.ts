@@ -7,7 +7,7 @@ import { getPreviewRecommendationExplanation } from "../../apps/web/src/i18n/app
 
 const fieldsByContentType = {
   "long-form-blog": ["topic", "thesis", "outline", "audience"],
-  "validation-post": ["topic", "hypothesis", "evidence"],
+  "validation-post": ["topic", "hypothesis", "evidence", "question"],
   "architecture-post": ["systemContext", "tradeoffs", "decision"],
   "linkedin-post": ["topic", "audience", "angle", "proof"],
   "twitter-thread": ["topic", "hook", "beats"],

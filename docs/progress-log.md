@@ -1,5 +1,6 @@
 # Progress Log
 
+| 2026-06-24 | fix(web): generation preview — header quota sync (store quotaRemaining not raw credits), projected remaining after cost in sidebar, remove credits from CTA; PT tooltip for engage-audience question field |
 | 2026-06-24 | fix(backend): billing entitlement backfill for existing users without subscription (`ensureUserEntitlement` on GET `/me/billing/entitlement`); map `BillingGatewayError` to 503 on checkout instead of opaque 500 |
 | 2026-06-24 | fix(web): expired Auth0 session relogin — detect auth token failures (`auth_expired`), auto `loginWithRedirect` with `prompt: login` instead of broken `logout` to `/login`; `useRelogin` hook; AppSdkGate/login/callback updated |
 | 2026-06-24 | fix(backend): lint/typecheck — propagate `DatabaseError` through repo contracts, auth JWT `sub` narrowing, `postgresTryPromise`/`billing-repository-sync`/`public-route` fixes; `pnpm lint` green across monorepo |
