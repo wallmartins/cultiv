@@ -1,5 +1,7 @@
 import {
   BillingCheckoutCatalogNotFoundError,
+  BillingEntitlementNotFoundError,
+  BillingGatewayError,
   BillingGatewayWebhookVerificationError
 } from "@my-ai-orchestrator/payments";
 import { createHttpErrorResponse } from "../http/error-response-core.js";
@@ -11,6 +13,20 @@ export function mapBillingError(error: unknown, path: string): HttpErrorResponse
     return createHttpErrorResponse(503, "service_unavailable", {
       message: error.message ?? "Billing checkout is not configured",
       details: { path, route: error.route }
+    });
+  }
+
+  if (error instanceof BillingEntitlementNotFoundError) {
+    return createHttpErrorResponse(404, "resource_not_found", {
+      message: "Billing entitlement not found",
+      details: { path, userId: error.userId, planId: error.planId }
+    });
+  }
+
+  if (error instanceof BillingGatewayError) {
+    return createHttpErrorResponse(503, "service_unavailable", {
+      message: error.message,
+      details: { path, gateway: error.gateway }
     });
   }
 

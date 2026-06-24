@@ -1,5 +1,6 @@
 # Progress Log
 
+| 2026-06-24 | fix(backend): billing entitlement backfill for existing users without subscription (`ensureUserEntitlement` on GET `/me/billing/entitlement`); map `BillingGatewayError` to 503 on checkout instead of opaque 500 |
 | 2026-06-24 | fix(web): expired Auth0 session relogin — detect auth token failures (`auth_expired`), auto `loginWithRedirect` with `prompt: login` instead of broken `logout` to `/login`; `useRelogin` hook; AppSdkGate/login/callback updated |
 | 2026-06-24 | fix(backend): lint/typecheck — propagate `DatabaseError` through repo contracts, auth JWT `sub` narrowing, `postgresTryPromise`/`billing-repository-sync`/`public-route` fixes; `pnpm lint` green across monorepo |
 | 2026-06-24 | perf(backend): Issue 107 — billing API boot loads catalog only (`loadPostgresBillingCatalog`); per-user slice hydrates on `resolvePublicActor`; `loadPostgresBillingRepository` kept for explicit full reload paths |

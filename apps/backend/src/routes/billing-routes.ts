@@ -14,6 +14,7 @@ import { BackendBillingNotConfiguredError } from "../http/errors.js";
 import { createPublicRouteHandler } from "../http/public-route.js";
 import { resolvePublicActor } from "../auth/auth-middleware.js";
 import { runEffectOrThrow, validateResponseBody } from "../http/http.js";
+import { ensureUserEntitlement } from "../product/billing/resolve-user-billing.js";
 import type { BackendProductServices } from "../product.js";
 
 export interface BillingRouteOptions {
@@ -66,14 +67,13 @@ export function registerBillingRoutes(app: Hono, options: BillingRouteOptions): 
       Routes.GetMeBillingEntitlement,
       options.services
     );
-    const planId = options.services.billing.getPrimarySubscriptionPlanId(actor.userId) ?? "free";
-    const entitlement = options.services.billing.getEntitlement(actor.userId, planId);
-    if (!entitlement) {
-      throw new BackendBillingNotConfiguredError({
-        route: Routes.GetMeBillingEntitlement,
-        message: "billing entitlement not found"
-      });
-    }
+    const entitlement = await runEffectOrThrow(
+      ensureUserEntitlement(options.services.billing, actor.userId, {
+        now: () => new Date(),
+        idempotencyNamespace: options.config.serviceName
+      })
+    );
+    const planId = entitlement.planId;
 
     const canonicalCreditCost = options.services.aiPolicy.getCanonicalCreditCost();
     const plan = options.services.billing.listPlans().find((candidate) => candidate.id === planId);
