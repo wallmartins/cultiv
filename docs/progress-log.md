@@ -1,5 +1,7 @@
 # Progress Log
 
+| 2026-06-24 | docs: issues 107–108 — billing API boot lazy-load, web file-size governance (promoted from backlog) |
+| 2026-06-24 | docs: Code Quality & Scale Readiness program — PRD, implementation plan (8 phases), parent issue, vertical slices 88–106 from full-stack code review |
 | 2026-06-23 | fix(marketing): Cartography landing polish — section rail with scroll highlight, hero vertical center, lucide territory icons, route without dashed line, compositor 3-step tools section, Explorador/Criador/Pro pricing cards |
 | 2026-06-23 | fix(app): plans and settings layout — wider sections, simplified plan cards, numbered settings cards, no dotted borders |
 | 2026-06-23 | fix(app): workspace UX polish — sidebar logo z-index + collapse on navigate; generation layout max-width; history filters grid; voice dashboard tabs; remove dotted borders on voice/history detail |

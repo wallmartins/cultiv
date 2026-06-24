@@ -38,6 +38,9 @@ Planejamento consolidado da implementação web do **Cultiv**, produzido nas ses
 | [Issues durable async runtime](../issues/README.md#durable-async-runtime) | Vertical slices 48–57 |
 | [Runbook production go-live](../runbooks/production-go-live.md) | Checklist deploy Vercel + Railway + Auth0 |
 | [Issues fase 1](../issues/README.md) | Vertical slices (8 issues) |
+| [PRD Code Quality & Scale Readiness](../prd/code-quality-scale-readiness.md) | Melhorias pós code review 2026-06-24 |
+| [Plano Code Quality & Scale Readiness](./code-quality-scale-readiness-implementation-plan.md) | 8 fases — confiabilidade, UX, DX, testes |
+| [Issues Code Quality & Scale Readiness](../issues/README-code-quality-scale-readiness.md) | Vertical slices 88–108 |
 
 ## Referências relacionadas
 
