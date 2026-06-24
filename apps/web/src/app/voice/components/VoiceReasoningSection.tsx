@@ -1,13 +1,16 @@
-import { Text } from "@my-ai-orchestrator/ui";
+import { CoordinateLabel, LogbookProse, Text } from "@my-ai-orchestrator/ui";
 import { VoiceTraitChip } from "~/app/voice/components/VoiceTraitChip";
 import { VoiceDevelopmentTraitsStrip } from "~/app/voice/components/VoiceDevelopmentTraitsStrip";
-import { VoiceMirrorHero } from "~/app/voice/components/VoiceMirrorHero";
-import type { VoiceConfidenceLevel } from "~/app/voice/components/VoiceConfidenceRing";
+import {
+  VoiceConfidenceRing,
+  type VoiceConfidenceLevel
+} from "~/app/voice/components/VoiceConfidenceRing";
 import type { DevelopmentTraitProfile, TraitKey, VoiceReasoningPresentationView } from "@my-ai-orchestrator/contracts";
 import { getMoveLabel } from "~/i18n/app/move-labels";
 import type { AppLocale, AppMessages } from "~/i18n/app/types";
 import type { AppDisclosureItem } from "~/platform/ui/AppDisclosure";
 import { getContentTypeLabel } from "~/i18n/app/content-types";
+import { getVoiceDashboardSectionTitles } from "~/app/voice/lib/voice-dashboard-copy";
 
 interface VoiceReasoningLayersProps {
   readonly locale: AppLocale;
@@ -40,17 +43,14 @@ export function buildReasoningDetailItems({
           formatCount > 0 ? (
           <div className="space-y-4">
             {reasoning.formatExpressions.map((expression) => (
-              <div
-                key={expression.contentType}
-                className="rounded-[var(--radius-press)] border border-borda/15 bg-creme p-4"
-              >
-                <Text variant="label" className="mb-2 block">
+              <LogbookProse key={expression.contentType} className="space-y-3 border-0 bg-off-white p-4 shadow-cartography">
+                <Text variant="label" className="block font-inter text-xs font-semibold uppercase tracking-wider text-ink-muted">
                   {getContentTypeLabel(locale, expression.contentType, expression.contentType)}
                 </Text>
-                <Text variant="body" className="mb-3 w-full text-ink-muted">
+                <Text variant="body" className="w-full whitespace-pre-wrap leading-relaxed text-ink">
                   {expression.narrativeProse}
                 </Text>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-2 border-t border-ink-ghost/20 pt-3">
                   <VoiceTraitChip
                     label={reasoningMessages.register}
                     value={reasoningMessages.enums.register[expression.register]}
@@ -64,7 +64,7 @@ export function buildReasoningDetailItems({
                     value={reasoningMessages.enums.technicalDensity[expression.technicalDensity]}
                   />
                 </div>
-              </div>
+              </LogbookProse>
             ))}
           </div>
         ) : (
@@ -131,6 +131,7 @@ export function buildReasoningDetailItems({
 interface VoiceReasoningMirrorProps {
   readonly locale: AppLocale;
   readonly messages: AppMessages["voice"]["reasoning"];
+  readonly voiceMessages: AppMessages["voice"];
   readonly reasoning: VoiceReasoningPresentationView;
   readonly confidenceLevel: VoiceConfidenceLevel;
   readonly dialSubline: string;
@@ -141,6 +142,7 @@ interface VoiceReasoningMirrorProps {
 export function VoiceReasoningMirror({
   locale,
   messages,
+  voiceMessages,
   reasoning,
   confidenceLevel,
   dialSubline,
@@ -149,28 +151,58 @@ export function VoiceReasoningMirror({
 }: VoiceReasoningMirrorProps) {
   const development = reasoning.development;
   const traitProfile = reasoning.traitProfile ?? development?.traitProfile;
+  const sectionTitles = getVoiceDashboardSectionTitles(voiceMessages);
 
   return (
     <section className="space-y-8">
-      <div>
-        <Text as="h2" variant="h2" className="mb-2 font-playfair text-azul">
-          {messages.title}
-        </Text>
-        <Text variant="meta" className="w-full text-ink-muted">
-          {messages.subtitle}
-        </Text>
+      <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <CoordinateLabel
+          index={0}
+          label={voiceMessages.detailLayers.profileHealth}
+          className="block"
+        />
+        <VoiceConfidenceRing
+          level={confidenceLevel}
+          label={dialAccessibleLabel}
+          centerLabel={dialSubline}
+          size="hero"
+          hideLabel
+        />
       </div>
 
-      <div className="space-y-4">
-        <Text variant="label" className="block font-inter text-xs font-semibold uppercase tracking-wider text-terracota/70">
-          {messages.coreTitle}
-        </Text>
-        <VoiceMirrorHero
-          level={confidenceLevel}
-          dialSubline={dialSubline}
-          dialAccessibleLabel={dialAccessibleLabel}
-          bodyCopy={reasoning.core.narrativeProse}
-        />
+      <div className="grid gap-4 md:grid-cols-2">
+        <LogbookProse className="space-y-3 border-0 bg-off-white p-5 shadow-cartography">
+          <CoordinateLabel index={1} label={sectionTitles.navigate} className="mb-1 block" />
+          <Text variant="meta" className="block text-ink-muted">
+            {messages.subtitle}
+          </Text>
+          <Text variant="body" className="w-full whitespace-pre-wrap leading-relaxed text-ink">
+            {reasoning.core.narrativeProse}
+          </Text>
+        </LogbookProse>
+
+        <LogbookProse className="space-y-3 border-0 bg-off-white p-5 shadow-cartography">
+          <CoordinateLabel index={2} label={sectionTitles.mapRoutes} className="mb-1 block" />
+          <Text variant="meta" className="block text-ink-muted">
+            {messages.developmentSubtitle}
+          </Text>
+          {development ? (
+            <>
+              <Text variant="body" className="w-full whitespace-pre-wrap leading-relaxed text-ink">
+                {development.developmentProse}
+              </Text>
+              {reasoning.developmentImmature ? (
+                <Text variant="meta" className="w-full text-ink-muted">
+                  {messages.developmentImmature}
+                </Text>
+              ) : null}
+            </>
+          ) : (
+            <Text variant="body" className="w-full text-ink-muted">
+              {messages.developmentImmature}
+            </Text>
+          )}
+        </LogbookProse>
       </div>
 
       <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
@@ -198,24 +230,7 @@ export function VoiceReasoningMirror({
       </div>
 
       {development ? (
-        <div className="space-y-4 border-t border-borda/15 pt-8">
-          <div>
-            <Text variant="label" className="mb-2 block font-inter text-xs font-semibold uppercase tracking-wider text-terracota/70">
-              {messages.developmentTitle}
-            </Text>
-            <Text variant="meta" className="mb-4 w-full text-ink-muted">
-              {messages.developmentSubtitle}
-            </Text>
-            <Text variant="body-lg" className="w-full whitespace-pre-wrap leading-relaxed text-ink">
-              {development.developmentProse}
-            </Text>
-            {reasoning.developmentImmature ? (
-              <Text variant="meta" className="mt-3 w-full text-ink-muted">
-                {messages.developmentImmature}
-              </Text>
-            ) : null}
-          </div>
-
+        <div className="space-y-4 border-t border-ink-ghost/20 pt-8">
           <div className="flex flex-wrap gap-2">
             <VoiceTraitChip
               label={messages.epistemicPosture}
@@ -224,21 +239,19 @@ export function VoiceReasoningMirror({
           </div>
 
           {development.moveLabels.length > 0 ? (
-            <div className="rounded-[var(--radius-press)] border border-borda/15 bg-creme px-4 py-3">
-              <Text variant="meta" className="mb-2 block font-inter text-xs font-semibold uppercase tracking-wider text-texto-sec">
-                {messages.typicalMoves}
-              </Text>
+            <LogbookProse className="space-y-3 border-0 bg-off-white p-4 shadow-cartography">
+              <CoordinateLabel index={3} label={messages.typicalMoves} className="block" />
               <ul className="flex flex-wrap gap-2">
                 {development.moveLabels.map((move) => (
                   <li
                     key={move}
-                    className="rounded-[var(--radius-press)] bg-terracota/10 border border-terracota/15 px-3 py-1 font-inter text-sm font-medium text-terracota"
+                    className="rounded-[5px] border border-ink-ghost/25 bg-cream px-3 py-1 font-inter text-sm font-medium text-terracotta"
                   >
                     {getMoveLabel(locale, move)}
                   </li>
                 ))}
               </ul>
-            </div>
+            </LogbookProse>
           ) : null}
 
           {traitProfile ? (
@@ -284,11 +297,8 @@ function TraitEvidenceDisclosure({
       {traitsWithEvidence.map((traitKey) => {
         const record = traitProfile.records[traitKey]!;
         return (
-          <div
-            key={traitKey}
-            className="rounded-[var(--radius-press)] border border-ink-ghost/60 bg-paper-elevated/60 p-4"
-          >
-            <Text variant="label" className="mb-3 block">
+          <LogbookProse key={traitKey} className="space-y-3 p-4">
+            <Text variant="label" className="block">
               {traitMessages.evidenceHeading(traitMessages.labels[traitKey], record.value)}
             </Text>
             <div className="space-y-3">
@@ -310,10 +320,10 @@ function TraitEvidenceDisclosure({
                 );
               })}
             </div>
-          </div>
+          </LogbookProse>
         );
       })}
-      <a href="/app/voice/examples" className="text-sm font-medium text-pigment-terracotta underline-offset-2 hover:underline">
+      <a href="/app/voice/examples" className="text-sm font-medium text-terracotta underline-offset-2 hover:underline">
         {traitMessages.manageExamplesLink}
       </a>
     </div>

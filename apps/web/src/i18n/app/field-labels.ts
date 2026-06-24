@@ -10,21 +10,21 @@ type FieldLabelMap = Record<string, Record<string, FieldCopy>>;
 
 const ptLabels: FieldLabelMap = {
   "linkedin-post": {
-    topic: { label: "Tópico", helpText: "Descreva a ideia principal da publicação." },
-    audience: { label: "Público", helpText: "Quem deve se interessar por este conteúdo." },
+    topic: { label: "Tema", helpText: "Descreva a ideia principal da publicação." },
+    audience: { label: "Audiência", helpText: "Quem deve se interessar por este conteúdo." },
     angle: { label: "Ângulo", helpText: "Opinião ou enquadramento que você quer transmitir." },
-    proof: { label: "Provas ou exemplos", helpText: "Liste exemplos concretos ou evidências." }
+    proof: { label: "Pontos de prova", helpText: "Liste exemplos concretos ou evidências." }
   },
   newsletter: {
-    topic: { label: "Tópico", helpText: "Tema principal da edição." },
-    audience: { label: "Público", helpText: "Segmento de leitores." },
+    topic: { label: "Tema", helpText: "Tema principal da edição." },
+    audience: { label: "Audiência", helpText: "Segmento de leitores." },
     promise: { label: "Promessa central", helpText: "Valor que o leitor leva desta edição." },
     sections: { label: "Seções", helpText: "Seções ou blocos que a edição deve incluir." }
   },
   "validation-post": {
-    topic: { label: "Tópico", helpText: "Problema ou ideia que você quer validar." },
+    topic: { label: "Tema", helpText: "Problema ou ideia que você quer validar." },
     hypothesis: { label: "Hipótese", helpText: "O que você quer provar ou refutar." },
-    evidence: { label: "Evidências", helpText: "Fatos ou exemplos que sustentam a hipótese." }
+    evidence: { label: "Pontos de prova", helpText: "Fatos ou exemplos que sustentam a hipótese." }
   },
   "architecture-post": {
     systemContext: { label: "Contexto do sistema", helpText: "Arquitetura ou limites do sistema." },
@@ -32,13 +32,13 @@ const ptLabels: FieldLabelMap = {
     decision: { label: "Decisão", helpText: "Recomendação ou conclusão." }
   },
   "long-form-blog": {
-    topic: { label: "Tópico", helpText: "Assunto do artigo." },
+    topic: { label: "Tema", helpText: "Assunto do artigo." },
     thesis: { label: "Tese", helpText: "Argumento central." },
     outline: { label: "Estrutura", helpText: "Seções do artigo." },
-    audience: { label: "Público", helpText: "Para quem o artigo é escrito." }
+    audience: { label: "Audiência", helpText: "Para quem o artigo é escrito." }
   },
   "twitter-thread": {
-    topic: { label: "Tópico", helpText: "Assunto da sequência." },
+    topic: { label: "Tema", helpText: "Assunto da sequência." },
     hook: { label: "Gancho", helpText: "Abertura que prende a atenção." },
     beats: { label: "Blocos", helpText: "Pontos principais da sequência." }
   }

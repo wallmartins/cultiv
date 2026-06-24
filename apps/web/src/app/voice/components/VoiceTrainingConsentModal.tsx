@@ -23,7 +23,7 @@ export function VoiceTrainingConsentModal({
       <div
         role="dialog"
         aria-modal="true"
-        className="w-full max-w-md rounded-[var(--radius-press)] border border-ink bg-paper-elevated p-6 shadow-lg"
+        className="w-full max-w-md rounded-[var(--radius-cartography)] border border-ink bg-paper-elevated p-6 shadow-lg"
       >
         <Text as="h2" variant="h2" className="mb-3">
           {messages.voice.consent.title}

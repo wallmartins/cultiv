@@ -1,10 +1,9 @@
 import type { GenerationPreviewResponse } from "@my-ai-orchestrator/contracts";
-import { Button, ReadingSurface, Text } from "@my-ai-orchestrator/ui";
+import { Button, LogbookProse, Text } from "@my-ai-orchestrator/ui";
 import type { AppLocale } from "~/i18n/app/types";
 import type { AppMessages } from "~/i18n/app/types";
 import { getPreviewRecommendationExplanation } from "~/i18n/app/preview-recommendation";
 import type { GenerationPreviewStatus } from "~/app/generation/lib/use-generation-preview";
-import { AppCard } from "~/platform/ui/AppCard";
 import { AppSkeleton } from "~/platform/ui/AppSkeleton";
 
 export function GenerationPreviewSidebar({
@@ -59,14 +58,10 @@ export function GenerationPreviewSidebar({
   readonly onGenerate: () => void;
 }) {
   return (
-    <aside className="mt-8 space-y-4 lg:mt-0 lg:sticky lg:top-[calc(var(--app-header-height)+1.5rem)]">
-      <AppCard className="space-y-4 border-azul/15">
-        <div className="flex items-center gap-2 pb-3 border-b border-borda/15">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4 text-azul">
-            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
-            <circle cx="12" cy="9" r="2.5" />
-          </svg>
-          <Text as="h2" variant="label" className="font-playfair text-azul">
+    <aside className="mt-8 lg:mt-0 lg:sticky lg:top-[calc(var(--app-header-height)+1.5rem)] lg:self-start">
+      <LogbookProse className="space-y-4 p-5">
+        <div className="space-y-1 pb-4">
+          <Text as="h2" variant="label" className="font-playfair text-deep-blue">
             {messages.generate.previewTitle}
           </Text>
         </div>
@@ -74,14 +69,14 @@ export function GenerationPreviewSidebar({
         {commercialInitialLoad ? <AppSkeleton className="h-16 w-full" /> : null}
         {commercialPreview ? (
           <div
-            className={`space-y-2 transition-opacity duration-300 ease-out ${
+            className={`space-y-2 transition-opacity duration-[250ms] ease-out motion-reduce:transition-none ${
               commercialRefreshing ? "opacity-55" : "opacity-100"
             }`}
           >
             {typeof commercialPreview.quotaCost === "number" &&
             typeof commercialPreview.quotaRemaining === "number" &&
             typeof commercialPreview.quotaLimit === "number" ? (
-              <Text variant="meta">
+              <Text variant="meta" className="ui-type-mono text-ink-muted">
                 {messages.generate.previewQuota
                   .replace("{cost}", String(commercialPreview.quotaCost))
                   .replace("{remaining}", String(commercialPreview.quotaRemaining))
@@ -89,15 +84,15 @@ export function GenerationPreviewSidebar({
               </Text>
             ) : (
               <>
-                <div className="flex items-center justify-between rounded-[var(--radius-press)] bg-creme px-3 py-2 border border-borda/15">
-                  <Text variant="meta" className="text-ink-muted">
+                <div className="rounded-[5px] border border-dotted-cartography bg-cream px-3 py-2.5">
+                  <Text variant="meta" className="ui-type-mono text-ink-muted">
                     {messages.generate.previewPrice.replace(
                       "{price}",
                       String(commercialPreview.pricingSnapshot.creditPrice)
                     )}
                   </Text>
                 </div>
-                <Text variant="meta">
+                <Text variant="meta" className="ui-type-mono text-ink-muted">
                   {messages.generate.previewBalance
                     .replace(
                       "{current}",
@@ -113,13 +108,13 @@ export function GenerationPreviewSidebar({
           <AppSkeleton className="h-10 w-full" />
         ) : null}
         {fullPreview && (previewRecommendation || recommendationStale) ? (
-          <ReadingSurface
-            className={`rounded-[var(--radius-press)] px-4 py-5 border border-borda/10 bg-creme transition-opacity duration-300 ease-out ${
+          <LogbookProse
+            className={`p-4 transition-opacity duration-[250ms] ease-out motion-reduce:transition-none ${
               fullRefreshing ? "opacity-55" : "opacity-100"
             }`}
           >
             {previewRecommendation ? (
-              <Text variant="reading" className="text-ink-muted">
+              <Text variant="logbook" className="text-ink-muted">
                 {getPreviewRecommendationExplanation(locale, previewRecommendation, {
                   fast: messages.qualityModes.fast,
                   balanced: messages.qualityModes.balanced,
@@ -128,16 +123,16 @@ export function GenerationPreviewSidebar({
               </Text>
             ) : null}
             {recommendationStale ? (
-              <Text variant="reading" className="text-ink-muted">
+              <Text variant="logbook" className="text-ink-muted">
                 {messages.generate.previewRecommendationStale}
               </Text>
             ) : null}
-          </ReadingSurface>
+          </LogbookProse>
         ) : null}
         {briefingComplete ? (
           <button
             type="button"
-            className="text-sm font-medium text-pigment-terracotta underline-offset-2 hover:underline disabled:opacity-50"
+            className="text-sm font-medium text-terracotta underline-offset-2 hover:underline disabled:opacity-50"
             disabled={fullStatus === "loading"}
             onClick={onRefreshRecommendation}
           >
@@ -155,7 +150,7 @@ export function GenerationPreviewSidebar({
           </Text>
         ) : null}
         {showCommercialCalculating ? (
-          <Text variant="meta" className="text-ink-muted">
+          <Text variant="meta" className="ui-type-mono text-ink-muted">
             {messages.generate.calculating}
           </Text>
         ) : null}
@@ -168,7 +163,7 @@ export function GenerationPreviewSidebar({
 
         <Button
           type="button"
-          className="w-full justify-center bg-terracota text-white shadow-[3px_3px_0px_rgba(0,0,0,0.12)] hover:bg-terracota/90"
+          className="w-full justify-center"
           disabled={
             !briefingComplete ||
             importedTooLarge ||
@@ -190,7 +185,7 @@ export function GenerationPreviewSidebar({
                   ? messages.generate.generateWithCredits.replace("{price}", String(creditPrice))
                   : messages.generate.generate}
         </Button>
-      </AppCard>
+      </LogbookProse>
     </aside>
   );
 }

@@ -1,6 +1,10 @@
 # Progress Log
 
 | 2026-06-23 | fix(marketing): Cartography landing polish — section rail with scroll highlight, hero vertical center, lucide territory icons, route without dashed line, compositor 3-step tools section, Explorador/Criador/Pro pricing cards |
+| 2026-06-23 | fix(app): plans and settings layout — wider sections, simplified plan cards, numbered settings cards, no dotted borders |
+| 2026-06-23 | fix(app): workspace UX polish — sidebar logo z-index + collapse on navigate; generation layout max-width; history filters grid; voice dashboard tabs; remove dotted borders on voice/history detail |
+| 2026-06-23 | docs: Cartography redesign implemented — Task 21 QA gate: fixed migration test drift (geo llms route copy, generation intent labels, VoiceReasoningMirror voiceMessages prop, content-type labels, cartography motion tokens); 936 tests pass (28 skipped), web build pass, cartography governance + primitives pass; manual QA: governance ✓, web build ✓, full suite ✓ |
+| 2026-06-23 | feat(marketing): Cartography motion — route draw, reveal stagger, hero word fade; retired stamp reveal and scroll-pin hooks |
 | 2026-06-23 | docs: Cultiv Cartography redesign implementation plan — 21 tasks across tokens, primitives, marketing reskin, workspace shell, Imprint retirement, QA gate |
 | 2026-06-23 | docs: Cultiv Cartography complete platform redesign design spec — Atlas Editorial approach, cartography identity (compass logo, Playfair/Inter/Caveat/JetBrains Mono), marketing + workspace layout reimagined, premium contained motion, supersedes ADR 0009 Imprint |
 | 2026-06-22 | fix(web): Imprint visual depth — craft Press Mark, scene mats, hero split + HeroImprintArt, restore problem/differentiator SVG scenes, stronger grain/ink/type |

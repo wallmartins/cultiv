@@ -1,5 +1,5 @@
 import type { ContentTypeFieldView } from "@my-ai-orchestrator/contracts";
-import { Input } from "@my-ai-orchestrator/ui";
+import { CoordinateLabel, Input } from "@my-ai-orchestrator/ui";
 import { HelpTooltip } from "~/platform/ui/HelpTooltip";
 import { getFieldHelpText, getFieldLabel } from "~/i18n/app/field-labels";
 import type { AppLocale } from "~/i18n/app/types";
@@ -8,7 +8,7 @@ import { AppSelect } from "~/platform/ui/AppSelect";
 import { lenisScrollRegionProps } from "~/platform/ui/lenis-scroll-region";
 
 const textareaClassName =
-  "workspace-field-control min-h-28 w-full font-inter text-base text-ink placeholder:text-ink-muted";
+  "min-h-28 w-full rounded-[5px] border border-dotted-cartography bg-off-white px-3 py-2.5 font-inter text-base text-ink placeholder:text-ink-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-terracotta/40";
 
 export interface BriefingFormProps {
   readonly locale: AppLocale;
@@ -32,8 +32,8 @@ export function BriefingForm({
   }
 
   return (
-    <div className="space-y-4">
-      {fields.map((field) => {
+    <div className="space-y-5">
+      {fields.map((field, index) => {
         const label = getFieldLabel(locale, contentTypeId, field.key, field.label);
         const helpText = getFieldHelpText(locale, contentTypeId, field.key, field.helpText);
         const value = values[field.key];
@@ -49,7 +49,7 @@ export function BriefingForm({
           ) : null;
 
         return (
-          <div key={field.key}>
+          <div key={field.key} className="space-y-2">
             {field.type === "boolean" ? (
               <label htmlFor={`briefing-${field.key}`} className="flex items-center gap-2 text-sm font-medium">
                 <input
@@ -58,19 +58,22 @@ export function BriefingForm({
                   checked={Boolean(value)}
                   onChange={(event) => updateField(field.key, event.target.checked)}
                 />
-                <span>
-                  {label}
-                  {field.required ? " *" : ""}
-                </span>
+                <CoordinateLabel index={index + 1} label={label} />
+                {field.required ? <span aria-hidden="true">*</span> : null}
                 {fieldHelp}
               </label>
             ) : (
               <>
-                <label htmlFor={`briefing-${field.key}`} className="mb-2 flex items-center gap-2 text-sm font-medium font-inter">
-                  <span>
-                    {label}
-                    {field.required ? " *" : ""}
-                  </span>
+                <label
+                  htmlFor={`briefing-${field.key}`}
+                  className="mb-2 flex items-center gap-2"
+                >
+                  <CoordinateLabel index={index + 1} label={label} />
+                  {field.required ? (
+                    <span className="ui-type-mono text-terracotta" aria-hidden="true">
+                      *
+                    </span>
+                  ) : null}
                   {fieldHelp}
                 </label>
 
@@ -93,7 +96,6 @@ export function BriefingForm({
                   <Input
                     id={`briefing-${field.key}`}
                     type="number"
-                    className="workspace-field-control"
                     value={typeof value === "number" ? value : ""}
                     onChange={(event) =>
                       updateField(field.key, event.target.value === "" ? undefined : Number(event.target.value))
@@ -102,7 +104,6 @@ export function BriefingForm({
                 ) : (
                   <Input
                     id={`briefing-${field.key}`}
-                    className="workspace-field-control"
                     value={typeof value === "string" ? value : ""}
                     onChange={(event) => updateField(field.key, event.target.value)}
                   />

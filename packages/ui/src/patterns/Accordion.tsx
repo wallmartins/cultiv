@@ -27,9 +27,9 @@ export function Accordion({ items }: AccordionProps) {
           <section
             key={item.id}
             className={cn(
-              "press-edge rounded-[var(--radius-press)] border bg-paper-elevated transition-[border-color,box-shadow] duration-200",
+              "rounded-[var(--radius-cartography)] border bg-off-white shadow-cartography transition-[border-color,box-shadow] duration-200",
               isOpen
-                ? "border-pigment-terracotta/45 shadow-[var(--shadow-press-edge),0_0_0_1px_rgba(181,89,58,0.08)]"
+                ? "border-terracotta/45 shadow-cartography"
                 : "border-ink-ghost hover:border-ink/20"
             )}
           >

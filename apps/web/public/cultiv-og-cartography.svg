@@ -1,0 +1,30 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Cultiv  Sua voz. Seu território.">
+  <defs>
+    <filter id="grain" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="4" stitchTiles="stitch" result="noise"/>
+      <feColorMatrix type="saturate" values="0" in="noise" result="mono"/>
+      <feBlend in="SourceGraphic" in2="mono" mode="multiply"/>
+    </filter>
+  </defs>
+
+  <rect width="1200" height="630" fill="#F5F0E6"/>
+  <rect width="1200" height="630" fill="#F5F0E6" filter="url(#grain)" opacity="0.035"/>
+
+  <!-- Compass mark  centered-left -->
+  <g transform="translate(140 115) scale(5)">
+    <circle cx="32" cy="32" r="22" fill="none" stroke="#1A2E3C" stroke-width="1" opacity="0.35"/>
+    <path d="M32 10 A22 22 0 1 1 31.99 10" fill="none" stroke="#1A2E3C" stroke-width="1"/>
+    <path d="M31.2 8.5 C31.8 12 32.4 16.5 32 21.5" fill="none" stroke="#1A2E3C" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M55.5 31.2 C51 31.8 46.5 32.4 42.5 32" fill="none" stroke="#1A2E3C" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M32.8 55.5 C32.2 51 31.6 46.5 32 41.5" fill="none" stroke="#1A2E3C" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M8.5 32.8 C12 32.2 16.5 31.6 21.5 32" fill="none" stroke="#1A2E3C" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M32 28 A4 4 0 1 1 31.99 28" fill="none" stroke="#1A2E3C" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M32 29.5 V34.5 M29.5 32 H34.5" fill="none" stroke="#1A2E3C" stroke-width="1.5" stroke-linecap="round"/>
+    <!-- single terracotta accent  north needle tip -->
+    <circle cx="32" cy="10" r="2.2" fill="#b55a3b"/>
+  </g>
+
+  <!-- Tagline -->
+  <text x="520" y="300" font-family="'Playfair Display', Georgia, 'Times New Roman', serif" font-size="64" font-weight="600" fill="#1A2E3C" letter-spacing="-0.02em">Sua voz.</text>
+  <text x="520" y="375" font-family="'Playfair Display', Georgia, 'Times New Roman', serif" font-size="64" font-weight="600" fill="#1A2E3C" letter-spacing="-0.02em">Seu território.</text>
+</svg>

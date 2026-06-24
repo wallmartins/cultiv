@@ -108,10 +108,10 @@
   }
 
   .workspace-card {
-    border-radius: var(--radius-press);
+    border-radius: var(--radius-cartography);
     border: 1px solid var(--color-ink-ghost);
     background: var(--color-paper-elevated);
-    box-shadow: var(--shadow-press-edge);
+    box-shadow: var(--shadow-cartography);
   }
 
   .workspace-card:has([data-app-select-open="true"]) {
@@ -128,12 +128,12 @@
   .workspace-card--hover:hover {
     transform: translateY(-1px);
     box-shadow:
-      var(--shadow-press-edge),
+      var(--shadow-cartography),
       0 4px 16px color-mix(in srgb, var(--color-ink) 8%, transparent);
   }
 
   .workspace-field-control {
-    border-radius: var(--radius-press);
+    border-radius: var(--radius-cartography);
     border: 1px solid var(--color-ink-ghost);
     background: var(--color-paper-elevated);
     transition:
@@ -148,10 +148,10 @@
   }
 
   .workspace-overlay {
-    border-radius: var(--radius-press);
+    border-radius: var(--radius-cartography);
     border: 1px solid var(--color-ink-ghost);
     background: var(--color-paper-elevated);
-    box-shadow: var(--shadow-press-edge);
+    box-shadow: var(--shadow-cartography);
     animation: workspace-fade-up var(--app-motion-duration-fast) var(--app-motion-ease);
   }
 
@@ -160,7 +160,7 @@
     width: 100%;
     align-items: center;
     gap: 0.625rem;
-    border-radius: var(--radius-press);
+    border-radius: var(--radius-cartography);
     padding: 0.5rem 0.75rem;
     text-align: left;
     font-size: 0.875rem;
@@ -225,7 +225,7 @@
     position: relative;
     width: max-content;
     max-width: 16rem;
-    border-radius: var(--radius-press);
+    border-radius: var(--radius-cartography);
     border: 1px solid var(--color-ink-ghost);
     background: var(--color-paper-elevated);
     padding: 0.625rem 0.75rem;
@@ -233,7 +233,7 @@
     line-height: 1.55;
     color: var(--color-ink);
     white-space: pre-line;
-    box-shadow: var(--shadow-press-edge);
+    box-shadow: var(--shadow-cartography);
     pointer-events: none;
     animation: workspace-fade-up var(--app-motion-duration-fast) var(--app-motion-ease);
   }
@@ -344,7 +344,7 @@
   }
 
   .workspace-skeleton {
-    border-radius: var(--radius-press);
+    border-radius: var(--radius-cartography);
     background: linear-gradient(
       90deg,
       color-mix(in srgb, var(--color-paper-pressed) 80%, transparent) 0%,
@@ -457,6 +457,45 @@
   color-scheme: light;
 }
 
+[data-surface="marketing"] {
+  --cartography-grain-opacity: 0.06;
+  --site-header-height: 4.25rem;
+  --cartography-grain-x: 0%;
+  --cartography-grain-y: 0%;
+}
+
+[data-surface="marketing"][data-paper-parallax]::before {
+  background-position: var(--cartography-grain-x) var(--cartography-grain-y);
+}
+
+@media (min-width: 768px) {
+  [data-surface="marketing"] {
+    --site-header-height: 5.25rem;
+  }
+}
+
+@layer utilities {
+  .marketing-header-spacer {
+    height: calc(var(--site-header-height) + 1rem);
+  }
+
+  .cartography-logo-hover {
+    transition: opacity 0.25s ease;
+  }
+
+  .cartography-logo-hover:hover {
+    opacity: 0.88;
+  }
+
+  [data-surface="marketing"] .rebrand-nav-hover:hover {
+    color: var(--color-terracotta);
+  }
+
+  [data-surface="marketing"] .rebrand-nav-hover::after {
+    background: var(--color-terracotta);
+  }
+}
+
 @layer utilities {
   .font-playfair {
     font-family: var(--font-playfair);
@@ -525,7 +564,7 @@
       bottom: -2px;
       width: 0;
       height: 1.5px;
-      background: var(--color-terracota);
+      background: var(--color-terracotta);
       border-radius: 1px;
       transition: width 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
@@ -535,7 +574,7 @@
     }
 
     .rebrand-nav-hover:hover {
-      color: var(--color-terracota);
+      color: var(--color-terracotta);
     }
 
     .rebrand-logo-breathe {

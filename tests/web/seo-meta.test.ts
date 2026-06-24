@@ -28,11 +28,11 @@ describe("seo meta resolver", () => {
         expect.objectContaining({ name: "og:site_name", content: "Cultiv" }),
         expect.objectContaining({ name: "og:title" }),
         expect.objectContaining({ name: "og:url" }),
-        expect.objectContaining({ name: "og:image", content: expect.stringMatching(/\/cultiv-og-imprint\.svg$/) }),
+        expect.objectContaining({ name: "og:image", content: expect.stringMatching(/\/cultiv-og-cartography\.svg$/) }),
         expect.objectContaining({ name: "og:image:width", content: "1200" }),
         expect.objectContaining({ name: "og:image:height", content: "630" }),
         expect.objectContaining({ name: "twitter:card", content: "summary_large_image" }),
-        expect.objectContaining({ name: "twitter:image", content: expect.stringMatching(/\/cultiv-og-imprint\.svg$/) })
+        expect.objectContaining({ name: "twitter:image", content: expect.stringMatching(/\/cultiv-og-cartography\.svg$/) })
       ])
     );
   });

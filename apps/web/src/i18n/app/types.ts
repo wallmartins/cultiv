@@ -26,7 +26,9 @@ export type AppShellMessages = {
     readonly statusDone: string;
     readonly statusFailed: string;
     readonly copy: string;
+    readonly export: string;
     readonly regenerate: string;
+    readonly newExpedition: string;
     readonly viewHistory: string;
     readonly retry: string;
     readonly noCreditsCharged: string;
@@ -39,6 +41,7 @@ export type AppShellMessages = {
     readonly retry: string;
   };
   readonly selectPlaceholder: string;
+  readonly notFound: string;
 };
 
 export type AppIntentWizardMessages = {
@@ -58,6 +61,9 @@ export type AppIntentWizardMessages = {
   readonly catalogLoadError: string;
   readonly catalogRetry: string;
   readonly stepIndicator: string;
+  readonly stepExplorar: string;
+  readonly stepEscala: string;
+  readonly stepCoordenadas: string;
 };
 
 export type AppGenerateMessages = {
@@ -249,6 +255,12 @@ export type AppVoiceMessages = {
   readonly manageExamples: string;
   readonly mirrorFallbackTitle: string;
   readonly mirrorFallbackSubtitle: string;
+  readonly mapLayersTitle: string;
+  readonly dashboardTabs: {
+    readonly overview: string;
+    readonly layers: string;
+    readonly health: string;
+  };
   readonly detailLayers: {
     readonly formats: string;
     readonly antiPatterns: string;
@@ -404,6 +416,7 @@ export type AppOnboardingMessages = {
 
 export type AppSettingsMessages = {
   readonly title: string;
+  readonly subtitle: string;
   readonly profile: string;
   readonly email: string;
   readonly locale: string;
@@ -416,6 +429,7 @@ export type AppSettingsMessages = {
   readonly revokeDisabled: string;
   readonly logout: string;
   readonly plans: string;
+  readonly saved: string;
 };
 
 export type AppPlansMessages = {
@@ -428,6 +442,10 @@ export type AppPlansMessages = {
   readonly planPro: string;
   readonly planCriador: string;
   readonly planFree: string;
+  readonly planFreeDescription: string;
+  readonly planCriadorDescription: string;
+  readonly planProDescription: string;
+  readonly planCurrentBadge: string;
   readonly upgradeCriador: string;
   readonly upgradePro: string;
   readonly alreadyPro: string;

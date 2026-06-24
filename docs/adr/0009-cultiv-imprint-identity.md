@@ -1,10 +1,13 @@
 ---
 title: Cultiv Imprint Unified Identity
 doc_type: adr
-status: accepted
+status: superseded
 last_updated: 2026-06-22
 supersedes: docs/adr/0003-workspace-visual-refresh.md
+superseded_by: docs/adr/0010-cultiv-cartography-identity.md
 ---
+
+> **Superseded by [ADR 0010](./0010-cultiv-cartography-identity.md).**
 
 # Cultiv Imprint unified visual identity
 

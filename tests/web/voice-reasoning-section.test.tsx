@@ -80,13 +80,15 @@ const reasoning: VoiceReasoningPresentationView = {
 };
 
 describe("VoiceReasoningMirror", () => {
-  const messages = appMessagesPt.voice.reasoning;
+  const voiceMessages = appMessagesPt.voice;
+  const messages = voiceMessages.reasoning;
 
   it("renders mirror prose and anti-patterns in detail items", () => {
     const html = renderToStaticMarkup(
       <VoiceReasoningMirror
         locale="pt"
         messages={messages}
+        voiceMessages={voiceMessages}
         reasoning={reasoning}
         confidenceLevel="high"
         dialSubline="raízes firmes"
@@ -95,7 +97,6 @@ describe("VoiceReasoningMirror", () => {
     );
 
     expect(html).toContain(messages.title);
-    expect(html).toContain(messages.coreTitle);
     expect(html).toContain(reasoning.core.narrativeProse);
     expect(html).toContain(messages.developmentTitle);
     expect(html).toContain(reasoning.development?.developmentProse);

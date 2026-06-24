@@ -1,53 +1,84 @@
 @theme {
-  --font-conducao: "Bricolage Grotesque", system-ui, sans-serif;
-  --font-impressao: "Fraunces", Georgia, serif;
-  --font-leitura: "Source Serif 4", Georgia, serif;
-  --font-body: var(--font-conducao);
-  --font-mono: "JetBrains Mono", ui-monospace, monospace;
-
+  /* ─── Cartography: Typography ─── */
   --font-inter: "Inter", system-ui, sans-serif;
   --font-playfair: "Playfair Display", Georgia, serif;
   --font-caveat: "Caveat", cursive;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
 
-  --color-paper: #f3f0ea;
-  --color-paper-elevated: #faf8f4;
-  --color-paper-pressed: #e8e4dc;
-  --color-ink: #1a1a18;
-  --color-ink-muted: #6b6860;
-  --color-ink-ghost: #c8c4bc;
-  --color-pigment-terracotta: #c4705a;
-  --color-pigment-indigo: #3d4f7c;
-  --color-pigment-ochre: #c4a35a;
-  --color-success: #5a8c6b;
-  --color-warning: #c4a35a;
-  --color-error: #c45a5a;
-  --color-info: #3d4f7c;
+  --font-autoridade: var(--font-playfair);
+  --font-conducao: var(--font-inter);
+  --font-margem: var(--font-caveat);
+  --font-coordenadas: var(--font-mono);
+  --font-body: var(--font-inter);
 
-  --color-azul: #1A2E3C;
-  --color-ocre: #C4A484;
-  --color-terracota: #B55A3B;
-  --color-creme: #F5F0E6;
-  --color-offwhite: #FAF8F3;
-  --color-texto: #2C2C2C;
-  --color-texto-sec: #5A5A5A;
-  --color-borda: #8A8A8A;
-  --color-musgo: #4A5D4E;
+  /* ─── Cartography: Color ─── */
+  --color-deep-blue: #1a2e3c;
+  --color-cream: #f5f0e6;
+  --color-off-white: #faf8f3;
+  --color-ochre: #c4a484;
+  --color-terracotta: #b55a3b;
+  --color-ink: #2c2c2c;
+  --color-ink-muted: #5a5a5a;
+  --color-ink-ghost: #8a8a8a;
+  --color-moss: #4a5d4e;
+  --color-success: var(--color-moss);
+  --color-warning: var(--color-ochre);
+  --color-error: #a84848;
+  --color-info: var(--color-deep-blue);
 
-  --radius-press: 2px;
+  /* ─── Cartography: Layout ─── */
+  --radius-cartography: 5px;
+  --shadow-cartography: 4px 4px 0 rgba(26, 46, 60, 0.08);
   --spacing-gutter: clamp(1.25rem, 4vw, 2.5rem);
   --spacing-section: 5.5rem;
   --spacing-section-sm: 3.5rem;
-  --shadow-press-edge:
-    inset 0 1px 0 rgb(255 255 255 / 0.4),
-    inset 0 -1px 0 rgb(0 0 0 / 0.06);
   --tracking-editorial: 0.18em;
   --tracking-editorial-wide: 0.28em;
+
+  /* surface aliases */
+  --color-paper: var(--color-cream);
+  --color-paper-elevated: var(--color-off-white);
+  --color-paper-pressed: #ede8dc;
+  --color-pigment-terracotta: var(--color-terracotta);
+  --color-pigment-indigo: var(--color-deep-blue);
+  --color-pigment-ochre: var(--color-ochre);
+
+  --color-azul: var(--color-deep-blue);
+  --color-ocre: var(--color-ochre);
+  --color-terracota: var(--color-terracotta);
+  --color-creme: var(--color-cream);
+  --color-offwhite: var(--color-off-white);
+  --color-texto: var(--color-ink);
+  --color-texto-sec: var(--color-ink-muted);
+  --color-borda: var(--color-ink-ghost);
+  --color-musgo: var(--color-moss);
 }
 
 @layer base {
   :root {
     color-scheme: light;
     --site-header-height: 4.25rem;
+    --cartography-grain-opacity: 0.06;
+  }
+
+  [data-surface="marketing"] {
+    --cartography-grain-opacity: 0.06;
+    --marketing-header-top: 1rem;
+    --marketing-header-bar: 3.25rem;
+    --marketing-header-gap: 0.75rem;
+    --marketing-chrome-top: calc(
+      var(--marketing-header-top) + var(--marketing-header-bar) + var(--marketing-header-gap)
+    );
+  }
+
+  @media (min-width: 768px) {
+    [data-surface="marketing"] {
+      --marketing-header-bar: 3.75rem;
+    }
+  }
+
+  [data-surface="workspace"] {
+    --cartography-grain-opacity: 0.03;
   }
 
   @media (min-width: 768px) {
@@ -57,15 +88,15 @@
   }
 
   .dark {
-    --color-paper: #1a1a18;
-    --color-paper-elevated: #242420;
+    --color-cream: #1a1a18;
+    --color-off-white: #242420;
     --color-paper-pressed: #2e2e2a;
-    --color-ink: #f3f0ea;
+    --color-ink: #f5f0e6;
     --color-ink-muted: #a8a59c;
     --color-ink-ghost: #3d3d38;
-    --color-pigment-terracotta: #d17f68;
-    --color-pigment-indigo: #4a5f94;
-    --color-pigment-ochre: #d4b066;
+    --color-terracotta: #c4705a;
+    --color-deep-blue: #4a5f94;
+    --color-ochre: #d4b066;
     color-scheme: dark;
   }
 
@@ -98,7 +129,7 @@
   }
 
   ::selection {
-    background-color: color-mix(in srgb, var(--color-pigment-ochre) 55%, var(--color-pigment-terracotta));
+    background-color: color-mix(in srgb, var(--color-ochre) 55%, var(--color-terracotta));
     color: var(--color-ink);
   }
 }
@@ -115,7 +146,7 @@
     min-height: 3rem;
     padding-inline: 1.75rem;
     padding-block: 0.875rem;
-    border-radius: var(--radius-press);
+    border-radius: var(--radius-cartography);
     font-family: var(--font-body);
     font-size: 0.9375rem;
     font-weight: 600;
@@ -149,6 +180,18 @@
     min-height: calc(100svh - var(--site-header-height));
   }
 
+  [data-surface="marketing"] .marketing-header-spacer {
+    height: var(--marketing-chrome-top);
+  }
+
+  [data-surface="marketing"] .h-hero-viewport {
+    height: calc(100svh - var(--marketing-chrome-top));
+  }
+
+  [data-surface="marketing"] .min-h-hero-viewport {
+    min-height: calc(100svh - var(--marketing-chrome-top));
+  }
+
   @media (prefers-reduced-motion: no-preference) {
     .motion-hover {
       transition:
@@ -161,197 +204,51 @@
     }
   }
 
+  .font-autoridade {
+    font-family: var(--font-autoridade);
+  }
+
   .font-conducao {
     font-family: var(--font-conducao);
   }
 
-  .font-impressao {
-    font-family: var(--font-impressao);
+  .font-margem {
+    font-family: var(--font-margem);
   }
 
-  .font-leitura {
-    font-family: var(--font-leitura);
+  .font-coordenadas {
+    font-family: var(--font-coordenadas);
   }
 
-  .press-edge {
-    box-shadow: var(--shadow-press-edge);
+  .shadow-cartography {
+    box-shadow: var(--shadow-cartography);
   }
 
-  .imprint-grain {
+  .border-dotted-cartography {
+    border: 1px dotted var(--color-ink-ghost);
+  }
+
+  .border-double-cartography {
+    border: 3px double var(--color-deep-blue);
+  }
+
+  .cartography-grain {
     position: relative;
   }
 
-  .imprint-grain::after {
+  .cartography-grain::after {
     content: "";
     pointer-events: none;
     position: absolute;
     inset: 0;
     mix-blend-mode: multiply;
+    opacity: var(--cartography-grain-opacity, 0.06);
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+    background-size: 200px 200px;
   }
 
-  [data-intensity="expressive"] .imprint-grain::after {
-    opacity: 0.08;
-  }
-
-  [data-intensity="quiet"] .imprint-grain::after,
-  :root:not([data-intensity]) .imprint-grain::after {
-    opacity: 0.04;
-  }
-
-  .imprint-hero-grid {
-    display: grid;
-    align-items: center;
-    gap: clamp(2.5rem, 6vw, 5rem);
-  }
-
-  @media (min-width: 1024px) {
-    .imprint-hero-grid {
-      grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
-    }
-
-    .imprint-section-grid {
-      display: grid;
-      grid-template-columns: minmax(0, 0.82fr) minmax(0, 1.18fr);
-      align-items: start;
-      gap: clamp(3rem, 5vw, 5rem);
-    }
-  }
-
-  .imprint-section-grid {
-    display: block;
-  }
-
-  .imprint-section-aside {
-    margin-bottom: 2.5rem;
-  }
-
-  @media (min-width: 1024px) {
-    .imprint-section-aside {
-      position: sticky;
-      top: calc(var(--site-header-height) + 1rem);
-      margin-bottom: 0;
-      padding-top: 0.25rem;
-    }
-
-    .imprint-section-body {
-      position: relative;
-      padding-top: 0.25rem;
-    }
-
-    .imprint-section-body::before {
-      content: "";
-      position: absolute;
-      top: -0.5rem;
-      bottom: 0;
-      left: -2rem;
-      width: 1px;
-      background: var(--color-ink-ghost);
-    }
-  }
-
-  @media (min-width: 1280px) {
-    .imprint-section-body::before {
-      left: -2.5rem;
-    }
-  }
-
-  .imprint-hero-rule {
-    width: min(8rem, 42%);
-    height: 1px;
-    background: linear-gradient(
-      to right,
-      color-mix(in srgb, var(--color-pigment-terracotta) 55%, transparent),
-      transparent
-    );
-  }
-
-  .imprint-form-island {
-    border: 1px solid color-mix(in srgb, var(--color-paper) 18%, transparent);
-    background: color-mix(in srgb, var(--color-paper) 6%, transparent);
-    box-shadow:
-      var(--shadow-press-edge),
-      0 24px 48px color-mix(in srgb, var(--color-ink) 28%, transparent);
-  }
-
-  .imprint-step-rail {
-    position: relative;
-  }
-
-  .imprint-step-rail::before {
-    content: "";
-    position: absolute;
-    top: 1.75rem;
-    bottom: 1.75rem;
-    left: 0.6875rem;
-    width: 2px;
-    background: linear-gradient(
-      to bottom,
-      transparent,
-      color-mix(in srgb, var(--color-pigment-terracotta) 38%, transparent) 12%,
-      color-mix(in srgb, var(--color-pigment-terracotta) 38%, transparent) 88%,
-      transparent
-    );
-    pointer-events: none;
-  }
-
-  @media (min-width: 768px) {
-    .imprint-step-rail::before {
-      top: auto;
-      bottom: auto;
-      left: 0;
-      right: 0;
-      height: 2px;
-      width: auto;
-      inset: auto 0 auto 0;
-      top: 1.35rem;
-      background: linear-gradient(
-        to right,
-        transparent,
-        color-mix(in srgb, var(--color-pigment-terracotta) 38%, transparent) 8%,
-        color-mix(in srgb, var(--color-pigment-terracotta) 38%, transparent) 92%,
-        transparent
-      );
-    }
-  }
-
-  .imprint-index-node {
-    display: flex;
-    height: 1.375rem;
-    width: 1.375rem;
-    flex-shrink: 0;
-    align-items: center;
-    justify-content: center;
-    border-radius: 9999px;
-    border: 1.5px solid color-mix(in srgb, var(--color-pigment-terracotta) 45%, transparent);
-    background: var(--color-paper-elevated);
-    font-family: var(--font-mono);
-    font-size: 0.625rem;
-    font-weight: 500;
-    color: var(--color-pigment-terracotta);
-    font-variant-numeric: tabular-nums;
-  }
-
-  .imprint-copy-card {
-    position: relative;
-    border: 1px solid var(--color-ink-ghost);
-    background: var(--color-paper-elevated);
-    box-shadow: var(--shadow-press-edge);
-  }
-
-  .imprint-copy-card::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    width: 3px;
-    background: linear-gradient(
-      to bottom,
-      color-mix(in srgb, var(--color-pigment-terracotta) 70%, transparent),
-      color-mix(in srgb, var(--color-pigment-ochre) 55%, transparent)
-    );
-    pointer-events: none;
+  .cartography-grain.cartography-grain-quiet::after {
+    opacity: 0.03;
   }
 
   .scene-artifact-mat {
@@ -367,12 +264,12 @@
     background:
       radial-gradient(
         ellipse 72% 64% at 18% 22%,
-        color-mix(in srgb, var(--color-pigment-terracotta) 14%, transparent),
+        color-mix(in srgb, var(--color-terracotta) 14%, transparent),
         transparent 64%
       ),
       radial-gradient(
         ellipse 58% 52% at 84% 78%,
-        color-mix(in srgb, var(--color-pigment-indigo) 10%, transparent),
+        color-mix(in srgb, var(--color-deep-blue) 10%, transparent),
         transparent 60%
       );
   }
@@ -399,7 +296,7 @@
       color-mix(in srgb, var(--color-paper-elevated) 94%, var(--color-paper-pressed)) 100%
     );
     padding: clamp(1.35rem, 3.2vw, 2.65rem);
-    box-shadow: var(--shadow-press-edge),
+    box-shadow: var(--shadow-cartography),
       0 18px 42px color-mix(in srgb, var(--color-ink) 7%, transparent);
   }
 
@@ -411,7 +308,7 @@
     height: 1px;
     background: linear-gradient(
       to right,
-      color-mix(in srgb, var(--color-pigment-terracotta) 42%, transparent),
+      color-mix(in srgb, var(--color-terracotta) 42%, transparent),
       transparent
     );
     pointer-events: none;
@@ -419,7 +316,7 @@
 
   .scene-artifact-mat__corner {
     position: absolute;
-    color: var(--color-pigment-terracotta);
+    color: var(--color-terracotta);
     opacity: 0.45;
     pointer-events: none;
   }
@@ -447,15 +344,37 @@
     background: linear-gradient(
       to bottom,
       transparent,
-      color-mix(in srgb, var(--color-pigment-ochre) 48%, transparent) 22%,
-      color-mix(in srgb, var(--color-pigment-ochre) 48%, transparent) 78%,
+      color-mix(in srgb, var(--color-ochre) 48%, transparent) 22%,
+      color-mix(in srgb, var(--color-ochre) 48%, transparent) 78%,
       transparent
     );
     pointer-events: none;
   }
 
-  .ui-type-display-hero {
+  .ui-type-autoridade {
+    font-family: var(--font-autoridade);
+  }
+
+  .ui-type-conducao {
     font-family: var(--font-conducao);
+  }
+
+  .ui-type-margem {
+    font-family: var(--font-margem);
+  }
+
+  .ui-type-mono {
+    font-family: var(--font-coordenadas);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .ui-type-logbook {
+    font-family: var(--font-autoridade);
+    font-style: italic;
+  }
+
+  .ui-type-display-hero {
+    font-family: var(--font-autoridade);
     font-size: clamp(3.5rem, 9vw, 5.5rem);
     font-weight: 500;
     line-height: 1.02;
@@ -464,7 +383,7 @@
   }
 
   .ui-type-display-xl {
-    font-family: var(--font-conducao);
+    font-family: var(--font-autoridade);
     font-size: clamp(3rem, 8vw, 5rem);
     font-weight: 500;
     line-height: 1.05;
@@ -472,18 +391,24 @@
     text-wrap: balance;
   }
 
-  .ui-type-reading {
-    font-family: var(--font-leitura);
-    font-size: 1.125rem;
-    line-height: 1.75;
-    letter-spacing: 0.01em;
+  @keyframes compass-breath {
+    0%,
+    100% {
+      transform: scale(1);
+    }
+
+    50% {
+      transform: scale(1.02);
+    }
   }
 
-  .ui-type-imprint {
-    font-family: var(--font-impressao);
-    font-size: clamp(1.25rem, 2.5vw, 1.75rem);
-    line-height: 1.35;
-    letter-spacing: 0.015em;
-    font-style: italic;
+  [data-animate-breath="true"] {
+    animation: compass-breath 4s ease-in-out infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    [data-animate-breath="true"] {
+      animation: none;
+    }
   }
 }

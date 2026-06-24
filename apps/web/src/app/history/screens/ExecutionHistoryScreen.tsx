@@ -1,4 +1,4 @@
-import { Button, cn, Text } from "@my-ai-orchestrator/ui";
+import { Button, cn, CompassMark, LogbookProse, Text } from "@my-ai-orchestrator/ui";
 import { Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useAppLocale } from "~/i18n/app/use-app-locale";
@@ -9,82 +9,46 @@ import {
   type HistoryPeriod,
   type HistoryStatusFilter
 } from "~/app/history/lib/use-executions-list";
-import { AppSelect } from "~/platform/ui/AppSelect";
-import { AppCard } from "~/platform/ui/AppCard";
 import { AppSkeleton } from "~/platform/ui/AppSkeleton";
+import type { AppMessages } from "~/i18n/app/types";
 
-function StatusBadge({ status }: { readonly status: string }) {
-  const configs: Record<string, { bg: string; border: string; text: string; dot: string; icon: React.ReactNode; label: string }> = {
-    done: {
-      bg: "bg-musgo/10",
-      border: "border-musgo/30",
-      text: "text-musgo",
-      dot: "bg-musgo",
-      icon: (
-        <svg viewBox="0 0 16 16" fill="currentColor" className="h-3 w-3">
-          <path fillRule="evenodd" d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z" clipRule="evenodd" />
-        </svg>
-      ),
-      label: "Concluída"
-    },
-    running: {
-      bg: "bg-azul/8",
-      border: "border-azul/25",
-      text: "text-azul",
-      dot: "bg-azul",
-      icon: (
-        <svg viewBox="0 0 16 16" fill="none" className="h-3 w-3 animate-spin">
-          <circle cx="8" cy="8" r="6" stroke="currentColor" strokeWidth="2" opacity="0.3" />
-          <path d="M8 2a6 6 0 016 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-        </svg>
-      ),
-      label: "Em andamento"
-    },
-    queued: {
-      bg: "bg-ocre/12",
-      border: "border-ocre/30",
-      text: "text-ocre",
-      dot: "bg-ocre",
-      icon: (
-        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="h-3 w-3">
-          <circle cx="8" cy="8" r="6" />
-          <path d="M8 4.5V8l2.5 1.5" />
-        </svg>
-      ),
-      label: "Na fila"
-    },
-    failed: {
-      bg: "bg-terracota/8",
-      border: "border-terracota/25",
-      text: "text-terracota",
-      dot: "bg-terracota",
-      icon: (
-        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="h-3 w-3">
-          <path d="M8 4v4M8 10.5v.5" />
-        </svg>
-      ),
-      label: "Falha"
-    }
-  };
+function statusFilterLabel(
+  status: string,
+  filters: AppMessages["history"]["filters"]
+): string {
+  switch (status) {
+    case "done":
+      return filters.statusDone;
+    case "failed":
+      return filters.statusFailed;
+    case "running":
+      return filters.statusRunning;
+    case "queued":
+      return filters.statusQueued;
+    default:
+      return status;
+  }
+}
 
-  const config = configs[status] ?? {
-    bg: "bg-borda/10",
-    border: "border-borda/20",
-    text: "text-borda",
-    dot: "bg-borda",
-    icon: null,
-    label: status
-  };
+function StatusDot({ status }: { readonly status: string }) {
+  const dotClass =
+    status === "done"
+      ? "bg-moss"
+      : status === "running" || status === "queued"
+        ? "bg-ochre"
+        : status === "failed"
+          ? "bg-terracotta"
+          : "bg-ink-ghost";
 
   return (
-    <span className={cn("inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 font-inter text-xs font-medium", config.bg, config.border, config.text)}>
-      {config.icon}
-      {config.label}
-    </span>
+    <span
+      className={cn("mt-1.5 size-2 shrink-0 rounded-full", dotClass)}
+      aria-hidden
+    />
   );
 }
 
-function FilterSelect({
+function FilterToggleGroup({
   label,
   value,
   onChange,
@@ -96,20 +60,32 @@ function FilterSelect({
   readonly options: readonly (readonly [string, string])[];
 }) {
   return (
-    <label className="block">
-      <Text variant="meta" className="mb-1 block font-inter text-xs font-semibold uppercase tracking-wider text-texto-sec">
+    <div className="shrink-0">
+      <Text variant="meta" className="mb-2 block font-inter text-xs font-semibold uppercase tracking-wider text-ink-muted">
         {label}
       </Text>
-      <AppSelect
-        compact
-        value={value}
-        onChange={onChange}
-        options={options.map(([optionValue, optionLabel]) => ({
-          value: optionValue,
-          label: optionLabel
-        }))}
-      />
-    </label>
+      <div className="flex flex-wrap gap-2">
+        {options.map(([optionValue, optionLabel]) => {
+          const active = value === optionValue;
+          return (
+            <button
+              key={optionValue}
+              type="button"
+              aria-pressed={active}
+              className={cn(
+                "rounded-full border px-3 py-1.5 font-inter text-sm transition-colors duration-[250ms] motion-reduce:transition-none",
+                active
+                  ? "border-terracotta/40 bg-terracotta/10 font-medium text-terracotta"
+                  : "border-dotted-cartography bg-off-white text-ink-muted hover:border-terracotta/25 hover:text-ink"
+              )}
+              onClick={() => onChange(optionValue)}
+            >
+              {optionLabel}
+            </button>
+          );
+        })}
+      </div>
+    </div>
   );
 }
 
@@ -131,26 +107,20 @@ export function ExecutionHistoryScreen() {
     <div className="px-[var(--spacing-gutter)] py-8 md:py-10">
       <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <Text as="h1" variant="h1" className="mb-2 font-playfair text-azul">
+          <Text as="h1" variant="h1" className="mb-2 font-playfair text-ink">
             {messages.history.title}
           </Text>
           <Text variant="body" className="text-ink-muted">
             {messages.history.subtitle}
           </Text>
         </div>
-        <Link
-          to="/app/generate"
-          className="rebrand-hover inline-flex items-center justify-center gap-2 rounded-sm bg-terracota px-5 py-2.5 font-inter text-sm font-semibold text-white shadow-[3px_3px_0px_rgba(0,0,0,0.12)] transition-all duration-300 hover:bg-terracota/90"
-        >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
-            <path d="M12 5v14M5 12h14" />
-          </svg>
-          {messages.history.emptyAction}
+        <Link to="/app/generate">
+          <Button type="button">{messages.history.emptyAction}</Button>
         </Link>
       </div>
 
-      <div className="mb-6 grid gap-3 md:grid-cols-3">
-        <FilterSelect
+      <div className="mb-6 grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+        <FilterToggleGroup
           label={messages.history.filters.period}
           value={filters.period}
           onChange={(value) => setFilters((current) => ({ ...current, period: value as HistoryPeriod }))}
@@ -161,7 +131,7 @@ export function ExecutionHistoryScreen() {
             ["all", messages.history.filters.periodAll]
           ]}
         />
-        <FilterSelect
+        <FilterToggleGroup
           label={messages.history.filters.status}
           value={filters.status}
           onChange={(value) =>
@@ -175,7 +145,7 @@ export function ExecutionHistoryScreen() {
             ["queued", messages.history.filters.statusQueued]
           ]}
         />
-        <FilterSelect
+        <FilterToggleGroup
           label={messages.history.filters.contentType}
           value={filters.contentType}
           onChange={(value) => setFilters((current) => ({ ...current, contentType: value }))}
@@ -188,88 +158,72 @@ export function ExecutionHistoryScreen() {
 
       {status === "loading" && items.length === 0 ? (
         <div className="space-y-3">
-          <AppSkeleton className="h-12 w-full" />
-          <AppSkeleton className="h-12 w-full" />
-          <AppSkeleton className="h-12 w-full" />
+          <AppSkeleton className="h-24 w-full" />
+          <AppSkeleton className="h-24 w-full" />
+          <AppSkeleton className="h-24 w-full" />
         </div>
       ) : null}
 
       {status === "error" ? (
-        <AppCard className="space-y-3">
-          <Text variant="meta" className="text-terracota">
+        <LogbookProse className="space-y-3 p-5">
+          <Text variant="meta" className="text-terracotta">
             {messages.history.error}
           </Text>
           <Button type="button" size="compact" onClick={retry}>
             {messages.history.retry}
           </Button>
-        </AppCard>
+        </LogbookProse>
       ) : null}
 
       {status === "ready" && items.length === 0 ? (
-        <AppCard className="space-y-4 text-center">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full border border-borda/20 bg-creme">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6 text-borda">
-              <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
+        <LogbookProse className="space-y-5 p-8 text-center">
+          <div className="mx-auto flex size-16 items-center justify-center rounded-full border border-dotted-cartography bg-cream">
+            <CompassMark size={36} variant="symbol" color="ochre" />
           </div>
-          <Text variant="meta" className="text-ink-muted">
+          <Text variant="body" className="text-ink-muted">
             {messages.history.empty}
           </Text>
-          <Link
-            to="/app/generate"
-            className="text-sm font-medium text-pigment-terracotta underline-offset-2 hover:underline"
-          >
-            {messages.history.emptyAction}
+          <Link to="/app/generate">
+            <Button type="button" variant="ghost">
+              {messages.history.emptyAction}
+            </Button>
           </Link>
-        </AppCard>
+        </LogbookProse>
       ) : null}
 
       {items.length > 0 ? (
-        <AppCard padding="none" className="overflow-hidden border-borda/15">
-          <table className="min-w-full text-left text-sm">
-            <thead className="border-b border-borda/15 bg-creme">
-              <tr>
-                <th className="px-4 py-3 font-inter text-xs font-semibold uppercase tracking-wider text-texto-sec">
-                  {messages.history.columns.format}
-                </th>
-                <th className="px-4 py-3 font-inter text-xs font-semibold uppercase tracking-wider text-texto-sec">
-                  {messages.history.columns.date}
-                </th>
-                <th className="px-4 py-3 font-inter text-xs font-semibold uppercase tracking-wider text-texto-sec">
-                  {messages.history.columns.status}
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {items.map((item) => (
-                <tr
-                  key={item.jobId}
-                  className="border-b border-borda/10 transition-colors last:border-b-0 hover:bg-creme/50"
-                >
-                  <td className="px-4 py-3">
-                    <Link
-                      to="/app/history/$executionId"
-                      params={{ executionId: item.jobId }}
-                      className="font-inter font-medium text-azul underline-offset-2 hover:text-terracota hover:underline"
-                    >
-                      {getContentTypeLabel(locale, item.contentType, item.contentType)}
-                    </Link>
-                  </td>
-                  <td className="px-4 py-3 font-inter text-texto-sec">
-                    {new Date(item.createdAt).toLocaleString(locale === "en" ? "en-US" : "pt-BR")}
-                  </td>
-                  <td className="px-4 py-3">
-                    <StatusBadge status={item.status} />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </AppCard>
+        <ul className="space-y-3">
+          {items.map((item) => (
+            <li key={item.jobId}>
+              <Link
+                to="/app/history/$executionId"
+                params={{ executionId: item.jobId }}
+                className="block rounded-[5px] border border-dotted-cartography bg-off-white p-4 shadow-cartography transition-colors duration-[250ms] hover:border-terracotta/30 motion-reduce:transition-none"
+              >
+                <div className="flex items-start gap-3">
+                  <StatusDot status={item.status} />
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-baseline justify-between gap-2">
+                      <Text as="span" variant="body" className="font-medium text-ink">
+                        {getContentTypeLabel(locale, item.contentType, item.contentType)}
+                      </Text>
+                      <Text variant="meta" className="shrink-0 text-ink-muted">
+                        {new Date(item.createdAt).toLocaleString(locale === "en" ? "en-US" : "pt-BR")}
+                      </Text>
+                    </div>
+                    <Text variant="meta" className="mt-1 text-ink-muted">
+                      {messages.history.columns.status}: {statusFilterLabel(item.status, messages.history.filters)}
+                    </Text>
+                  </div>
+                </div>
+              </Link>
+            </li>
+          ))}
+        </ul>
       ) : null}
 
       {hasMore ? (
-        <div className="mt-4 text-center">
+        <div className="mt-6 text-center">
           <Button type="button" variant="ghost" size="compact" onClick={loadMore}>
             …
           </Button>

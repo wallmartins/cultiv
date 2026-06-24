@@ -1,7 +1,7 @@
 ---
 title: Cultiv Cartography — Complete Platform Redesign
 doc_type: design
-status: approved
+status: implemented
 domain: design-system
 last_updated: 2026-06-23
 source_rebranding: docs/live/rebranding/
