@@ -9,6 +9,11 @@ import {
   VoiceSignalSummarySchema
 } from "../voice.js";
 import {
+  GenerationChannelSchema,
+  GenerationIntentSchema,
+  GenerationLengthTierSchema
+} from "../generation-intent.js";
+import {
   AsyncRunResponseSchema,
   ExecutionControlsSchema,
   ExecutionModeSchema,
@@ -50,7 +55,11 @@ export const JobStatusResponseSchema = Schema.Struct({
   createdAt: Schema.String,
   completedAt: Schema.NullOr(Schema.String),
   voice: Schema.optional(ExecutionVoiceMetadataViewSchema),
-  userId: Schema.optional(Schema.String)
+  userId: Schema.optional(Schema.String),
+  generationIntent: Schema.optional(GenerationIntentSchema),
+  briefingTopic: Schema.optional(Schema.String),
+  lengthTier: Schema.optional(GenerationLengthTierSchema),
+  channel: Schema.optional(GenerationChannelSchema)
 });
 export type JobStatusResponse = typeof JobStatusResponseSchema.Type;
 
@@ -108,7 +117,11 @@ export const ExecutionStatusViewSchema = Schema.Struct({
   error: Schema.NullOr(JobErrorSchema),
   createdAt: Schema.String,
   completedAt: Schema.NullOr(Schema.String),
-  voice: Schema.optional(ExecutionVoiceMetadataViewSchema)
+  voice: Schema.optional(ExecutionVoiceMetadataViewSchema),
+  generationIntent: Schema.optional(GenerationIntentSchema),
+  briefingTopic: Schema.optional(Schema.String),
+  lengthTier: Schema.optional(GenerationLengthTierSchema),
+  channel: Schema.optional(GenerationChannelSchema)
 });
 export type ExecutionStatusView = typeof ExecutionStatusViewSchema.Type;
 

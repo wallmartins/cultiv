@@ -9,7 +9,8 @@ export type HistoryStatusFilter = "all" | ExecutionStatusView["status"];
 export type HistoryFilters = {
   readonly period: HistoryPeriod;
   readonly status: HistoryStatusFilter;
-  readonly contentType: string;
+  readonly intent: string;
+  readonly lengthTier: string;
 };
 
 const PAGE_SIZE = 20;
@@ -23,9 +24,10 @@ export function useExecutionsList(filters: HistoryFilters) {
     () => ({
       period: filters.period,
       status: filters.status,
-      ...(filters.contentType !== "all" ? { contentType: filters.contentType } : {})
+      ...(filters.intent !== "all" ? { intent: filters.intent } : {}),
+      ...(filters.lengthTier !== "all" ? { lengthTier: filters.lengthTier } : {})
     }),
-    [filters.period, filters.status, filters.contentType]
+    [filters.period, filters.status, filters.intent, filters.lengthTier]
   );
 
   const { status, data, retry: retryQuery } = useSdkQuery(

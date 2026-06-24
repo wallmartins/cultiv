@@ -45,7 +45,8 @@ describe("useExecutionsList", () => {
     const initialFilters = {
       period: "30d" as const,
       status: "all" as const,
-      contentType: "all"
+      intent: "all",
+      lengthTier: "all"
     };
 
     const { result, rerender } = renderHook(
@@ -69,7 +70,8 @@ describe("useExecutionsList", () => {
       filters: {
         period: "30d",
         status: "done",
-        contentType: "all"
+        intent: "all",
+        lengthTier: "all"
       }
     });
 
@@ -100,7 +102,8 @@ describe("useExecutionsList", () => {
       useExecutionsList({
         period: "30d",
         status: "done",
-        contentType: "all"
+        intent: "all",
+        lengthTier: "all"
       })
     );
 
@@ -110,8 +113,8 @@ describe("useExecutionsList", () => {
   });
 
   it("appends the next page via loadMore and clears hasMore when every item is loaded", async () => {
-    listMock.mockImplementation((input: { offset?: number; contentType?: string }) => {
-      if (input.contentType !== "newsletter") {
+    listMock.mockImplementation((input: { offset?: number; intent?: string }) => {
+      if (input.intent !== "share-idea") {
         return {
           total: 0,
           items: [],
@@ -127,9 +130,10 @@ describe("useExecutionsList", () => {
       return {
         total: 40,
         items: Array.from({ length: pageSize }, (_, index) => ({
-          jobId: `newsletter-${offset + index}`,
+          jobId: `share-${offset + index}`,
           status: "done",
-          contentType: "newsletter",
+          contentType: "short-piece",
+          generationIntent: "share-idea",
           createdAt: "2026-06-20T00:00:00.000Z"
         })),
         limit: 20,
@@ -141,7 +145,8 @@ describe("useExecutionsList", () => {
       useExecutionsList({
         period: "30d",
         status: "all",
-        contentType: "newsletter"
+        intent: "share-idea",
+        lengthTier: "all"
       })
     );
 
@@ -155,7 +160,7 @@ describe("useExecutionsList", () => {
     expect(result.current.hasMore).toBe(false);
     expect(listMock).toHaveBeenLastCalledWith(
       expect.objectContaining({
-        contentType: "newsletter",
+        intent: "share-idea",
         offset: 20
       })
     );

@@ -9,7 +9,7 @@ import type {
   PipelineRequest,
   ExecutionVoiceMetadataView
 } from "@my-ai-orchestrator/contracts";
-import { matchesExecutionsListFilters, type ExecutionsListFilters } from "@my-ai-orchestrator/contracts";
+import { matchesExecutionsListFilters, resolveExecutionPresentation, type ExecutionsListFilters } from "@my-ai-orchestrator/contracts";
 import { resolveContentType, resolveEstimatedSteps } from "./job-status-mappers.js";
 
 export interface StoredJob {
@@ -71,6 +71,8 @@ function resolveUserId(request: PipelineRequest): string {
 }
 
 export function snapshotStoredJob(job: StoredJob): JobStatusResponse {
+  const presentation = resolveExecutionPresentation(job.request, job.contentType);
+
   return {
     jobId: job.jobId,
     status: job.status,
@@ -81,7 +83,8 @@ export function snapshotStoredJob(job: StoredJob): JobStatusResponse {
     createdAt: job.createdAt,
     completedAt: job.completedAt,
     ...(job.voice ? { voice: job.voice } : {}),
-    userId: job.userId
+    userId: job.userId,
+    ...presentation
   };
 }
 
@@ -132,7 +135,22 @@ export function createInMemoryJobRepository(
         Effect.map((jobs) => {
           const items = [...jobs.values()]
             .filter((job) => job.userId === userId)
-            .filter((job) => (filters ? matchesExecutionsListFilters(job, filters) : true))
+            .filter((job) => {
+              if (!filters) {
+                return true;
+              }
+
+              const presentation = resolveExecutionPresentation(job.request, job.contentType);
+              return matchesExecutionsListFilters(
+                {
+                  createdAt: job.createdAt,
+                  status: job.status,
+                  contentType: job.contentType,
+                  ...presentation
+                },
+                filters
+              );
+            })
             .sort((left, right) => right.createdAt.localeCompare(left.createdAt));
           return {
             items: items.slice(offset, offset + limit),

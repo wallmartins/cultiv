@@ -1,5 +1,6 @@
 import { Schema } from "effect";
 import { createSchemaDecoder } from "../shared.js";
+import { GenerationIntentSchema, GenerationLengthTierSchema, type GenerationIntent, type GenerationLengthTier } from "../generation-intent.js";
 import { JobStatusSchema } from "./job.js";
 
 export const ExecutionsListPeriodSchema = Schema.Literal("7d", "30d", "90d", "all");
@@ -13,7 +14,9 @@ export const ExecutionsListQuerySchema = Schema.Struct({
   offset: Schema.optional(Schema.Number),
   period: Schema.optional(ExecutionsListPeriodSchema),
   status: Schema.optional(ExecutionsListStatusFilterSchema),
-  contentType: Schema.optional(Schema.String)
+  contentType: Schema.optional(Schema.String),
+  intent: Schema.optional(GenerationIntentSchema),
+  lengthTier: Schema.optional(GenerationLengthTierSchema)
 });
 export type ExecutionsListQuery = typeof ExecutionsListQuerySchema.Type;
 
@@ -21,17 +24,23 @@ export type ExecutionsListFilters = {
   readonly period: ExecutionsListPeriod;
   readonly status: ExecutionsListStatusFilter;
   readonly contentType?: string;
+  readonly intent?: GenerationIntent;
+  readonly lengthTier?: GenerationLengthTier;
 };
 
 export const decodeExecutionsListQuery = createSchemaDecoder("ExecutionsListQuery", ExecutionsListQuerySchema);
 
 export function normalizeExecutionsListFilters(query: Partial<ExecutionsListQuery>): ExecutionsListFilters {
   const contentType = query.contentType?.trim();
+  const intent = query.intent;
+  const lengthTier = query.lengthTier;
 
   return {
     period: query.period ?? "all",
     status: query.status ?? "all",
-    ...(contentType && contentType !== "all" ? { contentType } : {})
+    ...(contentType && contentType !== "all" ? { contentType } : {}),
+    ...(intent ? { intent } : {}),
+    ...(lengthTier ? { lengthTier } : {})
   };
 }
 
@@ -47,8 +56,16 @@ export function resolveExecutionsPeriodCutoff(
   return new Date(nowMs - days * 24 * 60 * 60 * 1000).toISOString();
 }
 
+export type ExecutionsListFilterItem = {
+  readonly createdAt: string;
+  readonly status: string;
+  readonly contentType: string;
+  readonly generationIntent?: string;
+  readonly lengthTier?: string;
+};
+
 export function matchesExecutionsListFilters(
-  item: { readonly createdAt: string; readonly status: string; readonly contentType: string },
+  item: ExecutionsListFilterItem,
   filters: ExecutionsListFilters
 ): boolean {
   const cutoff = resolveExecutionsPeriodCutoff(filters.period);
@@ -61,6 +78,14 @@ export function matchesExecutionsListFilters(
   }
 
   if (filters.contentType && item.contentType !== filters.contentType) {
+    return false;
+  }
+
+  if (filters.intent && item.generationIntent !== filters.intent) {
+    return false;
+  }
+
+  if (filters.lengthTier && item.lengthTier !== filters.lengthTier) {
     return false;
   }
 

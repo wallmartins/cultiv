@@ -7,7 +7,11 @@ import { ProgressSteps } from "~/app/execution/components/ProgressSteps";
 import { AppCard } from "~/platform/ui/AppCard";
 import { AppSkeleton } from "~/platform/ui/AppSkeleton";
 import { useAppLocale } from "~/i18n/app/use-app-locale";
-import { getContentTypeLabel } from "~/i18n/app/content-types";
+import {
+  getExecutionFormatLabel,
+  getExecutionSubtitle,
+  getExecutionTitle
+} from "~/app/history/lib/execution-presentation";
 import { storeGeneratePrefill } from "~/app/generation/lib/generate-prefill";
 import { useClientSdk } from "~/platform/runtime/client-sdk-context";
 
@@ -151,13 +155,25 @@ export function ExecutionHistoryDetail({ executionId }: { readonly executionId: 
   }
 
   const metadata = execution.result?.metadata ?? {};
+  const subtitle = getExecutionSubtitle(execution, locale);
+  const formatLabel = getExecutionFormatLabel(execution, locale);
 
   return (
     <div className="px-[var(--spacing-gutter)] py-8 md:py-10">
       <div className="mb-6">
-        <Text as="h1" variant="h1" className="mb-3 font-playfair text-azul">
-          {getContentTypeLabel(locale, execution.contentType, execution.contentType)}
+        <Text as="h1" variant="h1" className="mb-2 font-playfair text-azul">
+          {getExecutionTitle(execution, locale)}
         </Text>
+        {subtitle ? (
+          <Text variant="body" className="mb-3 text-ink-muted">
+            {subtitle}
+          </Text>
+        ) : null}
+        {formatLabel ? (
+          <Text variant="meta" className="mb-3 text-ink-muted">
+            {messages.history.columns.format}: {formatLabel}
+          </Text>
+        ) : null}
         <StatusBadge status={execution.status} />
       </div>
 
@@ -198,6 +214,14 @@ export function ExecutionHistoryDetail({ executionId }: { readonly executionId: 
           onClick={() => {
             storeGeneratePrefill({
               contentType: execution.contentType,
+              intent: execution.generationIntent,
+              scope:
+                execution.lengthTier
+                  ? {
+                      lengthTier: execution.lengthTier,
+                      ...(execution.channel ? { channel: execution.channel } : {})
+                    }
+                  : undefined,
               briefing:
                 typeof metadata.briefing === "object" && metadata.briefing
                   ? (metadata.briefing as Record<string, unknown>)

@@ -141,7 +141,8 @@ export type AppHistoryMessages = {
   readonly filters: {
     readonly period: string;
     readonly status: string;
-    readonly contentType: string;
+    readonly intent: string;
+    readonly lengthTier: string;
     readonly period7d: string;
     readonly period30d: string;
     readonly period90d: string;
@@ -151,7 +152,8 @@ export type AppHistoryMessages = {
     readonly statusFailed: string;
     readonly statusRunning: string;
     readonly statusQueued: string;
-    readonly contentTypeAll: string;
+    readonly intentAll: string;
+    readonly lengthTierAll: string;
   };
   readonly columns: {
     readonly format: string;

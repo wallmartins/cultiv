@@ -1,5 +1,6 @@
 import { Effect } from "effect";
-import { matchesExecutionsListFilters } from "@my-ai-orchestrator/contracts";
+import { matchesExecutionsListFilters, resolveExecutionPresentation } from "@my-ai-orchestrator/contracts";
+import type { PipelineRequest } from "@my-ai-orchestrator/contracts";
 import {
   DatabaseJobAlreadyExistsError,
   DatabaseJobNotFoundError
@@ -60,16 +61,47 @@ export function createJobRepository(stateRef: StateRef): JobRepository {
     listByUser(userId, limit, offset, filters) {
       const records = Object.values(stateRef.current.jobs)
         .filter((record) => jobUserId(record) === userId)
-        .filter((record) => (filters ? matchesExecutionsListFilters(record, filters) : true))
+        .filter((record) => {
+          if (!filters) {
+            return true;
+          }
+
+          const presentation = resolveExecutionPresentation(readRuntimeRequest(record), record.contentType);
+          return matchesExecutionsListFilters(
+            {
+              createdAt: record.createdAt,
+              status: record.status,
+              contentType: record.contentType,
+              ...presentation
+            },
+            filters
+          );
+        })
         .map(cloneRecord)
         .sort((left, right) => right.createdAt.localeCompare(left.createdAt));
       return Effect.succeed(records.slice(offset, offset + limit));
     },
     countByUser(userId, filters) {
-      const count = Object.values(stateRef.current.jobs).filter(
-        (record) =>
-          jobUserId(record) === userId && (filters ? matchesExecutionsListFilters(record, filters) : true)
-      ).length;
+      const count = Object.values(stateRef.current.jobs).filter((record) => {
+        if (jobUserId(record) !== userId) {
+          return false;
+        }
+
+        if (!filters) {
+          return true;
+        }
+
+        const presentation = resolveExecutionPresentation(readRuntimeRequest(record), record.contentType);
+        return matchesExecutionsListFilters(
+          {
+            createdAt: record.createdAt,
+            status: record.status,
+            contentType: record.contentType,
+            ...presentation
+          },
+          filters
+        );
+      }).length;
       return Effect.succeed(count);
     },
     remove(id) {
@@ -194,6 +226,17 @@ function updateJob(
 
     return cloneRecord(next);
   });
+}
+
+function readRuntimeRequest(record: JobRecord): PipelineRequest | undefined {
+  const created = record.history.find((entry) => entry.type === "created");
+  const payload = created?.payload;
+  if (payload && typeof payload === "object" && "runtime" in payload) {
+    const runtime = (payload as { runtime?: { request?: PipelineRequest } }).runtime;
+    return runtime?.request;
+  }
+
+  return undefined;
 }
 
 function jobUserId(record: JobRecord): string | undefined {

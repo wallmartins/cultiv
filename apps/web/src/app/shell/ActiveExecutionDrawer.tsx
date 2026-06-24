@@ -3,6 +3,7 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useId, useState } from "react";
 import { createPortal } from "react-dom";
 import { ActiveExecutionList } from "~/app/shell/ActiveExecutionList";
+import { ExecutionResultView } from "~/app/execution/components/ExecutionResultView";
 import { getExecutionStepPresentation } from "~/app/execution/lib/execution-step-messages";
 import { useAppLocale } from "~/i18n/app/use-app-locale";
 import { useActiveExecutions } from "~/platform/active-executions/active-execution-store";
@@ -191,7 +192,7 @@ export function ActiveExecutionDrawer() {
 
           {item && item.status === "done" && item.result ? (
             <div className="space-y-5">
-              <LogbookProse className="whitespace-pre-wrap p-5">{item.result.content}</LogbookProse>
+              <ExecutionResultView content={item.result.content} embedInScrollParent />
               <div className="flex flex-wrap gap-2 border-t border-dotted-cartography pt-4">
                 <Button type="button" size="compact" onClick={() => void handleCopy()}>
                   {messages.shell.activeExecutions.copy}

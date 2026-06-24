@@ -1,5 +1,7 @@
 # Progress Log
 
+| 2026-06-24 | fix(web): execution result reading — paragraph-split display in drawer and history detail via shared `ExecutionResultView` |
+| 2026-06-24 | feat(web+contracts): execution history presentation — list/detail show briefing topic as title, expedition intent + format (length tier · channel) as subtitle/column; filters by intent and format instead of internal plan signatures; `resolveExecutionPresentation` on API snapshots |
 | 2026-06-24 | fix(backend): execution enqueue varchar(64) — hash voice profile snapshot ids (≤64 chars); migration 0014 widens jobs/billing/execution user_id columns; briefing values stay in JSONB (no length cap on hypothesis/evidence/question) |
 | 2026-06-24 | fix(web): intent briefing field labels use schema preset key (engage-audience → validation-post) so hypothesis/evidence/question show PT labels at every length tier |
 | 2026-06-24 | fix(web): generation preview — header quota sync (store quotaRemaining not raw credits), projected remaining after cost in sidebar, remove credits from CTA; PT tooltip for engage-audience question field |

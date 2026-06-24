@@ -171,7 +171,8 @@ export const appMessagesPt: AppMessages = {
     filters: {
       period: "Período",
       status: "Status",
-      contentType: "Formato",
+      intent: "Expedição",
+      lengthTier: "Formato",
       period7d: "Últimos 7 dias",
       period30d: "Últimos 30 dias",
       period90d: "Últimos 90 dias",
@@ -181,10 +182,11 @@ export const appMessagesPt: AppMessages = {
       statusFailed: "Falhas",
       statusRunning: "Em andamento",
       statusQueued: "Na fila",
-      contentTypeAll: "Todos os formatos"
+      intentAll: "Todas as expedições",
+      lengthTierAll: "Todos os formatos"
     },
     columns: {
-      format: "Expedição",
+      format: "Formato",
       date: "Data de partida",
       mode: "Modo",
       credits: "Créditos",

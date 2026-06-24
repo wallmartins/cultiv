@@ -79,7 +79,9 @@ describe("job status mappers", () => {
       createdAt: "2026-06-18T10:00:00.000Z",
       completedAt: null,
       voice: undefined,
-      userId: "user-1"
+      userId: "user-1",
+      generationIntent: "tell-story",
+      lengthTier: "medium"
     });
   });
 });

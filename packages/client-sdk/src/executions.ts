@@ -34,6 +34,8 @@ export interface ExecutionsListInput {
   readonly period?: ExecutionsListPeriod;
   readonly status?: ExecutionsListStatusFilter;
   readonly contentType?: string;
+  readonly intent?: string;
+  readonly lengthTier?: string;
   readonly signal?: AbortSignal;
 }
 
@@ -94,7 +96,9 @@ export function createExecutionsClient(config: ClientSdkConfig, transport: HttpT
             offset: input.offset,
             period: input.period,
             status: input.status,
-            contentType: input.contentType
+            contentType: input.contentType,
+            intent: input.intent,
+            lengthTier: input.lengthTier
           },
           signal: input.signal
         });
