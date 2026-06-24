@@ -22,7 +22,7 @@ export const en: LocaleMessages = {
     location: "Brazil",
     description:
       "Your voice. Your territory. Your words. AI that maps how you write and generates text with your signature.",
-    signature: "With ♥ and ✦, Cultiv",
+    signature: "Handcrafted with AI, Cultiv",
     seal: "Handcrafted with AI"
   },
   hero: {

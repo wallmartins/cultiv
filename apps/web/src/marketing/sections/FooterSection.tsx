@@ -57,7 +57,7 @@ export function FooterSection({ locale }: FooterSectionProps) {
 
           <nav
             aria-label={messages.header.navLabel}
-            className="grid gap-6 sm:grid-cols-3 md:grid-cols-1 md:gap-4"
+            className="grid grid-cols-2 gap-8 sm:grid-cols-3"
           >
             <div className="space-y-2">
               <p className="ui-type-mono text-[0.6875rem] uppercase tracking-widest text-off-white/40">
