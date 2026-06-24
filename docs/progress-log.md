@@ -1,5 +1,6 @@
 # Progress Log
 
+| 2026-06-23 | fix(marketing): Cartography landing polish — section rail with scroll highlight, hero vertical center, lucide territory icons, route without dashed line, compositor 3-step tools section, Explorador/Criador/Pro pricing cards |
 | 2026-06-23 | docs: Cultiv Cartography redesign implementation plan — 21 tasks across tokens, primitives, marketing reskin, workspace shell, Imprint retirement, QA gate |
 | 2026-06-23 | docs: Cultiv Cartography complete platform redesign design spec — Atlas Editorial approach, cartography identity (compass logo, Playfair/Inter/Caveat/JetBrains Mono), marketing + workspace layout reimagined, premium contained motion, supersedes ADR 0009 Imprint |
 | 2026-06-22 | fix(web): Imprint visual depth — craft Press Mark, scene mats, hero split + HeroImprintArt, restore problem/differentiator SVG scenes, stronger grain/ink/type |
