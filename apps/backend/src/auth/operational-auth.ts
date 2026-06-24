@@ -1,4 +1,5 @@
 import { Effect } from "effect";
+import type { DatabaseError } from "@my-ai-orchestrator/database";
 import type { BackendConfig } from "../config/config.js";
 import { BackendAuthenticationError } from "../http/errors.js";
 import type { BackendAuthenticatedActor } from "./legacy-auth.js";
@@ -11,7 +12,7 @@ export function resolveBackendOperationalActor(args: {
   readonly readHeader: (name: string) => string | undefined;
 }): Effect.Effect<
   BackendAuthenticatedActor,
-  BackendAuthenticationError,
+  BackendAuthenticationError | DatabaseError,
   OperatorService
 > {
   return Effect.gen(function* () {

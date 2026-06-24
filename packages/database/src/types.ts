@@ -13,6 +13,7 @@ import type {
 } from "@my-ai-orchestrator/domain";
 import type { JobError, JobProgress, JobResult, ExecutionsListFilters } from "@my-ai-orchestrator/contracts";
 import type {
+  DatabaseError,
   DatabaseJobAlreadyExistsError,
   DatabaseJobNotFoundError,
   DatabaseTransactionInvariantError,
@@ -118,88 +119,133 @@ export interface JobCreateOptions {
 }
 
 export interface JobRepository {
-  create: (job: Job, options?: JobCreateOptions) => Effect.Effect<JobRecord, DatabaseJobAlreadyExistsError>;
-  save: (record: JobRecord) => Effect.Effect<JobRecord, DatabaseJobNotFoundError>;
-  findById: (id: string) => Effect.Effect<JobRecord | undefined>;
-  list: () => Effect.Effect<readonly JobRecord[]>;
+  create: (
+    job: Job,
+    options?: JobCreateOptions
+  ) => Effect.Effect<JobRecord, DatabaseJobAlreadyExistsError | DatabaseError>;
+  save: (record: JobRecord) => Effect.Effect<JobRecord, DatabaseJobNotFoundError | DatabaseError>;
+  findById: (id: string) => Effect.Effect<JobRecord | undefined, DatabaseError>;
+  list: () => Effect.Effect<readonly JobRecord[], DatabaseError>;
   listByUser: (
     userId: string,
     limit: number,
     offset: number,
     filters?: ExecutionsListFilters
-  ) => Effect.Effect<readonly JobRecord[]>;
-  countByUser: (userId: string, filters?: ExecutionsListFilters) => Effect.Effect<number>;
-  remove: (id: string) => Effect.Effect<boolean>;
-  appendHistory: (id: string, entry: DatabaseHistoryEntry) => Effect.Effect<JobRecord, DatabaseJobNotFoundError>;
-  recordProgress: (id: string, progress: JobProgress, at?: string) => Effect.Effect<JobRecord, DatabaseJobNotFoundError>;
-  complete: (id: string, result: JobResult, at?: string) => Effect.Effect<JobRecord, DatabaseJobNotFoundError>;
-  fail: (id: string, error: JobError, at?: string) => Effect.Effect<JobRecord, DatabaseJobNotFoundError>;
+  ) => Effect.Effect<readonly JobRecord[], DatabaseError>;
+  countByUser: (userId: string, filters?: ExecutionsListFilters) => Effect.Effect<number, DatabaseError>;
+  remove: (id: string) => Effect.Effect<boolean, DatabaseError>;
+  appendHistory: (
+    id: string,
+    entry: DatabaseHistoryEntry
+  ) => Effect.Effect<JobRecord, DatabaseJobNotFoundError | DatabaseError>;
+  recordProgress: (
+    id: string,
+    progress: JobProgress,
+    at?: string
+  ) => Effect.Effect<JobRecord, DatabaseJobNotFoundError | DatabaseError>;
+  complete: (
+    id: string,
+    result: JobResult,
+    at?: string
+  ) => Effect.Effect<JobRecord, DatabaseJobNotFoundError | DatabaseError>;
+  fail: (
+    id: string,
+    error: JobError,
+    at?: string
+  ) => Effect.Effect<JobRecord, DatabaseJobNotFoundError | DatabaseError>;
 }
 
 export interface MemoryRepository {
-  put: (record: DomainMemoryRecord, version?: number) => Effect.Effect<MemoryEntryRecord>;
-  get: (userId: string, key: string) => Effect.Effect<MemoryEntryRecord | undefined>;
-  listByUser: (userId: string) => Effect.Effect<readonly MemoryEntryRecord[]>;
-  remove: (userId: string, key: string) => Effect.Effect<boolean>;
+  put: (record: DomainMemoryRecord, version?: number) => Effect.Effect<MemoryEntryRecord, DatabaseError>;
+  get: (userId: string, key: string) => Effect.Effect<MemoryEntryRecord | undefined, DatabaseError>;
+  listByUser: (userId: string) => Effect.Effect<readonly MemoryEntryRecord[], DatabaseError>;
+  remove: (userId: string, key: string) => Effect.Effect<boolean, DatabaseError>;
 }
 
 export interface ContentTypeRepository {
-  put: (record: ContentType, version?: number, updatedAt?: string) => Effect.Effect<ContentTypeRecord>;
-  get: (id: string) => Effect.Effect<ContentTypeRecord | undefined>;
-  list: () => Effect.Effect<readonly ContentTypeRecord[]>;
+  put: (
+    record: ContentType,
+    version?: number,
+    updatedAt?: string
+  ) => Effect.Effect<ContentTypeRecord, DatabaseError>;
+  get: (id: string) => Effect.Effect<ContentTypeRecord | undefined, DatabaseError>;
+  list: () => Effect.Effect<readonly ContentTypeRecord[], DatabaseError>;
 }
 
 export interface PipelineRepository {
-  put: (record: Pipeline, version?: number, updatedAt?: string) => Effect.Effect<PipelineRecord>;
-  get: (id: string) => Effect.Effect<PipelineRecord | undefined>;
-  list: () => Effect.Effect<readonly PipelineRecord[]>;
+  put: (
+    record: Pipeline,
+    version?: number,
+    updatedAt?: string
+  ) => Effect.Effect<PipelineRecord, DatabaseError>;
+  get: (id: string) => Effect.Effect<PipelineRecord | undefined, DatabaseError>;
+  list: () => Effect.Effect<readonly PipelineRecord[], DatabaseError>;
 }
 
 export interface VoiceExampleRepository {
-  create: (record: VoiceExample, version?: number) => Effect.Effect<VoiceExampleRecord, DatabaseVoiceExampleAlreadyExistsError>;
-  save: (record: VoiceExampleRecord) => Effect.Effect<VoiceExampleRecord, DatabaseVoiceExampleNotFoundError>;
-  get: (id: string) => Effect.Effect<VoiceExampleRecord | undefined>;
-  listByUser: (userId: string) => Effect.Effect<readonly VoiceExampleRecord[]>;
-  remove: (id: string) => Effect.Effect<boolean>;
-  removeByUser: (userId: string) => Effect.Effect<number>;
+  create: (
+    record: VoiceExample,
+    version?: number
+  ) => Effect.Effect<VoiceExampleRecord, DatabaseVoiceExampleAlreadyExistsError | DatabaseError>;
+  save: (
+    record: VoiceExampleRecord
+  ) => Effect.Effect<VoiceExampleRecord, DatabaseVoiceExampleNotFoundError | DatabaseError>;
+  get: (id: string) => Effect.Effect<VoiceExampleRecord | undefined, DatabaseError>;
+  listByUser: (userId: string) => Effect.Effect<readonly VoiceExampleRecord[], DatabaseError>;
+  remove: (id: string) => Effect.Effect<boolean, DatabaseError>;
+  removeByUser: (userId: string) => Effect.Effect<number, DatabaseError>;
 }
 
 export interface VoiceProfileRepository {
-  put: (record: DerivedVoiceProfile, version?: number) => Effect.Effect<VoiceProfileRecord>;
-  getByUser: (userId: string) => Effect.Effect<VoiceProfileRecord | undefined>;
-  removeByUser: (userId: string) => Effect.Effect<boolean>;
+  put: (record: DerivedVoiceProfile, version?: number) => Effect.Effect<VoiceProfileRecord, DatabaseError>;
+  getByUser: (userId: string) => Effect.Effect<VoiceProfileRecord | undefined, DatabaseError>;
+  removeByUser: (userId: string) => Effect.Effect<boolean, DatabaseError>;
 }
 
 export interface VoiceProfileDiagnosticsRepository {
-  put: (record: VoiceProfileDiagnostics, version?: number) => Effect.Effect<VoiceProfileDiagnosticsRecord>;
-  getByUser: (userId: string) => Effect.Effect<VoiceProfileDiagnosticsRecord | undefined>;
-  removeByUser: (userId: string) => Effect.Effect<boolean>;
+  put: (
+    record: VoiceProfileDiagnostics,
+    version?: number
+  ) => Effect.Effect<VoiceProfileDiagnosticsRecord, DatabaseError>;
+  getByUser: (userId: string) => Effect.Effect<VoiceProfileDiagnosticsRecord | undefined, DatabaseError>;
+  removeByUser: (userId: string) => Effect.Effect<boolean, DatabaseError>;
 }
 
 export interface VoiceProfileSnapshotRepository {
-  create: (record: VoiceProfileSnapshot, version?: number) => Effect.Effect<VoiceProfileSnapshotRecord>;
-  get: (id: string) => Effect.Effect<VoiceProfileSnapshotRecord | undefined>;
-  listByUser: (userId: string) => Effect.Effect<readonly VoiceProfileSnapshotRecord[]>;
-  removeByUser: (userId: string) => Effect.Effect<number>;
+  create: (
+    record: VoiceProfileSnapshot,
+    version?: number
+  ) => Effect.Effect<VoiceProfileSnapshotRecord, DatabaseError>;
+  get: (id: string) => Effect.Effect<VoiceProfileSnapshotRecord | undefined, DatabaseError>;
+  listByUser: (userId: string) => Effect.Effect<readonly VoiceProfileSnapshotRecord[], DatabaseError>;
+  removeByUser: (userId: string) => Effect.Effect<number, DatabaseError>;
 }
 
 export interface VoiceExampleBatchRepository {
-  readonly create: (record: VoiceExampleBatch, version?: number) => Effect.Effect<VoiceExampleBatchRecord, DatabaseVoiceBatchAlreadyExistsError>;
-  readonly save: (record: VoiceExampleBatchRecord) => Effect.Effect<VoiceExampleBatchRecord, DatabaseVoiceBatchNotFoundError>;
-  readonly get: (id: string) => Effect.Effect<VoiceExampleBatchRecord | undefined>;
-  readonly listByUser: (userId: string) => Effect.Effect<readonly VoiceExampleBatchRecord[]>;
-  readonly remove: (id: string) => Effect.Effect<boolean>;
+  readonly create: (
+    record: VoiceExampleBatch,
+    version?: number
+  ) => Effect.Effect<VoiceExampleBatchRecord, DatabaseVoiceBatchAlreadyExistsError | DatabaseError>;
+  readonly save: (
+    record: VoiceExampleBatchRecord
+  ) => Effect.Effect<VoiceExampleBatchRecord, DatabaseVoiceBatchNotFoundError | DatabaseError>;
+  readonly get: (id: string) => Effect.Effect<VoiceExampleBatchRecord | undefined, DatabaseError>;
+  readonly listByUser: (userId: string) => Effect.Effect<readonly VoiceExampleBatchRecord[], DatabaseError>;
+  readonly remove: (id: string) => Effect.Effect<boolean, DatabaseError>;
 }
 
 export interface VoiceTrainingConsentRepository {
-  readonly put: (record: VoiceTrainingConsent, version?: number) => Effect.Effect<VoiceTrainingConsentRecord>;
-  readonly getByUser: (userId: string) => Effect.Effect<VoiceTrainingConsentRecord | undefined>;
+  readonly put: (
+    record: VoiceTrainingConsent,
+    version?: number
+  ) => Effect.Effect<VoiceTrainingConsentRecord, DatabaseError>;
+  readonly getByUser: (userId: string) => Effect.Effect<VoiceTrainingConsentRecord | undefined, DatabaseError>;
 }
 
 export interface AuditRepository {
-  putIfAbsent: (record: AuditRecord) => Effect.Effect<AuditRecord>;
-  getByLogicalKey: (logicalKey: string) => Effect.Effect<AuditRecord | undefined>;
-  list: () => Effect.Effect<readonly AuditRecord[]>;
+  putIfAbsent: (record: AuditRecord) => Effect.Effect<AuditRecord, DatabaseError>;
+  getByLogicalKey: (logicalKey: string) => Effect.Effect<AuditRecord | undefined, DatabaseError>;
+  list: () => Effect.Effect<readonly AuditRecord[], DatabaseError>;
 }
 
 export interface DatabaseClient {

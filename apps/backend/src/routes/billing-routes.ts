@@ -1,5 +1,8 @@
 import { Hono } from "hono";
+import { Schema } from "effect";
 import {
+  type BillingCheckoutRequest,
+  type BillingCheckoutResponse,
   BillingCheckoutResponseSchema,
   BillingEntitlementViewSchema,
   decodeBillingCheckoutRequest
@@ -21,12 +24,12 @@ export interface BillingRouteOptions {
 export function registerBillingRoutes(app: Hono, options: BillingRouteOptions): void {
   app.post(
     "/me/billing/checkout",
-    createPublicRouteHandler({
+    createPublicRouteHandler<BillingCheckoutRequest, BillingCheckoutResponse>({
       route: Routes.PostMeBillingCheckout,
       config: options.config,
       services: options.services,
       decodeInput: decodeBillingCheckoutRequest,
-      responseSchema: BillingCheckoutResponseSchema,
+      responseSchema: BillingCheckoutResponseSchema as Schema.Schema<BillingCheckoutResponse, unknown, any>,
       responseSchemaName: "BillingCheckoutResponse",
       handler: async ({ actor, input }) => {
         if (!options.services.billingCheckout) {

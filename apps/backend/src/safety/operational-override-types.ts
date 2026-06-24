@@ -1,4 +1,5 @@
 import { Effect } from "effect";
+import type { DatabaseError } from "@my-ai-orchestrator/database";
 import type { AuditRecord } from "@my-ai-orchestrator/database";
 import type {
   SafetyClassificationCategory,
@@ -89,12 +90,12 @@ export interface OperationalOverrideConsumptionResult {
 export interface BackendOperationalOverrideService {
   readonly requestOverride: (
     request: OperationalOverrideRequest
-  ) => Effect.Effect<OperationalOverrideRequestDecision, never>;
+  ) => Effect.Effect<OperationalOverrideRequestDecision, DatabaseError>;
   readonly consumeOverride: (
     overrideId: string
   ) => Effect.Effect<
     OperationalOverrideConsumptionResult,
-    import("../http/errors.js").BackendOperationalOverrideStateError
+    import("../http/errors.js").BackendOperationalOverrideStateError | DatabaseError
   >;
 }
 

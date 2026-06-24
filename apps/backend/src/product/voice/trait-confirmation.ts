@@ -1,5 +1,5 @@
 import { Effect } from "effect";
-import type { DatabaseClient } from "@my-ai-orchestrator/database";
+import type { DatabaseClient, DatabaseError } from "@my-ai-orchestrator/database";
 import { toVoiceProfileDomain } from "@my-ai-orchestrator/database";
 import type {
   NextActionCode,
@@ -17,7 +17,7 @@ export function recordTraitConfirmation(
   input: TraitConfirmationInput,
   now: () => Date,
   observability: BackendObservabilityService
-): Effect.Effect<VoiceProfileDiagnosticsView | undefined> {
+): Effect.Effect<VoiceProfileDiagnosticsView | undefined, DatabaseError> {
   return Effect.gen(function* () {
     const diagnosticsRecord = yield* database.voiceProfileDiagnostics.getByUser(userId);
     if (!diagnosticsRecord) {

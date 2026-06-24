@@ -1,6 +1,7 @@
 import type { Effect } from "effect";
 import type { JobProgress, PipelineRequest } from "@my-ai-orchestrator/contracts";
 import type { CorpusManager, MemoryManager } from "@my-ai-orchestrator/core";
+import type { DatabaseError } from "@my-ai-orchestrator/database";
 import type { AIAdapterServiceContract } from "@my-ai-orchestrator/ai-adapters";
 import type { FeatureFlagServiceContract } from "@my-ai-orchestrator/feature-flags";
 import type { OrchestrationPlan } from "@my-ai-orchestrator/orchestrator";
@@ -28,7 +29,7 @@ export interface ExecutePipelineOptions {
   };
   readonly providerTransport: BackendProviderTransport;
   readonly voice?: EffectiveVoiceResolution;
-  readonly memory?: MemoryManager;
+  readonly memory?: MemoryManager<DatabaseError>;
   readonly corpus?: CorpusManager;
   readonly onProgress?: (progress: JobProgress) => ProgressCallbackResult;
 }

@@ -1,3 +1,4 @@
+import type { DatabaseError } from "@my-ai-orchestrator/database";
 import type { PipelineRequest } from "@my-ai-orchestrator/contracts";
 import type { AppLogger } from "@my-ai-orchestrator/core";
 import type { OrchestrationPlan } from "@my-ai-orchestrator/orchestrator";
@@ -25,9 +26,9 @@ export interface BackendQueuedJob {
 export interface BackendJobWorkerOptions {
   readonly config: BackendConfig;
   readonly jobStore: {
-    readonly updateJobProgress: (jobId: string, progress: JobProgress, updatedAt?: string) => Effect.Effect<JobStatusResponse | undefined, never>;
-    readonly completeJob: (jobId: string, result: JobResult, completedAt?: string) => Effect.Effect<JobStatusResponse | undefined, never>;
-    readonly failJob: (jobId: string, error: JobError, completedAt?: string) => Effect.Effect<JobStatusResponse | undefined, never>;
+    readonly updateJobProgress: (jobId: string, progress: JobProgress, updatedAt?: string) => Effect.Effect<JobStatusResponse | undefined, DatabaseError>;
+    readonly completeJob: (jobId: string, result: JobResult, completedAt?: string) => Effect.Effect<JobStatusResponse | undefined, DatabaseError>;
+    readonly failJob: (jobId: string, error: JobError, completedAt?: string) => Effect.Effect<JobStatusResponse | undefined, DatabaseError>;
   };
   readonly logger?: AppLogger;
   readonly now: () => Date;

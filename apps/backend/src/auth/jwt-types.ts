@@ -28,6 +28,8 @@ export interface BackendJwtClaims {
   readonly [claimKey: string]: unknown;
 }
 
+export type AuthenticatedBackendJwtClaims = BackendJwtClaims & { readonly sub: string };
+
 export interface JwtHeader {
   readonly alg: string;
   readonly typ?: string;

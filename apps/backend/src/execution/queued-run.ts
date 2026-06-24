@@ -1,3 +1,4 @@
+import type { DatabaseError } from "@my-ai-orchestrator/database";
 import { Effect } from "effect";
 import type { AsyncRunResponse, PipelineRequest } from "@my-ai-orchestrator/contracts";
 import type { OrchestrationPlan } from "@my-ai-orchestrator/orchestrator";
@@ -12,7 +13,7 @@ export function createQueuedRun(
     readonly pricingEnvelope?: ResolvedPricingEnvelope;
     readonly simulateCredits?: boolean;
   }
-): Effect.Effect<AsyncRunResponse, BackendExecutionFailedError> {
+): Effect.Effect<AsyncRunResponse, BackendExecutionFailedError | DatabaseError> {
   const createdAt = options.now().toISOString();
   return Effect.gen(function* () {
     if (options.runtimeMode === "durable" && options.durableEnqueue) {

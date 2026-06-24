@@ -6,4 +6,4 @@ export {
   readStringArrayClaim,
   verifyBackendJwt
 } from "./jwt-token.js";
-export type { BackendAuthProfile, BackendJwtClaims } from "./jwt-types.js";
+export type { AuthenticatedBackendJwtClaims, BackendAuthProfile, BackendJwtClaims } from "./jwt-types.js";

@@ -1,11 +1,11 @@
 import { Context, Effect, Layer, Ref } from "effect";
-import type { DatabaseClient } from "@my-ai-orchestrator/database";
+import type { DatabaseClient, DatabaseError } from "@my-ai-orchestrator/database";
 import type { CorpusManager, MemoryManager, MemoryQuery, ReferenceText } from "@my-ai-orchestrator/core";
 import { createBackendCorpusManager } from "./memory-corpus.js";
 import { createBackendMemoryManager } from "./memory-store.js";
 
 export interface BackendMemoryBundle {
-  readonly memory: MemoryManager;
+  readonly memory: MemoryManager<DatabaseError>;
   readonly corpus: CorpusManager;
 }
 

@@ -1,3 +1,4 @@
+import type { DatabaseError } from "@my-ai-orchestrator/database";
 import { Effect } from "effect";
 import { DatabaseTransactionInvariantError } from "@my-ai-orchestrator/database";
 import { BackendOperationalOverrideStateError } from "../http/errors.js";
@@ -12,7 +13,7 @@ import { createBackendOperationalOverrideGrantRepository } from "./operational-o
 export function consumeStoredOperationalOverride(args: {
   readonly overrideId: string;
   readonly deps: BackendOperationalOverrideDependencies;
-}): Effect.Effect<OperationalOverrideConsumptionResult, BackendOperationalOverrideStateError> {
+}): Effect.Effect<OperationalOverrideConsumptionResult, BackendOperationalOverrideStateError | DatabaseError> {
   return Effect.gen(function* () {
     const consumedAt = args.deps.now().toISOString();
     const transition = yield* args.deps.database.transaction((database) =>

@@ -1,8 +1,12 @@
 import { randomUUID } from "node:crypto";
 import { Effect } from "effect";
 import type { Kysely } from "kysely";
+import type { DatabaseError } from "@my-ai-orchestrator/database";
 import {
   ensureDefaultFreeSubscription,
+  type BillingEntitlementNotFoundError,
+  type BillingOperationConflictError,
+  type BillingPlanNotFoundError,
   type BillingRepository,
   type BillingServiceContract
 } from "@my-ai-orchestrator/payments";
@@ -24,7 +28,7 @@ export function resolveBackendPublicAuthenticatedActor(args: {
   readonly postgres?: Kysely<DatabaseTables>;
 }): Effect.Effect<
   BackendAuthenticatedActor,
-  BackendAuthenticationError | BackendUserSuspendedError,
+  BackendAuthenticationError | BackendUserSuspendedError | DatabaseError | BillingPlanNotFoundError | BillingEntitlementNotFoundError | BillingOperationConflictError,
   ApplicationUserService
 > {
   return Effect.gen(function* () {
@@ -67,7 +71,7 @@ function resolveOrProvisionApplicationUser(
   externalSubject: string
 ): Effect.Effect<
   { readonly user: import("./application-user.js").BackendApplicationUser; readonly provisioned: boolean },
-  never
+  DatabaseError
 > {
   return Effect.gen(function* () {
     const existing = yield* users.findByExternalSubject(externalSubject);

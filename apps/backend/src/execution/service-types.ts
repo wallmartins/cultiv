@@ -6,6 +6,7 @@ import type {
   RunResponse
 } from "@my-ai-orchestrator/contracts";
 import type { CorpusManager, MemoryManager } from "@my-ai-orchestrator/core";
+import type { DatabaseError } from "@my-ai-orchestrator/database";
 import type { AppLogger } from "@my-ai-orchestrator/core";
 import type { BackendConfig } from "../config/config.js";
 import type {
@@ -30,7 +31,7 @@ export interface BackendExecutionOptions {
   readonly now: () => Date;
   readonly services: BackendProductServices;
   readonly providerTransport?: BackendProviderTransport;
-  readonly memory?: MemoryManager;
+  readonly memory?: MemoryManager<DatabaseError>;
   readonly corpus?: CorpusManager;
   readonly onQueuedJob?: (job: BackendQueuedJob) => void;
   readonly durableEnqueue?: DurableJobRuntime["enqueueAtomic"];
@@ -44,7 +45,7 @@ export interface BackendExecutionService {
     request: PipelineRequest
   ) => Effect.Effect<
     RunResponse,
-    BackendExecutionConflictError | BackendExecutionFailedError | BackendUsageAuthorizationError | BackendAIPolicyCatalogError
+    BackendExecutionConflictError | BackendExecutionFailedError | BackendUsageAuthorizationError | BackendAIPolicyCatalogError | DatabaseError
   >;
   readonly executeTrusted: (
     snapshot: ResolvedExecutionSnapshot,
@@ -57,6 +58,7 @@ export interface BackendExecutionService {
     | BackendExecutionFailedError
     | BackendExecutionIntegrityError
     | BackendUsageAuthorizationError
+    | DatabaseError
   >;
 }
 
@@ -74,7 +76,7 @@ export interface BackendJobStoreLike {
       readonly estimatedSteps?: number;
       readonly voice?: ExecutionVoiceMetadataView;
     }
-  ) => Effect.Effect<AsyncRunResponse, never>;
+  ) => Effect.Effect<AsyncRunResponse, DatabaseError>;
 }
 
 export interface PreparedExecution {

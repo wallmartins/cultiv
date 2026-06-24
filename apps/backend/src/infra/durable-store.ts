@@ -1,3 +1,4 @@
+import { DatabaseError } from "@my-ai-orchestrator/database";
 import { Effect } from "effect";
 import { sql, type Kysely, type Transaction } from "kysely";
 import { replaceBillingRepositoryContents } from "./billing-repository-sync.js";
@@ -82,7 +83,7 @@ export function reloadBillingRepositoryForUserInto(
   db: Kysely<DatabaseTables>,
   target: BillingRepository,
   userId: string
-): Effect.Effect<void, Error> {
+): Effect.Effect<void, DatabaseError> {
   return Effect.gen(function* () {
     const relationalEnabled = yield* hasPostgresBillingTables(db);
     if (relationalEnabled) {
@@ -92,7 +93,17 @@ export function reloadBillingRepositoryForUserInto(
 
     const loaded = yield* loadBillingSnapshotRepository(db);
     replaceBillingRepositoryContents(target, loaded);
-  });
+  }).pipe(
+    Effect.mapError((cause) =>
+      cause instanceof DatabaseError
+        ? cause
+        : new DatabaseError({
+            operation: "reloadBillingRepositoryForUserInto",
+            message: cause instanceof Error ? cause.message : String(cause),
+            cause
+          })
+    )
+  );
 }
 
 function loadBillingSnapshotRepository(

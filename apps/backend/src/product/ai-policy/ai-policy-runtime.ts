@@ -1,4 +1,5 @@
 import { Effect } from "effect";
+import type { DatabaseError } from "@my-ai-orchestrator/database";
 import { BackendAIPolicyPricingError } from "../../http/errors.js";
 import type { ResolvedVersionDocument } from "./ai-policy-loader.js";
 import { createActivePolicyPointerController } from "./ai-policy-active-pointer.js";
@@ -22,7 +23,7 @@ export function createBackendAIPolicyService(options: {
   readonly namespace: string;
   readonly now: () => Date;
   readonly reloadIntervalMs?: number;
-}): Effect.Effect<BackendAIPolicyServiceContract, never> {
+}): Effect.Effect<BackendAIPolicyServiceContract, DatabaseError> {
   const index = createResolvedPolicyVersionIndex({
     activePolicy: options.activePolicy,
     versionIndex: options.versionIndex

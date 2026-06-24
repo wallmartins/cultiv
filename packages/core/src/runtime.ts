@@ -205,12 +205,12 @@ export interface MemoryBackend<E = never> {
   readonly query: (namespace: string, query: MemoryQuery) => Effect.Effect<Record<string, unknown>, E>;
 }
 
-export interface MemoryManager {
-  readonly read: (key: string) => Effect.Effect<unknown, never>;
-  readonly write: (key: string, value: unknown) => Effect.Effect<void, never>;
-  readonly list: () => Effect.Effect<string[], never>;
-  readonly delete: (key: string) => Effect.Effect<void, never>;
-  readonly query: (query: MemoryQuery) => Effect.Effect<Record<string, unknown>, never>;
+export interface MemoryManager<E = never> {
+  readonly read: (key: string) => Effect.Effect<unknown, E>;
+  readonly write: (key: string, value: unknown) => Effect.Effect<void, E>;
+  readonly list: () => Effect.Effect<string[], E>;
+  readonly delete: (key: string) => Effect.Effect<void, E>;
+  readonly query: (query: MemoryQuery) => Effect.Effect<Record<string, unknown>, E>;
 }
 
 export interface CorpusManager {

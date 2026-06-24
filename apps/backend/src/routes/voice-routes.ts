@@ -1,4 +1,5 @@
 import { Hono, type Context } from "hono";
+import { Schema } from "effect";
 import {
   type VoiceExampleBatchCommitResultView,
   VoiceExampleBatchCommitResultViewSchema,
@@ -64,11 +65,11 @@ export function registerVoiceRoutes(app: Hono, options: VoiceRouteOptions): void
 
   app.get(
     "/me/voice-profile",
-    createPublicRouteHandler({
+    createPublicRouteHandler<VoiceProfileScreenView>({
       route: Routes.GetMeVoiceProfile,
       config: options.config,
       services: options.services,
-      responseSchema: VoiceProfileScreenViewSchema,
+      responseSchema: VoiceProfileScreenViewSchema as Schema.Schema<VoiceProfileScreenView, unknown, any>,
       responseSchemaName: "VoiceProfileScreenView",
       handler: async ({ actor }) => {
         const response = await runEffectOrThrow(options.services.voice.getProfileScreen(actor.userId));

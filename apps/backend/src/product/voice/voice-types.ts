@@ -1,4 +1,5 @@
 import { Effect } from "effect";
+import type { DatabaseError } from "@my-ai-orchestrator/database";
 import type {
   ExecutionVoiceMetadataView,
   TraitConfirmationInput,
@@ -31,25 +32,29 @@ export interface ListVoiceExamplesOptions {
 }
 
 export interface BackendVoiceService {
-  readonly getProfileScreen: (userId: string) => Effect.Effect<VoiceProfileScreenView | undefined>;
+  readonly getProfileScreen: (userId: string) => Effect.Effect<VoiceProfileScreenView | undefined, DatabaseError>;
   readonly recordTraitConfirmation: (
     userId: string,
     input: TraitConfirmationInput
-  ) => Effect.Effect<VoiceProfileDiagnosticsView | undefined>;
+  ) => Effect.Effect<VoiceProfileDiagnosticsView | undefined, DatabaseError>;
   readonly resolveEffectiveVoice: (
     userId: string,
     context: EffectiveVoiceContext
-  ) => Effect.Effect<EffectiveVoiceResolution | undefined>;
+  ) => Effect.Effect<EffectiveVoiceResolution | undefined, DatabaseError>;
   readonly listExamples: (
     userId: string,
     options?: ListVoiceExamplesOptions
-  ) => Effect.Effect<VoiceExamplesPageView>;
+  ) => Effect.Effect<VoiceExamplesPageView, DatabaseError>;
   readonly createExample: (
     userId: string,
     input: VoiceExampleCreateInput
   ) => Effect.Effect<
     VoiceExampleListItemView,
-    VoiceExampleValidationError | VoicePinnedLimitExceededError | BackendVoiceTrainingConsentRequiredError | BackendVoiceTrainingConsentFailureError
+    | VoiceExampleValidationError
+    | VoicePinnedLimitExceededError
+    | BackendVoiceTrainingConsentRequiredError
+    | BackendVoiceTrainingConsentFailureError
+    | DatabaseError
   >;
   readonly updateExample: (
     userId: string,
@@ -57,32 +62,46 @@ export interface BackendVoiceService {
     input: VoiceExampleUpdateInput
   ) => Effect.Effect<
     VoiceExampleListItemView | undefined,
-    VoiceExampleValidationError | VoicePinnedLimitExceededError | BackendVoiceTrainingConsentRequiredError | BackendVoiceTrainingConsentFailureError
+    | VoiceExampleValidationError
+    | VoicePinnedLimitExceededError
+    | BackendVoiceTrainingConsentRequiredError
+    | BackendVoiceTrainingConsentFailureError
+    | DatabaseError
   >;
   readonly createBatch: (
     userId: string,
     options?: {
       readonly expiresAt?: string;
     }
-  ) => Effect.Effect<VoiceExampleBatchView>;
+  ) => Effect.Effect<VoiceExampleBatchView, DatabaseError>;
   readonly addBatchItems: (
     userId: string,
     batchId: string,
     items: readonly VoiceExampleBatchInput[]
   ) => Effect.Effect<
     VoiceExampleBatchView,
-    VoiceBatchNotFoundError | VoiceBatchExpiredError
+    VoiceBatchNotFoundError | VoiceBatchExpiredError | DatabaseError
   >;
   readonly commitBatch: (
     userId: string,
     batchId: string
   ) => Effect.Effect<
     VoiceExampleBatchCommitResultView,
-    VoiceBatchNotFoundError | VoiceBatchExpiredError | VoiceExampleValidationError | VoicePinnedLimitExceededError | BackendVoiceTrainingConsentRequiredError | BackendVoiceTrainingConsentFailureError
+    | VoiceBatchNotFoundError
+    | VoiceBatchExpiredError
+    | VoiceExampleValidationError
+    | VoicePinnedLimitExceededError
+    | BackendVoiceTrainingConsentRequiredError
+    | BackendVoiceTrainingConsentFailureError
+    | DatabaseError
   >;
   readonly autoCommitExpiredBatches: (userId?: string) => Effect.Effect<
     readonly VoiceExampleBatchCommitResultView[],
-    VoiceExampleValidationError | VoicePinnedLimitExceededError | BackendVoiceTrainingConsentRequiredError | BackendVoiceTrainingConsentFailureError
+    | VoiceExampleValidationError
+    | VoicePinnedLimitExceededError
+    | BackendVoiceTrainingConsentRequiredError
+    | BackendVoiceTrainingConsentFailureError
+    | DatabaseError
   >;
 }
 

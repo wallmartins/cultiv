@@ -1,4 +1,5 @@
 import { Effect } from "effect";
+import type { DatabaseError } from "@my-ai-orchestrator/database";
 import {
   buildActivatedPolicyPointer,
   loadActivePolicyPointer,
@@ -15,8 +16,8 @@ import type {
 
 export interface ActivePolicyPointerController {
   readonly getCurrentPointer: () => ActivePolicyPointerRecord;
-  readonly ensureFreshPointer: () => Effect.Effect<ActivePolicyPointerRecord, never>;
-  readonly reloadPointer: () => Effect.Effect<ActivePolicyPointerRecord, never>;
+  readonly ensureFreshPointer: () => Effect.Effect<ActivePolicyPointerRecord, DatabaseError>;
+  readonly reloadPointer: () => Effect.Effect<ActivePolicyPointerRecord, DatabaseError>;
   readonly activatePolicyVersion: (args: {
     readonly policyVersion: string;
     readonly actor: string;
@@ -27,11 +28,11 @@ export interface ActivePolicyPointerController {
     readonly provider: string;
     readonly occurredAt: string;
     readonly failureCount: number;
-  }) => Effect.Effect<void, never>;
+  }) => Effect.Effect<void, DatabaseError>;
   readonly recommendFuturePolicyVersion: (
     policyVersions: readonly ResolvedAIPolicyVersion[],
     activePolicyVersion: string
-  ) => Effect.Effect<BackendAIPolicyDegradationRecommendation | undefined, never>;
+  ) => Effect.Effect<BackendAIPolicyDegradationRecommendation | undefined, DatabaseError>;
 }
 
 export function createActivePolicyPointerController(args: {
@@ -40,7 +41,7 @@ export function createActivePolicyPointerController(args: {
   readonly defaultPolicyVersion: string;
   readonly now: () => Date;
   readonly reloadIntervalMs: number;
-}): Effect.Effect<ActivePolicyPointerController, never> {
+}): Effect.Effect<ActivePolicyPointerController, DatabaseError> {
   return Effect.gen(function* () {
     let pointer = yield* loadActivePolicyPointer({
       database: args.database,

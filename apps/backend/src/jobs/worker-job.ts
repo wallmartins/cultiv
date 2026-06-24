@@ -1,3 +1,4 @@
+import type { DatabaseError } from "@my-ai-orchestrator/database";
 import { Effect } from "effect";
 import type { BackendJobWorkerOptions, BackendQueuedJob } from "./worker.js";
 import { executeSyncRun } from "../execution/runtime.js";
@@ -59,7 +60,7 @@ function publishJobProgress(
   options: BackendJobWorkerOptions,
   jobId: string,
   progress: import("@my-ai-orchestrator/contracts").JobProgress
-): Effect.Effect<void, never> {
+): Effect.Effect<void, DatabaseError> {
   const updatedAt = options.now().toISOString();
 
   return Effect.all(
@@ -79,7 +80,7 @@ function completeQueuedJob(
   options: BackendJobWorkerOptions,
   jobId: string,
   result: import("@my-ai-orchestrator/contracts").JobResult
-): Effect.Effect<void, never> {
+): Effect.Effect<void, DatabaseError> {
   const completedAt = options.now().toISOString();
 
   return Effect.all(
@@ -99,7 +100,7 @@ function failQueuedJob(
   options: BackendJobWorkerOptions,
   jobId: string,
   message: string
-): Effect.Effect<void, never> {
+): Effect.Effect<void, DatabaseError> {
   const completedAt = options.now().toISOString();
   const error = {
     message,

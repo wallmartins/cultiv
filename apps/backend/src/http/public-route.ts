@@ -17,7 +17,7 @@ interface PublicRouteBaseOptions<TResponse> {
   readonly route: string;
   readonly config: BackendConfig;
   readonly services: BackendProductServices;
-  readonly responseSchema: Schema.Schema<TResponse, unknown>;
+  readonly responseSchema: Schema.Schema<TResponse, unknown, any>;
   readonly responseSchemaName: string;
   readonly status?: number;
 }
@@ -48,6 +48,16 @@ interface PublicRouteWithBodyOptions<TInput, TResponse> extends PublicRouteBaseO
  *   handler: ({ actor }) => options.services.billing.getEntitlement(actor.userId, "free")
  * }));
  */
+type PublicRouteOptions<TInput, TResponse> =
+  | PublicRouteWithoutBodyOptions<TResponse>
+  | PublicRouteWithBodyOptions<TInput, TResponse>;
+
+function isPublicRouteWithBody<TInput, TResponse>(
+  options: PublicRouteOptions<TInput, TResponse>
+): options is PublicRouteWithBodyOptions<TInput, TResponse> {
+  return "decodeInput" in options;
+}
+
 export function createPublicRouteHandler<TResponse>(
   options: PublicRouteWithoutBodyOptions<TResponse>
 ): (c: Context) => Promise<Response>;
@@ -55,16 +65,15 @@ export function createPublicRouteHandler<TInput, TResponse>(
   options: PublicRouteWithBodyOptions<TInput, TResponse>
 ): (c: Context) => Promise<Response>;
 export function createPublicRouteHandler<TInput, TResponse>(
-  options: PublicRouteWithoutBodyOptions<TResponse> | PublicRouteWithBodyOptions<TInput, TResponse>
+  options: PublicRouteOptions<TInput, TResponse>
 ): (c: Context) => Promise<Response> {
   return async (c) => {
     const actor = await resolvePublicActor(c, options.config, options.route, options.services);
     const ctx: PublicRouteHandlerContext = { c, actor };
 
-    const response =
-      "decodeInput" in options && options.decodeInput
-        ? await runPublicRouteHandlerWithBody(options as PublicRouteWithBodyOptions<TInput, TResponse>, ctx, c)
-        : await runPublicRouteHandler(options as PublicRouteWithoutBodyOptions<TResponse>, ctx);
+    const response = isPublicRouteWithBody(options)
+      ? await runPublicRouteHandlerWithBody(options, ctx, c)
+      : await runPublicRouteHandler(options, ctx);
 
     const validated = await validateResponseBody(options.responseSchema, response, options.responseSchemaName);
     return c.json(validated, (options.status ?? 200) as 200);

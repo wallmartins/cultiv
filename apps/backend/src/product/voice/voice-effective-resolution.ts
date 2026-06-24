@@ -1,5 +1,5 @@
 import { Effect } from "effect";
-import type { DatabaseClient } from "@my-ai-orchestrator/database";
+import type { DatabaseClient, DatabaseError } from "@my-ai-orchestrator/database";
 import type { FeatureFlagServiceContract } from "@my-ai-orchestrator/feature-flags";
 import type { VoiceProfileSnapshot } from "@my-ai-orchestrator/domain";
 import type { BackendConfig } from "../../config/config.js";
@@ -27,7 +27,7 @@ export function resolveEffectiveVoice(
     readonly featureFlags?: FeatureFlagServiceContract;
     readonly config?: BackendConfig;
   }
-): Effect.Effect<EffectiveVoiceResolution | undefined> {
+): Effect.Effect<EffectiveVoiceResolution | undefined, DatabaseError> {
   return Effect.gen(function* () {
     if (voiceConsent) {
       const consentStatus = yield* voiceConsent.getConsentStatus(userId).pipe(

@@ -27,8 +27,16 @@ export function mergeBillingUserSliceInto(
     }
   }
 
-  target.usage = target.usage.filter((entry) => entry.userId !== userId);
-  target.ledger = target.ledger.filter((entry) => !entry.accountId.startsWith(accountPrefix));
+  target.usage.splice(
+    0,
+    target.usage.length,
+    ...target.usage.filter((entry) => entry.userId !== userId)
+  );
+  target.ledger.splice(
+    0,
+    target.ledger.length,
+    ...target.ledger.filter((entry) => !entry.accountId.startsWith(accountPrefix))
+  );
 
   for (const [reservationId, reservation] of target.reservations) {
     if (reservation.accountId.startsWith(accountPrefix)) {

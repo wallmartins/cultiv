@@ -3,13 +3,13 @@ import type { BackendConfig } from "../config/config.js";
 import { BackendAuthenticationError } from "../http/errors.js";
 import { resolveBackendAuthProfile } from "./jwt-profile.js";
 import { parseBearerToken, verifyBackendJwt } from "./jwt-token.js";
-import type { BackendJwtClaims } from "./jwt-types.js";
+import type { BackendJwtClaims, AuthenticatedBackendJwtClaims } from "./jwt-types.js";
 
 export function authenticateBackendBearerJwt(args: {
   readonly config: BackendConfig;
   readonly route: string;
   readonly readHeader: (name: string) => string | undefined;
-}): Effect.Effect<BackendJwtClaims, BackendAuthenticationError> {
+}): Effect.Effect<AuthenticatedBackendJwtClaims, BackendAuthenticationError> {
   return Effect.gen(function* () {
     const token = parseBearerToken(args.readHeader("authorization"));
     if (!token) {
@@ -35,6 +35,6 @@ export function authenticateBackendBearerJwt(args: {
       );
     }
 
-    return claims;
+    return { ...claims, sub: claims.sub };
   });
 }

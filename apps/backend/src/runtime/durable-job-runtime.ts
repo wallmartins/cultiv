@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import type { DatabaseError } from "@my-ai-orchestrator/database";
 import { Effect } from "effect";
 import type { Kysely } from "kysely";
 import type { Redis } from "ioredis";
@@ -69,7 +70,7 @@ export type DurableJobRuntime = BackendJobStoreServiceContract & {
       readonly simulateCredits?: boolean;
     }
   ) => Effect.Effect<JobCreatedResponse, BackendExecutionFailedError>;
-  readonly getRuntimePayload: (executionId: string) => Effect.Effect<ExecutionRuntimePayload | undefined, never>;
+  readonly getRuntimePayload: (executionId: string) => Effect.Effect<ExecutionRuntimePayload | undefined, DatabaseError>;
 };
 
 export function createDurableJobRuntime(options: DurableJobRuntimeOptions): DurableJobRuntime {
@@ -126,7 +127,11 @@ export function createDurableJobRuntime(options: DurableJobRuntimeOptions): Dura
           })
       }).pipe(
         Effect.tapError(() =>
-          reloadBillingRepositoryForUserInto(options.postgres, options.billingRepository, billingIdentity.userId)
+          reloadBillingRepositoryForUserInto(
+            options.postgres,
+            options.billingRepository,
+            billingIdentity.userId
+          ).pipe(Effect.catchAll(() => Effect.void))
         )
       );
 

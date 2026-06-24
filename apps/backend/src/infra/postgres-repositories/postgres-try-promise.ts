@@ -21,7 +21,7 @@ export function postgresTryPromise<A>(
   tryFn: () => PromiseLike<A> | A
 ): Effect.Effect<A, DatabaseError> {
   return Effect.tryPromise({
-    try: tryFn,
+    try: async () => await tryFn(),
     catch: (cause) => toDatabaseError(operation, cause)
   });
 }

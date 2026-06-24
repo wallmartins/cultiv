@@ -1,9 +1,11 @@
 import { Hono } from "hono";
+import { Schema } from "effect";
 import { resolvePublicActor } from "../auth/auth-middleware.js";
 import type { BackendConfig } from "../config/config.js";
 import {
   type ExecutionStatusView,
   ExecutionStatusViewSchema,
+  type ExecutionVoiceMetadataView,
   type ExecutionsPageView,
   ExecutionsPageViewSchema,
   decodeExecutionsListQuery,
@@ -48,7 +50,7 @@ export function registerExecutionRoutes(app: Hono, options: ExecutionRouteOption
     const response = await runEffectOrThrow(publicGeneration.execute({ userId: actor.userId, ...input }));
 
     if ("jobId" in response) {
-      const voice = "voice" in response ? response.voice : undefined;
+      const voice = (response as { readonly voice?: ExecutionVoiceMetadataView }).voice;
       if (!voice) {
         throw new BackendExecutionFailedError({
           message: `Queued execution "${response.jobId}" is missing voice metadata`,
@@ -56,14 +58,14 @@ export function registerExecutionRoutes(app: Hono, options: ExecutionRouteOption
         });
       }
 
-      const queuedExecution = {
+      const queuedExecution: QueuedExecutionView = {
         ...response,
-        status: "queued" as const,
+        status: "queued",
         voice
       };
       const validated = await validateResponseBody(
         QueuedExecutionViewSchema,
-        queuedExecution satisfies QueuedExecutionView,
+        queuedExecution,
         "QueuedExecutionView"
       );
       return c.json(validated, 202);
@@ -87,11 +89,11 @@ export function registerExecutionRoutes(app: Hono, options: ExecutionRouteOption
 
   app.get(
     "/me/executions",
-    createPublicRouteHandler({
+    createPublicRouteHandler<ExecutionsPageView>({
       route: Routes.GetMeExecutions,
       config: options.config,
       services: options.services,
-      responseSchema: ExecutionsPageViewSchema,
+      responseSchema: ExecutionsPageViewSchema as Schema.Schema<ExecutionsPageView, unknown, any>,
       responseSchemaName: "ExecutionsPageView",
       handler: async ({ actor, c }) => {
         const { limit, offset, filters } = await parseExecutionsListQuery(c);

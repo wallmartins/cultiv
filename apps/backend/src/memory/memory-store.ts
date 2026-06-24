@@ -1,5 +1,5 @@
 import { Effect, Ref } from "effect";
-import type { DatabaseClient } from "@my-ai-orchestrator/database";
+import type { DatabaseClient, DatabaseError } from "@my-ai-orchestrator/database";
 import type { MemoryManager, MemoryQuery } from "@my-ai-orchestrator/core";
 import type { BackendMemoryEntry, BackendMemoryState } from "./memory.js";
 
@@ -9,7 +9,7 @@ export function createBackendMemoryManager(
     readonly database?: DatabaseClient;
     readonly namespace: string;
   }
-): MemoryManager {
+): MemoryManager<DatabaseError> {
   return {
     read: (key) =>
       Ref.get(memoryState).pipe(Effect.map((state) => state.entries.get(key)?.value)),

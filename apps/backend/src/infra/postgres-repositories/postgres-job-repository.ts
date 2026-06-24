@@ -1,5 +1,5 @@
 import { Effect } from "effect";
-import { Kysely, sql } from "kysely";
+import { Kysely, sql, type SelectQueryBuilder } from "kysely";
 import {
   DatabaseJobAlreadyExistsError,
   DatabaseJobNotFoundError,
@@ -263,7 +263,7 @@ export function createPostgresJobRepository(
   };
 }
 
-function applyJobListFilters<QB extends { where: (...args: never[]) => QB }>(
+function applyJobListFilters<QB extends SelectQueryBuilder<DatabaseTables, "jobs", object>>(
   query: QB,
   filters?: ExecutionsListFilters
 ): QB {
@@ -274,15 +274,15 @@ function applyJobListFilters<QB extends { where: (...args: never[]) => QB }>(
   let next = query;
   const cutoff = resolveExecutionsPeriodCutoff(filters.period);
   if (cutoff) {
-    next = next.where("created_at", ">=", cutoff);
+    next = next.where("created_at", ">=", cutoff) as QB;
   }
 
   if (filters.status !== "all") {
-    next = next.where(sql`data->>'status'`, "=", filters.status);
+    next = next.where(sql`data->>'status'`, "=", filters.status) as QB;
   }
 
   if (filters.contentType) {
-    next = next.where(sql`data->>'contentType'`, "=", filters.contentType);
+    next = next.where(sql`data->>'contentType'`, "=", filters.contentType) as QB;
   }
 
   return next;

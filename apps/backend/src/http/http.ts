@@ -20,8 +20,8 @@ export async function readJsonBody(c: Context, route: string): Promise<unknown> 
   }
 }
 
-export async function runEffectOrThrow<A, E>(effect: Effect.Effect<A, E>): Promise<A> {
-  const result = await Effect.runPromise(Effect.either(effect));
+export async function runEffectOrThrow<A, E, R = never>(effect: Effect.Effect<A, E, R>): Promise<A> {
+  const result = await Effect.runPromise(Effect.either(effect) as Effect.Effect<Either.Either<A, E>, never, never>);
 
   if (Either.isLeft(result)) {
     throw result.left;
@@ -30,13 +30,13 @@ export async function runEffectOrThrow<A, E>(effect: Effect.Effect<A, E>): Promi
   return result.right;
 }
 
-export async function validateResponseBody<A, I>(
-  schema: Schema.Schema<A, I>,
+export async function validateResponseBody<A, I, R = never>(
+  schema: Schema.Schema<A, I, R>,
   body: A,
   schemaName: string
 ): Promise<A> {
   try {
-    return await runEffectOrThrow(Schema.decodeUnknown(schema)(body));
+    return await runEffectOrThrow(Effect.orDie(Schema.decodeUnknown(schema)(body)));
   } catch (error) {
     throw new BackendResponseValidationError({
       schema: schemaName,

@@ -1,4 +1,5 @@
 import { Context, Effect, Layer, Ref } from "effect";
+import type { DatabaseError } from "@my-ai-orchestrator/database";
 import type {
   JobCreatedResponse,
   JobError,
@@ -60,33 +61,33 @@ export interface BackendJobStoreServiceContract {
       readonly estimatedSteps?: number;
       readonly voice?: ExecutionVoiceMetadataView;
     }
-  ) => Effect.Effect<JobCreatedResponse, never>;
-  readonly getJobStatus: (jobId: string) => Effect.Effect<JobStatusResponse | undefined, never>;
-  readonly listJobs: () => Effect.Effect<readonly JobStatusResponse[], never>;
+  ) => Effect.Effect<JobCreatedResponse, DatabaseError>;
+  readonly getJobStatus: (jobId: string) => Effect.Effect<JobStatusResponse | undefined, DatabaseError>;
+  readonly listJobs: () => Effect.Effect<readonly JobStatusResponse[], DatabaseError>;
   readonly listJobsForUser: (
     userId: string,
     limit: number,
     offset: number,
     filters?: ExecutionsListFilters
-  ) => Effect.Effect<{ readonly items: readonly JobStatusResponse[]; readonly total: number }, never>;
-  readonly claimQueuedJob: (jobId: string) => Effect.Effect<boolean, never>;
+  ) => Effect.Effect<{ readonly items: readonly JobStatusResponse[]; readonly total: number }, DatabaseError>;
+  readonly claimQueuedJob: (jobId: string) => Effect.Effect<boolean, DatabaseError>;
   readonly updateJobProgress: (
     jobId: string,
     progress: JobProgress,
     updatedAt?: string
-  ) => Effect.Effect<JobStatusResponse | undefined, never>;
+  ) => Effect.Effect<JobStatusResponse | undefined, DatabaseError>;
   readonly completeJob: (
     jobId: string,
     result: JobResult,
     completedAt?: string
-  ) => Effect.Effect<JobStatusResponse | undefined, never>;
+  ) => Effect.Effect<JobStatusResponse | undefined, DatabaseError>;
   readonly failJob: (
     jobId: string,
     error: JobError,
     completedAt?: string
-  ) => Effect.Effect<JobStatusResponse | undefined, never>;
-  readonly listJobEvents: (jobId: string) => Effect.Effect<readonly BackendJobEvent[], never>;
-  readonly subscribe: (jobId: string, listener: JobListener) => Effect.Effect<() => void, never>;
+  ) => Effect.Effect<JobStatusResponse | undefined, DatabaseError>;
+  readonly listJobEvents: (jobId: string) => Effect.Effect<readonly BackendJobEvent[], DatabaseError>;
+  readonly subscribe: (jobId: string, listener: JobListener) => Effect.Effect<() => void, DatabaseError>;
 }
 
 export class BackendJobStoreService extends Context.Tag("BackendJobStoreService")<

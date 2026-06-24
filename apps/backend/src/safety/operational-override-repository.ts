@@ -1,4 +1,5 @@
 import { Effect } from "effect";
+import type { DatabaseError } from "@my-ai-orchestrator/database";
 import type { DatabaseClient, MemoryEntryRecord } from "@my-ai-orchestrator/database";
 import type {
   PersistedOperationalOverrideGrant,
@@ -8,8 +9,8 @@ import type {
 const overrideMemoryNamespace = "safety_override_grants";
 
 export interface BackendOperationalOverrideGrantRepository {
-  readonly put: (grant: PersistedOperationalOverrideGrant) => Effect.Effect<PersistedOperationalOverrideGrant>;
-  readonly get: (overrideId: string) => Effect.Effect<PersistedOperationalOverrideGrant | undefined>;
+  readonly put: (grant: PersistedOperationalOverrideGrant) => Effect.Effect<PersistedOperationalOverrideGrant, DatabaseError>;
+  readonly get: (overrideId: string) => Effect.Effect<PersistedOperationalOverrideGrant | undefined, DatabaseError>;
 }
 
 export function createBackendOperationalOverrideGrantRepository(
