@@ -46,16 +46,13 @@ export function getExecutionSubtitle(
   >,
   locale: AppLocale
 ): string | null {
-  const parts: string[] = [];
-
   if (item.briefingTopic && item.generationIntent) {
-    parts.push(getIntentLabel(locale, item.generationIntent, item.generationIntent));
+    return getIntentLabel(locale, item.generationIntent, item.generationIntent);
   }
 
-  const formatLabel = getExecutionFormatLabel(item, locale);
-  if (formatLabel) {
-    parts.push(formatLabel);
+  if (!item.briefingTopic) {
+    return getExecutionFormatLabel(item, locale);
   }
 
-  return parts.length > 0 ? parts.join(" · ") : null;
+  return null;
 }

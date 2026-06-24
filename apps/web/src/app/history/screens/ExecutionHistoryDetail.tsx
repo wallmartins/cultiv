@@ -169,7 +169,7 @@ export function ExecutionHistoryDetail({ executionId }: { readonly executionId: 
             {subtitle}
           </Text>
         ) : null}
-        {formatLabel ? (
+        {formatLabel && execution.briefingTopic ? (
           <Text variant="meta" className="mb-3 text-ink-muted">
             {messages.history.columns.format}: {formatLabel}
           </Text>

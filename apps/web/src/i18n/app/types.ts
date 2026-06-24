@@ -162,6 +162,13 @@ export type AppHistoryMessages = {
     readonly credits: string;
     readonly status: string;
   };
+  readonly pagination: {
+    readonly perPage: string;
+    readonly range: string;
+    readonly page: string;
+    readonly previous: string;
+    readonly next: string;
+  };
   readonly detail: {
     readonly copy: string;
     readonly regenerate: string;

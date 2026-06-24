@@ -192,6 +192,13 @@ export const appMessagesPt: AppMessages = {
       credits: "Créditos",
       status: "Status"
     },
+    pagination: {
+      perPage: "Por página",
+      range: "{start}–{end} de {total}",
+      page: "Página {page} de {pageCount}",
+      previous: "Anterior",
+      next: "Próxima"
+    },
     detail: {
       copy: "Copiar",
       regenerate: "Nova expedição",

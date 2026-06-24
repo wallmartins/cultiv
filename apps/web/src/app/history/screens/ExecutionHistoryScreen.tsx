@@ -1,6 +1,6 @@
 import { Button, cn, CompassMark, LogbookProse, Text } from "@my-ai-orchestrator/ui";
 import { Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { GenerationIntent } from "@my-ai-orchestrator/contracts";
 import { useAppLocale } from "~/i18n/app/use-app-locale";
 import {
@@ -15,8 +15,15 @@ import {
   getExecutionTitle
 } from "~/app/history/lib/execution-presentation";
 import {
+  formatHistoryPaginationPage,
+  formatHistoryPaginationRange
+} from "~/app/history/lib/history-pagination-messages";
+import {
+  DEFAULT_HISTORY_PAGE_SIZE,
+  HISTORY_PAGE_SIZE_OPTIONS,
   useExecutionsList,
   type HistoryFilters,
+  type HistoryPageSize,
   type HistoryPeriod,
   type HistoryStatusFilter
 } from "~/app/history/lib/use-executions-list";
@@ -108,17 +115,37 @@ export function ExecutionHistoryScreen() {
     intent: "all",
     lengthTier: "all"
   });
-  const { status, items, hasMore, loadMore, retry } = useExecutionsList(filters);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState<HistoryPageSize>(DEFAULT_HISTORY_PAGE_SIZE);
+
+  useEffect(() => {
+    setPage(1);
+  }, [filters, pageSize]);
+
+  const {
+    status,
+    items,
+    total,
+    page: effectivePage,
+    pageCount,
+    rangeStart,
+    rangeEnd,
+    hasPreviousPage,
+    hasNextPage,
+    retry
+  } = useExecutionsList({ filters, page, pageSize });
+
+  useEffect(() => {
+    if (effectivePage !== page) {
+      setPage(effectivePage);
+    }
+  }, [effectivePage, page]);
 
   const visibleIntents = useMemo((): GenerationIntent[] => {
-    const fromItems = items
-      .map((item) => item.generationIntent)
-      .filter((intent): intent is GenerationIntent => intent !== undefined);
-    const ids = fromItems.length > 0 ? [...new Set(fromItems)] : [...GENERATION_INTENT_IDS];
-    return ids.sort((left, right) =>
+    return [...GENERATION_INTENT_IDS].sort((left, right) =>
       getIntentLabel(locale, left, left).localeCompare(getIntentLabel(locale, right, right), locale === "pt" ? "pt-BR" : "en")
     );
-  }, [items, locale]);
+  }, [locale]);
 
   return (
     <div className="px-[var(--spacing-gutter)] py-8 md:py-10">
@@ -220,59 +247,96 @@ export function ExecutionHistoryScreen() {
       ) : null}
 
       {items.length > 0 ? (
-        <ul className="space-y-3">
-          {items.map((item) => {
-            const subtitle = getExecutionSubtitle(item, locale);
-            const formatLabel = getExecutionFormatLabel(item, locale);
+        <>
+          <ul className="space-y-3">
+            {items.map((item) => {
+              const title = getExecutionTitle(item, locale);
+              const subtitle = getExecutionSubtitle(item, locale);
+              const formatLabel = getExecutionFormatLabel(item, locale);
 
-            return (
-              <li key={item.jobId}>
-                <Link
-                  to="/app/history/$executionId"
-                  params={{ executionId: item.jobId }}
-                  className="block rounded-[5px] border border-dotted-cartography bg-off-white p-4 shadow-cartography transition-colors duration-[250ms] hover:border-terracotta/30 motion-reduce:transition-none"
-                >
-                  <div className="flex items-start gap-3">
-                    <StatusDot status={item.status} />
-                    <div className="min-w-0 flex-1">
-                      <div className="flex flex-wrap items-baseline justify-between gap-2">
-                        <Text as="span" variant="body" className="font-medium text-ink">
-                          {getExecutionTitle(item, locale)}
-                        </Text>
-                        <Text variant="meta" className="shrink-0 text-ink-muted">
-                          {new Date(item.createdAt).toLocaleString(locale === "en" ? "en-US" : "pt-BR")}
-                        </Text>
-                      </div>
-                      {subtitle ? (
-                        <Text variant="meta" className="mt-1 text-ink-muted">
-                          {subtitle}
-                        </Text>
-                      ) : null}
-                      <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1">
-                        {formatLabel ? (
-                          <Text variant="meta" className="text-ink-muted">
-                            {messages.history.columns.format}: {formatLabel}
+              return (
+                <li key={item.jobId}>
+                  <Link
+                    to="/app/history/$executionId"
+                    params={{ executionId: item.jobId }}
+                    className="block rounded-[5px] border border-dotted-cartography bg-off-white p-4 shadow-cartography transition-colors duration-[250ms] hover:border-terracotta/30 motion-reduce:transition-none"
+                  >
+                    <div className="flex items-start gap-3">
+                      <StatusDot status={item.status} />
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-start justify-between gap-3">
+                          <Text
+                            as="span"
+                            variant="body"
+                            className="min-w-0 flex-1 truncate font-medium text-ink"
+                            title={title}
+                          >
+                            {title}
+                          </Text>
+                          <Text variant="meta" className="shrink-0 text-ink-muted">
+                            {new Date(item.createdAt).toLocaleString(locale === "en" ? "en-US" : "pt-BR")}
+                          </Text>
+                        </div>
+                        {subtitle ? (
+                          <Text variant="meta" className="mt-1 text-ink-muted">
+                            {subtitle}
                           </Text>
                         ) : null}
-                        <Text variant="meta" className="text-ink-muted">
-                          {messages.history.columns.status}: {statusFilterLabel(item.status, messages.history.filters)}
-                        </Text>
+                        <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1">
+                          {formatLabel ? (
+                            <Text variant="meta" className="text-ink-muted">
+                              {messages.history.columns.format}: {formatLabel}
+                            </Text>
+                          ) : null}
+                          <Text variant="meta" className="text-ink-muted">
+                            {messages.history.columns.status}: {statusFilterLabel(item.status, messages.history.filters)}
+                          </Text>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
-      ) : null}
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
 
-      {hasMore ? (
-        <div className="mt-6 text-center">
-          <Button type="button" variant="ghost" size="compact" onClick={loadMore}>
-            …
-          </Button>
-        </div>
+          <div className="mt-6 flex flex-col gap-4 border-t border-dotted-cartography pt-5 sm:flex-row sm:items-end sm:justify-between">
+            <FilterToggleGroup
+              label={messages.history.pagination.perPage}
+              value={String(pageSize)}
+              onChange={(value) => setPageSize(Number(value) as HistoryPageSize)}
+              options={HISTORY_PAGE_SIZE_OPTIONS.map((size) => [String(size), String(size)] as const)}
+            />
+            <div className="flex flex-col items-start gap-3 sm:items-end">
+              <Text variant="meta" className="text-ink-muted">
+                {formatHistoryPaginationRange(messages.history.pagination, rangeStart, rangeEnd, total)}
+              </Text>
+              <Text variant="meta" className="text-ink-muted">
+                {formatHistoryPaginationPage(messages.history.pagination, effectivePage, pageCount)}
+              </Text>
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="compact"
+                  disabled={!hasPreviousPage}
+                  onClick={() => setPage((current) => Math.max(1, current - 1))}
+                >
+                  {messages.history.pagination.previous}
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="compact"
+                  disabled={!hasNextPage}
+                  onClick={() => setPage((current) => current + 1)}
+                >
+                  {messages.history.pagination.next}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </>
       ) : null}
     </div>
   );
