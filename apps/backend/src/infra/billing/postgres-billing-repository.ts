@@ -42,6 +42,25 @@ export function hasPostgresBillingTables(db: Kysely<DatabaseTables>): Effect.Eff
   }).pipe(Effect.orElseSucceed(() => false));
 }
 
+export function loadPostgresBillingCatalog(
+  db: Kysely<DatabaseTables>
+): Effect.Effect<BillingRepository, Error> {
+  return Effect.tryPromise({
+    try: async () => {
+      const [plans, topUpPackages] = await Promise.all([
+        db.selectFrom("billing_plans").selectAll().execute(),
+        db.selectFrom("billing_top_up_packages").selectAll().execute()
+      ]);
+
+      return createBillingRepository({
+        plans: plans.map((row) => mapBillingPlanFromRow(row)),
+        topUpPackages: topUpPackages.map((row) => mapBillingTopUpPackageFromRow(row))
+      });
+    },
+    catch: (error) => (error instanceof Error ? error : new Error(String(error)))
+  });
+}
+
 export function loadPostgresBillingRepository(
   db: Kysely<DatabaseTables>
 ): Effect.Effect<BillingRepository, Error> {

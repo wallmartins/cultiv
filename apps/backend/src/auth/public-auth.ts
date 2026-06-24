@@ -1,9 +1,16 @@
 import { randomUUID } from "node:crypto";
 import { Effect } from "effect";
-import { ensureDefaultFreeSubscription, type BillingServiceContract } from "@my-ai-orchestrator/payments";
+import type { Kysely } from "kysely";
+import {
+  ensureDefaultFreeSubscription,
+  type BillingRepository,
+  type BillingServiceContract
+} from "@my-ai-orchestrator/payments";
 import type { BackendConfig } from "../config/config.js";
 import { BackendAuthenticationError, BackendUserSuspendedError } from "../http/errors.js";
 import { dedupeStrings } from "../internal/utils.js";
+import { reloadBillingRepositoryForUserInto } from "../infra/durable-store.js";
+import type { DatabaseTables } from "../infra/postgres-tables.js";
 import type { BackendAuthenticatedActor } from "./legacy-auth.js";
 import { ApplicationUserService } from "./application-user-service.js";
 import { authenticateBackendBearerJwt, readStringArrayClaim } from "./jwt-common.js";
@@ -13,6 +20,8 @@ export function resolveBackendPublicAuthenticatedActor(args: {
   readonly route: string;
   readonly readHeader: (name: string) => string | undefined;
   readonly billing?: BillingServiceContract;
+  readonly billingRepository?: BillingRepository;
+  readonly postgres?: Kysely<DatabaseTables>;
 }): Effect.Effect<
   BackendAuthenticatedActor,
   BackendAuthenticationError | BackendUserSuspendedError,
@@ -23,6 +32,10 @@ export function resolveBackendPublicAuthenticatedActor(args: {
 
     const users = yield* ApplicationUserService;
     const { user, provisioned } = yield* resolveOrProvisionApplicationUser(users, claims.sub);
+
+    if (args.postgres && args.billingRepository) {
+      yield* reloadBillingRepositoryForUserInto(args.postgres, args.billingRepository, user.id);
+    }
 
     if (provisioned && args.billing) {
       yield* ensureDefaultFreeSubscription(args.billing, user.id, {

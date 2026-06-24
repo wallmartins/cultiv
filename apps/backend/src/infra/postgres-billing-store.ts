@@ -6,6 +6,7 @@ export {
 
 export {
   hasPostgresBillingTables,
+  loadPostgresBillingCatalog,
   loadPostgresBillingRepository,
   persistPostgresBillingRepositoryInTransaction,
   reloadPostgresBillingRepositoryInto,

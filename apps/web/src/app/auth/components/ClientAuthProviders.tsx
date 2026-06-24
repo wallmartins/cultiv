@@ -46,7 +46,7 @@ export function ClientAuthProviders({ children }: ClientAuthProvidersProps) {
         audience: config.audience,
         scope: API_ACCESS_SCOPES
       }}
-      cacheLocation="localstorage"
+      cacheLocation="memory"
       useRefreshTokens
       onRedirectCallback={(appState) => {
         const returnTo = typeof appState?.returnTo === "string" ? appState.returnTo : undefined;

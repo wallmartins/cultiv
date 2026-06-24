@@ -60,6 +60,24 @@ Referência rápida das decisões tomadas no planejamento. Termos de domínio co
 | i18n app | Bilíngue dia 1; **App Locale** sem `/en` em `/app/*` |
 | Histórico | Lista + página detalhe; drawer é atalho rápido |
 
+## Segurança (Auth0 SPA)
+
+| Tópico | Decisão |
+|--------|---------|
+| Token cache | **`memory`** — tokens não persistem em `localStorage`; reduz superfície XSS para billing/voice |
+| Refresh | `useRefreshTokens` ativo; sessão mantida na aba via silent refresh |
+| Reload completo | Hard refresh pode exigir novo login (tradeoff aceito vs. exfiltração de tokens) |
+| Issue | [95-auth0-session-cache-security.md](../issues/95-auth0-session-cache-security.md) |
+
+## Voz — tipos canônicos
+
+| Tópico | Decisão |
+|--------|---------|
+| Fonte canônica pipeline | `TextQualityVoiceProfile` em `packages/contracts` |
+| domain | `DerivedVoiceProfile` + mappers `toVoiceProfileView` / `toTextQualityVoiceProfile` |
+| text-quality | `VoiceProfile` = alias de `TextQualityVoiceProfile` |
+| Issue | [105-voice-profile-type-consolidation.md](../issues/105-voice-profile-type-consolidation.md) |
+
 ## Governança
 
 - Frontend **não** chama rotas do backend diretamente (`tests/governance/frontend-client-boundary.test.ts`)

@@ -1,11 +1,12 @@
 # Progress Log
 
-| 2026-06-24 | refactor(backend): Issue 106 — `POST /api/run` returns 410 Gone with migration to `/me/executions/run`; removed `runHandler`; tests migrated to canonical `/me` surface; 853 backend tests pass |
+| 2026-06-24 | perf(backend): Issue 107 — billing API boot loads catalog only (`loadPostgresBillingCatalog`); per-user slice hydrates on `resolvePublicActor`; `loadPostgresBillingRepository` kept for explicit full reload paths |
 | 2026-06-24 | refactor(backend): Issue 100 — remove duplicate GET `/api/internal/policies/active`; voice routes use `Routes.*`; async enqueue returns voice inline (drops post-enqueue `getJobStatus`); `dist.bak.*` already gitignored |
 | 2026-06-24 | test(web): Issue 103 — RTL component tests for RequireAuth, AppSdkGate, AppModal (focus trap/Escape), useExecutionsList hasMore; `render-with-router` helper + vitest aliases for web auth/router deps; 128 web tests pass |
 | 2026-06-24 | refactor(backend): Issue 99 — `createPublicRouteHandler` (auth → decode → handler → validate); pilot routes billing checkout, voice profile GET, executions list; shared `authenticateBackendBearerJwt` dedupes public/operational JWT parsing |
 | 2026-06-24 | fix(backend): Issue 89 — worker targeted billing reload per execution user (`reloadBillingRepositoryForUserInto`); PG slice merge for subscriptions/reservations/ledger/cycle state; worker + enqueue rollback paths updated |
 | 2026-06-24 | fix(database): Issue 97 — `listByUser`/`countByUser` filter by userId via `jobUserId` helper; governance test aligned with text-quality deps; `database-jobs.test.ts` user-scoping test |
+| 2026-06-24 | feat(platform): issues 95, 105, 107 — Auth0 memory token cache; TextQualityVoiceProfile canonical in contracts + domain mappers; billing catalog-only API boot + per-user hydration on auth |
 | 2026-06-24 | feat(platform): Code Quality & Scale Readiness Sprint 1–4 — issues 88–106 (except HITL 95/105): PG DatabaseError propagation, JIT billing on provision only, worker per-user billing reload, execution history server filters, auth i18n + document.lang, AppModal a11y, GenerationScreen split (210 lines), text-quality lane cap (3), database listByUser fix, AI provider factory, createPublicRouteHandler, route cleanup + 410 /api/run, React.lazy app routes, useSdkQuery, component tests, webhook tests, web file-size governance; 981 tests pass |
 | 2026-06-24 | docs: issues 107–108 — billing API boot lazy-load, web file-size governance (promoted from backlog) |
 | 2026-06-24 | docs: Code Quality & Scale Readiness program — PRD, implementation plan (8 phases), parent issue, vertical slices 88–106 from full-stack code review |

@@ -3,7 +3,7 @@ import { sql, type Kysely, type Transaction } from "kysely";
 import { replaceBillingRepositoryContents } from "./billing-repository-sync.js";
 import {
   hasPostgresBillingTables,
-  loadPostgresBillingRepository,
+  loadPostgresBillingCatalog,
   persistPostgresBillingRepositoryInTransaction,
   reloadPostgresBillingRepositoryInto,
   reloadPostgresBillingUserInto,
@@ -38,12 +38,10 @@ export function loadBillingRepository(
   return Effect.gen(function* () {
     const relationalEnabled = yield* hasPostgresBillingTables(db);
     if (relationalEnabled) {
-      const relational = yield* loadPostgresBillingRepository(db).pipe(
+      // ponytail: catalog-only at boot; per-user slices hydrate on auth (issue 107)
+      return yield* loadPostgresBillingCatalog(db).pipe(
         Effect.catchAll(() => Effect.succeed(createBillingRepository()))
       );
-      if (repositoryHasBillingData(relational)) {
-        return relational;
-      }
     }
 
     return yield* loadBillingSnapshotRepository(db);

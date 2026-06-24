@@ -38,12 +38,31 @@ describe("voice-profile-centralization governance", () => {
     }
   });
 
-  it("requires VoiceProfile to carry user-derived fields", async () => {
+  it("requires canonical TextQualityVoiceProfile in contracts", async () => {
+    const contractsVoicePath = resolve(ROOT, "packages", "contracts", "src", "voice.ts");
+    const source = await readFile(contractsVoicePath, "utf-8");
+
+    expect(source).toMatch(/export const TextQualityVoiceProfileSchema/);
+    expect(source).toMatch(/antiPatternsExplicit: Schema\.Array/);
+    expect(source).toMatch(/userLabels: Schema\.Array/);
+  });
+
+  it("requires text-quality VoiceProfile to alias contracts canonical type", async () => {
     const typesPath = resolve(ROOT, "packages", "text-quality", "src", "types.ts");
     const source = await readFile(typesPath, "utf-8");
 
-    expect(source).toMatch(/readonly\s+antiPatternsExplicit:\s+readonly\s+string\[\]/);
-    expect(source).toMatch(/readonly\s+userLabels:\s+readonly\s+string\[\]/);
+    expect(source).toMatch(/from\s+["']@my-ai-orchestrator\/contracts["']/);
+    expect(source).toMatch(/export type VoiceProfile = TextQualityVoiceProfile/);
+    expect(source).not.toMatch(/export type VoiceProfile = \{/);
+  });
+
+  it("requires domain voice mappers from contracts", async () => {
+    const mappersPath = resolve(ROOT, "packages", "domain", "src", "voice-profile-mappers.ts");
+    const source = await readFile(mappersPath, "utf-8");
+
+    expect(source).toMatch(/toTextQualityVoiceProfile/);
+    expect(source).toMatch(/toVoiceProfileView/);
+    expect(source).toMatch(/from\s+["']@my-ai-orchestrator\/contracts["']/);
   });
 
   it("requires voice-resolution to be a pass-through or absent", async () => {

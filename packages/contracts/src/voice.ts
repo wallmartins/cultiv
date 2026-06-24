@@ -1,8 +1,11 @@
 import { Schema } from "effect";
 import { createSchemaDecoder } from "./shared.js";
 import {
+  ArgumentDevelopmentSignatureSchema,
   ClosingModeSchema,
+  CoreReasoningSignatureSchema,
   EpistemicPostureSchema,
+  FormatExpressionProfileSchema,
   OpeningModeSchema,
   InsightTimingSchema,
   TraitConfirmationRecordSchema,
@@ -114,6 +117,27 @@ export const VoiceProfileViewSchema = Schema.Struct({
   antiPatterns: Schema.Array(Schema.String)
 });
 export type VoiceProfileView = typeof VoiceProfileViewSchema.Type;
+
+/** Canonical pipeline voice profile — single source for text-quality and domain mappers. */
+export const TextQualityVoiceProfileSchema = Schema.Struct({
+  userId: Schema.String,
+  tone: Schema.String,
+  cadence: Schema.String,
+  description: Schema.optional(Schema.String),
+  lexicon: Schema.Array(Schema.String),
+  constraints: Schema.Array(Schema.String),
+  examples: Schema.Array(Schema.String),
+  antiPatterns: Schema.Array(Schema.String),
+  antiPatternsExplicit: Schema.Array(Schema.String),
+  rules: Schema.Array(Schema.String),
+  styleMarkers: Schema.Array(Schema.String),
+  userLabels: Schema.Array(Schema.String),
+  coreReasoningSignature: Schema.optional(CoreReasoningSignatureSchema),
+  argumentDevelopmentSignature: Schema.optional(ArgumentDevelopmentSignatureSchema),
+  formatExpressionProfile: Schema.optional(FormatExpressionProfileSchema),
+  derivedAntiPatterns: Schema.optional(Schema.Array(Schema.String))
+});
+export type TextQualityVoiceProfile = typeof TextQualityVoiceProfileSchema.Type;
 
 export const VoiceMaterialBaseBreakdownSchema = Schema.Struct({
   totalExamples: Schema.Number,
