@@ -9,9 +9,14 @@ import type { MarketingLocale } from "~/i18n/marketing/types";
 export interface MarketingLayoutProps {
   readonly locale: MarketingLocale;
   readonly children: ReactNode;
+  readonly showSectionRail?: boolean;
 }
 
-export function MarketingLayout({ locale, children }: MarketingLayoutProps) {
+export function MarketingLayout({
+  locale,
+  children,
+  showSectionRail = true
+}: MarketingLayoutProps) {
   useDocumentLang(locale);
   usePaperParallax();
 
@@ -24,9 +29,11 @@ export function MarketingLayout({ locale, children }: MarketingLayoutProps) {
       <SiteHeader locale={locale} />
       <div className="relative">
         <div className="min-w-0">{children}</div>
-        <aside className="pointer-events-none absolute inset-y-0 left-0 z-20 hidden w-12 bg-transparent lg:block">
-          <MarketingSectionRail locale={locale} />
-        </aside>
+        {showSectionRail ? (
+          <aside className="pointer-events-none absolute inset-y-0 left-0 z-20 hidden w-12 bg-transparent lg:block">
+            <MarketingSectionRail locale={locale} />
+          </aside>
+        ) : null}
       </div>
       <FooterSection locale={locale} />
     </div>

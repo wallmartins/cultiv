@@ -10,6 +10,7 @@ import { seo } from "~/marketing/seo/seo";
 import {
   getBlogIndexPath,
   getBlogPostPath,
+  getBlogRssPath,
   getBlogTagPath
 } from "./blog-paths";
 
@@ -51,7 +52,15 @@ export function resolveBlogIndexHead(locale: MarketingLocale) {
       url: canonicalUrl,
       locale
     }),
-    links: buildAlternateLinks(locale, path, alternatePath)
+    links: [
+      ...buildAlternateLinks(locale, path, alternatePath),
+      {
+        rel: "alternate",
+        type: "application/rss+xml",
+        title: messages.blog.rssTitle,
+        href: `${getSiteUrl()}${getBlogRssPath(locale)}`
+      }
+    ]
   };
 }
 

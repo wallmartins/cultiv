@@ -1,6 +1,6 @@
 # Progress Log
 
-| 2026-06-25 | feat(web): add blog UI components and screens — BlogProse, BlogPostCard, BlogTagChips, BlogAuthorBlock, BlogShareActions, BlogStructuredData; BlogIndexScreen + BlogPostScreen |
+| 2026-06-25 | feat(web): add blog routes and RSS feeds — PT/EN TanStack routes (index, post, tag, rss.xml); MarketingLayout `showSectionRail`; RSS link in blog index head; tag page heading |
 | 2026-06-25 | feat(web): blog JSON-LD, RSS, sitemap, and llms extensions — `blog-json-ld.ts`, `blog-rss.ts`, `blog-sitemap.ts`; sitemap + llms.txt/llms-full.txt wired; 8 blog-seo tests |
 | 2026-06-25 | feat(web): add blog server functions for route loaders — `fetchBlogPosts`, `fetchBlogPost`, `fetchBlogTagPage` in `blog/server/blog-fns.ts` |
 | 2026-06-25 | feat(web): load and validate blog posts from markdown files — `loadBlogPostsFromDirectory`, `getBlogPostBySlug`, `renderMarkdownToHtml`, `resolveBlogPublicDir`; cover validation, scheduling filter, tag filter; fixture covers + 3 loader tests |

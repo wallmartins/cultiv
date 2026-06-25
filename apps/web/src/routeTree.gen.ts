@@ -20,11 +20,14 @@ import { Route as CallbackRouteImport } from './routes/callback'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as EnIndexRouteImport } from './routes/en/index'
+import { Route as BlogIndexRouteImport } from './routes/blog/index'
 import { Route as AppIndexRouteImport } from './routes/app/index'
 import { Route as EnTermsRouteImport } from './routes/en/terms'
 import { Route as EnPrivacyRouteImport } from './routes/en/privacy'
 import { Route as EnLlmsDottxtRouteImport } from './routes/en/llms[.]txt'
 import { Route as EnLlmsFullDottxtRouteImport } from './routes/en/llms-full[.]txt'
+import { Route as BlogRssDotxmlRouteImport } from './routes/blog/rss[.]xml'
+import { Route as BlogSlugRouteImport } from './routes/blog/$slug'
 import { Route as AppSettingsRouteImport } from './routes/app/settings'
 import { Route as AppPlansRouteImport } from './routes/app/plans'
 import { Route as AppOnboardingRouteImport } from './routes/app/onboarding'
@@ -33,11 +36,16 @@ import { Route as AppGenerateRouteImport } from './routes/app/generate'
 import { Route as AppBillingRouteImport } from './routes/app/billing'
 import { Route as ApiWaitlistRouteImport } from './routes/api/waitlist'
 import { Route as AppVoiceRouteRouteImport } from './routes/app/voice/route'
+import { Route as EnBlogIndexRouteImport } from './routes/en/blog/index'
 import { Route as AppVoiceIndexRouteImport } from './routes/app/voice/index'
 import { Route as AppHistoryIndexRouteImport } from './routes/app/history.index'
+import { Route as EnBlogRssDotxmlRouteImport } from './routes/en/blog/rss[.]xml'
+import { Route as EnBlogSlugRouteImport } from './routes/en/blog/$slug'
+import { Route as BlogTagTagSlugRouteImport } from './routes/blog/tag/$tagSlug'
 import { Route as AppHistoryExecutionIdRouteImport } from './routes/app/history.$executionId'
 import { Route as AppGenerateExecutionIdRouteImport } from './routes/app/generate.$executionId'
 import { Route as AppVoiceExamplesIndexRouteImport } from './routes/app/voice/examples/index'
+import { Route as EnBlogTagTagSlugRouteImport } from './routes/en/blog/tag/$tagSlug'
 import { Route as AppVoiceExamplesNewRouteImport } from './routes/app/voice/examples/new'
 import { Route as AppVoiceExamplesIdEditRouteImport } from './routes/app/voice/examples/$id/edit'
 
@@ -96,6 +104,11 @@ const EnIndexRoute = EnIndexRouteImport.update({
   path: '/en/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BlogIndexRoute = BlogIndexRouteImport.update({
+  id: '/blog/',
+  path: '/blog/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppIndexRoute = AppIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -119,6 +132,16 @@ const EnLlmsDottxtRoute = EnLlmsDottxtRouteImport.update({
 const EnLlmsFullDottxtRoute = EnLlmsFullDottxtRouteImport.update({
   id: '/en/llms-full.txt',
   path: '/en/llms-full.txt',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BlogRssDotxmlRoute = BlogRssDotxmlRouteImport.update({
+  id: '/blog/rss.xml',
+  path: '/blog/rss.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BlogSlugRoute = BlogSlugRouteImport.update({
+  id: '/blog/$slug',
+  path: '/blog/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppSettingsRoute = AppSettingsRouteImport.update({
@@ -161,6 +184,11 @@ const AppVoiceRouteRoute = AppVoiceRouteRouteImport.update({
   path: '/voice',
   getParentRoute: () => AppRoute,
 } as any)
+const EnBlogIndexRoute = EnBlogIndexRouteImport.update({
+  id: '/en/blog/',
+  path: '/en/blog/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppVoiceIndexRoute = AppVoiceIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -170,6 +198,21 @@ const AppHistoryIndexRoute = AppHistoryIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AppHistoryRoute,
+} as any)
+const EnBlogRssDotxmlRoute = EnBlogRssDotxmlRouteImport.update({
+  id: '/en/blog/rss.xml',
+  path: '/en/blog/rss.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EnBlogSlugRoute = EnBlogSlugRouteImport.update({
+  id: '/en/blog/$slug',
+  path: '/en/blog/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BlogTagTagSlugRoute = BlogTagTagSlugRouteImport.update({
+  id: '/blog/tag/$tagSlug',
+  path: '/blog/tag/$tagSlug',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AppHistoryExecutionIdRoute = AppHistoryExecutionIdRouteImport.update({
   id: '/$executionId',
@@ -185,6 +228,11 @@ const AppVoiceExamplesIndexRoute = AppVoiceExamplesIndexRouteImport.update({
   id: '/examples/',
   path: '/examples/',
   getParentRoute: () => AppVoiceRouteRoute,
+} as any)
+const EnBlogTagTagSlugRoute = EnBlogTagTagSlugRouteImport.update({
+  id: '/en/blog/tag/$tagSlug',
+  path: '/en/blog/tag/$tagSlug',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AppVoiceExamplesNewRoute = AppVoiceExamplesNewRouteImport.update({
   id: '/examples/new',
@@ -216,17 +264,25 @@ export interface FileRoutesByFullPath {
   '/app/onboarding': typeof AppOnboardingRoute
   '/app/plans': typeof AppPlansRoute
   '/app/settings': typeof AppSettingsRoute
+  '/blog/$slug': typeof BlogSlugRoute
+  '/blog/rss.xml': typeof BlogRssDotxmlRoute
   '/en/llms-full.txt': typeof EnLlmsFullDottxtRoute
   '/en/llms.txt': typeof EnLlmsDottxtRoute
   '/en/privacy': typeof EnPrivacyRoute
   '/en/terms': typeof EnTermsRoute
   '/app/': typeof AppIndexRoute
+  '/blog/': typeof BlogIndexRoute
   '/en/': typeof EnIndexRoute
   '/app/generate/$executionId': typeof AppGenerateExecutionIdRoute
   '/app/history/$executionId': typeof AppHistoryExecutionIdRoute
+  '/blog/tag/$tagSlug': typeof BlogTagTagSlugRoute
+  '/en/blog/$slug': typeof EnBlogSlugRoute
+  '/en/blog/rss.xml': typeof EnBlogRssDotxmlRoute
   '/app/history/': typeof AppHistoryIndexRoute
   '/app/voice/': typeof AppVoiceIndexRoute
+  '/en/blog/': typeof EnBlogIndexRoute
   '/app/voice/examples/new': typeof AppVoiceExamplesNewRoute
+  '/en/blog/tag/$tagSlug': typeof EnBlogTagTagSlugRoute
   '/app/voice/examples/': typeof AppVoiceExamplesIndexRoute
   '/app/voice/examples/$id/edit': typeof AppVoiceExamplesIdEditRoute
 }
@@ -246,17 +302,25 @@ export interface FileRoutesByTo {
   '/app/onboarding': typeof AppOnboardingRoute
   '/app/plans': typeof AppPlansRoute
   '/app/settings': typeof AppSettingsRoute
+  '/blog/$slug': typeof BlogSlugRoute
+  '/blog/rss.xml': typeof BlogRssDotxmlRoute
   '/en/llms-full.txt': typeof EnLlmsFullDottxtRoute
   '/en/llms.txt': typeof EnLlmsDottxtRoute
   '/en/privacy': typeof EnPrivacyRoute
   '/en/terms': typeof EnTermsRoute
   '/app': typeof AppIndexRoute
+  '/blog': typeof BlogIndexRoute
   '/en': typeof EnIndexRoute
   '/app/generate/$executionId': typeof AppGenerateExecutionIdRoute
   '/app/history/$executionId': typeof AppHistoryExecutionIdRoute
+  '/blog/tag/$tagSlug': typeof BlogTagTagSlugRoute
+  '/en/blog/$slug': typeof EnBlogSlugRoute
+  '/en/blog/rss.xml': typeof EnBlogRssDotxmlRoute
   '/app/history': typeof AppHistoryIndexRoute
   '/app/voice': typeof AppVoiceIndexRoute
+  '/en/blog': typeof EnBlogIndexRoute
   '/app/voice/examples/new': typeof AppVoiceExamplesNewRoute
+  '/en/blog/tag/$tagSlug': typeof EnBlogTagTagSlugRoute
   '/app/voice/examples': typeof AppVoiceExamplesIndexRoute
   '/app/voice/examples/$id/edit': typeof AppVoiceExamplesIdEditRoute
 }
@@ -280,17 +344,25 @@ export interface FileRoutesById {
   '/app/onboarding': typeof AppOnboardingRoute
   '/app/plans': typeof AppPlansRoute
   '/app/settings': typeof AppSettingsRoute
+  '/blog/$slug': typeof BlogSlugRoute
+  '/blog/rss.xml': typeof BlogRssDotxmlRoute
   '/en/llms-full.txt': typeof EnLlmsFullDottxtRoute
   '/en/llms.txt': typeof EnLlmsDottxtRoute
   '/en/privacy': typeof EnPrivacyRoute
   '/en/terms': typeof EnTermsRoute
   '/app/': typeof AppIndexRoute
+  '/blog/': typeof BlogIndexRoute
   '/en/': typeof EnIndexRoute
   '/app/generate/$executionId': typeof AppGenerateExecutionIdRoute
   '/app/history/$executionId': typeof AppHistoryExecutionIdRoute
+  '/blog/tag/$tagSlug': typeof BlogTagTagSlugRoute
+  '/en/blog/$slug': typeof EnBlogSlugRoute
+  '/en/blog/rss.xml': typeof EnBlogRssDotxmlRoute
   '/app/history/': typeof AppHistoryIndexRoute
   '/app/voice/': typeof AppVoiceIndexRoute
+  '/en/blog/': typeof EnBlogIndexRoute
   '/app/voice/examples/new': typeof AppVoiceExamplesNewRoute
+  '/en/blog/tag/$tagSlug': typeof EnBlogTagTagSlugRoute
   '/app/voice/examples/': typeof AppVoiceExamplesIndexRoute
   '/app/voice/examples/$id/edit': typeof AppVoiceExamplesIdEditRoute
 }
@@ -315,17 +387,25 @@ export interface FileRouteTypes {
     | '/app/onboarding'
     | '/app/plans'
     | '/app/settings'
+    | '/blog/$slug'
+    | '/blog/rss.xml'
     | '/en/llms-full.txt'
     | '/en/llms.txt'
     | '/en/privacy'
     | '/en/terms'
     | '/app/'
+    | '/blog/'
     | '/en/'
     | '/app/generate/$executionId'
     | '/app/history/$executionId'
+    | '/blog/tag/$tagSlug'
+    | '/en/blog/$slug'
+    | '/en/blog/rss.xml'
     | '/app/history/'
     | '/app/voice/'
+    | '/en/blog/'
     | '/app/voice/examples/new'
+    | '/en/blog/tag/$tagSlug'
     | '/app/voice/examples/'
     | '/app/voice/examples/$id/edit'
   fileRoutesByTo: FileRoutesByTo
@@ -345,17 +425,25 @@ export interface FileRouteTypes {
     | '/app/onboarding'
     | '/app/plans'
     | '/app/settings'
+    | '/blog/$slug'
+    | '/blog/rss.xml'
     | '/en/llms-full.txt'
     | '/en/llms.txt'
     | '/en/privacy'
     | '/en/terms'
     | '/app'
+    | '/blog'
     | '/en'
     | '/app/generate/$executionId'
     | '/app/history/$executionId'
+    | '/blog/tag/$tagSlug'
+    | '/en/blog/$slug'
+    | '/en/blog/rss.xml'
     | '/app/history'
     | '/app/voice'
+    | '/en/blog'
     | '/app/voice/examples/new'
+    | '/en/blog/tag/$tagSlug'
     | '/app/voice/examples'
     | '/app/voice/examples/$id/edit'
   id:
@@ -378,17 +466,25 @@ export interface FileRouteTypes {
     | '/app/onboarding'
     | '/app/plans'
     | '/app/settings'
+    | '/blog/$slug'
+    | '/blog/rss.xml'
     | '/en/llms-full.txt'
     | '/en/llms.txt'
     | '/en/privacy'
     | '/en/terms'
     | '/app/'
+    | '/blog/'
     | '/en/'
     | '/app/generate/$executionId'
     | '/app/history/$executionId'
+    | '/blog/tag/$tagSlug'
+    | '/en/blog/$slug'
+    | '/en/blog/rss.xml'
     | '/app/history/'
     | '/app/voice/'
+    | '/en/blog/'
     | '/app/voice/examples/new'
+    | '/en/blog/tag/$tagSlug'
     | '/app/voice/examples/'
     | '/app/voice/examples/$id/edit'
   fileRoutesById: FileRoutesById
@@ -405,11 +501,19 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TermsRoute: typeof TermsRoute
   ApiWaitlistRoute: typeof ApiWaitlistRoute
+  BlogSlugRoute: typeof BlogSlugRoute
+  BlogRssDotxmlRoute: typeof BlogRssDotxmlRoute
   EnLlmsFullDottxtRoute: typeof EnLlmsFullDottxtRoute
   EnLlmsDottxtRoute: typeof EnLlmsDottxtRoute
   EnPrivacyRoute: typeof EnPrivacyRoute
   EnTermsRoute: typeof EnTermsRoute
+  BlogIndexRoute: typeof BlogIndexRoute
   EnIndexRoute: typeof EnIndexRoute
+  BlogTagTagSlugRoute: typeof BlogTagTagSlugRoute
+  EnBlogSlugRoute: typeof EnBlogSlugRoute
+  EnBlogRssDotxmlRoute: typeof EnBlogRssDotxmlRoute
+  EnBlogIndexRoute: typeof EnBlogIndexRoute
+  EnBlogTagTagSlugRoute: typeof EnBlogTagTagSlugRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -491,6 +595,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EnIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/blog/': {
+      id: '/blog/'
+      path: '/blog'
+      fullPath: '/blog/'
+      preLoaderRoute: typeof BlogIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/app/': {
       id: '/app/'
       path: '/'
@@ -524,6 +635,20 @@ declare module '@tanstack/react-router' {
       path: '/en/llms-full.txt'
       fullPath: '/en/llms-full.txt'
       preLoaderRoute: typeof EnLlmsFullDottxtRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/blog/rss.xml': {
+      id: '/blog/rss.xml'
+      path: '/blog/rss.xml'
+      fullPath: '/blog/rss.xml'
+      preLoaderRoute: typeof BlogRssDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/blog/$slug': {
+      id: '/blog/$slug'
+      path: '/blog/$slug'
+      fullPath: '/blog/$slug'
+      preLoaderRoute: typeof BlogSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/app/settings': {
@@ -582,6 +707,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppVoiceRouteRouteImport
       parentRoute: typeof AppRoute
     }
+    '/en/blog/': {
+      id: '/en/blog/'
+      path: '/en/blog'
+      fullPath: '/en/blog/'
+      preLoaderRoute: typeof EnBlogIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/app/voice/': {
       id: '/app/voice/'
       path: '/'
@@ -595,6 +727,27 @@ declare module '@tanstack/react-router' {
       fullPath: '/app/history/'
       preLoaderRoute: typeof AppHistoryIndexRouteImport
       parentRoute: typeof AppHistoryRoute
+    }
+    '/en/blog/rss.xml': {
+      id: '/en/blog/rss.xml'
+      path: '/en/blog/rss.xml'
+      fullPath: '/en/blog/rss.xml'
+      preLoaderRoute: typeof EnBlogRssDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/en/blog/$slug': {
+      id: '/en/blog/$slug'
+      path: '/en/blog/$slug'
+      fullPath: '/en/blog/$slug'
+      preLoaderRoute: typeof EnBlogSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/blog/tag/$tagSlug': {
+      id: '/blog/tag/$tagSlug'
+      path: '/blog/tag/$tagSlug'
+      fullPath: '/blog/tag/$tagSlug'
+      preLoaderRoute: typeof BlogTagTagSlugRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/app/history/$executionId': {
       id: '/app/history/$executionId'
@@ -616,6 +769,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/app/voice/examples/'
       preLoaderRoute: typeof AppVoiceExamplesIndexRouteImport
       parentRoute: typeof AppVoiceRouteRoute
+    }
+    '/en/blog/tag/$tagSlug': {
+      id: '/en/blog/tag/$tagSlug'
+      path: '/en/blog/tag/$tagSlug'
+      fullPath: '/en/blog/tag/$tagSlug'
+      preLoaderRoute: typeof EnBlogTagTagSlugRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/app/voice/examples/new': {
       id: '/app/voice/examples/new'
@@ -714,11 +874,19 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TermsRoute: TermsRoute,
   ApiWaitlistRoute: ApiWaitlistRoute,
+  BlogSlugRoute: BlogSlugRoute,
+  BlogRssDotxmlRoute: BlogRssDotxmlRoute,
   EnLlmsFullDottxtRoute: EnLlmsFullDottxtRoute,
   EnLlmsDottxtRoute: EnLlmsDottxtRoute,
   EnPrivacyRoute: EnPrivacyRoute,
   EnTermsRoute: EnTermsRoute,
+  BlogIndexRoute: BlogIndexRoute,
   EnIndexRoute: EnIndexRoute,
+  BlogTagTagSlugRoute: BlogTagTagSlugRoute,
+  EnBlogSlugRoute: EnBlogSlugRoute,
+  EnBlogRssDotxmlRoute: EnBlogRssDotxmlRoute,
+  EnBlogIndexRoute: EnBlogIndexRoute,
+  EnBlogTagTagSlugRoute: EnBlogTagTagSlugRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

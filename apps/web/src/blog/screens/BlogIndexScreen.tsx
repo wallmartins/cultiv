@@ -9,9 +9,15 @@ export interface BlogIndexScreenProps {
   readonly locale: MarketingLocale;
   readonly posts: ReadonlyArray<BlogPost>;
   readonly activeTagSlug?: string;
+  readonly headingTitle?: string;
 }
 
-export function BlogIndexScreen({ locale, posts, activeTagSlug }: BlogIndexScreenProps) {
+export function BlogIndexScreen({
+  locale,
+  posts,
+  activeTagSlug,
+  headingTitle
+}: BlogIndexScreenProps) {
   const messages = getLocaleMessages(locale);
 
   return (
@@ -23,7 +29,7 @@ export function BlogIndexScreen({ locale, posts, activeTagSlug }: BlogIndexScree
           className="mb-4 block"
         />
         <Text as="h1" variant="display" className="mb-3 text-deep-blue">
-          {messages.header.nav.blog}
+          {headingTitle ?? messages.header.nav.blog}
         </Text>
         <Text as="p" variant="body-lg" className="text-ink-muted">
           {messages.blog.indexSubtitle}
