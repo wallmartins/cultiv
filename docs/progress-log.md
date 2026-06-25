@@ -1,5 +1,6 @@
 # Progress Log
 
+| 2026-06-25 | docs: Cultiv blog (Diário de bordo) design spec — Markdown-in-repo, bilingual `/blog` + `/en/blog`, tags with canonical slugs, `publishedAt` scheduling, automatic SEO/GEO/RSS/sitemap, Cultiv Cartography UI with Inter body; `docs/superpowers/specs/2026-06-25-cultiv-blog-design.md` |
 | 2026-06-24 | feat(web): paginated execution history — 10/25/50/100 per page with range summary and prev/next controls |
 | 2026-06-24 | fix(web): execution result reading — paragraph-split display in drawer and history detail via shared `ExecutionResultView` |
 | 2026-06-24 | feat(web+contracts): execution history presentation — list/detail show briefing topic as title, expedition intent + format (length tier · channel) as subtitle/column; filters by intent and format instead of internal plan signatures; `resolveExecutionPresentation` on API snapshots |
