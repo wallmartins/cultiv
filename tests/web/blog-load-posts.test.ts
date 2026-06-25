@@ -42,28 +42,31 @@ describe("estimateReadingTimeMinutes", () => {
 
 describe("loadBlogPostsFromDirectory", () => {
   it("filters future publishedAt when includeScheduled is false", () => {
-    const posts = loadBlogPostsFromDirectory("pt", fixturesPt, {
+    const posts = loadBlogPostsFromDirectory("pt", {
       now: new Date("2026-01-01T00:00:00Z"),
       includeScheduled: false,
+      contentLocaleDir: fixturesPt,
       publicDir: fixturesPublic
     });
     expect(posts.map((p) => p.slug)).toEqual(["post-valido"]);
   });
 
   it("includes scheduled posts when includeScheduled is true", () => {
-    const posts = loadBlogPostsFromDirectory("pt", fixturesPt, {
+    const posts = loadBlogPostsFromDirectory("pt", {
       now: new Date("2026-01-01T00:00:00Z"),
       includeScheduled: true,
+      contentLocaleDir: fixturesPt,
       publicDir: fixturesPublic
     });
     expect(posts.map((p) => p.slug).sort()).toEqual(["post-futuro", "post-valido"]);
   });
 
   it("filters by tagSlug", () => {
-    const posts = loadBlogPostsFromDirectory("pt", fixturesPt, {
+    const posts = loadBlogPostsFromDirectory("pt", {
       now: new Date("2026-01-01T00:00:00Z"),
       includeScheduled: true,
       tagSlug: "product",
+      contentLocaleDir: fixturesPt,
       publicDir: fixturesPublic
     });
     expect(posts.map((p) => p.slug)).toEqual(["post-futuro"]);

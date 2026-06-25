@@ -1,6 +1,4 @@
-import { join } from "node:path";
 import type { MarketingLocale } from "~/i18n/marketing/types";
-import { resolveBlogContentRoot, resolveBlogPublicDir } from "../lib/blog-content-root.server.js";
 import { loadBlogPostsFromDirectory } from "../lib/load-posts.server.js";
 import { getBlogIndexPath, getBlogPostPath, getBlogTagPath } from "./blog-paths";
 
@@ -26,8 +24,6 @@ function buildUrlEntry(
 }
 
 export function buildBlogSitemapUrlEntries(siteUrl: string, now = new Date()): string[] {
-  const contentRoot = resolveBlogContentRoot();
-  const publicDir = resolveBlogPublicDir();
   const buildDate = formatLastmod(now);
   const entries: string[] = [];
 
@@ -36,10 +32,7 @@ export function buildBlogSitemapUrlEntries(siteUrl: string, now = new Date()): s
       buildUrlEntry(siteUrl, getBlogIndexPath(locale), "0.8", "weekly", buildDate)
     );
 
-    const posts = loadBlogPostsFromDirectory(locale, join(contentRoot, locale), {
-      now,
-      publicDir
-    });
+    const posts = loadBlogPostsFromDirectory(locale, { now });
 
     for (const post of posts) {
       entries.push(

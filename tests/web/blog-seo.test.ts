@@ -125,8 +125,9 @@ describe("blog JSON-LD, RSS, and sitemap", () => {
   const siteUrl = "https://cultiv.app";
 
   it("builds BlogPosting JSON-LD for a post", () => {
-    const [post] = loadBlogPostsFromDirectory("pt", fixturesPt, {
+    const [post] = loadBlogPostsFromDirectory("pt", {
       now: new Date("2026-01-01T00:00:00Z"),
+      contentLocaleDir: fixturesPt,
       publicDir: fixturesPublic
     });
 
@@ -161,8 +162,9 @@ describe("blog JSON-LD, RSS, and sitemap", () => {
   });
 
   it("builds RSS 2.0 feed with items and enclosure", () => {
-    const posts = loadBlogPostsFromDirectory("pt", fixturesPt, {
+    const posts = loadBlogPostsFromDirectory("pt", {
       now: new Date("2026-01-01T00:00:00Z"),
+      contentLocaleDir: fixturesPt,
       publicDir: fixturesPublic
     });
     const rss = buildBlogRssXml("pt", posts, siteUrl);

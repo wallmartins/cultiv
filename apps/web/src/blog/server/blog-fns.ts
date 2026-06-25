@@ -5,14 +5,10 @@ import { getBlogTag } from "../../../content/blog/tags.js";
 export const fetchBlogPosts = createServerFn({ method: "GET" })
   .validator((input: { locale: MarketingLocale; tagSlug?: string; includeScheduled?: boolean }) => input)
   .handler(async ({ data }) => {
-    const { join } = await import("node:path");
-    const { resolveBlogContentRoot, resolveBlogPublicDir } = await import(
-      "../lib/blog-content-root.server.js"
-    );
+    const { resolveBlogPublicDir } = await import("../lib/blog-content-root.server.js");
     const { loadBlogPostsFromDirectory } = await import("../lib/load-posts.server.js");
-    const contentRoot = resolveBlogContentRoot();
     const publicDir = resolveBlogPublicDir();
-    return loadBlogPostsFromDirectory(data.locale, join(contentRoot, data.locale), {
+    return loadBlogPostsFromDirectory(data.locale, {
       tagSlug: data.tagSlug,
       includeScheduled: data.includeScheduled ?? false,
       publicDir
@@ -22,19 +18,13 @@ export const fetchBlogPosts = createServerFn({ method: "GET" })
 export const fetchBlogPost = createServerFn({ method: "GET" })
   .validator((input: { locale: MarketingLocale; slug: string; includeScheduled?: boolean }) => input)
   .handler(async ({ data }) => {
-    const { join } = await import("node:path");
-    const { resolveBlogContentRoot, resolveBlogPublicDir } = await import(
-      "../lib/blog-content-root.server.js"
-    );
+    const { resolveBlogPublicDir } = await import("../lib/blog-content-root.server.js");
     const { getBlogPostBySlug } = await import("../lib/load-posts.server.js");
-    const contentRoot = resolveBlogContentRoot();
     const publicDir = resolveBlogPublicDir();
-    const post = getBlogPostBySlug(
-      data.locale,
-      data.slug,
-      join(contentRoot, data.locale),
-      { includeScheduled: data.includeScheduled ?? false, publicDir }
-    );
+    const post = getBlogPostBySlug(data.locale, data.slug, {
+      includeScheduled: data.includeScheduled ?? false,
+      publicDir
+    });
     if (!post) {
       throw new Response("Not Found", { status: 404 });
     }
@@ -48,14 +38,10 @@ export const fetchBlogTagPage = createServerFn({ method: "GET" })
     if (!tag) {
       throw new Response("Not Found", { status: 404 });
     }
-    const { join } = await import("node:path");
-    const { resolveBlogContentRoot, resolveBlogPublicDir } = await import(
-      "../lib/blog-content-root.server.js"
-    );
+    const { resolveBlogPublicDir } = await import("../lib/blog-content-root.server.js");
     const { loadBlogPostsFromDirectory } = await import("../lib/load-posts.server.js");
-    const contentRoot = resolveBlogContentRoot();
     const publicDir = resolveBlogPublicDir();
-    const posts = loadBlogPostsFromDirectory(data.locale, join(contentRoot, data.locale), {
+    const posts = loadBlogPostsFromDirectory(data.locale, {
       tagSlug: data.tagSlug,
       includeScheduled: data.includeScheduled ?? false,
       publicDir

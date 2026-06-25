@@ -1,6 +1,6 @@
 # Progress Log
 
-| 2026-06-25 | fix(web): restore root Auth0 provider — keep session across callback→app; AuthLoading only on auth routes during hydration |
+| 2026-06-25 | fix(web): bundle blog markdown for Vercel — `import.meta.glob` embeds posts at build time; skip cover fs check without public dir; fix EN tag slug |
 | 2026-06-25 | ux(web): blog post back link — `BlogPostScreen` shows `backToIndex` above cover and after author block |
 | 2026-06-25 | content(web): Cultiv blog v1 complete — seed posts PT/EN (bem-vindo-ao-diario, welcome-to-the-logbook), cover assets, 158 web tests + build green |
 | 2026-06-25 | feat(web): add blog routes and RSS feeds — PT/EN TanStack routes (index, post, tag, rss.xml); MarketingLayout `showSectionRail`; RSS link in blog index head; tag page heading |

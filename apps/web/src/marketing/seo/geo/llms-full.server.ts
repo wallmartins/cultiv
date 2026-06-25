@@ -1,6 +1,4 @@
-import { join } from "node:path";
 import { getBlogPostPath } from "~/blog/seo/blog-paths";
-import { resolveBlogContentRoot, resolveBlogPublicDir } from "~/blog/lib/blog-content-root.server";
 import { loadBlogPostsFromDirectory } from "~/blog/lib/load-posts.server";
 import { getMarketingContentTypes } from "~/marketing/content/content-types/catalog";
 import { getLocaleMessages } from "~/i18n/marketing/get-locale";
@@ -14,14 +12,10 @@ function formatSection(title: string, lines: ReadonlyArray<string>): string {
 
 function buildRecentBlogPostsSection(): string {
   const siteUrl = getSiteUrl();
-  const contentRoot = resolveBlogContentRoot();
-  const publicDir = resolveBlogPublicDir();
   const lines = ["## Recent blog posts", ""];
 
   for (const blogLocale of ["pt", "en"] as const) {
-    const posts = loadBlogPostsFromDirectory(blogLocale, join(contentRoot, blogLocale), {
-      publicDir
-    }).slice(0, 5);
+    const posts = loadBlogPostsFromDirectory(blogLocale).slice(0, 5);
 
     if (posts.length === 0) {
       continue;

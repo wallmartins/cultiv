@@ -4,7 +4,7 @@ slug: "there-is-no-silver-bullet"
 publishedAt: "2026-06-25T17:30:00-03:00"
 excerpt: "How I learned that breaking instructions into smaller pieces delivers more authenticity than a single colossal prompt."
 coverImage: "/blog/covers/bem-vindo.webp"
-tags: ["AI", "prompt", "software-engineering"]
+tags: ["AI", "prompt", "software-engineer"]
 ---
 
 The obsession with the **perfect prompt** cost me months of empty work. I genuinely believed that if I could condense all my intent, every subtle nuance of tone, and every imaginable constraint into one colossal instruction, the machine would have the exact roadmap to brilliance. What I got in return was frustration. The result was content that felt like a patchwork quilt—soulless, lukewarm, and painfully generic.
