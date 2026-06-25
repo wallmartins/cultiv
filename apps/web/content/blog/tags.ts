@@ -1,7 +1,10 @@
 export const blogTags = [
   { slug: "voice", label: { pt: "Voz", en: "Voice" } },
   { slug: "product", label: { pt: "Produto", en: "Product" } },
-  { slug: "writing", label: { pt: "Escrita", en: "Writing" } }
+  { slug: "writing", label: { pt: "Escrita", en: "Writing" } },
+  { slug: "AI", label: { pt: "IA", en: "AI" } },
+  { slug: "prompt", label: { pt: "Prompt", en: "Prompt" } },
+  { slug: "software-engineer", label: { pt: "Engenheiro de Software", en: "Software Engineer" } },
 ] as const;
 
 export type BlogTagSlug = (typeof blogTags)[number]["slug"];
