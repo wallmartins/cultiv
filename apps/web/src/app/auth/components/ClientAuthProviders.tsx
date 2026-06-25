@@ -3,6 +3,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { getAuthCallbackUrl, isWebAuthConfigured, readWebAuthConfig } from "~/app/auth/lib/auth-config";
 import { API_ACCESS_SCOPES } from "~/app/auth/lib/use-api-access-token";
 import { ClientSdkProvider } from "~/platform/runtime/client-sdk-context";
+import { isAuthSurfacePath } from "~/app/auth/lib/is-auth-surface-path";
 import { AuthLoading } from "./AuthLoading";
 
 const AUTH_RETURN_TO_KEY = "cultiv.auth.returnTo";
@@ -29,7 +30,11 @@ export function ClientAuthProviders({ children }: ClientAuthProvidersProps) {
   }, []);
 
   if (!ready) {
-    return <AuthLoading />;
+    const pathname = typeof window !== "undefined" ? window.location.pathname : "";
+    if (isAuthSurfacePath(pathname)) {
+      return <AuthLoading />;
+    }
+    return children;
   }
 
   const config = readWebAuthConfig();

@@ -1,6 +1,7 @@
 import { HeadContent, Scripts, createRootRoute } from "@tanstack/react-router";
 import { DeferredAnalytics } from "~/marketing/components/DeferredAnalytics";
 import type { ReactNode } from "react";
+import { ClientAuthProviders } from "~/app/auth/components/ClientAuthProviders";
 import { DeferredLenisProvider } from "~/marketing/animations/deferred-lenis-provider";
 import { DefaultCatchBoundary } from "~/platform/components/DefaultCatchBoundary";
 import { NotFound } from "~/platform/components/NotFound";
@@ -33,7 +34,9 @@ function RootDocument({ children }: { readonly children: ReactNode }) {
         <HeadContent />
       </head>
       <body>
-        <DeferredLenisProvider>{children}</DeferredLenisProvider>
+        <ClientAuthProviders>
+          <DeferredLenisProvider>{children}</DeferredLenisProvider>
+        </ClientAuthProviders>
         <DeferredAnalytics />
         <Scripts />
       </body>

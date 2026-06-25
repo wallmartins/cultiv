@@ -3,7 +3,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef } from "react";
 import { AuthLoading } from "~/app/auth/components/AuthLoading";
 import { AuthNotConfigured } from "~/app/auth/components/AuthNotConfigured";
-import { ClientAuthProviders, consumeAuthReturnTo } from "~/app/auth/components/ClientAuthProviders";
+import { consumeAuthReturnTo } from "~/app/auth/components/ClientAuthProviders";
 import { isWebAuthConfigured } from "~/app/auth/lib/auth-config";
 import { resolvePostLoginNavigation } from "~/app/auth/lib/resolve-post-login-navigation";
 import { useRelogin } from "~/app/auth/lib/use-relogin";
@@ -19,11 +19,7 @@ function CallbackPage() {
     return <AuthNotConfigured />;
   }
 
-  return (
-    <ClientAuthProviders>
-      <CallbackPageContent />
-    </ClientAuthProviders>
-  );
+  return <CallbackPageContent />;
 }
 
 function CallbackPageContent() {
