@@ -390,5 +390,12 @@ export const en: LocaleMessages = {
   legal: {
     privacyTitle: "Privacy Policy",
     termsTitle: "Terms of Use"
+  },
+  blog: {
+    indexTitle: "Logbook — Cultiv",
+    indexDescription:
+      "Articles on authorial voice, AI writing, and mapping your signature on Cultiv.",
+    tagPageTitle: "Posts about {tag} — Cultiv",
+    rssTitle: "Logbook — Cultiv RSS"
   }
 };

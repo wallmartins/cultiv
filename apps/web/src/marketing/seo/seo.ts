@@ -8,7 +8,8 @@ export function seo({
   locale,
   image,
   imageAlt,
-  siteName = BRAND_NAME
+  siteName = BRAND_NAME,
+  type = "website"
 }: {
   readonly title: string;
   readonly description?: string;
@@ -17,6 +18,7 @@ export function seo({
   readonly image?: string;
   readonly imageAlt?: string;
   readonly siteName?: string;
+  readonly type?: "website" | "article";
 }) {
   const ogLocale = locale === "pt" ? "pt_BR" : locale === "en" ? "en_US" : undefined;
   const twitterCard = image ? "summary_large_image" : "summary";
@@ -24,7 +26,7 @@ export function seo({
   return [
     { title },
     ...(description ? [{ name: "description", content: description }] : []),
-    { name: "og:type", content: "website" },
+    { name: "og:type", content: type },
     { name: "og:site_name", content: siteName },
     { name: "og:title", content: title },
     ...(description ? [{ name: "og:description", content: description }] : []),

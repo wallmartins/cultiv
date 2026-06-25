@@ -216,4 +216,10 @@ export type LocaleMessages = {
     readonly privacyTitle: string;
     readonly termsTitle: string;
   };
+  readonly blog: {
+    readonly indexTitle: string;
+    readonly indexDescription: string;
+    readonly tagPageTitle: string;
+    readonly rssTitle: string;
+  };
 };

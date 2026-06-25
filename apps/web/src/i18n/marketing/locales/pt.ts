@@ -390,5 +390,12 @@ export const pt: LocaleMessages = {
   legal: {
     privacyTitle: "Política de Privacidade",
     termsTitle: "Termos de Uso"
+  },
+  blog: {
+    indexTitle: "Diário de bordo — Cultiv",
+    indexDescription:
+      "Artigos sobre voz autoral, escrita com IA e o território da sua assinatura no Cultiv.",
+    tagPageTitle: "Posts sobre {tag} — Cultiv",
+    rssTitle: "Diário de bordo — Cultiv RSS"
   }
 };
