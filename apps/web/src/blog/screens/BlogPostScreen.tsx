@@ -34,7 +34,7 @@ export function BlogPostScreen({ locale, post }: BlogPostScreenProps) {
 
   return (
     <Container className="py-[var(--spacing-section-sm)] md:py-[var(--spacing-section)]">
-      <article className="mx-auto max-w-3xl">
+      <article className="mx-auto w-full max-w-none md:max-w-[60vw]">
         <nav className="mb-6 md:mb-8" aria-label={messages.blog.backToIndex}>
           <Link
             to={getBlogIndexPath(locale)}
@@ -88,7 +88,7 @@ export function BlogPostScreen({ locale, post }: BlogPostScreenProps) {
           </div>
         </header>
 
-        <BlogProse html={post.html} className="mx-auto mb-10 max-w-[42rem] md:mb-12" />
+        <BlogProse html={post.html} className="mb-10 md:mb-12" />
 
         <div className="mb-10 space-y-8 md:mb-12">
           <BlogShareActions locale={locale} title={post.title} url={shareUrl} />

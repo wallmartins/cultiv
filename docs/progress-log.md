@@ -1,5 +1,6 @@
 # Progress Log
 
+| 2026-06-25 | ux(web): blog post typography — Playfair body at ~60vw column width for editorial read |
 | 2026-06-25 | fix(web): sticky marketing footer — `MarketingLayout` uses flex column so footer sits at viewport bottom on short pages |
 | 2026-06-25 | fix(web): bundle blog markdown for Vercel — `import.meta.glob` embeds posts at build time; skip cover fs check without public dir; fix EN tag slug |
 | 2026-06-25 | ux(web): blog post back link — `BlogPostScreen` shows `backToIndex` above cover and after author block |
