@@ -1,5 +1,7 @@
 # Progress Log
 
+| 2026-06-25 | feat(web): load and validate blog posts from markdown files — `loadBlogPostsFromDirectory`, `getBlogPostBySlug`, `renderMarkdownToHtml`, `resolveBlogPublicDir`; cover validation, scheduling filter, tag filter; fixture covers + 3 loader tests |
+| 2026-06-25 | chore(web): scaffold blog content directories and registry — gray-matter, marked, zod; tags.ts, author.ts, README, public/blog/covers + inline |
 | 2026-06-25 | docs: Cultiv blog implementation plan — 13 tasks (Markdown loader, routes, SEO/RSS/sitemap, UI, nav); `docs/superpowers/plans/2026-06-25-cultiv-blog.md` |
 | 2026-06-25 | docs: Cultiv blog (Diário de bordo) design spec — Markdown-in-repo, bilingual `/blog` + `/en/blog`, tags with canonical slugs, `publishedAt` scheduling, automatic SEO/GEO/RSS/sitemap, Cultiv Cartography UI with Inter body; `docs/superpowers/specs/2026-06-25-cultiv-blog-design.md` |
 | 2026-06-24 | feat(web): paginated execution history — 10/25/50/100 per page with range summary and prev/next controls |

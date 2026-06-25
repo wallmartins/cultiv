@@ -15,3 +15,11 @@ export function resolveBlogContentRoot(): string {
 
   return candidates[0]!;
 }
+
+export function resolveBlogPublicDir(): string {
+  const candidates = [join(process.cwd(), "public"), join(process.cwd(), "apps/web/public")];
+  for (const c of candidates) {
+    if (existsSync(join(c, "blog"))) return c;
+  }
+  return candidates[0]!;
+}
