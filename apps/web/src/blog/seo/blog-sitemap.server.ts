@@ -1,7 +1,7 @@
 import { join } from "node:path";
 import type { MarketingLocale } from "~/i18n/marketing/types";
-import { resolveBlogContentRoot, resolveBlogPublicDir } from "../lib/blog-content-root.js";
-import { loadBlogPostsFromDirectory } from "../lib/load-posts.js";
+import { resolveBlogContentRoot, resolveBlogPublicDir } from "../lib/blog-content-root.server.js";
+import { loadBlogPostsFromDirectory } from "../lib/load-posts.server.js";
 import { getBlogIndexPath, getBlogPostPath, getBlogTagPath } from "./blog-paths";
 
 const BLOG_LOCALES: readonly MarketingLocale[] = ["pt", "en"];

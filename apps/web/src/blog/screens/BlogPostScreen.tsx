@@ -6,7 +6,7 @@ import { BlogAuthorBlock } from "../components/BlogAuthorBlock";
 import { BlogProse } from "../components/BlogProse";
 import { BlogShareActions } from "../components/BlogShareActions";
 import type { BlogPost } from "../lib/post-schema";
-import { getBlogPostPath, getBlogTagPath } from "../seo/blog-paths";
+import { getBlogIndexPath, getBlogPostPath, getBlogTagPath } from "../seo/blog-paths";
 import { getHomePath, getLocaleMessages } from "~/i18n/marketing/get-locale";
 import { getSiteUrl } from "~/marketing/seo/site-url";
 import type { MarketingLocale } from "~/i18n/marketing/types";
@@ -35,6 +35,18 @@ export function BlogPostScreen({ locale, post }: BlogPostScreenProps) {
   return (
     <Container className="py-[var(--spacing-section-sm)] md:py-[var(--spacing-section)]">
       <article className="mx-auto max-w-3xl">
+        <nav className="mb-6 md:mb-8" aria-label={messages.blog.backToIndex}>
+          <Link
+            to={getBlogIndexPath(locale)}
+            className={cn(
+              "ui-type-mono text-sm text-ink-muted",
+              "transition-colors duration-200 hover:text-deep-blue motion-reduce:transition-none"
+            )}
+          >
+            {messages.blog.backToIndex}
+          </Link>
+        </nav>
+
         <div
           className={cn(
             "mb-8 overflow-hidden rounded-[5px] border-dotted-cartography shadow-cartography",
@@ -82,6 +94,18 @@ export function BlogPostScreen({ locale, post }: BlogPostScreenProps) {
           <BlogShareActions locale={locale} title={post.title} url={shareUrl} />
           <BlogAuthorBlock locale={locale} />
         </div>
+
+        <nav className="mb-8 md:mb-10" aria-label={messages.blog.backToIndex}>
+          <Link
+            to={getBlogIndexPath(locale)}
+            className={cn(
+              "ui-type-mono text-sm text-ink-muted",
+              "transition-colors duration-200 hover:text-deep-blue motion-reduce:transition-none"
+            )}
+          >
+            {messages.blog.backToIndex}
+          </Link>
+        </nav>
 
         <ButtonLink href={`${getHomePath(locale)}#waitlist`}>
           {messages.blog.ctaWaitlist}

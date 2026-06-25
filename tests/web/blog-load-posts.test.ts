@@ -3,7 +3,7 @@ import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { blogFrontmatterSchema } from "../../apps/web/src/blog/lib/post-schema.js";
 import { estimateReadingTimeMinutes } from "../../apps/web/src/blog/lib/reading-time.js";
-import { loadBlogPostsFromDirectory } from "../../apps/web/src/blog/lib/load-posts.js";
+import { loadBlogPostsFromDirectory } from "../../apps/web/src/blog/lib/load-posts.server.js";
 
 const fixturesRoot = join(dirname(fileURLToPath(import.meta.url)), "../../apps/web/src/blog/__fixtures__");
 const fixturesPt = join(fixturesRoot, "pt");

@@ -13,13 +13,14 @@ import {
   buildBlogTagJsonLd
 } from "../../apps/web/src/blog/seo/blog-json-ld.js";
 import { buildBlogRssXml } from "../../apps/web/src/blog/seo/blog-rss.js";
-import { buildBlogSitemapUrlEntries } from "../../apps/web/src/blog/seo/blog-sitemap.js";
-import { loadBlogPostsFromDirectory } from "../../apps/web/src/blog/lib/load-posts.js";
+import { buildBlogSitemapUrlEntries } from "../../apps/web/src/blog/seo/blog-sitemap.server.js";
+import { loadBlogPostsFromDirectory } from "../../apps/web/src/blog/lib/load-posts.server.js";
 import {
   resolveBlogIndexHead,
   resolveBlogPostHead,
   resolveBlogTagHead
 } from "../../apps/web/src/blog/seo/resolve-blog-head.js";
+import { buildFullSitemapXml } from "../../apps/web/src/marketing/seo/build-sitemap.server.js";
 import { buildSitemapXml } from "../../apps/web/src/marketing/seo/resolve-page-seo.js";
 
 const fixturesRoot = join(dirname(fileURLToPath(import.meta.url)), "../../apps/web/src/blog/__fixtures__");
@@ -174,10 +175,11 @@ describe("blog JSON-LD, RSS, and sitemap", () => {
 
   it("includes blog index and post URLs in sitemap entries", () => {
     const entries = buildBlogSitemapUrlEntries(siteUrl, new Date("2026-01-01T00:00:00Z"));
-    const xml = buildSitemapXml(siteUrl);
+    const xml = buildFullSitemapXml(siteUrl);
 
     expect(entries.join("\n")).toContain("<loc>https://cultiv.app/blog</loc>");
     expect(entries.join("\n")).toContain("<loc>https://cultiv.app/en/blog</loc>");
     expect(xml).toContain("https://cultiv.app/blog");
+    expect(buildSitemapXml(siteUrl)).not.toContain("https://cultiv.app/blog");
   });
 });

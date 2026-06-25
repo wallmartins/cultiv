@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { buildHomeJsonLdGraph, buildLegalPageJsonLd } from "../../apps/web/src/marketing/seo/geo/json-ld.js";
-import { buildGeoRobotsTxt, buildLlmsFullTxt, buildLlmsTxt } from "../../apps/web/src/marketing/seo/geo/llms.js";
+import { buildLlmsFullTxt } from "../../apps/web/src/marketing/seo/geo/llms-full.server.js";
+import { buildLlmsTxt } from "../../apps/web/src/marketing/seo/geo/llms.js";
+import { buildGeoRobotsTxt } from "../../apps/web/src/marketing/seo/geo/robots-txt.js";
 import { resolveHomePageHead } from "../../apps/web/src/marketing/seo/resolve-page-head.js";
 
 describe("GEO package", () => {

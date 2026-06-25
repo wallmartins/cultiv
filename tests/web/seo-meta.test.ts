@@ -5,6 +5,7 @@ import {
   getAlternatePagePath,
   resolvePageSeo
 } from "../../apps/web/src/marketing/seo/resolve-page-seo.js";
+import { buildFullSitemapXml } from "../../apps/web/src/marketing/seo/build-sitemap.server.js";
 
 describe("seo meta resolver", () => {
   it("pairs pt and en home routes with hreflang alternates", () => {
@@ -51,8 +52,10 @@ describe("seo meta resolver", () => {
     expect(sitemap).toContain("<loc>https://cultiv.app/en/terms</loc>");
     expect(sitemap).toContain("<loc>https://cultiv.app/llms.txt</loc>");
     expect(sitemap).toContain("<loc>https://cultiv.app/en/llms-full.txt</loc>");
-    expect(sitemap).toContain("<loc>https://cultiv.app/blog</loc>");
-    expect(sitemap).toContain("<loc>https://cultiv.app/en/blog</loc>");
+
+    const fullSitemap = buildFullSitemapXml(siteUrl);
+    expect(fullSitemap).toContain("<loc>https://cultiv.app/blog</loc>");
+    expect(fullSitemap).toContain("<loc>https://cultiv.app/en/blog</loc>");
   });
 
   it("pairs legal routes across locales", () => {
