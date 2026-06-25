@@ -6,6 +6,7 @@ import {
   getTermsPath
 } from "../../i18n/marketing/get-locale.js";
 import type { MarketingLocale } from "../../i18n/marketing/types.js";
+import { buildBlogSitemapUrlEntries } from "../../blog/seo/blog-sitemap.js";
 import { buildGeoRobotsTxt } from "./geo/llms.js";
 import { getOgImageUrl } from "./og-image.js";
 import { getSiteUrl } from "./site-url";
@@ -132,9 +133,11 @@ export function buildSitemapXml(siteUrl: string): string {
   </url>`;
   });
 
+  const blogUrls = buildBlogSitemapUrlEntries(siteUrl);
+
   return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${urls.join("\n")}
+${[...urls, ...blogUrls].join("\n")}
 </urlset>
 `;
 }

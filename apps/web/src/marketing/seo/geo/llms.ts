@@ -1,3 +1,7 @@
+import { join } from "node:path";
+import { getBlogIndexPath, getBlogPostPath, getBlogRssPath } from "../../../blog/seo/blog-paths.js";
+import { resolveBlogContentRoot, resolveBlogPublicDir } from "../../../blog/lib/blog-content-root.js";
+import { loadBlogPostsFromDirectory } from "../../../blog/lib/load-posts.js";
 import { getMarketingContentTypes } from "../../content/content-types/catalog.js";
 import {
   getHomePath,
@@ -46,6 +50,12 @@ export function buildLlmsTxt(locale: MarketingLocale): string {
       `- ${llms.labels.email}: ${messages.footer.contact}`,
       `- ${llms.labels.location}: ${messages.footer.location}`
     ]),
+    formatSection("Blog", [
+      `- Index (pt): ${siteUrl}${getBlogIndexPath("pt")}`,
+      `- RSS (pt): ${siteUrl}${getBlogRssPath("pt")}`,
+      `- Index (en): ${siteUrl}${getBlogIndexPath("en")}`,
+      `- RSS (en): ${siteUrl}${getBlogRssPath("en")}`
+    ]),
     "## Documentation",
     "",
     `- ${llms.labels.fullDoc}: ${fullLlms}`,
@@ -55,6 +65,31 @@ export function buildLlmsTxt(locale: MarketingLocale): string {
   ];
 
   return lines.join("\n").trimEnd() + "\n";
+}
+
+function buildRecentBlogPostsSection(): string {
+  const siteUrl = getSiteUrl();
+  const contentRoot = resolveBlogContentRoot();
+  const publicDir = resolveBlogPublicDir();
+  const lines = ["## Recent blog posts", ""];
+
+  for (const blogLocale of ["pt", "en"] as const) {
+    const posts = loadBlogPostsFromDirectory(blogLocale, join(contentRoot, blogLocale), {
+      publicDir
+    }).slice(0, 5);
+
+    if (posts.length === 0) {
+      continue;
+    }
+
+    lines.push(`### ${blogLocale === "pt" ? "Português" : "English"}`, "");
+    for (const post of posts) {
+      lines.push(`- ${post.title}: ${siteUrl}${getBlogPostPath(blogLocale, post.slug)}`);
+    }
+    lines.push("");
+  }
+
+  return lines.join("\n").trimEnd();
 }
 
 export function buildLlmsFullTxt(locale: MarketingLocale): string {
@@ -101,6 +136,8 @@ export function buildLlmsFullTxt(locale: MarketingLocale): string {
     formatsDetail.trimEnd(),
     "",
     faqSection.trimEnd(),
+    "",
+    buildRecentBlogPostsSection(),
     "",
     `*${llms.fullFooter}*`,
     ""

@@ -12,6 +12,7 @@ describe("GEO package", () => {
     expect(pt).toContain("Sua voz. Seu território. Suas palavras.");
     expect(pt).toContain("/llms-full.txt");
     expect(pt).toContain("/en/llms.txt");
+    expect(pt).toContain("/blog");
     expect(en).toContain("Your voice. Your territory. Your words.");
     expect(en).toContain("/llms.txt");
   });

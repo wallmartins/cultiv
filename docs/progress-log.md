@@ -1,5 +1,6 @@
 # Progress Log
 
+| 2026-06-25 | feat(web): blog JSON-LD, RSS, sitemap, and llms extensions — `blog-json-ld.ts`, `blog-rss.ts`, `blog-sitemap.ts`; sitemap + llms.txt/llms-full.txt wired; 8 blog-seo tests |
 | 2026-06-25 | feat(web): add blog server functions for route loaders — `fetchBlogPosts`, `fetchBlogPost`, `fetchBlogTagPage` in `blog/server/blog-fns.ts` |
 | 2026-06-25 | feat(web): load and validate blog posts from markdown files — `loadBlogPostsFromDirectory`, `getBlogPostBySlug`, `renderMarkdownToHtml`, `resolveBlogPublicDir`; cover validation, scheduling filter, tag filter; fixture covers + 3 loader tests |
 | 2026-06-25 | chore(web): scaffold blog content directories and registry — gray-matter, marked, zod; tags.ts, author.ts, README, public/blog/covers + inline |

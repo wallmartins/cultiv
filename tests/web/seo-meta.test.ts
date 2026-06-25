@@ -51,6 +51,8 @@ describe("seo meta resolver", () => {
     expect(sitemap).toContain("<loc>https://cultiv.app/en/terms</loc>");
     expect(sitemap).toContain("<loc>https://cultiv.app/llms.txt</loc>");
     expect(sitemap).toContain("<loc>https://cultiv.app/en/llms-full.txt</loc>");
+    expect(sitemap).toContain("<loc>https://cultiv.app/blog</loc>");
+    expect(sitemap).toContain("<loc>https://cultiv.app/en/blog</loc>");
   });
 
   it("pairs legal routes across locales", () => {
