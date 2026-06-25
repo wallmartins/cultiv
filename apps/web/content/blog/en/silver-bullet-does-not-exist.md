@@ -1,7 +1,7 @@
 ---
 title: "If There Is No Silver Bullet in Software Engineering, Why Would There Be One for AI?"
 slug: "there-is-no-silver-bullet"
-publishedAt: "2026-06-20T10:00:00-03:00"
+publishedAt: "2026-06-25T17:30:00-03:00"
 excerpt: "How I learned that breaking instructions into smaller pieces delivers more authenticity than a single colossal prompt."
 coverImage: "/blog/covers/bem-vindo.webp"
 tags: ["AI", "prompt", "software-engineering"]
