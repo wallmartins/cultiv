@@ -8,6 +8,7 @@ import {
   getTermsPath
 } from "~/i18n/marketing/get-locale";
 import type { MarketingLocale } from "~/i18n/marketing/types";
+import { getBlogIndexPath } from "~/blog/seo/blog-paths";
 import { marketingNavItems } from "~/marketing/navigation/marketing-nav-items";
 import { rebrandNavItemClassName } from "~/marketing/components/SiteHeader";
 
@@ -71,6 +72,11 @@ export function FooterSection({ locale }: FooterSectionProps) {
                     </a>
                   </li>
                 ))}
+                <li>
+                  <a href={getBlogIndexPath(locale)} className={footerNavLinkClassName}>
+                    {messages.header.nav.blog}
+                  </a>
+                </li>
               </ul>
             </div>
 

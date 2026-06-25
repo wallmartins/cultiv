@@ -8,6 +8,7 @@ import {
 import { BrandMark } from "~/marketing/components/BrandMark";
 import { LocaleToggle } from "~/marketing/components/LocaleToggle";
 import { rebrandNavItemClassName } from "~/marketing/components/SiteHeader";
+import { getBlogIndexPath } from "~/blog/seo/blog-paths";
 import { marketingNavItems } from "~/marketing/navigation/marketing-nav-items";
 import type { LocaleMessages, MarketingLocale } from "~/i18n/marketing/types";
 
@@ -94,6 +95,20 @@ export function SiteMobileNav({ locale, messages }: SiteMobileNavProps) {
                     </a>
                   </li>
                 ))}
+                <li className="border-b border-dotted-cartography py-4">
+                  <CoordinateLabel
+                    index={marketingNavItems.length + 1}
+                    label={messages.nav.blog}
+                    className="mb-2 block text-[0.6875rem] tracking-wide"
+                  />
+                  <a
+                    href={getBlogIndexPath(locale)}
+                    className={`${rebrandNavItemClassName} block text-sm normal-case tracking-normal`}
+                    onClick={closeMenu}
+                  >
+                    {messages.nav.blog}
+                  </a>
+                </li>
                 <li className="border-b border-dotted-cartography py-4">
                   <CoordinateLabel
                     index="—"

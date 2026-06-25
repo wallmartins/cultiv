@@ -4,6 +4,7 @@ import { SiteMobileNav } from "~/marketing/components/SiteMobileNav";
 import { LocaleToggle } from "~/marketing/components/LocaleToggle";
 import { getLocaleMessages } from "~/i18n/marketing/get-locale";
 import type { MarketingLocale } from "~/i18n/marketing/types";
+import { getBlogIndexPath } from "~/blog/seo/blog-paths";
 import { marketingNavItems } from "~/marketing/navigation/marketing-nav-items";
 
 export const rebrandNavItemClassName =
@@ -41,6 +42,9 @@ export function SiteHeader({ locale }: SiteHeaderProps) {
                 {messages.header.nav[item.key]}
               </a>
             ))}
+            <a href={getBlogIndexPath(locale)} className={rebrandNavItemClassName}>
+              {messages.header.nav.blog}
+            </a>
             <LocaleToggle locale={locale} className={rebrandNavItemClassName} />
             <ButtonLink href="#waitlist" size="compact" className="ml-1">
               {messages.header.ctaWaitlist}
