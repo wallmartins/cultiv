@@ -1,5 +1,6 @@
 # Progress Log
 
+| 2026-06-25 | content(web): Cultiv blog v1 complete — seed posts PT/EN (bem-vindo-ao-diario, welcome-to-the-logbook), cover assets, 158 web tests + build green |
 | 2026-06-25 | feat(web): add blog routes and RSS feeds — PT/EN TanStack routes (index, post, tag, rss.xml); MarketingLayout `showSectionRail`; RSS link in blog index head; tag page heading |
 | 2026-06-25 | feat(web): blog JSON-LD, RSS, sitemap, and llms extensions — `blog-json-ld.ts`, `blog-rss.ts`, `blog-sitemap.ts`; sitemap + llms.txt/llms-full.txt wired; 8 blog-seo tests |
 | 2026-06-25 | feat(web): add blog server functions for route loaders — `fetchBlogPosts`, `fetchBlogPost`, `fetchBlogTagPage` in `blog/server/blog-fns.ts` |
