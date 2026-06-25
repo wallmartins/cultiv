@@ -542,3 +542,11 @@ Key outcomes:
 - Glossary updates: `CONTEXT.md` (Marketing Surface, Showcase Sample, Waitlist, Cultiv, etc.)
 - Visual system (illustration + typography): Playfair/Caveat/Inter/JetBrains tokens; botanical SVG illustrations with paper grain + stroke-draw/upright animations; `LetterReveal`, `HandwrittenNote`, `StampBadge`, `TypeVine`; integrated across Hero, About, Formats, Showcase, Waitlist sections
 - Issue 94: `GenerationScreen.tsx` decomposed to 210 lines — extracted `GenerationComposeStep`, `LegacyContentTypeSection`, and hooks `useGenerationFormSelection`, `useGenerationPrefill`, `useGenerationSubmit`; generation tests pass
+
+### 2026-06-25 — Cultiv blog Task 5: SEO head resolvers
+
+- Blog path helpers (`getBlogIndexPath`, `getBlogPostPath`, `getBlogTagPath`, `getBlogRssPath`)
+- `resolveBlogIndexHead`, `resolveBlogPostHead`, `resolveBlogTagHead` with canonical + hreflang (index/tag; post canonical-only)
+- Extended `seo()` with optional `type` (`website` | `article`) for `og:type`
+- Minimal `blog` i18n namespace (indexTitle, indexDescription, tagPageTitle, rssTitle) in pt/en
+- Tests: `tests/web/blog-seo.test.ts` (4 passing)
