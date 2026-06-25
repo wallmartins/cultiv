@@ -12,7 +12,8 @@ export const pt: LocaleMessages = {
       territory: "O território",
       route: "A rota",
       tools: "Ferramentas",
-      questions: "Perguntas"
+      questions: "Perguntas",
+      blog: "Diário de bordo"
     }
   },
   footer: {
@@ -395,7 +396,19 @@ export const pt: LocaleMessages = {
     indexTitle: "Diário de bordo — Cultiv",
     indexDescription:
       "Artigos sobre voz autoral, escrita com IA e o território da sua assinatura no Cultiv.",
+    indexEyebrow: "Expedições",
+    indexSubtitle: "Notas do território sobre voz, escrita e produto.",
+    allTags: "Todas",
+    backToIndex: "← Voltar ao diário",
+    readTimeMinutes: "{minutes} min de leitura",
+    shareCopy: "Copiar link",
+    shareCopied: "Link copiado",
+    shareNative: "Compartilhar",
+    ctaWaitlist: "Explorar sua voz",
     tagPageTitle: "Posts sobre {tag} — Cultiv",
-    rssTitle: "Diário de bordo — Cultiv RSS"
+    tagPostCount: "{count} expedições",
+    tagEmpty: "Nenhuma expedição neste território ainda.",
+    rssTitle: "Diário de bordo — Cultiv RSS",
+    emptyIndex: "Nenhuma expedição registrada ainda."
   }
 };

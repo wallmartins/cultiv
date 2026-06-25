@@ -12,7 +12,8 @@ export const en: LocaleMessages = {
       territory: "The territory",
       route: "The route",
       tools: "Tools",
-      questions: "Questions"
+      questions: "Questions",
+      blog: "Logbook"
     }
   },
   footer: {
@@ -395,7 +396,19 @@ export const en: LocaleMessages = {
     indexTitle: "Logbook — Cultiv",
     indexDescription:
       "Articles on authorial voice, AI writing, and mapping your signature on Cultiv.",
+    indexEyebrow: "Expeditions",
+    indexSubtitle: "Field notes from the territory on voice, writing, and product.",
+    allTags: "All",
+    backToIndex: "← Back to logbook",
+    readTimeMinutes: "{minutes} min read",
+    shareCopy: "Copy link",
+    shareCopied: "Link copied",
+    shareNative: "Share",
+    ctaWaitlist: "Explore your voice",
     tagPageTitle: "Posts about {tag} — Cultiv",
-    rssTitle: "Logbook — Cultiv RSS"
+    tagPostCount: "{count} expeditions",
+    tagEmpty: "No expeditions mapped for this tag yet.",
+    rssTitle: "Logbook — Cultiv RSS",
+    emptyIndex: "No expeditions logged yet."
   }
 };

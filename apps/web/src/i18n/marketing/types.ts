@@ -26,6 +26,7 @@ export type LocaleMessages = {
       readonly route: string;
       readonly tools: string;
       readonly questions: string;
+      readonly blog: string;
     };
   };
   readonly footer: {
@@ -219,7 +220,19 @@ export type LocaleMessages = {
   readonly blog: {
     readonly indexTitle: string;
     readonly indexDescription: string;
+    readonly indexEyebrow: string;
+    readonly indexSubtitle: string;
+    readonly allTags: string;
+    readonly backToIndex: string;
+    readonly readTimeMinutes: string;
+    readonly shareCopy: string;
+    readonly shareCopied: string;
+    readonly shareNative: string;
+    readonly ctaWaitlist: string;
     readonly tagPageTitle: string;
+    readonly tagPostCount: string;
+    readonly tagEmpty: string;
     readonly rssTitle: string;
+    readonly emptyIndex: string;
   };
 };
