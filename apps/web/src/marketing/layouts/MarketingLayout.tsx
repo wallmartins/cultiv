@@ -22,13 +22,13 @@ export function MarketingLayout({
 
   return (
     <div
-      className="rebrand min-h-screen overflow-x-clip bg-transparent font-inter"
+      className="rebrand flex min-h-screen flex-col overflow-x-clip bg-transparent font-inter"
       data-surface="marketing"
       data-paper-parallax=""
     >
       <SiteHeader locale={locale} />
-      <div className="relative">
-        <div className="min-w-0">{children}</div>
+      <div className="relative flex min-w-0 flex-1 flex-col">
+        <div className="min-w-0 flex-1">{children}</div>
         {showSectionRail ? (
           <aside className="pointer-events-none absolute inset-y-0 left-0 z-20 hidden w-12 bg-transparent lg:block">
             <MarketingSectionRail locale={locale} />
