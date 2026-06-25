@@ -1,13 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { buildLlmsFullTxt } from "~/marketing/seo/geo/llms";
 
 export const Route = createFileRoute("/llms-full.txt")({
   server: {
     handlers: {
-      GET: () =>
-        new Response(buildLlmsFullTxt("pt"), {
+      GET: async () => {
+        const { buildLlmsFullTxt } = await import("~/marketing/seo/geo/llms-full.server");
+        return new Response(buildLlmsFullTxt("pt"), {
           headers: { "Content-Type": "text/plain; charset=utf-8" }
-        })
+        });
+      }
     }
   }
 });

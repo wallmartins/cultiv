@@ -1,3 +1,4 @@
+import { getBlogIndexPath, getBlogRssPath } from "../../../blog/seo/blog-paths.js";
 import { getMarketingContentTypes } from "../../content/content-types/catalog.js";
 import {
   getHomePath,
@@ -46,6 +47,12 @@ export function buildLlmsTxt(locale: MarketingLocale): string {
       `- ${llms.labels.email}: ${messages.footer.contact}`,
       `- ${llms.labels.location}: ${messages.footer.location}`
     ]),
+    formatSection("Blog", [
+      `- Index (pt): ${siteUrl}${getBlogIndexPath("pt")}`,
+      `- RSS (pt): ${siteUrl}${getBlogRssPath("pt")}`,
+      `- Index (en): ${siteUrl}${getBlogIndexPath("en")}`,
+      `- RSS (en): ${siteUrl}${getBlogRssPath("en")}`
+    ]),
     "## Documentation",
     "",
     `- ${llms.labels.fullDoc}: ${fullLlms}`,
@@ -55,81 +62,4 @@ export function buildLlmsTxt(locale: MarketingLocale): string {
   ];
 
   return lines.join("\n").trimEnd() + "\n";
-}
-
-export function buildLlmsFullTxt(locale: MarketingLocale): string {
-  const messages = getLocaleMessages(locale);
-  const { llms } = messages.geo;
-  const summary = buildLlmsTxt(locale);
-  const contentTypes = getMarketingContentTypes(locale, messages.contentTypes);
-
-  const routeSection = formatSection(
-    llms.sections.productFlow,
-    messages.route.steps.map((step) => {
-      return `### ${step.index}, ${step.title}\n\n${step.body}`;
-    })
-  );
-
-  const faqSection = formatSection(
-    llms.sections.faq,
-    messages.faq.items.map((item) => `### ${item.question}\n\n${item.answer}`)
-  );
-
-  const overviewSection = formatSection(llms.sections.overview, [
-    messages.hero.subheadline
-  ]);
-
-  const formatsDetail = formatSection(
-    llms.sections.formatsDetail,
-    contentTypes.map(
-      (type, index) =>
-        `${index + 1}. **${type.label}** (\`${type.id}\`)\n   ${type.description}`
-    )
-  );
-
-  return [
-    summary.replace(llms.citationNote, "").trimEnd(),
-    "",
-    "---",
-    "",
-    `# ${llms.fullTitle}`,
-    "",
-    overviewSection.trimEnd(),
-    "",
-    routeSection.trimEnd(),
-    "",
-    formatsDetail.trimEnd(),
-    "",
-    faqSection.trimEnd(),
-    "",
-    `*${llms.fullFooter}*`,
-    ""
-  ].join("\n");
-}
-
-export function buildGeoRobotsTxt(siteUrl: string): string {
-  const aiAgents = [
-    "GPTBot",
-    "ChatGPT-User",
-    "ClaudeBot",
-    "Claude-Web",
-    "anthropic-ai",
-    "Google-Extended",
-    "PerplexityBot",
-    "Applebot-Extended",
-    "cohere-ai"
-  ];
-
-  const aiRules = aiAgents
-    .map((agent) => `User-agent: ${agent}\nAllow: /`)
-    .join("\n\n");
-
-  return `User-agent: *
-Allow: /
-
-${aiRules}
-
-Sitemap: ${siteUrl}/sitemap.xml
-# LLM product documentation: ${siteUrl}/llms.txt
-`;
 }

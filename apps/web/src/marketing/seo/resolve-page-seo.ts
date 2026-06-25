@@ -6,7 +6,7 @@ import {
   getTermsPath
 } from "../../i18n/marketing/get-locale.js";
 import type { MarketingLocale } from "../../i18n/marketing/types.js";
-import { buildGeoRobotsTxt } from "./geo/llms.js";
+import { buildGeoRobotsTxt } from "./geo/robots-txt.js";
 import { getOgImageUrl } from "./og-image.js";
 import { getSiteUrl } from "./site-url";
 import { seo } from "./seo";

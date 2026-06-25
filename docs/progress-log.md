@@ -1,5 +1,14 @@
 # Progress Log
 
+| 2026-06-25 | ux(web): blog post back link — `BlogPostScreen` shows `backToIndex` above cover and after author block |
+| 2026-06-25 | content(web): Cultiv blog v1 complete — seed posts PT/EN (bem-vindo-ao-diario, welcome-to-the-logbook), cover assets, 158 web tests + build green |
+| 2026-06-25 | feat(web): add blog routes and RSS feeds — PT/EN TanStack routes (index, post, tag, rss.xml); MarketingLayout `showSectionRail`; RSS link in blog index head; tag page heading |
+| 2026-06-25 | feat(web): blog JSON-LD, RSS, sitemap, and llms extensions — `blog-json-ld.ts`, `blog-rss.ts`, `blog-sitemap.ts`; sitemap + llms.txt/llms-full.txt wired; 8 blog-seo tests |
+| 2026-06-25 | feat(web): add blog server functions for route loaders — `fetchBlogPosts`, `fetchBlogPost`, `fetchBlogTagPage` in `blog/server/blog-fns.ts` |
+| 2026-06-25 | feat(web): load and validate blog posts from markdown files — `loadBlogPostsFromDirectory`, `getBlogPostBySlug`, `renderMarkdownToHtml`, `resolveBlogPublicDir`; cover validation, scheduling filter, tag filter; fixture covers + 3 loader tests |
+| 2026-06-25 | chore(web): scaffold blog content directories and registry — gray-matter, marked, zod; tags.ts, author.ts, README, public/blog/covers + inline |
+| 2026-06-25 | docs: Cultiv blog implementation plan — 13 tasks (Markdown loader, routes, SEO/RSS/sitemap, UI, nav); `docs/superpowers/plans/2026-06-25-cultiv-blog.md` |
+| 2026-06-25 | docs: Cultiv blog (Diário de bordo) design spec — Markdown-in-repo, bilingual `/blog` + `/en/blog`, tags with canonical slugs, `publishedAt` scheduling, automatic SEO/GEO/RSS/sitemap, Cultiv Cartography UI with Inter body; `docs/superpowers/specs/2026-06-25-cultiv-blog-design.md` |
 | 2026-06-24 | feat(web): paginated execution history — 10/25/50/100 per page with range summary and prev/next controls |
 | 2026-06-24 | fix(web): execution result reading — paragraph-split display in drawer and history detail via shared `ExecutionResultView` |
 | 2026-06-24 | feat(web+contracts): execution history presentation — list/detail show briefing topic as title, expedition intent + format (length tier · channel) as subtitle/column; filters by intent and format instead of internal plan signatures; `resolveExecutionPresentation` on API snapshots |
@@ -537,3 +546,11 @@ Key outcomes:
 - Glossary updates: `CONTEXT.md` (Marketing Surface, Showcase Sample, Waitlist, Cultiv, etc.)
 - Visual system (illustration + typography): Playfair/Caveat/Inter/JetBrains tokens; botanical SVG illustrations with paper grain + stroke-draw/upright animations; `LetterReveal`, `HandwrittenNote`, `StampBadge`, `TypeVine`; integrated across Hero, About, Formats, Showcase, Waitlist sections
 - Issue 94: `GenerationScreen.tsx` decomposed to 210 lines — extracted `GenerationComposeStep`, `LegacyContentTypeSection`, and hooks `useGenerationFormSelection`, `useGenerationPrefill`, `useGenerationSubmit`; generation tests pass
+
+### 2026-06-25 — Cultiv blog Task 5: SEO head resolvers
+
+- Blog path helpers (`getBlogIndexPath`, `getBlogPostPath`, `getBlogTagPath`, `getBlogRssPath`)
+- `resolveBlogIndexHead`, `resolveBlogPostHead`, `resolveBlogTagHead` with canonical + hreflang (index/tag; post canonical-only)
+- Extended `seo()` with optional `type` (`website` | `article`) for `og:type`
+- Minimal `blog` i18n namespace (indexTitle, indexDescription, tagPageTitle, rssTitle) in pt/en
+- Tests: `tests/web/blog-seo.test.ts` (4 passing)
