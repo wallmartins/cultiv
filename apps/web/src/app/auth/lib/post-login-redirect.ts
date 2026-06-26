@@ -1,3 +1,4 @@
+import { hasCheckoutIntent } from "~/marketing/auth/has-checkout-intent";
 import { APP_ONBOARDING_PATH } from "./is-onboarding-route.js";
 
 export interface PostLoginRedirectInput {
@@ -9,6 +10,10 @@ export interface PostLoginRedirectInput {
 const APP_GENERATE_PATH = "/app/generate";
 
 export function resolvePostLoginPath(input: PostLoginRedirectInput): string {
+  if (input.intendedPath && hasCheckoutIntent(input.intendedPath)) {
+    return input.intendedPath;
+  }
+
   const gatedPath = shouldEnterOnboarding(input) ? APP_ONBOARDING_PATH : APP_GENERATE_PATH;
 
   if (!input.intendedPath || !isAppPath(input.intendedPath)) {

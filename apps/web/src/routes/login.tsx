@@ -10,7 +10,10 @@ import { useAppLocale } from "~/i18n/app/use-app-locale";
 import { useOptionalClientSdk, useSdkSessionStatus } from "~/platform/runtime/client-sdk-context";
 
 export const Route = createFileRoute("/login")({
-  component: LoginPage
+  validateSearch: (search: Record<string, unknown>) => ({
+    returnTo: typeof search.returnTo === "string" ? search.returnTo : undefined,
+  }),
+  component: LoginPage,
 });
 
 function LoginPage() {
@@ -28,6 +31,8 @@ function LoginPageContent() {
   const sessionStatus = useSdkSessionStatus();
   const relogin = useRelogin();
   const navigate = useNavigate();
+  const search = Route.useSearch();
+  const returnTo = search.returnTo ?? "/app/generate";
   const redirected = useRef(false);
 
   useEffect(() => {
@@ -55,11 +60,11 @@ function LoginPageContent() {
     if (!isAuthenticated) {
       void loginWithRedirect({
         appState: {
-          returnTo: "/app/generate"
-        }
+          returnTo,
+        },
       });
     }
-  }, [client, isAuthenticated, isLoading, loginWithRedirect, navigate, relogin, sessionStatus, user?.sub]);
+  }, [client, isAuthenticated, isLoading, loginWithRedirect, navigate, relogin, returnTo, sessionStatus, user?.sub]);
 
   if (sessionStatus === "auth_expired") {
     return <AuthLoading message={messages.auth.redirectingToLogin} />;
