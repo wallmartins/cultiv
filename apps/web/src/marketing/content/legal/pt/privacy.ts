@@ -5,15 +5,15 @@ export const privacyPt: LegalDocument = {
   sections: [
     {
       heading: "Dados coletados",
-      body: "Na lista de espera, coletamos email e, opcionalmente, nome. Ao usar o produto, poderemos processar exemplos de voz e textos gerados conforme descrito nesta política."
+      body: "Ao criar conta, coletamos email e dados de perfil necessários para o serviço. Ao usar o produto, processamos exemplos de voz e textos gerados conforme descrito nesta política."
     },
     {
       heading: "Finalidade",
-      body: "Usamos seus dados de waitlist para comunicar acesso antecipado e atualizações do Cultiv. Não vendemos seus dados."
+      body: "Usamos seus dados para operar o serviço, autenticar sua conta e comunicar atualizações do Cultiv. Não vendemos seus dados."
     },
     {
-      heading: "Processador",
-      body: "Envios da waitlist são encaminhados ao Loops (loops.so) para gestão de contatos e emails transacionais."
+      heading: "Processadores",
+      body: "Autenticação é gerenciada pelo Auth0. Pagamentos são processados por Stripe ou Asaas conforme sua região."
     },
     {
       heading: "Seus direitos",

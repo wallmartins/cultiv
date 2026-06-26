@@ -5,15 +5,15 @@ export const privacyEn: LegalDocument = {
   sections: [
     {
       heading: "Data we collect",
-      body: "On the waitlist, we collect email and optionally name. When using the product, we may process voice examples and generated text as described here."
+      body: "When you create an account, we collect email and profile data needed to operate the service. When using the product, we may process voice examples and generated text as described here."
     },
     {
       heading: "Purpose",
-      body: "We use waitlist data to communicate early access and Cultiv updates. We do not sell your data."
+      body: "We use your data to operate the service, authenticate your account, and communicate Cultiv updates. We do not sell your data."
     },
     {
-      heading: "Processor",
-      body: "Waitlist submissions are forwarded to Loops (loops.so) for contact management and transactional email."
+      heading: "Processors",
+      body: "Authentication is managed by Auth0. Payments are processed by Stripe or Asaas depending on your region."
     },
     {
       heading: "Your rights",
