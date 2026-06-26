@@ -20,11 +20,14 @@ export type LocaleMessages = {
     readonly navLabel: string;
     readonly menuOpenLabel: string;
     readonly menuCloseLabel: string;
-    readonly ctaWaitlist: string;
+    readonly ctaStartFree: string;
+    readonly ctaSignIn: string;
+    readonly ctaGoToApp: string;
     readonly nav: {
       readonly territory: string;
       readonly route: string;
       readonly tools: string;
+      readonly pricing: string;
       readonly questions: string;
       readonly blog: string;
     };
@@ -126,7 +129,13 @@ export type LocaleMessages = {
   readonly pricing: {
     readonly eyebrow: string;
     readonly title: string;
-    readonly cta: string;
+    readonly periodMonthly: string;
+    readonly periodAnnual: string;
+    readonly currencyBrl: string;
+    readonly currencyUsd: string;
+    readonly quotaLabel: string;
+    readonly ctaFree: string;
+    readonly ctaSubscribe: string;
     readonly recommendedBadge: string;
     readonly plans: ReadonlyArray<{
       readonly name: string;
@@ -142,24 +151,11 @@ export type LocaleMessages = {
     readonly title: string;
     readonly items: ReadonlyArray<FaqItem>;
   };
-  readonly waitlist: {
+  readonly launchCta: {
     readonly eyebrow: string;
     readonly title: string;
     readonly description: string;
-    readonly emailLabel: string;
-    readonly nameLabel: string;
-    readonly namePlaceholder: string;
-    readonly consentPrefix: string;
-    readonly consentLink: string;
-    readonly submit: string;
-    readonly submitting: string;
-    readonly success: string;
-    readonly note: string;
-    readonly errors: {
-      readonly validation: string;
-      readonly provider: string;
-      readonly rateLimited: string;
-    };
+    readonly ctaPrimary: string;
   };
   readonly contentTypes: ContentTypeLabels;
   readonly seo: {
@@ -205,7 +201,7 @@ export type LocaleMessages = {
         readonly home: string;
         readonly privacy: string;
         readonly terms: string;
-        readonly waitlist: string;
+        readonly signup: string;
         readonly email: string;
         readonly location: string;
         readonly fullDoc: string;
@@ -228,7 +224,7 @@ export type LocaleMessages = {
     readonly shareCopy: string;
     readonly shareCopied: string;
     readonly shareNative: string;
-    readonly ctaWaitlist: string;
+    readonly ctaStartFree: string;
     readonly tagPageTitle: string;
     readonly tagPostCount: string;
     readonly tagEmpty: string;
