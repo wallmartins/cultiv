@@ -41,7 +41,7 @@ export function buildLlmsTxt(locale: MarketingLocale): string {
       `- ${llms.labels.home}: ${homeUrl}`,
       `- ${llms.labels.privacy}: ${siteUrl}${getPrivacyPath(locale)}`,
       `- ${llms.labels.terms}: ${siteUrl}${getTermsPath(locale)}`,
-      `- ${llms.labels.signup}: ${siteUrl}/login`
+      `- ${llms.labels.signup}: ${homeUrl} (free account — ${locale === "pt" ? "Começar grátis" : "Start free"})`
     ]),
     formatSection(llms.sections.contact, [
       `- ${llms.labels.email}: ${messages.footer.contact}`,

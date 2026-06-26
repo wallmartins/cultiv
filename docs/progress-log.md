@@ -1,6 +1,6 @@
 # Progress Log
 
-| 2026-06-26 | docs: Cultiv launch marketing implementation plan — 12 tasks (auth intents, plan catalog, auto-checkout, i18n, pricing UI, waitlist removal, QA); `docs/superpowers/plans/2026-06-26-cultiv-launch-marketing.md` |
+| 2026-06-26 | docs(web): blog + GEO point to signup; launch runbook drops Loops, documents checkout redirect URLs |
 | 2026-06-26 | docs: Cultiv launch marketing design spec — conversion intents (free/paid), pay-first onboarding bypass, real pricing on landing, narrative restructure, full waitlist removal; `docs/superpowers/specs/2026-06-26-cultiv-launch-marketing-design.md` |
 | 2026-06-25 | ux(web): blog post typography — Playfair body at ~60vw column width for editorial read |
 | 2026-06-25 | fix(web): sticky marketing footer — `MarketingLayout` uses flex column so footer sits at viewport bottom on short pages |

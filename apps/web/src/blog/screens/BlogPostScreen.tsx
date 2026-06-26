@@ -1,4 +1,6 @@
-import { ButtonLink, Container, CoordinateLabel, Text, cn } from "@my-ai-orchestrator/ui";
+import { Container, CoordinateLabel, Text, cn } from "@my-ai-orchestrator/ui";
+import { defaultCurrencyForLocale } from "~/marketing/auth/marketing-auth-intent";
+import { MarketingConversionLink } from "~/marketing/components/MarketingConversionLink";
 import { Link } from "@tanstack/react-router";
 import { getBlogTagLabel } from "../../../content/blog/tags";
 import type { BlogTagSlug } from "../../../content/blog/tags";
@@ -107,9 +109,15 @@ export function BlogPostScreen({ locale, post }: BlogPostScreenProps) {
           </Link>
         </nav>
 
-        <ButtonLink href="/login">
+        <MarketingConversionLink
+          intent={{
+            plan: "free",
+            currency: defaultCurrencyForLocale(locale),
+            period: "monthly",
+          }}
+        >
           {messages.blog.ctaStartFree}
-        </ButtonLink>
+        </MarketingConversionLink>
       </article>
     </Container>
   );
