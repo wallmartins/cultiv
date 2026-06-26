@@ -171,6 +171,9 @@ importers:
       '@my-ai-orchestrator/client-sdk':
         specifier: workspace:*
         version: link:../../packages/client-sdk
+      '@my-ai-orchestrator/payments':
+        specifier: workspace:*
+        version: link:../../packages/payments
       '@my-ai-orchestrator/ui':
         specifier: workspace:*
         version: link:../../packages/ui

@@ -16,6 +16,7 @@
   "dependencies": {
     "@auth0/auth0-react": "^2.18.0",
     "@my-ai-orchestrator/client-sdk": "workspace:*",
+    "@my-ai-orchestrator/payments": "workspace:*",
     "@my-ai-orchestrator/ui": "workspace:*",
     "@tanstack/react-router": "^1.170.15",
     "@tanstack/react-start": "^1.168.25",
