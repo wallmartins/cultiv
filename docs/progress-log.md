@@ -1,5 +1,7 @@
 # Progress Log
 
+| 2026-06-26 | feat(web): marketing pricing section with live prices and conversion CTAs — Hero free intent + `#preco` secondary; PricingSection currency/period toggles, catalog prices, quotas, MarketingConversionLink per plan |
+| 2026-06-26 | chore(web): remove waitlist surface and Loops integration — delete server route/action/service, drop ioredis dep, update legal copy and hero CTA |
 | 2026-06-26 | docs(web): blog + GEO point to signup; launch runbook drops Loops, documents checkout redirect URLs |
 | 2026-06-26 | docs: Cultiv launch marketing design spec — conversion intents (free/paid), pay-first onboarding bypass, real pricing on landing, narrative restructure, full waitlist removal; `docs/superpowers/specs/2026-06-26-cultiv-launch-marketing-design.md` |
 | 2026-06-25 | ux(web): blog post typography — Playfair body at ~60vw column width for editorial read |
