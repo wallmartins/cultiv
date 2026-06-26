@@ -7,20 +7,20 @@ import { getLocaleMessages } from "~/i18n/marketing/get-locale";
 const SECTION_IDS = [
   "hero",
   "territorio",
+  "comparacao",
   "rota",
   "ferramentas",
-  "comparacao",
-  "depoimento",
   "preco",
+  "depoimento",
   "perguntas",
-  "waitlist",
+  "comecar",
 ] as const;
 
 type SectionId = (typeof SECTION_IDS)[number];
 
-const WAITLIST_INDEX = SECTION_IDS.indexOf("waitlist");
+const COMECAR_INDEX = SECTION_IDS.indexOf("comecar");
 
-const DARK_SURFACE_SECTIONS = new Set<SectionId>(["waitlist"]);
+const DARK_SURFACE_SECTIONS = new Set<SectionId>(["comecar"]);
 
 function sectionLabel(
   locale: MarketingLocale,
@@ -34,20 +34,20 @@ function sectionLabel(
       return locale === "pt" ? "Entrada" : "Entry";
     case "territorio":
       return messages.territory.eyebrow;
+    case "comparacao":
+      return messages.comparison.eyebrow;
     case "rota":
       return messages.route.eyebrow;
     case "ferramentas":
       return messages.tools.eyebrow;
-    case "comparacao":
-      return messages.comparison.eyebrow;
-    case "depoimento":
-      return locale === "pt" ? "Depoimento" : "Testimonial";
     case "preco":
       return messages.pricing.eyebrow;
+    case "depoimento":
+      return locale === "pt" ? "Depoimento" : "Testimonial";
     case "perguntas":
       return messages.faq.eyebrow;
-    case "waitlist":
-      return messages.waitlist.eyebrow;
+    case "comecar":
+      return messages.launchCta.eyebrow;
     default:
       return String(index).padStart(2, "0");
   }
@@ -58,17 +58,17 @@ function visibleHeight(rect: DOMRect): number {
 }
 
 function resolveActiveSectionIndex(viewportAnchor: number): number {
-  const waitlist = document.getElementById("waitlist");
-  if (waitlist) {
-    const waitlistRect = waitlist.getBoundingClientRect();
-    const waitlistVisible = visibleHeight(waitlistRect);
+  const comecar = document.getElementById("comecar");
+  if (comecar) {
+    const comecarRect = comecar.getBoundingClientRect();
+    const comecarVisible = visibleHeight(comecarRect);
 
     if (
-      waitlistVisible > 0 &&
-      ((waitlistRect.top <= viewportAnchor && waitlistRect.bottom > viewportAnchor) ||
-        waitlistVisible >= window.innerHeight * 0.28)
+      comecarVisible > 0 &&
+      ((comecarRect.top <= viewportAnchor && comecarRect.bottom > viewportAnchor) ||
+        comecarVisible >= window.innerHeight * 0.28)
     ) {
-      return WAITLIST_INDEX;
+      return COMECAR_INDEX;
     }
   }
 
