@@ -1,10 +1,13 @@
+import { useAuth0 } from "@auth0/auth0-react";
 import { ButtonLink, cn } from "@my-ai-orchestrator/ui";
 import { BrandMark } from "~/marketing/components/BrandMark";
+import { MarketingConversionLink } from "~/marketing/components/MarketingConversionLink";
 import { SiteMobileNav } from "~/marketing/components/SiteMobileNav";
 import { LocaleToggle } from "~/marketing/components/LocaleToggle";
 import { getLocaleMessages } from "~/i18n/marketing/get-locale";
 import type { MarketingLocale } from "~/i18n/marketing/types";
 import { getBlogIndexPath } from "~/blog/seo/blog-paths";
+import { defaultCurrencyForLocale } from "~/marketing/auth/marketing-auth-intent";
 import { marketingNavItems } from "~/marketing/navigation/marketing-nav-items";
 
 export const rebrandNavItemClassName =
@@ -16,6 +19,12 @@ export interface SiteHeaderProps {
 
 export function SiteHeader({ locale }: SiteHeaderProps) {
   const messages = getLocaleMessages(locale);
+  const { isAuthenticated } = useAuth0();
+  const freeIntent = {
+    plan: "free" as const,
+    currency: defaultCurrencyForLocale(locale),
+    period: "monthly" as const,
+  };
 
   return (
     <>
@@ -46,9 +55,20 @@ export function SiteHeader({ locale }: SiteHeaderProps) {
               {messages.header.nav.blog}
             </a>
             <LocaleToggle locale={locale} className={rebrandNavItemClassName} />
-            <ButtonLink href="#waitlist" size="compact" className="ml-1">
-              {messages.header.ctaWaitlist}
-            </ButtonLink>
+            {isAuthenticated ? (
+              <ButtonLink href="/app/generate" size="compact" className="ml-1">
+                {messages.header.ctaGoToApp}
+              </ButtonLink>
+            ) : (
+              <>
+                <MarketingConversionLink intent={freeIntent} size="compact" className="ml-1">
+                  {messages.header.ctaStartFree}
+                </MarketingConversionLink>
+                <ButtonLink href="/login" variant="ghost" size="compact">
+                  {messages.header.ctaSignIn}
+                </ButtonLink>
+              </>
+            )}
           </nav>
 
           <SiteMobileNav locale={locale} messages={messages.header} />

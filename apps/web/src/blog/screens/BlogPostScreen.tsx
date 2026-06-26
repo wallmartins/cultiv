@@ -107,8 +107,8 @@ export function BlogPostScreen({ locale, post }: BlogPostScreenProps) {
           </Link>
         </nav>
 
-        <ButtonLink href={`${getHomePath(locale)}#waitlist`}>
-          {messages.blog.ctaWaitlist}
+        <ButtonLink href="/login">
+          {messages.blog.ctaStartFree}
         </ButtonLink>
       </article>
     </Container>

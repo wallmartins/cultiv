@@ -88,8 +88,8 @@ export function PricingSection({ locale }: PricingSectionProps) {
                 </ul>
 
                 <div className="flex justify-center pt-2">
-                  <ButtonLink href="#waitlist" variant="primary">
-                    {pricing.cta}
+                  <ButtonLink href="/login" variant="primary">
+                    {plan.name.includes("Free") ? pricing.ctaFree : pricing.ctaSubscribe}
                   </ButtonLink>
                 </div>
               </article>
