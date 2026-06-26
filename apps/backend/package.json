@@ -43,7 +43,8 @@
     "hono": "^4.8.0",
     "ioredis": "^5.6.1",
     "kysely": "^0.29.2",
-    "pg": "^8.21.0"
+    "pg": "^8.21.0",
+    "stripe": "^22.2.1"
   },
   "devDependencies": {
     "@types/pg": "^8.15.6",

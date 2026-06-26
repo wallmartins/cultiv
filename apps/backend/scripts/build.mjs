@@ -11,7 +11,8 @@ const external = [
   "effect",
   "hono",
   "@hono/node-server",
-  "kysely"
+  "kysely",
+  "stripe"
 ];
 
 const migrationDir = "src/infra/migrations";
