@@ -9,6 +9,8 @@ import {
 } from "@my-ai-orchestrator/ui";
 import { useHeroHeadlineWords } from "~/marketing/animations/use-hero-headline-words";
 import { useSectionReveal } from "~/marketing/animations/use-section-reveal";
+import { defaultCurrencyForLocale } from "~/marketing/auth/marketing-auth-intent";
+import { MarketingConversionLink } from "~/marketing/components/MarketingConversionLink";
 import { getLocaleMessages } from "~/i18n/marketing/get-locale";
 import type { MarketingLocale } from "~/i18n/marketing/types";
 import { HeroComparisonFrame } from "~/marketing/visual/HeroComparisonFrame";
@@ -93,8 +95,16 @@ export function HeroSection({ locale }: HeroSectionProps) {
             data-hero-item
             className="flex flex-col gap-3 sm:flex-row sm:items-center"
           >
-            <ButtonLink href="#waitlist">{hero.ctaPrimary}</ButtonLink>
-            <ButtonLink href="#rota" variant="ghost">
+            <MarketingConversionLink
+              intent={{
+                plan: "free",
+                currency: defaultCurrencyForLocale(locale),
+                period: "monthly",
+              }}
+            >
+              {hero.ctaPrimary}
+            </MarketingConversionLink>
+            <ButtonLink href="#preco" variant="ghost">
               {hero.ctaSecondary}
             </ButtonLink>
           </div>
