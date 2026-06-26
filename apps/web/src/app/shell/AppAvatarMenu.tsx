@@ -3,7 +3,9 @@ import { cn } from "@my-ai-orchestrator/ui";
 import { Link } from "@tanstack/react-router";
 import { useEffect, useId, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
+import { getLogoutReturnUrl } from "~/app/auth/lib/get-logout-return-url";
 import type { AppMessages } from "~/i18n/app/types";
+import { useAppLocale } from "~/i18n/app/use-app-locale";
 
 export interface AppAvatarMenuProps {
   readonly messages: AppMessages;
@@ -75,6 +77,7 @@ function measureMenuPosition(trigger: HTMLElement): CSSProperties {
 
 export function AppAvatarMenu({ messages }: AppAvatarMenuProps) {
   const { user, logout } = useAuth0();
+  const { locale } = useAppLocale();
   const [open, setOpen] = useState(false);
   const [menuStyle, setMenuStyle] = useState<CSSProperties>({});
   const menuId = useId();
@@ -194,7 +197,7 @@ export function AppAvatarMenu({ messages }: AppAvatarMenuProps) {
           setOpen(false);
           void logout({
             logoutParams: {
-              returnTo: `${window.location.origin}/login`
+              returnTo: getLogoutReturnUrl(locale)
             }
           });
         }}

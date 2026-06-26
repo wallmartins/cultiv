@@ -1,6 +1,7 @@
 import { useAuth0 } from "@auth0/auth0-react";
 import { Button, cn, CoordinateLabel, Text } from "@my-ai-orchestrator/ui";
 import { useId, useRef, useState, type RefObject } from "react";
+import { getLogoutReturnUrl } from "~/app/auth/lib/get-logout-return-url";
 import { useAppLocale } from "~/i18n/app/use-app-locale";
 import { hasVoiceConsent } from "~/app/voice/lib/voice-consent-storage";
 import { AppCard } from "~/platform/ui/AppCard";
@@ -139,7 +140,7 @@ export function SettingsScreen() {
           onClick={() =>
             void logout({
               logoutParams: {
-                returnTo: `${window.location.origin}/login`
+                returnTo: getLogoutReturnUrl(locale)
               }
             })
           }

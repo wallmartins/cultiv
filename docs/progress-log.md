@@ -1,5 +1,6 @@
 # Progress Log
 
+| 2026-06-26 | fix(web): logout redirects to marketing landing — `getLogoutReturnUrl` uses locale home (`/` or `/en`) instead of `/login` in avatar menu and settings |
 | 2026-06-26 | feat(web): marketing pricing section with live prices and conversion CTAs — Hero free intent + `#preco` secondary; PricingSection currency/period toggles, catalog prices, quotas, MarketingConversionLink per plan |
 | 2026-06-26 | chore(web): remove waitlist surface and Loops integration — delete server route/action/service, drop ioredis dep, update legal copy and hero CTA |
 | 2026-06-26 | docs(web): blog + GEO point to signup; launch runbook drops Loops, documents checkout redirect URLs |
