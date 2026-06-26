@@ -64,7 +64,7 @@
   [data-surface="marketing"] {
     --cartography-grain-opacity: 0.06;
     --marketing-header-top: 1rem;
-    --marketing-header-bar: 3.25rem;
+    --marketing-header-bar: 3.5rem;
     --marketing-header-gap: 0.75rem;
     --marketing-chrome-top: calc(
       var(--marketing-header-top) + var(--marketing-header-bar) + var(--marketing-header-gap)
@@ -73,7 +73,7 @@
 
   @media (min-width: 768px) {
     [data-surface="marketing"] {
-      --marketing-header-bar: 3.75rem;
+      --marketing-header-bar: 4.25rem;
     }
   }
 

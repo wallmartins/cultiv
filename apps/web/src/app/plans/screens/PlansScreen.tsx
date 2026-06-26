@@ -1,12 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSearch } from "@tanstack/react-router";
 import { Button, CoordinateLabel, Text } from "@my-ai-orchestrator/ui";
 import type { BillingCheckoutPeriod, BillingCurrency, BillingPaymentMethod } from "@my-ai-orchestrator/contracts";
 import { useAppLocale } from "~/i18n/app/use-app-locale";
 import { useClientSdk } from "~/platform/runtime/client-sdk-context";
 import { AppCard } from "~/platform/ui/AppCard";
-
-type CheckoutStatus = "success" | "cancel" | undefined;
 
 function ToggleButton(props: { readonly active: boolean; readonly label: string; readonly onClick: () => void }) {
   return (
@@ -72,7 +70,8 @@ function PlanCard({
 export function PlansScreen() {
   const { messages } = useAppLocale();
   const client = useClientSdk();
-  const search = useSearch({ strict: false }) as { status?: CheckoutStatus };
+  const search = useSearch({ from: "/app/plans" });
+  const autoCheckoutStarted = useRef(false);
   const [currency, setCurrency] = useState<BillingCurrency>("BRL");
   const [billingPeriod, setBillingPeriod] = useState<Exclude<BillingCheckoutPeriod, "one_time">>("monthly");
   const [paymentMethod, setPaymentMethod] = useState<BillingPaymentMethod>("card");
@@ -110,8 +109,10 @@ export function PlansScreen() {
   async function startCheckout(
     productKind: "subscription" | "topup",
     internalRef: string,
-    period: BillingCheckoutPeriod
+    period: BillingCheckoutPeriod,
+    currencyOverride?: BillingCurrency
   ): Promise<void> {
+    const checkoutCurrency = currencyOverride ?? currency;
     setCheckoutError(false);
     setLoadingCheckout(
       productKind === "topup" ? "topup" : internalRef === "criador" ? "criador" : "pro"
@@ -122,9 +123,9 @@ export function PlansScreen() {
         client.billing.createCheckout({
           productKind,
           internalRef,
-          currency,
+          currency: checkoutCurrency,
           billingPeriod: period,
-          ...(currency === "BRL" ? { paymentMethod } : {})
+          ...(checkoutCurrency === "BRL" ? { paymentMethod } : {})
         })
       );
       window.location.href = result.url;
@@ -133,6 +134,24 @@ export function PlansScreen() {
       setLoadingCheckout(null);
     }
   }
+
+  useEffect(() => {
+    if (!search.checkout || !entitlement || autoCheckoutStarted.current) {
+      return;
+    }
+
+    const targetTier = search.checkout === "criador" ? "starter" : "pro";
+    const alreadyOnPlan = entitlement.tier === targetTier && entitlement.status === "active";
+
+    if (alreadyOnPlan) {
+      return;
+    }
+
+    autoCheckoutStarted.current = true;
+    const checkoutCurrency = search.currency ?? currency;
+    const checkoutPeriod = search.period ?? billingPeriod;
+    void startCheckout("subscription", search.checkout, checkoutPeriod, checkoutCurrency);
+  }, [entitlement, search.checkout, search.currency, search.period, currency, billingPeriod]);
 
   const isPro = entitlement?.tier === "pro" && entitlement.status === "active";
   const isCriador = entitlement?.tier === "starter" && entitlement.status === "active";

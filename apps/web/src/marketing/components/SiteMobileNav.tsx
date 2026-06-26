@@ -1,3 +1,4 @@
+import { useAuth0 } from "@auth0/auth0-react";
 import { useEffect, useId, useState } from "react";
 import { createPortal } from "react-dom";
 import {
@@ -6,9 +7,11 @@ import {
   cn
 } from "@my-ai-orchestrator/ui";
 import { BrandMark } from "~/marketing/components/BrandMark";
+import { MarketingConversionLink } from "~/marketing/components/MarketingConversionLink";
 import { LocaleToggle } from "~/marketing/components/LocaleToggle";
 import { rebrandNavItemClassName } from "~/marketing/components/SiteHeader";
 import { getBlogIndexPath } from "~/blog/seo/blog-paths";
+import { defaultCurrencyForLocale } from "~/marketing/auth/marketing-auth-intent";
 import { marketingNavItems } from "~/marketing/navigation/marketing-nav-items";
 import type { LocaleMessages, MarketingLocale } from "~/i18n/marketing/types";
 
@@ -18,9 +21,15 @@ export interface SiteMobileNavProps {
 }
 
 export function SiteMobileNav({ locale, messages }: SiteMobileNavProps) {
+  const { isAuthenticated } = useAuth0();
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const panelId = useId();
+  const freeIntent = {
+    plan: "free" as const,
+    currency: defaultCurrencyForLocale(locale),
+    period: "monthly" as const,
+  };
 
   useEffect(() => {
     setMounted(true);
@@ -119,10 +128,30 @@ export function SiteMobileNav({ locale, messages }: SiteMobileNavProps) {
                 </li>
               </ul>
 
-              <div className="border-t border-dotted-cartography px-[var(--spacing-gutter)] py-5">
-                <ButtonLink href="#waitlist" className="w-full justify-center" onClick={closeMenu}>
-                  {messages.ctaWaitlist}
-                </ButtonLink>
+              <div className="flex flex-col gap-2 border-t border-dotted-cartography px-[var(--spacing-gutter)] py-5">
+                {isAuthenticated ? (
+                  <ButtonLink href="/app/generate" className="w-full justify-center" onClick={closeMenu}>
+                    {messages.ctaGoToApp}
+                  </ButtonLink>
+                ) : (
+                  <>
+                    <MarketingConversionLink
+                      intent={freeIntent}
+                      className="w-full justify-center"
+                      onClick={closeMenu}
+                    >
+                      {messages.ctaStartFree}
+                    </MarketingConversionLink>
+                    <ButtonLink
+                      href="/login"
+                      variant="ghost"
+                      className="w-full justify-center"
+                      onClick={closeMenu}
+                    >
+                      {messages.ctaSignIn}
+                    </ButtonLink>
+                  </>
+                )}
               </div>
             </nav>
           </div>,

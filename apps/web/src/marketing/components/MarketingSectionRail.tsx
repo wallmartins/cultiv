@@ -7,20 +7,15 @@ import { getLocaleMessages } from "~/i18n/marketing/get-locale";
 const SECTION_IDS = [
   "hero",
   "territorio",
+  "comparacao",
   "rota",
   "ferramentas",
-  "comparacao",
-  "depoimento",
   "preco",
+  "depoimento",
   "perguntas",
-  "waitlist",
 ] as const;
 
 type SectionId = (typeof SECTION_IDS)[number];
-
-const WAITLIST_INDEX = SECTION_IDS.indexOf("waitlist");
-
-const DARK_SURFACE_SECTIONS = new Set<SectionId>(["waitlist"]);
 
 function sectionLabel(
   locale: MarketingLocale,
@@ -34,20 +29,18 @@ function sectionLabel(
       return locale === "pt" ? "Entrada" : "Entry";
     case "territorio":
       return messages.territory.eyebrow;
+    case "comparacao":
+      return messages.comparison.eyebrow;
     case "rota":
       return messages.route.eyebrow;
     case "ferramentas":
       return messages.tools.eyebrow;
-    case "comparacao":
-      return messages.comparison.eyebrow;
-    case "depoimento":
-      return locale === "pt" ? "Depoimento" : "Testimonial";
     case "preco":
       return messages.pricing.eyebrow;
+    case "depoimento":
+      return locale === "pt" ? "Depoimento" : "Testimonial";
     case "perguntas":
       return messages.faq.eyebrow;
-    case "waitlist":
-      return messages.waitlist.eyebrow;
     default:
       return String(index).padStart(2, "0");
   }
@@ -58,20 +51,6 @@ function visibleHeight(rect: DOMRect): number {
 }
 
 function resolveActiveSectionIndex(viewportAnchor: number): number {
-  const waitlist = document.getElementById("waitlist");
-  if (waitlist) {
-    const waitlistRect = waitlist.getBoundingClientRect();
-    const waitlistVisible = visibleHeight(waitlistRect);
-
-    if (
-      waitlistVisible > 0 &&
-      ((waitlistRect.top <= viewportAnchor && waitlistRect.bottom > viewportAnchor) ||
-        waitlistVisible >= window.innerHeight * 0.28)
-    ) {
-      return WAITLIST_INDEX;
-    }
-  }
-
   for (let index = SECTION_IDS.length - 1; index >= 0; index -= 1) {
     const element = document.getElementById(SECTION_IDS[index] ?? "");
     if (!element) {
@@ -104,28 +83,7 @@ function resolveActiveSectionIndex(viewportAnchor: number): number {
   return bestIndex;
 }
 
-function isDarkSurfaceBehindRail(railElement: HTMLElement | null): boolean {
-  if (!railElement) {
-    return false;
-  }
-
-  const railRect = railElement.getBoundingClientRect();
-
-  for (const sectionId of DARK_SURFACE_SECTIONS) {
-    const section = document.getElementById(sectionId);
-    if (!section) {
-      continue;
-    }
-
-    const sectionRect = section.getBoundingClientRect();
-    const overlaps =
-      sectionRect.top < railRect.bottom && sectionRect.bottom > railRect.top;
-
-    if (overlaps) {
-      return true;
-    }
-  }
-
+function isDarkSurfaceBehindRail(_railElement: HTMLElement | null): boolean {
   return false;
 }
 
@@ -167,13 +125,9 @@ export function MarketingSectionRail({ locale }: MarketingSectionRailProps) {
     const update = () => {
       const viewportAnchor = window.innerHeight * 0.42;
       const nextActiveIndex = resolveActiveSectionIndex(viewportAnchor);
-      const activeSectionId = SECTION_IDS[nextActiveIndex];
 
       setActiveIndex(nextActiveIndex);
-      setUseLightRail(
-        (activeSectionId !== undefined && DARK_SURFACE_SECTIONS.has(activeSectionId)) ||
-          isDarkSurfaceBehindRail(navRef.current)
-      );
+      setUseLightRail(isDarkSurfaceBehindRail(navRef.current));
     };
 
     update();

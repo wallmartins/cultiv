@@ -17,9 +17,8 @@ This repository is a **pnpm monorepo** containing the marketing site, the authen
 | **Voice Profile** | Durable model of tone, cadence, vocabulary, and constraints — learned from the author's samples |
 | **Content Type** | Kind of text (blog post, LinkedIn post, thread, newsletter, …) — each with its own pipeline |
 | **Generation Request** | User-facing request to generate text (briefing + voice inputs) without exposing internal pipeline structure |
-| **Marketing Surface** | Unauthenticated experience: editorial showcase + waitlist |
+| **Marketing Surface** | Unauthenticated experience: editorial showcase + signup CTAs |
 | **Authenticated Workspace** | Auth0-protected `/app` routes: generation, voice, history, settings |
-| **Waitlist Submission** | Signup forwarded to Loops; does **not** create an application user |
 
 Full domain language: [`CONTEXT.md`](./CONTEXT.md).
 
@@ -32,7 +31,7 @@ Full domain language: [`CONTEXT.md`](./CONTEXT.md).
                          │  Vercel — apps/web              │
                          │  Marketing (/ , /en)            │
                          │  Workspace (/app/*) + Auth0     │
-                         │  Waitlist → Loops (server-only) │
+                         │  Signup → Auth0 → /app/generate │
                          └────────────┬────────────────────┘
                                       │ client-sdk (HTTPS)
                                       ▼
@@ -55,7 +54,7 @@ Full domain language: [`CONTEXT.md`](./CONTEXT.md).
 
 ### Boundary rules
 
-- **Marketing waitlist** never calls the product backend — Loops only (`POST /api/waitlist` or TanStack Start server fn). Enforced in `tests/governance/frontend-client-boundary.test.ts`.
+- **Marketing CTAs** route anonymous visitors through Auth0 login with `returnTo=/app/generate` (free) or plan checkout paths (paid). Auth-aware links use `buildMarketingConversionUrl` in `apps/web/src/marketing/auth/marketing-auth-intent.ts`.
 - **Authenticated workspace** consumes the backend only through `@my-ai-orchestrator/client-sdk`, not raw HTTP to internal routes.
 - **Auth** (login/signup) is Auth0 — not the client SDK.
 - **Production** uses durable async execution (`EXECUTION_MODE=async`): API enqueues jobs; a separate **worker** process drains the queue.
@@ -134,7 +133,7 @@ TanStack Start app serving both the **marketing surface** and the **authenticate
 
 | Route | Locale | Purpose |
 |-------|--------|---------|
-| `/`, `/en` | pt / en | Home + showcase + waitlist |
+| `/`, `/en` | pt / en | Home + showcase + signup CTAs |
 | `/privacy`, `/terms`, `/en/*` | pt / en | Legal |
 | `/llms.txt`, `/llms-full.txt` | pt / en | LLM-oriented product docs |
 | `/robots.txt`, `/sitemap.xml` | — | Crawlers |
@@ -160,13 +159,19 @@ apps/web/src/
 └── styles/
 ```
 
-### Waitlist flow
+### Launch conversion
+
+Marketing CTAs (hero, header, pricing, blog, launch section) use `MarketingConversionLink` and `buildMarketingConversionUrl`:
 
 ```
-Browser (WaitlistForm)
-    → submitWaitlistAction (TanStack Start server fn)
-    → Waitlist Service (Effect)
-    → Loops adapter
+Anonymous visitor
+    → MarketingConversionLink (free intent)
+    → /login?returnTo=%2Fapp%2Fgenerate
+    → Auth0 signup/login
+    → /app/generate
+
+Authenticated visitor → /app/generate (skips login)
+Paid plan CTAs → /login?returnTo=<checkout path> or direct checkout when logged in
 ```
 
 Showcase samples live in `apps/web/src/marketing/content/showcase/`.
@@ -316,8 +321,6 @@ See [`apps/web/.env.example`](./apps/web/.env.example).
 | `SITE_URL` | Canonical URL for SEO / OG |
 | `VITE_API_BASE_URL` | Backend public API |
 | `VITE_AUTH0_*` | Auth0 SPA client |
-| `REDIS_URL` | Waitlist rate limit (production on Vercel) |
-| `LOOPS_API_KEY`, `LOOPS_WAITLIST_ID` | Server-only — never `VITE_*` |
 
 Do not commit `.env` files.
 
@@ -350,7 +353,7 @@ Do not commit `.env` files.
 2. **Node.js:** 22.x
 3. `vercel.json` installs from monorepo root:
    `cd ../.. && npx -y pnpm@11.3.0 install --frozen-lockfile`
-4. Production env: `SITE_URL`, `VITE_*`, `REDIS_URL`, `LOOPS_*`, Auth0 vars
+4. Production env: `SITE_URL`, `VITE_*`, Auth0 vars
 
 ### Railway (backend)
 
@@ -392,7 +395,7 @@ GitHub Actions (`.github/workflows/ci.yml`):
 
 | Phase | Scope | Status |
 |-------|--------|--------|
-| **Marketing Surface** | Landing, showcase, waitlist, legal, SEO | Code complete |
+| **Marketing Surface** | Landing, showcase, signup CTAs, legal, SEO | Code complete |
 | **Authenticated Workspace** | Auth0, `/app`, generation, voice, history, billing | Implemented in repo; production hardening in progress |
 | **Go-live** | Vercel + Railway + Auth0 + Cloudflare + smoke tests | Pending |
 

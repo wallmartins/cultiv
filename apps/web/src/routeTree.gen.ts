@@ -34,7 +34,6 @@ import { Route as AppOnboardingRouteImport } from './routes/app/onboarding'
 import { Route as AppHistoryRouteImport } from './routes/app/history'
 import { Route as AppGenerateRouteImport } from './routes/app/generate'
 import { Route as AppBillingRouteImport } from './routes/app/billing'
-import { Route as ApiWaitlistRouteImport } from './routes/api/waitlist'
 import { Route as AppVoiceRouteRouteImport } from './routes/app/voice/route'
 import { Route as EnBlogIndexRouteImport } from './routes/en/blog/index'
 import { Route as AppVoiceIndexRouteImport } from './routes/app/voice/index'
@@ -174,11 +173,6 @@ const AppBillingRoute = AppBillingRouteImport.update({
   path: '/billing',
   getParentRoute: () => AppRoute,
 } as any)
-const ApiWaitlistRoute = ApiWaitlistRouteImport.update({
-  id: '/api/waitlist',
-  path: '/api/waitlist',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AppVoiceRouteRoute = AppVoiceRouteRouteImport.update({
   id: '/voice',
   path: '/voice',
@@ -257,7 +251,6 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/app/voice': typeof AppVoiceRouteRouteWithChildren
-  '/api/waitlist': typeof ApiWaitlistRoute
   '/app/billing': typeof AppBillingRoute
   '/app/generate': typeof AppGenerateRouteWithChildren
   '/app/history': typeof AppHistoryRouteWithChildren
@@ -296,7 +289,6 @@ export interface FileRoutesByTo {
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
-  '/api/waitlist': typeof ApiWaitlistRoute
   '/app/billing': typeof AppBillingRoute
   '/app/generate': typeof AppGenerateRouteWithChildren
   '/app/onboarding': typeof AppOnboardingRoute
@@ -337,7 +329,6 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/app/voice': typeof AppVoiceRouteRouteWithChildren
-  '/api/waitlist': typeof ApiWaitlistRoute
   '/app/billing': typeof AppBillingRoute
   '/app/generate': typeof AppGenerateRouteWithChildren
   '/app/history': typeof AppHistoryRouteWithChildren
@@ -380,7 +371,6 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/terms'
     | '/app/voice'
-    | '/api/waitlist'
     | '/app/billing'
     | '/app/generate'
     | '/app/history'
@@ -419,7 +409,6 @@ export interface FileRouteTypes {
     | '/robots.txt'
     | '/sitemap.xml'
     | '/terms'
-    | '/api/waitlist'
     | '/app/billing'
     | '/app/generate'
     | '/app/onboarding'
@@ -459,7 +448,6 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/terms'
     | '/app/voice'
-    | '/api/waitlist'
     | '/app/billing'
     | '/app/generate'
     | '/app/history'
@@ -500,7 +488,6 @@ export interface RootRouteChildren {
   RobotsDottxtRoute: typeof RobotsDottxtRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TermsRoute: typeof TermsRoute
-  ApiWaitlistRoute: typeof ApiWaitlistRoute
   BlogSlugRoute: typeof BlogSlugRoute
   BlogRssDotxmlRoute: typeof BlogRssDotxmlRoute
   EnLlmsFullDottxtRoute: typeof EnLlmsFullDottxtRoute
@@ -693,13 +680,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppBillingRouteImport
       parentRoute: typeof AppRoute
     }
-    '/api/waitlist': {
-      id: '/api/waitlist'
-      path: '/api/waitlist'
-      fullPath: '/api/waitlist'
-      preLoaderRoute: typeof ApiWaitlistRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/app/voice': {
       id: '/app/voice'
       path: '/voice'
@@ -873,7 +853,6 @@ const rootRouteChildren: RootRouteChildren = {
   RobotsDottxtRoute: RobotsDottxtRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TermsRoute: TermsRoute,
-  ApiWaitlistRoute: ApiWaitlistRoute,
   BlogSlugRoute: BlogSlugRoute,
   BlogRssDotxmlRoute: BlogRssDotxmlRoute,
   EnLlmsFullDottxtRoute: EnLlmsFullDottxtRoute,

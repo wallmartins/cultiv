@@ -92,6 +92,8 @@ pnpm hitl:durable-smoke   # requires Docker PG+Redis + GEMINI_API_KEY
 | `APP_VERSION` | release tag / semver | |
 | `BACKEND_TRUST_PROXY` | `true` (default when unset in prod) | Trust `X-Forwarded-For` behind Railway/CF |
 | `BACKEND_ALLOW_IN_MEMORY_RUNTIME` | **unset or `false`** | **Forbidden** in production (boot fails if `true`) |
+| `BILLING_CHECKOUT_SUCCESS_URL` | `https://<domain>/app/onboarding?from=checkout` | Post-payment redirect for new paid users |
+| `BILLING_CHECKOUT_CANCEL_URL` | `https://<domain>/app/plans?status=cancel` | Checkout cancel redirect |
 
 Optional tuning:
 
@@ -110,9 +112,6 @@ Optional tuning:
 | `VITE_AUTH0_DOMAIN` | Host only, no `https://` |
 | `VITE_AUTH0_CLIENT_ID` | Auth0 SPA client |
 | `VITE_AUTH0_AUDIENCE` | Same as `AUTH_AUDIENCE` |
-| `REDIS_URL` | **Required** for waitlist rate limit (can share backend Redis) |
-| `LOOPS_API_KEY` | Server-only (waitlist) |
-| `LOOPS_WAITLIST_ID` | Server-only |
 
 See `apps/web/.env.example` and `.env.example` at repo root.
 
@@ -224,7 +223,7 @@ Document your WAF product and rules (see [durable HITL §2](./durable-async-runt
 
 - [ ] `/` and `/en` load; locale toggle works
 - [ ] Legal pages render
-- [ ] Waitlist signup reaches Loops (production list)
+- [ ] Free signup CTA → Auth0 login → `/app/generate`
 - [ ] Lighthouse mobile: performance ≥ 90, accessibility ≥ 90 on `/` (issue 08)
 
 **Sign-off:** _________________ Date: _______

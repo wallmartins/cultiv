@@ -48,6 +48,16 @@ describe("resolvePostLoginPath", () => {
       })
     ).toBe("/app/onboarding");
   });
+
+  it("honors paid checkout returnTo before onboarding gate", () => {
+    expect(
+      resolvePostLoginPath({
+        onboardingComplete: false,
+        voiceExampleCount: 0,
+        intendedPath: "/app/plans?checkout=criador&currency=BRL&period=monthly",
+      })
+    ).toBe("/app/plans?checkout=criador&currency=BRL&period=monthly");
+  });
 });
 
 describe("shouldEnterOnboarding", () => {

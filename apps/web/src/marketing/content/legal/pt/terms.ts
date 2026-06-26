@@ -5,7 +5,7 @@ export const termsPt: LegalDocument = {
   sections: [
     {
       heading: "Aceitação",
-      body: "Ao usar o site do Cultiv e enviar dados na waitlist, você concorda com estes termos e com a política de privacidade."
+      body: "Ao usar o site do Cultiv e criar uma conta, você concorda com estes termos e com a política de privacidade."
     },
     {
       heading: "Serviço em validação",

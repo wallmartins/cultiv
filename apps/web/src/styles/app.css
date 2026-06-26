@@ -470,7 +470,7 @@
 
 @media (min-width: 768px) {
   [data-surface="marketing"] {
-    --site-header-height: 5.25rem;
+    --site-header-height: 5.75rem;
   }
 }
 
