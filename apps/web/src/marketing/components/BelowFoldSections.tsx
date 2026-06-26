@@ -5,7 +5,6 @@ import { ComparisonSection } from "~/marketing/sections/ComparisonSection";
 import { TestimonialSection } from "~/marketing/sections/TestimonialSection";
 import { PricingSection } from "~/marketing/sections/PricingSection";
 import { FaqSection } from "~/marketing/sections/FaqSection";
-import { LaunchCtaSection } from "~/marketing/sections/LaunchCtaSection";
 import type { MarketingLocale } from "~/i18n/marketing/types";
 
 export interface BelowFoldSectionsProps {
@@ -22,7 +21,6 @@ export function BelowFoldSections({ locale }: BelowFoldSectionsProps) {
       <PricingSection locale={locale} />
       <TestimonialSection locale={locale} />
       <FaqSection locale={locale} />
-      <LaunchCtaSection locale={locale} />
     </>
   );
 }

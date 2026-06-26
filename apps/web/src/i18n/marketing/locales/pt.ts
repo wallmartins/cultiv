@@ -195,9 +195,10 @@ export const pt: LocaleMessages = {
     periodAnnual: "Anual",
     currencyBrl: "BRL",
     currencyUsd: "USD",
-    quotaLabel: "~{count} gerações/mês",
+    quotaMultiplierFeature: "{multiplier}× as gerações do Explorador",
     ctaFree: "Começar grátis",
     ctaSubscribe: "Assinar",
+    annualSavingsBadge: "-{percent}%",
     recommendedBadge: "Mais popular",
     plans: [
       {
@@ -220,7 +221,7 @@ export const pt: LocaleMessages = {
         description: "Para quem publica com regularidade e quer mais profundidade.",
         features: [
           "Tudo do Explorador",
-          "Mais gerações por mês",
+          "{quotaMultiplier}",
           "Modos rápido e equilibrado",
           "Perfil de voz mais robusto",
           "Suporte a textos de médio e longo alcance"
@@ -235,7 +236,7 @@ export const pt: LocaleMessages = {
           "Para quem escreve com frequência e quer o máximo de controle e qualidade.",
         features: [
           "Tudo do Criador",
-          "Uma cota muito mais generosa de gerações",
+          "{quotaMultiplier}",
           "Todos os modos de geração, incluindo o mais refinado",
           "Acesso antecipado a novidades",
           "Prioridade no rollout"

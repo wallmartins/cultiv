@@ -133,9 +133,10 @@ export type LocaleMessages = {
     readonly periodAnnual: string;
     readonly currencyBrl: string;
     readonly currencyUsd: string;
-    readonly quotaLabel: string;
+    readonly quotaMultiplierFeature: string;
     readonly ctaFree: string;
     readonly ctaSubscribe: string;
+    readonly annualSavingsBadge: string;
     readonly recommendedBadge: string;
     readonly plans: ReadonlyArray<{
       readonly name: string;

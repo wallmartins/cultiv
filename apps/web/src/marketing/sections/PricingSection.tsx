@@ -16,10 +16,13 @@ import {
 import { formatPlanPrice } from "~/marketing/auth/format-plan-price";
 import { MarketingConversionLink } from "~/marketing/components/MarketingConversionLink";
 import {
+  formatQuotaMultiplier,
   getMarketingDisplayPrice,
-  getMarketingPlanQuotas,
   MARKETING_CANONICAL_CREDIT_COST,
+  resolveMarketingAnnualSavingsPercent,
+  resolveMarketingQuotaMultiplier,
 } from "~/marketing/content/plans/marketing-plan-catalog";
+import { PRICING_QUOTA_MULTIPLIER_FEATURE } from "~/marketing/content/plans/pricing-feature-placeholders";
 import { getLocaleMessages } from "~/i18n/marketing/get-locale";
 import type { MarketingLocale } from "~/i18n/marketing/types";
 
@@ -33,10 +36,12 @@ function PricingToggle({
   active,
   label,
   onClick,
+  badge,
 }: {
   readonly active: boolean;
   readonly label: string;
   readonly onClick: () => void;
+  readonly badge?: string;
 }) {
   return (
     <button
@@ -44,13 +49,45 @@ function PricingToggle({
       aria-pressed={active}
       onClick={onClick}
       className={cn(
-        "ui-type-mono rounded-[3px] px-2.5 py-1 text-[0.625rem] uppercase tracking-widest transition-colors",
+        "ui-type-mono inline-flex items-center gap-1.5 rounded-[3px] px-2.5 py-1 text-[0.625rem] uppercase tracking-widest transition-colors",
         active ? "bg-deep-blue text-off-white" : "text-ink-muted hover:text-ink"
       )}
     >
-      {label}
+      <span>{label}</span>
+      {badge ? (
+        <span
+          className={cn(
+            "rounded-[3px] px-1 py-px text-[0.5625rem] font-semibold tracking-normal",
+            active ? "bg-terracotta text-off-white" : "bg-terracotta/15 text-terracotta"
+          )}
+        >
+          {badge}
+        </span>
+      ) : null}
     </button>
   );
+}
+
+function formatAnnualSavingsBadge(template: string, percent: number): string {
+  return template.replace("{percent}", String(percent));
+}
+
+function resolvePricingFeatureText(
+  feature: string,
+  planId: MarketingPlanIntent,
+  locale: MarketingLocale,
+  quotaMultiplierFeature: string
+): string {
+  if (feature !== PRICING_QUOTA_MULTIPLIER_FEATURE || planId === "free") {
+    return feature;
+  }
+
+  const multiplier = formatQuotaMultiplier(
+    resolveMarketingQuotaMultiplier(planId, MARKETING_CANONICAL_CREDIT_COST),
+    locale
+  );
+
+  return quotaMultiplierFeature.replace("{multiplier}", multiplier);
 }
 
 export function PricingSection({ locale }: PricingSectionProps) {
@@ -60,7 +97,13 @@ export function PricingSection({ locale }: PricingSectionProps) {
     defaultCurrencyForLocale(locale)
   );
   const [period, setPeriod] = useState<MarketingBillingPeriod>("monthly");
-  const quotas = getMarketingPlanQuotas(MARKETING_CANONICAL_CREDIT_COST);
+  const annualSavingsPercent =
+    resolveMarketingAnnualSavingsPercent("criador", currency) ??
+    resolveMarketingAnnualSavingsPercent("pro", currency);
+  const annualSavingsBadge =
+    annualSavingsPercent !== null
+      ? formatAnnualSavingsBadge(pricing.annualSavingsBadge, annualSavingsPercent)
+      : undefined;
 
   return (
     <section id="preco" className="border-b border-ink-ghost/30">
@@ -116,6 +159,7 @@ export function PricingSection({ locale }: PricingSectionProps) {
               <PricingToggle
                 active={period === "annual"}
                 label={pricing.periodAnnual}
+                badge={annualSavingsBadge}
                 onClick={() => setPeriod("annual")}
               />
             </div>
@@ -128,9 +172,10 @@ export function PricingSection({ locale }: PricingSectionProps) {
             {pricing.plans.map((plan, index) => {
               const planId = MARKETING_PLAN_IDS[index] ?? "free";
               const price = getMarketingDisplayPrice(planId, currency, period);
-              const quota = quotas[planId];
               const formattedPrice = formatPlanPrice(price, currency, period, locale);
-              const quotaLabel = pricing.quotaLabel.replace("{count}", String(quota));
+              const planAnnualSavings =
+                planId !== "free" ? resolveMarketingAnnualSavingsPercent(planId, currency) : null;
+              const showAnnualSavings = period === "annual" && planAnnualSavings !== null;
 
               return (
                 <article
@@ -159,12 +204,16 @@ export function PricingSection({ locale }: PricingSectionProps) {
                   </div>
 
                   <div className="mb-4">
-                    <Text as="p" variant="display" className="text-deep-blue">
-                      {formattedPrice}
-                    </Text>
-                    <Text as="p" variant="body" className="mt-1 text-ink-muted">
-                      {quotaLabel}
-                    </Text>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Text as="p" variant="display" className="text-deep-blue">
+                        {formattedPrice}
+                      </Text>
+                      {showAnnualSavings ? (
+                        <span className="rounded-[5px] bg-terracotta/10 px-2 py-0.5 ui-type-mono text-[0.625rem] font-semibold uppercase tracking-widest text-terracotta">
+                          {formatAnnualSavingsBadge(pricing.annualSavingsBadge, planAnnualSavings)}
+                        </span>
+                      ) : null}
+                    </div>
                   </div>
 
                   <Text as="p" variant="body" className="mb-6 text-ink-muted">
@@ -172,17 +221,26 @@ export function PricingSection({ locale }: PricingSectionProps) {
                   </Text>
 
                   <ul className="mb-8 flex-1 space-y-3">
-                    {plan.features.map((feature) => (
+                    {plan.features.map((feature) => {
+                      const featureText = resolvePricingFeatureText(
+                        feature,
+                        planId,
+                        locale,
+                        pricing.quotaMultiplierFeature
+                      );
+
+                      return (
                       <li key={feature} className="flex items-start gap-3">
                         <span
                           aria-hidden
                           className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-terracotta"
                         />
                         <Text as="span" variant="body" className="text-ink-muted">
-                          {feature}
+                          {featureText}
                         </Text>
                       </li>
-                    ))}
+                      );
+                    })}
                   </ul>
 
                   <div className="flex justify-center pt-2">

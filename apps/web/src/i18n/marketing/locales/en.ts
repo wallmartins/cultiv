@@ -195,9 +195,10 @@ export const en: LocaleMessages = {
     periodAnnual: "Annual",
     currencyBrl: "BRL",
     currencyUsd: "USD",
-    quotaLabel: "~{count} generations/mo",
+    quotaMultiplierFeature: "{multiplier}× Explorer generations",
     ctaFree: "Start free",
     ctaSubscribe: "Subscribe",
+    annualSavingsBadge: "-{percent}%",
     recommendedBadge: "Most popular",
     plans: [
       {
@@ -220,7 +221,7 @@ export const en: LocaleMessages = {
         description: "For regular publishers who want more depth.",
         features: [
           "Everything in Explorer",
-          "More generations per month",
+          "{quotaMultiplier}",
           "Fast and balanced modes",
           "Stronger voice profile",
           "Support for medium- and long-form text"
@@ -235,7 +236,7 @@ export const en: LocaleMessages = {
           "For frequent writers who want maximum control and quality.",
         features: [
           "Everything in Creator",
-          "A much more generous generation quota",
+          "{quotaMultiplier}",
           "All generation modes, including the most refined",
           "Early access to new features",
           "Priority rollout"

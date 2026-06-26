@@ -11,7 +11,7 @@ import { defaultCurrencyForLocale } from "~/marketing/auth/marketing-auth-intent
 import { marketingNavItems } from "~/marketing/navigation/marketing-nav-items";
 
 export const rebrandNavItemClassName =
-  "rebrand-nav-hover font-inter text-xs font-semibold uppercase tracking-widest text-ink-muted";
+  "rebrand-nav-hover whitespace-nowrap font-inter text-xs font-semibold uppercase tracking-widest text-ink-muted";
 
 export interface SiteHeaderProps {
   readonly locale: MarketingLocale;
@@ -35,16 +35,16 @@ export function SiteHeader({ locale }: SiteHeaderProps) {
       <header className="fixed top-4 left-0 right-0 z-50 px-[var(--spacing-gutter)]">
         <div
           className={cn(
-            "mx-auto flex w-full max-w-[60rem] items-center justify-between gap-3 rounded-[5px]",
+            "mx-auto flex w-full max-w-[80rem] items-center justify-between gap-3 rounded-[5px]",
             "border-dotted-cartography bg-off-white/92 px-3 py-2.5 shadow-cartography backdrop-blur-sm",
-            "md:gap-4 md:px-5 md:py-3"
+            "md:gap-4 md:px-6 md:py-3.5 lg:px-8"
           )}
         >
-          <BrandMark locale={locale} brandLabel={messages.header.brand} size={32} />
+          <BrandMark locale={locale} brandLabel={messages.header.brand} size={32} className="shrink-0" />
 
           <nav
             aria-label={messages.header.navLabel}
-            className="hidden items-center justify-end gap-x-5 md:flex"
+            className="hidden min-w-0 flex-1 flex-nowrap items-center justify-end gap-x-3 md:flex lg:gap-x-4 xl:gap-x-5"
           >
             {marketingNavItems.map((item) => (
               <a key={item.key} href={item.href} className={rebrandNavItemClassName}>
@@ -56,15 +56,15 @@ export function SiteHeader({ locale }: SiteHeaderProps) {
             </a>
             <LocaleToggle locale={locale} className={rebrandNavItemClassName} />
             {isAuthenticated ? (
-              <ButtonLink href="/app/generate" size="compact" className="ml-1">
+              <ButtonLink href="/app/generate" size="compact" className="ml-1 shrink-0 whitespace-nowrap">
                 {messages.header.ctaGoToApp}
               </ButtonLink>
             ) : (
               <>
-                <MarketingConversionLink intent={freeIntent} size="compact" className="ml-1">
+                <MarketingConversionLink intent={freeIntent} size="compact" className="ml-1 shrink-0 whitespace-nowrap">
                   {messages.header.ctaStartFree}
                 </MarketingConversionLink>
-                <ButtonLink href="/login" variant="ghost" size="compact">
+                <ButtonLink href="/login" variant="ghost" size="compact" className="shrink-0 whitespace-nowrap">
                   {messages.header.ctaSignIn}
                 </ButtonLink>
               </>

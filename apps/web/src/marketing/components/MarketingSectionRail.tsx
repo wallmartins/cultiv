@@ -13,14 +13,9 @@ const SECTION_IDS = [
   "preco",
   "depoimento",
   "perguntas",
-  "comecar",
 ] as const;
 
 type SectionId = (typeof SECTION_IDS)[number];
-
-const COMECAR_INDEX = SECTION_IDS.indexOf("comecar");
-
-const DARK_SURFACE_SECTIONS = new Set<SectionId>(["comecar"]);
 
 function sectionLabel(
   locale: MarketingLocale,
@@ -46,8 +41,6 @@ function sectionLabel(
       return locale === "pt" ? "Depoimento" : "Testimonial";
     case "perguntas":
       return messages.faq.eyebrow;
-    case "comecar":
-      return messages.launchCta.eyebrow;
     default:
       return String(index).padStart(2, "0");
   }
@@ -58,20 +51,6 @@ function visibleHeight(rect: DOMRect): number {
 }
 
 function resolveActiveSectionIndex(viewportAnchor: number): number {
-  const comecar = document.getElementById("comecar");
-  if (comecar) {
-    const comecarRect = comecar.getBoundingClientRect();
-    const comecarVisible = visibleHeight(comecarRect);
-
-    if (
-      comecarVisible > 0 &&
-      ((comecarRect.top <= viewportAnchor && comecarRect.bottom > viewportAnchor) ||
-        comecarVisible >= window.innerHeight * 0.28)
-    ) {
-      return COMECAR_INDEX;
-    }
-  }
-
   for (let index = SECTION_IDS.length - 1; index >= 0; index -= 1) {
     const element = document.getElementById(SECTION_IDS[index] ?? "");
     if (!element) {
@@ -104,28 +83,7 @@ function resolveActiveSectionIndex(viewportAnchor: number): number {
   return bestIndex;
 }
 
-function isDarkSurfaceBehindRail(railElement: HTMLElement | null): boolean {
-  if (!railElement) {
-    return false;
-  }
-
-  const railRect = railElement.getBoundingClientRect();
-
-  for (const sectionId of DARK_SURFACE_SECTIONS) {
-    const section = document.getElementById(sectionId);
-    if (!section) {
-      continue;
-    }
-
-    const sectionRect = section.getBoundingClientRect();
-    const overlaps =
-      sectionRect.top < railRect.bottom && sectionRect.bottom > railRect.top;
-
-    if (overlaps) {
-      return true;
-    }
-  }
-
+function isDarkSurfaceBehindRail(_railElement: HTMLElement | null): boolean {
   return false;
 }
 
@@ -167,13 +125,9 @@ export function MarketingSectionRail({ locale }: MarketingSectionRailProps) {
     const update = () => {
       const viewportAnchor = window.innerHeight * 0.42;
       const nextActiveIndex = resolveActiveSectionIndex(viewportAnchor);
-      const activeSectionId = SECTION_IDS[nextActiveIndex];
 
       setActiveIndex(nextActiveIndex);
-      setUseLightRail(
-        (activeSectionId !== undefined && DARK_SURFACE_SECTIONS.has(activeSectionId)) ||
-          isDarkSurfaceBehindRail(navRef.current)
-      );
+      setUseLightRail(isDarkSurfaceBehindRail(navRef.current));
     };
 
     update();
