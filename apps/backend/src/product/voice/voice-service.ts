@@ -7,7 +7,6 @@ import type { BackendVoiceService } from "./voice-types.js";
 import type { BackendVoiceRebuildService } from "./voice-rebuild-types.js";
 import type { BackendObservabilityService } from "../core/observability-types.js";
 import type { BackendVoiceConsentService } from "../../safety/voice-consent-types.js";
-import { createVoiceBatchOperations } from "./voice-batches.js";
 import { createVoiceLifecycleOperations } from "./voice-lifecycle.js";
 import { resolveEffectiveVoice as resolveEffectiveVoiceResolution } from "./voice-effective-resolution.js";
 import { recordTraitConfirmation } from "./trait-confirmation.js";
@@ -26,7 +25,6 @@ export function createBackendVoiceService(
   }
 ): BackendVoiceService {
   const lifecycle = createVoiceLifecycleOperations(database, voiceRebuild, now, logger, voiceConsent);
-  const batches = createVoiceBatchOperations(database, voiceRebuild, now, observability, logger, voiceConsent);
 
   return {
     getProfileScreen(userId) {
@@ -78,7 +76,6 @@ export function createBackendVoiceService(
         options
       );
     },
-    ...lifecycle,
-    ...batches
+    ...lifecycle
   };
 }

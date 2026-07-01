@@ -4,10 +4,11 @@ import type {
   ArgumentDevelopmentSignature,
   ClosingMode,
   CoreReasoningSignature,
-  FormatExpressionProfile,
+  DeterministicFeatures,
   InsightTiming,
   NextActionCode,
   OpeningMode,
+  QuantitativeSignals,
   ReasonCode,
   TraitConfirmationRecord,
   TraitKey,
@@ -55,6 +56,11 @@ export interface VoiceExample extends Entity {
   readonly channel?: string;
   readonly format?: string;
   readonly explicitContentType?: string;
+  readonly textLengthBucket?: string;
+  readonly argumentComplexity?: string;
+  readonly register?: string;
+  readonly deterministicFeatures?: DeterministicFeatures;
+  readonly topicTag?: string;
   readonly context?: string;
   readonly state: VoiceExampleState;
   readonly classificationLabels: readonly string[];
@@ -108,7 +114,9 @@ export interface DerivedVoiceProfile extends Entity<string> {
   readonly antiPatterns: readonly string[];
   readonly coreReasoningSignature?: CoreReasoningSignature;
   readonly argumentDevelopmentSignature?: ArgumentDevelopmentSignature;
-  readonly formatExpressionProfiles?: Readonly<Record<string, FormatExpressionProfile>>;
+  readonly quantitativeSignals?: QuantitativeSignals;
+  readonly signatureOpenings?: readonly string[];
+  readonly signatureClosings?: readonly string[];
   readonly createdAt: string;
   readonly updatedAt: string;
 }
@@ -126,6 +134,7 @@ export interface VoiceProfileDiagnostics extends Entity<string> {
   readonly pendingRebuild: PendingVoiceProfileRebuildState;
   readonly materialBase: VoiceMaterialBaseBreakdown;
   readonly traitConfirmations?: Readonly<Partial<Record<TraitKey, TraitConfirmationRecord>>>;
+  readonly quantitativeMetrics?: QuantitativeSignals;
   readonly createdAt: string;
   readonly updatedAt: string;
 }

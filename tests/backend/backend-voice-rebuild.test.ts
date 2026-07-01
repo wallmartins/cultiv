@@ -53,7 +53,7 @@ describe("backend voice rebuilds", () => {
     expect(examples.items[0]?.targetProfileVersion).toBe(1);
   });
 
-  it("triggers rebuild after batch commit and promotes the committed version", async () => {
+  it("triggers rebuild after example create and promotes the committed version", async () => {
     const services = Effect.runSync(
       createBackendProductServices(config, {
         now: () => new Date("2026-05-14T00:00:00.000Z")
@@ -62,30 +62,20 @@ describe("backend voice rebuilds", () => {
 
     await Effect.runPromise(services.voiceConsent.grantConsent("user_1"));
 
-    const batch = Effect.runSync(services.voice.createBatch("user_1"));
     Effect.runSync(
-      services.voice.addBatchItems("user_1", batch.batchId, [
-        {
-          clientItemId: "item-1",
-          input: {
-            text: "Escrevo newsletters com contexto, opiniÃ£o e ritmo mais reflexivo quando o assunto pede profundidade.",
-            language: "pt-BR",
-            channel: "newsletter",
-            explicitContentType: "newsletter"
-          }
-        }
-      ])
+      services.voice.createExample("user_1", {
+        text: "Escrevo newsletters com contexto, opinião e ritmo mais reflexivo quando o assunto pede profundidade.",
+        language: "pt-BR",
+        channel: "newsletter",
+        explicitContentType: "newsletter"
+      })
     );
 
-    await Effect.runPromise(services.voice.commitBatch("user_1", batch.batchId));
     await Effect.runPromise(services.voiceRebuild.drain("user_1"));
 
     const screen = Effect.runSync(services.voice.getProfileScreen("user_1"));
     expect(screen?.profile.version).toBe(1);
     expect(screen?.materialBase.byContentType.newsletter).toBe(1);
-
-    const committedBatch = Effect.runSync(services.database.voiceExampleBatches.get(batch.batchId));
-    expect(committedBatch?.targetProfileVersion).toBe(1);
 
     const examples = Effect.runSync(services.voice.listExamples("user_1"));
     expect(examples.total).toBe(1);

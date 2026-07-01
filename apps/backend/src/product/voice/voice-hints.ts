@@ -2,7 +2,6 @@ import type { VoiceExampleRecord } from "@my-ai-orchestrator/database";
 import type {
   ArgumentDevelopmentSignature,
   CoreReasoningSignature,
-  FormatExpressionProfile,
   VoiceAdaptationMode,
   VoiceProfileConfidence
 } from "@my-ai-orchestrator/contracts";
@@ -24,7 +23,9 @@ export function buildVoiceHints(
     readonly primaryLanguage: string;
     readonly coreReasoningSignature?: CoreReasoningSignature;
     readonly argumentDevelopmentSignature?: ArgumentDevelopmentSignature;
-    readonly formatExpressionProfiles?: Readonly<Record<string, FormatExpressionProfile>>;
+    readonly quantitativeSignals?: VoiceProfile["quantitativeSignals"];
+    readonly signatureOpenings?: readonly string[];
+    readonly signatureClosings?: readonly string[];
   },
   matchingExamples: readonly VoiceExampleRecord[],
   pinnedMatchingExamples: readonly VoiceExampleRecord[],
@@ -65,10 +66,6 @@ export function buildVoiceHints(
     matchingExamples.flatMap((example) => example.antiPatternsExplicit ?? [])
   );
   const antiPatternsExplicit = explicitFromExamples;
-  const examples = unique([
-    ...pinnedMatchingExamples.map((example) => example.text.trim()),
-    ...matchingExamples.filter((example) => !example.pinned).map((example) => example.text.trim())
-  ]).slice(0, confidence === "low" ? 3 : 6);
 
   const profileLexicon = unique(profile.lexicon);
   const lexicon = filterLexiconForDomain(
@@ -83,8 +80,6 @@ export function buildVoiceHints(
     matchingExamples.flatMap((example) => example.classificationLabels ?? [])
   );
 
-  const formatExpressionProfile = profile.formatExpressionProfiles?.[context.contentType];
-
   return {
     tone: profile.tone,
     cadence: profile.cadence,
@@ -96,16 +91,17 @@ export function buildVoiceHints(
       ...(confidence === "low" || adaptationMode === "conservative" ? ["prefer_conservative_voice_adaptation"] : []),
       ...(languageMismatch ? ["preserve_target_language"] : [])
     ]),
-    examples,
     antiPatterns,
     antiPatternsExplicit,
     rules,
     styleMarkers,
     userLabels,
+    ...(profile.quantitativeSignals ? { quantitativeSignals: profile.quantitativeSignals } : {}),
+    ...(profile.signatureOpenings?.length ? { signatureOpenings: [...profile.signatureOpenings] } : {}),
+    ...(profile.signatureClosings?.length ? { signatureClosings: [...profile.signatureClosings] } : {}),
     ...(reasoningSignatureEnabled && profile.coreReasoningSignature
       ? {
           coreReasoningSignature: profile.coreReasoningSignature,
-          formatExpressionProfile,
           derivedAntiPatterns: derivedAntiPatterns,
           ...(profile.argumentDevelopmentSignature
             ? { argumentDevelopmentSignature: profile.argumentDevelopmentSignature }

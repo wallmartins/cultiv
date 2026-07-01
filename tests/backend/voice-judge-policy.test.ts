@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { shouldInvokeVoiceJudge } from "../../apps/backend/src/execution/quality/voice-judge-policy.js";
+import {
+  resolveDevelopmentDriftThreshold,
+  shouldInvokeVoiceJudge
+} from "../../apps/backend/src/execution/quality/voice-judge-policy.js";
 import type { CandidateText, VoiceProfile } from "@my-ai-orchestrator/text-quality";
+import type { QuantitativeSignals } from "@my-ai-orchestrator/contracts";
 
 const voiceProfile: VoiceProfile = {
   userId: "user-1",
@@ -122,6 +126,80 @@ describe("voice judge policy", () => {
         reasoningSignatureEnabled: true,
         voiceProfile,
         candidates: [candidate("a", { score: 92 }, 90), candidate("b", { score: 50 }, 70)]
+      })
+    ).toBe(false);
+  });
+
+  it("resolves a tighter development threshold for consistent authors", () => {
+    const signals: QuantitativeSignals = {
+      aggregate: {
+        typeTokenRatio: 0.7,
+        avgWordLength: 4,
+        hapaxRatio: 0.3,
+        avgSentenceLength: 16,
+        sentenceLengthVariance: 5,
+        avgDependencyDepth: 1.5,
+        paragraphCount: 2,
+        avgParagraphLength: 40,
+        punctuationDensity: 0.03,
+        formalityScore: 0.6,
+        emotionalityScore: 0.1,
+        certaintyMarkerCount: 0,
+        hedgingMarkerCount: 1,
+        transitionMarkerCount: 1
+      },
+      consistencyScore: 0.9,
+      topicIndependenceScore: 0.8,
+      crossLengthConsistency: 0.85,
+      extractionQuality: {
+        reasoningExtracted: true,
+        developmentExtracted: true,
+        reconciliationNeeded: false
+      }
+    };
+
+    expect(resolveDevelopmentDriftThreshold(signals)).toBe(80);
+    expect(resolveDevelopmentDriftThreshold(undefined)).toBe(75);
+    expect(resolveDevelopmentDriftThreshold({ ...signals, consistencyScore: 0.4 })).toBe(70);
+  });
+
+  it("does not invoke judge when development drift is above a high-consistency threshold", () => {
+    const consistentProfile: VoiceProfile = {
+      ...voiceProfile,
+      quantitativeSignals: {
+        aggregate: {
+          typeTokenRatio: 0.7,
+          avgWordLength: 4,
+          hapaxRatio: 0.3,
+          avgSentenceLength: 16,
+          sentenceLengthVariance: 5,
+          avgDependencyDepth: 1.5,
+          paragraphCount: 2,
+          avgParagraphLength: 40,
+          punctuationDensity: 0.03,
+          formalityScore: 0.6,
+          emotionalityScore: 0.1,
+          certaintyMarkerCount: 0,
+          hedgingMarkerCount: 1,
+          transitionMarkerCount: 1
+        },
+        consistencyScore: 0.9,
+        topicIndependenceScore: 0.8,
+        crossLengthConsistency: 0.85,
+        extractionQuality: {
+          reasoningExtracted: true,
+          developmentExtracted: true,
+          reconciliationNeeded: false
+        }
+      }
+    };
+
+    expect(
+      shouldInvokeVoiceJudge({
+        qualityMode: "balanced",
+        reasoningSignatureEnabled: true,
+        voiceProfile: consistentProfile,
+        candidates: [candidate("a", { score: 92, reasoningScore: 92, developmentScore: 85 }, 90)]
       })
     ).toBe(false);
   });

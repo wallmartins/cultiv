@@ -36,7 +36,6 @@ export function evaluateWithVoiceJudge(
 
     const core = input.voiceProfile.coreReasoningSignature;
     const development = input.voiceProfile.argumentDevelopmentSignature;
-    const examples = input.voiceProfile.examples.slice(0, 2).join("\n\n---\n\n");
     const developmentBlock = development
       ? [
           `Argument development:\n${development.developmentProse}`,
@@ -73,7 +72,6 @@ export function evaluateWithVoiceJudge(
                   `Author reasoning:\n${core.narrativeProse}`,
                   `Certainty: ${core.certaintyLevel}; Judgment: ${core.judgmentFrequency}; Conclusion pace: ${core.conclusionPace}`,
                   ...(developmentBlock ? [developmentBlock] : []),
-                  `Examples:\n${examples.slice(0, 600)}`,
                   `Candidate:\n${input.candidate.refinedDraft.slice(0, 2500)}`
                 ].join("\n\n")
               }
@@ -229,7 +227,8 @@ export function runVoiceJudgePass(args: {
     const finalists = selectVoiceJudgeCandidates(args.candidates);
     const triggerReason = resolveVoiceJudgeTrigger({
       qualityMode: args.qualityMode,
-      candidates: args.candidates
+      candidates: args.candidates,
+      quantitativeSignals: args.voiceProfile.quantitativeSignals
     });
     logVoiceJudgeEvent("started", {
       pipelineName: args.pipelineName,

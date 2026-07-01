@@ -68,7 +68,8 @@ describe("compositor expression instructions", () => {
         topic: "Composable pricing",
         briefingText: "Why compositor planning matters",
         sourceText: "",
-        previousContent: ""
+        previousContent: "",
+        quantitativeConstraintsSection: ""
       }
     })
     );

@@ -5,7 +5,6 @@ import {
   ClosingModeSchema,
   CoreReasoningSignatureSchema,
   EpistemicPostureSchema,
-  FormatExpressionProfileSchema,
   OpeningModeSchema,
   InsightTimingSchema,
   TraitConfirmationRecordSchema,
@@ -84,6 +83,40 @@ export type FallbackReasonCode = typeof FallbackReasonCodeSchema.Type;
 export const VoiceCoverageSchema = Schema.Literal("low", "medium", "high");
 export type VoiceCoverage = typeof VoiceCoverageSchema.Type;
 
+export const DeterministicFeaturesSchema = Schema.Struct({
+  typeTokenRatio: Schema.Number,
+  avgWordLength: Schema.Number,
+  hapaxRatio: Schema.Number,
+  avgSentenceLength: Schema.Number,
+  sentenceLengthVariance: Schema.Number,
+  avgDependencyDepth: Schema.Number,
+  paragraphCount: Schema.Number,
+  avgParagraphLength: Schema.Number,
+  punctuationDensity: Schema.Number,
+  formalityScore: Schema.Number,
+  emotionalityScore: Schema.Number,
+  certaintyMarkerCount: Schema.Number,
+  hedgingMarkerCount: Schema.Number,
+  transitionMarkerCount: Schema.Number
+});
+export type DeterministicFeatures = typeof DeterministicFeaturesSchema.Type;
+
+export const QuantitativeSignalsExtractionQualitySchema = Schema.Struct({
+  reasoningExtracted: Schema.Boolean,
+  developmentExtracted: Schema.Boolean,
+  reconciliationNeeded: Schema.Boolean
+});
+export type QuantitativeSignalsExtractionQuality = typeof QuantitativeSignalsExtractionQualitySchema.Type;
+
+export const QuantitativeSignalsSchema = Schema.Struct({
+  aggregate: DeterministicFeaturesSchema,
+  consistencyScore: Schema.Number,
+  topicIndependenceScore: Schema.Number,
+  crossLengthConsistency: Schema.Number,
+  extractionQuality: QuantitativeSignalsExtractionQualitySchema
+});
+export type QuantitativeSignals = typeof QuantitativeSignalsSchema.Type;
+
 export const VoiceSignalSummarySchema = Schema.Struct({
   styleMarkers: Schema.Array(Schema.String),
   rules: Schema.Array(Schema.String),
@@ -126,7 +159,6 @@ export const TextQualityVoiceProfileSchema = Schema.Struct({
   description: Schema.optional(Schema.String),
   lexicon: Schema.Array(Schema.String),
   constraints: Schema.Array(Schema.String),
-  examples: Schema.Array(Schema.String),
   antiPatterns: Schema.Array(Schema.String),
   antiPatternsExplicit: Schema.Array(Schema.String),
   rules: Schema.Array(Schema.String),
@@ -134,8 +166,10 @@ export const TextQualityVoiceProfileSchema = Schema.Struct({
   userLabels: Schema.Array(Schema.String),
   coreReasoningSignature: Schema.optional(CoreReasoningSignatureSchema),
   argumentDevelopmentSignature: Schema.optional(ArgumentDevelopmentSignatureSchema),
-  formatExpressionProfile: Schema.optional(FormatExpressionProfileSchema),
-  derivedAntiPatterns: Schema.optional(Schema.Array(Schema.String))
+  derivedAntiPatterns: Schema.optional(Schema.Array(Schema.String)),
+  quantitativeSignals: Schema.optional(QuantitativeSignalsSchema),
+  signatureOpenings: Schema.optional(Schema.Array(Schema.String)),
+  signatureClosings: Schema.optional(Schema.Array(Schema.String))
 });
 export type TextQualityVoiceProfile = typeof TextQualityVoiceProfileSchema.Type;
 
@@ -181,7 +215,8 @@ export const VoiceProfileScreenViewSchema = Schema.Struct({
   profile: VoiceProfileViewSchema,
   diagnostics: VoiceProfileDiagnosticsViewSchema,
   materialBase: VoiceMaterialBaseBreakdownSchema,
-  reasoning: Schema.optional(VoiceReasoningPresentationViewSchema)
+  reasoning: Schema.optional(VoiceReasoningPresentationViewSchema),
+  quantitativeSignals: Schema.optional(QuantitativeSignalsSchema)
 });
 export type VoiceProfileScreenView = typeof VoiceProfileScreenViewSchema.Type;
 

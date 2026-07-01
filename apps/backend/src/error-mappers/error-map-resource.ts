@@ -1,5 +1,6 @@
 import {
   BackendJobNotFoundError,
+  BackendVoiceCalibrationSessionNotFoundError,
   BackendVoiceExampleNotFoundError,
   BackendVoiceProfileNotFoundError
 } from "../http/errors.js";
@@ -25,6 +26,13 @@ export function mapResourceError(error: unknown, path: string): HttpErrorRespons
     return createHttpErrorResponse(404, "resource_not_found", {
       message: `Voice example ${error.exampleId} was not found for user ${error.userId}`,
       details: { exampleId: error.exampleId, userId: error.userId, path }
+    });
+  }
+
+  if (error instanceof BackendVoiceCalibrationSessionNotFoundError) {
+    return createHttpErrorResponse(404, "resource_not_found", {
+      message: `Voice calibration session ${error.sessionId} was not found for user ${error.userId}`,
+      details: { sessionId: error.sessionId, userId: error.userId, path }
     });
   }
 

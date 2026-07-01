@@ -5,3 +5,4 @@ export * from "./product/persistence/persistence.js";
 export * from "./product/usage/usage-policy.js";
 export * from "./product/voice/voice-rebuild-service.js";
 export * from "./product/voice/voice-service.js";
+export * from "./product/voice/voice-calibration-service.js";

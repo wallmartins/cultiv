@@ -98,7 +98,8 @@ export function toVoiceProfileScreenView(
             traitConfirmations: diagnostics.traitConfirmations
           })
         }
-      : {})
+      : {}),
+    ...(profile.quantitativeSignals ? { quantitativeSignals: profile.quantitativeSignals } : {})
   };
 }
 
@@ -113,9 +114,7 @@ export function toVoiceReasoningPresentationView(
     return undefined;
   }
 
-  const formatExpressions = Object.values(profile.formatExpressionProfiles ?? {}).map(
-    (expression) => ({ ...expression })
-  );
+  const formatExpressions: VoiceReasoningPresentationView["formatExpressions"] = [];
 
   const rawTraitProfile = profile.argumentDevelopmentSignature?.traitProfile;
   const traitProfile = rawTraitProfile

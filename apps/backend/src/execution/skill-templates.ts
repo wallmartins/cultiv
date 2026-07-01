@@ -90,6 +90,7 @@ function buildSystemTemplate(): string {
     "",
     "{{authorReasoningSection}}",
     "{{authorDevelopmentSection}}",
+    "{{quantitativeConstraintsSection}}",
     "== TOPIC, AUDIENCE, AND DOMAIN ==",
     "Generation domain: {{generationDomain}}",
     "{{domainPolicy}}",

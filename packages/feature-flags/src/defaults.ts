@@ -54,6 +54,14 @@ export const DEFAULT_FEATURE_FLAGS: readonly FeatureFlagDefinition[] = [
     variants: ["off", "on"]
   },
   {
+    key: "voice.calibrationWizardV1",
+    scope: "content",
+    enabled: true,
+    description: "Wizard-based voice calibration (replaces legacy example import)",
+    defaultVariant: "on",
+    variants: ["off", "on"]
+  },
+  {
     key: "rollout.beta.access",
     scope: "rollout",
     enabled: false,

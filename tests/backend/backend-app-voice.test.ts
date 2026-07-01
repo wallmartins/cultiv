@@ -1,8 +1,6 @@
 import { Effect } from "effect";
 import { describe, expect, it } from "vitest";
 import {
-  decodeVoiceExampleBatchCommitResultView,
-  decodeVoiceExampleBatchView,
   decodeVoiceExamplesPageView,
   decodeVoiceProfileScreenView
 } from "@my-ai-orchestrator/contracts";
@@ -107,7 +105,7 @@ describe("backend app voice surface", () => {
     expect(decoded.materialBase.totalExamples).toBe(3);
   });
 
-  it("exposes voice examples and batches through the canonical /me routes", async () => {
+  it("exposes voice examples through the canonical /me routes", async () => {
     const config = createBackendAppTestConfig({ billingUserId: "user_1" });
     const services = createBackendAppTestServices(config);
 
@@ -154,13 +152,9 @@ describe("backend app voice surface", () => {
         pinned: false
       })
     });
-    expect(createResponse.status).toBe(201);
+    expect(createResponse.status).toBe(404);
 
-    const createdBody = await createResponse.json();
-    expect(createdBody.text).toBe("Example created through the API.");
-    expect(createdBody.pinned).toBe(false);
-
-    const updateResponse = await app.request(`/me/voice-profile/examples/${createdBody.exampleId}`, {
+    const updateResponse = await app.request(`/me/voice-profile/examples/${createdOne.exampleId}`, {
       method: "PATCH",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
@@ -168,53 +162,6 @@ describe("backend app voice surface", () => {
         text: "Updated and excluded text."
       })
     });
-    expect(updateResponse.status).toBe(200);
-
-    const updatedBody = await updateResponse.json();
-    expect(updatedBody.state).toBe("excluded");
-    expect(updatedBody.text).toBe("Updated and excluded text.");
-
-    const batchResponse = await app.request("/me/voice-profile/example-batches", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({})
-    });
-    expect(batchResponse.status).toBe(201);
-
-    const batchBody = await batchResponse.json();
-    const decodedBatch = await Effect.runPromise(decodeVoiceExampleBatchView(batchBody));
-    expect(decodedBatch.status).toBe("open");
-
-    const addItemsResponse = await app.request(`/me/voice-profile/example-batches/${decodedBatch.batchId}/items`, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({
-        items: [
-          {
-            clientItemId: "item-1",
-            input: {
-              text: "Batch item accepted through the API.",
-              explicitContentType: "newsletter"
-            }
-          }
-        ]
-      })
-    });
-    expect(addItemsResponse.status).toBe(200);
-
-    const addItemsBody = await addItemsResponse.json();
-    const decodedAdded = await Effect.runPromise(decodeVoiceExampleBatchView(addItemsBody));
-    expect(decodedAdded.itemResults).toHaveLength(1);
-    expect(decodedAdded.itemResults[0]?.accepted).toBe(true);
-
-    const commitResponse = await app.request(`/me/voice-profile/example-batches/${decodedBatch.batchId}/commit`, {
-      method: "POST"
-    });
-    expect(commitResponse.status).toBe(200);
-
-    const commitBody = await commitResponse.json();
-    const decodedCommit = await Effect.runPromise(decodeVoiceExampleBatchCommitResultView(commitBody));
-    expect(decodedCommit.batchId).toBe(decodedBatch.batchId);
-    expect(decodedCommit.acceptedItems).toBe(1);
+    expect(updateResponse.status).toBe(404);
   });
 });

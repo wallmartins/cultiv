@@ -14,9 +14,13 @@ import { extractReasoningSignature } from "./reasoning-extraction.js";
 import { extractArgumentDevelopmentSignature } from "./argument-development-extraction.js";
 import { evaluateVoiceSignatureDivergence } from "./voice-signature-divergence.js";
 import { reconcileVoiceSignatures } from "./voice-signature-reconciliation.js";
+import { buildQuantitativeSignalsFromWizardExamples } from "./deterministic-extraction.js";
+import { extractSignaturePhrases } from "./reasoning-extraction.js";
+import { isWizardVoiceExample } from "./wizard-voice-examples.js";
 import type {
   ArgumentDevelopmentExtractionResult,
   ArgumentDevelopmentSignature,
+  QuantitativeSignals,
   ReasoningExtractionResult
 } from "@my-ai-orchestrator/contracts";
 import type { BackendObservabilityService } from "../core/observability-types.js";
@@ -243,6 +247,26 @@ function processUserRebuild(deps: VoiceRebuildPipelineDeps, userId: string) {
       }
     }
 
+    let quantitativeSignals: QuantitativeSignals | undefined;
+    let signatureOpenings: readonly string[] | undefined;
+    let signatureClosings: readonly string[] | undefined;
+
+    const wizardExamples = activeExamples.filter(isWizardVoiceExample);
+    if (wizardExamples.length > 0) {
+      try {
+        quantitativeSignals = buildQuantitativeSignalsFromWizardExamples(wizardExamples, {
+          reasoningExtracted: reasoning !== undefined && !reasoningExtractionFailed,
+          developmentExtracted: development !== undefined && !developmentExtractionFailed,
+          reconciliationNeeded: reconciliationFailed
+        });
+        const phrases = extractSignaturePhrases(wizardExamples.map((example) => example.text));
+        signatureOpenings = phrases.signatureOpenings;
+        signatureClosings = phrases.signatureClosings;
+      } catch {
+        // ponytail: deterministic extraction is optional; rebuild continues without signals
+      }
+    }
+
     const derivedState = deriveVoiceRebuildState({
       userId,
       version: nextVersion,
@@ -253,7 +277,10 @@ function processUserRebuild(deps: VoiceRebuildPipelineDeps, userId: string) {
       development,
       reasoningExtractionFailed,
       developmentExtractionFailed,
-      reconciliationFailed
+      reconciliationFailed,
+      quantitativeSignals,
+      signatureOpenings,
+      signatureClosings
     });
 
     yield* database.voiceProfiles.put(derivedState.profile).pipe(Effect.orDie);

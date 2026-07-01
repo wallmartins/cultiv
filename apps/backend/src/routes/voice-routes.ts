@@ -1,12 +1,6 @@
 import { Hono, type Context } from "hono";
 import { Schema } from "effect";
 import {
-  type VoiceExampleBatchCommitResultView,
-  VoiceExampleBatchCommitResultViewSchema,
-  type VoiceExampleBatchView,
-  VoiceExampleBatchViewSchema,
-  type VoiceExampleListItemView,
-  VoiceExampleListItemViewSchema,
   type VoiceExamplesPageView,
   VoiceExamplesPageViewSchema,
   type VoiceProfileScreenView,
@@ -15,17 +9,12 @@ import {
   VoiceProfileDiagnosticsViewSchema,
   type VoiceTrainingConsentStatusView,
   VoiceTrainingConsentStatusViewSchema,
-  decodeTraitConfirmationInput,
-  decodeVoiceExampleBatchCreateInput,
-  decodeVoiceExampleBatchItemsInput,
-  decodeVoiceExampleCreateInput,
-  decodeVoiceExampleUpdateInput
+  decodeTraitConfirmationInput
 } from "@my-ai-orchestrator/contracts";
 import { resolvePublicActor } from "../auth/auth-middleware.js";
 import type { BackendConfig } from "../config/config.js";
 import {
   BackendRequestBodyParseError,
-  BackendVoiceExampleNotFoundError,
   BackendVoiceProfileNotFoundError
 } from "../http/errors.js";
 import type { BackendProductServices } from "../product.js";
@@ -110,81 +99,6 @@ export function registerVoiceRoutes(app: Hono, options: VoiceRouteOptions): void
     );
     return c.json(validated);
   });
-
-  app.post("/me/voice-profile/examples", async (c) => {
-    const userId = await resolveActorUserId(c, options.config, Routes.PostMeVoiceProfileExamples, options.services);
-    const rawBody = await readJsonBody(c, Routes.PostMeVoiceProfileExamples);
-    const input = await runEffectOrThrow(decodeVoiceExampleCreateInput(rawBody));
-    const response = await runEffectOrThrow(options.services.voice.createExample(userId, input));
-    const validated = await validateResponseBody(
-      VoiceExampleListItemViewSchema,
-      response satisfies VoiceExampleListItemView,
-      "VoiceExampleListItemView"
-    );
-    return c.json(validated, 201);
-  });
-
-  app.patch("/me/voice-profile/examples/:exampleId", async (c) => {
-    const userId = await resolveActorUserId(c, options.config, Routes.PatchMeVoiceProfileExample, options.services);
-    const exampleId = c.req.param("exampleId");
-    if (!exampleId || exampleId.trim().length === 0) {
-      throw new BackendVoiceExampleNotFoundError({ userId, exampleId: exampleId ?? "" });
-    }
-
-    const rawBody = await readJsonBody(c, Routes.PatchMeVoiceProfileExample);
-    const input = await runEffectOrThrow(decodeVoiceExampleUpdateInput(rawBody));
-    const response = await runEffectOrThrow(options.services.voice.updateExample(userId, exampleId, input));
-
-    if (!response) {
-      throw new BackendVoiceExampleNotFoundError({ userId, exampleId });
-    }
-
-    const validated = await validateResponseBody(
-      VoiceExampleListItemViewSchema,
-      response satisfies VoiceExampleListItemView,
-      "VoiceExampleListItemView"
-    );
-    return c.json(validated);
-  });
-
-  app.post("/me/voice-profile/example-batches", async (c) => {
-    const userId = await resolveActorUserId(c, options.config, Routes.PostMeVoiceProfileBatches, options.services);
-    const rawBody = await readJsonBody(c, Routes.PostMeVoiceProfileBatches);
-    const input = await runEffectOrThrow(decodeVoiceExampleBatchCreateInput(rawBody));
-    const response = await runEffectOrThrow(options.services.voice.createBatch(userId, input));
-    const validated = await validateResponseBody(
-      VoiceExampleBatchViewSchema,
-      response satisfies VoiceExampleBatchView,
-      "VoiceExampleBatchView"
-    );
-    return c.json(validated, 201);
-  });
-
-  app.post("/me/voice-profile/example-batches/:batchId/items", async (c) => {
-    const userId = await resolveActorUserId(c, options.config, Routes.PostMeVoiceProfileBatchItems, options.services);
-    const batchId = requireRouteParam(c, "batchId");
-    const rawBody = await readJsonBody(c, Routes.PostMeVoiceProfileBatchItems);
-    const input = await runEffectOrThrow(decodeVoiceExampleBatchItemsInput(rawBody));
-    const response = await runEffectOrThrow(options.services.voice.addBatchItems(userId, batchId, input.items));
-    const validated = await validateResponseBody(
-      VoiceExampleBatchViewSchema,
-      response satisfies VoiceExampleBatchView,
-      "VoiceExampleBatchView"
-    );
-    return c.json(validated);
-  });
-
-  app.post("/me/voice-profile/example-batches/:batchId/commit", async (c) => {
-    const userId = await resolveActorUserId(c, options.config, Routes.PostMeVoiceProfileBatchCommit, options.services);
-    const batchId = requireRouteParam(c, "batchId");
-    const response = await runEffectOrThrow(options.services.voice.commitBatch(userId, batchId));
-    const validated = await validateResponseBody(
-      VoiceExampleBatchCommitResultViewSchema,
-      response satisfies VoiceExampleBatchCommitResultView,
-      "VoiceExampleBatchCommitResultView"
-    );
-    return c.json(validated);
-  });
 }
 
 function parseListOptions(c: Context): ListVoiceExamplesOptions {
@@ -256,18 +170,6 @@ function normalizeQueryValue(value: string | undefined): string | undefined {
   }
 
   return value.trim();
-}
-
-function requireRouteParam(c: Context, name: string): string {
-  const value = c.req.param(name);
-  if (!value || value.trim().length === 0) {
-    throw new BackendRequestBodyParseError({
-      route: c.req.path,
-      message: `Route parameter ${name} is required`
-    });
-  }
-
-  return value;
 }
 
 async function resolveActorUserId(

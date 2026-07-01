@@ -46,7 +46,8 @@ describe("system prompt voice injection", () => {
           previousScore: 0,
           lexiconInstruction: "Author lexicon (use sparingly):",
           domainPolicy: "Generation domain: non-technical. Do not use technical jargon.",
-          generationDomain: "non-technical"
+          generationDomain: "non-technical",
+          quantitativeConstraintsSection: ""
         }
       })
     );
@@ -113,7 +114,8 @@ describe("system prompt voice injection", () => {
           previousScore: 0,
           lexiconInstruction: "Author lexicon (use sparingly):",
           domainPolicy: "Generation domain: non-technical. Do not use technical jargon.",
-          generationDomain: "non-technical"
+          generationDomain: "non-technical",
+          quantitativeConstraintsSection: ""
         }
       })
     );

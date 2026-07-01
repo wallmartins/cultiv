@@ -5,6 +5,7 @@ import {
   formatSignalList,
   formatVoiceExamples
 } from "../skill-inputs.js";
+import { formatQuantitativeConstraintsSection } from "@my-ai-orchestrator/text-quality";
 import { formatAuthorReasoningBlock, formatAuthorReasoningSection } from "./reasoning-prompt.js";
 import {
   formatArgumentDevelopmentBlock,
@@ -23,6 +24,7 @@ export interface StepVoiceContext {
   readonly authorReasoning: string;
   readonly authorDevelopmentSection: string;
   readonly authorDevelopment: string;
+  readonly quantitativeConstraintsSection: string;
 }
 
 export function buildStepVoiceContext(
@@ -37,13 +39,11 @@ export function buildStepVoiceContext(
   const lexicon = voiceProfile?.lexicon ?? [];
   const authorReasoning = formatAuthorReasoningBlock(
     stepName,
-    voiceProfile?.coreReasoningSignature,
-    voiceProfile?.formatExpressionProfile
+    voiceProfile?.coreReasoningSignature
   );
   const authorReasoningSection = formatAuthorReasoningSection(
     stepName,
-    voiceProfile?.coreReasoningSignature,
-    voiceProfile?.formatExpressionProfile
+    voiceProfile?.coreReasoningSignature
   );
   const authorDevelopment = formatArgumentDevelopmentBlock(
     stepName,
@@ -53,12 +53,14 @@ export function buildStepVoiceContext(
     stepName,
     voiceProfile?.argumentDevelopmentSignature
   );
+  const quantitativeConstraintsSection = formatQuantitativeConstraintsSection(voiceProfile ?? {});
 
   const baseVoiceContext = {
     authorReasoning,
     authorReasoningSection,
     authorDevelopment,
-    authorDevelopmentSection
+    authorDevelopmentSection,
+    quantitativeConstraintsSection
   };
 
   switch (stepName) {

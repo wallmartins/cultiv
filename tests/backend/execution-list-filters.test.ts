@@ -43,6 +43,8 @@ function createIntentPipelineRequest(userId: string): PipelineRequest {
 describe("execution list filters", () => {
   it("normalizes query filters and matches jobs by period, status, intent, and length tier", () => {
     const now = Date.parse("2026-06-24T12:00:00.000Z");
+    vi.setSystemTime(now);
+
     const filters = normalizeExecutionsListFilters({
       period: "7d",
       status: "done",
@@ -87,6 +89,8 @@ describe("execution list filters", () => {
         filters
       )
     ).toBe(false);
+
+    vi.useRealTimers();
   });
 
   it("filters in-memory jobs by resolved presentation metadata", () => {

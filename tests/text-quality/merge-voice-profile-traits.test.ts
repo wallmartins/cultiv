@@ -28,7 +28,6 @@ describe("mergeVoiceProfile development traits", () => {
         cadence: "direct",
         lexicon: [],
         constraints: [],
-        examples: [],
         antiPatterns: [],
         antiPatternsExplicit: [],
         rules: [],

@@ -1,4 +1,4 @@
-import type { QualityMode } from "@my-ai-orchestrator/contracts";
+import type { QualityMode, QuantitativeSignals } from "@my-ai-orchestrator/contracts";
 import type { CandidateText, VoiceProfile } from "@my-ai-orchestrator/text-quality";
 
 export type VoiceJudgeSkipReason =
@@ -19,9 +19,36 @@ function isBorderline(score: number | undefined): boolean {
   return typeof score === "number" && score >= 60 && score <= 80;
 }
 
+export function resolveDevelopmentDriftThreshold(signals?: QuantitativeSignals): number {
+  const base = 75;
+  if (!signals) {
+    return base;
+  }
+  if (signals.consistencyScore > 0.8) {
+    return base + 5;
+  }
+  if (signals.consistencyScore < 0.5) {
+    return base - 5;
+  }
+  return base;
+}
+
+function isDevelopmentDriftBorderline(
+  score: number | undefined,
+  signals?: QuantitativeSignals
+): boolean {
+  if (typeof score !== "number") {
+    return false;
+  }
+
+  const threshold = resolveDevelopmentDriftThreshold(signals);
+  return score >= threshold - 15 && score <= threshold;
+}
+
 export function resolveVoiceJudgeTrigger(args: {
   readonly qualityMode: QualityMode;
   readonly candidates: readonly CandidateText[];
+  readonly quantitativeSignals?: QuantitativeSignals;
 }): VoiceJudgeTriggerReason | undefined {
   if (args.qualityMode === "strict") {
     return "strict_mode";
@@ -40,7 +67,10 @@ export function resolveVoiceJudgeTrigger(args: {
   }
 
   const reasoningBorderline = isBorderline(top.drift.reasoningScore ?? top.drift.score);
-  const developmentBorderline = isBorderline(top.drift.developmentScore);
+  const developmentBorderline = isDevelopmentDriftBorderline(
+    top.drift.developmentScore,
+    args.quantitativeSignals
+  );
   const tied =
     runnerUp !== undefined
     && Math.abs(top.score.finalScore - runnerUp.score.finalScore) <= 2;
@@ -82,7 +112,13 @@ export function explainVoiceJudgeSkip(args: {
     return "no_candidates";
   }
 
-  if (resolveVoiceJudgeTrigger(args)) {
+  if (
+    resolveVoiceJudgeTrigger({
+      qualityMode: args.qualityMode,
+      candidates: args.candidates,
+      quantitativeSignals: args.voiceProfile.quantitativeSignals
+    })
+  ) {
     return undefined;
   }
 

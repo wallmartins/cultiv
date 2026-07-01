@@ -25,16 +25,7 @@ describe("buildVoiceHints reasoning flag", () => {
     styleMarkers: [],
     primaryLanguage: "pt-BR",
     coreReasoningSignature: core,
-    argumentDevelopmentSignature: TEST_ARGUMENT_DEVELOPMENT_EXTRACTION_FIXTURE.development,
-    formatExpressionProfiles: {
-      "linkedin-post": {
-        contentType: "linkedin-post",
-        narrativeProse: "Short paragraphs.",
-        register: "conversational",
-        openingStyle: "direct",
-        technicalDensity: "low"
-      }
-    }
+    argumentDevelopmentSignature: TEST_ARGUMENT_DEVELOPMENT_EXTRACTION_FIXTURE.development
   };
 
   it("does not expose reasoning fields or derived anti-patterns when flag is off", () => {

@@ -8,11 +8,16 @@ import { createExecutionsClient, type ExecutionsClient } from "./executions.js";
 import { createPreviewClient, type PreviewClient } from "./preview.js";
 import { createHttpTransport, type HttpTransport } from "./transport.js";
 import { createVoiceClient, type VoiceClient } from "./voice.js";
+import {
+  createVoiceCalibrationClient,
+  type VoiceCalibrationClient
+} from "./voice-calibration.js";
 
 export interface ClientSdk {
   readonly preview: PreviewClient;
   readonly executions: ExecutionsClient;
   readonly voice: VoiceClient;
+  readonly voiceCalibration: VoiceCalibrationClient;
   readonly contentTypes: ContentTypesClient;
   readonly generationIntents: GenerationIntentsClient;
   readonly billing: BillingClient;
@@ -31,6 +36,7 @@ export function createClientSdk(config: ClientSdkConfig): ClientSdk {
     preview: createPreviewClient(transport),
     executions: createExecutionsClient(config, transport),
     voice: createVoiceClient(transport),
+    voiceCalibration: createVoiceCalibrationClient(transport),
     contentTypes: createContentTypesClient(transport),
     generationIntents: createGenerationIntentsClient(transport),
     billing: createBillingClient(transport),

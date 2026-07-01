@@ -64,7 +64,6 @@ describe("text-quality package", () => {
           tone: "personal",
           styleMarkers: ["eu", "na prática", "direto"],
           rules: ["Prefer first-person observations", "Avoid generic section headings"],
-          examples: ["Eu prefiro escrever como quem está pensando em voz alta, mas sem perder precisão."],
           antiPatterns: ["não é x, é y", "o problema", "a solução"]
         },
         lanes,
@@ -84,7 +83,6 @@ describe("text-quality package", () => {
     expect(result.voiceProfile.userId).toBe("user-123");
     expect(result.voiceProfile.tone).toBe("personal");
     expect(result.voiceProfile.styleMarkers).toContain("na prática");
-    expect(result.voiceProfile.examples).toHaveLength(1);
     expect(result.candidates[1]?.critic.findings.some((finding) => finding.type === "llmish")).toBe(true);
     expect(progressStages).toHaveLength(14);
     expect(progressStages).toEqual(expect.arrayContaining([
@@ -111,7 +109,6 @@ describe("text-quality package", () => {
       description: "Direct writing",
       tone: "concise",
       cadence: "tight",
-      examples: [],
       antiPatterns: ["generic linkedin tone"],
       antiPatternsExplicit: [],
       styleMarkers: ["short paragraphs"],
@@ -196,8 +193,7 @@ describe("text-quality package", () => {
             description: "Direct writing",
             tone: "concise",
             cadence: "tight",
-            examples: [],
-            antiPatterns: [],
+      antiPatterns: [],
             antiPatternsExplicit: [],
             styleMarkers: [],
             rules: [],
@@ -257,8 +253,7 @@ describe("text-quality package", () => {
             description: "Direct writing",
             tone: "concise",
             cadence: "tight",
-            examples: [],
-            antiPatterns: [],
+      antiPatterns: [],
             antiPatternsExplicit: [],
             styleMarkers: [],
             rules: [],

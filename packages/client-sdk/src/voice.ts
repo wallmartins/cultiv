@@ -1,10 +1,5 @@
 import { Effect } from "effect";
 import {
-  decodeVoiceExampleBatchCommitResultView,
-  decodeVoiceExampleBatchView,
-  decodeVoiceExampleCreateInput,
-  decodeVoiceExampleListItemView,
-  decodeVoiceExampleUpdateInput,
   decodeVoiceExamplesPageView,
   decodeVoiceProfileScreenView,
   decodeVoiceProfileDiagnosticsView,
@@ -12,18 +7,12 @@ import {
   decodeTraitConfirmationInput,
   type TraitConfirmationInput,
   type VoiceProfileDiagnosticsView,
-  type VoiceExampleBatchCommitResultView,
-  type VoiceExampleBatchView,
-  type VoiceExampleCreateInput,
-  type VoiceExampleListItemView,
-  type VoiceExampleUpdateInput,
   type VoiceExamplesPageView,
   type VoiceProfileScreenView,
   type VoiceTrainingConsentStatusView
 } from "@my-ai-orchestrator/contracts";
 import { decodeOkResponseEffect } from "./decode-response.js";
 import type { ClientSdkError } from "./errors.js";
-import { ClientSdkInvalidRequestError } from "./errors.js";
 import { createIdempotencyKey } from "./idempotency.js";
 import type { HttpTransport } from "./transport.js";
 
@@ -41,34 +30,6 @@ export interface VoiceListExamplesInput {
   readonly signal?: AbortSignal;
 }
 
-export interface VoiceCreateExampleInput extends VoiceExampleCreateInput {
-  readonly signal?: AbortSignal;
-}
-
-export interface VoiceUpdateExampleInput extends VoiceExampleUpdateInput {
-  readonly exampleId: string;
-  readonly signal?: AbortSignal;
-}
-
-export interface VoiceCreateBatchInput {
-  readonly expiresAt?: string;
-  readonly signal?: AbortSignal;
-}
-
-export interface VoiceAddBatchItemsInput {
-  readonly batchId: string;
-  readonly items: ReadonlyArray<{
-    readonly clientItemId: string;
-    readonly input: VoiceExampleCreateInput;
-  }>;
-  readonly signal?: AbortSignal;
-}
-
-export interface VoiceCommitBatchInput {
-  readonly batchId: string;
-  readonly signal?: AbortSignal;
-}
-
 export interface VoiceTraitConfirmationInput extends TraitConfirmationInput {
   readonly signal?: AbortSignal;
 }
@@ -81,11 +42,6 @@ export interface VoiceClient {
     input: VoiceTraitConfirmationInput
   ) => Effect.Effect<VoiceProfileDiagnosticsView, ClientSdkError>;
   readonly listExamples: (input?: VoiceListExamplesInput) => Effect.Effect<VoiceExamplesPageView, ClientSdkError>;
-  readonly createExample: (input: VoiceCreateExampleInput) => Effect.Effect<VoiceExampleListItemView, ClientSdkError>;
-  readonly updateExample: (input: VoiceUpdateExampleInput) => Effect.Effect<VoiceExampleListItemView, ClientSdkError>;
-  readonly createBatch: (input?: VoiceCreateBatchInput) => Effect.Effect<VoiceExampleBatchView, ClientSdkError>;
-  readonly addBatchItems: (input: VoiceAddBatchItemsInput) => Effect.Effect<VoiceExampleBatchView, ClientSdkError>;
-  readonly commitBatch: (input: VoiceCommitBatchInput) => Effect.Effect<VoiceExampleBatchCommitResultView, ClientSdkError>;
 }
 
 export function createVoiceClient(transport: HttpTransport): VoiceClient {
@@ -111,7 +67,8 @@ export function createVoiceClient(transport: HttpTransport): VoiceClient {
         const response = yield* transport.send({
           method: "POST",
           path: "/me/voice-training-consent",
-          signal: input.signal
+          signal: input.signal,
+          idempotencyKey: createIdempotencyKey()
         });
 
         return yield* decodeOkResponseEffect(
@@ -137,21 +94,14 @@ export function createVoiceClient(transport: HttpTransport): VoiceClient {
     recordTraitConfirmation(input) {
       return Effect.gen(function* () {
         const { signal, ...request } = input;
-        const validated = yield* decodeTraitConfirmationInput(request).pipe(
-          Effect.mapError(
-            (error) =>
-              new ClientSdkInvalidRequestError({
-                message: error.message,
-                request
-              })
-          )
-        );
+        const validated = yield* decodeTraitConfirmationInput(request);
 
         const response = yield* transport.send({
           method: "POST",
           path: "/me/voice-profile/trait-confirmations",
           body: validated,
-          signal
+          signal,
+          idempotencyKey: createIdempotencyKey()
         });
 
         return yield* decodeOkResponseEffect(
@@ -164,112 +114,22 @@ export function createVoiceClient(transport: HttpTransport): VoiceClient {
 
     listExamples(input = {}) {
       return Effect.gen(function* () {
+        const params = new URLSearchParams();
+        if (input.limit !== undefined) {
+          params.set("limit", String(input.limit));
+        }
+        if (input.offset !== undefined) {
+          params.set("offset", String(input.offset));
+        }
+
+        const query = params.toString();
         const response = yield* transport.send({
           method: "GET",
-          path: "/me/voice-profile/examples",
-          query: {
-            limit: input.limit,
-            offset: input.offset
-          },
+          path: query.length > 0 ? `/me/voice-profile/examples?${query}` : "/me/voice-profile/examples",
           signal: input.signal
         });
 
-        return yield* decodeOkResponseEffect(response, "voice examples", decodeVoiceExamplesPageView);
-      });
-    },
-
-    createExample(input) {
-      return Effect.gen(function* () {
-        const { signal, ...request } = input;
-        const validated = yield* decodeVoiceExampleCreateInput(request).pipe(
-          Effect.mapError(
-            (error) =>
-              new ClientSdkInvalidRequestError({
-                message: error.message,
-                request
-              })
-          )
-        );
-
-        const response = yield* transport.send({
-          method: "POST",
-          path: "/me/voice-profile/examples",
-          body: validated,
-          signal,
-          idempotencyKey: createIdempotencyKey()
-        });
-
-        return yield* decodeOkResponseEffect(response, "voice example create", decodeVoiceExampleListItemView);
-      });
-    },
-
-    updateExample(input) {
-      return Effect.gen(function* () {
-        const { exampleId, signal, ...request } = input;
-        const validated = yield* decodeVoiceExampleUpdateInput(request).pipe(
-          Effect.mapError(
-            (error) =>
-              new ClientSdkInvalidRequestError({
-                message: error.message,
-                request
-              })
-          )
-        );
-
-        const response = yield* transport.send({
-          method: "PATCH",
-          path: `/me/voice-profile/examples/${encodeURIComponent(exampleId)}`,
-          body: validated,
-          signal,
-          idempotencyKey: createIdempotencyKey()
-        });
-
-        return yield* decodeOkResponseEffect(response, "voice example update", decodeVoiceExampleListItemView);
-      });
-    },
-
-    createBatch(input = {}) {
-      return Effect.gen(function* () {
-        const response = yield* transport.send({
-          method: "POST",
-          path: "/me/voice-profile/example-batches",
-          body: input.expiresAt ? { expiresAt: input.expiresAt } : {},
-          signal: input.signal,
-          idempotencyKey: createIdempotencyKey()
-        });
-
-        return yield* decodeOkResponseEffect(response, "voice batch create", decodeVoiceExampleBatchView);
-      });
-    },
-
-    addBatchItems(input) {
-      return Effect.gen(function* () {
-        const response = yield* transport.send({
-          method: "POST",
-          path: `/me/voice-profile/example-batches/${encodeURIComponent(input.batchId)}/items`,
-          body: { items: input.items },
-          signal: input.signal,
-          idempotencyKey: createIdempotencyKey()
-        });
-
-        return yield* decodeOkResponseEffect(response, "voice batch items", decodeVoiceExampleBatchView);
-      });
-    },
-
-    commitBatch(input) {
-      return Effect.gen(function* () {
-        const response = yield* transport.send({
-          method: "POST",
-          path: `/me/voice-profile/example-batches/${encodeURIComponent(input.batchId)}/commit`,
-          signal: input.signal,
-          idempotencyKey: createIdempotencyKey()
-        });
-
-        return yield* decodeOkResponseEffect(
-          response,
-          "voice batch commit",
-          decodeVoiceExampleBatchCommitResultView
-        );
+        return yield* decodeOkResponseEffect(response, "voice examples list", decodeVoiceExamplesPageView);
       });
     }
   };

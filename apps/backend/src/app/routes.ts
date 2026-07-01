@@ -17,6 +17,7 @@ import { registerExperimentalExecutionRoutes } from "../routes/experimental-exec
 import { registerInternalPolicyRoutes } from "../routes/internal-policy-routes.js";
 import { registerInternalOverrideRoutes } from "../routes/internal-override-routes.js";
 import { registerVoiceRoutes } from "../routes/voice-routes.js";
+import { registerVoiceCalibrationRoutes } from "../routes/voice-calibration-routes.js";
 import { registerDevShowcaseRoutes } from "../routes/dev-showcase-routes.js";
 import { registerBillingRoutes } from "../routes/billing-routes.js";
 import { registerBillingWebhookRoutes } from "../routes/billing-webhook-routes.js";
@@ -76,6 +77,10 @@ export function registerBackendRoutes(app: Hono, options: BackendRouteOptions): 
     return c.json(response, 410);
   });
   registerVoiceRoutes(app, {
+    config: options.config,
+    services: options.services
+  });
+  registerVoiceCalibrationRoutes(app, {
     config: options.config,
     services: options.services
   });

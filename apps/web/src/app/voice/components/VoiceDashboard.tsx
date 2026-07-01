@@ -1,5 +1,5 @@
 import { Button, cn, CoordinateLabel, LogbookProse, Text } from "@my-ai-orchestrator/ui";
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import type { TraitConfirmationInput } from "@my-ai-orchestrator/contracts";
 import type { AppDisclosureItem } from "~/platform/ui/AppDisclosure";
@@ -9,6 +9,7 @@ import { toVoiceConfidenceLevel } from "~/app/voice/components/VoiceConfidenceRi
 import { VoiceMirrorHero } from "~/app/voice/components/VoiceMirrorHero";
 import { VoiceRebuildStatusBanner } from "~/app/voice/components/VoiceRebuildStatusBanner";
 import { VoiceNextStepPanel } from "~/app/voice/components/VoiceNextStepPanel";
+import { VoiceQuantitativeSignalsSection } from "~/app/voice/components/VoiceQuantitativeSignalsSection";
 import {
   buildReasoningDetailItems,
   VoiceReasoningMirror
@@ -27,6 +28,7 @@ import {
   getVoiceDiagnosticsText,
   resolveVoiceNextStepFromDiagnostics
 } from "~/app/voice/lib/voice-dashboard-copy";
+import { buildWizardStepVariances } from "~/app/voice/lib/voice-quantitative-breakdown";
 import { useAppLocale } from "~/i18n/app/use-app-locale";
 import { getContentTypeLabel } from "~/i18n/app/content-types";
 import { isSdkResourceNotFound } from "~/platform/sdk/is-sdk-resource-not-found";
@@ -130,6 +132,7 @@ function HealthStat({
 }
 
 export function VoiceDashboard() {
+  const navigate = useNavigate();
   const { locale, messages } = useAppLocale();
   const client = useClientSdk();
   const [status, setStatus] = useState<DashboardStatus>("loading");
@@ -137,6 +140,9 @@ export function VoiceDashboard() {
   const [confirmationDismissed, setConfirmationDismissed] = useState(false);
   const [confirmationSubmitting, setConfirmationSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState<VoiceDashboardTab>("overview");
+  const [stepVariances, setStepVariances] = useState<
+    readonly { readonly stepId: string; readonly variance: number }[]
+  >([]);
   const authorityAnchorRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -150,6 +156,18 @@ export function VoiceDashboard() {
         setStatus(isSdkResourceNotFound(error) ? "empty" : "error");
       });
   }, [client]);
+
+  useEffect(() => {
+    if (!profile?.quantitativeSignals) {
+      setStepVariances([]);
+      return;
+    }
+
+    void client
+      .toPromise(client.voice.listExamples({ limit: 50 }))
+      .then((page) => setStepVariances(buildWizardStepVariances(page.items)))
+      .catch(() => setStepVariances([]));
+  }, [client, profile?.quantitativeSignals]);
 
   if (status === "loading") {
     return (
@@ -171,7 +189,7 @@ export function VoiceDashboard() {
             {messages.voice.dashboardEmpty}
           </Text>
         </div>
-        <Link to="/app/voice/examples/new">
+        <Link to="/app/voice">
           <Button type="button">{messages.voice.dashboardEmptyAction}</Button>
         </Link>
       </div>
@@ -198,7 +216,9 @@ export function VoiceDashboard() {
   const missingFormats = getMissingVoiceFormats(profile.materialBase);
   const underrepresentedFormats = getUnderrepresentedVoiceFormats(profile.diagnostics);
   const coverageComplete = missingFormats.length === 0 && underrepresentedFormats.length === 0;
-  const nextStep = resolveVoiceNextStepFromDiagnostics(profile.diagnostics, voiceMessages);
+  const nextStep = resolveVoiceNextStepFromDiagnostics(profile.diagnostics, voiceMessages, {
+    hasCalibrationSignals: profile.quantitativeSignals !== undefined
+  });
   const rebuildStatus = profile.diagnostics.pendingRebuild.status;
   const confidenceLevel = toVoiceConfidenceLevel(profile.profile.confidence);
   const dialSubline = getVoiceConfidenceDialSubline(profile.profile.confidence, voiceMessages);
@@ -334,7 +354,7 @@ export function VoiceDashboard() {
             <Link to="/app/generate">
               <Button type="button">{voiceMessages.nextStep.generateCta}</Button>
             </Link>
-            <Link to="/app/voice/examples">
+            <Link to="/app/voice">
               <Button type="button" variant="ghost">
                 {voiceMessages.manageExamples}
               </Button>
@@ -356,6 +376,21 @@ export function VoiceDashboard() {
 
       {activeTab === "overview" ? (
         <section className="space-y-6">
+          {profile.quantitativeSignals ? (
+            <VoiceQuantitativeSignalsSection
+              signals={profile.quantitativeSignals}
+              messages={voiceMessages.quantitativeDashboard}
+              stepLabels={messages.onboarding.voiceCalibration.stepLabels}
+              stepVariances={stepVariances}
+              onRedoStep={() => {
+                void navigate({ to: "/app/onboarding" });
+              }}
+              onBonusTopicStep={() => {
+                void navigate({ to: "/app/onboarding" });
+              }}
+            />
+          ) : null}
+
           {profile.reasoning ? (
             <div ref={authorityAnchorRef}>
               <VoiceReasoningMirror
