@@ -2,6 +2,7 @@
  * @vitest-environment jsdom
  */
 import React from "react";
+import { Effect } from "effect";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { WizardStep, wizardStepCanAdvance } from "../../apps/web/src/app/onboarding/components/WizardStep";
@@ -113,5 +114,77 @@ describe("VoiceCalibrationSession", () => {
     fireEvent.click(screen.getByText(appMessagesPt.onboarding.voiceCalibration.audienceOptions.colegas));
 
     expect(continueButton).not.toBeDisabled();
+  });
+
+  it("returns to the previous writable step when back is pressed on review", async () => {
+    const sessionAtReview = {
+      sessionId: "voice-calibration:test",
+      userId: "user-1",
+      status: "in_progress",
+      currentStepId: "review_confirm",
+      completedStepCount: 4,
+      steps: [
+        { stepId: "micro_opinion", text: "Opinião salva." },
+        { stepId: "reasoning_reflection", text: "Reflexão salva." },
+        { stepId: "argument_development", text: "Desenvolvimento salvo." },
+        { stepId: "format_adaptation", text: "Formato salvo." },
+        { stepId: "review_confirm" }
+      ]
+    };
+
+    startSession.mockReturnValue(Effect.succeed({ sessionId: "voice-calibration:test" }));
+    setContext.mockReturnValue(Effect.succeed(sessionAtReview));
+    getStepPrompt.mockReturnValue(
+      Effect.succeed({
+        stepId: "format_adaptation",
+        prompt: "Adapte o formato.",
+        theme: "linkedin",
+        targetWords: 80,
+        maxWords: 120,
+        minWords: 40
+      })
+    );
+    toPromise.mockImplementation((effect) => Effect.runPromise(effect));
+
+    render(<VoiceCalibrationSession onComplete={vi.fn()} />);
+
+    fireEvent.click(screen.getByText(appMessagesPt.onboarding.voiceCalibration.domainOptions.tecnologia));
+    fireEvent.click(screen.getByText(appMessagesPt.onboarding.voiceCalibration.audienceOptions.colegas));
+    fireEvent.click(screen.getByRole("button", { name: appMessagesPt.onboarding.continue }));
+
+    await screen.findByText(appMessagesPt.onboarding.voiceCalibration.wizardTitle);
+
+    getProfile.mockReturnValue(
+      Effect.succeed({
+        profile: { userId: "user-1" },
+        diagnostics: { updating: false },
+        materialBase: {},
+        reasoning: {
+          core: { narrativeProse: "Como você pensa." },
+          development: { developmentProse: "Como você desenvolve." }
+        }
+      })
+    );
+    submitStep.mockImplementation(() =>
+      Effect.succeed({
+        ...sessionAtReview,
+        currentStepId: "review_confirm"
+      })
+    );
+
+    for (let index = 0; index < 4; index += 1) {
+      const textarea = await screen.findByRole("textbox");
+      fireEvent.change(textarea, { target: { value: "palavra ".repeat(40) } });
+      fireEvent.click(screen.getByRole("button", { name: appMessagesPt.onboarding.continue }));
+    }
+
+    expect(
+      await screen.findByText(appMessagesPt.onboarding.voiceCalibration.reviewThinking)
+    ).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: appMessagesPt.onboarding.voiceCalibration.back }));
+
+    expect(await screen.findByDisplayValue("Formato salvo.")).toBeInTheDocument();
+    expect(screen.queryByText(appMessagesPt.onboarding.voiceCalibration.reviewThinking)).not.toBeInTheDocument();
   });
 });

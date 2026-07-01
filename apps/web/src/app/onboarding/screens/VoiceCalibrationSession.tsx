@@ -16,6 +16,11 @@ import {
   type WizardAudienceOption,
   type WizardDomainOption
 } from "~/app/onboarding/lib/onboarding-steps";
+import {
+  isWizardReviewStep,
+  resolveDevelopmentReviewBody,
+  shouldPollVoiceProfileOnReview
+} from "~/app/onboarding/lib/voice-calibration-review";
 import { VoiceTrainingConsentModal } from "~/app/voice/components/VoiceTrainingConsentModal";
 import { grantVoiceConsent, hasVoiceConsent } from "~/app/voice/lib/voice-consent-storage";
 import { useAppLocale } from "~/i18n/app/use-app-locale";
@@ -116,6 +121,9 @@ function WizardStepIndicator({
   );
 }
 
+const REVIEW_PROFILE_POLL_MS = 2_000;
+const REVIEW_PROFILE_POLL_MAX = 30;
+
 export function VoiceCalibrationSession({ onComplete, onSkip }: VoiceCalibrationSessionProps) {
   const { user } = useAuth0();
   const { messages } = useAppLocale();
@@ -143,10 +151,13 @@ export function VoiceCalibrationSession({ onComplete, onSkip }: VoiceCalibration
   );
 
   const currentStepId = session?.currentStepId ?? CALIBRATION_WIZARD_STEP_IDS[0];
-  const isReviewStep = currentStepId === "review_confirm" || uiStepIndex === CALIBRATION_WIZARD_STEP_IDS.length - 1;
+  const isReviewStep = isWizardReviewStep(uiStepIndex);
   const serverStepIndex = resolveWizardStepIndex(currentStepId);
   const viewingPastStep = uiStepIndex < serverStepIndex;
   const viewingFutureStep = uiStepIndex > serverStepIndex;
+  const isProfileUpdating = profile?.diagnostics?.updating === true;
+  const thinkingBody = profile?.reasoning?.core.narrativeProse?.trim();
+  const developmentBody = resolveDevelopmentReviewBody(profile, session);
 
   const loadPrompt = useCallback(
     async (sessionId: string, stepId: string) => {
@@ -190,12 +201,54 @@ export function VoiceCalibrationSession({ onComplete, onSkip }: VoiceCalibration
       return;
     }
 
+    let cancelled = false;
+    let pollAttempt = 0;
+    let timer: ReturnType<typeof setInterval> | undefined;
+
+    const stopPolling = () => {
+      if (timer) {
+        clearInterval(timer);
+        timer = undefined;
+      }
+    };
+
+    async function refreshProfile() {
+      try {
+        const next = await client.toPromise(client.voice.getProfile());
+        if (cancelled) {
+          return;
+        }
+
+        setProfile(next);
+        setError(undefined);
+        pollAttempt += 1;
+
+        if (!shouldPollVoiceProfileOnReview(next, pollAttempt, REVIEW_PROFILE_POLL_MAX)) {
+          stopPolling();
+        }
+      } catch {
+        if (!cancelled) {
+          setError(copy.loadError);
+        }
+        stopPolling();
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    }
+
     setLoading(true);
-    void client
-      .toPromise(client.voice.getProfile())
-      .then(setProfile)
-      .catch(() => setError(copy.loadError))
-      .finally(() => setLoading(false));
+    void refreshProfile();
+
+    timer = setInterval(() => {
+      void refreshProfile();
+    }, REVIEW_PROFILE_POLL_MS);
+
+    return () => {
+      cancelled = true;
+      stopPolling();
+    };
   }, [client, copy.loadError, isReviewStep, phase, session]);
 
   function beginWizard() {
@@ -333,10 +386,12 @@ export function VoiceCalibrationSession({ onComplete, onSkip }: VoiceCalibration
     }
 
     const prevIndex = uiStepIndex - 1;
-    setUiStepIndex(prevIndex);
     const prevStepId = CALIBRATION_WIZARD_STEP_IDS[prevIndex];
+    setUiStepIndex(prevIndex);
+
     if (session && prevStepId && prevStepId !== "review_confirm") {
       syncDraftFromSession(session, prevStepId);
+      void loadPrompt(session.sessionId, prevStepId).catch(() => setError(copy.loadError));
     }
   }
 
@@ -471,7 +526,9 @@ export function VoiceCalibrationSession({ onComplete, onSkip }: VoiceCalibration
             <>
               <ReviewSection
                 title={copy.reviewThinking}
-                body={profile?.reasoning?.core.narrativeProse}
+                body={thinkingBody}
+                loading={isProfileUpdating && !thinkingBody}
+                loadingLabel={copy.loadingProfile}
                 confirmed={confirmedSections.has("thinking")}
                 confirmLabel={copy.confirmSection}
                 onConfirm={() =>
@@ -480,7 +537,9 @@ export function VoiceCalibrationSession({ onComplete, onSkip }: VoiceCalibration
               />
               <ReviewSection
                 title={copy.reviewDevelopment}
-                body={profile?.reasoning?.development?.developmentProse}
+                body={developmentBody}
+                loading={isProfileUpdating && !developmentBody}
+                loadingLabel={copy.loadingProfile}
                 confirmed={confirmedSections.has("development")}
                 confirmLabel={copy.confirmSection}
                 onConfirm={() =>
@@ -577,12 +636,16 @@ export function VoiceCalibrationSession({ onComplete, onSkip }: VoiceCalibration
 function ReviewSection({
   title,
   body,
+  loading,
+  loadingLabel,
   confirmed,
   confirmLabel,
   onConfirm
 }: {
   readonly title: string;
   readonly body?: string;
+  readonly loading?: boolean;
+  readonly loadingLabel: string;
   readonly confirmed: boolean;
   readonly confirmLabel: string;
   readonly onConfirm: () => void;
@@ -592,10 +655,21 @@ function ReviewSection({
       <Text variant="label" className="block">
         {title}
       </Text>
-      <Text variant="body" className="w-full text-ink-muted">
-        {body ?? "…"}
-      </Text>
-      <Button type="button" variant={confirmed ? "ghost" : "primary"} onClick={onConfirm} disabled={confirmed}>
+      {loading ? (
+        <Text variant="body" className="text-ink-muted">
+          {loadingLabel}
+        </Text>
+      ) : body ? (
+        <Text variant="body" className="text-ink-muted">
+          {body}
+        </Text>
+      ) : null}
+      <Button
+        type="button"
+        variant={confirmed ? "ghost" : "primary"}
+        onClick={onConfirm}
+        disabled={confirmed || loading || !body}
+      >
         {confirmLabel}
       </Button>
     </LogbookProse>
