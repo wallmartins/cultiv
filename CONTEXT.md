@@ -53,7 +53,7 @@ The offline harmonization step after parallel **Reasoning Extraction** and **Arg
 _Avoid_: User-visible conflict card, dual profile, generation gate, unconditional third extraction call
 
 **Format Expression Profile**:
-Per-**Content Type** register and expression traits — such as formality, technical density, and platform tone — derived from that format's examples and layered on top of the **Core Reasoning Signature** without changing the author's reasoning mode.
+Per-**Content Type** register and expression traits — such as formality, technical density, and channel conventions — derived only when the author has enough active examples for that **Content Type**; optional in cold start and not tied to legacy channel fields when channel is omitted.
 _Avoid_: Format voice preset, channel persona, per-format cognitive profile
 
 **Derived Anti-Patterns**:
@@ -117,15 +117,55 @@ The persisted voice projection recalculated from the user's examples and anti-pa
 _Avoid_: Cached prompt, temporary profile
 
 **Voice Example**:
-A user-provided text sample that teaches the system how the author writes and helps derive the current **Voice Profile**.
+A text sample that teaches the system how the author writes and helps derive the current **Voice Profile** — either imported as prior authorship or produced through **Voice Calibration** and **Author Affirmation**.
 _Avoid_: Seed text, sample prompt
+
+**Voice Example Provenance**:
+Whether a **Voice Example** came from prior authorship (`authored`) or from a **Calibration Round** where the author chose, optionally edited, and attested the text (`calibrated`).
+_Avoid_: Example source, sample type, training data tag
+
+**Voice Entry Path**:
+The author's chosen first way to teach Cultiv their voice — importing **authored** **Voice Examples** or completing a **Voice Calibration Session**.
+_Avoid_: Onboarding mode, setup track, user type
+
+**Voice Onboarding Gateway**:
+The first-time screen where an **End User** with no voice material yet chooses a **Voice Entry Path** before entering either the **Voice Example Composer** or a **Voice Calibration Session**.
+_Avoid_: Setup fork, onboarding menu, path picker
+
+**Voice Calibration Session**:
+A guided alternative to importing a writing portfolio: the author completes one or more **Calibration Rounds** instead of pasting existing texts, with optional depth (more rounds yield higher **Voice Confidence** up to **Voice Calibration Entitlement** limits).
+_Avoid_: Questionnaire wizard, voice quiz, onboarding survey
+
+**Voice Calibration Entitlement**:
+The plan-scoped commercial rules for **Voice Calibration Session** access — maximum **Calibration Rounds**, whether each round debits the author's generation quota, and the **Voice Confidence** ceiling reachable from calibrated material alone.
+_Avoid_: Calibration plan, voice tier, onboarding limit
+
+**Calibration Quota Charge**:
+The debit of one generation unit from the **End User**'s monthly quota when a **Calibration Round** completes on the free plan; paid plans do not apply **Calibration Quota Charge** to calibration rounds.
+_Avoid_: Calibration credit, voice setup cost, round price
+
+**Calibration Round**:
+One step inside a **Voice Calibration Session** where the system presents two candidate texts, the author picks one, may make small lexical or structural edits, and attests that the result sounds like how they want to write.
+_Avoid_: A/B test, style poll, preference question
+
+**Author Affirmation**:
+The author's explicit confirmation that a **Voice Example** — especially a calibrated one — represents how they want their texts to sound, recorded at the end of a **Calibration Round** or when resolving a **Voice Direction Conflict**.
+_Avoid_: Thumbs up, user approval, quality rating
+
+**Voice Direction Conflict**:
+A detected divergence between the current **Derived Voice Profile** and newer **authored** **Voice Examples** — for example calibrated informal tone versus imported formal posts.
+_Avoid_: Profile mismatch, voice drift alert, inconsistency error
+
+**Author Voice Preference Resolution**:
+The author-facing confirmation flow triggered by a **Voice Direction Conflict**; the author chooses which direction to keep or whether to blend toward the new material before **Voice Profile Rebuild** applies the decision.
+_Avoid_: Conflict modal, merge wizard, profile override dialog
 
 **Voice Example Composer**:
 The shared multi-slot form used to ingest one or more **Voice Examples** at once; submitting one filled slot calls the single-create API path, while submitting two or more filled slots calls the batch commit path.
 _Avoid_: Example wizard, upload form, inline onboarding fields
 
 **Voice Confidence**:
-The trust level of the current **Derived Voice Profile**, based on example count and minimum diversity.
+The trust level of the current **Derived Voice Profile**, based on attested example volume, diversity across **Calibration Rounds** or **Voice Examples**, and — for calibrated material — **Author Affirmation** rather than example count alone.
 _Avoid_: Score, certainty
 
 **Voice Adaptation Mode**:
@@ -245,7 +285,7 @@ The persisted operational pointer that marks which versioned **AI Policy** is ac
 _Avoid_: Runtime toggle, live config flag
 
 **Onboarding**:
-The optional guided first-time flow that collects voice examples, tone preferences, and plan awareness. Can be skipped entirely, but skipped steps produce persistent reminders on the generation screen.
+The optional guided first-time flow that starts at the **Voice Onboarding Gateway**, then follows the chosen **Voice Entry Path** until the author has voice material and reaches the **Onboarding Welcome Step**. Can be skipped entirely, but skipped steps produce persistent reminders on the **Generation Screen**.
 _Avoid_: Tutorial, wizard, setup tour
 
 **Onboarding Completion**:
@@ -586,6 +626,16 @@ _Avoid_: AI Writing Engine, content-lib, my-ai-orchestrator
 - **Voice Reasoning Presentation** is read-only in Fase 1; authors refine inference by adding or improving **Voice Examples**, not by editing derived reasoning fields directly.
 - Dynamic example retrieval remains out of Fase 1 scope until per-format example volume routinely exceeds prompt budget.
 - A **Voice Example** contributes to the user's **Derived Voice Profile** and **Reasoning Signature**.
+- A **Voice Example** carries **Voice Example Provenance** (`authored` or `calibrated`); **authored** examples outrank **calibrated** ones when resolving a **Voice Direction Conflict** unless **Author Voice Preference Resolution** chooses otherwise.
+- A **Voice Onboarding Gateway** offers every new **End User** without voice material a choice between **Voice Entry Path** options; neither path is the default over the other.
+- **Onboarding** branches after the **Voice Onboarding Gateway**: one branch reuses the **Voice Example Composer**; the other enters a **Voice Calibration Session**.
+- A **Voice Calibration Session** produces **calibrated** **Voice Examples** through **Calibration Rounds** ending in **Author Affirmation**; **Voice Calibration Entitlement** caps how many rounds an **End User** may complete.
+- **Voice Calibration Entitlement** on the free plan: up to three **Calibration Rounds**, each completed round applies one **Calibration Quota Charge**, and calibrated profiles may reach `medium` **Voice Confidence** at most until upgrade or **authored** examples arrive.
+- **Voice Calibration Entitlement** on paid plans (Criador, Pro): up to ten **Calibration Rounds**, no **Calibration Quota Charge**, and calibrated profiles may reach `high` **Voice Confidence** when attestation and designed diversity thresholds are met.
+- Importing **authored** **Voice Examples** on any plan does not apply **Calibration Quota Charge**; only **Calibration Rounds** on the free plan debit generation quota.
+- **Voice Confidence** for calibrated profiles rises with completed attested rounds and designed diversity across rounds, not only raw example count.
+- A **Voice Direction Conflict** triggers **Author Voice Preference Resolution** before the conflicting signal changes generation behavior; silent overwrite of the author's stated preference is not allowed.
+- **Format Expression Profile** is built only per **Content Type** with sufficient active examples; absence of per-type coverage does not block cold start when **Core Reasoning Signature** and calibrated examples exist.
 - **Reasoning Signature** is derived from **Voice Examples** during profile rebuild and consumed alongside the **Derived Voice Profile** at generation time.
 - **Reasoning Signature Representation** uses narrative prose for prompt guidance and reduced enums for measurable drift checks; dynamic example retrieval is a later enhancement when per-format example volume exceeds prompt budget.
 - A **Voice Example** may be consumed in raw form by explicitly authorized pipeline stages when voice fidelity requires it, but the main generation step still consumes the **Derived Voice Profile** as its voice source of truth.
@@ -618,7 +668,7 @@ _Avoid_: AI Writing Engine, content-lib, my-ai-orchestrator
 - The **Active AI Policy Pointer** selects which versioned **AI Policy** new executions and previews use.
 - An **Onboarding** step collects **Voice Examples** and tone preferences; skipped steps produce reminders on the **Generation Screen**.
 - The first **Onboarding** step reuses the same **Voice Example Composer** as `/app/voice/examples/new`, so first-time users learn the real ingestion flow instead of a simplified inline variant.
-- Web v2 **Onboarding** has exactly two steps: **Voice Example Composer**, then an **Onboarding Welcome Step**; there is no separate global tone-preferences step because tone is derived from **Voice Examples**.
+- Web v2 **Onboarding** currently has two steps after voice material exists (**Voice Example Composer** on the import path, then **Onboarding Welcome Step**); the **Voice Onboarding Gateway** adds a preceding choice screen and a calibration branch — not a separate global tone-preferences step, because tone is derived from examples or calibration.
 - The **Voice Example Composer** starts with one example slot and can add more slots on demand; one submitted slot uses single-create ingestion, while multiple submitted slots use batch ingestion through the **Client Integration Surface**.
 - Editing an existing **Voice Example** reuses the same composer shape constrained to one slot and the update API path.
 - After authentication, the **Authenticated Workspace** uses a smart first-entry redirect: users with no **Voice Examples** and incomplete **Onboarding Completion** land on `/app/onboarding`; all other users land on `/app/generate`.

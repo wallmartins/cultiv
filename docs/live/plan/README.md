@@ -13,6 +13,7 @@ Planejamento consolidado da implementação web do **Cultiv**, produzido nas ses
 | [author-reasoning-signature-implementation-plan.md](./author-reasoning-signature-implementation-plan.md) | Plano — raciocínio autoral, extração no rebuild, judge Groq (ADR 0006) |
 | [argument-development-signature-implementation-plan.md](./argument-development-signature-implementation-plan.md) | Plano — desenvolvimento argumentativo, extração paralela, reconciliação condicional (ADR 0007) |
 | [development-traits-implementation-plan.md](./development-traits-implementation-plan.md) | Plano — Development Traits, Trait Confidence, espelho e confirmação do autor (ADR 0008) |
+| [voice-calibration-cold-start-implementation-plan.md](./voice-calibration-cold-start-implementation-plan.md) | Plano — calibração de voz, gateway de onboarding, entitlement híbrido (ADR 0011) |
 | [development-traits-regression-baseline.md](./development-traits-regression-baseline.md) | Baseline de regressão — corpus `expectedTraits`, `pnpm eval:development-traits` |
 | [text-generation-lexical-quality-tracker.md](./text-generation-lexical-quality-tracker.md) | Tracker — issues 17–26, baseline de métricas, rollout |
 | [phase-2-implementation-plan.md](./phase-2-implementation-plan.md) | Plano detalhado — App autenticado (produto) |

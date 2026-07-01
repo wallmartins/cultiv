@@ -10,6 +10,7 @@ Product Requirements Documents for active Cultiv work.
 | [Author Reasoning Signature](./author-reasoning-signature.md) | `ready-for-agent` | [author-reasoning-signature-implementation-plan.md](../plan/author-reasoning-signature-implementation-plan.md) · [issue](./issue-author-reasoning-signature.md) |
 | [Argument Development Signature](./argument-development-signature.md) | `ready-for-agent` | [argument-development-signature-implementation-plan.md](../plan/argument-development-signature-implementation-plan.md) · [issue](./issue-argument-development-signature.md) |
 | [Development Traits and Author Confidence](./development-traits-and-author-confidence.md) | `ready-for-agent` | [development-traits-implementation-plan.md](../plan/development-traits-implementation-plan.md) · [issue](./issue-development-traits.md) |
+| [Voice Calibration Cold Start](./voice-calibration-cold-start.md) | `ready-for-agent` | [voice-calibration-cold-start-implementation-plan.md](../plan/voice-calibration-cold-start-implementation-plan.md) · [issue](./issue-voice-calibration-cold-start.md) |
 | [Cultiv Authenticated Workspace — Web v2](./cultiv-authenticated-workspace-web-v2.md) | `ready-for-agent` | [phase-2-implementation-plan.md](../plan/phase-2-implementation-plan.md) · [web-v2-screen-specs.md](../plan/web-v2-screen-specs.md) |
 | [Workspace Visual Refresh](./workspace-visual-refresh.md) | `ready-for-agent` | [workspace-visual-refresh-implementation-plan.md](../plan/workspace-visual-refresh-implementation-plan.md) · [issue](./issue-workspace-visual-refresh.md) |
 | [Durable Async Runtime](./durable-async-runtime.md) | `ready-for-agent` | [durable-async-runtime-implementation-plan.md](../plan/durable-async-runtime-implementation-plan.md) · [issue](./issue-durable-async-runtime.md) |
@@ -52,9 +53,12 @@ Child slices: [`48`–`57`](../issues/README.md#durable-async-runtime) in `docs/
 | [Author Reasoning Signature](./issue-author-reasoning-signature.md) | `ready-for-agent` | [Author Reasoning Signature PRD](./author-reasoning-signature.md) |
 | [Argument Development Signature](./issue-argument-development-signature.md) | `ready-for-agent` | [Argument Development Signature PRD](./argument-development-signature.md) |
 | [Development Traits and Author Confidence](./issue-development-traits.md) | `ready-for-agent` | [Development Traits PRD](./development-traits-and-author-confidence.md) |
+| [Voice Calibration Cold Start](./issue-voice-calibration-cold-start.md) | `ready-for-agent` | [Voice Calibration PRD](./voice-calibration-cold-start.md) |
 
 Child slices: [`66`–`73`](../issues/README.md#author-reasoning-signature) in `docs/live/issues/`.
 
 Child slices: [`74`–`81`](../issues/README.md#argument-development-signature) in `docs/live/issues/`.
 
 Child slices: [`82`–`87`](../issues/README.md#development-traits-and-author-confidence) in `docs/live/issues/`.
+
+Child slices: [`109`–`116`](../issues/109-voice-calibration-contracts-provenance.md) — Voice Calibration Cold Start.

@@ -1,5 +1,11 @@
 # Progress Log
 
+| 2026-06-30 | feat(backend): Voice Calibration cold-start backend — session store, deterministic candidates, quota charge, calibration service + routes, preference resolution, provenance-aware confidence/rebuild, `voice.calibrationV1` flag, tests 109–112 |
+
+| 2026-06-30 | feat(web+sdk): Voice Calibration cold-start frontend — `voiceCalibration` SDK client, onboarding gateway + calibration session UI, `/app/onboarding/calibration` route, pt/en i18n, gateway + i18n tests |
+
+| 2026-06-30 | docs: Voice Calibration Cold Start program — grill session outcomes, ADR 0011 (hybrid entitlement), CONTEXT glossary, PRD + issues 109–116, implementation plan |
+
 | 2026-06-26 | fix(backend): mark stripe external in esbuild and add direct dependency — fixes backend build on deploy when stripe is not bundled from payments workspace |
 
 | 2026-06-26 | fix(web): logout redirects to marketing landing — `getLogoutReturnUrl` uses locale home (`/` or `/en`) instead of `/login` in avatar menu and settings |
