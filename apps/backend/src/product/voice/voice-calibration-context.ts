@@ -40,21 +40,19 @@ export function getCalibrationWizardStep(stepId: WizardStepId): CalibrationWizar
 }
 
 export function resolveTheme(step: CalibrationWizardStep, context?: WizardContext): string {
-  if (step.id === "reasoning_reflection" || step.id === "format_adaptation") {
-    return "fixedPrompt" in step && step.fixedPrompt ? step.fixedPrompt : step.prompt;
+  switch (step.id) {
+    case "reasoning_reflection":
+    case "format_adaptation":
+      return step.fixedPrompt;
+    case "review_confirm":
+      return step.defaultTheme;
+    case "micro_opinion":
+      return context?.domain
+        ? (THEMES_BY_DOMAIN[context.domain]?.opinion ?? step.defaultTheme)
+        : step.defaultTheme;
+    case "argument_development":
+      return context?.domain
+        ? (THEMES_BY_DOMAIN[context.domain]?.argument ?? step.defaultTheme)
+        : step.defaultTheme;
   }
-
-  if (step.id === "review_confirm") {
-    return step.defaultTheme;
-  }
-
-  if (step.id === "micro_opinion" && context?.domain) {
-    return THEMES_BY_DOMAIN[context.domain]?.opinion ?? step.defaultTheme;
-  }
-
-  if (step.id === "argument_development" && context?.domain) {
-    return THEMES_BY_DOMAIN[context.domain]?.argument ?? step.defaultTheme;
-  }
-
-  return step.defaultTheme;
 }

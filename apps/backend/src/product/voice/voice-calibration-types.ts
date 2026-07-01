@@ -12,7 +12,9 @@ import type {
 import type { WizardStepId } from "@my-ai-orchestrator/domain";
 import type {
   BackendVoiceCalibrationSessionNotFoundError,
-  BackendVoiceCalibrationValidationError
+  BackendVoiceCalibrationValidationError,
+  BackendVoiceTrainingConsentFailureError,
+  BackendVoiceTrainingConsentRequiredError
 } from "../../http/errors.js";
 
 export interface BackendVoiceCalibrationService {
@@ -20,7 +22,7 @@ export interface BackendVoiceCalibrationService {
     userId: string
   ) => Effect.Effect<
     VoiceCalibrationSessionView,
-    BackendVoiceCalibrationValidationError | import("../../safety/voice-consent-types.js").BackendVoiceTrainingConsentRequiredError
+    BackendVoiceCalibrationValidationError | BackendVoiceTrainingConsentRequiredError | BackendVoiceTrainingConsentFailureError
   >;
   readonly setContext: (
     sessionId: string,
@@ -52,7 +54,8 @@ export interface BackendVoiceCalibrationService {
     | BackendVoiceCalibrationSessionNotFoundError
     | BackendVoiceCalibrationValidationError
     | DatabaseError
-    | import("../../safety/voice-consent-types.js").BackendVoiceTrainingConsentRequiredError
+    | BackendVoiceTrainingConsentRequiredError
+    | BackendVoiceTrainingConsentFailureError
   >;
   readonly skipStep: (
     sessionId: string,

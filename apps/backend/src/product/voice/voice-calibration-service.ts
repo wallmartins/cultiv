@@ -22,6 +22,7 @@ import {
   BackendVoiceCalibrationValidationError
 } from "../../http/errors.js";
 import type { BackendVoiceConsentService } from "../../safety/voice-consent-types.js";
+import type { BillingPlanTier } from "../ai-policy/ai-policy-types.js";
 import { resolveStoredUserPlanTier } from "../billing/resolve-user-billing.js";
 import { buildStepPrompt } from "./voice-calibration-candidates.js";
 import {
@@ -66,10 +67,20 @@ const WRITABLE_STEP_IDS = new Set<WizardStepId>([
 function resolvePlanTier(
   billing: BillingServiceContract,
   userId: string
-): "free" | "criador" | "pro" {
+): keyof typeof VOICE_CALIBRATION_PLAN_LIMITS {
   const tier = resolveStoredUserPlanTier(billing, userId);
-  if (tier === "criador" || tier === "pro") {
-    return tier;
+  return mapBillingPlanTierToCalibrationLimits(tier);
+}
+
+function mapBillingPlanTierToCalibrationLimits(
+  tier: BillingPlanTier
+): keyof typeof VOICE_CALIBRATION_PLAN_LIMITS {
+  if (tier === "pro" || tier === "enterprise") {
+    return "pro";
+  }
+
+  if (tier === "starter") {
+    return "criador";
   }
 
   return "free";

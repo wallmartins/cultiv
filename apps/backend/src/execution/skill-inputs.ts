@@ -1,4 +1,5 @@
 import type { SkillExecutionContext } from "@my-ai-orchestrator/skills";
+import type { VoiceProfile } from "@my-ai-orchestrator/text-quality";
 
 import { stripRuntimeMetadata } from "./pipeline/sanitized-generation-input.js";
 
@@ -126,16 +127,13 @@ export function collectVoiceAntiPatterns(profile: {
   return [...new Set(merged.filter((signal) => signal.trim().length > 0))];
 }
 
-export function collectVoiceExampleTexts(profile: {
-  readonly examples?: readonly string[];
-} | undefined): readonly string[] {
-  if (!profile?.examples) {
-    return [];
-  }
+export function collectVoiceExampleTexts(profile: Partial<VoiceProfile> | undefined): readonly string[] {
+  const signaturePhrases = [
+    ...(profile?.signatureOpenings ?? []),
+    ...(profile?.signatureClosings ?? [])
+  ];
 
-  return profile.examples
-    .filter((example): example is string => typeof example === "string" && example.trim().length > 0)
-    .map((example) => example.trim());
+  return signaturePhrases.filter((phrase) => phrase.trim().length > 0);
 }
 
 export function normalizeViolations(value: unknown): readonly unknown[] | undefined {
