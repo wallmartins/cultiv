@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
   isWizardReviewStep,
+  isReviewSectionPending,
   resolveDevelopmentReviewBody,
+  resolveThinkingReviewBody,
   shouldPollVoiceProfileOnReview
 } from "../../apps/web/src/app/onboarding/lib/voice-calibration-review";
 
@@ -11,53 +13,77 @@ describe("voice calibration review helpers", () => {
     expect(isWizardReviewStep(3)).toBe(false);
   });
 
-  it("falls back to the argument development draft while extraction is pending", () => {
+  it("never falls back to raw wizard step text", () => {
+    expect(resolveThinkingReviewBody(null)).toBeUndefined();
+    expect(resolveDevelopmentReviewBody(null)).toBeUndefined();
     expect(
-      resolveDevelopmentReviewBody(
+      resolveDevelopmentReviewBody({
+        profile: {} as never,
+        diagnostics: { updating: false } as never,
+        materialBase: {} as never
+      })
+    ).toBeUndefined();
+  });
+
+  it("returns extracted prose when available", () => {
+    expect(
+      resolveThinkingReviewBody({
+        profile: {} as never,
+        diagnostics: { updating: false } as never,
+        materialBase: {} as never,
+        reasoning: {
+          core: { narrativeProse: "Observa antes de concluir." }
+        } as never
+      })
+    ).toBe("Observa antes de concluir.");
+
+    expect(
+      resolveDevelopmentReviewBody({
+        profile: {} as never,
+        diagnostics: { updating: false } as never,
+        materialBase: {} as never,
+        reasoning: {
+          development: { developmentProse: "Abre pela observação." }
+        } as never
+      })
+    ).toBe("Abre pela observação.");
+  });
+
+  it("marks review sections as pending while profile is updating or prose is missing", () => {
+    expect(isReviewSectionPending(null, undefined)).toBe(true);
+    expect(
+      isReviewSectionPending(
         {
           profile: {} as never,
           diagnostics: { updating: true } as never,
           materialBase: {} as never
         },
-        {
-          steps: [{ stepId: "argument_development", text: "Meu texto de desenvolvimento." } as never]
-        } as never
+        "Pronto."
       )
-    ).toBeUndefined();
-
+    ).toBe(true);
     expect(
-      resolveDevelopmentReviewBody(
+      isReviewSectionPending(
         {
           profile: {} as never,
           diagnostics: { updating: false } as never,
           materialBase: {} as never
         },
-        {
-          steps: [{ stepId: "argument_development", text: "Meu texto de desenvolvimento." } as never]
-        } as never
+        undefined
       )
-    ).toBe("Meu texto de desenvolvimento.");
-  });
-
-  it("prefers extracted development prose when available", () => {
+    ).toBe(true);
     expect(
-      resolveDevelopmentReviewBody(
+      isReviewSectionPending(
         {
           profile: {} as never,
           diagnostics: { updating: false } as never,
-          materialBase: {} as never,
-          reasoning: {
-            development: { developmentProse: "Abre pela observação." }
-          } as never
+          materialBase: {} as never
         },
-        {
-          steps: [{ stepId: "argument_development", text: "Rascunho." } as never]
-        } as never
+        "Pronto."
       )
-    ).toBe("Abre pela observação.");
+    ).toBe(false);
   });
 
-  it("keeps polling while the profile is updating or development prose is missing", () => {
+  it("keeps polling while either review section is still missing", () => {
     expect(shouldPollVoiceProfileOnReview(undefined, 0, 30)).toBe(true);
     expect(
       shouldPollVoiceProfileOnReview(
@@ -77,7 +103,22 @@ describe("voice calibration review helpers", () => {
           diagnostics: { updating: false } as never,
           materialBase: {} as never,
           reasoning: {
-            development: { developmentProse: "Pronto." }
+            core: { narrativeProse: "Pensamento pronto." }
+          } as never
+        },
+        1,
+        30
+      )
+    ).toBe(true);
+    expect(
+      shouldPollVoiceProfileOnReview(
+        {
+          profile: {} as never,
+          diagnostics: { updating: false } as never,
+          materialBase: {} as never,
+          reasoning: {
+            core: { narrativeProse: "Pensamento pronto." },
+            development: { developmentProse: "Desenvolvimento pronto." }
           } as never
         },
         1,

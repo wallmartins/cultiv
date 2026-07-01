@@ -528,6 +528,8 @@ export const appMessagesPt: AppMessages = {
       confirmSection: "Confirmo",
       confirmAll: "Tudo certo, vamos gerar!",
       loadingProfile: "Estamos montando seu perfil a partir dos textos…",
+      generatingSectionProfile:
+        "Ainda estamos gerando esta parte do seu perfil — em instantes ela aparecerá aqui.",
       loadError: "Não foi possível continuar. Tente novamente.",
       contextRequired: "Selecione área e audiência para continuar.",
       consistencyScore: "Consistência: {score}",

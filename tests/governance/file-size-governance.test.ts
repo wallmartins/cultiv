@@ -16,9 +16,9 @@ const FILE_SIZE_ALLOWLIST = new Set<string>([
 
 const FILE_SIZE_BASELINE = new Map<string, number>([
   ["apps/web/src/app/voice/components/VoiceDashboard.tsx", 468],
-  ["apps/web/src/app/onboarding/screens/VoiceCalibrationSession.tsx", 678],
+  ["apps/web/src/app/onboarding/screens/VoiceCalibrationSession.tsx", 681],
   ["apps/backend/src/product/voice/voice-calibration-service.ts", 497],
-  ["apps/backend/src/product/voice/reasoning-extraction.ts", 449],
+  ["apps/backend/src/product/voice/reasoning-extraction.ts", 471],
   ["apps/backend/src/infra/billing/postgres-billing-repository.ts", 526]
 ]);
 

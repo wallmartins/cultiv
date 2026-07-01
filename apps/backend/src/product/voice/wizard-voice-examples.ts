@@ -8,11 +8,11 @@ export function isWizardVoiceExample(example: VoiceExampleRecord): boolean {
     return true;
   }
 
-  return example.classificationLabels.some((label) => WIZARD_STEP_IDS.has(label));
+  return example.classificationLabels?.some((label) => WIZARD_STEP_IDS.has(label)) ?? false;
 }
 
 export function resolveWizardStepId(example: VoiceExampleRecord): WizardStepId | undefined {
-  const fromLabels = example.classificationLabels.find((label) => WIZARD_STEP_IDS.has(label));
+  const fromLabels = example.classificationLabels?.find((label) => WIZARD_STEP_IDS.has(label));
   return fromLabels as WizardStepId | undefined;
 }
 

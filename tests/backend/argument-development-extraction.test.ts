@@ -9,6 +9,7 @@ import {
   extractArgumentDevelopmentSignature
 } from "../../apps/backend/src/product/voice/argument-development-extraction.js";
 import { buildReasoningExtractionMessages } from "../../apps/backend/src/product/voice/reasoning-extraction.js";
+import { buildVoiceSignatureBrief } from "../../apps/backend/src/product/voice/voice-signature-brief.js";
 import { createAIAdapterRegistry, createAIAdapterService, registerDefaultAIProviders } from "@my-ai-orchestrator/ai-adapters";
 import type { BackendProviderTransport } from "../../apps/backend/src/execution/pipeline/provider-transport.js";
 
@@ -42,11 +43,12 @@ const examples: VoiceExampleRecord[] = [
     text: "Começo pela experiência vivida e só depois testo a ideia em um caso concreto.",
     language: "pt-BR",
     state: "active",
-    classificationLabels: [],
+    classificationLabels: ["reasoning_reflection", "wizard_calibration"],
     antiPatternsExplicit: [],
     pinned: false,
     pendingProfileImpact: false,
     effectiveContentTypeHints: ["linkedin-post"],
+    topicTag: "reasoning_reflection",
     createdAt: "2026-06-17T00:00:00.000Z",
     updatedAt: "2026-06-17T00:00:00.000Z"
   },
@@ -56,11 +58,12 @@ const examples: VoiceExampleRecord[] = [
     text: "Quando ainda tenho dúvida, deixo isso explícito antes de fechar o raciocínio.",
     language: "pt-BR",
     state: "active",
-    classificationLabels: [],
+    classificationLabels: ["argument_development", "wizard_calibration"],
     antiPatternsExplicit: [],
     pinned: false,
     pendingProfileImpact: false,
     effectiveContentTypeHints: ["linkedin-post"],
+    topicTag: "argument_development",
     createdAt: "2026-06-17T00:00:00.000Z",
     updatedAt: "2026-06-17T00:00:00.000Z"
   }
@@ -68,12 +71,13 @@ const examples: VoiceExampleRecord[] = [
 
 describe("argument development extraction prompts", () => {
   it("does not include draft core reasoning in the development prompt", () => {
-    const development = buildDevelopmentExtractionMessages(examples);
-    const reasoning = buildReasoningExtractionMessages(examples);
+    const brief = buildVoiceSignatureBrief(examples);
+    const development = buildDevelopmentExtractionMessages(examples, brief);
 
-    expect(development.user).not.toContain("certaintyLevel");
-    expect(development.user).not.toContain(reasoning.user.match(/Analyze the author's reasoning/)?.[0] ?? "");
+    expect(development.user).not.toContain("Analyze the author's reasoning patterns");
+    expect(development.user).not.toContain('"certaintyLevel"');
     expect(development.user).toContain("how the author develops texts");
+    expect(development.user).toContain("DETERMINISTIC SIGNATURE BRIEF");
     expect(development.user).toContain("moveLabels MUST be written in Brazilian Portuguese");
     expect(development.system).toContain("moveLabels MUST be written in Brazilian Portuguese");
   });
