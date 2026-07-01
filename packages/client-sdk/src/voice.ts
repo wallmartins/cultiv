@@ -13,6 +13,7 @@ import {
 } from "@my-ai-orchestrator/contracts";
 import { decodeOkResponseEffect } from "./decode-response.js";
 import type { ClientSdkError } from "./errors.js";
+import { ClientSdkInvalidRequestError } from "./errors.js";
 import { createIdempotencyKey } from "./idempotency.js";
 import type { HttpTransport } from "./transport.js";
 
@@ -94,7 +95,15 @@ export function createVoiceClient(transport: HttpTransport): VoiceClient {
     recordTraitConfirmation(input) {
       return Effect.gen(function* () {
         const { signal, ...request } = input;
-        const validated = yield* decodeTraitConfirmationInput(request);
+        const validated = yield* decodeTraitConfirmationInput(request).pipe(
+          Effect.mapError(
+            (error) =>
+              new ClientSdkInvalidRequestError({
+                message: error.message,
+                request
+              })
+          )
+        );
 
         const response = yield* transport.send({
           method: "POST",

@@ -87,7 +87,7 @@ export function VoiceQuantitativeSignalsSection({
               <Text variant="meta" className="text-ink-muted">
                 {messages.highestVarianceHint}
               </Text>
-              <Button type="button" variant="secondary" onClick={() => onRedoStep(highestVarianceStep.stepId)}>
+              <Button type="button" variant="ghost" onClick={() => onRedoStep(highestVarianceStep.stepId)}>
                 {messages.redoStep}: {stepLabels[highestVarianceStep.stepId] ?? highestVarianceStep.stepId}
               </Button>
             </div>
