@@ -4,6 +4,7 @@ import {
   VoiceExampleValidationError,
   VoicePinnedLimitExceededError
 } from "@my-ai-orchestrator/domain";
+import { BackendVoiceCalibrationValidationError } from "../http/errors.js";
 import { createHttpErrorResponse } from "../http/error-response-core.js";
 import type { HttpErrorResponse } from "../http/error-response-core.js";
 
@@ -40,6 +41,17 @@ export function mapVoiceError(error: unknown, path: string): HttpErrorResponse |
         userId: error.userId,
         attemptedPinnedCount: error.attemptedPinnedCount,
         pinnedLimit: error.pinnedLimit,
+        path
+      }
+    });
+  }
+
+  if (error instanceof BackendVoiceCalibrationValidationError) {
+    return createHttpErrorResponse(400, "invalid_request", {
+      message: error.message,
+      details: {
+        sessionId: error.sessionId,
+        stepId: error.stepId,
         path
       }
     });

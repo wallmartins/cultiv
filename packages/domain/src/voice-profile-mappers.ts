@@ -23,10 +23,8 @@ export function toVoiceProfileView(profile: DerivedVoiceProfile): VoiceProfileVi
 export function toTextQualityVoiceProfile(
   profile: DerivedVoiceProfile,
   extras: {
-    readonly examples?: readonly string[];
     readonly antiPatternsExplicit?: readonly string[];
     readonly userLabels?: readonly string[];
-    readonly formatExpressionProfile?: TextQualityVoiceProfile["formatExpressionProfile"];
     readonly derivedAntiPatterns?: readonly string[];
   } = {}
 ): TextQualityVoiceProfile {
@@ -37,7 +35,6 @@ export function toTextQualityVoiceProfile(
     description: profile.description,
     lexicon: [...profile.lexicon],
     constraints: [...profile.constraints],
-    examples: [...(extras.examples ?? [])],
     antiPatterns: [...profile.antiPatterns],
     antiPatternsExplicit: [...(extras.antiPatternsExplicit ?? [])],
     rules: [...profile.rules],
@@ -47,7 +44,9 @@ export function toTextQualityVoiceProfile(
     ...(profile.argumentDevelopmentSignature
       ? { argumentDevelopmentSignature: profile.argumentDevelopmentSignature }
       : {}),
-    ...(extras.formatExpressionProfile ? { formatExpressionProfile: extras.formatExpressionProfile } : {}),
-    ...(extras.derivedAntiPatterns?.length ? { derivedAntiPatterns: [...extras.derivedAntiPatterns] } : {})
+    ...(extras.derivedAntiPatterns?.length ? { derivedAntiPatterns: [...extras.derivedAntiPatterns] } : {}),
+    ...(profile.quantitativeSignals ? { quantitativeSignals: profile.quantitativeSignals } : {}),
+    ...(profile.signatureOpenings?.length ? { signatureOpenings: [...profile.signatureOpenings] } : {}),
+    ...(profile.signatureClosings?.length ? { signatureClosings: [...profile.signatureClosings] } : {})
   };
 }

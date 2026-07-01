@@ -15,7 +15,12 @@ export function evaluateVoiceDrift(profile: VoiceProfile, candidate: string, req
     ? evaluateReasoningDrift(profile.coreReasoningSignature, candidate, stepName)
     : { score: 100, notes: [] as string[] };
   const development = profile.argumentDevelopmentSignature
-    ? evaluateArgumentDevelopmentDrift(profile.argumentDevelopmentSignature, candidate, stepName)
+    ? evaluateArgumentDevelopmentDrift(
+        profile.argumentDevelopmentSignature,
+        candidate,
+        stepName,
+        profile.quantitativeSignals
+      )
     : { score: 100, notes: [] as string[] };
 
   let score: number;
@@ -83,7 +88,7 @@ function scoreDrift(profile: VoiceProfile, candidate: string, request?: Pipeline
     score -= Math.min(20, markerMisses * 5);
   }
 
-  if (profile.examples.length > 0 && lacksExampleCadence(profile, candidate)) {
+  if (profile.quantitativeSignals && lacksQuantitativeCadence(profile, candidate)) {
     score -= 10;
   }
 
@@ -95,18 +100,14 @@ function missingStyleMarkers(profile: VoiceProfile, candidate: string): readonly
   return profile.styleMarkers.filter((marker) => !lower.includes(marker.toLowerCase()));
 }
 
-function lacksExampleCadence(profile: VoiceProfile, candidate: string): boolean {
-  const candidateLength = averageSentenceLength(candidate);
-  const exampleLengths = profile.examples
-    .map((example) => averageSentenceLength(example))
-    .filter((value) => value > 0);
-
-  if (exampleLengths.length === 0) {
+function lacksQuantitativeCadence(profile: VoiceProfile, candidate: string): boolean {
+  const target = profile.quantitativeSignals?.aggregate.avgSentenceLength;
+  if (target === undefined || target <= 0) {
     return false;
   }
 
-  const averageExampleLength = exampleLengths.reduce((total, value) => total + value, 0) / exampleLengths.length;
-  return Math.abs(candidateLength - averageExampleLength) > 18;
+  const candidateLength = averageSentenceLength(candidate);
+  return Math.abs(candidateLength - target) > target * 0.25;
 }
 
 function averageSentenceLength(text: string): number {

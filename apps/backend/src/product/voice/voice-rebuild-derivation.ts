@@ -1,5 +1,11 @@
 import type { VoiceExampleRecord } from "@my-ai-orchestrator/database";
-import type { ReasonCode, ReasoningExtractionResult, VoiceProfileConfidence, ArgumentDevelopmentSignature } from "@my-ai-orchestrator/contracts";
+import type {
+  QuantitativeSignals,
+  ReasonCode,
+  ReasoningExtractionResult,
+  VoiceProfileConfidence,
+  ArgumentDevelopmentSignature
+} from "@my-ai-orchestrator/contracts";
 import {
   nextActionCodesForReason,
   type DerivedVoiceProfile,
@@ -36,10 +42,14 @@ export function deriveVoiceRebuildState(args: {
   readonly reasoningExtractionFailed?: boolean;
   readonly developmentExtractionFailed?: boolean;
   readonly reconciliationFailed?: boolean;
+  readonly quantitativeSignals?: QuantitativeSignals;
+  readonly signatureOpenings?: readonly string[];
+  readonly signatureClosings?: readonly string[];
+  readonly confidenceCap?: VoiceProfileConfidence;
 }): VoiceRebuildDerivation {
   const activeExamples = args.allExamples.filter((example) => example.state === "active");
   const materialBase = buildVoiceMaterialBase(args.allExamples);
-  const confidence = deriveConfidence(activeExamples);
+  const confidence = deriveConfidence(activeExamples, args.quantitativeSignals, args.confidenceCap);
   const reasonCodes = [...deriveReasonCodes(activeExamples)];
   if (args.reasoningExtractionFailed) {
     reasonCodes.push("reasoning_extraction_failed");
@@ -75,8 +85,9 @@ export function deriveVoiceRebuildState(args: {
       args.reasoning?.core ?? args.previousProfile?.coreReasoningSignature,
     argumentDevelopmentSignature:
       args.development ?? args.previousProfile?.argumentDevelopmentSignature,
-    formatExpressionProfiles:
-      args.reasoning?.formatExpressions ?? args.previousProfile?.formatExpressionProfiles,
+    quantitativeSignals: args.quantitativeSignals ?? args.previousProfile?.quantitativeSignals,
+    signatureOpenings: args.signatureOpenings ?? args.previousProfile?.signatureOpenings,
+    signatureClosings: args.signatureClosings ?? args.previousProfile?.signatureClosings,
     createdAt: args.timestamp,
     updatedAt: args.timestamp
   };
@@ -160,7 +171,26 @@ export function resolveNextProfileVersion(
   return Math.max(activeVersion + 1, currentDiagnostics?.pendingVersion ?? 0);
 }
 
-function deriveConfidence(activeExamples: readonly VoiceExampleRecord[]): VoiceProfileConfidence {
+const CONFIDENCE_ORDER: readonly VoiceProfileConfidence[] = ["low", "medium", "high"];
+
+function upgradeConfidence(level: VoiceProfileConfidence): VoiceProfileConfidence {
+  const index = CONFIDENCE_ORDER.indexOf(level);
+  return CONFIDENCE_ORDER[Math.min(index + 1, CONFIDENCE_ORDER.length - 1)]!;
+}
+
+function downgradeConfidence(level: VoiceProfileConfidence): VoiceProfileConfidence {
+  const index = CONFIDENCE_ORDER.indexOf(level);
+  return CONFIDENCE_ORDER[Math.max(index - 1, 0)]!;
+}
+
+function minConfidence(
+  level: VoiceProfileConfidence,
+  cap: VoiceProfileConfidence
+): VoiceProfileConfidence {
+  return CONFIDENCE_ORDER.indexOf(level) <= CONFIDENCE_ORDER.indexOf(cap) ? level : cap;
+}
+
+function deriveLegacyConfidence(activeExamples: readonly VoiceExampleRecord[]): VoiceProfileConfidence {
   if (activeExamples.length < 5) {
     return "low";
   }
@@ -171,6 +201,48 @@ function deriveConfidence(activeExamples: readonly VoiceExampleRecord[]): VoiceP
   }
 
   return "high";
+}
+
+function deriveCompositeConfidence(
+  activeExamples: readonly VoiceExampleRecord[],
+  signals: QuantitativeSignals,
+  cap: VoiceProfileConfidence
+): VoiceProfileConfidence {
+  let base: VoiceProfileConfidence =
+    activeExamples.length >= 5 ? "high" : activeExamples.length >= 3 ? "medium" : "low";
+
+  if (signals.consistencyScore > 0.7) {
+    base = upgradeConfidence(base);
+  }
+
+  if (signals.topicIndependenceScore > 0.6) {
+    base = upgradeConfidence(base);
+  }
+
+  if (
+    signals.extractionQuality.reasoningExtracted
+    && signals.extractionQuality.developmentExtracted
+  ) {
+    base = upgradeConfidence(base);
+  }
+
+  if (signals.consistencyScore > 0.95) {
+    base = downgradeConfidence(base);
+  }
+
+  return minConfidence(base, cap);
+}
+
+export function deriveConfidence(
+  activeExamples: readonly VoiceExampleRecord[],
+  signals?: QuantitativeSignals,
+  cap?: VoiceProfileConfidence
+): VoiceProfileConfidence {
+  if (!signals) {
+    return deriveLegacyConfidence(activeExamples);
+  }
+
+  return deriveCompositeConfidence(activeExamples, signals, cap ?? "high");
 }
 
 function deriveReasonCodes(activeExamples: readonly VoiceExampleRecord[]): readonly ReasonCode[] {

@@ -172,10 +172,8 @@ describe('domain package', () => {
     expect(view.tone).toBe('direct');
 
     const pipelineProfile = toTextQualityVoiceProfile(derived, {
-      examples: ['sample'],
       userLabels: ['mentor']
     });
-    expect(pipelineProfile.examples).toEqual(['sample']);
     expect(pipelineProfile.userLabels).toEqual(['mentor']);
   });
 });

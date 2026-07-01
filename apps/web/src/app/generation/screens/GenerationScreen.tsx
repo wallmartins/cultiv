@@ -113,7 +113,7 @@ export function GenerationScreen() {
               {messages.generate.reminderBanner}
             </Text>
             <Link
-              to="/app/voice/examples/new"
+              to="/app/voice"
               className="text-sm font-medium text-ink underline-offset-2 hover:underline"
             >
               {messages.generate.reminderBannerAction}

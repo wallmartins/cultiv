@@ -19,6 +19,7 @@ import { createBackendVoiceRebuildService } from "../voice/voice-rebuild-service
 import { createBackendProviderTransport } from "../../execution/pipeline/provider-transport.js";
 import type { BackendProviderTransport } from "../../execution/pipeline/provider-transport.js";
 import { createBackendVoiceService } from "../voice/voice-service.js";
+import { createBackendVoiceCalibrationService } from "../voice/voice-calibration-service.js";
 import { createBackendObservabilityService } from "./observability.js";
 import { createBackendApplicationUserMemoryRepository } from "../../auth/application-user-memory.js";
 import { createBackendOperatorMemoryRepository } from "../../auth/operator-memory.js";
@@ -163,6 +164,14 @@ export function createBackendProductServices(
           featureFlags: dependencies.featureFlags,
           config
         }
+      ),
+      voiceCalibration: createBackendVoiceCalibrationService(
+        dependencies.database,
+        voiceRebuild,
+        dependencies.billing,
+        now,
+        voiceConsent,
+        safeLogger
       ),
       policyEvidence,
       operationalOverride,

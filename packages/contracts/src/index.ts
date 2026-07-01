@@ -12,4 +12,5 @@ export * from "./generation-preview.js";
 export * from "./billing.js";
 export * from "./billing-checkout.js";
 export * from "./voice.js";
+export * from "./voice-calibration.js";
 export * from "./reasoning.js";

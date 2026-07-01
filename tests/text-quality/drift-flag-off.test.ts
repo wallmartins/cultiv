@@ -8,7 +8,6 @@ const baseProfile: VoiceProfile = {
   cadence: "direct",
   lexicon: [],
   constraints: [],
-  examples: [],
   antiPatterns: ["generic linkedin tone"],
   antiPatternsExplicit: [],
   rules: [],

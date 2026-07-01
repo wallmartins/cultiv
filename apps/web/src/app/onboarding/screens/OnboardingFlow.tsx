@@ -2,7 +2,7 @@ import { useAuth0 } from "@auth0/auth0-react";
 import { Button, CompassMark, CoordinateLabel, LogbookProse, Text } from "@my-ai-orchestrator/ui";
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { VoiceExampleComposer } from "~/app/voice/components/VoiceExampleComposer";
+import { VoiceCalibrationSession } from "~/app/onboarding/screens/VoiceCalibrationSession";
 import { toVoiceConfidenceLevel, VoiceConfidenceRing } from "~/app/voice/components/VoiceConfidenceRing";
 import { useAppLocale } from "~/i18n/app/use-app-locale";
 import { useCreditBalance } from "~/platform/credits/use-credit-balance";
@@ -59,38 +59,15 @@ export function OnboardingFlow() {
       </div>
 
       {step === 1 ? (
-        <div className="workspace-stagger-group space-y-6">
-          <div>
-            <Text as="h1" variant="h1" className="mb-3 font-playfair text-ink">
-              {messages.onboarding.step1Title}
-            </Text>
-            <Text variant="body" className="text-ink-muted">
-              {messages.onboarding.step1Subtitle}
-            </Text>
-          </div>
-
-          <LogbookProse className="p-5">
-            <VoiceExampleComposer mode="create" onSaved={() => setStep(2)} />
-          </LogbookProse>
-
-          <div className="flex flex-wrap gap-3">
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={() => {
-                if (userId) {
-                  markVoiceStepSkipped(userId);
-                }
-                setStep(2);
-              }}
-            >
-              {messages.onboarding.skip}
-            </Button>
-            <Button type="button" onClick={() => setStep(2)}>
-              {messages.onboarding.continue}
-            </Button>
-          </div>
-        </div>
+        <VoiceCalibrationSession
+          onComplete={() => setStep(2)}
+          onSkip={() => {
+            if (userId) {
+              markVoiceStepSkipped(userId);
+            }
+            setStep(2);
+          }}
+        />
       ) : (
         <div className="workspace-stagger-group space-y-6">
           <div className="text-center">

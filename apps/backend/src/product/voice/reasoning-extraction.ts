@@ -347,6 +347,61 @@ export function isReasoningNarrativeLikelyPortuguese(result: ReasoningExtraction
 }
 
 
+export function extractSignaturePhrases(texts: readonly string[]): {
+  readonly signatureOpenings: readonly string[];
+  readonly signatureClosings: readonly string[];
+} {
+  const signatureOpenings: string[] = [];
+  const signatureClosings: string[] = [];
+  const seenOpenings = new Set<string>();
+  const seenClosings = new Set<string>();
+
+  for (const text of texts) {
+    const trimmed = text.trim();
+    if (!trimmed) {
+      continue;
+    }
+
+    const sentences = trimmed
+      .split(/[.!?]+/)
+      .map((sentence) => sentence.trim())
+      .filter((sentence) => sentence.length > 0);
+    const opening = sentences[0];
+    const closing = sentences.length > 0 ? sentences[sentences.length - 1] : undefined;
+
+    if (opening && !seenOpenings.has(opening) && signatureOpenings.length < 5) {
+      seenOpenings.add(opening);
+      signatureOpenings.push(opening);
+    }
+
+    if (
+      closing
+      && closing !== opening
+      && !seenClosings.has(closing)
+      && signatureClosings.length < 5
+    ) {
+      seenClosings.add(closing);
+      signatureClosings.push(closing);
+    }
+  }
+
+  return { signatureOpenings, signatureClosings };
+}
+
+export function extractSignaturePhrasesFromExamples(
+  examples: readonly VoiceExampleRecord[]
+): {
+  readonly signatureOpenings: readonly string[];
+  readonly signatureClosings: readonly string[];
+} {
+  const texts = examples
+    .filter((example) => example.state === "active")
+    .map((example) => example.text)
+    .filter((text) => text.trim().length > 0);
+
+  return extractSignaturePhrases(texts);
+}
+
 export const TEST_REASONING_EXTRACTION_FIXTURE: ReasoningExtractionResult = {
   core: {
     narrativeProse:

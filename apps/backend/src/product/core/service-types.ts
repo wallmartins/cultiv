@@ -16,6 +16,7 @@ import type { BackendOutputReleaseGateService } from "../../safety/output-releas
 import type { BackendVoiceConsentService } from "../../safety/voice-consent-types.js";
 import type { BackendVoiceRebuildService } from "../voice/voice-rebuild-types.js";
 import type { BackendVoiceService } from "../voice/voice-types.js";
+import type { BackendVoiceCalibrationService } from "../voice/voice-calibration-types.js";
 import type { BackendApplicationUserRepository } from "../../auth/application-user.js";
 import type { BackendOperatorRepository } from "../../auth/operator.js";
 import type { BackendPolicyEvidenceService } from "../../safety/policy-evidence-types.js";
@@ -43,6 +44,7 @@ export interface BackendProductServices {
   readonly generationPreview: BackendGenerationPreviewService;
   readonly voiceRebuild: BackendVoiceRebuildService;
   readonly voice: BackendVoiceService;
+  readonly voiceCalibration: BackendVoiceCalibrationService;
   readonly voiceConsent: BackendVoiceConsentService;
   readonly policyEvidence: BackendPolicyEvidenceService;
   readonly operationalOverride: BackendOperationalOverrideService;

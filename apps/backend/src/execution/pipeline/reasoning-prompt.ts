@@ -1,4 +1,4 @@
-import type { CoreReasoningSignature, FormatExpressionProfile } from "@my-ai-orchestrator/contracts";
+import type { CoreReasoningSignature } from "@my-ai-orchestrator/contracts";
 
 const STRUCTURAL_STEPS = new Set([
   "hook",
@@ -10,23 +10,15 @@ const STRUCTURAL_STEPS = new Set([
 ]);
 const REFINEMENT_STEPS = new Set(["refine", "tighten"]);
 
-export function formatAuthorReasoningSection(
-  stepName: string,
-  core?: CoreReasoningSignature,
-  formatExpression?: FormatExpressionProfile
-): string {
+export function formatAuthorReasoningSection(stepName: string, core?: CoreReasoningSignature): string {
   if (!core) {
     return "";
   }
 
-  return ["== AUTHOR REASONING ==", formatAuthorReasoningBlock(stepName, core, formatExpression), ""].join("\n");
+  return ["== AUTHOR REASONING ==", formatAuthorReasoningBlock(stepName, core), ""].join("\n");
 }
 
-export function formatAuthorReasoningBlock(
-  stepName: string,
-  core?: CoreReasoningSignature,
-  formatExpression?: FormatExpressionProfile
-): string {
+export function formatAuthorReasoningBlock(stepName: string, core?: CoreReasoningSignature): string {
   if (!core) {
     return "";
   }
@@ -56,17 +48,6 @@ export function formatAuthorReasoningBlock(
     ].join("\n");
   }
 
-  const formatLines = formatExpression
-    ? [
-        "",
-        "Format expression:",
-        formatExpression.narrativeProse,
-        `- Register: ${formatExpression.register}`,
-        `- Opening style: ${formatExpression.openingStyle}`,
-        `- Technical density: ${formatExpression.technicalDensity}`
-      ]
-    : [];
-
   return [
     core.narrativeProse,
     "",
@@ -75,7 +56,6 @@ export function formatAuthorReasoningBlock(
     `Conclusion pace: ${core.conclusionPace}`,
     `Reader relationship: ${core.readerRelationship}`,
     `Authority source: ${core.authoritySource}`,
-    ...formatLines,
     "",
     "Derived anti-patterns:",
     ...formatBulletList(core.derivedAntiPatterns)

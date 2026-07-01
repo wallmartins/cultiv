@@ -11,8 +11,7 @@ import { resolveTemplate } from "@my-ai-orchestrator/skills";
 import { COGNITIVE_PRESET_RULE_MARKERS } from "../../apps/backend/src/product/voice/voice-presets.js";
 import type {
   ArgumentDevelopmentSignature,
-  CoreReasoningSignature,
-  FormatExpressionProfile
+  CoreReasoningSignature
 } from "@my-ai-orchestrator/contracts";
 
 const core: CoreReasoningSignature = {
@@ -24,14 +23,6 @@ const core: CoreReasoningSignature = {
   readerRelationship: "peer",
   authoritySource: "personal_observation",
   derivedAntiPatterns: ["generic linkedin tone", "numbered thesis proof list"]
-};
-
-const formatExpression: FormatExpressionProfile = {
-  contentType: "linkedin-post",
-  narrativeProse: "LinkedIn posts stay conversational with short paragraphs.",
-  register: "conversational",
-  openingStyle: "direct",
-  technicalDensity: "low"
 };
 
 const development: ArgumentDevelopmentSignature = {
@@ -73,7 +64,8 @@ const templateLocals = {
   lexiconInstruction: "Author lexicon:",
   domainPolicy: "Match topic.",
   generationDomain: "non-technical",
-  stepLabel: "Step"
+  stepLabel: "Step",
+  quantitativeConstraintsSection: ""
 };
 
 async function renderSystemPrompt(stepName: string, reasoningEnabled: boolean, developmentEnabled = false) {
@@ -88,10 +80,10 @@ async function renderSystemPrompt(stepName: string, reasoningEnabled: boolean, d
         ...templateLocals,
         stepName,
         authorReasoning: reasoningEnabled
-          ? formatAuthorReasoningBlock(stepName, core, formatExpression)
+          ? formatAuthorReasoningBlock(stepName, core)
           : "",
         authorReasoningSection: reasoningEnabled
-          ? formatAuthorReasoningSection(stepName, core, formatExpression)
+          ? formatAuthorReasoningSection(stepName, core)
           : "",
         authorDevelopment: developmentEnabled
           ? formatArgumentDevelopmentBlock(stepName, development)
@@ -116,8 +108,7 @@ describe("reasoning prompt snapshots", () => {
       const prompt = await renderSystemPrompt(stepName, true);
       expect(prompt).toContain("== AUTHOR REASONING ==");
       expect(prompt).toContain(core.narrativeProse);
-      expect(prompt).toContain("Format expression:");
-      expect(prompt).toContain(formatExpression.narrativeProse);
+      expect(prompt).not.toContain("Format expression:");
       expect(prompt).not.toContain("progress through discovery");
     }
   });

@@ -39,10 +39,11 @@ describe("voice prompt inputs", () => {
     ).toEqual(["observação"]);
   });
 
-  it("collects trimmed example texts from the voice profile", () => {
+  it("collects trimmed signature phrases from the voice profile", () => {
     expect(
       collectVoiceExampleTexts({
-        examples: ["  Primeiro exemplo.  ", "", "Segundo exemplo."]
+        signatureOpenings: ["  Primeiro exemplo.  ", ""],
+        signatureClosings: ["Segundo exemplo."]
       })
     ).toEqual(["Primeiro exemplo.", "Segundo exemplo."]);
   });

@@ -300,10 +300,17 @@ export function createMinimalServices(
       getProfileScreen: () => Effect.succeed(null),
       listExamples: () => Effect.succeed({ items: [], total: 0 }),
       createExample: () => Effect.succeed({} as any),
-      updateExample: () => Effect.succeed({} as any),
-      createBatch: () => Effect.succeed({} as any),
-      addBatchItems: () => Effect.succeed({} as any),
-      commitBatch: () => Effect.succeed({} as any)
+      updateExample: () => Effect.succeed({} as any)
+    } as any,
+    voiceCalibration: {
+      startSession: () => Effect.succeed({} as any),
+      setContext: () => Effect.succeed({} as any),
+      getSession: () => Effect.succeed({} as any),
+      getStepPrompt: () => Effect.succeed({} as any),
+      submitStep: () => Effect.succeed({} as any),
+      skipStep: () => Effect.succeed({} as any),
+      completeReview: () => Effect.succeed({} as any),
+      getEntitlement: () => Effect.succeed({} as any)
     } as any,
     users: createBackendApplicationUserMemoryRepository(),
     operators: createBackendOperatorMemoryRepository(),

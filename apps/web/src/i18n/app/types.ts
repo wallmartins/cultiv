@@ -323,6 +323,7 @@ export type AppVoiceMessages = {
     readonly cancel: string;
     readonly accept: string;
   };
+  readonly quantitativeDashboard: AppVoiceCalibrationDashboardMessages;
   readonly reasoning: {
     readonly title: string;
     readonly subtitle: string;
@@ -421,6 +422,70 @@ export type AppOnboardingMessages = {
   readonly goGenerate: string;
   readonly confidence: string;
   readonly credits: string;
+  readonly voiceCalibration: AppVoiceCalibrationWizardMessages;
+};
+
+export type AppVoiceCalibrationWizardMessages = {
+  readonly preTitle: string;
+  readonly preSubtitle: string;
+  readonly wizardTitle: string;
+  readonly wizardSubtitle: string;
+  readonly domainQuestion: string;
+  readonly audienceQuestion: string;
+  readonly strengthQuestion: string;
+  readonly strengthPlaceholder: string;
+  readonly stepIndicator: string;
+  readonly wordCount: string;
+  readonly wordCountMin: string;
+  readonly skipStep: string;
+  readonly skipPenalty: string;
+  readonly back: string;
+  readonly submitting: string;
+  readonly reviewThinking: string;
+  readonly reviewDevelopment: string;
+  readonly reviewConsistency: string;
+  readonly confirmSection: string;
+  readonly confirmAll: string;
+  readonly loadingProfile: string;
+  readonly loadError: string;
+  readonly contextRequired: string;
+  readonly consistencyScore: string;
+  readonly topicIndependenceScore: string;
+  readonly domainOptions: Record<
+    "tecnologia" | "negocios" | "educacao" | "saude" | "criativo" | "outros",
+    string
+  >;
+  readonly audienceOptions: Record<
+    "colegas" | "clientes" | "publico_geral" | "comunidade_tecnica" | "estudantes",
+    string
+  >;
+  readonly stepLabels: Record<
+    | "micro_opinion"
+    | "reasoning_reflection"
+    | "argument_development"
+    | "format_adaptation"
+    | "review_confirm",
+    string
+  >;
+};
+
+export type AppVoiceCalibrationDashboardMessages = {
+  readonly title: string;
+  readonly subtitle: string;
+  readonly consistency: string;
+  readonly topicIndependence: string;
+  readonly crossLength: string;
+  readonly perStepTitle: string;
+  readonly varianceLabel: string;
+  readonly scoreGood: string;
+  readonly scoreFair: string;
+  readonly scoreLow: string;
+  readonly highestVarianceHint: string;
+  readonly redoStep: string;
+  readonly bonusTopicTitle: string;
+  readonly bonusTopicBody: string;
+  readonly bonusTopicAction: string;
+  readonly keepAsIs: string;
 };
 
 export type AppSettingsMessages = {

@@ -109,47 +109,6 @@ describe("Voice training consent-gated ingestion", () => {
     expect(result.left).toBeInstanceOf(BackendVoiceTrainingConsentRequiredError);
   });
 
-  it("blocks batch commit when consent is absent", () => {
-    const services = Effect.runSync(
-      createBackendProductServices(config, {
-        now: () => new Date("2026-05-14T00:00:00.000Z")
-      })
-    );
-
-    const batch = Effect.runSync(services.voice.createBatch("user_4"));
-    Effect.runSync(
-      services.voice.addBatchItems("user_4", batch.batchId, [
-        { clientItemId: "item-1", input: { text: "Exemplo em lote.", language: "pt-BR" } }
-      ])
-    );
-
-    const result = Effect.runSync(
-      Effect.either(services.voice.commitBatch("user_4", batch.batchId))
-    );
-
-    expect(result._tag).toBe("Left");
-    expect(result.left).toBeInstanceOf(BackendVoiceTrainingConsentRequiredError);
-  });
-
-  it("allows batch commit when consent is present", () => {
-    const services = Effect.runSync(
-      createBackendProductServices(config, {
-        now: () => new Date("2026-05-14T00:00:00.000Z")
-      })
-    );
-
-    Effect.runSync(services.voiceConsent.grantConsent("user_5"));
-    const batch = Effect.runSync(services.voice.createBatch("user_5"));
-    Effect.runSync(
-      services.voice.addBatchItems("user_5", batch.batchId, [
-        { clientItemId: "item-1", input: { text: "Exemplo em lote.", language: "pt-BR" } }
-      ])
-    );
-
-    const committed = Effect.runSync(services.voice.commitBatch("user_5", batch.batchId));
-    expect(committed.acceptedItems).toBe(1);
-  });
-
   it("preserves Derived Voice Profile as the generation-time voice source of truth", () => {
     const services = Effect.runSync(
       createBackendProductServices(config, {

@@ -151,7 +151,7 @@ export function getUnderrepresentedVoiceFormats(
     .filter((contentType) => knownFormats.has(contentType));
 }
 
-export type VoiceNextStepHref = "/app/generate" | "/app/voice/examples" | "/app/voice/examples/new";
+export type VoiceNextStepHref = "/app/generate" | "/app/voice";
 
 export interface VoiceNextStepView {
   readonly message: string;
@@ -171,10 +171,10 @@ function voiceNextStepForCode(
     case "add_more_examples":
     case "add_examples_from_other_content_types":
     case "retry_batch_commit":
-      return { message, cta, href: "/app/voice/examples/new" };
+      return { message, cta, href: "/app/voice" };
     case "review_conflicting_examples":
     case "remove_pinned_example":
-      return { message, cta, href: "/app/voice/examples" };
+      return { message, cta, href: "/app/voice" };
     case "wait_for_profile_update":
       return { message, cta, href: "/app/generate", disabled: true };
     case "upgrade_plan":
@@ -210,10 +210,29 @@ export function resolveVoiceNextStep(
 
 export function resolveVoiceNextStepFromDiagnostics(
   diagnostics: VoiceProfileDiagnosticsView,
-  messages: AppVoiceMessages
+  messages: AppVoiceMessages,
+  options?: { readonly hasCalibrationSignals?: boolean }
 ): VoiceNextStepView {
   if (diagnostics.pendingRebuild.status === "in_progress") {
     return voiceNextStepForCode("wait_for_profile_update", messages);
+  }
+
+  if (options?.hasCalibrationSignals) {
+    const addExamplesCodes = new Set<NextActionCode>([
+      "add_more_examples",
+      "add_examples_from_other_content_types"
+    ]);
+    const filtered = diagnostics.nextActionCodes.filter((code) => !addExamplesCodes.has(code));
+
+    if (filtered.length === 0) {
+      return {
+        message: messages.nextStep.matureMessage,
+        cta: messages.nextStep.generateCta,
+        href: "/app/generate"
+      };
+    }
+
+    return resolveVoiceNextStep(filtered, messages);
   }
 
   return resolveVoiceNextStep(diagnostics.nextActionCodes, messages);

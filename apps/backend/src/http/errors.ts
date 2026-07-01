@@ -64,6 +64,21 @@ export class BackendVoiceExampleNotFoundError extends Data.TaggedError("BackendV
   readonly userId: string;
 }> {}
 
+export class BackendVoiceCalibrationSessionNotFoundError extends Data.TaggedError(
+  "BackendVoiceCalibrationSessionNotFoundError"
+)<{
+  readonly sessionId: string;
+  readonly userId: string;
+}> {}
+
+export class BackendVoiceCalibrationValidationError extends Data.TaggedError(
+  "BackendVoiceCalibrationValidationError"
+)<{
+  readonly sessionId?: string;
+  readonly stepId?: string;
+  readonly message: string;
+}> {}
+
 export class BackendExecutionNotFoundError extends Data.TaggedError("BackendExecutionNotFoundError")<{
   readonly executionId: string;
   readonly userId: string;

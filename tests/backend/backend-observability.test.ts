@@ -65,19 +65,12 @@ describe("backend observability", () => {
     );
     expect(effective).toBeDefined();
 
-    const batch = Effect.runSync(services.voice.createBatch("user_1"));
-    Effect.runSync(
-      services.voice.addBatchItems("user_1", batch.batchId, [
-        {
-          clientItemId: "item-1",
-          input: {
-            text: "Texto em lote para consolidar a observabilidade.",
-            explicitContentType: "newsletter"
-          }
-        }
-      ])
+    await Effect.runPromise(
+      services.voice.createExample("user_1", {
+        text: "Texto adicional para consolidar a observabilidade.",
+        explicitContentType: "newsletter"
+      })
     );
-    await Effect.runPromise(services.voice.commitBatch("user_1", batch.batchId));
     await Effect.runPromise(services.voiceRebuild.drain("user_1"));
 
     const snapshot = Effect.runSync(services.observability.snapshot());
@@ -85,13 +78,11 @@ describe("backend observability", () => {
     expect(snapshot.counters.voice_rebuild_started).toBeGreaterThanOrEqual(2);
     expect(snapshot.counters.voice_rebuild_completed).toBeGreaterThanOrEqual(2);
     expect(snapshot.counters.voice_snapshot_persisted).toBeGreaterThanOrEqual(1);
-    expect(snapshot.counters.voice_batch_committed).toBeGreaterThanOrEqual(1);
     expect(snapshot.counters.voice_refresh_event).toBeGreaterThanOrEqual(2);
 
     expect(snapshot.events.some((event) => event.kind === "voice_refresh_event")).toBe(true);
     expect(snapshot.events.some((event) => event.kind === "voice_snapshot_persisted")).toBe(true);
     expect(logger.entries.some((entry) => entry.message === "Queued voice profile rebuild")).toBe(true);
-    expect(logger.entries.some((entry) => entry.message === "Committed voice example batch")).toBe(true);
     expect(logger.entries.some((entry) => entry.message === "Persisted execution voice snapshot")).toBe(true);
   });
 });

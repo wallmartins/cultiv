@@ -1,5 +1,16 @@
 # Progress Log
 
+| 2026-07-01 | feat(voice-engine): Phase 1 foundation — deterministic extraction, `QuantitativeSignals` schemas, `CALIBRATION_WIZARD_STEPS`, wizard context/theme resolution, tests |
+
+| 2026-07-01 | fix(voice-engine): review gaps — removed public example import routes/SDK batch methods, `voice.calibrationWizardV1` flag, DLQ failure store + save retry, dashboard redo/bonus CTAs |
+
+
+| 2026-07-01 | chore(voice-engine): Phase 6 cleanup — removed example composer UI, batch ingestion routes/helpers, `examples`/`formatExpressionProfile` from active schemas and code paths; onboarding links to voice dashboard |
+
+| 2026-07-01 | feat(backend): Voice engine Phase 3 — wizard calibration contracts, in-memory session store, step prompt/candidates, calibration service + routes, deterministic extraction on submit, rebuild from step 3+, 5 service tests |
+
+| 2026-07-01 | feat(backend): Voice engine Phase 2 — composite `deriveConfidence` with optional `QuantitativeSignals`, wizard-only deterministic extraction in rebuild pipeline, signature phrase extraction, mapper passthrough |
+
 | 2026-06-30 | feat(backend): Voice Calibration cold-start backend — session store, deterministic candidates, quota charge, calibration service + routes, preference resolution, provenance-aware confidence/rebuild, `voice.calibrationV1` flag, tests 109–112 |
 
 | 2026-06-30 | feat(web+sdk): Voice Calibration cold-start frontend — `voiceCalibration` SDK client, onboarding gateway + calibration session UI, `/app/onboarding/calibration` route, pt/en i18n, gateway + i18n tests |
@@ -570,3 +581,10 @@ Key outcomes:
 - Extended `seo()` with optional `type` (`website` | `article`) for `og:type`
 - Minimal `blog` i18n namespace (indexTitle, indexDescription, tagPageTitle, rssTitle) in pt/en
 - Tests: `tests/web/blog-seo.test.ts` (4 passing)
+
+### 2026-07-01 — Voice engine Phase 4: text-quality prompt + drift
+
+- `buildStructuredPrompt` (7 sections) + `formatQuantitativeConstraintsSection`; merge/create pass `quantitativeSignals`, `signatureOpenings`, `signatureClosings`
+- Development drift: optional quantitative checks (sentence length ±25%, formality ±0.2, TTR <70% target); surface drift skips `lacksExampleCadence` when signals present
+- `resolveDevelopmentDriftThreshold` in voice-judge-policy; quantitative constraints wired into generation system prompt via step context
+- Tests: `structured-prompt`, `development-drift-quantitative`, updated `voice-judge-policy` (18 passing)

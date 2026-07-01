@@ -43,10 +43,7 @@ import { Route as EnBlogSlugRouteImport } from './routes/en/blog/$slug'
 import { Route as BlogTagTagSlugRouteImport } from './routes/blog/tag/$tagSlug'
 import { Route as AppHistoryExecutionIdRouteImport } from './routes/app/history.$executionId'
 import { Route as AppGenerateExecutionIdRouteImport } from './routes/app/generate.$executionId'
-import { Route as AppVoiceExamplesIndexRouteImport } from './routes/app/voice/examples/index'
 import { Route as EnBlogTagTagSlugRouteImport } from './routes/en/blog/tag/$tagSlug'
-import { Route as AppVoiceExamplesNewRouteImport } from './routes/app/voice/examples/new'
-import { Route as AppVoiceExamplesIdEditRouteImport } from './routes/app/voice/examples/$id/edit'
 
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
@@ -218,25 +215,10 @@ const AppGenerateExecutionIdRoute = AppGenerateExecutionIdRouteImport.update({
   path: '/$executionId',
   getParentRoute: () => AppGenerateRoute,
 } as any)
-const AppVoiceExamplesIndexRoute = AppVoiceExamplesIndexRouteImport.update({
-  id: '/examples/',
-  path: '/examples/',
-  getParentRoute: () => AppVoiceRouteRoute,
-} as any)
 const EnBlogTagTagSlugRoute = EnBlogTagTagSlugRouteImport.update({
   id: '/en/blog/tag/$tagSlug',
   path: '/en/blog/tag/$tagSlug',
   getParentRoute: () => rootRouteImport,
-} as any)
-const AppVoiceExamplesNewRoute = AppVoiceExamplesNewRouteImport.update({
-  id: '/examples/new',
-  path: '/examples/new',
-  getParentRoute: () => AppVoiceRouteRoute,
-} as any)
-const AppVoiceExamplesIdEditRoute = AppVoiceExamplesIdEditRouteImport.update({
-  id: '/examples/$id/edit',
-  path: '/examples/$id/edit',
-  getParentRoute: () => AppVoiceRouteRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -274,10 +256,7 @@ export interface FileRoutesByFullPath {
   '/app/history/': typeof AppHistoryIndexRoute
   '/app/voice/': typeof AppVoiceIndexRoute
   '/en/blog/': typeof EnBlogIndexRoute
-  '/app/voice/examples/new': typeof AppVoiceExamplesNewRoute
   '/en/blog/tag/$tagSlug': typeof EnBlogTagTagSlugRoute
-  '/app/voice/examples/': typeof AppVoiceExamplesIndexRoute
-  '/app/voice/examples/$id/edit': typeof AppVoiceExamplesIdEditRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -311,10 +290,7 @@ export interface FileRoutesByTo {
   '/app/history': typeof AppHistoryIndexRoute
   '/app/voice': typeof AppVoiceIndexRoute
   '/en/blog': typeof EnBlogIndexRoute
-  '/app/voice/examples/new': typeof AppVoiceExamplesNewRoute
   '/en/blog/tag/$tagSlug': typeof EnBlogTagTagSlugRoute
-  '/app/voice/examples': typeof AppVoiceExamplesIndexRoute
-  '/app/voice/examples/$id/edit': typeof AppVoiceExamplesIdEditRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -352,10 +328,7 @@ export interface FileRoutesById {
   '/app/history/': typeof AppHistoryIndexRoute
   '/app/voice/': typeof AppVoiceIndexRoute
   '/en/blog/': typeof EnBlogIndexRoute
-  '/app/voice/examples/new': typeof AppVoiceExamplesNewRoute
   '/en/blog/tag/$tagSlug': typeof EnBlogTagTagSlugRoute
-  '/app/voice/examples/': typeof AppVoiceExamplesIndexRoute
-  '/app/voice/examples/$id/edit': typeof AppVoiceExamplesIdEditRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -394,10 +367,7 @@ export interface FileRouteTypes {
     | '/app/history/'
     | '/app/voice/'
     | '/en/blog/'
-    | '/app/voice/examples/new'
     | '/en/blog/tag/$tagSlug'
-    | '/app/voice/examples/'
-    | '/app/voice/examples/$id/edit'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -431,10 +401,7 @@ export interface FileRouteTypes {
     | '/app/history'
     | '/app/voice'
     | '/en/blog'
-    | '/app/voice/examples/new'
     | '/en/blog/tag/$tagSlug'
-    | '/app/voice/examples'
-    | '/app/voice/examples/$id/edit'
   id:
     | '__root__'
     | '/'
@@ -471,10 +438,7 @@ export interface FileRouteTypes {
     | '/app/history/'
     | '/app/voice/'
     | '/en/blog/'
-    | '/app/voice/examples/new'
     | '/en/blog/tag/$tagSlug'
-    | '/app/voice/examples/'
-    | '/app/voice/examples/$id/edit'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -743,13 +707,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppGenerateExecutionIdRouteImport
       parentRoute: typeof AppGenerateRoute
     }
-    '/app/voice/examples/': {
-      id: '/app/voice/examples/'
-      path: '/examples'
-      fullPath: '/app/voice/examples/'
-      preLoaderRoute: typeof AppVoiceExamplesIndexRouteImport
-      parentRoute: typeof AppVoiceRouteRoute
-    }
     '/en/blog/tag/$tagSlug': {
       id: '/en/blog/tag/$tagSlug'
       path: '/en/blog/tag/$tagSlug'
@@ -757,35 +714,15 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EnBlogTagTagSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/app/voice/examples/new': {
-      id: '/app/voice/examples/new'
-      path: '/examples/new'
-      fullPath: '/app/voice/examples/new'
-      preLoaderRoute: typeof AppVoiceExamplesNewRouteImport
-      parentRoute: typeof AppVoiceRouteRoute
-    }
-    '/app/voice/examples/$id/edit': {
-      id: '/app/voice/examples/$id/edit'
-      path: '/examples/$id/edit'
-      fullPath: '/app/voice/examples/$id/edit'
-      preLoaderRoute: typeof AppVoiceExamplesIdEditRouteImport
-      parentRoute: typeof AppVoiceRouteRoute
-    }
   }
 }
 
 interface AppVoiceRouteRouteChildren {
   AppVoiceIndexRoute: typeof AppVoiceIndexRoute
-  AppVoiceExamplesNewRoute: typeof AppVoiceExamplesNewRoute
-  AppVoiceExamplesIndexRoute: typeof AppVoiceExamplesIndexRoute
-  AppVoiceExamplesIdEditRoute: typeof AppVoiceExamplesIdEditRoute
 }
 
 const AppVoiceRouteRouteChildren: AppVoiceRouteRouteChildren = {
   AppVoiceIndexRoute: AppVoiceIndexRoute,
-  AppVoiceExamplesNewRoute: AppVoiceExamplesNewRoute,
-  AppVoiceExamplesIndexRoute: AppVoiceExamplesIndexRoute,
-  AppVoiceExamplesIdEditRoute: AppVoiceExamplesIdEditRoute,
 }
 
 const AppVoiceRouteRouteWithChildren = AppVoiceRouteRoute._addFileChildren(

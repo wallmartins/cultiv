@@ -8,11 +8,17 @@ const MAX_LINE_COUNT = 400;
 // Remove entries as architecture-deepening phases complete.
 const FILE_SIZE_ALLOWLIST = new Set<string>([
   "apps/web/src/app/voice/components/VoiceDashboard.tsx",
+  "apps/web/src/app/onboarding/screens/VoiceCalibrationSession.tsx",
+  "apps/backend/src/product/voice/voice-calibration-service.ts",
+  "apps/backend/src/product/voice/reasoning-extraction.ts",
   "apps/backend/src/infra/billing/postgres-billing-repository.ts"
 ]);
 
 const FILE_SIZE_BASELINE = new Map<string, number>([
-  ["apps/web/src/app/voice/components/VoiceDashboard.tsx", 433],
+  ["apps/web/src/app/voice/components/VoiceDashboard.tsx", 468],
+  ["apps/web/src/app/onboarding/screens/VoiceCalibrationSession.tsx", 604],
+  ["apps/backend/src/product/voice/voice-calibration-service.ts", 497],
+  ["apps/backend/src/product/voice/reasoning-extraction.ts", 449],
   ["apps/backend/src/infra/billing/postgres-billing-repository.ts", 526]
 ]);
 

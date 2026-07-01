@@ -3,8 +3,6 @@ import type { DatabaseError } from "@my-ai-orchestrator/database";
 import type {
   ExecutionVoiceMetadataView,
   TraitConfirmationInput,
-  VoiceExampleBatchCommitResultView,
-  VoiceExampleBatchView,
   VoiceExampleCreateInput,
   VoiceExampleListItemView,
   VoiceExamplesPageView,
@@ -13,8 +11,6 @@ import type {
   VoiceProfileScreenView
 } from "@my-ai-orchestrator/contracts";
 import type {
-  VoiceBatchExpiredError,
-  VoiceBatchNotFoundError,
   VoiceExampleValidationError,
   VoicePinnedLimitExceededError
 } from "@my-ai-orchestrator/domain";
@@ -68,46 +64,6 @@ export interface BackendVoiceService {
     | BackendVoiceTrainingConsentFailureError
     | DatabaseError
   >;
-  readonly createBatch: (
-    userId: string,
-    options?: {
-      readonly expiresAt?: string;
-    }
-  ) => Effect.Effect<VoiceExampleBatchView, DatabaseError>;
-  readonly addBatchItems: (
-    userId: string,
-    batchId: string,
-    items: readonly VoiceExampleBatchInput[]
-  ) => Effect.Effect<
-    VoiceExampleBatchView,
-    VoiceBatchNotFoundError | VoiceBatchExpiredError | DatabaseError
-  >;
-  readonly commitBatch: (
-    userId: string,
-    batchId: string
-  ) => Effect.Effect<
-    VoiceExampleBatchCommitResultView,
-    | VoiceBatchNotFoundError
-    | VoiceBatchExpiredError
-    | VoiceExampleValidationError
-    | VoicePinnedLimitExceededError
-    | BackendVoiceTrainingConsentRequiredError
-    | BackendVoiceTrainingConsentFailureError
-    | DatabaseError
-  >;
-  readonly autoCommitExpiredBatches: (userId?: string) => Effect.Effect<
-    readonly VoiceExampleBatchCommitResultView[],
-    | VoiceExampleValidationError
-    | VoicePinnedLimitExceededError
-    | BackendVoiceTrainingConsentRequiredError
-    | BackendVoiceTrainingConsentFailureError
-    | DatabaseError
-  >;
-}
-
-export interface VoiceExampleBatchInput {
-  readonly clientItemId: string;
-  readonly input: VoiceExampleCreateInput;
 }
 
 export interface EffectiveVoiceContext {

@@ -71,11 +71,10 @@ describe("voice rebuild reasoning", () => {
     expect(profile.argumentDevelopmentSignature?.epistemicPosture).toBe(
       TEST_ARGUMENT_DEVELOPMENT_EXTRACTION_FIXTURE.development.epistemicPosture
     );
-    expect(profile.formatExpressionProfiles?.["linkedin-post"]).toBeDefined();
 
     const screen = Effect.runSync(services.voice.getProfileScreen("user_reasoning"));
     expect(screen?.reasoning?.core.certaintyLevel).toBe(TEST_REASONING_EXTRACTION_FIXTURE.core.certaintyLevel);
-    expect(screen?.reasoning?.formatExpressions.length).toBeGreaterThan(0);
+    expect(screen?.reasoning?.formatExpressions).toEqual([]);
   });
 
   it("keeps previous reasoning when extraction result is absent", () => {
@@ -100,22 +99,12 @@ describe("voice rebuild reasoning", () => {
         rules: [],
         antiPatterns: [],
         coreReasoningSignature: previousCore,
-        formatExpressionProfiles: {
-          "linkedin-post": {
-            contentType: "linkedin-post",
-            narrativeProse: "Short LinkedIn expression.",
-            register: "conversational",
-            openingStyle: "direct",
-            technicalDensity: "low"
-          }
-        },
         createdAt: "2026-06-16T11:00:00.000Z",
         updatedAt: "2026-06-16T11:00:00.000Z"
       }
     });
 
     expect(derived.profile.coreReasoningSignature).toEqual(previousCore);
-    expect(derived.profile.formatExpressionProfiles?.["linkedin-post"]?.register).toBe("conversational");
   });
 
   it("marks diagnostics failed when reasoning extraction fails but keeps previous snapshot", () => {

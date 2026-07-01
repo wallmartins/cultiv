@@ -154,6 +154,7 @@ export function createBackendSkillDefinition(
             authorReasoningSection: stepVoice.authorReasoningSection,
             authorDevelopment: stepVoice.authorDevelopment,
             authorDevelopmentSection: stepVoice.authorDevelopmentSection,
+            quantitativeConstraintsSection: stepVoice.quantitativeConstraintsSection,
             retryInstruction: refinement.retryInstruction,
             tone: refinement.tone,
             languageCode: refinement.languageCode,

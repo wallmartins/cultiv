@@ -87,7 +87,7 @@ describe("Voice training field protection and protected persistence", () => {
     expect(authorized?.context).toBe("Contexto atualizado ainda protegido.");
   });
 
-  it("protects staged batch input and committed examples through the batch ingestion path", () => {
+  it("protects committed examples created through the direct ingestion path", () => {
     const rawDatabase = createDatabase();
     const services = Effect.runSync(
       createBackendProductServices(config, {
@@ -98,32 +98,20 @@ describe("Voice training field protection and protected persistence", () => {
 
     Effect.runSync(services.voiceConsent.grantConsent("user_protected_batch"));
 
-    const batch = Effect.runSync(services.voice.createBatch("user_protected_batch"));
     Effect.runSync(
-      services.voice.addBatchItems("user_protected_batch", batch.batchId, [
-        {
-          clientItemId: "item-1",
-          input: {
-            text: "Exemplo sensível vindo do batch.",
-            context: "Contexto sensível do batch.",
-            language: "pt-BR"
-          }
-        }
-      ])
+      services.voice.createExample("user_protected_batch", {
+        text: "Exemplo sensível criado diretamente.",
+        context: "Contexto sensível do exemplo.",
+        language: "pt-BR"
+      })
     );
-
-    const stagedBatch = rawDatabase.snapshot().voiceExampleBatches[batch.batchId];
-    expect(stagedBatch?.items[0]?.stagedInput?.text).toMatch(/^voiceprot:v1:/);
-    expect(stagedBatch?.items[0]?.stagedInput?.context).toMatch(/^voiceprot:v1:/);
-
-    Effect.runSync(services.voice.commitBatch("user_protected_batch", batch.batchId));
 
     const committedExamples = Object.values(rawDatabase.snapshot().voiceExamples).filter(
       (record) => record.userId === "user_protected_batch"
     );
     expect(committedExamples).toHaveLength(1);
     expect(committedExamples[0]?.text).toMatch(/^voiceprot:v1:/);
-    expect(committedExamples[0]?.text).not.toContain("Exemplo sensível vindo do batch.");
+    expect(committedExamples[0]?.text).not.toContain("Exemplo sensível criado diretamente.");
   });
 
   it("fails closed when protected persistence cannot protect a voice example", () => {
