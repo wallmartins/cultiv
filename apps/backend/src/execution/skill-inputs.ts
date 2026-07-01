@@ -133,7 +133,9 @@ export function collectVoiceExampleTexts(profile: Partial<VoiceProfile> | undefi
     ...(profile?.signatureClosings ?? [])
   ];
 
-  return signaturePhrases.filter((phrase) => phrase.trim().length > 0);
+  return signaturePhrases
+    .map((phrase) => phrase.trim())
+    .filter((phrase) => phrase.length > 0);
 }
 
 export function normalizeViolations(value: unknown): readonly unknown[] | undefined {
