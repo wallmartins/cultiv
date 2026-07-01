@@ -527,6 +527,8 @@ export const appMessagesEn: AppMessages = {
       confirmSection: "I confirm",
       confirmAll: "All good — let's generate!",
       loadingProfile: "Building your profile from your texts…",
+      generatingSectionProfile:
+        "We're still generating this part of your profile — it will appear here shortly.",
       loadError: "Could not continue. Try again.",
       contextRequired: "Select area and audience to continue.",
       consistencyScore: "Consistency: {score}",

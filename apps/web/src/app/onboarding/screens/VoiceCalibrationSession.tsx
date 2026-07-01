@@ -18,7 +18,9 @@ import {
 } from "~/app/onboarding/lib/onboarding-steps";
 import {
   isWizardReviewStep,
+  isReviewSectionPending,
   resolveDevelopmentReviewBody,
+  resolveThinkingReviewBody,
   shouldPollVoiceProfileOnReview
 } from "~/app/onboarding/lib/voice-calibration-review";
 import { VoiceTrainingConsentModal } from "~/app/voice/components/VoiceTrainingConsentModal";
@@ -155,9 +157,10 @@ export function VoiceCalibrationSession({ onComplete, onSkip }: VoiceCalibration
   const serverStepIndex = resolveWizardStepIndex(currentStepId);
   const viewingPastStep = uiStepIndex < serverStepIndex;
   const viewingFutureStep = uiStepIndex > serverStepIndex;
-  const isProfileUpdating = profile?.diagnostics?.updating === true;
-  const thinkingBody = profile?.reasoning?.core.narrativeProse?.trim();
-  const developmentBody = resolveDevelopmentReviewBody(profile, session);
+  const thinkingBody = resolveThinkingReviewBody(profile);
+  const developmentBody = resolveDevelopmentReviewBody(profile);
+  const thinkingPending = isReviewSectionPending(profile, thinkingBody);
+  const developmentPending = isReviewSectionPending(profile, developmentBody);
 
   const loadPrompt = useCallback(
     async (sessionId: string, stepId: string) => {
@@ -527,8 +530,8 @@ export function VoiceCalibrationSession({ onComplete, onSkip }: VoiceCalibration
               <ReviewSection
                 title={copy.reviewThinking}
                 body={thinkingBody}
-                loading={isProfileUpdating && !thinkingBody}
-                loadingLabel={copy.loadingProfile}
+                loading={thinkingPending}
+                loadingLabel={copy.generatingSectionProfile}
                 confirmed={confirmedSections.has("thinking")}
                 confirmLabel={copy.confirmSection}
                 onConfirm={() =>
@@ -538,8 +541,8 @@ export function VoiceCalibrationSession({ onComplete, onSkip }: VoiceCalibration
               <ReviewSection
                 title={copy.reviewDevelopment}
                 body={developmentBody}
-                loading={isProfileUpdating && !developmentBody}
-                loadingLabel={copy.loadingProfile}
+                loading={developmentPending}
+                loadingLabel={copy.generatingSectionProfile}
                 confirmed={confirmedSections.has("development")}
                 confirmLabel={copy.confirmSection}
                 onConfirm={() =>

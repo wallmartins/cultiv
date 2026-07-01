@@ -9,6 +9,14 @@ import type { BackendProviderTransport } from "../../execution/pipeline/provider
 import type { AIPolicyProviderModelAttempt } from "../ai-policy/ai-policy-types.js";
 import { ReasoningExtractionError } from "./voice-extraction-errors.js";
 import { parseJsonFromLlmResponse } from "./voice-extraction-json.js";
+import { resolveWizardStepId } from "./wizard-voice-examples.js";
+import {
+  ANTI_TOPIC_EXTRACTION_RULES,
+  TOPIC_LEAKAGE_RETRY_SUFFIX,
+  detectTopicLeakage,
+  formatBriefForPrompt,
+  type VoiceSignatureBrief
+} from "./voice-signature-brief.js";
 
 export { ReasoningExtractionError } from "./voice-extraction-errors.js";
 
@@ -68,12 +76,13 @@ export function extractReasoningSignature(args: {
   readonly attempts: readonly AIPolicyProviderModelAttempt[];
   readonly aiAdapters: AIAdapterServiceContract;
   readonly providerTransport: BackendProviderTransport;
+  readonly brief?: VoiceSignatureBrief;
 }): Effect.Effect<ReasoningExtractionResult, ReasoningExtractionError> {
   return Effect.gen(function* () {
     const grouped = groupExamplesByContentType(args.examples);
     const outputLanguage = resolveReasoningOutputLanguage(args.examples);
     const systemPrompt = buildReasoningExtractionSystemPrompt(outputLanguage);
-    let userPrompt = buildExtractionPrompt(grouped, args.examples, outputLanguage);
+    let userPrompt = buildExtractionPrompt(grouped, args.examples, outputLanguage, args.brief);
 
     let lastError: ReasoningExtractionError | undefined;
 
@@ -122,7 +131,12 @@ export function extractReasoningSignature(args: {
           && languageRetry === 0
           && !isReasoningNarrativeLikelyPortuguese(parsed.right)
         ) {
-          userPrompt = `${buildExtractionPrompt(grouped, args.examples, outputLanguage)}${LANGUAGE_RETRY_SUFFIX}`;
+          userPrompt = `${buildExtractionPrompt(grouped, args.examples, outputLanguage, args.brief)}${LANGUAGE_RETRY_SUFFIX}`;
+          continue;
+        }
+
+        if (languageRetry === 0 && detectTopicLeakage(parsed.right.core.narrativeProse, args.examples)) {
+          userPrompt = `${buildExtractionPrompt(grouped, args.examples, outputLanguage, args.brief)}${TOPIC_LEAKAGE_RETRY_SUFFIX}`;
           continue;
         }
 
@@ -175,28 +189,31 @@ function normalizeExtractionResult(result: ReasoningExtractionResult): Reasoning
 }
 
 export function buildReasoningExtractionMessages(
-  examples: readonly VoiceExampleRecord[]
+  examples: readonly VoiceExampleRecord[],
+  brief?: VoiceSignatureBrief
 ): { readonly system: string; readonly user: string } {
   const grouped = groupExamplesByContentType(examples);
   const outputLanguage = resolveReasoningOutputLanguage(examples);
 
   return {
     system: buildReasoningExtractionSystemPrompt(outputLanguage),
-    user: buildExtractionPrompt(grouped, examples, outputLanguage)
+    user: buildExtractionPrompt(grouped, examples, outputLanguage, brief)
   };
 }
 
 function buildExtractionPrompt(
   grouped: Readonly<Record<string, readonly VoiceExampleRecord[]>>,
   examples: readonly VoiceExampleRecord[],
-  outputLanguage: ReasoningOutputLanguage
+  outputLanguage: ReasoningOutputLanguage,
+  brief?: VoiceSignatureBrief
 ): string {
   const sections = Object.entries(grouped).map(([contentType, groupedExamples]) => {
     const exampleBlocks = groupedExamples
-      .map(
-        (example, index) =>
-          `Example ${index + 1} (language: ${example.language}):\n${example.text.trim()}`
-      )
+      .map((example, index) => {
+        const stepId = resolveWizardStepId(example);
+        const stepLabel = stepId ? `, step: ${stepId}` : "";
+        return `Example ${index + 1} (language: ${example.language}${stepLabel}):\n${example.text.trim()}`;
+      })
       .join("\n\n");
 
     return `## Content type: ${contentType}\n${exampleBlocks}`;
@@ -208,11 +225,14 @@ function buildExtractionPrompt(
     "Analyze the author's reasoning patterns across all examples below.",
     "Return JSON only matching the agreed schema.",
     "Infer a single global core reasoning signature and per-content-type format expression profiles.",
-    "Do not copy example text verbatim into narrative prose.",
+    ANTI_TOPIC_EXTRACTION_RULES,
+    brief ? formatBriefForPrompt(brief) : "",
     resolveReasoningLanguageInstruction(outputLanguage),
     "",
     ...sections
-  ].join("\n");
+  ]
+    .filter((section) => section.length > 0)
+    .join("\n");
 }
 
 export function normalizeExampleLanguage(language: string): string {
@@ -298,6 +318,8 @@ function buildReasoningExtractionSystemPrompt(outputLanguage: ReasoningOutputLan
     "Respond with JSON only — no markdown fences or commentary.",
     `OUTPUT LANGUAGE: ${outputLanguage.label} (${outputLanguage.bcp47}).`,
     `Every narrativeProse value MUST be written in ${outputLanguage.label}.`,
+    "core.narrativeProse must describe cognitive and epistemic habits that transfer across topics.",
+    "Never summarize what the examples are about.",
     "Enum fields remain the schema literals in English (for example low|moderate|high).",
     "derivedAntiPatterns may stay short phrase labels in the example language.",
     "Schema:",

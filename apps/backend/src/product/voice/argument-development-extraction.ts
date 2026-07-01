@@ -16,6 +16,14 @@ import {
 } from "./reasoning-extraction.js";
 import { ArgumentDevelopmentExtractionError } from "./voice-extraction-errors.js";
 import { parseJsonFromLlmResponse } from "./voice-extraction-json.js";
+import { resolveWizardStepId } from "./wizard-voice-examples.js";
+import {
+  ANTI_TOPIC_EXTRACTION_RULES,
+  TOPIC_LEAKAGE_RETRY_SUFFIX,
+  detectTopicLeakage,
+  formatBriefForPrompt,
+  type VoiceSignatureBrief
+} from "./voice-signature-brief.js";
 
 export { ArgumentDevelopmentExtractionError } from "./voice-extraction-errors.js";
 
@@ -29,6 +37,7 @@ export function extractArgumentDevelopmentSignature(args: {
   readonly attempts: readonly AIPolicyProviderModelAttempt[];
   readonly aiAdapters: AIAdapterServiceContract;
   readonly providerTransport: BackendProviderTransport;
+  readonly brief?: VoiceSignatureBrief;
 }): Effect.Effect<ArgumentDevelopmentExtractionResult, ArgumentDevelopmentExtractionError> {
   return Effect.gen(function* () {
     const activeExamples = args.examples.filter((example) => example.state === "active");
@@ -42,7 +51,7 @@ export function extractArgumentDevelopmentSignature(args: {
 
     const outputLanguage = resolveReasoningOutputLanguage(activeExamples);
     const systemPrompt = buildDevelopmentExtractionSystemPrompt(outputLanguage);
-    let userPrompt = buildDevelopmentExtractionPrompt(activeExamples, outputLanguage);
+    let userPrompt = buildDevelopmentExtractionPrompt(activeExamples, outputLanguage, args.brief);
 
     let lastError: ArgumentDevelopmentExtractionError | undefined;
 
@@ -85,7 +94,15 @@ export function extractArgumentDevelopmentSignature(args: {
           && languageRetry === 0
           && !isLikelyPortugueseText(parsed.right.development.developmentProse)
         ) {
-          userPrompt = `${buildDevelopmentExtractionPrompt(activeExamples, outputLanguage)}${LANGUAGE_RETRY_SUFFIX}`;
+          userPrompt = `${buildDevelopmentExtractionPrompt(activeExamples, outputLanguage, args.brief)}${LANGUAGE_RETRY_SUFFIX}`;
+          continue;
+        }
+
+        if (
+          languageRetry === 0
+          && detectTopicLeakage(parsed.right.development.developmentProse, activeExamples)
+        ) {
+          userPrompt = `${buildDevelopmentExtractionPrompt(activeExamples, outputLanguage, args.brief)}${TOPIC_LEAKAGE_RETRY_SUFFIX}`;
           continue;
         }
 
@@ -100,14 +117,15 @@ export function extractArgumentDevelopmentSignature(args: {
 }
 
 export function buildDevelopmentExtractionMessages(
-  examples: readonly VoiceExampleRecord[]
+  examples: readonly VoiceExampleRecord[],
+  brief?: VoiceSignatureBrief
 ): { readonly system: string; readonly user: string } {
   const activeExamples = examples.filter((example) => example.state === "active");
   const outputLanguage = resolveReasoningOutputLanguage(activeExamples);
 
   return {
     system: buildDevelopmentExtractionSystemPrompt(outputLanguage),
-    user: buildDevelopmentExtractionPrompt(activeExamples, outputLanguage)
+    user: buildDevelopmentExtractionPrompt(activeExamples, outputLanguage, brief)
   };
 }
 
@@ -154,23 +172,33 @@ function normalizeDevelopmentExtractionResult(
 
 function buildDevelopmentExtractionPrompt(
   examples: readonly VoiceExampleRecord[],
-  outputLanguage: ReasoningOutputLanguage
+  outputLanguage: ReasoningOutputLanguage,
+  brief?: VoiceSignatureBrief
 ): string {
   const exampleBlocks = examples
-    .map((example, index) => `Example ${index + 1} (language: ${example.language}):\n${example.text.trim()}`)
+    .map((example, index) => {
+      const stepId = resolveWizardStepId(example);
+      const stepLabel = stepId ? `, step: ${stepId}` : "";
+      return `Example ${index + 1} (language: ${example.language}${stepLabel}):\n${example.text.trim()}`;
+    })
     .join("\n\n");
 
   return [
     `Dominant example language: ${outputLanguage.bcp47} (${outputLanguage.label}).`,
     `Write developmentProse and moveLabels in ${outputLanguage.label}.`,
     "Analyze how the author develops texts — argumentative moves, transitions, epistemic posture while writing, and structural habits.",
+    "Synthesize patterns across ALL examples, especially reasoning_reflection, argument_development, and format_adaptation steps.",
     "Do NOT infer cognitive traits (certainty, judgment) — focus on how the text unfolds.",
     "Do NOT impose a fixed phase template; infer moves from examples only.",
+    ANTI_TOPIC_EXTRACTION_RULES,
+    brief ? formatBriefForPrompt(brief) : "",
     "Return JSON only matching the agreed schema.",
     resolveDevelopmentLanguageInstruction(outputLanguage),
     "",
     exampleBlocks
-  ].join("\n");
+  ]
+    .filter((section) => section.length > 0)
+    .join("\n");
 }
 
 function resolveDevelopmentLanguageInstruction(outputLanguage: ReasoningOutputLanguage): string {
@@ -191,6 +219,7 @@ function buildDevelopmentExtractionSystemPrompt(outputLanguage: ReasoningOutputL
     "Respond with JSON only — no markdown fences or commentary.",
     `OUTPUT LANGUAGE: ${outputLanguage.label} (${outputLanguage.bcp47}).`,
     `developmentProse and moveLabels MUST be written in ${outputLanguage.label}.`,
+    "developmentProse must describe the author's typical argumentative path, not the content of any single example.",
     "moveLabels are author-specific short labels (snake_case slugs or brief phrases) in the output language — not schema enum literals.",
     "Enum fields remain schema literals in English.",
     "Schema:",

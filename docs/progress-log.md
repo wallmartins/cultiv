@@ -1,5 +1,7 @@
 # Progress Log
 
+| 2026-07-01 | feat(voice-engine): hybrid signature synthesis — deterministic brief feeds LLM extraction, topic-leakage retry, deterministic fallback prose, review UI shows generating placeholder instead of raw step text |
+
 | 2026-07-01 | feat(voice-engine): Phase 1 foundation — deterministic extraction, `QuantitativeSignals` schemas, `CALIBRATION_WIZARD_STEPS`, wizard context/theme resolution, tests |
 
 | 2026-07-01 | fix(voice-engine): review gaps — removed public example import routes/SDK batch methods, `voice.calibrationWizardV1` flag, DLQ failure store + save retry, dashboard redo/bonus CTAs |

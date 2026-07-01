@@ -447,6 +447,7 @@ export type AppVoiceCalibrationWizardMessages = {
   readonly confirmSection: string;
   readonly confirmAll: string;
   readonly loadingProfile: string;
+  readonly generatingSectionProfile: string;
   readonly loadError: string;
   readonly contextRequired: string;
   readonly consistencyScore: string;

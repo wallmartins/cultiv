@@ -15,8 +15,13 @@ import { extractArgumentDevelopmentSignature } from "./argument-development-extr
 import { evaluateVoiceSignatureDivergence } from "./voice-signature-divergence.js";
 import { reconcileVoiceSignatures } from "./voice-signature-reconciliation.js";
 import { buildQuantitativeSignalsFromWizardExamples } from "./deterministic-extraction.js";
-import { extractSignaturePhrases } from "./reasoning-extraction.js";
+import { extractSignaturePhrases, resolveReasoningOutputLanguage } from "./reasoning-extraction.js";
 import { isWizardVoiceExample } from "./wizard-voice-examples.js";
+import {
+  buildVoiceSignatureBrief,
+  synthesizeDevelopmentFromBrief,
+  synthesizeReasoningExtractionFromBrief
+} from "./voice-signature-brief.js";
 import type {
   ArgumentDevelopmentExtractionResult,
   ArgumentDevelopmentSignature,
@@ -98,6 +103,9 @@ function processUserRebuild(deps: VoiceRebuildPipelineDeps, userId: string) {
     let reconciliationFailed = false;
 
     const activeExamples = allExamples.filter((example) => example.state === "active");
+    const wizardExamples = activeExamples.filter(isWizardVoiceExample);
+    const signatureBrief =
+      wizardExamples.length > 0 ? buildVoiceSignatureBrief(wizardExamples) : undefined;
 
     if (
       reasoningEnabled
@@ -116,7 +124,8 @@ function processUserRebuild(deps: VoiceRebuildPipelineDeps, userId: string) {
           examples: allExamples,
           attempts,
           aiAdapters: dependencies.aiAdapters,
-          providerTransport: dependencies.providerTransport
+          providerTransport: dependencies.providerTransport,
+          brief: signatureBrief
         }).pipe(Effect.either);
 
         const developmentEffect =
@@ -125,7 +134,8 @@ function processUserRebuild(deps: VoiceRebuildPipelineDeps, userId: string) {
                 examples: allExamples,
                 attempts,
                 aiAdapters: dependencies.aiAdapters,
-                providerTransport: dependencies.providerTransport
+                providerTransport: dependencies.providerTransport,
+                brief: signatureBrief
               }).pipe(Effect.either)
             : Effect.succeed(
                 Either.right<ArgumentDevelopmentExtractionResult | undefined>(undefined)
@@ -247,19 +257,35 @@ function processUserRebuild(deps: VoiceRebuildPipelineDeps, userId: string) {
       }
     }
 
+    if (signatureBrief) {
+      const outputLanguage = resolveReasoningOutputLanguage(allExamples);
+
+      if (!reasoning) {
+        reasoning = synthesizeReasoningExtractionFromBrief(signatureBrief, outputLanguage);
+        reasoningExtractionFailed = false;
+        logger?.info("Used deterministic reasoning fallback from signature brief", { userId });
+      }
+
+      if (!development && activeExamples.length >= 2) {
+        development = synthesizeDevelopmentFromBrief(signatureBrief, outputLanguage);
+        developmentExtractionFailed = false;
+        logger?.info("Used deterministic development fallback from signature brief", { userId });
+      }
+    }
+
     let quantitativeSignals: QuantitativeSignals | undefined;
     let signatureOpenings: readonly string[] | undefined;
     let signatureClosings: readonly string[] | undefined;
 
-    const wizardExamples = activeExamples.filter(isWizardVoiceExample);
-    if (wizardExamples.length > 0) {
+    const wizardExamplesForSignals = activeExamples.filter(isWizardVoiceExample);
+    if (wizardExamplesForSignals.length > 0) {
       try {
-        quantitativeSignals = buildQuantitativeSignalsFromWizardExamples(wizardExamples, {
+        quantitativeSignals = buildQuantitativeSignalsFromWizardExamples(wizardExamplesForSignals, {
           reasoningExtracted: reasoning !== undefined && !reasoningExtractionFailed,
           developmentExtracted: development !== undefined && !developmentExtractionFailed,
           reconciliationNeeded: reconciliationFailed
         });
-        const phrases = extractSignaturePhrases(wizardExamples.map((example) => example.text));
+        const phrases = extractSignaturePhrases(wizardExamplesForSignals.map((example) => example.text));
         signatureOpenings = phrases.signatureOpenings;
         signatureClosings = phrases.signatureClosings;
       } catch {
