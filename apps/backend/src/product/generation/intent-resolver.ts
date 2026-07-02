@@ -6,9 +6,9 @@ import type {
 } from "@my-ai-orchestrator/contracts";
 import {
   PHASE1_DEFAULT_LENGTH_BY_INTENT,
-  PHASE1_WORD_TARGETS,
   resolvePhase1LegacyContentTypeId
 } from "@my-ai-orchestrator/contracts";
+import { resolveEffectiveWordTarget, toIntentWordTarget } from "@my-ai-orchestrator/text-quality";
 
 export interface ResolvedGenerationIntent {
   readonly intent: GenerationIntent;
@@ -33,7 +33,13 @@ export function resolveGenerationIntent(input: {
     intent: input.intent,
     scope: input.scope,
     legacyContentTypeId,
-    wordTarget: PHASE1_WORD_TARGETS[input.scope.lengthTier],
+    wordTarget: toIntentWordTarget(
+      resolveEffectiveWordTarget({
+        contentType: legacyContentTypeId,
+        lengthTier: input.scope.lengthTier,
+        channel: channelHint
+      })
+    ),
     channelHint
   };
 }

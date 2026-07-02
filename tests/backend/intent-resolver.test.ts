@@ -1,15 +1,24 @@
 import { describe, expect, it } from "vitest";
 import type { GenerationIntent, GenerationLengthTier } from "@my-ai-orchestrator/contracts";
+import { resolveEffectiveWordTarget, toIntentWordTarget } from "@my-ai-orchestrator/text-quality";
 import {
   defaultLengthTierForIntent,
   resolveGenerationIntent
 } from "../../apps/backend/src/product/generation/intent-resolver.js";
 
-const WORD_TARGETS: Record<GenerationLengthTier, { min: number; max: number }> = {
-  short: { min: 150, max: 400 },
-  medium: { min: 400, max: 1200 },
-  long: { min: 1200, max: 3500 }
-};
+function expectedWordTarget(args: {
+  readonly contentType: string;
+  readonly lengthTier: GenerationLengthTier;
+  readonly channel?: "professional-network" | "email" | "social" | "blog" | "unspecified";
+}) {
+  return toIntentWordTarget(
+    resolveEffectiveWordTarget({
+      contentType: args.contentType,
+      lengthTier: args.lengthTier,
+      channel: args.channel
+    })
+  );
+}
 
 const PHASE1_LEGACY_MAPPINGS: ReadonlyArray<{
   readonly intent: GenerationIntent;
@@ -46,7 +55,9 @@ describe("resolveGenerationIntent", () => {
       });
 
       expect(resolved.legacyContentTypeId).toBe(legacyContentTypeId);
-      expect(resolved.wordTarget).toEqual(WORD_TARGETS[lengthTier]);
+      expect(resolved.wordTarget).toEqual(
+        expectedWordTarget({ contentType: legacyContentTypeId, lengthTier })
+      );
       expect(resolved.intent).toBe(intent);
       expect(resolved.scope.lengthTier).toBe(lengthTier);
     }
@@ -59,7 +70,9 @@ describe("resolveGenerationIntent", () => {
     });
 
     expect(resolved.legacyContentTypeId).toBe("newsletter");
-    expect(resolved.wordTarget).toEqual({ min: 1200, max: 3500 });
+    expect(resolved.wordTarget).toEqual(
+      expectedWordTarget({ contentType: "newsletter", lengthTier: "long" })
+    );
   });
 
   it("defaults channel to unspecified when omitted", () => {

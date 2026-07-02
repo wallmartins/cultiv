@@ -65,7 +65,8 @@ const templateLocals = {
   domainPolicy: "Match topic.",
   generationDomain: "non-technical",
   stepLabel: "Step",
-  quantitativeConstraintsSection: ""
+  quantitativeConstraintsSection: "",
+  argumentLensesSection: ""
 };
 
 async function renderSystemPrompt(stepName: string, reasoningEnabled: boolean, developmentEnabled = false) {

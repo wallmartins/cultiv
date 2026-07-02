@@ -3,9 +3,14 @@ import type { DomainProfile } from "../domain/domain-classifier.js";
 import type { CriticFinding, CriticResult, VoiceProfile } from "../types.js";
 import { countWords, resolveOutputWordTarget } from "../format/output-length.js";
 import {
+  collectReadabilityFindings,
+  resolveReadabilityLimits
+} from "./readability-guardrails.js";
+import {
   collectReasoningFindings
 } from "./reasoning-critic.js";
 import { collectDevelopmentFindings } from "./development-critic.js";
+import { collectMetaphorFindings } from "./metaphor-critic.js";
 import { containsEmDash } from "./em-dash.js";
 import { evaluateLexicalQuality } from "./lexical-quality.js";
 
@@ -102,6 +107,10 @@ export function criticizeText(
     );
   }
 
+  if (voiceProfile?.metaphorSignature) {
+    findings.push(...collectMetaphorFindings(voiceProfile.metaphorSignature, text));
+  }
+
   if (containsEmDash(text)) {
     findings.push({
       type: "llmish",
@@ -122,9 +131,25 @@ export function criticizeText(
     } else if (wordCount > target.maxWords) {
       findings.push({
         type: "redundant",
-        severity: wordCount > Math.round(target.maxWords * 1.25) ? "high" : "medium",
+        severity: wordCount > Math.round(target.maxWords * 1.1) ? "high" : "medium",
         message: `Text is too long for the requested format (${wordCount} words, expected at most ${target.maxWords})`
       });
+    }
+
+    if (voiceProfile) {
+      for (const finding of collectReadabilityFindings(
+        text,
+        resolveReadabilityLimits({
+          target,
+          quantitativeSignals: voiceProfile.quantitativeSignals
+        })
+      )) {
+        findings.push({
+          type: "redundant",
+          severity: finding.severity,
+          message: finding.message
+        });
+      }
     }
   }
 

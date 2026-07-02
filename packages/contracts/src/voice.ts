@@ -10,6 +10,10 @@ import {
   TraitConfirmationRecordSchema,
   VoiceReasoningPresentationViewSchema
 } from "./reasoning.js";
+import { MetaphorSignatureSchema } from "./metaphor-signature.js";
+
+export { AnalogyModeSchema, MetaphorSignatureSchema, formatMetaphorStylePromptBlock } from "./metaphor-signature.js";
+export type { AnalogyMode, MetaphorSignature } from "./metaphor-signature.js";
 
 export const VoiceProfileConfidenceSchema = Schema.Literal("low", "medium", "high");
 export type VoiceProfileConfidence = typeof VoiceProfileConfidenceSchema.Type;
@@ -169,7 +173,8 @@ export const TextQualityVoiceProfileSchema = Schema.Struct({
   derivedAntiPatterns: Schema.optional(Schema.Array(Schema.String)),
   quantitativeSignals: Schema.optional(QuantitativeSignalsSchema),
   signatureOpenings: Schema.optional(Schema.Array(Schema.String)),
-  signatureClosings: Schema.optional(Schema.Array(Schema.String))
+  signatureClosings: Schema.optional(Schema.Array(Schema.String)),
+  metaphorSignature: Schema.optional(MetaphorSignatureSchema)
 });
 export type TextQualityVoiceProfile = typeof TextQualityVoiceProfileSchema.Type;
 

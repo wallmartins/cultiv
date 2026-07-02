@@ -45,6 +45,7 @@ export function deriveVoiceRebuildState(args: {
   readonly quantitativeSignals?: QuantitativeSignals;
   readonly signatureOpenings?: readonly string[];
   readonly signatureClosings?: readonly string[];
+  readonly metaphorSignature?: DerivedVoiceProfile["metaphorSignature"];
   readonly confidenceCap?: VoiceProfileConfidence;
 }): VoiceRebuildDerivation {
   const activeExamples = args.allExamples.filter((example) => example.state === "active");
@@ -88,6 +89,7 @@ export function deriveVoiceRebuildState(args: {
     quantitativeSignals: args.quantitativeSignals ?? args.previousProfile?.quantitativeSignals,
     signatureOpenings: args.signatureOpenings ?? args.previousProfile?.signatureOpenings,
     signatureClosings: args.signatureClosings ?? args.previousProfile?.signatureClosings,
+    metaphorSignature: args.metaphorSignature ?? args.previousProfile?.metaphorSignature,
     createdAt: args.timestamp,
     updatedAt: args.timestamp
   };

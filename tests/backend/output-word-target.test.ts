@@ -11,7 +11,7 @@ describe("unified output word targets", () => {
     const target = resolveOutputWordTargetForFormatName("linkedin-post");
     const instructions = resolveFormatInstructions("linkedin-post", "draft");
 
-    expect(target).toEqual({ minWords: 130, maxWords: 220, idealWords: 170 });
+    expect(target).toEqual({ minWords: 130, maxWords: 300, idealWords: 200 });
     expect(instructions).toContain(describeOutputWordTarget(target));
     expect(instructions).not.toContain("800-1200");
   });
@@ -22,6 +22,6 @@ describe("unified output word targets", () => {
       inputs: { briefing: "Test" }
     });
 
-    expect(target.idealWords).toBe(170);
+    expect(target.idealWords).toBe(200);
   });
 });

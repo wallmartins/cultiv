@@ -15,6 +15,7 @@ import { extractArgumentDevelopmentSignature } from "./argument-development-extr
 import { evaluateVoiceSignatureDivergence } from "./voice-signature-divergence.js";
 import { reconcileVoiceSignatures } from "./voice-signature-reconciliation.js";
 import { buildQuantitativeSignalsFromWizardExamples } from "./deterministic-extraction.js";
+import { deriveMetaphorSignature } from "./metaphor-signature.js";
 import { extractSignaturePhrases, resolveReasoningOutputLanguage } from "./reasoning-extraction.js";
 import { isWizardVoiceExample } from "./wizard-voice-examples.js";
 import {
@@ -26,7 +27,8 @@ import type {
   ArgumentDevelopmentExtractionResult,
   ArgumentDevelopmentSignature,
   QuantitativeSignals,
-  ReasoningExtractionResult
+  ReasoningExtractionResult,
+  TraitFrequency
 } from "@my-ai-orchestrator/contracts";
 import type { BackendObservabilityService } from "../core/observability-types.js";
 import type { BackendVoiceConsentService } from "../../safety/voice-consent-types.js";
@@ -276,6 +278,7 @@ function processUserRebuild(deps: VoiceRebuildPipelineDeps, userId: string) {
     let quantitativeSignals: QuantitativeSignals | undefined;
     let signatureOpenings: readonly string[] | undefined;
     let signatureClosings: readonly string[] | undefined;
+    let metaphorSignature = previousProfile?.metaphorSignature;
 
     const wizardExamplesForSignals = activeExamples.filter(isWizardVoiceExample);
     if (wizardExamplesForSignals.length > 0) {
@@ -288,6 +291,7 @@ function processUserRebuild(deps: VoiceRebuildPipelineDeps, userId: string) {
         const phrases = extractSignaturePhrases(wizardExamplesForSignals.map((example) => example.text));
         signatureOpenings = phrases.signatureOpenings;
         signatureClosings = phrases.signatureClosings;
+        metaphorSignature = deriveMetaphorSignature(wizardExamplesForSignals, resolveUsesAnalogiesTrait(development));
       } catch {
         // ponytail: deterministic extraction is optional; rebuild continues without signals
       }
@@ -306,7 +310,8 @@ function processUserRebuild(deps: VoiceRebuildPipelineDeps, userId: string) {
       reconciliationFailed,
       quantitativeSignals,
       signatureOpenings,
-      signatureClosings
+      signatureClosings,
+      metaphorSignature
     });
 
     yield* database.voiceProfiles.put(derivedState.profile).pipe(Effect.orDie);
@@ -348,4 +353,15 @@ function processUserRebuild(deps: VoiceRebuildPipelineDeps, userId: string) {
       )
     )
   );
+}
+
+function resolveUsesAnalogiesTrait(
+  development?: ArgumentDevelopmentSignature
+): TraitFrequency | undefined {
+  const fromRecord = development?.traitProfile?.records.usesAnalogies?.value;
+  if (fromRecord === "rare" || fromRecord === "occasional" || fromRecord === "common" || fromRecord === "dominant") {
+    return fromRecord;
+  }
+
+  return development?.traitProfile?.traits.usesAnalogies;
 }

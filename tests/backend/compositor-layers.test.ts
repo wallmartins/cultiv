@@ -2,10 +2,35 @@ import { describe, expect, it } from "vitest";
 import { pickBasePreset, resolveExpressionProfile } from "../../apps/backend/src/product/generation/compositor/expression.js";
 import { getRhetoricalProfile } from "../../apps/backend/src/product/generation/compositor/rhetorical-profiles.js";
 import { gateHeavySteps, resolveWordTarget } from "../../apps/backend/src/product/generation/compositor/scale.js";
+import { resolveEffectiveWordTarget, toIntentWordTarget } from "@my-ai-orchestrator/text-quality";
+
+function expectedWordTarget(args: {
+  readonly contentType: string;
+  readonly lengthTier: "short" | "medium" | "long";
+  readonly channel?: "professional-network" | "email" | "social" | "blog" | "unspecified";
+}) {
+  return toIntentWordTarget(
+    resolveEffectiveWordTarget({
+      contentType: args.contentType,
+      lengthTier: args.lengthTier,
+      channel: args.channel
+    })
+  );
+}
 
 describe("compositor layers", () => {
-  it("resolveWordTarget(medium) uses PHASE1_WORD_TARGETS", () => {
-    expect(resolveWordTarget("medium")).toEqual({ min: 400, max: 1200 });
+  it("resolveWordTarget uses effective targets for linkedin medium", () => {
+    expect(
+      resolveWordTarget({
+        intent: "engage-audience",
+        lengthTier: "medium",
+        channel: "professional-network"
+      })
+    ).toEqual(expectedWordTarget({
+      contentType: "linkedin-post",
+      lengthTier: "medium",
+      channel: "professional-network"
+    }));
   });
 
   it("gateHeavySteps allows research/outline only for long tier", () => {

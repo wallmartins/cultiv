@@ -85,7 +85,7 @@ export function createBackendSkillDefinition(
       Effect.gen(function* () {
         const voiceProfile = context.state.voiceProfile as Partial<VoiceProfile> | undefined;
         const generationContext = context.state.generationContext as GenerationContext | undefined;
-        const stepVoice = buildStepVoiceContext(step.name, voiceProfile);
+        const generationIntent = pickGenerationIntent(context.inputs, context.state);
         const voiceExampleTexts = collectVoiceExampleTexts(voiceProfile);
         const stepExamples = step.name === "hook"
           ? voiceExampleTexts.slice(0, 1)
@@ -111,6 +111,10 @@ export function createBackendSkillDefinition(
         const previousStep = context.pipeline.steps[context.stepIndex - 1];
         const previousContent = previousStep ? context.state[previousStep.name] : undefined;
         const briefingText = getBriefingText(context.inputs);
+        const stepVoice = buildStepVoiceContext(step.name, voiceProfile, {
+          intent: generationIntent,
+          briefing: briefingText
+        });
         const topic = getTopic(context.inputs, context.state, context.pipeline.name);
         const domain = generationContext?.domain;
         const contextWordTarget = resolveContextWordTarget(context.inputs);
@@ -154,6 +158,7 @@ export function createBackendSkillDefinition(
             authorReasoningSection: stepVoice.authorReasoningSection,
             authorDevelopment: stepVoice.authorDevelopment,
             authorDevelopmentSection: stepVoice.authorDevelopmentSection,
+            argumentLensesSection: stepVoice.argumentLensesSection,
             quantitativeConstraintsSection: stepVoice.quantitativeConstraintsSection,
             retryInstruction: refinement.retryInstruction,
             tone: refinement.tone,
@@ -175,4 +180,29 @@ export function createBackendSkillDefinition(
         } satisfies StepOutput;
       })
   };
+}
+
+function pickGenerationIntent(
+  inputs: Readonly<Record<string, unknown>>,
+  state: Readonly<Record<string, unknown>>
+): string | undefined {
+  const fromInputs = inputs.generationIntent;
+  if (typeof fromInputs === "string" && fromInputs.trim().length > 0) {
+    return fromInputs;
+  }
+
+  const context = inputs.context;
+  if (typeof context === "object" && context !== null) {
+    const nestedIntent = (context as Record<string, unknown>).generationIntent;
+    if (typeof nestedIntent === "string" && nestedIntent.trim().length > 0) {
+      return nestedIntent;
+    }
+  }
+
+  const fromState = state.generationIntent;
+  if (typeof fromState === "string" && fromState.trim().length > 0) {
+    return fromState;
+  }
+
+  return undefined;
 }

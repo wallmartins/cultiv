@@ -63,6 +63,7 @@ export function evaluateWithVoiceJudge(
                 content: [
                   "You are a voice fidelity judge.",
                   "Score the candidate from 0 to 100 for voice fidelity against the author reasoning and development signatures.",
+                  "Penalize heavily if the candidate exceeds the requested word range or reads like a single-dimension essay.",
                   "Respond with JSON only: {\"score\": number, \"rationale\": string}"
                 ].join("\n")
               },

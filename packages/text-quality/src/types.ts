@@ -67,7 +67,9 @@ export interface CriticFinding {
     | "rhetorical_inflation"
     | "structural_premature_thesis"
     | "structural_advocacy_arc"
-    | "structural_anti_pattern_hit";
+    | "structural_anti_pattern_hit"
+    | "metaphor_repetition"
+    | "metaphor_domain_leak";
   readonly severity: "low" | "medium" | "high";
   readonly message: string;
 }

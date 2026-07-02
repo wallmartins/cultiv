@@ -1,7 +1,9 @@
 import { Effect } from "effect";
 import { describe, expect, it } from "vitest";
+import { resolveEffectiveWordTarget, toIntentWordTarget } from "@my-ai-orchestrator/text-quality";
 import { BackendValidationError } from "../../apps/backend/src/http/errors.js";
 import { resolveGenerationTarget } from "../../apps/backend/src/product/generation/resolve-generation-target.js";
+import { resolvePhase1LegacyContentTypeId } from "@my-ai-orchestrator/contracts";
 
 describe("resolveGenerationTarget", () => {
   it("resolves intent and scope to legacy content type with metadata", async () => {
@@ -16,7 +18,12 @@ describe("resolveGenerationTarget", () => {
     expect(resolved.resolvedIntent).toMatchObject({
       intent: "share-idea",
       legacyContentTypeId: "linkedin-post",
-      wordTarget: { min: 150, max: 400 },
+      wordTarget: toIntentWordTarget(
+        resolveEffectiveWordTarget({
+          contentType: resolvePhase1LegacyContentTypeId("share-idea", "short"),
+          lengthTier: "short"
+        })
+      ),
       channelHint: "unspecified"
     });
   });

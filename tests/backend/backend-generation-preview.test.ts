@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { Effect } from "effect";
-import { decodeGenerationPreviewResponse } from "@my-ai-orchestrator/contracts";
+import { decodeGenerationPreviewResponse, resolvePhase1LegacyContentTypeId } from "@my-ai-orchestrator/contracts";
+import { resolveEffectiveWordTarget, toIntentWordTarget } from "@my-ai-orchestrator/text-quality";
 import {
   backendAppTestStartedAt,
   createBackendAppTestApp,
@@ -149,11 +150,18 @@ describe("backend generation preview", () => {
 
     expect(decoded.pricingSnapshot.contentType).toBe("linkedin-post");
     expect(decoded.pricingSnapshot.creditPrice).toBeGreaterThan(0);
+    const wordTarget = toIntentWordTarget(
+      resolveEffectiveWordTarget({
+        contentType: resolvePhase1LegacyContentTypeId("share-idea", "short"),
+        lengthTier: "short"
+      })
+    );
+
     expect(decoded.resolvedIntent).toEqual({
       intent: "share-idea",
       scope: { lengthTier: "short" },
-      wordTargetMin: 150,
-      wordTargetMax: 400
+      wordTargetMin: wordTarget.min,
+      wordTargetMax: wordTarget.max
     });
   });
 

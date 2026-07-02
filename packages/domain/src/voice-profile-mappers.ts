@@ -47,6 +47,7 @@ export function toTextQualityVoiceProfile(
     ...(extras.derivedAntiPatterns?.length ? { derivedAntiPatterns: [...extras.derivedAntiPatterns] } : {}),
     ...(profile.quantitativeSignals ? { quantitativeSignals: profile.quantitativeSignals } : {}),
     ...(profile.signatureOpenings?.length ? { signatureOpenings: [...profile.signatureOpenings] } : {}),
-    ...(profile.signatureClosings?.length ? { signatureClosings: [...profile.signatureClosings] } : {})
+    ...(profile.signatureClosings?.length ? { signatureClosings: [...profile.signatureClosings] } : {}),
+    ...(profile.metaphorSignature ? { metaphorSignature: profile.metaphorSignature } : {})
   };
 }

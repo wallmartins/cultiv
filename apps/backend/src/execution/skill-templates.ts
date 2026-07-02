@@ -90,6 +90,7 @@ function buildSystemTemplate(): string {
     "",
     "{{authorReasoningSection}}",
     "{{authorDevelopmentSection}}",
+    "{{argumentLensesSection}}",
     "{{quantitativeConstraintsSection}}",
     "== TOPIC, AUDIENCE, AND DOMAIN ==",
     "Generation domain: {{generationDomain}}",
@@ -229,9 +230,11 @@ export function resolveFormatInstructions(
   contextWordTarget?: IntentWordTarget
 ): string {
   const target = resolveContentFormat(contentType);
-  const wordTarget = (stepName === "draft" || stepName === "refine") && contextWordTarget
-    ? formatIntentWordTargetLine(contextWordTarget)
-    : `Target length: ${describeOutputWordTarget(resolveOutputWordTargetForFormatName(contentType))}.`;
+  const wordTarget =
+    (stepName === "draft" || stepName === "refine" || stepName === "expand" || stepName === "tighten")
+    && contextWordTarget
+      ? formatIntentWordTargetLine(contextWordTarget)
+      : `Target length: ${describeOutputWordTarget(resolveOutputWordTargetForFormatName(contentType))}.`;
   const stepContract = stepName === "hook"
     ? "Return only the opening hook, not the full piece."
     : stepName === "outline" || stepName === "structure" || stepName === "analyze"

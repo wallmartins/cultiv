@@ -8,6 +8,7 @@ import type {
   InsightTiming,
   NextActionCode,
   OpeningMode,
+  MetaphorSignature,
   QuantitativeSignals,
   ReasonCode,
   TraitConfirmationRecord,
@@ -117,6 +118,7 @@ export interface DerivedVoiceProfile extends Entity<string> {
   readonly quantitativeSignals?: QuantitativeSignals;
   readonly signatureOpenings?: readonly string[];
   readonly signatureClosings?: readonly string[];
+  readonly metaphorSignature?: MetaphorSignature;
   readonly createdAt: string;
   readonly updatedAt: string;
 }

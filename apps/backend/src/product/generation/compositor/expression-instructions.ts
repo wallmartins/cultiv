@@ -62,7 +62,8 @@ export function resolveExpressionFormatInstructions(
     "Write as final publishable content for the requested format and no editor commentary.";
 
   const wordTarget =
-    (stepName === "draft" || stepName === "refine" || stepName === "tighten") && contextWordTarget
+    (stepName === "draft" || stepName === "refine" || stepName === "expand" || stepName === "tighten")
+    && contextWordTarget
       ? formatIntentWordTargetLine(contextWordTarget)
       : "";
 

@@ -11,6 +11,7 @@ import {
   formatArgumentDevelopmentBlock,
   formatArgumentDevelopmentSection
 } from "./development-prompt.js";
+import { buildArgumentLensesSection } from "../../product/generation/argument-lenses.js";
 import { resolveContextWordTarget } from "../skill-templates.js";
 
 export interface StepVoiceContext {
@@ -24,12 +25,19 @@ export interface StepVoiceContext {
   readonly authorReasoning: string;
   readonly authorDevelopmentSection: string;
   readonly authorDevelopment: string;
+  readonly argumentLensesSection: string;
   readonly quantitativeConstraintsSection: string;
+}
+
+export interface StepGenerationHints {
+  readonly intent?: string;
+  readonly briefing?: string;
 }
 
 export function buildStepVoiceContext(
   stepName: string,
-  voiceProfile: Partial<VoiceProfile> | undefined
+  voiceProfile: Partial<VoiceProfile> | undefined,
+  generationHints?: StepGenerationHints
 ): StepVoiceContext {
   const exampleTexts = collectVoiceExampleTexts(voiceProfile);
   const antiPatterns = collectVoiceAntiPatterns(voiceProfile);
@@ -54,12 +62,19 @@ export function buildStepVoiceContext(
     voiceProfile?.argumentDevelopmentSignature
   );
   const quantitativeConstraintsSection = formatQuantitativeConstraintsSection(voiceProfile ?? {});
+  const argumentLensesSection = buildArgumentLensesSection({
+    stepName,
+    voiceProfile,
+    intent: generationHints?.intent,
+    briefing: generationHints?.briefing
+  });
 
   const baseVoiceContext = {
     authorReasoning,
     authorReasoningSection,
     authorDevelopment,
     authorDevelopmentSection,
+    argumentLensesSection,
     quantitativeConstraintsSection
   };
 

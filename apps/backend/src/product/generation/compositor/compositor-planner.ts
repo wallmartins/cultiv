@@ -147,7 +147,11 @@ export function planGeneration(input: PlanGenerationInput): ExecutionPlan {
     planSignature: resolvePlanSignature(steps, basePresetId),
     steps,
     parameters: {
-      wordTarget: resolveWordTarget(lengthTier),
+      wordTarget: resolveWordTarget({
+        intent: input.intent,
+        lengthTier,
+        channel
+      }),
       expressionProfile: resolveExpressionProfile({ intent: input.intent, channel }),
       intent: input.intent,
       lengthTier

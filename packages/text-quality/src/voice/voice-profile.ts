@@ -1,4 +1,5 @@
 import type { VoiceProfile } from "../types.js";
+import { formatMetaphorStylePromptBlock } from "@my-ai-orchestrator/contracts";
 
 export function createVoiceProfile(userId: string, hints: Partial<VoiceProfile> = {}): VoiceProfile {
   return {
@@ -59,6 +60,9 @@ export function buildStructuredPrompt(profile: VoiceProfile): { system: string; 
     `Cadence: ${profile.cadence}`,
     `Markers: ${profile.styleMarkers.join(", ")}`,
     "",
+    ...(profile.metaphorSignature
+      ? [formatMetaphorStylePromptBlock(profile.metaphorSignature), ""]
+      : []),
     "== QUANTITATIVE CONSTRAINTS ==",
     `- Average sentence length: ${profile.quantitativeSignals?.aggregate.avgSentenceLength ?? "varies"} words (±15%)`,
     `- Sentence length variance: ${profile.quantitativeSignals?.aggregate.sentenceLengthVariance ?? "varies"}`,
@@ -105,6 +109,7 @@ function resolveOptionalFields(
   | "quantitativeSignals"
   | "signatureOpenings"
   | "signatureClosings"
+  | "metaphorSignature"
 > {
   const coreReasoningSignature = hints.coreReasoningSignature ?? base?.coreReasoningSignature;
   const argumentDevelopmentSignature =
@@ -113,6 +118,7 @@ function resolveOptionalFields(
   const quantitativeSignals = hints.quantitativeSignals ?? base?.quantitativeSignals;
   const signatureOpenings = hints.signatureOpenings ?? base?.signatureOpenings;
   const signatureClosings = hints.signatureClosings ?? base?.signatureClosings;
+  const metaphorSignature = hints.metaphorSignature ?? base?.metaphorSignature;
 
   return {
     ...(coreReasoningSignature ? { coreReasoningSignature } : {}),
@@ -120,7 +126,8 @@ function resolveOptionalFields(
     ...(derivedAntiPatterns?.length ? { derivedAntiPatterns } : {}),
     ...(quantitativeSignals ? { quantitativeSignals } : {}),
     ...(signatureOpenings?.length ? { signatureOpenings } : {}),
-    ...(signatureClosings?.length ? { signatureClosings } : {})
+    ...(signatureClosings?.length ? { signatureClosings } : {}),
+    ...(metaphorSignature ? { metaphorSignature } : {})
   };
 }
 

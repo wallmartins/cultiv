@@ -1,6 +1,21 @@
 import { describe, expect, it } from "vitest";
+import { resolveEffectiveWordTarget, toIntentWordTarget } from "@my-ai-orchestrator/text-quality";
 import { planGeneration } from "../../apps/backend/src/product/generation/compositor/compositor-planner.js";
 import { materializeCompositorPipeline } from "../../apps/backend/src/product/generation/compositor/plan-materializer.js";
+
+function expectedWordTarget(args: {
+  readonly contentType: string;
+  readonly lengthTier: "short" | "medium" | "long";
+  readonly channel?: "professional-network" | "email" | "social" | "blog" | "unspecified";
+}) {
+  return toIntentWordTarget(
+    resolveEffectiveWordTarget({
+      contentType: args.contentType,
+      lengthTier: args.lengthTier,
+      channel: args.channel
+    })
+  );
+}
 
 describe("CompositorPlanner", () => {
   it("share-idea short professional-network → short-piece with hook", () => {
@@ -12,7 +27,13 @@ describe("CompositorPlanner", () => {
     expect(plan.planSignature).toBe("short-piece");
     expect(plan.steps.map((s) => s.name)).toContain("hook");
     expect(plan.parameters.expressionProfile).toBe("professional-share-idea");
-    expect(plan.parameters.wordTarget).toEqual({ min: 150, max: 400 });
+    expect(plan.parameters.wordTarget).toEqual(
+      expectedWordTarget({
+        contentType: "linkedin-post",
+        lengthTier: "short",
+        channel: "professional-network"
+      })
+    );
   });
 
   it("share-idea medium email → edition-piece without hook", () => {

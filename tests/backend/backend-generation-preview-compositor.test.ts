@@ -1,6 +1,7 @@
 import { Effect } from "effect";
 import { describe, expect, it } from "vitest";
-import { decodeGenerationPreviewResponse } from "@my-ai-orchestrator/contracts";
+import { decodeGenerationPreviewResponse, resolvePhase1LegacyContentTypeId } from "@my-ai-orchestrator/contracts";
+import { resolveEffectiveWordTarget, toIntentWordTarget } from "@my-ai-orchestrator/text-quality";
 import {
   backendAppTestStartedAt,
   createBackendAppTestApp,
@@ -44,11 +45,19 @@ describe("backend generation preview compositor", () => {
     expect(decoded.compositor?.planSignature).toBe("edition-piece");
     expect(decoded.compositor?.expressionProfile).toBe("email-share-idea");
     expect(decoded.pricingSnapshot.contentType).toBe("edition-piece");
+    const wordTarget = toIntentWordTarget(
+      resolveEffectiveWordTarget({
+        contentType: resolvePhase1LegacyContentTypeId("share-idea", "medium"),
+        lengthTier: "medium",
+        channel: "email"
+      })
+    );
+
     expect(decoded.resolvedIntent).toMatchObject({
       intent: "share-idea",
       scope: { lengthTier: "medium", channel: "email" },
-      wordTargetMin: 400,
-      wordTargetMax: 1200
+      wordTargetMin: wordTarget.min,
+      wordTargetMax: wordTarget.max
     });
   });
 

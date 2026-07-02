@@ -59,6 +59,7 @@ describe("compositor expression instructions", () => {
         voiceExamples: "-",
         authorReasoningSection: "",
         authorDevelopmentSection: "",
+        argumentLensesSection: "",
         generationDomain: "briefing-based",
         domainPolicy: "Match the briefing.",
         retryInstruction: "",

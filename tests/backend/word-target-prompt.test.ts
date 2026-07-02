@@ -28,14 +28,20 @@ describe("word target prompt", () => {
   it("falls back to format-based target when context wordTarget is absent", () => {
     const instructions = resolveFormatInstructions("linkedin-post", "draft");
 
-    expect(instructions).toContain("130-220 words");
+    expect(instructions).toContain("130-300 words");
   });
 
-  it("does not override word target for non-draft/refine steps", () => {
+  it("includes word range in expand format instructions when context wordTarget is provided", () => {
+    const instructions = resolveFormatInstructions("linkedin-post", "expand", { min: 180, max: 260 });
+
+    expect(instructions).toContain("Target length: between 180 and 260 words.");
+  });
+
+  it("does not override word target for non-draft/refine/expand steps", () => {
     const instructions = resolveFormatInstructions("linkedin-post", "hook", { min: 150, max: 400 });
 
     expect(instructions).not.toContain("between 150 and 400");
-    expect(instructions).toContain("130-220 words");
+    expect(instructions).toContain("130-300 words");
   });
 
   it("resolves wordTarget from runtime inputs", () => {

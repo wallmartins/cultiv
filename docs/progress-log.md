@@ -1,5 +1,9 @@
 # Progress Log
 
+| 2026-07-01 | feat(generation): unified word targets + readability guardrails + argument lenses + metaphor signature — `resolveEffectiveWordTarget` wired through compositor/intent/prompts/critic/judge; sentence/paragraph/trigram checks; multidimensional lenses on draft/expand/structure; metaphor style on profile + critic; 1097 tests passing |
+
+| 2026-07-01 | feat(voice-engine): Metaphor Signature — derive from wizard examples, optional `metaphorSignature` on profile, METAPHOR STYLE prompt block, critic checks for repeated lemmas and calibration domain leaks; tests in `metaphor-signature.test.ts` (5 passing) |
+
 | 2026-07-01 | feat(voice-engine): hybrid signature synthesis — deterministic brief feeds LLM extraction, topic-leakage retry, deterministic fallback prose, review UI shows generating placeholder instead of raw step text |
 
 | 2026-07-01 | feat(voice-engine): Phase 1 foundation — deterministic extraction, `QuantitativeSignals` schemas, `CALIBRATION_WIZARD_STEPS`, wizard context/theme resolution, tests |

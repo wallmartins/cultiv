@@ -17,6 +17,7 @@ describe("mergeIntentPipelineContext", () => {
     expect(merged).toEqual({
       existing: "value",
       wordTarget: { min: 150, max: 400 },
+      lengthTier: "short",
       generationIntent: "share-idea",
       generationChannel: "professional-network"
     });
@@ -53,6 +54,7 @@ describe("mergeIntentPipelineContext", () => {
     expect(merged).toEqual({
       existing: "value",
       wordTarget: { min: 400, max: 1200 },
+      lengthTier: "medium",
       generationIntent: "share-idea",
       generationChannel: "email",
       compositor: {

@@ -43,6 +43,7 @@ export function mergeIntentPipelineContext(
   return {
     ...requestContext,
     wordTarget: resolvedIntent.wordTarget,
+    lengthTier: resolvedIntent.scope.lengthTier,
     generationIntent: resolvedIntent.intent,
     generationChannel: resolvedIntent.channelHint,
     ...(compositorMetadata ? { compositor: compositorMetadata } : {}),
