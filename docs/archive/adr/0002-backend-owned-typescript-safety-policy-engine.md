@@ -1,3 +1,0 @@
-# Backend-owned TypeScript safety policy engine
-
-This product will enforce LLM safety, data classification, step isolation, and input/output policy through a backend-owned TypeScript policy engine instead of delegating primary decisions to an external guardrails runtime. We chose this because the hard parts are domain-specific and LGPD-sensitive: classification, consent boundaries, `Step Scope`, `Instruction Override Attempt` handling, and `fail closed` behavior on critical paths must remain in the same typed backend that owns identity, audit, and authorization decisions. Specialized scanning libraries may still be used behind adapters, but they are evidence providers, not the canonical policy source.

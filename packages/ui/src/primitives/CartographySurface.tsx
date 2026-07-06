@@ -14,8 +14,8 @@ export function CartographySurface({
   return (
     <div
       className={cn(
-        "relative bg-cream",
-        "before:pointer-events-none before:absolute before:inset-0 before:cartography-grain",
+        "bg-cream",
+        "cartography-grain",
         vignette &&
           "after:pointer-events-none after:absolute after:inset-0 after:bg-[radial-gradient(ellipse_at_center,transparent_60%,rgba(26,46,60,0.06)_100%)]",
         className
