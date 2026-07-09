@@ -1,0 +1,157 @@
+{
+  "version": "current",
+  "timestamp": "2026-07-07T14:29:48.981Z",
+  "suite": "drift-regression",
+  "results": [
+    {
+      "caseId": "drift-author-conversational-linkedin-01",
+      "scores": {
+        "deterministic": 100,
+        "heuristic": 55,
+        "evalComposite": 73
+      }
+    },
+    {
+      "caseId": "drift-author-conversational-linkedin-02",
+      "scores": {
+        "deterministic": 100,
+        "heuristic": 57,
+        "evalComposite": 74
+      }
+    },
+    {
+      "caseId": "drift-author-fast-concluder-01",
+      "scores": {
+        "deterministic": 100,
+        "heuristic": 60,
+        "evalComposite": 76
+      }
+    },
+    {
+      "caseId": "drift-author-fast-concluder-02",
+      "scores": {
+        "deterministic": 100,
+        "heuristic": 56,
+        "evalComposite": 74
+      }
+    },
+    {
+      "caseId": "drift-author-formal-architect-01",
+      "scores": {
+        "deterministic": 100,
+        "heuristic": 55,
+        "evalComposite": 73
+      }
+    },
+    {
+      "caseId": "drift-author-formal-architect-02",
+      "scores": {
+        "deterministic": 100,
+        "heuristic": 55,
+        "evalComposite": 73
+      }
+    },
+    {
+      "caseId": "drift-author-high-confidence-twelve-01",
+      "scores": {
+        "deterministic": 100,
+        "heuristic": 54,
+        "evalComposite": 72
+      }
+    },
+    {
+      "caseId": "drift-author-high-confidence-twelve-02",
+      "scores": {
+        "deterministic": 100,
+        "heuristic": 54,
+        "evalComposite": 72
+      }
+    },
+    {
+      "caseId": "drift-author-low-judgment-newsletter-01",
+      "scores": {
+        "deterministic": 100,
+        "heuristic": 57,
+        "evalComposite": 74
+      }
+    },
+    {
+      "caseId": "drift-author-low-judgment-newsletter-02",
+      "scores": {
+        "deterministic": 100,
+        "heuristic": 55,
+        "evalComposite": 73
+      }
+    },
+    {
+      "caseId": "drift-author-measured-mentor-01",
+      "scores": {
+        "deterministic": 100,
+        "heuristic": 62,
+        "evalComposite": 77
+      }
+    },
+    {
+      "caseId": "drift-author-measured-mentor-02",
+      "scores": {
+        "deterministic": 100,
+        "heuristic": 57,
+        "evalComposite": 74
+      }
+    },
+    {
+      "caseId": "drift-author-moderate-observer-01",
+      "scores": {
+        "deterministic": 100,
+        "heuristic": 55,
+        "evalComposite": 73
+      }
+    },
+    {
+      "caseId": "drift-author-moderate-observer-02",
+      "scores": {
+        "deterministic": 100,
+        "heuristic": 57,
+        "evalComposite": 74
+      }
+    },
+    {
+      "caseId": "drift-epistemic-excessive-hedging-01",
+      "scores": {
+        "deterministic": 100,
+        "heuristic": 55,
+        "evalComposite": 73
+      }
+    },
+    {
+      "caseId": "drift-epistemic-overconfident-01",
+      "scores": {
+        "deterministic": 100,
+        "heuristic": 62,
+        "evalComposite": 77
+      }
+    },
+    {
+      "caseId": "drift-structural-bullet-list-01",
+      "scores": {
+        "deterministic": 100,
+        "heuristic": 54,
+        "evalComposite": 72
+      }
+    },
+    {
+      "caseId": "drift-structural-slow-warmup-01",
+      "scores": {
+        "deterministic": 100,
+        "heuristic": 50,
+        "evalComposite": 70
+      }
+    }
+  ],
+  "summary": {
+    "avgEvalComposite": 74,
+    "minEvalComposite": 70,
+    "passRate": 100,
+    "regressions": []
+  }
+}

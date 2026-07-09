@@ -28,15 +28,6 @@ export const AuthoritySourceSchema = Schema.Literal(
 );
 export type AuthoritySource = typeof AuthoritySourceSchema.Type;
 
-export const FormatRegisterSchema = Schema.Literal("formal", "informal", "technical", "conversational");
-export type FormatRegister = typeof FormatRegisterSchema.Type;
-
-export const OpeningStyleSchema = Schema.Literal("direct", "contextual", "provocative");
-export type OpeningStyle = typeof OpeningStyleSchema.Type;
-
-export const TechnicalDensitySchema = Schema.Literal("low", "medium", "high");
-export type TechnicalDensity = typeof TechnicalDensitySchema.Type;
-
 export const CoreReasoningSignatureSchema = Schema.Struct({
   narrativeProse: Schema.String,
   certaintyLevel: CertaintyLevelSchema,
@@ -48,18 +39,8 @@ export const CoreReasoningSignatureSchema = Schema.Struct({
 });
 export type CoreReasoningSignature = typeof CoreReasoningSignatureSchema.Type;
 
-export const FormatExpressionProfileSchema = Schema.Struct({
-  contentType: Schema.String,
-  narrativeProse: Schema.String,
-  register: FormatRegisterSchema,
-  openingStyle: OpeningStyleSchema,
-  technicalDensity: TechnicalDensitySchema
-});
-export type FormatExpressionProfile = typeof FormatExpressionProfileSchema.Type;
-
 export const ReasoningExtractionResultSchema = Schema.Struct({
-  core: CoreReasoningSignatureSchema,
-  formatExpressions: Schema.Record({ key: Schema.String, value: FormatExpressionProfileSchema })
+  core: CoreReasoningSignatureSchema
 });
 export type ReasoningExtractionResult = typeof ReasoningExtractionResultSchema.Type;
 
@@ -207,14 +188,12 @@ export type ArgumentDevelopmentExtractionResult = typeof ArgumentDevelopmentExtr
 
 export const UnifiedVoiceSignatureSchema = Schema.Struct({
   core: CoreReasoningSignatureSchema,
-  development: ArgumentDevelopmentSignatureSchema,
-  formatExpressions: Schema.Record({ key: Schema.String, value: FormatExpressionProfileSchema })
+  development: ArgumentDevelopmentSignatureSchema
 });
 export type UnifiedVoiceSignature = typeof UnifiedVoiceSignatureSchema.Type;
 
 export const VoiceReasoningPresentationViewSchema = Schema.Struct({
   core: CoreReasoningSignatureSchema,
-  formatExpressions: Schema.Array(FormatExpressionProfileSchema),
   reasoningVersion: Schema.optional(Schema.Number),
   development: Schema.optional(ArgumentDevelopmentSignatureSchema),
   developmentImmature: Schema.optional(Schema.Boolean),
@@ -237,10 +216,6 @@ export const decodeUnifiedVoiceSignature = createSchemaDecoder(
 export const decodeCoreReasoningSignature = createSchemaDecoder(
   "CoreReasoningSignature",
   CoreReasoningSignatureSchema
-);
-export const decodeFormatExpressionProfile = createSchemaDecoder(
-  "FormatExpressionProfile",
-  FormatExpressionProfileSchema
 );
 export const decodeReasoningExtractionResult = createSchemaDecoder(
   "ReasoningExtractionResult",

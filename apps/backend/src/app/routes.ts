@@ -10,8 +10,8 @@ import type { BackendProductServices } from "../product.js";
 import { createErrorBody, runEffectOrThrow, validateResponseBody } from "../http/http.js";
 import type { BackendJobStoreServiceContract } from "../jobs/job-store.js";
 import { registerExecutionRoutes } from "../routes/execution-routes.js";
-import { registerContentTypeRoutes } from "../routes/content-type-routes.js";
 import { registerGenerationIntentRoutes } from "../routes/generation-intent-routes.js";
+import { registerOnboardingRoutes } from "../routes/onboarding-routes.js";
 import { registerGenerationPreviewRoutes } from "../routes/generation-preview-routes.js";
 import { registerExperimentalExecutionRoutes } from "../routes/experimental-execution-routes.js";
 import { registerInternalPolicyRoutes } from "../routes/internal-policy-routes.js";
@@ -84,7 +84,7 @@ export function registerBackendRoutes(app: Hono, options: BackendRouteOptions): 
     config: options.config,
     services: options.services
   });
-  registerContentTypeRoutes(app, {
+  registerOnboardingRoutes(app, {
     config: options.config,
     services: options.services
   });

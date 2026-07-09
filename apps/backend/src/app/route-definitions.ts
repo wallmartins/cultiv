@@ -4,7 +4,6 @@ export const Routes = {
   Ready: "GET /ready",
   ApiReady: "GET /api/ready",
 
-  GetMeContentTypes: "GET /me/content-types",
   GetMeGenerationIntents: "GET /me/generation-intents",
 
   PostMeExecutionsRun: "POST /me/executions/run",
@@ -16,7 +15,6 @@ export const Routes = {
   PostMeVoiceTrainingConsent: "POST /me/voice-training-consent",
   GetMeVoiceProfile: "GET /me/voice-profile",
   PostMeVoiceProfileTraitConfirmations: "POST /me/voice-profile/trait-confirmations",
-  GetMeVoiceProfileExamples: "GET /me/voice-profile/examples",
 
   PostMeVoiceCalibrationSessions: "POST /me/voice-calibration/sessions",
   GetMeVoiceCalibrationSession: "GET /me/voice-calibration/sessions/:sessionId",
@@ -26,6 +24,9 @@ export const Routes = {
   PostMeVoiceCalibrationSessionStepSkip: "POST /me/voice-calibration/sessions/:sessionId/steps/:stepId/skip",
   PostMeVoiceCalibrationSessionComplete: "POST /me/voice-calibration/sessions/:sessionId/complete",
   GetMeVoiceCalibrationEntitlement: "GET /me/voice-calibration/entitlement",
+
+  PostMeOnboardingComplete: "POST /me/onboarding/complete",
+  GetMeOnboardingStatus: "GET /me/onboarding/status",
 
   PostMeBillingCheckout: "POST /me/billing/checkout",
   GetMeBillingEntitlement: "GET /me/billing/entitlement",

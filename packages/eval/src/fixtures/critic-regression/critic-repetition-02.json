@@ -1,0 +1,12 @@
+{
+  "id": "critic-repetition-02",
+  "suite": "critic-regression",
+  "input": {
+    "text": "word word word does not make an argument stronger."
+  },
+  "expectations": {
+    "mustTriggerCritic": ["redundant"],
+    "maxCriticScore": 80
+  },
+  "tags": ["critic", "repetition"]
+}

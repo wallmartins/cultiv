@@ -1,0 +1,12 @@
+{
+  "id": "critic-meta-commentary-01",
+  "suite": "critic-regression",
+  "input": {
+    "text": "Segue abaixo o conteúdo do artigo, como solicitado."
+  },
+  "expectations": {
+    "mustTriggerCritic": ["llmish"],
+    "maxCriticScore": 80
+  },
+  "tags": ["critic", "meta-commentary"]
+}

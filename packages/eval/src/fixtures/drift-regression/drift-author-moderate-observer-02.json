@@ -1,0 +1,66 @@
+{
+  "id": "drift-author-moderate-observer-02",
+  "suite": "drift-regression",
+  "input": {
+    "voiceProfile": {
+      "userId": "eval-author-moderate-observer",
+      "tone": "measured",
+      "cadence": "moderate",
+      "lexicon": [],
+      "constraints": [],
+      "antiPatterns": [],
+      "antiPatternsExplicit": [],
+      "rules": [],
+      "styleMarkers": [],
+      "userLabels": [
+        "drift-regression"
+      ],
+      "coreReasoningSignature": {
+        "narrativeProse": "Observes concrete situations, tolerates ambiguity, and delays judgment until context is clear.",
+        "certaintyLevel": "moderate",
+        "judgmentFrequency": "low",
+        "conclusionPace": "slow",
+        "readerRelationship": "peer",
+        "authoritySource": "personal_observation",
+        "derivedAntiPatterns": [
+          "generic linkedin tone",
+          "numbered thesis proof list"
+        ]
+      },
+      "argumentDevelopmentSignature": {
+        "developmentProse": "Opens from observation, tolerates ambiguity, and delays the thesis until context is established.",
+        "moveLabels": [
+          "observation",
+          "ambiguity",
+          "delayed_conclusion"
+        ],
+        "transitionTendencies": [
+          {
+            "from": "observation",
+            "to": "ambiguity",
+            "frequency": "common"
+          },
+          {
+            "from": "ambiguity",
+            "to": "delayed_conclusion",
+            "frequency": "occasional"
+          }
+        ],
+        "epistemicPosture": "exploratory",
+        "structuralAntiPatterns": [
+          "premature_thesis",
+          "advocacy_arc"
+        ]
+      }
+    },
+    "candidate": "Você deve concluir agora, obviamente, sem mais contexto.",
+    "stepName": "draft"
+  },
+  "expectations": {
+    "minDriftScore": 50
+  },
+  "tags": [
+    "drift",
+    "author-moderate-observer"
+  ]
+}

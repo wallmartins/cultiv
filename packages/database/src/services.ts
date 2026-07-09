@@ -5,7 +5,6 @@ import type {
   JobRepository,
   MemoryRepository,
   PipelineRepository,
-  VoiceExampleBatchRepository,
   VoiceExampleRepository,
   VoiceProfileDiagnosticsRepository,
   VoiceProfileRepository,
@@ -55,11 +54,6 @@ export class VoiceProfileSnapshotRepositoryService extends Context.Tag("VoicePro
   VoiceProfileSnapshotRepository
 >() {}
 
-export class VoiceExampleBatchRepositoryService extends Context.Tag("VoiceExampleBatchRepositoryService")<
-  VoiceExampleBatchRepositoryService,
-  VoiceExampleBatchRepository
->() {}
-
 export class VoiceTrainingConsentRepositoryService extends Context.Tag("VoiceTrainingConsentRepositoryService")<
   VoiceTrainingConsentRepositoryService,
   VoiceTrainingConsentRepository
@@ -101,10 +95,6 @@ export function createVoiceProfileSnapshotRepositoryLayer(repository: VoiceProfi
   return Layer.succeed(VoiceProfileSnapshotRepositoryService, repository);
 }
 
-export function createVoiceExampleBatchRepositoryLayer(repository: VoiceExampleBatchRepository) {
-  return Layer.succeed(VoiceExampleBatchRepositoryService, repository);
-}
-
 export function createVoiceTrainingConsentRepositoryLayer(repository: VoiceTrainingConsentRepository) {
   return Layer.succeed(VoiceTrainingConsentRepositoryService, repository);
 }
@@ -120,7 +110,6 @@ export const createDatabaseClientLayer = (client: DatabaseClient) =>
     createVoiceProfileRepositoryLayer(client.voiceProfiles),
     createVoiceProfileDiagnosticsRepositoryLayer(client.voiceProfileDiagnostics),
     createVoiceProfileSnapshotRepositoryLayer(client.voiceProfileSnapshots),
-    createVoiceExampleBatchRepositoryLayer(client.voiceExampleBatches),
     createVoiceTrainingConsentRepositoryLayer(client.voiceTrainingConsents)
   );
 

@@ -46,8 +46,8 @@ describe("voice calibration service", () => {
     expect(session.sessionId).toMatch(/^voice-calibration:/);
     expect(session.userId).toBe("user_cal_1");
     expect(session.status).toBe("in_progress");
-    expect(session.currentStepId).toBe("micro_opinion");
-    expect(session.steps).toHaveLength(5);
+    expect(session.currentStepId).toBe("context_setup");
+    expect(session.steps).toHaveLength(6);
     expect(session.completedStepCount).toBe(0);
   });
 
@@ -74,6 +74,11 @@ describe("voice calibration service", () => {
     Effect.runSync(services.voiceConsent.grantConsent("user_cal_3"));
 
     const started = Effect.runSync(services.voiceCalibration.startSession("user_cal_3"));
+    Effect.runSync(
+      services.voiceCalibration.setContext(started.sessionId, "user_cal_3", {
+        domain: "tecnologia"
+      })
+    );
     const submitted = Effect.runSync(
       services.voiceCalibration.submitStep(started.sessionId, "user_cal_3", {
         stepId: "micro_opinion",
@@ -87,9 +92,9 @@ describe("voice calibration service", () => {
     expect(submitted.currentStepId).toBe("reasoning_reflection");
     expect(submitted.completedStepCount).toBe(1);
 
-    const examples = Effect.runSync(services.voice.listExamples("user_cal_3"));
-    expect(examples.total).toBe(1);
-    expect(examples.items[0]?.classificationLabels).toEqual(["micro_opinion", "wizard_calibration"]);
+    const examples = Effect.runSync(services.database.voiceExamples.listByUser("user_cal_3"));
+    expect(examples.length).toBe(1);
+    expect(examples[0]?.classificationLabels).toEqual(["micro_opinion", "wizard_calibration"]);
   });
 
   it("skips the current step and advances the wizard", () => {
@@ -97,6 +102,11 @@ describe("voice calibration service", () => {
     Effect.runSync(services.voiceConsent.grantConsent("user_cal_4"));
 
     const started = Effect.runSync(services.voiceCalibration.startSession("user_cal_4"));
+    Effect.runSync(
+      services.voiceCalibration.setContext(started.sessionId, "user_cal_4", {
+        domain: "tecnologia"
+      })
+    );
     const skipped = Effect.runSync(
       services.voiceCalibration.skipStep(started.sessionId, "user_cal_4", "micro_opinion")
     );
@@ -107,8 +117,8 @@ describe("voice calibration service", () => {
     expect(skipped.currentStepId).toBe("reasoning_reflection");
     expect(skipped.completedStepCount).toBe(1);
 
-    const examples = Effect.runSync(services.voice.listExamples("user_cal_4"));
-    expect(examples.total).toBe(0);
+    const examples = Effect.runSync(services.database.voiceExamples.listByUser("user_cal_4"));
+    expect(examples.length).toBe(0);
   });
 
   it("personalizes micro_opinion theme for tecnologia domain", () => {

@@ -136,9 +136,9 @@ describe("backend production hardening", () => {
       "x-forwarded-for": "203.0.113.10"
     };
 
-    const first = await app.request("/me/content-types", { headers });
-    const second = await app.request("/me/content-types", { headers });
-    const third = await app.request("/me/content-types", { headers });
+    const first = await app.request("/me/onboarding/status", { headers });
+    const second = await app.request("/me/onboarding/status", { headers });
+    const third = await app.request("/me/onboarding/status", { headers });
 
     expect(first.status).toBe(200);
     expect(second.status).toBe(200);

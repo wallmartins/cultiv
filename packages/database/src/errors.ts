@@ -38,14 +38,6 @@ export class DatabaseVoiceProfileSnapshotNotFoundError extends Data.TaggedError(
   readonly snapshotId: string;
 }> {}
 
-export class DatabaseVoiceBatchAlreadyExistsError extends Data.TaggedError("DatabaseVoiceBatchAlreadyExistsError")<{
-  readonly batchId: string;
-}> {}
-
-export class DatabaseVoiceBatchNotFoundError extends Data.TaggedError("DatabaseVoiceBatchNotFoundError")<{
-  readonly batchId: string;
-}> {}
-
 export class DatabaseVoiceTrainingConsentNotFoundError extends Data.TaggedError("DatabaseVoiceTrainingConsentNotFoundError")<{
   readonly userId: string;
 }> {}

@@ -1,0 +1,12 @@
+{
+  "id": "critic-filler-01",
+  "suite": "critic-regression",
+  "input": {
+    "text": "Essentially, basically, this is actually just a filler sentence that says nothing."
+  },
+  "expectations": {
+    "mustTriggerCritic": ["llmish"],
+    "maxCriticScore": 80
+  },
+  "tags": ["critic", "filler"]
+}

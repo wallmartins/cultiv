@@ -1,0 +1,93 @@
+{
+  "version": "current",
+  "timestamp": "2026-07-07T14:29:48.981Z",
+  "suite": "voice-fidelity",
+  "results": [
+    {
+      "caseId": "voice-fidelity-blog-casual-01",
+      "scores": {
+        "deterministic": 100,
+        "heuristic": 55,
+        "evalComposite": 73
+      }
+    },
+    {
+      "caseId": "voice-fidelity-blog-formal-01",
+      "scores": {
+        "deterministic": 100,
+        "heuristic": 48,
+        "evalComposite": 69
+      }
+    },
+    {
+      "caseId": "voice-fidelity-blog-formal-02",
+      "scores": {
+        "deterministic": 100,
+        "heuristic": 55,
+        "evalComposite": 73
+      }
+    },
+    {
+      "caseId": "voice-fidelity-blog-technical-01",
+      "scores": {
+        "deterministic": 100,
+        "heuristic": 55,
+        "evalComposite": 73
+      }
+    },
+    {
+      "caseId": "voice-fidelity-linkedin-casual-01",
+      "scores": {
+        "deterministic": 100,
+        "heuristic": 53,
+        "evalComposite": 72
+      }
+    },
+    {
+      "caseId": "voice-fidelity-linkedin-formal-01",
+      "scores": {
+        "deterministic": 100,
+        "heuristic": 52,
+        "evalComposite": 71
+      }
+    },
+    {
+      "caseId": "voice-fidelity-linkedin-technical-01",
+      "scores": {
+        "deterministic": 100,
+        "heuristic": 52,
+        "evalComposite": 71
+      }
+    },
+    {
+      "caseId": "voice-fidelity-thread-casual-01",
+      "scores": {
+        "deterministic": 100,
+        "heuristic": 52,
+        "evalComposite": 71
+      }
+    },
+    {
+      "caseId": "voice-fidelity-thread-formal-01",
+      "scores": {
+        "deterministic": 100,
+        "heuristic": 52,
+        "evalComposite": 71
+      }
+    },
+    {
+      "caseId": "voice-fidelity-thread-technical-01",
+      "scores": {
+        "deterministic": 100,
+        "heuristic": 52,
+        "evalComposite": 71
+      }
+    }
+  ],
+  "summary": {
+    "avgEvalComposite": 72,
+    "minEvalComposite": 69,
+    "passRate": 90,
+    "regressions": []
+  }
+}

@@ -76,6 +76,7 @@ export interface ApplicationUsersTable {
   id: string;
   external_subject: string;
   status: string;
+  onboarding_completed_at: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -274,7 +275,6 @@ export interface DatabaseTables {
   voice_profiles: VoiceProfilesTable;
   voice_profile_diagnostics: VoiceProfileDiagnosticsTable;
   voice_profile_snapshots: VoiceProfileSnapshotsTable;
-  voice_example_batches: VoiceExampleBatchesTable;
   application_users: ApplicationUsersTable;
   operators: OperatorsTable;
   audit_records: AuditRecordsTable;

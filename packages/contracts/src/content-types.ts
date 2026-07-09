@@ -1,6 +1,4 @@
 import { Schema } from "effect";
-import { QualityModeSchema } from "./execution.js";
-import { createSchemaDecoder } from "./shared.js";
 import { ReasonCodeSchema } from "./voice.js";
 
 export const ContentTypeDefinitionSchema = Schema.Struct({
@@ -63,16 +61,4 @@ export const ContentTypeCatalogItemViewSchema = Schema.Struct({
 });
 export type ContentTypeCatalogItemView = typeof ContentTypeCatalogItemViewSchema.Type;
 
-export const ContentTypeCatalogCommercialSchema = Schema.Struct({
-  planTier: Schema.String,
-  allowedQualityModes: Schema.Array(QualityModeSchema)
-});
-export type ContentTypeCatalogCommercial = typeof ContentTypeCatalogCommercialSchema.Type;
 
-export const ContentTypeCatalogViewSchema = Schema.Struct({
-  items: Schema.Array(ContentTypeCatalogItemViewSchema),
-  commercial: Schema.optional(ContentTypeCatalogCommercialSchema)
-});
-export type ContentTypeCatalogView = typeof ContentTypeCatalogViewSchema.Type;
-
-export const decodeContentTypeCatalogView = createSchemaDecoder("ContentTypeCatalogView", ContentTypeCatalogViewSchema);

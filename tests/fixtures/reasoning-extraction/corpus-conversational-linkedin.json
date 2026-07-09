@@ -59,15 +59,6 @@
       "readerRelationship": "peer",
       "authoritySource": "personal_observation",
       "derivedAntiPatterns": ["generic linkedin tone"]
-    },
-    "formatExpressions": {
-      "linkedin-post": {
-        "contentType": "linkedin-post",
-        "narrativeProse": "LinkedIn posts stay conversational with short paragraphs.",
-        "register": "conversational",
-        "openingStyle": "direct",
-        "technicalDensity": "low"
-      }
     }
   }
 }

@@ -1,0 +1,20 @@
+{
+  "id": "voice-fidelity-blog-casual-01",
+  "suite": "voice-fidelity",
+  "input": {
+    "contentType": "blog-post",
+    "briefing": "Share what you have learned about building a consistent writing habit",
+    "voiceProfile": {
+      "type": "fixture",
+      "path": "voice-fidelity/profiles/casual-creator.json"
+    },
+    "qualityMode": "balanced"
+  },
+  "expectations": {
+    "mustContain": ["writing"],
+    "mustNotContain": ["synergy", "leverage"],
+    "wordCountRange": { "min": 400, "max": 800 },
+    "minDriftScore": 70
+  },
+  "tags": ["blog", "casual", "creative"]
+}

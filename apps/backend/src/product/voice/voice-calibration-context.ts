@@ -41,6 +41,8 @@ export function getCalibrationWizardStep(stepId: WizardStepId): CalibrationWizar
 
 export function resolveTheme(step: CalibrationWizardStep, context?: WizardContext): string {
   switch (step.id) {
+    case "context_setup":
+      return "";
     case "reasoning_reflection":
     case "format_adaptation":
       return step.fixedPrompt;

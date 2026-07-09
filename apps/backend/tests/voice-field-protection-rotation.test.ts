@@ -1,9 +1,8 @@
 import { Effect } from "effect";
 import { describe, expect, it } from "vitest";
-import type { VoiceExampleBatchRecord, VoiceExampleRecord } from "@my-ai-orchestrator/database";
+import type { VoiceExampleRecord } from "@my-ai-orchestrator/database";
 import { createBackendVoiceFieldProtectionService } from "../src/safety/voice-field-protection.js";
 import {
-  voiceExampleBatchQualifiesForProtectionRotation,
   voiceExampleQualifiesForProtectionRotation
 } from "../src/safety/voice-field-protection-rotation.js";
 
@@ -54,24 +53,6 @@ describe("voice field protection rotation", () => {
     expect(encrypted.context).toMatch(/^voiceprot:v1:/);
     expect(encrypted.text).not.toContain("Exemplo legado");
   });
-
-  it("qualifies batch staged input plaintext when encryptPlaintext is enabled", () => {
-    const batch = createVoiceExampleBatchRecord({
-      items: [
-        {
-          clientItemId: "item-1",
-          stagedInput: {
-            text: "Batch legado.",
-            context: "Contexto batch.",
-            language: "pt-BR"
-          }
-        }
-      ]
-    });
-
-    expect(voiceExampleBatchQualifiesForProtectionRotation(batch, false)).toBe(false);
-    expect(voiceExampleBatchQualifiesForProtectionRotation(batch, true)).toBe(true);
-  });
 });
 
 function createVoiceExampleRecord(
@@ -97,20 +78,6 @@ function createVoiceExampleRecord(
       contributionPreview: "Preview",
       userPinned: false
     },
-    createdAt: "2026-06-02T00:00:00.000Z",
-    updatedAt: "2026-06-02T00:00:00.000Z",
-    version: 1
-  };
-}
-
-function createVoiceExampleBatchRecord(
-  overrides: Pick<VoiceExampleBatchRecord, "items">
-): VoiceExampleBatchRecord {
-  return {
-    id: "voice-batch:user_legacy:1",
-    userId: "user_legacy",
-    state: "staging",
-    items: overrides.items,
     createdAt: "2026-06-02T00:00:00.000Z",
     updatedAt: "2026-06-02T00:00:00.000Z",
     version: 1

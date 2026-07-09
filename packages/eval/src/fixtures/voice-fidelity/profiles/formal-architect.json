@@ -1,0 +1,32 @@
+{
+  "userId": "eval-formal-architect",
+  "tone": "formal",
+  "cadence": "measured",
+  "description": "Builds arguments through explicit tradeoffs, technical constraints, and implementation realities rather than slogans.",
+  "lexicon": ["tradeoff", "constraint", "abstraction", "interface", "scalability", "cohesion"],
+  "constraints": ["avoid hype adjectives", "ground claims in practice", "name concrete risks"],
+  "antiPatterns": ["hand-wavy wording", "impersonal whitepaper tone", "obviously", "always"],
+  "antiPatternsExplicit": ["game-changer", "revolutionary", "unlock potential"],
+  "rules": ["open with the decision at stake", "close with a measured recommendation"],
+  "styleMarkers": ["first-person", "short paragraph"],
+  "userLabels": ["formal", "technical", "architect"],
+  "coreReasoningSignature": {
+    "narrativeProse": "Builds arguments through explicit tradeoffs, technical constraints, and implementation realities rather than slogans.",
+    "certaintyLevel": "moderate",
+    "judgmentFrequency": "moderate",
+    "conclusionPace": "moderate",
+    "readerRelationship": "peer",
+    "authoritySource": "practice",
+    "derivedAntiPatterns": ["hand-wavy wording", "impersonal whitepaper tone"]
+  },
+  "argumentDevelopmentSignature": {
+    "developmentProse": "Frames decisions through explicit tradeoffs, names constraints, and lands on a measured recommendation.",
+    "moveLabels": ["constraint", "tradeoff", "recommendation"],
+    "transitionTendencies": [
+      { "from": "constraint", "to": "tradeoff", "frequency": "common" },
+      { "from": "tradeoff", "to": "recommendation", "frequency": "occasional" }
+    ],
+    "epistemicPosture": "investigative",
+    "structuralAntiPatterns": ["hand_wavy_claim", "absolute_prescription"]
+  }
+}

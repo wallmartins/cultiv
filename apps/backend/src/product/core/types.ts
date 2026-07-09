@@ -44,7 +44,7 @@ export type {
 } from "../generation/generation-preview-types.js";
 export type { BackendProductServices } from "./service-types.js";
 export type { BackendVoiceRebuildService } from "../voice/voice-rebuild-types.js";
-export type { BackendVoiceService, ListVoiceExamplesOptions } from "../voice/voice-types.js";
+export type { BackendVoiceService } from "../voice/voice-types.js";
 export type {
   BackendOperationalOverrideService,
   OperationalOverrideRequestDecision,

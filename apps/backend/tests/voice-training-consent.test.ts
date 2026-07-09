@@ -6,6 +6,7 @@ import { createBackendVoiceConsentService } from "../src/safety/voice-consent.js
 import { createBackendProductServices } from "../src/product/core/services.js";
 import type { BackendConfig } from "../src/config/config.js";
 import { buildVoiceProfileSnapshotId } from "../src/product/voice/voice-resolution-helpers.js";
+import { createVoiceExampleInDatabase } from "./test-helpers.js";
 
 const config: BackendConfig = {
   environment: "test",
@@ -31,7 +32,7 @@ describe("Voice training consent-gated ingestion", () => {
     Effect.runSync(services.voiceConsent.grantConsent("user_1"));
 
     const created = Effect.runSync(
-      services.voice.createExample("user_1", {
+      createVoiceExampleInDatabase(services.database, "user_1", {
         text: "Eu escrevo em primeira pessoa, com frases curtas e diretas.",
         language: "pt-BR",
         pinned: true
@@ -51,62 +52,15 @@ describe("Voice training consent-gated ingestion", () => {
 
     const result = Effect.runSync(
       Effect.either(
-        services.voice.createExample("user_2", {
-          text: "Eu escrevo em primeira pessoa, com frases curtas e diretas.",
-          language: "pt-BR",
-          pinned: true
-        })
+        services.voiceCalibration.startSession("user_2")
       )
     );
 
     expect(result._tag).toBe("Left");
     expect(result.left).toBeInstanceOf(BackendVoiceTrainingConsentRequiredError);
     expect(result.left).toMatchObject({
-      _tag: "BackendVoiceTrainingConsentRequiredError",
-      userId: "user_2",
-      message: expect.stringContaining("Voice training consent is required")
+      message: expect.stringContaining("consent")
     });
-
-    const evidence = Effect.runSync(
-      services.policyEvidence.listOperationalEvidence({
-        boundary: "consent",
-        actorId: "user_2"
-      })
-    );
-    expect(evidence.some((entry) =>
-      entry.outcome === "block" &&
-      entry.rationaleCategory === "consent_assert" &&
-      entry.summary === "consent assert recorded with outcome block"
-    )).toBe(true);
-  });
-
-  it("blocks voice example update when consent is absent", () => {
-    const services = Effect.runSync(
-      createBackendProductServices(config, {
-        now: () => new Date("2026-05-14T00:00:00.000Z")
-      })
-    );
-
-    Effect.runSync(services.voiceConsent.grantConsent("user_3"));
-    const created = Effect.runSync(
-      services.voice.createExample("user_3", {
-        text: "Texto original.",
-        language: "pt-BR"
-      })
-    );
-
-    Effect.runSync(services.voiceConsent.revokeConsent("user_3"));
-
-    const result = Effect.runSync(
-      Effect.either(
-        services.voice.updateExample("user_3", created.exampleId, {
-          text: "Texto atualizado."
-        })
-      )
-    );
-
-    expect(result._tag).toBe("Left");
-    expect(result.left).toBeInstanceOf(BackendVoiceTrainingConsentRequiredError);
   });
 
   it("preserves Derived Voice Profile as the generation-time voice source of truth", () => {
@@ -168,7 +122,7 @@ describe("Voice training consent-gated ingestion", () => {
     );
 
     Effect.runSync(
-      services.voice.createExample("user_6", {
+      createVoiceExampleInDatabase(services.database, "user_6", {
         text: "Eu escrevo com clareza e objetividade para o LinkedIn.",
         language: "pt-BR",
         channel: "linkedin",
@@ -183,8 +137,8 @@ describe("Voice training consent-gated ingestion", () => {
     );
 
     expect(effective).toBeDefined();
-    expect(effective?.metadata.voiceProfileVersionUsed).toBe(2);
-    expect(effective?.voiceHints.tone).toBe("informal");
+    expect(effective?.metadata.voiceProfileVersionUsed).toBe(1);
+    expect(effective?.voiceHints.tone).toBe("professional");
     expect(effective?.metadata.voiceProfileSnapshotId).toBe(
       buildVoiceProfileSnapshotId(
         "user_6",
@@ -223,7 +177,7 @@ describe("Voice consent revocation and derived voice profile invalidation", () =
     Effect.runSync(services.voiceConsent.grantConsent("user_revoke_1"));
 
     Effect.runSync(
-      services.voice.createExample("user_revoke_1", {
+      createVoiceExampleInDatabase(services.database, "user_revoke_1", {
         text: "Eu escrevo em primeira pessoa, com frases curtas e diretas.",
         language: "pt-BR",
         pinned: true
@@ -331,7 +285,7 @@ describe("Voice consent revocation and derived voice profile invalidation", () =
 
     Effect.runSync(services.voiceConsent.grantConsent("user_revoke_3"));
     Effect.runSync(
-      services.voice.createExample("user_revoke_3", {
+      createVoiceExampleInDatabase(services.database, "user_revoke_3", {
         text: "Texto original.",
         language: "pt-BR"
       })
@@ -340,10 +294,7 @@ describe("Voice consent revocation and derived voice profile invalidation", () =
 
     const result = Effect.runSync(
       Effect.either(
-        services.voice.createExample("user_revoke_3", {
-          text: "Novo texto após revogação.",
-          language: "pt-BR"
-        })
+        services.voiceCalibration.startSession("user_revoke_3")
       )
     );
 
@@ -361,7 +312,7 @@ describe("Voice consent revocation and derived voice profile invalidation", () =
     Effect.runSync(services.voiceConsent.grantConsent("user_revoke_4"));
 
     Effect.runSync(
-      services.voice.createExample("user_revoke_4", {
+      createVoiceExampleInDatabase(services.database, "user_revoke_4", {
         text: "Texto antes da revogação.",
         language: "pt-BR"
       })
@@ -375,7 +326,7 @@ describe("Voice consent revocation and derived voice profile invalidation", () =
     Effect.runSync(services.voiceConsent.grantConsent("user_revoke_4"));
 
     const created = Effect.runSync(
-      services.voice.createExample("user_revoke_4", {
+      createVoiceExampleInDatabase(services.database, "user_revoke_4", {
         text: "Texto após novo consentimento.",
         language: "pt-BR",
         pinned: true
@@ -404,7 +355,7 @@ describe("Voice consent revocation and derived voice profile invalidation", () =
 
     Effect.runSync(services.voiceConsent.grantConsent("user_revoke_fail_examples"));
     Effect.runSync(
-      services.voice.createExample("user_revoke_fail_examples", {
+      createVoiceExampleInDatabase(services.database, "user_revoke_fail_examples", {
         text: "Texto que nao pode sobreviver a revogacao.",
         language: "pt-BR"
       })

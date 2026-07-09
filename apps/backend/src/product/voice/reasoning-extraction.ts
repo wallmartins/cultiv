@@ -54,23 +54,6 @@ export function groupExamplesByContentType(
   return Object.fromEntries(groups.entries());
 }
 
-export function filterFormatExpressionsByCoverage(
-  result: ReasoningExtractionResult,
-  examplesByContentType: Readonly<Record<string, readonly VoiceExampleRecord[]>>
-): ReasoningExtractionResult {
-  const formatExpressions = Object.fromEntries(
-    Object.entries(result.formatExpressions).filter(([contentType]) => {
-      const count = examplesByContentType[contentType]?.length ?? 0;
-      return count >= 2;
-    })
-  );
-
-  return {
-    core: result.core,
-    formatExpressions
-  };
-}
-
 export function extractReasoningSignature(args: {
   readonly examples: readonly VoiceExampleRecord[];
   readonly attempts: readonly AIPolicyProviderModelAttempt[];
@@ -79,10 +62,9 @@ export function extractReasoningSignature(args: {
   readonly brief?: VoiceSignatureBrief;
 }): Effect.Effect<ReasoningExtractionResult, ReasoningExtractionError> {
   return Effect.gen(function* () {
-    const grouped = groupExamplesByContentType(args.examples);
     const outputLanguage = resolveReasoningOutputLanguage(args.examples);
     const systemPrompt = buildReasoningExtractionSystemPrompt(outputLanguage);
-    let userPrompt = buildExtractionPrompt(grouped, args.examples, outputLanguage, args.brief);
+    let userPrompt = buildExtractionPrompt(args.examples, outputLanguage, args.brief);
 
     let lastError: ReasoningExtractionError | undefined;
 
@@ -131,16 +113,16 @@ export function extractReasoningSignature(args: {
           && languageRetry === 0
           && !isReasoningNarrativeLikelyPortuguese(parsed.right)
         ) {
-          userPrompt = `${buildExtractionPrompt(grouped, args.examples, outputLanguage, args.brief)}${LANGUAGE_RETRY_SUFFIX}`;
+          userPrompt = `${buildExtractionPrompt(args.examples, outputLanguage, args.brief)}${LANGUAGE_RETRY_SUFFIX}`;
           continue;
         }
 
         if (languageRetry === 0 && detectTopicLeakage(parsed.right.core.narrativeProse, args.examples)) {
-          userPrompt = `${buildExtractionPrompt(grouped, args.examples, outputLanguage, args.brief)}${TOPIC_LEAKAGE_RETRY_SUFFIX}`;
+          userPrompt = `${buildExtractionPrompt(args.examples, outputLanguage, args.brief)}${TOPIC_LEAKAGE_RETRY_SUFFIX}`;
           continue;
         }
 
-        return filterFormatExpressionsByCoverage(parsed.right, grouped);
+        return parsed.right;
       }
     }
 
@@ -169,22 +151,11 @@ function parseExtractionResponse(
 }
 
 function normalizeExtractionResult(result: ReasoningExtractionResult): ReasoningExtractionResult {
-  const formatExpressions = Object.fromEntries(
-    Object.entries(result.formatExpressions).map(([contentType, profile]) => [
-      contentType,
-      {
-        ...profile,
-        contentType: profile.contentType || contentType
-      }
-    ])
-  );
-
   return {
     core: {
       ...result.core,
       derivedAntiPatterns: [...new Set(result.core.derivedAntiPatterns.map((item) => item.trim()).filter(Boolean))]
-    },
-    formatExpressions
+    }
   };
 }
 
@@ -192,44 +163,39 @@ export function buildReasoningExtractionMessages(
   examples: readonly VoiceExampleRecord[],
   brief?: VoiceSignatureBrief
 ): { readonly system: string; readonly user: string } {
-  const grouped = groupExamplesByContentType(examples);
   const outputLanguage = resolveReasoningOutputLanguage(examples);
 
   return {
     system: buildReasoningExtractionSystemPrompt(outputLanguage),
-    user: buildExtractionPrompt(grouped, examples, outputLanguage, brief)
+    user: buildExtractionPrompt(examples, outputLanguage, brief)
   };
 }
 
 function buildExtractionPrompt(
-  grouped: Readonly<Record<string, readonly VoiceExampleRecord[]>>,
   examples: readonly VoiceExampleRecord[],
   outputLanguage: ReasoningOutputLanguage,
   brief?: VoiceSignatureBrief
 ): string {
-  const sections = Object.entries(grouped).map(([contentType, groupedExamples]) => {
-    const exampleBlocks = groupedExamples
-      .map((example, index) => {
-        const stepId = resolveWizardStepId(example);
-        const stepLabel = stepId ? `, step: ${stepId}` : "";
-        return `Example ${index + 1} (language: ${example.language}${stepLabel}):\n${example.text.trim()}`;
-      })
-      .join("\n\n");
-
-    return `## Content type: ${contentType}\n${exampleBlocks}`;
-  });
+  const activeExamples = examples.filter((example) => example.state === "active");
+  const exampleBlocks = activeExamples
+    .map((example, index) => {
+      const stepId = resolveWizardStepId(example);
+      const stepLabel = stepId ? `, step: ${stepId}` : "";
+      return `Example ${index + 1} (language: ${example.language}${stepLabel}):\n${example.text.trim()}`;
+    })
+    .join("\n\n");
 
   return [
     `Dominant example language: ${outputLanguage.bcp47} (${outputLanguage.label}).`,
     `Write every narrativeProse field in ${outputLanguage.label}.`,
     "Analyze the author's reasoning patterns across all examples below.",
     "Return JSON only matching the agreed schema.",
-    "Infer a single global core reasoning signature and per-content-type format expression profiles.",
+    "Infer a single global core reasoning signature.",
     ANTI_TOPIC_EXTRACTION_RULES,
     brief ? formatBriefForPrompt(brief) : "",
     resolveReasoningLanguageInstruction(outputLanguage),
     "",
-    ...sections
+    exampleBlocks
   ]
     .filter((section) => section.length > 0)
     .join("\n");
@@ -332,15 +298,6 @@ function buildReasoningExtractionSystemPrompt(outputLanguage: ReasoningOutputLan
     '    "readerRelationship": "peer|mentor|observer|collaborator|guide",',
     '    "authoritySource": "personal_observation|lived_experience|data|reference|practice",',
     '    "derivedAntiPatterns": ["string"]',
-    "  },",
-    '  "formatExpressions": {',
-    '    "<contentType>": {',
-    '      "contentType": "<contentType>",',
-    '      "narrativeProse": "string",',
-    '      "register": "formal|informal|technical|conversational",',
-    '      "openingStyle": "direct|contextual|provocative",',
-    '      "technicalDensity": "low|medium|high"',
-    "    }",
     "  }",
     "}"
   ].join("\n");
@@ -360,12 +317,7 @@ export function isLikelyPortugueseText(text: string): boolean {
 }
 
 export function isReasoningNarrativeLikelyPortuguese(result: ReasoningExtractionResult): boolean {
-  const narratives = [
-    result.core.narrativeProse,
-    ...Object.values(result.formatExpressions).map((expression) => expression.narrativeProse)
-  ];
-
-  return narratives.every(isLikelyPortugueseText);
+  return isLikelyPortugueseText(result.core.narrativeProse);
 }
 
 
@@ -434,15 +386,6 @@ export const TEST_REASONING_EXTRACTION_FIXTURE: ReasoningExtractionResult = {
     readerRelationship: "peer",
     authoritySource: "personal_observation",
     derivedAntiPatterns: ["generic linkedin tone", "numbered thesis proof list"]
-  },
-  formatExpressions: {
-    "linkedin-post": {
-      contentType: "linkedin-post",
-      narrativeProse: "LinkedIn posts stay conversational with short paragraphs and a direct opening.",
-      register: "conversational",
-      openingStyle: "direct",
-      technicalDensity: "low"
-    }
   }
 };
 
@@ -456,15 +399,5 @@ export const TEST_REASONING_EXTRACTION_FIXTURE_PT: ReasoningExtractionResult = {
     readerRelationship: "peer",
     authoritySource: "personal_observation",
     derivedAntiPatterns: ["tom genérico de linkedin", "lista numerada de tese e prova"]
-  },
-  formatExpressions: {
-    "linkedin-post": {
-      contentType: "linkedin-post",
-      narrativeProse:
-        "Posts no LinkedIn mantêm tom conversacional, com parágrafos curtos e abertura direta.",
-      register: "conversational",
-      openingStyle: "direct",
-      technicalDensity: "low"
-    }
   }
 };

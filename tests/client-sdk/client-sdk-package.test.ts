@@ -34,7 +34,8 @@ describe("client-sdk package", () => {
     expect(typeof sdk.executions.create).toBe("function");
     expect(typeof sdk.executions.watch).toBe("function");
     expect(typeof sdk.voice.getProfile).toBe("function");
-    expect(typeof sdk.contentTypes.list).toBe("function");
+    expect(typeof sdk.onboarding.getStatus).toBe("function");
+    expect(typeof sdk.generationIntents.list).toBe("function");
     expect(typeof sdk.toPromise).toBe("function");
   });
 
@@ -85,10 +86,7 @@ describe("client-sdk package", () => {
       calls.push({ url, init });
       return new Response(
         JSON.stringify({
-          items: [],
-          total: 0,
-          limit: 20,
-          offset: 0
+          completed: false
         }),
         {
           status: 200,
@@ -104,9 +102,9 @@ describe("client-sdk package", () => {
       fetcher
     });
 
-    await sdk.toPromise(sdk.contentTypes.list());
+    await sdk.toPromise(sdk.onboarding.getStatus());
 
-    expect(calls[0]?.url).toBe("https://api.example.com/me/content-types");
+    expect(calls[0]?.url).toBe("https://api.example.com/me/onboarding/status");
     expect(calls[0]?.init?.headers).toMatchObject({
       accept: "application/json",
       authorization: "Bearer token_123",
@@ -197,7 +195,7 @@ describe("client-sdk package", () => {
     });
 
     const result = await Effect.runPromise(
-      Effect.either(sdk.contentTypes.list({ signal: controller.signal }))
+      Effect.either(sdk.onboarding.getStatus({ signal: controller.signal }))
     );
 
     expect(result._tag).toBe("Left");

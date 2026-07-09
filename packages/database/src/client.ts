@@ -16,7 +16,6 @@ export function hydrateDatabase(snapshot: DatabaseSnapshot): DatabaseClient {
     voiceProfiles: Object.values(snapshot.voiceProfiles),
     voiceProfileDiagnostics: Object.values(snapshot.voiceProfileDiagnostics),
     voiceProfileSnapshots: Object.values(snapshot.voiceProfileSnapshots),
-    voiceExampleBatches: Object.values(snapshot.voiceExampleBatches),
     voiceTrainingConsents: Object.values(snapshot.voiceTrainingConsents),
     auditRecords: Object.values(snapshot.auditRecords)
   });
@@ -33,7 +32,6 @@ export function summarizeDatabase(client: DatabaseClient) {
     voiceProfiles: Object.keys(snapshot.voiceProfiles).length,
     voiceProfileDiagnostics: Object.keys(snapshot.voiceProfileDiagnostics).length,
     voiceProfileSnapshots: Object.keys(snapshot.voiceProfileSnapshots).length,
-    voiceExampleBatches: Object.keys(snapshot.voiceExampleBatches).length,
     voiceTrainingConsents: Object.keys(snapshot.voiceTrainingConsents).length,
     auditRecords: Object.keys(snapshot.auditRecords).length
   });

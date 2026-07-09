@@ -9,7 +9,6 @@ export {
   createVoiceProfileRepositoryFromClient,
   createVoiceProfileDiagnosticsRepositoryFromClient,
   createVoiceProfileSnapshotRepositoryFromClient,
-  createVoiceExampleBatchRepositoryFromClient,
   createAuditRepositoryFromClient,
   createVoiceTrainingConsentRepositoryFromClient
 } from "./repositories/index.js";

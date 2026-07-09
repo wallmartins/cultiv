@@ -1,0 +1,12 @@
+{
+  "id": "critic-llm-tic-01",
+  "suite": "critic-regression",
+  "input": {
+    "text": "O problema é claro. A solução é óbvia. Onde estamos hoje? Não estou vendendo nada."
+  },
+  "expectations": {
+    "mustTriggerCritic": ["llmish"],
+    "maxCriticScore": 80
+  },
+  "tags": ["critic", "llm-tic"]
+}

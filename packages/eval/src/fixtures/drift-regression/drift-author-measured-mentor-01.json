@@ -1,0 +1,66 @@
+{
+  "id": "drift-author-measured-mentor-01",
+  "suite": "drift-regression",
+  "input": {
+    "voiceProfile": {
+      "userId": "eval-author-measured-mentor",
+      "tone": "measured",
+      "cadence": "moderate",
+      "lexicon": [],
+      "constraints": [],
+      "antiPatterns": [],
+      "antiPatternsExplicit": [],
+      "rules": [],
+      "styleMarkers": [],
+      "userLabels": [
+        "drift-regression"
+      ],
+      "coreReasoningSignature": {
+        "narrativeProse": "Teaches through guided questions and shared experience, acknowledging limits before offering a takeaway.",
+        "certaintyLevel": "moderate",
+        "judgmentFrequency": "moderate",
+        "conclusionPace": "moderate",
+        "readerRelationship": "mentor",
+        "authoritySource": "reference",
+        "derivedAntiPatterns": [
+          "absolute claims",
+          "guru positioning"
+        ]
+      },
+      "argumentDevelopmentSignature": {
+        "developmentProse": "Guides through questions and shared experience, acknowledging limits before offering a takeaway.",
+        "moveLabels": [
+          "question",
+          "experience",
+          "takeaway"
+        ],
+        "transitionTendencies": [
+          {
+            "from": "question",
+            "to": "experience",
+            "frequency": "common"
+          },
+          {
+            "from": "experience",
+            "to": "takeaway",
+            "frequency": "occasional"
+          }
+        ],
+        "epistemicPosture": "exploratory",
+        "structuralAntiPatterns": [
+          "absolute_claim",
+          "guru_positioning"
+        ]
+      }
+    },
+    "candidate": "Sempre faça assim e nunca questione este padrão.",
+    "stepName": "draft"
+  },
+  "expectations": {
+    "minDriftScore": 50
+  },
+  "tags": [
+    "drift",
+    "author-measured-mentor"
+  ]
+}

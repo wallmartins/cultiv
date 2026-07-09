@@ -59,15 +59,6 @@
       "readerRelationship": "guide",
       "authoritySource": "data",
       "derivedAntiPatterns": ["excessive hedging"]
-    },
-    "formatExpressions": {
-      "newsletter": {
-        "contentType": "newsletter",
-        "narrativeProse": "Newsletter sections lead with the takeaway and keep supporting detail tight.",
-        "register": "informal",
-        "openingStyle": "direct",
-        "technicalDensity": "medium"
-      }
     }
   }
 }

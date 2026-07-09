@@ -1,0 +1,101 @@
+{
+  "version": "current",
+  "timestamp": "2026-07-07T14:29:48.981Z",
+  "suite": "critic-regression",
+  "results": [
+    {
+      "caseId": "critic-cliche-01",
+      "scores": {
+        "deterministic": 100,
+        "heuristic": 64,
+        "evalComposite": 78
+      }
+    },
+    {
+      "caseId": "critic-cliche-02",
+      "scores": {
+        "deterministic": 100,
+        "heuristic": 64,
+        "evalComposite": 78
+      }
+    },
+    {
+      "caseId": "critic-filler-01",
+      "scores": {
+        "deterministic": 100,
+        "heuristic": 64,
+        "evalComposite": 78
+      }
+    },
+    {
+      "caseId": "critic-filler-02",
+      "scores": {
+        "deterministic": 100,
+        "heuristic": 64,
+        "evalComposite": 78
+      }
+    },
+    {
+      "caseId": "critic-llm-tic-01",
+      "scores": {
+        "deterministic": 100,
+        "heuristic": 58,
+        "evalComposite": 75
+      }
+    },
+    {
+      "caseId": "critic-meta-commentary-01",
+      "scores": {
+        "deterministic": 100,
+        "heuristic": 58,
+        "evalComposite": 75
+      }
+    },
+    {
+      "caseId": "critic-meta-commentary-02",
+      "scores": {
+        "deterministic": 100,
+        "heuristic": 58,
+        "evalComposite": 75
+      }
+    },
+    {
+      "caseId": "critic-performative-01",
+      "scores": {
+        "deterministic": 100,
+        "heuristic": 64,
+        "evalComposite": 78
+      }
+    },
+    {
+      "caseId": "critic-performative-02",
+      "scores": {
+        "deterministic": 100,
+        "heuristic": 64,
+        "evalComposite": 78
+      }
+    },
+    {
+      "caseId": "critic-repetition-01",
+      "scores": {
+        "deterministic": 100,
+        "heuristic": 62,
+        "evalComposite": 77
+      }
+    },
+    {
+      "caseId": "critic-repetition-02",
+      "scores": {
+        "deterministic": 100,
+        "heuristic": 62,
+        "evalComposite": 77
+      }
+    }
+  ],
+  "summary": {
+    "avgEvalComposite": 77,
+    "minEvalComposite": 75,
+    "passRate": 100,
+    "regressions": []
+  }
+}

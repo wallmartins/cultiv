@@ -1,0 +1,32 @@
+{
+  "userId": "eval-casual-creator",
+  "tone": "conversational",
+  "cadence": "rhythmic",
+  "description": "Writes like a thoughtful practitioner sharing notes from the field — warm, direct, and allergic to corporate speak.",
+  "lexicon": ["practice", "loop", "experiment", "signal", "noise", "momentum"],
+  "constraints": ["no corporate jargon", "write like a letter to one reader"],
+  "antiPatterns": ["buzzword salad", "performatively polished conclusions"],
+  "antiPatternsExplicit": ["leverage", "synergy", "move the needle"],
+  "rules": ["start with an observation", "end with an open question or invitation"],
+  "styleMarkers": ["first-person", "direct opening"],
+  "userLabels": ["casual", "creator", "reflective"],
+  "coreReasoningSignature": {
+    "narrativeProse": "Observes patterns from practice, shares them as working hypotheses, and invites the reader to test them.",
+    "certaintyLevel": "low",
+    "judgmentFrequency": "low",
+    "conclusionPace": "slow",
+    "readerRelationship": "collaborator",
+    "authoritySource": "lived_experience",
+    "derivedAntiPatterns": ["absolute claims", "prescriptive closing"]
+  },
+  "argumentDevelopmentSignature": {
+    "developmentProse": "Moves from a concrete observation to a tentative pattern, then opens the floor for the reader's experience.",
+    "moveLabels": ["observation", "pattern", "invitation"],
+    "transitionTendencies": [
+      { "from": "observation", "to": "pattern", "frequency": "common" },
+      { "from": "pattern", "to": "invitation", "frequency": "occasional" }
+    ],
+    "epistemicPosture": "exploratory",
+    "structuralAntiPatterns": ["absolute_prescription", "closed_conclusion"]
+  }
+}

@@ -15,3 +15,4 @@ export * from "./voice.js";
 export * from "./metaphor-signature.js";
 export * from "./voice-calibration.js";
 export * from "./reasoning.js";
+export * from "./onboarding.js";

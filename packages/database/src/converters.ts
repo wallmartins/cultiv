@@ -5,7 +5,6 @@ import type {
   MemoryRecord as DomainMemoryRecord,
   Pipeline,
   VoiceExample,
-  VoiceExampleBatch,
   VoiceProfileDiagnostics,
   VoiceProfileSnapshot,
   VoiceTrainingConsent
@@ -17,7 +16,6 @@ import type {
   JobRecord,
   MemoryEntryRecord,
   PipelineRecord,
-  VoiceExampleBatchRecord,
   VoiceExampleRecord,
   VoiceProfileDiagnosticsRecord,
   VoiceProfileRecord,
@@ -150,18 +148,6 @@ export function toVoiceProfileSnapshotRecord(record: VoiceProfileSnapshot, versi
 export function toVoiceProfileSnapshotDomain(record: VoiceProfileSnapshotRecord): VoiceProfileSnapshot {
   const { version, ...snapshot } = record;
   return snapshot;
-}
-
-export function toVoiceExampleBatchRecord(record: VoiceExampleBatch, version = 1): VoiceExampleBatchRecord {
-  return {
-    ...record,
-    version
-  };
-}
-
-export function toVoiceExampleBatchDomain(record: VoiceExampleBatchRecord): VoiceExampleBatch {
-  const { version, ...batch } = record;
-  return batch;
 }
 
 export function toVoiceTrainingConsentRecord(record: VoiceTrainingConsent, version = 1): VoiceTrainingConsentRecord {

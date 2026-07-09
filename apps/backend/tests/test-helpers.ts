@@ -1,6 +1,8 @@
 import { Effect } from "effect";
 import { Hono } from "hono";
 import { createBillingService, createBillingRepository } from "@my-ai-orchestrator/payments";
+import type { DatabaseClient } from "@my-ai-orchestrator/database";
+import type { VoiceExample } from "@my-ai-orchestrator/domain";
 import { createBackendApplicationUserMemoryRepository } from "../src/auth/application-user-memory.js";
 import { createBackendOperatorMemoryRepository } from "../src/auth/operator-memory.js";
 import { registerBackendRoutes } from "../src/app/routes.js";
@@ -12,6 +14,13 @@ import { createBackendPublicInputSafetyGatewayService } from "../src/safety/publ
 import { createBackendOutputReleaseGateService } from "../src/safety/output-release.js";
 import { createBackendVoiceConsentService } from "../src/safety/voice-consent.js";
 import { createBackendHardening } from "../src/app/production-hardening.js";
+import {
+  buildExampleId,
+  buildInitialEvaluation,
+  resolveContentTypeHints,
+  resolveTargetProfileVersion
+} from "../src/product/voice/voice-shared.js";
+import type { BackendVoiceRebuildService } from "../src/product/voice/voice-rebuild-types.js";
 
 export function createTestConfig(overrides?: Partial<BackendConfig>): BackendConfig {
   return {
@@ -297,10 +306,7 @@ export function createMinimalServices(
       now: () => new Date()
     }),
     voice: {
-      getProfileScreen: () => Effect.succeed(null),
-      listExamples: () => Effect.succeed({ items: [], total: 0 }),
-      createExample: () => Effect.succeed({} as any),
-      updateExample: () => Effect.succeed({} as any)
+      getProfileScreen: () => Effect.succeed(null)
     } as any,
     voiceCalibration: {
       startSession: () => Effect.succeed({} as any),
@@ -379,4 +385,59 @@ export function createTestApp(
     } as any
   });
   return app;
+}
+
+export interface CreateVoiceExampleInput {
+  readonly text: string;
+  readonly language?: string;
+  readonly pinned?: boolean;
+  readonly channel?: string;
+  readonly explicitContentType?: string;
+  readonly context?: string;
+}
+
+export function createVoiceExampleInDatabase(
+  database: DatabaseClient,
+  userId: string,
+  input: CreateVoiceExampleInput,
+  voiceRebuild?: BackendVoiceRebuildService
+): Effect.Effect<VoiceExample, never> {
+  return Effect.gen(function* () {
+    const existing = yield* database.voiceExamples.listByUser(userId);
+    const timestamp = new Date().toISOString();
+    const targetProfileVersion = yield* resolveTargetProfileVersion(database, userId);
+    const evaluation = buildInitialEvaluation({
+      text: input.text,
+      pinned: input.pinned ?? false
+    });
+
+    const example: VoiceExample = {
+      id: buildExampleId(userId, existing.length + 1),
+      userId,
+      text: input.text.trim(),
+      language: input.language ?? "pt-BR",
+      state: "active",
+      classificationLabels: ["positive"],
+      antiPatternsExplicit: [],
+      pinned: input.pinned ?? false,
+      pendingProfileImpact: true,
+      targetProfileVersion,
+      effectiveContentTypeHints: resolveContentTypeHints(input.explicitContentType, input.channel),
+      channel: input.channel,
+      explicitContentType: input.explicitContentType,
+      context: input.context,
+      evaluation,
+      createdAt: timestamp,
+      updatedAt: timestamp
+    };
+
+    const stored = yield* database.voiceExamples.create(example).pipe(Effect.orDie);
+
+    if (voiceRebuild) {
+      yield* voiceRebuild.schedule(userId).pipe(Effect.orDie);
+      yield* voiceRebuild.drain(userId).pipe(Effect.orDie);
+    }
+
+    return stored;
+  });
 }

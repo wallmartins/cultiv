@@ -1,9 +1,6 @@
 import { Effect } from "effect";
 import { describe, expect, it } from "vitest";
-import {
-  decodeVoiceExamplesPageView,
-  decodeVoiceProfileScreenView
-} from "@my-ai-orchestrator/contracts";
+import { decodeVoiceProfileScreenView } from "@my-ai-orchestrator/contracts";
 import {
   createBackendAppTestApp,
   createBackendAppTestConfig,
@@ -84,7 +81,11 @@ describe("backend app voice surface", () => {
     expect(before.status).toBe(200);
     expect(await before.json()).toMatchObject({ granted: false });
 
-    const grant = await app.request("/me/voice-training-consent", { method: "POST" });
+    const grant = await app.request("/me/voice-training-consent", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ action: "grant" })
+    });
     expect(grant.status).toBe(200);
     expect(await grant.json()).toMatchObject({ granted: true });
   });
@@ -105,63 +106,4 @@ describe("backend app voice surface", () => {
     expect(decoded.materialBase.totalExamples).toBe(3);
   });
 
-  it("exposes voice examples through the canonical /me routes", async () => {
-    const config = createBackendAppTestConfig({ billingUserId: "user_1" });
-    const services = createBackendAppTestServices(config);
-
-    Effect.runSync(services.voiceConsent.grantConsent("user_1"));
-
-    const createdOne = Effect.runSync(
-      services.voice.createExample("user_1", {
-        text: "Writes clear LinkedIn posts with direct openings.",
-        explicitContentType: "linkedin-post",
-        pinned: true
-      })
-    );
-    Effect.runSync(
-      services.voice.createExample("user_1", {
-        text: "Also writes newsletters with context and short conclusions.",
-        explicitContentType: "newsletter"
-      })
-    );
-    Effect.runSync(
-      services.voice.createExample("user_1", {
-        text: "Excluded example for state filtering.",
-        explicitContentType: "blog-post"
-      })
-    );
-
-    const app = createBackendAppTestApp(config, services);
-
-    const listResponse = await app.request("/me/voice-profile/examples?state=active&contentType=linkedin-post&limit=1&offset=0");
-    expect(listResponse.status).toBe(200);
-
-    const listBody = await listResponse.json();
-    const decodedList = await Effect.runPromise(decodeVoiceExamplesPageView(listBody));
-    expect(decodedList.total).toBe(1);
-    expect(decodedList.limit).toBe(1);
-    expect(decodedList.offset).toBe(0);
-    expect(decodedList.items[0]?.exampleId).toBe(createdOne.exampleId);
-
-    const createResponse = await app.request("/me/voice-profile/examples", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({
-        text: "Example created through the API.",
-        explicitContentType: "linkedin-post",
-        pinned: false
-      })
-    });
-    expect(createResponse.status).toBe(404);
-
-    const updateResponse = await app.request(`/me/voice-profile/examples/${createdOne.exampleId}`, {
-      method: "PATCH",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({
-        state: "excluded",
-        text: "Updated and excluded text."
-      })
-    });
-    expect(updateResponse.status).toBe(404);
-  });
 });

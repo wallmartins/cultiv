@@ -1,0 +1,66 @@
+{
+  "id": "drift-author-fast-concluder-02",
+  "suite": "drift-regression",
+  "input": {
+    "voiceProfile": {
+      "userId": "eval-author-fast-concluder",
+      "tone": "measured",
+      "cadence": "moderate",
+      "lexicon": [],
+      "constraints": [],
+      "antiPatterns": [],
+      "antiPatternsExplicit": [],
+      "rules": [],
+      "styleMarkers": [],
+      "userLabels": [
+        "drift-regression"
+      ],
+      "coreReasoningSignature": {
+        "narrativeProse": "States the thesis early, supports it quickly with one or two examples, and closes without long digressions.",
+        "certaintyLevel": "high",
+        "judgmentFrequency": "moderate",
+        "conclusionPace": "fast",
+        "readerRelationship": "guide",
+        "authoritySource": "data",
+        "derivedAntiPatterns": [
+          "slow narrative warmup",
+          "excessive hedging"
+        ]
+      },
+      "argumentDevelopmentSignature": {
+        "developmentProse": "States the takeaway early, supports it with one tight example, and closes without exploratory detours.",
+        "moveLabels": [
+          "thesis",
+          "evidence",
+          "close"
+        ],
+        "transitionTendencies": [
+          {
+            "from": "thesis",
+            "to": "evidence",
+            "frequency": "dominant"
+          },
+          {
+            "from": "evidence",
+            "to": "close",
+            "frequency": "common"
+          }
+        ],
+        "epistemicPosture": "advocacy_mixed",
+        "structuralAntiPatterns": [
+          "slow_warmup",
+          "excessive_hedging"
+        ]
+      }
+    },
+    "candidate": "Antes de concluir, vamos percorrer dez analogias históricas sem chegar ao ponto.",
+    "stepName": "draft"
+  },
+  "expectations": {
+    "minDriftScore": 50
+  },
+  "tags": [
+    "drift",
+    "author-fast-concluder"
+  ]
+}

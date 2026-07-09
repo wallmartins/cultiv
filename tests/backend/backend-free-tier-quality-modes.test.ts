@@ -38,15 +38,6 @@ describe("backend free tier quality modes", () => {
     const app = createBackendAppTestApp(config, services);
     const authHeader = createBackendTestAuthorizationHeader({ userId });
 
-    const contentTypesResponse = await app.request("/me/content-types", {
-      headers: { authorization: authHeader }
-    });
-    expect(contentTypesResponse.status).toBe(200);
-    const contentTypesBody = await contentTypesResponse.json();
-    expect(contentTypesBody.items.length).toBe(6);
-    expect(contentTypesBody.items.every((item: { available: boolean }) => item.available)).toBe(true);
-    expect(contentTypesBody.commercial.allowedQualityModes).toEqual(["fast"]);
-
     const previewResponse = await app.request("/api/generation-preview", {
       method: "POST",
       headers: {
@@ -129,7 +120,7 @@ describe("backend free tier quality modes", () => {
     });
     const externalSubject = "user_jit_catalog";
 
-    const response = await app.request("/me/content-types", {
+    const response = await app.request("/me/onboarding/status", {
       headers: {
         authorization: createBackendTestAuthorizationHeader({ userId: externalSubject })
       }

@@ -8,9 +8,10 @@ import {
 } from "../src/product/voice/voice-calibration-context.js";
 
 describe("voice calibration context", () => {
-  it("exposes five wizard steps from domain constants", () => {
-    expect(CALIBRATION_WIZARD_STEPS).toHaveLength(5);
+  it("exposes six wizard steps from domain constants", () => {
+    expect(CALIBRATION_WIZARD_STEPS).toHaveLength(6);
     expect(CALIBRATION_WIZARD_STEPS.map((step) => step.id)).toEqual([
+      "context_setup",
       "micro_opinion",
       "reasoning_reflection",
       "argument_development",
