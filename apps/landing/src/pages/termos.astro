@@ -1,0 +1,57 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Nav from "../components/Nav.astro";
+import Footer from "../components/Footer.astro";
+import T from "../components/T.astro";
+
+// Placeholder shipped so the footer's legal row never 404s. Every statement
+// here is a verifiable product fact (trial mechanics, cancellation, contact) —
+// no invented clauses. TODO: replace with the lawyer-reviewed full version
+// before launch and update the date line.
+---
+
+<Layout title="Termos de uso — Cultiv">
+  <Nav />
+  <main class="wrap legal" id="main">
+    <h1 class="headline"><T pt="Termos de uso" en="Terms of use" /></h1>
+    <p class="label muted">
+      <T
+        pt="Versão resumida, em revisão jurídica · julho de 2026"
+        en="Short-form version, under legal review · July 2026"
+      />
+    </p>
+
+    <h2 class="title"><T pt="O serviço" en="The service" /></h2>
+    <p>
+      <T
+        pt="O Cultiv é um motor de escrita com IA que deriva um perfil de voz a partir de uma calibração guiada e gera rascunhos a partir da sua intenção. O acesso é feito por conta individual e planos pagos de assinatura."
+        en="Cultiv is an AI writing engine that derives a voice profile from a guided calibration and generates drafts from your intent. Access is through an individual account and paid subscription plans."
+      />
+    </p>
+
+    <h2 class="title"><T pt="Teste grátis e cobrança" en="Free trial and billing" /></h2>
+    <p>
+      <T
+        pt="Todo plano começa com um teste grátis de 7 dias que não pede cartão. A cobrança só existe quando você assina um plano, na moeda da sua região (reais no Brasil, dólares fora dele). Você pode cancelar a assinatura a qualquer momento, direto na sua conta, e o acesso permanece até o fim do período já pago."
+        en="Every plan starts with a 7-day free trial that asks for no card. Billing only exists once you subscribe to a plan, in your region's currency (BRL in Brazil, USD elsewhere). You can cancel your subscription at any time from your account, and access remains until the end of the period already paid."
+      />
+    </p>
+
+    <h2 class="title"><T pt="O seu conteúdo" en="Your content" /></h2>
+    <p>
+      <T
+        pt="As respostas de calibração que você escreve e os textos que o Cultiv gera para você são seus. O Cultiv os utiliza para operar o serviço — derivar o seu perfil de voz e gerar os seus rascunhos."
+        en="The calibration answers you write and the texts Cultiv generates for you are yours. Cultiv uses them to operate the service — deriving your voice profile and generating your drafts."
+      />
+    </p>
+
+    <h2 class="title"><T pt="Dúvidas" en="Questions" /></h2>
+    <p>
+      <T
+        pt='Enquanto a versão completa deste documento está em revisão, qualquer dúvida sobre os termos pode ser enviada para <a href="mailto:contato@cultiv.app">contato@cultiv.app</a>.'
+        en='While the full version of this document is under review, any question about the terms can be sent to <a href="mailto:contato@cultiv.app">contato@cultiv.app</a>.'
+      />
+    </p>
+  </main>
+  <Footer />
+</Layout>

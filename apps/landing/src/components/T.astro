@@ -1,0 +1,18 @@
+---
+// Bilingual text pair. Renders both languages; CSS shows one based on
+// html[data-lang]. JS-off default is pt-BR.
+interface Props {
+  pt: string;
+  en: string;
+  el?: string;
+  class?: string;
+}
+const { pt, en, el = "span", class: cls } = Astro.props;
+const Tag = el as "span";
+---
+<Tag class={cls} data-l="pt" lang="pt-BR" set:html={pt} /><Tag
+  class={cls}
+  data-l="en"
+  lang="en"
+  set:html={en}
+/>

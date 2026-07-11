@@ -1,0 +1,65 @@
+---
+import T from "./T.astro";
+import BrandMark from "./BrandMark.astro";
+
+const year = new Date().getFullYear(); // stamped at build time
+---
+
+<footer class="footer">
+  <div class="wrap footer__row">
+    <div class="footer__brand">
+      <span class="footer__logo">
+        <BrandMark size={20} id="footer" />
+        <span>Cultiv</span>
+      </span>
+      <span class="label muted">
+        <T pt="Sua autenticidade, em escala." en="Your authenticity, at scale." />
+      </span>
+    </div>
+    <nav class="footer__links label" aria-label="Seções" data-aria-pt="Seções" data-aria-en="Sections">
+      <a href="/#como-funciona"><T pt="Como funciona" en="How it works" /></a>
+      <a href="/#calibracao"><T pt="Calibração" en="Calibration" /></a>
+      <a href="/#planos"><T pt="Planos" en="Plans" /></a>
+    </nav>
+    <nav class="footer__links footer__legal label" aria-label="Legal">
+      <a href="/termos"><T pt="Termos de uso" en="Terms of use" /></a>
+      <a href="/privacidade"><T pt="Privacidade" en="Privacy" /></a>
+      <a href="mailto:contato@cultiv.app"><T pt="Falar com a gente" en="Get in touch" /></a>
+    </nav>
+    <span class="label muted">© {year} Cultiv</span>
+  </div>
+</footer>
+
+<style>
+  .footer { border-top: 1px solid var(--line); padding-block: var(--sp-xl); }
+  .footer__row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--sp-lg) var(--sp-2xl);
+  }
+  .footer__brand { display: flex; flex-direction: column; gap: 2px; }
+  .footer__logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-headline);
+    font-weight: 400;
+    font-size: 1.25rem;
+    letter-spacing: 0;
+  }
+  .footer__links { display: flex; flex-wrap: wrap; gap: var(--sp-md) var(--sp-lg); }
+  .footer__links:first-of-type { margin-inline-start: auto; }
+  .footer__legal { margin-inline-end: auto; }
+  .footer__links a {
+    color: var(--muted);
+    text-decoration: none;
+    transition: color var(--t-fast) var(--ease-out);
+  }
+  .footer__links a:hover { color: var(--ink); }
+
+  @media (max-width: 600px) {
+    .footer__row { flex-direction: column; align-items: flex-start; }
+    .footer__links, .footer__links:first-of-type, .footer__legal { margin-inline: 0; }
+  }
+</style>

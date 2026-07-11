@@ -1,0 +1,49 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Nav from "../components/Nav.astro";
+import Footer from "../components/Footer.astro";
+import T from "../components/T.astro";
+
+// Placeholder shipped so the footer's legal row never 404s. Statements are
+// limited to what the product verifiably does (Auth0 login, currency-routed
+// checkout, encrypted voice fields) — no invented policy. TODO: replace with
+// the lawyer-reviewed LGPD-complete version before launch.
+---
+
+<Layout title="Privacidade — Cultiv">
+  <Nav />
+  <main class="wrap legal" id="main">
+    <h1 class="headline"><T pt="Privacidade" en="Privacy" /></h1>
+    <p class="label muted">
+      <T
+        pt="Versão resumida, em revisão jurídica · julho de 2026"
+        en="Short-form version, under legal review · July 2026"
+      />
+    </p>
+
+    <h2 class="title"><T pt="O que coletamos" en="What we collect" /></h2>
+    <p>
+      <T
+        pt="A sua conta é criada e autenticada pela Auth0. O pagamento é processado pela Stripe (dólares) ou pela Asaas (reais) — o Cultiv não armazena números de cartão. Para operar o serviço, guardamos as suas respostas de calibração, o perfil de voz derivado delas e os textos gerados na sua conta."
+        en="Your account is created and authenticated by Auth0. Payment is processed by Stripe (USD) or Asaas (BRL) — Cultiv does not store card numbers. To operate the service, we keep your calibration answers, the voice profile derived from them, and the texts generated in your account."
+      />
+    </p>
+
+    <h2 class="title"><T pt="Como protegemos a sua voz" en="How we protect your voice" /></h2>
+    <p>
+      <T
+        pt="Os campos do seu perfil de voz são armazenados criptografados, com rotação periódica de chaves. Eles existem para uma única finalidade: gerar textos que soem como você, na sua conta."
+        en="Your voice profile fields are stored encrypted, with periodic key rotation. They exist for a single purpose: generating texts that sound like you, in your account."
+      />
+    </p>
+
+    <h2 class="title"><T pt="Seus direitos" en="Your rights" /></h2>
+    <p>
+      <T
+        pt='Enquanto a política completa (LGPD) está em revisão, pedidos de acesso, correção ou exclusão de dados podem ser enviados para <a href="mailto:contato@cultiv.app">contato@cultiv.app</a>.'
+        en='While the complete policy (LGPD) is under review, requests to access, correct, or delete data can be sent to <a href="mailto:contato@cultiv.app">contato@cultiv.app</a>.'
+      />
+    </p>
+  </main>
+  <Footer />
+</Layout>

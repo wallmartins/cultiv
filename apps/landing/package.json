@@ -1,0 +1,25 @@
+{
+  "name": "@my-ai-orchestrator/landing",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node scripts/sync-brand.mjs && astro dev",
+    "build": "node scripts/sync-brand.mjs && astro build",
+    "preview": "astro preview",
+    "lint": "astro check"
+  },
+  "dependencies": {
+    "@astrojs/sitemap": "^3.7.3",
+    "@fontsource-variable/fraunces": "^5.2.9",
+    "@fontsource-variable/mona-sans": "^5.2.8",
+    "@fontsource/instrument-serif": "^5.2.8",
+    "@my-ai-orchestrator/ui": "workspace:*",
+    "aeo.js": "^0.0.15",
+    "astro": "^5.7.0"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.4",
+    "typescript": "^5.8.2"
+  }
+}

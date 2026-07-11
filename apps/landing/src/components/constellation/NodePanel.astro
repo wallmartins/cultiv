@@ -1,0 +1,32 @@
+---
+// Painel do nó selecionado — lateral no desktop, bottom sheet no empilhado.
+// Além do painel (aberto quando a página serve um nó), publica um <template>
+// por nó; scripts/constellation/panel.ts clona o template correspondente ao
+// abrir outro ponto, preservando marcação e estilos do servidor.
+import PanelContent from "./PanelContent.astro";
+import { NODES, type ConstellationNode } from "../../data/constellation";
+
+interface Props {
+  initial?: ConstellationNode;
+}
+const { initial } = Astro.props;
+---
+
+<div class="panel-wrap" data-panel-wrap hidden={!initial}>
+  <aside class="panel" data-panel aria-label="Detalhe do ponto selecionado" tabindex="-1">
+    <div class="sheet-handle" data-sheet-handle aria-hidden="true">
+      <span></span>
+    </div>
+    <div class="panel-body" data-panel-body>
+      {initial && <PanelContent node={initial} />}
+    </div>
+  </aside>
+</div>
+
+{
+  NODES.map((n) => (
+    <template data-panel-template={n.id}>
+      <PanelContent node={n} />
+    </template>
+  ))
+}

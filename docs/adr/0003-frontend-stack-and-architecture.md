@@ -90,6 +90,28 @@ Usuário na página → Abre extensão (sidebar/popup)
 - **SPA puro para landing:** SEO/GEO é prioridade #1 para aquisição. SPA sem SSR comprometeria indexação.
 - **Astro + React islands na landing:** Carregar React no marketing surface para componentes triviais quebra a premissa "zero JS por padrão". O modelo híbrido de tokens + implementações nativas resolve isso.
 
+## Nota de implementação (2026-07-09)
+
+`packages/ui` foi criado **tokens-first**: por enquanto expõe apenas
+`@my-ai-orchestrator/ui/tokens.css` (custom properties, temas light/dark,
+fontes, escalas, motion — a fonte única da verdade visual), consumido hoje por
+`apps/landing`. Dois desvios deliberados em relação à estrutura desenhada acima:
+
+- **`packages/ui/landing` não será criado.** Os componentes da landing são
+  seções de página (Hero, Pricing, FounderNote…) com copy e narrativa acopladas
+  — têm um único consumidor por definição e permanecem em
+  `apps/landing/src/components`. O subdiretório previsto aqui fazia sentido
+  para primitivos `.astro` compartilhados entre páginas públicas; hoje esses
+  primitivos são classes CSS que acompanham os tokens.
+- **`packages/ui/app` nasce junto com o segundo consumidor.** A regra adotada:
+  extrair quando o segundo consumidor está à vista, não antes. Componentes
+  `.tsx` entram no pacote quando `apps/web` (recriado) e/ou `apps/extension`
+  existirem para compartilhá-los.
+
+O pacote está registrado na governança do monorepo (`tests/governance`) como
+folha sem dependências de runtime — precisa continuar consumível por Astro,
+React e extensão igualmente.
+
 ## Consequências
 
 - Dois deploys independentes coordenados por proxy reverso. Simples de configurar, mas é uma peça de infra que precisa existir.

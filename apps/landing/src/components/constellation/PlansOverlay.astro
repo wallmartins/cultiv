@@ -1,0 +1,24 @@
+---
+// Overlay de Planos: grid de PlanCards dentro da moldura comum.
+import OverlayShell from "./OverlayShell.astro";
+import PlanCard from "./PlanCard.astro";
+import { PLANS } from "../../data/constellation";
+
+interface Props {
+  open?: boolean;
+}
+const { open = false } = Astro.props;
+---
+
+<OverlayShell
+  id="planos"
+  kicker="Jornada · Planos"
+  title="Escolha o ritmo da sua voz"
+  sub="Todos os planos incluem o Perfil de Voz completo, suporte e atualizações. Mude de plano quando quiser."
+  open={open}
+  closeLabel="Fechar planos"
+>
+  <div class="plans-grid">
+    {PLANS.map((p, i) => <PlanCard plan={p} index={i} />)}
+  </div>
+</OverlayShell>

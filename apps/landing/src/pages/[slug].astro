@@ -1,0 +1,30 @@
+---
+// Uma URL indexável por ponto da constelação (SEO doc 05: History API +
+// páginas por seção). Cada rota serve o mesmo app com o painel do nó já
+// aberto no HTML — título, descrição e JSON-LD próprios. /demo e /planos
+// abrem o overlay correspondente.
+import ConstellationLayout from "../layouts/ConstellationLayout.astro";
+import ConstellationApp from "../components/constellation/ConstellationApp.astro";
+import { NODES, nodeMeta, type ConstellationNode } from "../data/constellation";
+import { nodeGraph } from "../data/seo";
+
+export function getStaticPaths() {
+  return NODES.map((node) => ({ params: { slug: node.slug }, props: { node } }));
+}
+
+interface Props {
+  node: ConstellationNode;
+}
+const { node } = Astro.props;
+const meta = nodeMeta(node);
+const overlay =
+  node.id === "demo" ? "demo" : node.id === "planos" ? "planos" : undefined;
+---
+
+<ConstellationLayout
+  title={meta.title}
+  description={meta.description}
+  jsonLd={nodeGraph(Astro.site!, node)}
+>
+  <ConstellationApp initial={overlay ? undefined : node} overlay={overlay} />
+</ConstellationLayout>

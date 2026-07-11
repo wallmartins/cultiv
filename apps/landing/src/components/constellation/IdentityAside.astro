@@ -1,0 +1,31 @@
+---
+// Coluna de identidade: marca, logo central, tagline (h1 da página) e
+// rodapé com tema — sempre no tema inverso do campo (dual-tone).
+// O canvas de ritmo é decorativo e desenhado por scripts/constellation/rhythm.ts.
+import Glyph from "./Glyph.astro";
+import ThemeToggle from "./ThemeToggle.astro";
+import { TAGLINE } from "../../data/constellation";
+---
+
+<aside class="identity" aria-label="Identidade Cultiv">
+  <canvas class="rhythm" data-rhythm aria-hidden="true"></canvas>
+
+  <a class="brand" href="/" data-home aria-label="Cultiv — voltar para a tela inicial">
+    <Glyph uid="brand" strokeWidth={5} class="brand-glyph" />
+    <span class="brand-name">Cultiv</span>
+  </a>
+
+  <div class="side-logo-wrap">
+    <Glyph uid="side" strokeWidth={2} class="side-logo" />
+  </div>
+
+  <h1 class="tagline" aria-label="Escreve como você pensa.">
+    <span data-typed aria-hidden="true">{TAGLINE}</span><span class="caret" aria-hidden="true"
+    ></span>
+  </h1>
+
+  <div class="identity-foot" data-foot>
+    <span class="fine mono">© 2026 Cultiv</span>
+    <ThemeToggle />
+  </div>
+</aside>

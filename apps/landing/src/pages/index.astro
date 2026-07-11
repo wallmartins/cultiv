@@ -1,0 +1,15 @@
+---
+// Home — a constelação Cultiv (Landing v3).
+import ConstellationLayout from "../layouts/ConstellationLayout.astro";
+import ConstellationApp from "../components/constellation/ConstellationApp.astro";
+import { SITE } from "../data/constellation";
+import { homeGraph } from "../data/seo";
+---
+
+<ConstellationLayout
+  title={SITE.title}
+  description={SITE.description}
+  jsonLd={homeGraph(Astro.site!)}
+>
+  <ConstellationApp />
+</ConstellationLayout>

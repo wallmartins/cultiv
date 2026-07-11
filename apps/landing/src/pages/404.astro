@@ -1,0 +1,25 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Nav from "../components/Nav.astro";
+import Footer from "../components/Footer.astro";
+import T from "../components/T.astro";
+---
+
+<Layout title="404 — Cultiv">
+  <Nav />
+  <main class="wrap legal" id="main">
+    <h1 class="headline"><T pt="Esta página não existe." en="This page doesn&rsquo;t exist." /></h1>
+    <p>
+      <T
+        pt="Acontece. Até onde sabemos, é o único texto por aqui que ninguém escreveu."
+        en="It happens. As far as we know, it&rsquo;s the only text around here nobody wrote."
+      />
+    </p>
+    <p>
+      <a class="btn btn--primary" href="/">
+        <T pt="Voltar para o Cultiv" en="Back to Cultiv" />
+      </a>
+    </p>
+  </main>
+  <Footer />
+</Layout>

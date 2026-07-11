@@ -1,0 +1,54 @@
+---
+// Overlay da Demo: textarea + leitura da voz. A análise roda no cliente
+// (scripts/constellation/demo.ts); sem JS o overlay degrada para o CTA de
+// começar grátis.
+import OverlayShell from "./OverlayShell.astro";
+import { planUrl } from "../../config";
+
+interface Props {
+  open?: boolean;
+}
+const { open = false } = Astro.props;
+---
+
+<OverlayShell
+  id="demo"
+  kicker="Jornada · Demo"
+  title="Veja o que a Cultiv enxerga na sua escrita"
+  sub="Cole um parágrafo seu — um e-mail, um post, qualquer texto — e receba uma leitura da sua voz em segundos."
+  open={open}
+  closeLabel="Fechar demo"
+>
+  <div class="demo-grid">
+    <div class="demo-input">
+      <textarea
+        data-demo-text
+        placeholder="Cole aqui um parágrafo seu (mínimo ~40 palavras para uma boa leitura)…"
+        aria-label="Seu texto para análise"></textarea>
+      <div class="demo-actions">
+        <span class="fine mono" aria-live="polite"><span data-demo-words>0</span> palavras</span>
+        <button class="btn solid" data-demo-analyze disabled>Analisar minha voz</button>
+      </div>
+      <noscript>
+        <p class="overlay-sub">
+          A análise instantânea precisa de JavaScript. Você também pode
+          <a href={planUrl("explorador", "monthly")}>começar grátis</a> e criar seu Perfil de Voz
+          completo.
+        </p>
+      </noscript>
+    </div>
+    <div class="demo-result">
+      <aside class="demo-card" data-demo-result hidden>
+        <h3 class="kicker">Leitura da sua voz</h3>
+        <div class="metrics" data-demo-metrics></div>
+        <p class="demo-summary" data-demo-summary></p>
+        <a class="btn solid wide" href="/planos" data-open-plans
+          >Criar meu Perfil de Voz completo</a
+        >
+      </aside>
+      <div class="demo-empty" data-demo-empty>
+        <span>a leitura da sua voz<br />aparece aqui</span>
+      </div>
+    </div>
+  </div>
+</OverlayShell>

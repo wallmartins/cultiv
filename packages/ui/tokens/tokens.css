@@ -1,0 +1,76 @@
+/* ============================================================
+   Cultiv — design tokens da landing (fonte única da verdade
+   visual, ADR 0003). Paleta "precise · modern · electric":
+   grafite monocromático + um único sinal acid-chartreuse.
+   Regra 60-30-10: bg domina, ink/primary estruturam, accent é
+   sempre detalhe — nunca bloco.
+   Consumidores: apps/landing (hoje), apps/web e apps/extension.
+   ============================================================ */
+
+:root {
+  /* Cores (Light Mode) */
+  --color-bg-light: oklch(0.99 0 0);
+  --color-ink-light: oklch(0.19 0 0);
+  --color-primary-light: oklch(0.24 0 0);
+  --color-accent-light: oklch(0.83 0.19 128);
+
+  /* Cores (Dark Mode) */
+  --color-bg-dark: oklch(0.16 0 0);
+  --color-ink-dark: oklch(0.93 0 0);
+  --color-primary-dark: oklch(0.93 0 0);
+  --color-accent-dark: oklch(0.86 0.20 128);
+
+  /* Fontes */
+  --font-headline: 'Instrument Serif', Georgia, serif;
+  --font-body: 'Mona Sans', sans-serif;
+  --font-ui: 'Fraunces', serif;
+
+  /* Opacidades (hierarquia visual, 01_DESIGN_SYSTEM) */
+  --op-100: 1;
+  --op-90: 0.9;
+  --op-75: 0.75;
+  --op-60: 0.6;
+  --op-15: 0.15;
+
+  /* ---- Aliases semânticos: resolvem para o tema ativo. ----
+     Os consumidores usam estes; os -light/-dark acima são a
+     matéria-prima e permanecem estáveis nos dois temas. */
+  --color-bg: var(--color-bg-light);
+  --color-ink: var(--color-ink-light);
+  --color-primary: var(--color-primary-light);
+  --color-accent: var(--color-accent-light);
+  /* Tinta sobre preenchimento chartreuse — invariante ao tema:
+     o acid continua claro no dark, então a tinta continua escura. */
+  --color-on-accent: oklch(0.19 0 0);
+  /* Linhas/hairlines: ink no nível "ambiente" da escala. */
+  --color-line: oklch(0.19 0 0 / var(--op-15));
+
+  /* Motion (03_ANIMATIONS) */
+  --ease-standard: cubic-bezier(0.25, 0.1, 0.25, 1);
+  --ease-electric: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --dur-short: 200ms;
+  --dur-medium: 350ms;
+  --dur-long: 700ms;
+
+  color-scheme: light;
+}
+
+[data-theme="dark"] {
+  --color-bg: var(--color-bg-dark);
+  --color-ink: var(--color-ink-dark);
+  --color-primary: var(--color-primary-dark);
+  --color-accent: var(--color-accent-dark);
+  --color-line: oklch(0.93 0 0 / var(--op-15));
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --color-bg: var(--color-bg-dark);
+    --color-ink: var(--color-ink-dark);
+    --color-primary: var(--color-primary-dark);
+    --color-accent: var(--color-accent-dark);
+    --color-line: oklch(0.93 0 0 / var(--op-15));
+    color-scheme: dark;
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "name": "@my-ai-orchestrator/ui",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json --noEmit",
+    "lint": "tsc -p tsconfig.json --noEmit"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./tokens.css": "./src/tokens.css",
+    "./tokens/tokens.css": "./tokens/tokens.css",
+    "./assets/*": "./assets/*",
+    "./package.json": "./package.json"
+  }
+}
