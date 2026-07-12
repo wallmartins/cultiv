@@ -53,11 +53,17 @@ const preconnectApp = Astro.site && new URL(Astro.site).origin !== APP_ORIGIN;
     <meta name="theme-color" content="#FCFCFC" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#121212" />
     {preconnectApp && <link rel="preconnect" href={APP_ORIGIN} />}
-    <script
-      is:inline
-      type="application/ld+json"
-      set:html={JSON.stringify({ "@context": "https://schema.org", "@graph": jsonLd })}
-    />
+    {/* Um <script> por entidade em vez de um único @graph: crawlers que
+       entendem @graph e parsers de AEO/motores generativos mais simples (que
+       NÃO percorrem @graph) enxergam Organization/FAQPage/WebPage direto. As
+       referências por @id continuam resolvendo entre blocos irmãos. */}
+    {jsonLd.map((node) => (
+      <script
+        is:inline
+        type="application/ld+json"
+        set:html={JSON.stringify({ "@context": "https://schema.org", ...node })}
+      />
+    ))}
     <script is:inline>
       // Antes do primeiro paint: marca JS disponível (esconde o .doc de SEO,
       // arma a cortina) e restaura o tema persistido. Padrão: escuro.

@@ -2,9 +2,11 @@ import { defineConfig } from "astro/config";
 import sitemap from "@astrojs/sitemap";
 import { aeoAstroIntegration } from "aeo.js/astro";
 
-// TODO: confirm https://cultiv.app as the production marketing origin before
-// launch — Layout.astro (canonical/og) and the aeo.js config below derive from it.
-const SITE = "https://cultiv.app";
+// Production marketing origin. The apex (cultiv.app) 308-redirects to www, so
+// www IS the canonical host — canonical/og:url/JSON-LD @ids and the sitemap all
+// derive from this and must match where the page is actually served, otherwise
+// crawlers/answer engines see self-referential canonicals pointing off-origin.
+const SITE = "https://www.cultiv.app";
 
 export default defineConfig({
   site: SITE,
