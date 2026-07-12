@@ -50,12 +50,12 @@ export function createOrchestratorGenerator(options: EvalExecutionAdapterOptions
 
       if (result.status === "failed") {
         const stepError = result.trace?.steps.find((s) => s.error)?.error;
-        const causeMessage = stepError?.cause?.message ?? "";
+        const cause = stepError?.cause;
+        const causeMessage =
+          cause instanceof Error ? cause.message : typeof cause === "string" ? cause : "";
         const detail = stepError
           ? `${stepError.type}: ${stepError.message}${causeMessage ? ` — ${causeMessage}` : ""}`
-          : Array.isArray(result.trace?.errors) && result.trace.errors.length > 0
-            ? result.trace.errors.map((e) => (e instanceof Error ? e.message : String(e))).join("; ")
-            : "";
+          : "";
         throw new Error(
           `Orchestrator generation failed after ${result.completedSteps} steps${detail ? `: ${detail}` : ""}`
         );
