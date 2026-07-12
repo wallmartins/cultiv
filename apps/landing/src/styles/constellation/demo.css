@@ -1,0 +1,152 @@
+/* constelação · demo (Voice Transform, contador, métricas). */
+
+/* ================= demo ================= */
+.demo-grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+  gap: 18px;
+  align-content: start;
+  padding: clamp(18px, 3vh, 32px) clamp(20px, 3.5vw, 48px) clamp(24px, 3.5vh, 40px);
+}
+.demo-input {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+.demo-input textarea {
+  width: 100%;
+  min-height: 260px;
+  flex: 1;
+  resize: vertical;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-input);
+  padding: 18px 20px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  line-height: var(--lh-body);
+  color: inherit;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.demo-input textarea:focus {
+  border-color: var(--accent);
+}
+.demo-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.demo-actions .fine {
+  color: var(--muted);
+  opacity: 1;
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  padding: 4px 12px;
+}
+/* Contador de palavras: número em Fraunces dentro do badge. */
+.demo-actions .fine [data-demo-words] {
+  font-family: var(--font-ui);
+  font-weight: 700;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+.demo-result {
+  min-width: 0;
+}
+.demo-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  padding: 22px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  animation: popIn 0.35s var(--ease-spring) both;
+}
+.demo-card[hidden] {
+  display: none;
+}
+/* Header do card de resultado: Instrument Serif, como os demais cards. */
+.demo-card h3 {
+  margin: 0;
+  font-family: var(--font-headline);
+  font-size: 1.25rem;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+  color: inherit;
+}
+.metrics {
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+}
+.metric {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.metric-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+.metric-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+/* Números de métrica: Fraunces em badge arredondado (visual rhyming). */
+.metric-value {
+  font-family: var(--font-ui);
+  font-weight: 700;
+  font-variant-numeric: lining-nums tabular-nums;
+  font-size: 11px;
+  color: var(--muted);
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  padding: 1px 8px;
+}
+.metric-track {
+  height: 5px;
+  border-radius: var(--r-pill);
+  background: var(--line);
+  overflow: hidden;
+}
+.metric-fill {
+  height: 100%;
+  width: 0;
+  background: var(--accent);
+  border-radius: var(--r-pill);
+  transition: width 0.8s var(--ease-out);
+}
+.demo-summary {
+  margin: 0;
+  font-size: 0.88rem;
+  opacity: 0.82;
+}
+.demo-empty {
+  border: 1px dashed var(--line);
+  border-radius: var(--r-card);
+  min-height: 160px;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+.demo-empty[hidden] {
+  display: none;
+}
+.demo-empty span {
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 11.5px;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  text-align: center;
+  line-height: 1.7;
+}
+

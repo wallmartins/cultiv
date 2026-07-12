@@ -1,12 +1,15 @@
 /* ============================================================
    Cultiv — design tokens (fonte única da verdade visual, ADR 0003).
-   Graphite monochrome architecture + one acid-chartreuse signal.
-   Doutrina completa (regras nomeadas, contraste medido): apps/landing/DESIGN.md.
+   Arquitetura monocromática grafite + um único sinal acid-chartreuse.
+   Regra 60-30-10: bg domina, ink/primary estruturam, accent é sempre
+   detalhe (≤10% de qualquer tela) — nunca bloco.
+   Doutrina completa (regras nomeadas, contraste medido, dualidade,
+   glow, movimento): apps/landing/DESIGN.md.
    Consumidores: apps/landing (hoje), apps/web e apps/extension (ao nascerem).
    ============================================================ */
 
 :root {
-  /* Light — bright gallery wall */
+  /* ---- Cor — Light (bright gallery wall) ---- */
   --bg: oklch(0.99 0 0);
   --surface: oklch(0.965 0 0);
   --ink: oklch(0.19 0 0);
@@ -17,9 +20,37 @@
   --on-accent: oklch(0.19 0 0);
   --muted: oklch(0.44 0 0);
   --line: oklch(0.885 0 0);
+  /* Moldura do campo de produto (fundo atrás da superfície flutuante). */
+  --frame: oklch(1 0 0);
 
+  /* ---- Dualidade: a "outra metade" claro/escuro ----
+     A coluna de identidade vive sempre no tema INVERSO do campo. No modo
+     claro (padrão) --x* resolve para os valores escuros; o bloco [dark]
+     abaixo os inverte. Alternar tema é um recurso de marca, não só a11y.
+     (Antes viviam locais em apps/landing; consolidados aqui como SSOT.) */
+  --xbg: oklch(0.16 0 0);
+  --xsurface: oklch(0.205 0 0);
+  --xink: oklch(0.93 0 0);
+  --xmuted: oklch(0.7 0 0);
+  --xline: oklch(0.285 0 0);
+
+  /* ---- Aliases semânticos (matéria-prima acima; consumidores usam estes) ---- */
+  --surface-card: var(--surface);
+  --text-muted: var(--muted);
+  --border-default: var(--line);
+
+  /* ---- Elevação e glow ----
+     shadow-lift = state-lift em grafite interativo (hover de botões), nunca
+     sombra de card em repouso. shadow-panel/sheet = superfícies flutuantes.
+     glow = a assinatura de interação da marca (hover/ignição do acento),
+     nunca troca de cor de fundo; glow-ring = anel de foco/seleção. */
   --shadow-lift: 0 6px 20px oklch(0 0 0 / 0.14);
+  --shadow-panel: 0 18px 50px oklch(0 0 0 / 0.2);
+  --shadow-sheet: 0 -18px 50px oklch(0 0 0 / 0.25);
   --glow-signal: 0 0 32px oklch(0.83 0.19 128 / 0.45);
+  --glow: var(--glow-signal);
+  --glow-soft: 0 0 16px oklch(0.83 0.19 128 / 0.4);
+  --glow-ring: 0 0 0 6px oklch(0.83 0.19 128 / 0.14), 0 0 32px oklch(0.83 0.19 128 / 0.45);
 
   /* Self-hosted (cada consumidor registra suas @font-face — ver
      apps/landing fonts.css). Papéis do sistema tipográfico:
@@ -36,10 +67,19 @@
   --lh-body: 1.6;
   --ls-body: 0em;
 
-  /* Visual rhyming: botões/badges são pill (100px), cards 24px,
-     inputs 16px, ícones em contêineres circulares. */
+  /* ---- Raios ----
+     Visual rhyming: botões/badges pill (100px), cards 24px, inputs 16px,
+     ícones em contêineres circulares. O vocabulário -radius-* é o mapa
+     semântico sobre a escala -r-* (o card do content-lib é 24px, mais
+     generoso que a referência de 14px, por escolha deliberada). */
   --r-sm: 4px; --r-md: 8px; --r-lg: 12px;
   --r-input: 16px; --r-card: 24px; --r-pill: 100px;
+  --radius-control: var(--r-md);   /* controles, chips */
+  --radius-panel: var(--r-lg);     /* painéis, textarea */
+  --radius-input: var(--r-input);  /* campos, moldura */
+  --radius-card: var(--r-card);    /* cards */
+  --radius-sheet: 18px;            /* bottom sheet (topo) */
+  --radius-pill: var(--r-pill);    /* pills, toggles, badges, pontos */
 
   --sp-xs: 4px; --sp-sm: 8px; --sp-md: 16px; --sp-lg: 24px;
   --sp-xl: 40px; --sp-2xl: 64px; --sp-3xl: 96px;
@@ -49,9 +89,18 @@
      passes comfortably. */
   --focus-ring: var(--ink);
 
+  /* ---- Movimento ----
+     ease-out (quint) para mudanças de estado; ease-out-expo para entradas.
+     Curvas nomeadas da doutrina: standard (transições gerais), decel
+     (câmera/deslizes), spring (popIn de painéis/cards), draw (traços). */
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);       /* quint */
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-standard: cubic-bezier(0.25, 0.1, 0.25, 1);
+  --ease-decel: var(--ease-out);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-draw: var(--ease-out-expo);
   --t-fast: 160ms; --t-med: 260ms; --t-slow: 600ms;
+  --dur-fast: var(--t-fast); --dur-med: var(--t-med); --dur-slow: var(--t-slow);
 
   --z-nav: 10; --z-sheet: 30; --z-skip: 40;
 
@@ -67,8 +116,22 @@
   --accent: oklch(0.86 0.2 128);
   --muted: oklch(0.7 0 0);
   --line: oklch(0.285 0 0);
+  --frame: oklch(0.08 0 0);
+
+  /* Dualidade invertida: no escuro, a identidade vive no claro. */
+  --xbg: oklch(0.99 0 0);
+  --xsurface: oklch(0.965 0 0);
+  --xink: oklch(0.19 0 0);
+  --xmuted: oklch(0.44 0 0);
+  --xline: oklch(0.885 0 0);
+
   --shadow-lift: 0 6px 20px oklch(0 0 0 / 0.5);
+  --shadow-panel: 0 18px 50px oklch(0 0 0 / 0.35);
+  --shadow-sheet: 0 -18px 50px oklch(0 0 0 / 0.4);
   --glow-signal: 0 0 36px oklch(0.86 0.2 128 / 0.5);
+  --glow-soft: 0 0 16px oklch(0.86 0.2 128 / 0.4);
+  --glow-ring: 0 0 0 6px oklch(0.86 0.2 128 / 0.14), 0 0 36px oklch(0.86 0.2 128 / 0.5);
+
   --lh-body: 1.68;
   --ls-body: 0.012em;
   --focus-ring: var(--accent);
@@ -84,8 +147,21 @@
     --accent: oklch(0.86 0.2 128);
     --muted: oklch(0.7 0 0);
     --line: oklch(0.285 0 0);
+    --frame: oklch(0.08 0 0);
+
+    --xbg: oklch(0.99 0 0);
+    --xsurface: oklch(0.965 0 0);
+    --xink: oklch(0.19 0 0);
+    --xmuted: oklch(0.44 0 0);
+    --xline: oklch(0.885 0 0);
+
     --shadow-lift: 0 6px 20px oklch(0 0 0 / 0.5);
+    --shadow-panel: 0 18px 50px oklch(0 0 0 / 0.35);
+    --shadow-sheet: 0 -18px 50px oklch(0 0 0 / 0.4);
     --glow-signal: 0 0 36px oklch(0.86 0.2 128 / 0.5);
+    --glow-soft: 0 0 16px oklch(0.86 0.2 128 / 0.4);
+    --glow-ring: 0 0 0 6px oklch(0.86 0.2 128 / 0.14), 0 0 36px oklch(0.86 0.2 128 / 0.5);
+
     --lh-body: 1.68;
     --ls-body: 0.012em;
     --focus-ring: var(--accent);

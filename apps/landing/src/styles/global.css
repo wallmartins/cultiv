@@ -1,152 +1,33 @@
 /* ============================================================
-   Cultiv landing — estilos da página.
-   Tokens (cores, temas, tipos, espaçamento, motion) vêm do pacote
-   compartilhado; este arquivo só contém o que é específico da landing.
+   Cultiv landing — superfície clássica/prosa (home legada + páginas
+   legais /termos, /privacidade). A identidade (tokens, fontes, keyframes,
+   base, type ramp e botões) vem do SSOT compartilhado @my-ai-orchestrator/ui;
+   este arquivo só contém o que é específico desta superfície.
    Doutrina visual: apps/landing/DESIGN.md.
    ============================================================ */
 
-@import "@my-ai-orchestrator/ui/tokens.css";
+@import "@my-ai-orchestrator/ui/styles.css";            /* tokens + fontes + keyframes + base */
+@import "@my-ai-orchestrator/ui/type.css";              /* type ramp / prosa */
+@import "@my-ai-orchestrator/ui/primitives-classic.css"; /* botões BEM .btn--* */
 
-@import "./fonts.css";
-
-/* ---------- base ---------- */
-
-*, *::before, *::after { box-sizing: border-box; }
-
-html { scroll-behavior: smooth; }
-
-/* Anchor targets clear the 64px fixed nav instead of tucking under it. */
-[id] { scroll-margin-top: 84px; }
+/* ---------- extras de corpo desta superfície (peso/kerning/transição de tema) ---------- */
 
 body {
-  margin: 0;
-  background: var(--bg);
-  color: var(--ink);
-  font-family: var(--font-body);
   font-size: 1rem;
   font-weight: 425;
-  line-height: var(--lh-body);
-  letter-spacing: var(--ls-body);
-  font-optical-sizing: auto;
   font-kerning: normal;
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
   transition: background-color var(--t-med) var(--ease-out), color var(--t-med) var(--ease-out);
 }
+
+/* Âncoras não ficam sob a nav fixa de 64px. */
+[id] { scroll-margin-top: 84px; }
 
 /* ---------- bilingual switching (JS-off default: pt) ---------- */
 
 html:not([data-lang="en"]) [data-l="en"] { display: none !important; }
 html[data-lang="en"] [data-l="pt"] { display: none !important; }
 
-/* ---------- type ramp ----------
-   Papéis: H1/headers de página e card = Instrument Serif 400 (peso único);
-   H2/subtítulos = Mona Sans 600; H3/títulos internos = Fraunces 600;
-   navegação e labels = Mona Sans 500; números/preços = Fraunces 700–800. */
-
-h1, h2, h3 { margin: 0; text-wrap: balance; }
-
-h1, .headline {
-  font-family: var(--font-headline);
-  font-size: 2.8rem;
-  font-weight: 400;
-  line-height: 1.15;
-  letter-spacing: 0;
-}
-/* Variante display do H1 (heros): mesma voz, mais fôlego. */
-.display {
-  font-family: var(--font-headline);
-  font-size: clamp(2.8rem, 6vw, 4.5rem);
-  font-weight: 400;
-  line-height: 1.1;
-  letter-spacing: 0;
-}
-h2, .subtitle {
-  font-family: var(--font-body);
-  font-size: 1.1rem;
-  font-weight: 600;
-  line-height: 1.3;
-}
-h3, .title {
-  font-family: var(--font-ui);
-  font-size: 1.2rem;
-  font-weight: 600;
-  line-height: 1.25;
-  letter-spacing: 0;
-}
-.label {
-  font-family: var(--font-body);
-  font-size: 1rem;
-  font-weight: 500;
-  line-height: 1.3;
-  letter-spacing: 0.01em;
-}
-/* Números, métricas e preços vivem em Fraunces, dentro de badges/círculos. */
-.num {
-  font-family: var(--font-ui);
-  font-weight: 700;
-  font-variant-numeric: lining-nums tabular-nums;
-}
-
-p { margin: 0; max-width: var(--measure); text-wrap: pretty; }
-.muted { color: var(--muted); }
-
-a { color: inherit; }
-
-::selection { background: var(--accent); color: var(--on-accent); }
-
-/* Selecting an acid-marked sentence flips it to graphite — a small reward
-   for readers who select as they read. (The descendant selector covers the
-   Transform's word-split spans inside the mark.) */
-mark::selection,
-mark ::selection { background: var(--primary); color: var(--bg); }
-
-/* ---------- buttons ---------- */
-
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  padding: 14px 28px;
-  border-radius: var(--r-pill);
-  border: 0;
-  font: 500 0.9375rem/1.2 var(--font-body);
-  letter-spacing: 0.005em;
-  text-decoration: none;
-  cursor: pointer;
-  transition:
-    transform var(--t-fast) var(--ease-out),
-    box-shadow var(--t-med) var(--ease-out),
-    background-color var(--t-fast) var(--ease-out),
-    border-color var(--t-fast) var(--ease-out);
-}
-.btn:active { transform: translateY(0) scale(0.98); }
-
-.btn--accent {
-  background: var(--accent);
-  color: var(--on-accent);
-}
-.btn--accent:hover { transform: translateY(-2px); box-shadow: var(--glow-signal); }
-
-.btn--primary { background: var(--primary); color: var(--bg); }
-.btn--primary:hover { transform: translateY(-2px); box-shadow: var(--shadow-lift); }
-
-.btn--ghost {
-  background: transparent;
-  color: var(--ink);
-  border: 1px solid var(--line);
-  padding: 13px 27px;
-}
-.btn--ghost:hover { border-color: var(--ink); transform: translateY(-2px); }
-
-:focus-visible {
-  outline: 2px solid var(--focus-ring);
-  outline-offset: 2px;
-  border-radius: var(--r-sm);
-}
-.btn:focus-visible { border-radius: var(--r-pill); }
-
-/* ---------- layout primitives ---------- */
+/* ---------- primitivos de layout desta superfície ---------- */
 
 .wrap {
   width: min(100% - clamp(2.5rem, 8vw, 5rem), 74rem);
@@ -155,9 +36,7 @@ mark ::selection { background: var(--primary); color: var(--bg); }
 
 section { padding-block: clamp(5rem, 12vw, 9rem); }
 
-.hairline { border: 0; border-top: 1px solid var(--line); margin: 0; }
-
-/* Legal pages (/termos, /privacidade): quiet single-column prose. */
+/* Páginas legais (/termos, /privacidade): prosa quieta em coluna única. */
 .legal {
   padding-block: clamp(8rem, 18vh, 11rem) clamp(5rem, 12vw, 9rem);
   display: flex;
@@ -167,60 +46,3 @@ section { padding-block: clamp(5rem, 12vw, 9rem); }
 .legal h1 { max-width: 20ch; }
 .legal h2 { margin-top: var(--sp-lg); }
 .legal p { max-width: 62ch; }
-
-/* Keyboard users' first tab stop; visually hidden until focused. */
-.skip-link {
-  position: fixed;
-  top: var(--sp-sm);
-  left: var(--sp-sm);
-  z-index: var(--z-skip);
-  padding: 10px 18px;
-  background: var(--primary);
-  color: var(--bg);
-  border-radius: var(--r-pill);
-  text-decoration: none;
-  transform: translateY(calc(-100% - var(--sp-md)));
-}
-.skip-link:focus-visible { transform: none; }
-
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  clip-path: inset(50%);
-  overflow: hidden;
-  white-space: nowrap;
-}
-
-/* ---------- scroll reveals (content visible by default; JS arms them) ---------- */
-
-html.js .reveal {
-  opacity: 0;
-  transform: translateY(18px);
-  transition: opacity var(--t-slow) var(--ease-out-expo), transform var(--t-slow) var(--ease-out-expo);
-  transition-delay: calc(var(--i, 0) * 70ms);
-}
-html.js .reveal.is-in { opacity: 1; transform: none; }
-
-/* Bulk release (hidden tab, print, no-human watchdog — see Layout.astro):
-   everything snaps visible with no transition, so a paused-rendering capture
-   can never photograph a half-faded section. */
-html.reveal-now .reveal { transition: none; }
-
-/* Print always shows every section, even in engines that never fire
-   beforeprint. */
-@media print {
-  html.js .reveal { opacity: 1; transform: none; transition: none; }
-}
-
-/* ---------- reduced motion ---------- */
-
-@media (prefers-reduced-motion: reduce) {
-  html { scroll-behavior: auto; }
-  *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    transition-delay: 0ms !important;
-  }
-}

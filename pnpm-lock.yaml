@@ -171,15 +171,6 @@ importers:
       '@astrojs/sitemap':
         specifier: ^3.7.3
         version: 3.7.3
-      '@fontsource-variable/fraunces':
-        specifier: ^5.2.9
-        version: 5.2.9
-      '@fontsource-variable/mona-sans':
-        specifier: ^5.2.8
-        version: 5.2.8
-      '@fontsource/instrument-serif':
-        specifier: ^5.2.8
-        version: 5.2.8
       '@my-ai-orchestrator/ui':
         specifier: workspace:*
         version: link:../../packages/ui
@@ -352,7 +343,17 @@ importers:
         specifier: ^3.16.12
         version: 3.21.2
 
-  packages/ui: {}
+  packages/ui:
+    devDependencies:
+      '@fontsource-variable/fraunces':
+        specifier: ^5.2.9
+        version: 5.2.9
+      '@fontsource-variable/mona-sans':
+        specifier: ^5.2.8
+        version: 5.2.8
+      '@fontsource/instrument-serif':
+        specifier: ^5.2.8
+        version: 5.2.8
 
 packages:
 

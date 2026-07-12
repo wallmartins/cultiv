@@ -1,0 +1,47 @@
+/* ============================================================
+   Cultiv — primitivos da superfície clássica/prosa (SSOT visual).
+   Sistema de botão BEM .btn--accent/--primary/--ghost usado pelas páginas
+   legais e (ao nascer) pela web. A superfície constelação usa o sistema
+   .btn.solid/.ghost em primitives.css — ambos são preservados de propósito.
+   ============================================================ */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 28px;
+  border-radius: var(--r-pill);
+  border: 0;
+  font: 500 0.9375rem/1.2 var(--font-body);
+  letter-spacing: 0.005em;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    transform var(--t-fast) var(--ease-out),
+    box-shadow var(--t-med) var(--ease-out),
+    background-color var(--t-fast) var(--ease-out),
+    border-color var(--t-fast) var(--ease-out);
+}
+.btn:active { transform: translateY(0) scale(0.98); }
+
+.btn--accent {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+.btn--accent:hover { transform: translateY(-2px); box-shadow: var(--glow-signal); }
+
+.btn--primary { background: var(--primary); color: var(--bg); }
+.btn--primary:hover { transform: translateY(-2px); box-shadow: var(--shadow-lift); }
+
+.btn--ghost {
+  background: transparent;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  padding: 13px 27px;
+}
+.btn--ghost:hover { border-color: var(--ink); transform: translateY(-2px); }
+
+/* Complementa o :focus-visible da base com raio (prosa: cantos suaves;
+   botões: pill). A base já define outline + offset. */
+:focus-visible { border-radius: var(--r-sm); }
+.btn:focus-visible { border-radius: var(--r-pill); }

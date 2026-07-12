@@ -1,6 +1,7 @@
 # Frontend Stack & Architecture
 
 **Status:** accepted
+**Emendada por:** ADR 0004 — o **fluxo de geração** descrito aqui e em `docs/frontend-application-flow.md` era intent-first (seletor de content type + formulário dinâmico). A ADR 0004 o substitui por um fluxo **tema-first guiado**. As decisões de **stack** desta ADR (Astro/Vite/WXT, data layer, auth, monorepo) permanecem vigentes.
 
 O frontend do Cultiv é dividido em três entregas com runtimes desacoplados, unificados sob o mesmo domínio via proxy reverso, compartilhando serviços e design tokens centralizados no monorepo.
 
@@ -76,9 +77,9 @@ Sem content script de injeção. A extensão abre como sidebar/popup com o fluxo
 
 ```
 Usuário na página → Abre extensão (sidebar/popup)
-→ Extensão lê URL da aba ativa → Pré-preenche canal se detectado
-→ Usuário seleciona intent, briefing, qualidade
-→ Preview → Gerar (API via client-sdk, igual ao SPA)
+→ Extensão lê URL da aba ativa → Pré-seleciona plataforma/canal se detectado
+→ Usuário digita o tema → inferência (prefill) → sessão de perguntas guiadas (ADR 0004)
+→ Gerar (API via client-sdk, igual ao SPA)
 → Resultado no popup → Copiar → Usuário cola no campo destino
 ```
 
@@ -102,7 +103,12 @@ fontes, escalas, motion — a fonte única da verdade visual), consumido hoje po
   — têm um único consumidor por definição e permanecem em
   `apps/landing/src/components`. O subdiretório previsto aqui fazia sentido
   para primitivos `.astro` compartilhados entre páginas públicas; hoje esses
-  primitivos são classes CSS que acompanham os tokens.
+  primitivos são classes CSS que acompanham os tokens. Essa camada de
+  identidade em CSS já vive em `packages/ui/src` e é consumida como folhas
+  importáveis — `styles.css` (tokens + fontes + keyframes + base universal),
+  `type.css`, `primitives.css`/`primitives-classic.css` — pela landing e,
+  ao nascer, por `apps/web`. Ajustar aqui replica a identidade por todas as
+  camadas; **componentes de framework** (`.astro`/`.tsx`) seguem nativos.
 - **`packages/ui/app` nasce junto com o segundo consumidor.** A regra adotada:
   extrair quando o segundo consumidor está à vista, não antes. Componentes
   `.tsx` entram no pacote quando `apps/web` (recriado) e/ou `apps/extension`

@@ -1,6 +1,6 @@
 # Frontend Application Flow & Screens
 
-> **Context:** This document details the user flow and screen specifications for the Cultiv authenticated workspace (`/app/*`), based on the frontend-backend contracts and ADR 0003 architecture decisions.
+> **Context:** This document details the user flow and screen specifications for the Cultiv authenticated workspace (`/app/*`), based on the frontend-backend contracts and ADR 0003 (stack/architecture). The **generation flow (Screen 1) follows ADR 0004** — theme-first guided — which supersedes the earlier intent-first design.
 
 ## Architecture Overview
 
@@ -56,72 +56,66 @@ packages/client-sdk                     ← HTTP, SSE, auth token, idempotency
 
 ## Screen Specifications
 
-### Screen 1: Generation Screen (`/app/generate`)
+### Screen 1: Generation Screen (`/app/generate`) — theme-first guided flow
 
-**Purpose:** Primary screen where users select content type, fill briefing, see preview, and trigger generation.
+> **Flow per ADR 0004.** The user arrives with a **theme in free text** (like ChatGPT); the setup (intent, size, channel, content type) is inferred behind the scenes, and a short conversational session extracts what gives the text body and originality. This supersedes the previous intent-first design (content type selector + dynamic `inputSchema` form).
+
+**Purpose:** Primary screen. The user types a theme, answers a short guided session, and triggers generation. Intent/content type are never surfaced.
 
 **Data Dependencies (on mount):**
 
 | SDK Method | Backend Route | Returns | When |
 |---|---|---|---|
-| `generationIntents.list()` | `GET /me/generation-intents` | `GenerationIntentCatalogView` | On mount — populate intent selector and drive briefing form schema |
 | `billing.getEntitlement()` | `GET /me/billing/entitlement` | `BillingEntitlementView` | On mount — show credit balance in header |
 
-**Layout:**
-- **Desktop:** Split view with Briefing Form (wider column) and sticky Generation Preview panel (narrower column)
-- **Mobile:** Single centered column with preview stacked below the form
+> The intent/content-type catalog no longer drives this screen. `generationIntents.list()` / the content-type `inputSchema` are not used to build the primary form (see "Content Type Catalog Structure" note below).
 
-**Components:**
-1. **Content Type Selector:** Lists every catalog content type; disables unavailable options with plan/policy reasons
-2. **Briefing Form:** Dynamic form driven by selected content type's `inputSchema`
-   - `type: "string"` → single-line input
-   - `type: "text"` → textarea
-   - `type: "enum"` → select dropdown
-   - `highImpact: true` → visually prominent fields
-3. **Generation Preview:** Shows credit price, projected balance, recommendation, and allowed options
-4. **Generate Button:** Triggers generation with cost badge
+**Interaction model (validated via prototype):** a **conversational thread** — the theme is the first message, the guided questions arrive one at a time as they're answered/skipped, with "Generate now" always at hand. Picked over a composer-with-side-rail and a one-question-per-screen stepper (prototype `.scratch/fluxo-geracao-tema-first/prototype/flow-prototype.html`, variant A "Conversa").
 
-**User Actions:**
+**Layout:** Single centered column, ChatGPT-like. A prominent **theme field** first; the conversational questions and the (optional) channel selector appear below it; a sticky cost/preview strip sits at the bottom near "Generate".
 
-#### Select Content Type → Preview
+**Flow steps:**
+
+**Step 1 — Theme → prefill inference.** The user types the theme and submits. One call runs the inference:
 ```typescript
-const preview = await sdk.toPromise(
-  sdk.preview.get({
-    contentType: "linkedin-post",
-    intent: "share-idea",
-    scope: { lengthTier: "medium", channel: "professional-network" },
-    briefing: { topic: "My topic", angle: "My angle" },
+const prefill = await sdk.toPromise(
+  sdk.generationPrefill.infer({
+    theme: "Aprender novas tecnologias com IA acelera, mas há a falácia de só delegar o trabalho cognitivo…",
     language: "pt-BR",
-    qualityMode: "balanced",
-    includeRecommendation: true,
   })
 )
+// → { prefill: { intent, scope: { lengthTier }, briefing: { topic }, language },
+//     intentAmbiguity: { ambiguous, alternative? } | null,
+//     detectedPlatform?: "linkedin",
+//     questionPlan: [{ id, angle, prompt }, …] }
 ```
+Target latency ~2–3s (12s hard timeout); on failure a graceful fallback (`share-idea` + default size) is used and the flow proceeds. The prefill result lives in **Zustand** — the server stays stateless.
 
-**UI Mapping:**
-- `pricingSnapshot.creditPrice` → cost badge next to "Generate" button
-- `projectedBalanceAfterGeneration` → projected balance after generation
-- `recommendation` → highlighted quality mode suggestion
-- `options.qualityModes[].blockedReason` → disabled state + tooltip on quality mode chips
-- `options.contentTypes[].blockedReason` → disabled state on content type selector
-- `resolvedIntent.wordTargetMin/Max` → word count guidance in briefing form
+**Step 2 — Guided conversational session.** The client walks `questionPlan` **one question at a time** (skippable). Answers accumulate in Zustand.
+- If `intentAmbiguity.ambiguous`, its natural-language question (built from `intent` + `alternative`) is the **first** step, with a one-line impact note.
+- Backbone angles: **thesis**, **concrete experience**, **counter-argument/tension**, **motivation** — plus 0–2 LLM-generated extras. A persuasive nudge ("the more you tell, the denser and more original the text") sits near **Generate now**, which is **always available**.
 
-#### Confirm → Run Generation
+**Step 3 — Channel (optional).** A light, skippable platform selector ("Where will you publish?"). Rich platforms (LinkedIn, X, Instagram, Medium, Substack, blog, newsletter…) map to the 4 `GenerationChannel` buckets client-side; `detectedPlatform` pre-selects it when the theme named one.
+
+**Step 4 — Assemble briefing → preview → run.** On "Generate", the client assembles the `briefing` record from the answers (theme → `topic`, thesis → `goal`, experience/counter/motivation/extras → `keyPoints[]`; skipped answers are **omitted**, never blank), optionally calls `preview` for pricing, then submits:
 ```typescript
 const result = await sdk.toPromise(
   sdk.executions.create({
-    contentType: "linkedin-post",
-    intent: "share-idea",
-    scope: { lengthTier: "medium", channel: "professional-network" },
-    briefing: { topic: "My topic", angle: "My angle" },
+    intent: prefill.prefill.intent,               // inferred, never shown as "intent"
+    scope: { lengthTier, channel },               // channel from the platform bucket (optional)
+    briefing: { topic, goal, keyPoints },         // built from the session answers (ADR 0004 §5)
     language: "pt-BR",
     qualityMode: "balanced",
-    quoteId: preview.pricingSnapshot.quoteId,
-    previewRecommendation: preview.recommendation,
-    importedContext: "pasted reference text...",
+    quoteId: preview?.pricingSnapshot.quoteId,
+    previewRecommendation: preview?.recommendation,
   })
 )
 ```
+> No `contentType` is sent: with `intent` + `scope` present, the backend derives it and ignores any client `contentType`.
+
+**Preview (optional, for pricing/confirmation):** same `sdk.preview.get(...)` as before, driven by the inferred `intent`/`scope`. UI mapping unchanged: `pricingSnapshot.creditPrice` → cost badge; `projectedBalanceAfterGeneration` → projected balance; `recommendation` → quality-mode suggestion; `resolvedIntent.wordTargetMin/Max` → word-count guidance.
+
+**Adjust (optional):** a discreet "Ajustar" affordance exposes **size + channel** only (content type is derived; the angle/intent is only ever changed via the ambiguity question or by regenerating).
 
 **After Creation:**
 1. Store `jobId` as `ExecutionIdentity`
@@ -358,7 +352,9 @@ All SDK methods return `Effect<T, ClientSdkError, never>`. Use `sdk.toPromise()`
 
 ## Content Type Catalog Structure
 
-Each `ContentTypeCatalogItemView` provides everything the Briefing Form needs:
+> **Superseded for the primary flow (ADR 0004).** The theme-first flow does not use `inputSchema` to build a dynamic form, nor a content-type selector — content type is **derived** from the inferred `intent × lengthTier` server-side. The structure below is retained for reference / internal use (and any surface still on the legacy intent-first flow); it no longer drives Screen 1.
+
+Each `ContentTypeCatalogItemView` provides everything the (legacy) Briefing Form needed:
 
 ```typescript
 {
@@ -418,15 +414,20 @@ The `client-sdk` parses this automatically and maps to `ExecutionTransition` obj
 
 ## Implementation Checklist
 
-### Phase 1: Core Generation Flow
+### Phase 1: Core Generation Flow (theme-first, ADR 0004)
 - [ ] SDK bootstrap with Auth0 token provider
-- [ ] Content type catalog → selector component
-- [ ] Generation intent catalog → intent picker (if used)
-- [ ] Briefing form (dynamic from `inputSchema`)
-- [ ] Generation preview → cost/recommendation display
-- [ ] Execution creation → queue status
+- [ ] Backend: `POST /me/generation-prefill` endpoint + inference service (`gemini-3.1-flash-lite`, per ADR 0004 §3)
+- [ ] client-sdk: `generationPrefill.infer({ theme, language })` subclient
+- [ ] Theme input → prefill call → Zustand session state
+- [ ] Conversational deepening session (one question at a time, skippable, "Generate now" always available)
+- [ ] Ambiguity question (natural language) when `intentAmbiguity.ambiguous`
+- [ ] Optional platform selector → platform→bucket map → `scope.channel`
+- [ ] Assemble briefing from answers (theme→topic, thesis→goal, rest→keyPoints; omit skipped)
+- [ ] Generation preview (optional) → cost/recommendation display
+- [ ] Execution creation (intent+scope, no contentType) → queue status
 - [ ] SSE watch → progress bar + completion
 - [ ] Active execution drawer
+- [ ] Eval set (~15–20 themes) tuning the inference prompt + ambiguity threshold
 
 ### Phase 2: Execution History
 - [ ] Paginated list with filters

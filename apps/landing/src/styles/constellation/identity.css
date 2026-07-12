@@ -1,0 +1,115 @@
+/* constelação · identidade (coluna da marca, wordmark, tagline). */
+
+/* ================= identidade ================= */
+.identity {
+  width: 30%;
+  min-width: 280px;
+  flex: none;
+  background: var(--xbg);
+  color: var(--xink);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 32px 34px 26px;
+  position: relative;
+  overflow: hidden;
+}
+.rhythm {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  pointer-events: none;
+}
+.brand {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: currentColor;
+  text-decoration: none;
+  opacity: 0;
+  transition: opacity 0.6s var(--ease-standard);
+}
+html:not(.js) .brand,
+.app.is-on .brand {
+  opacity: 1;
+}
+.brand .brand-glyph {
+  width: 39px;
+  height: 39px;
+}
+/* Wordmark em Instrument Serif — sem caixa-alta nem tracking largo;
+   o desenho da fonte carrega a identidade sozinho. */
+.brand-name {
+  font-family: var(--font-headline);
+  font-weight: 400;
+  font-style: italic;
+  font-size: 1.76rem;
+  letter-spacing: 0;
+  line-height: 1;
+  /* correção óptica: centra a mancha do wordmark no anel do glifo */
+  transform: translateY(2px);
+}
+.side-logo-wrap {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  display: grid;
+  place-items: center;
+  min-height: 0;
+}
+.side-logo {
+  width: min(56%, 190px);
+  opacity: 0;
+  transition: opacity 2.2s var(--ease-standard);
+}
+html:not(.js) .side-logo {
+  opacity: 0.7;
+}
+.tagline {
+  position: relative;
+  z-index: 1;
+  font-family: var(--font-headline);
+  font-weight: 400;
+  font-style: italic;
+  font-size: 3.22rem;
+  line-height: 1.15;
+  letter-spacing: 0;
+  margin: 0 0 6px;
+  white-space: pre-line;
+  min-height: 3.45em;
+}
+.caret {
+  display: inline-block;
+  width: 3px;
+  height: 0.9em;
+  background: var(--accent);
+  margin-left: 5px;
+  vertical-align: -0.08em;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.identity-foot {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-top: 1px solid var(--xline);
+  padding-top: 16px;
+  opacity: 0;
+  transform: translateY(18px);
+  transition:
+    opacity 0.5s var(--ease-standard),
+    transform 0.5s var(--ease-out);
+}
+html:not(.js) .identity-foot,
+.identity-foot.is-in {
+  opacity: 1;
+  transform: translateY(0);
+}
+

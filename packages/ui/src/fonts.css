@@ -1,9 +1,8 @@
 /* ---------- fonts (self-hosted; no third-party CDN) ----------
-   Shared by the classic layout (global.css) and the constellation
-   landing — importing from both places costs nothing: the bundler
-   dedupes, and @font-face is idempotent.
+   SSOT das @font-face da identidade Cultiv — consumido por toda camada
+   (landing hoje; web/extension ao nascerem) via styles.css.
 
-   Papéis (tokens em packages/ui/src/tokens.css):
+   Papéis (tokens em ./tokens.css):
    - Instrument Serif → --font-headline (H1, wordmark, slogan e headers
      de cards/páginas) — 400, seu único peso.
    - Mona Sans        → --font-body (corpo, nav, labels) — variável,

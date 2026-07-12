@@ -3,8 +3,7 @@
 // As páginas legais antigas continuam em Layout.astro; este layout serve a
 // home e as páginas por nó (/perfil-de-voz, /tom, …), que são o mesmo app
 // com um ponto pré-selecionado e meta próprios.
-import "../styles/fonts.css";
-import "@my-ai-orchestrator/ui/tokens.css";
+import "@my-ai-orchestrator/ui/styles.css";
 import { APP_ORIGIN } from "../config";
 import { SITE } from "../data/constellation";
 
@@ -83,43 +82,12 @@ const preconnectApp = Astro.site && new URL(Astro.site).origin !== APP_ORIGIN;
 </html>
 
 <style is:global>
-  *,
-  *::before,
-  *::after {
-    box-sizing: border-box;
-  }
-  body {
-    margin: 0;
-    background: var(--bg);
-    color: var(--ink);
-    font-family: var(--font-body);
-    line-height: var(--lh-body);
-    letter-spacing: var(--ls-body);
-    font-optical-sizing: auto;
-    -webkit-font-smoothing: antialiased;
-    text-rendering: optimizeLegibility;
-  }
-  /* Com JS o app vive em uma viewport fixa (a rolagem é interna, por
-     breakpoint); sem JS a página flui e o .doc fica legível abaixo. */
+  /* Reset, corpo, seleção, foco e reduced-motion vêm da base compartilhada
+     (@my-ai-orchestrator/ui/styles.css). Aqui fica só o comportamento
+     específico desta superfície: com JS o app vive em viewport fixa (rolagem
+     interna, por breakpoint); sem JS a página flui e o .doc fica legível abaixo. */
   html.js body {
     height: 100dvh;
     overflow: hidden;
-  }
-  ::selection {
-    background: var(--accent);
-    color: var(--on-accent);
-  }
-  :focus-visible {
-    outline: 2px solid var(--focus-ring);
-    outline-offset: 2px;
-  }
-  @media (prefers-reduced-motion: reduce) {
-    *,
-    *::before,
-    *::after {
-      animation-duration: 0.01ms !important;
-      animation-iteration-count: 1 !important;
-      transition-duration: 0.01ms !important;
-    }
   }
 </style>
