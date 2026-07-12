@@ -1,5 +1,6 @@
 // Servidor estático de desenvolvimento, zero dependências (http nativo do Node).
-// Serve `public/` em http://localhost:4321 — placeholder até o app real nascer.
+// Serve `public/` sob http://localhost:4321/app — espelha o proxy de produção
+// (a landing faz rewrite de `/app/*` para este deploy). Placeholder até o app real nascer.
 import { createServer } from "node:http";
 import { readFile } from "node:fs/promises";
 import { dirname, extname, join, normalize } from "node:path";
@@ -18,7 +19,8 @@ const types = {
 
 createServer(async (req, res) => {
   const url = new URL(req.url ?? "/", `http://localhost:${port}`);
-  const rel = url.pathname === "/" ? "/index.html" : url.pathname;
+  const path = url.pathname.replace(/^\/app/, "") || "/";
+  const rel = path === "/" ? "/index.html" : path;
   const file = join(pub, normalize(rel).replace(/^(\.\.[/\\])+/, ""));
   try {
     const body = await readFile(file);
@@ -28,4 +30,4 @@ createServer(async (req, res) => {
     res.writeHead(404, { "content-type": "text/html; charset=utf-8" });
     res.end(await readFile(join(pub, "index.html")).catch(() => "404"));
   }
-}).listen(port, () => console.log(`web: http://localhost:${port}`));
+}).listen(port, () => console.log(`web: http://localhost:${port}/app`));

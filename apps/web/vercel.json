@@ -3,5 +3,6 @@
   "framework": null,
   "installCommand": "cd ../.. && npx -y pnpm@11.3.0 install --frozen-lockfile",
   "buildCommand": "pnpm build",
-  "outputDirectory": "dist"
+  "outputDirectory": "dist",
+  "rewrites": [{ "source": "/app/:path*", "destination": "/app/index.html" }]
 }
