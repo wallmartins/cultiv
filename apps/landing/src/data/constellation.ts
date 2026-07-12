@@ -233,45 +233,109 @@ export const EDGES: [string, string, number][] = [
   ["demo", "planos", 0.1],
 ];
 
-import type { PlanId } from "../config";
+import type { PlanId, PlanPeriod } from "../config";
+
+/** Moedas oferecidas no toggle: real (Asaas) e dólar (Stripe). */
+export type Currency = "brl" | "usd";
+
+/** Desconto do plano anual (cobrado à vista, valor cheio do ano). */
+export const ANNUAL_DISCOUNT = 0.2;
+
+/** Um estado de preço já formatado para exibição. */
+export interface PriceView {
+  /** Valor grande do card (ex.: "R$ 49", "$9"). No anual é o /mês equivalente. */
+  amount: string;
+  /** Sufixo do valor (ex.: "/mês"). */
+  per: string;
+  /** Aviso do anual ("Cobrado R$ 470 por ano · 20% off"); vazio no mensal. */
+  note: string;
+}
 
 export interface Plan {
   id: PlanId;
   name: string;
   tag: string;
+  /** Exibição padrão sem JS (BRL mensal) — usada por crawlers e pelo doc estático. */
   price: string;
-  /** Preço numérico em BRL para o JSON-LD (0 = grátis). */
-  priceValue: number;
   per: string;
+  /** Preço numérico em BRL mensal para o JSON-LD. */
+  priceValue: number;
+  /** Matriz completa moeda × período, resolvida pelos toggles no cliente. */
+  prices: Record<Currency, Record<PlanPeriod, PriceView>>;
   features: string[];
   btn: string;
   featured: boolean;
 }
 
+const fmtBRL = (n: number): string => `R$ ${n.toLocaleString("pt-BR")}`;
+const fmtUSD = (n: number): string => `$${n.toLocaleString("en-US")}`;
+
+/** Deriva os 4 estados (moeda × período) a partir dos preços mensais base. */
+const planPrices = (brlMonthly: number, usdMonthly: number): Plan["prices"] => {
+  const mk = (fmt: (n: number) => string, monthly: number): Record<PlanPeriod, PriceView> => {
+    const annualMonthly = Math.round(monthly * (1 - ANNUAL_DISCOUNT));
+    const annualTotal = Math.round(monthly * 12 * (1 - ANNUAL_DISCOUNT));
+    return {
+      monthly: { amount: fmt(monthly), per: "/mês", note: "" },
+      annual: {
+        amount: fmt(annualMonthly),
+        per: "/mês",
+        note: `Cobrado ${fmt(annualTotal)} por ano · 20% off`,
+      },
+    };
+  };
+  return { brl: mk(fmtBRL, brlMonthly), usd: mk(fmtUSD, usdMonthly) };
+};
+
+interface PlanSeed {
+  id: PlanId;
+  name: string;
+  tag: string;
+  brl: number;
+  usd: number;
+  features: string[];
+  btn: string;
+  featured: boolean;
+}
+
+const makePlan = (s: PlanSeed): Plan => {
+  const prices = planPrices(s.brl, s.usd);
+  return {
+    id: s.id,
+    name: s.name,
+    tag: s.tag,
+    price: prices.brl.monthly.amount,
+    per: prices.brl.monthly.per,
+    priceValue: s.brl,
+    prices,
+    features: s.features,
+    btn: s.btn,
+    featured: s.featured,
+  };
+};
+
 export const PLANS: Plan[] = [
-  {
+  makePlan({
     id: "explorador",
     name: "Explorador",
     tag: "Para conhecer a sua voz digital.",
-    price: "Grátis",
-    priceValue: 0,
-    per: "",
+    brl: 49,
+    usd: 9,
     features: [
       "Perfil de Voz completo",
       "10 créditos de geração/mês",
       "Formatos essenciais",
       "Refinamento básico",
     ],
-    btn: "Começar grátis",
+    btn: "Assinar Explorador",
     featured: false,
-  },
-  {
+  }),
+  makePlan({
     id: "criador",
     name: "Criador",
     tag: "Para quem publica toda semana.",
-    price: "R$ 49",
-    priceValue: 49,
-    per: "/mês",
+    brl: 99,
+    usd: 19,
     features: [
       "Tudo do Explorador",
       "100 créditos de geração/mês",
@@ -281,14 +345,13 @@ export const PLANS: Plan[] = [
     ],
     btn: "Assinar Criador",
     featured: true,
-  },
-  {
+  }),
+  makePlan({
     id: "pro",
     name: "Profissional",
     tag: "Para volume e equipes.",
-    price: "R$ 129",
-    priceValue: 129,
-    per: "/mês",
+    brl: 199,
+    usd: 39,
     features: [
       "Tudo do Criador",
       "Créditos ilimitados",
@@ -298,7 +361,7 @@ export const PLANS: Plan[] = [
     ],
     btn: "Assinar Profissional",
     featured: false,
-  },
+  }),
 ];
 
 export const TAGLINE = "Escreve\ncomo você\npensa.";

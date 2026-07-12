@@ -88,4 +88,4 @@ apps/backend/src/
 
 ## Stack reference
 
-TypeScript · Effect-TS · Hono · PostgreSQL (Kysely + `pg`) · Redis + BullMQ · Auth0 (SPA + API JWT) · Stripe (payments) · Effect Schema contracts · Vitest. Backend bundled with esbuild; deploy targets Railway (api + worker services, `railway*.toml`) with local Postgres/Redis via `docker-compose.yml`.
+TypeScript · Effect-TS · Hono · PostgreSQL (Kysely + `pg`) · Redis + BullMQ · Auth0 (SPA + API JWT) · ASAAS/Stripe (payments) · Effect Schema contracts · Vitest. Backend bundled with esbuild; deploy targets Railway (api + worker services, `railway*.toml`) with local Postgres/Redis via `docker-compose.yml`.

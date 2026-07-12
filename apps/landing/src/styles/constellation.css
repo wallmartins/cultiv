@@ -1016,6 +1016,65 @@ html:not(.js) .identity-foot,
 }
 
 /* ================= planos ================= */
+/* Toggles de moeda e período: controles segmentados centralizados. */
+.plans-toggles {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  padding: clamp(14px, 2.5vh, 24px) clamp(20px, 3.5vw, 48px) 0;
+}
+.seg {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+}
+.seg-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  padding: 7px 15px;
+  border-radius: var(--r-pill);
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+}
+.seg-btn:hover {
+  color: var(--ink);
+}
+.seg-btn[aria-pressed="true"] {
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: var(--shadow-lift);
+}
+.seg-tag {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.seg-btn[aria-pressed="true"] .seg-tag {
+  color: var(--accent);
+}
+/* Aviso do plano anual (cobrança à vista do ano cheio). */
+.plan-note {
+  margin: -4px 0 0;
+  font-size: 0.74rem;
+  line-height: 1.4;
+  color: var(--muted);
+}
 .plans-grid {
   flex: 1;
   display: grid;

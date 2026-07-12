@@ -1,5 +1,7 @@
 ---
-// Overlay de Planos: grid de PlanCards dentro da moldura comum.
+// Overlay de Planos: toggles de moeda (R$/US$) e período (mensal/anual) +
+// grid de PlanCards dentro da moldura comum. Os toggles reescrevem preço,
+// aviso do anual e href do CTA no cliente (ver <script> abaixo).
 import OverlayShell from "./OverlayShell.astro";
 import PlanCard from "./PlanCard.astro";
 import { PLANS } from "../../data/constellation";
@@ -18,7 +20,96 @@ const { open = false } = Astro.props;
   open={open}
   closeLabel="Fechar planos"
 >
+  <div class="plans-toggles" data-plans-toggles>
+    <div class="seg" role="group" aria-label="Moeda">
+      <button type="button" class="seg-btn" data-currency="brl" aria-pressed="true">R$ Real</button>
+      <button type="button" class="seg-btn" data-currency="usd" aria-pressed="false">US$ Dólar</button>
+    </div>
+    <div class="seg" role="group" aria-label="Período de cobrança">
+      <button type="button" class="seg-btn" data-period="monthly" aria-pressed="true">Mensal</button>
+      <button type="button" class="seg-btn" data-period="annual" aria-pressed="false">
+        Anual <span class="seg-tag">20% off</span>
+      </button>
+    </div>
+  </div>
+
   <div class="plans-grid">
     {PLANS.map((p, i) => <PlanCard plan={p} index={i} />)}
   </div>
 </OverlayShell>
+
+<script>
+  // Estado dos toggles → reescreve cada card. Sem dependências: lê a matriz de
+  // preços embutida em data-prices e troca o period do href do CTA.
+  type Currency = "brl" | "usd";
+  type Period = "monthly" | "annual";
+  interface PriceView { amount: string; per: string; note: string; }
+  type Prices = Record<Currency, Record<Period, PriceView>>;
+
+  const root = document.querySelector<HTMLElement>("[data-plans-toggles]");
+  if (root) {
+    const state: { currency: Currency; period: Period } = { currency: "brl", period: "monthly" };
+
+    try {
+      const c = localStorage.getItem("cultiv-currency");
+      if (c === "brl" || c === "usd") state.currency = c;
+      const p = localStorage.getItem("cultiv-period");
+      if (p === "monthly" || p === "annual") state.period = p;
+    } catch {}
+
+    const currencyBtns = root.querySelectorAll<HTMLButtonElement>("[data-currency]");
+    const periodBtns = root.querySelectorAll<HTMLButtonElement>("[data-period]");
+    const cards = document.querySelectorAll<HTMLElement>("[data-plan]");
+
+    const render = () => {
+      currencyBtns.forEach((b) =>
+        b.setAttribute("aria-pressed", String(b.dataset.currency === state.currency))
+      );
+      periodBtns.forEach((b) =>
+        b.setAttribute("aria-pressed", String(b.dataset.period === state.period))
+      );
+
+      cards.forEach((card) => {
+        let prices: Prices;
+        try {
+          prices = JSON.parse(card.dataset.prices ?? "");
+        } catch {
+          return;
+        }
+        const view = prices[state.currency]?.[state.period];
+        if (!view) return;
+
+        const amount = card.querySelector<HTMLElement>("[data-plan-amount]");
+        const per = card.querySelector<HTMLElement>("[data-plan-per]");
+        const note = card.querySelector<HTMLElement>("[data-plan-note]");
+        if (amount) amount.textContent = view.amount;
+        if (per) per.textContent = view.per;
+        if (note) {
+          note.textContent = view.note;
+          note.hidden = view.note === "";
+        }
+
+        const cta = card.querySelector<HTMLAnchorElement>("[data-plan-cta]");
+        const href = state.period === "annual" ? cta?.dataset.hrefAnnual : cta?.dataset.hrefMonthly;
+        if (cta && href) cta.href = href;
+      });
+    };
+
+    currencyBtns.forEach((b) =>
+      b.addEventListener("click", () => {
+        state.currency = b.dataset.currency as Currency;
+        try { localStorage.setItem("cultiv-currency", state.currency); } catch {}
+        render();
+      })
+    );
+    periodBtns.forEach((b) =>
+      b.addEventListener("click", () => {
+        state.period = b.dataset.period as Period;
+        try { localStorage.setItem("cultiv-period", state.period); } catch {}
+        render();
+      })
+    );
+
+    render();
+  }
+</script>
