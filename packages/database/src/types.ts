@@ -6,7 +6,6 @@ import type {
   MemoryRecord as DomainMemoryRecord,
   Pipeline,
   VoiceExample,
-  VoiceExampleBatch,
   VoiceProfileDiagnostics,
   VoiceProfileSnapshot,
   VoiceTrainingConsent
@@ -17,8 +16,6 @@ import type {
   DatabaseJobAlreadyExistsError,
   DatabaseJobNotFoundError,
   DatabaseTransactionInvariantError,
-  DatabaseVoiceBatchAlreadyExistsError,
-  DatabaseVoiceBatchNotFoundError,
   DatabaseVoiceExampleAlreadyExistsError,
   DatabaseVoiceExampleNotFoundError
 } from "./errors.js";
@@ -75,10 +72,6 @@ export interface VoiceProfileSnapshotRecord extends VoiceProfileSnapshot {
   readonly version: number;
 }
 
-export interface VoiceExampleBatchRecord extends VoiceExampleBatch {
-  readonly version: number;
-}
-
 export interface VoiceTrainingConsentRecord extends VoiceTrainingConsent {
   readonly version: number;
 }
@@ -104,7 +97,6 @@ export interface DatabaseState {
   readonly voiceProfiles: Record<string, VoiceProfileRecord>;
   readonly voiceProfileDiagnostics: Record<string, VoiceProfileDiagnosticsRecord>;
   readonly voiceProfileSnapshots: Record<string, VoiceProfileSnapshotRecord>;
-  readonly voiceExampleBatches: Record<string, VoiceExampleBatchRecord>;
   readonly voiceTrainingConsents: Record<string, VoiceTrainingConsentRecord>;
   readonly auditRecords: Record<string, AuditRecord>;
 }
@@ -221,19 +213,6 @@ export interface VoiceProfileSnapshotRepository {
   removeByUser: (userId: string) => Effect.Effect<number, DatabaseError>;
 }
 
-export interface VoiceExampleBatchRepository {
-  readonly create: (
-    record: VoiceExampleBatch,
-    version?: number
-  ) => Effect.Effect<VoiceExampleBatchRecord, DatabaseVoiceBatchAlreadyExistsError | DatabaseError>;
-  readonly save: (
-    record: VoiceExampleBatchRecord
-  ) => Effect.Effect<VoiceExampleBatchRecord, DatabaseVoiceBatchNotFoundError | DatabaseError>;
-  readonly get: (id: string) => Effect.Effect<VoiceExampleBatchRecord | undefined, DatabaseError>;
-  readonly listByUser: (userId: string) => Effect.Effect<readonly VoiceExampleBatchRecord[], DatabaseError>;
-  readonly remove: (id: string) => Effect.Effect<boolean, DatabaseError>;
-}
-
 export interface VoiceTrainingConsentRepository {
   readonly put: (
     record: VoiceTrainingConsent,
@@ -257,7 +236,6 @@ export interface DatabaseClient {
   readonly voiceProfiles: VoiceProfileRepository;
   readonly voiceProfileDiagnostics: VoiceProfileDiagnosticsRepository;
   readonly voiceProfileSnapshots: VoiceProfileSnapshotRepository;
-  readonly voiceExampleBatches: VoiceExampleBatchRepository;
   readonly voiceTrainingConsents: VoiceTrainingConsentRepository;
   readonly audit: AuditRepository;
   readonly transaction: <T, E>(
@@ -275,7 +253,6 @@ export interface DatabaseSnapshot {
   readonly voiceProfiles: Record<string, VoiceProfileRecord>;
   readonly voiceProfileDiagnostics: Record<string, VoiceProfileDiagnosticsRecord>;
   readonly voiceProfileSnapshots: Record<string, VoiceProfileSnapshotRecord>;
-  readonly voiceExampleBatches: Record<string, VoiceExampleBatchRecord>;
   readonly voiceTrainingConsents: Record<string, VoiceTrainingConsentRecord>;
   readonly auditRecords: Record<string, AuditRecord>;
 }
@@ -289,7 +266,6 @@ export interface DatabaseSeed {
   readonly voiceProfiles?: readonly VoiceProfileRecord[];
   readonly voiceProfileDiagnostics?: readonly VoiceProfileDiagnosticsRecord[];
   readonly voiceProfileSnapshots?: readonly VoiceProfileSnapshotRecord[];
-  readonly voiceExampleBatches?: readonly VoiceExampleBatchRecord[];
   readonly voiceTrainingConsents?: readonly VoiceTrainingConsentRecord[];
   readonly auditRecords?: readonly AuditRecord[];
 }

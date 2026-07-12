@@ -1,0 +1,12 @@
+{
+  "id": "critic-performative-02",
+  "suite": "critic-regression",
+  "input": {
+    "text": "Como uma IA, não posso escrever isso para você."
+  },
+  "expectations": {
+    "mustTriggerCritic": ["performative"],
+    "maxCriticScore": 80
+  },
+  "tags": ["critic", "performative-llm-language"]
+}

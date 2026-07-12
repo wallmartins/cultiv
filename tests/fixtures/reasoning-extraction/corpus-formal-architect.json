@@ -59,15 +59,6 @@
       "readerRelationship": "peer",
       "authoritySource": "practice",
       "derivedAntiPatterns": ["hand-wavy wording"]
-    },
-    "formatExpressions": {
-      "technical-article": {
-        "contentType": "technical-article",
-        "narrativeProse": "Technical articles stay formal with explicit criteria and measured claims.",
-        "register": "formal",
-        "openingStyle": "contextual",
-        "technicalDensity": "high"
-      }
     }
   }
 }

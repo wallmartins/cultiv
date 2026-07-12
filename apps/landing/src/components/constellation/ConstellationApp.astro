@@ -1,0 +1,66 @@
+---
+// Cultiv Landing v3 — raiz de composição da constelação.
+// Todo o conteúdo é renderizado no servidor (SEO/GEO); o script cliente só
+// adiciona coreografia. Cada peça é um componente puro em ./; os estilos são
+// globais em styles/constellation.css (o script clona/cria elementos que
+// precisam deles); a lógica vive em scripts/constellation/.
+import "../../styles/constellation.css";
+import IdentityAside from "./IdentityAside.astro";
+import CtaHeader from "./CtaHeader.astro";
+import ConstellationField from "./ConstellationField.astro";
+import DemoOverlay from "./DemoOverlay.astro";
+import PlansOverlay from "./PlansOverlay.astro";
+import NodePanel from "./NodePanel.astro";
+import StackedFooter from "./StackedFooter.astro";
+import Curtain from "./Curtain.astro";
+import ConstellationDoc from "./ConstellationDoc.astro";
+import { clientPayload } from "../../data/constellation-client";
+import type { ConstellationNode } from "../../data/constellation";
+
+interface Props {
+  /** Nó pré-selecionado (páginas /:slug) — painel aberto no HTML inicial. */
+  initial?: ConstellationNode;
+  /** Overlay aberto no HTML inicial (/demo e /planos). */
+  overlay?: "demo" | "planos";
+}
+const { initial, overlay } = Astro.props;
+---
+
+{/* <main> engloba app + doc: o extrator de markdown do aeo.js só lê <main>. */}
+<main
+  class:list={["app", { "has-active": !!initial, "has-sel": !!initial }]}
+  data-app
+  data-initial={initial?.id}
+  data-initial-overlay={overlay}
+>
+  <div class="frame">
+    <IdentityAside />
+
+    <div class="stage">
+      <CtaHeader />
+      <div class="grain" aria-hidden="true"></div>
+      <ConstellationField initial={initial}>
+        <DemoOverlay open={overlay === "demo"} />
+        <PlansOverlay open={overlay === "planos"} />
+      </ConstellationField>
+    </div>
+
+    <StackedFooter />
+  </div>
+
+  <NodePanel initial={initial} />
+  <Curtain />
+
+  <script
+    is:inline
+    type="application/json"
+    data-constellation-data
+    set:html={JSON.stringify(clientPayload())}
+  />
+
+  <ConstellationDoc />
+</main>
+
+<script>
+  import "../../scripts/constellation";
+</script>

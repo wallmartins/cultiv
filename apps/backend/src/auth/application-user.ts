@@ -5,6 +5,7 @@ export interface BackendApplicationUser {
   readonly id: string;
   readonly externalSubject: string;
   readonly status: "active" | "suspended";
+  readonly onboardingCompletedAt?: Date;
   readonly createdAt: Date;
   readonly updatedAt: Date;
 }
@@ -19,6 +20,7 @@ export interface BackendApplicationUserRepository {
       readonly id: string;
       readonly externalSubject: string;
       readonly status?: BackendApplicationUser["status"];
+      readonly onboardingCompletedAt?: Date;
       readonly createdAt?: Date;
       readonly updatedAt?: Date;
     }
@@ -27,4 +29,9 @@ export interface BackendApplicationUserRepository {
   readonly findById: (
     id: string
   ) => Effect.Effect<BackendApplicationUser | undefined, DatabaseError>;
+
+  readonly updateOnboardingStatus: (
+    id: string,
+    completedAt: Date
+  ) => Effect.Effect<BackendApplicationUser, DatabaseError>;
 }

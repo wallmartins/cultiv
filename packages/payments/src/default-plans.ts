@@ -10,7 +10,8 @@ export const DEFAULT_BILLING_PLANS: readonly BillingPlanDefinition[] = [
       { key: "execution.sync_mode", enabled: true },
       { key: "content.language.refinement", enabled: false }
     ],
-    allowedModels: ["llama3.1", "gpt-4o-mini"]
+    allowedModels: ["llama3.1", "gpt-4o-mini"],
+    currency: "BRL"
   },
   {
     id: "criador",
@@ -21,7 +22,8 @@ export const DEFAULT_BILLING_PLANS: readonly BillingPlanDefinition[] = [
       { key: "execution.sync_mode", enabled: true },
       { key: "content.language.refinement", enabled: false }
     ],
-    allowedModels: ["gpt-4o-mini", "gpt-4.1"]
+    allowedModels: ["gpt-4o-mini", "gpt-4.1"],
+    currency: "BRL"
   },
   {
     id: "pro",
@@ -33,6 +35,7 @@ export const DEFAULT_BILLING_PLANS: readonly BillingPlanDefinition[] = [
       { key: "content.language.refinement", enabled: true },
       { key: "rollout.beta.access", enabled: true }
     ],
-    allowedModels: ["gpt-4o-mini", "gpt-4.1", "claude-3-5-sonnet"]
+    allowedModels: ["gpt-4o-mini", "gpt-4.1", "claude-3-5-sonnet"],
+    currency: "BRL"
   }
 ];

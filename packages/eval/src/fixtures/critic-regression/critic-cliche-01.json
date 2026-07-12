@@ -1,0 +1,12 @@
+{
+  "id": "critic-cliche-01",
+  "suite": "critic-regression",
+  "input": {
+    "text": "This revolutionary game-changer will unlock your true potential."
+  },
+  "expectations": {
+    "mustTriggerCritic": ["cliche"],
+    "maxCriticScore": 80
+  },
+  "tags": ["critic", "cliche"]
+}

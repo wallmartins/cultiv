@@ -70,17 +70,6 @@ export const ContributionCodeSchema = Schema.Literal(
 );
 export type ContributionCode = typeof ContributionCodeSchema.Type;
 
-export const AttentionReasonCodeSchema = Schema.Literal(
-  "redundant_example",
-  "too_short",
-  "low_specificity",
-  "format_specific_only",
-  "conflicts_with_profile",
-  "language_conflict",
-  "excluded_from_profile"
-);
-export type AttentionReasonCode = typeof AttentionReasonCodeSchema.Type;
-
 export const FallbackReasonCodeSchema = Schema.Literal("rebuild_failed", "rebuild_in_progress");
 export type FallbackReasonCode = typeof FallbackReasonCodeSchema.Type;
 
@@ -225,135 +214,20 @@ export const VoiceProfileScreenViewSchema = Schema.Struct({
 });
 export type VoiceProfileScreenView = typeof VoiceProfileScreenViewSchema.Type;
 
-export const VoiceExampleEvaluationViewSchema = Schema.Struct({
-  systemWeight: Schema.Number,
-  attentionLevel: AttentionLevelSchema,
-  attentionReasonCodes: Schema.Array(AttentionReasonCodeSchema),
-  contributionCode: ContributionCodeSchema,
-  contributionPreview: Schema.String,
-  userPinned: Schema.Boolean
-});
-export type VoiceExampleEvaluationView = typeof VoiceExampleEvaluationViewSchema.Type;
-
-export const VoiceExampleListItemViewSchema = Schema.Struct({
-  exampleId: Schema.String,
-  version: Schema.Number,
-  state: VoiceExampleStateSchema,
-  text: Schema.String,
-  previewText: Schema.String,
-  language: Schema.String,
-  channel: Schema.optional(Schema.String),
-  format: Schema.optional(Schema.String),
-  explicitContentType: Schema.optional(Schema.String),
-  effectiveContentTypeHints: Schema.Array(Schema.String),
-  classificationLabels: Schema.Array(Schema.String),
-  pinned: Schema.Boolean,
-  pendingProfileImpact: Schema.Boolean,
-  targetProfileVersion: Schema.optional(Schema.Number),
-  evaluation: VoiceExampleEvaluationViewSchema,
-  createdAt: Schema.String,
-  updatedAt: Schema.String
-});
-export type VoiceExampleListItemView = typeof VoiceExampleListItemViewSchema.Type;
-
-export const VoiceExamplesPageViewSchema = Schema.Struct({
-  items: Schema.Array(VoiceExampleListItemViewSchema),
-  total: Schema.Number,
-  limit: Schema.Number,
-  offset: Schema.Number
-});
-export type VoiceExamplesPageView = typeof VoiceExamplesPageViewSchema.Type;
-
-export const VoiceExampleCreateInputSchema = Schema.Struct({
-  text: Schema.String,
-  language: Schema.optional(Schema.String),
-  channel: Schema.optional(Schema.String),
-  format: Schema.optional(Schema.String),
-  explicitContentType: Schema.optional(Schema.String),
-  context: Schema.optional(Schema.String),
-  antiPatternsExplicit: Schema.optional(Schema.Array(Schema.String)),
-  userLabels: Schema.optional(Schema.Array(Schema.String)),
-  pinned: Schema.optional(Schema.Boolean),
-  performance: Schema.optional(
-    Schema.Struct({
-      channel: Schema.optional(Schema.String),
-      publishedAt: Schema.optional(Schema.String),
-      selfRating: Schema.optional(Schema.Number),
-      likes: Schema.optional(Schema.Number),
-      comments: Schema.optional(Schema.Number)
-    })
-  )
-});
-export type VoiceExampleCreateInput = typeof VoiceExampleCreateInputSchema.Type;
-
-export const VoiceExampleUpdateInputSchema = Schema.Struct({
-  text: Schema.optional(Schema.String),
-  language: Schema.optional(Schema.String),
-  channel: Schema.optional(Schema.String),
-  format: Schema.optional(Schema.String),
-  explicitContentType: Schema.optional(Schema.String),
-  context: Schema.optional(Schema.String),
-  antiPatternsExplicit: Schema.optional(Schema.Array(Schema.String)),
-  userLabels: Schema.optional(Schema.Array(Schema.String)),
-  pinned: Schema.optional(Schema.Boolean),
-  state: Schema.optional(VoiceExampleStateSchema)
-});
-export type VoiceExampleUpdateInput = typeof VoiceExampleUpdateInputSchema.Type;
-
-export const VoiceExampleBatchCreateInputSchema = Schema.Struct({
-  expiresAt: Schema.optional(Schema.String)
-});
-export type VoiceExampleBatchCreateInput = typeof VoiceExampleBatchCreateInputSchema.Type;
-
-export const VoiceExampleBatchItemInputSchema = Schema.Struct({
-  clientItemId: Schema.String,
-  input: VoiceExampleCreateInputSchema
-});
-export type VoiceExampleBatchItemInput = typeof VoiceExampleBatchItemInputSchema.Type;
-
-export const VoiceExampleBatchItemsInputSchema = Schema.Struct({
-  items: Schema.Array(VoiceExampleBatchItemInputSchema)
-});
-export type VoiceExampleBatchItemsInput = typeof VoiceExampleBatchItemsInputSchema.Type;
-
-export const VoiceExampleBatchItemResultViewSchema = Schema.Struct({
-  clientItemId: Schema.String,
-  accepted: Schema.Boolean,
-  exampleId: Schema.optional(Schema.String),
-  reasonCode: Schema.optional(ReasonCodeSchema),
-  message: Schema.optional(Schema.String)
-});
-export type VoiceExampleBatchItemResultView = typeof VoiceExampleBatchItemResultViewSchema.Type;
-
-export const VoiceExampleBatchViewSchema = Schema.Struct({
-  batchId: Schema.String,
-  status: Schema.Literal("open", "committed", "expired"),
-  expiresAt: Schema.String,
-  acceptedItems: Schema.Number,
-  rejectedItems: Schema.Number,
-  itemResults: Schema.Array(VoiceExampleBatchItemResultViewSchema)
-});
-export type VoiceExampleBatchView = typeof VoiceExampleBatchViewSchema.Type;
-
-export const VoiceExampleBatchCommitResultViewSchema = Schema.Struct({
-  batchId: Schema.String,
-  committedAt: Schema.String,
-  acceptedItems: Schema.Number,
-  rejectedItems: Schema.Number,
-  targetProfileVersion: Schema.optional(Schema.Number)
-});
-export type VoiceExampleBatchCommitResultView = typeof VoiceExampleBatchCommitResultViewSchema.Type;
-
-export const decodeVoiceExampleListItemView = createSchemaDecoder(
-  "VoiceExampleListItemView",
-  VoiceExampleListItemViewSchema
-);
 export const VoiceTrainingConsentStatusViewSchema = Schema.Struct({
   granted: Schema.Boolean,
   grantedAt: Schema.optional(Schema.String),
   revokedAt: Schema.optional(Schema.String)
 });
 export type VoiceTrainingConsentStatusView = typeof VoiceTrainingConsentStatusViewSchema.Type;
+
+export const VoiceTrainingConsentActionSchema = Schema.Literal("grant", "revoke");
+export type VoiceTrainingConsentAction = typeof VoiceTrainingConsentActionSchema.Type;
+
+export const VoiceTrainingConsentInputSchema = Schema.Struct({
+  action: Schema.optional(VoiceTrainingConsentActionSchema)
+});
+export type VoiceTrainingConsentInput = typeof VoiceTrainingConsentInputSchema.Type;
 
 export const decodeVoiceProfileScreenView = createSchemaDecoder("VoiceProfileScreenView", VoiceProfileScreenViewSchema);
 export const decodeVoiceProfileDiagnosticsView = createSchemaDecoder(
@@ -363,20 +237,4 @@ export const decodeVoiceProfileDiagnosticsView = createSchemaDecoder(
 export const decodeVoiceTrainingConsentStatusView = createSchemaDecoder(
   "VoiceTrainingConsentStatusView",
   VoiceTrainingConsentStatusViewSchema
-);
-export const decodeVoiceExamplesPageView = createSchemaDecoder("VoiceExamplesPageView", VoiceExamplesPageViewSchema);
-export const decodeVoiceExampleCreateInput = createSchemaDecoder("VoiceExampleCreateInput", VoiceExampleCreateInputSchema);
-export const decodeVoiceExampleUpdateInput = createSchemaDecoder("VoiceExampleUpdateInput", VoiceExampleUpdateInputSchema);
-export const decodeVoiceExampleBatchCreateInput = createSchemaDecoder(
-  "VoiceExampleBatchCreateInput",
-  VoiceExampleBatchCreateInputSchema
-);
-export const decodeVoiceExampleBatchItemsInput = createSchemaDecoder(
-  "VoiceExampleBatchItemsInput",
-  VoiceExampleBatchItemsInputSchema
-);
-export const decodeVoiceExampleBatchView = createSchemaDecoder("VoiceExampleBatchView", VoiceExampleBatchViewSchema);
-export const decodeVoiceExampleBatchCommitResultView = createSchemaDecoder(
-  "VoiceExampleBatchCommitResultView",
-  VoiceExampleBatchCommitResultViewSchema
 );

@@ -1,5 +1,6 @@
-.output
-.vercel
-.nitro
-node_modules
-.env
+# Build / deploy artifacts
+/dist/
+/.output/
+/.vercel/
+/.nitro/
+/node_modules/

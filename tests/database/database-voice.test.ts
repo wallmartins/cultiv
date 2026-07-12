@@ -2,11 +2,8 @@ import { describe, expect, it } from "vitest";
 import { Effect } from "effect";
 import {
   createDatabase,
-  DatabaseVoiceBatchAlreadyExistsError,
   DatabaseVoiceExampleAlreadyExistsError,
   hydrateDatabase,
-  toVoiceExampleBatchDomain,
-  toVoiceExampleBatchRecord,
   toVoiceExampleDomain,
   toVoiceExampleRecord,
   toVoiceProfileDiagnosticsDomain,
@@ -102,26 +99,6 @@ describe("database voice aggregate", () => {
       },
       createdAt: "2026-05-14T00:00:00.000Z"
     });
-    const batchRecord = toVoiceExampleBatchRecord({
-      id: "batch_1",
-      userId: "user_1",
-      status: "open",
-      expiresAt: "2026-05-14T01:00:00.000Z",
-      acceptedItems: 1,
-      rejectedItems: 0,
-      items: [
-        {
-          id: "batch-item_1",
-          batchId: "batch_1",
-          clientItemId: "client_1",
-          accepted: true,
-          exampleId: "example_1",
-          createdAt: "2026-05-14T00:00:00.000Z"
-        }
-      ],
-      createdAt: "2026-05-14T00:00:00.000Z",
-      updatedAt: "2026-05-14T00:00:00.000Z"
-    });
 
     expect(exampleRecord.version).toBe(1);
     expect(toVoiceExampleDomain(exampleRecord).text).toBe("Eu escrevo de forma direta.");
@@ -132,8 +109,6 @@ describe("database voice aggregate", () => {
     expect(toVoiceProfileDiagnosticsDomain(diagnosticsRecord).materialBase.totalExamples).toBe(1);
     expect(snapshotRecord.version).toBe(1);
     expect(toVoiceProfileSnapshotDomain(snapshotRecord).contentType).toBe("linkedin-post");
-    expect(batchRecord.version).toBe(1);
-    expect(toVoiceExampleBatchDomain(batchRecord).items).toHaveLength(1);
   });
 
   it("persists voice examples, profiles, snapshots and batches", () => {
@@ -229,41 +204,16 @@ describe("database voice aggregate", () => {
       createdAt: "2026-05-14T00:10:00.000Z"
     }));
 
-    const batch = Effect.runSync(database.voiceExampleBatches.create({
-      id: "batch_2",
-      userId: "user_1",
-      status: "committed",
-      expiresAt: "2026-05-14T01:00:00.000Z",
-      committedAt: "2026-05-14T00:12:00.000Z",
-      targetProfileVersion: 4,
-      acceptedItems: 1,
-      rejectedItems: 0,
-      items: [
-        {
-          id: "batch-item_2",
-          batchId: "batch_2",
-          clientItemId: "client_2",
-          accepted: true,
-          exampleId: "example_2",
-          createdAt: "2026-05-14T00:11:00.000Z"
-        }
-      ],
-      createdAt: "2026-05-14T00:11:00.000Z",
-      updatedAt: "2026-05-14T00:12:00.000Z"
-    }));
-
     expect(example.pinned).toBe(true);
     expect(profile.snapshotId).toBe("snapshot_3");
     expect(profile.profileVersion).toBe(3);
     expect(diagnostics.pendingVersion).toBe(4);
     expect(snapshot.sourceProfileVersion).toBe(3);
-    expect(batch.status).toBe("committed");
 
     expect(Effect.runSync(database.voiceExamples.listByUser("user_1"))).toHaveLength(1);
     expect(Effect.runSync(database.voiceProfiles.getByUser("user_1"))?.version).toBe(1);
     expect(Effect.runSync(database.voiceProfileDiagnostics.getByUser("user_1"))?.pendingVersion).toBe(4);
     expect(Effect.runSync(database.voiceProfileSnapshots.listByUser("user_1"))).toHaveLength(1);
-    expect(Effect.runSync(database.voiceExampleBatches.listByUser("user_1"))).toHaveLength(1);
   });
 
   it("rehydrates voice aggregate state from a snapshot", () => {
@@ -299,7 +249,7 @@ describe("database voice aggregate", () => {
     expect(Effect.runSync(rehydrated.voiceExamples.listByUser("user_2"))).toHaveLength(1);
   });
 
-  it("throws typed errors for duplicate voice examples and batches", () => {
+  it("throws typed errors for duplicate voice examples", () => {
     const database = createDatabase();
     Effect.runSync(database.voiceExamples.create({
       id: "example_4",
@@ -351,37 +301,7 @@ describe("database voice aggregate", () => {
       )
     );
 
-    Effect.runSync(database.voiceExampleBatches.create({
-      id: "batch_dup",
-      userId: "user_1",
-      status: "open",
-      expiresAt: "2026-05-14T01:00:00.000Z",
-      acceptedItems: 0,
-      rejectedItems: 0,
-      items: [],
-      createdAt: "2026-05-14T00:00:00.000Z",
-      updatedAt: "2026-05-14T00:00:00.000Z"
-    }));
-
-    const duplicateBatch = Effect.runSync(
-      Effect.either(
-        database.voiceExampleBatches.create({
-          id: "batch_dup",
-          userId: "user_1",
-          status: "open",
-          expiresAt: "2026-05-14T01:00:00.000Z",
-          acceptedItems: 0,
-          rejectedItems: 0,
-          items: [],
-          createdAt: "2026-05-14T00:00:00.000Z",
-          updatedAt: "2026-05-14T00:00:00.000Z"
-        })
-      )
-    );
-
     expect(duplicateExample._tag).toBe("Left");
     expect(duplicateExample.left).toBeInstanceOf(DatabaseVoiceExampleAlreadyExistsError);
-    expect(duplicateBatch._tag).toBe("Left");
-    expect(duplicateBatch.left).toBeInstanceOf(DatabaseVoiceBatchAlreadyExistsError);
   });
 });

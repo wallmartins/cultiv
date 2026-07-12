@@ -1,0 +1,148 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-07-09T23:30:00Z",
+  "title": "Design System: Cultiv",
+  "extensions": {
+    "themes": ["light", "dark"],
+    "colorMeta": {
+      "bg": { "role": "neutral", "displayName": "Gallery Off-White", "canonical": "oklch(0.990 0 0)", "dark": "oklch(0.160 0 0)", "tonalRamp": ["oklch(0.16 0 0)", "oklch(0.24 0 0)", "oklch(0.36 0 0)", "oklch(0.48 0 0)", "oklch(0.62 0 0)", "oklch(0.78 0 0)", "oklch(0.90 0 0)", "oklch(0.99 0 0)"] },
+      "surface": { "role": "neutral", "displayName": "Raised Graphite Panel", "canonical": "oklch(0.965 0 0)", "dark": "oklch(0.205 0 0)" },
+      "ink": { "role": "neutral", "displayName": "Graphite Ink Text", "canonical": "oklch(0.190 0 0)", "dark": "oklch(0.930 0 0)" },
+      "primary": { "role": "primary", "displayName": "Graphite Ink", "canonical": "oklch(0.240 0 0)", "dark": "oklch(0.930 0 0)", "tonalRamp": ["oklch(0.16 0 0)", "oklch(0.22 0 0)", "oklch(0.30 0 0)", "oklch(0.40 0 0)", "oklch(0.52 0 0)", "oklch(0.66 0 0)", "oklch(0.82 0 0)", "oklch(0.94 0 0)"] },
+      "accent": { "role": "secondary", "displayName": "Acid Chartreuse", "canonical": "oklch(0.830 0.190 128)", "dark": "oklch(0.860 0.200 128)", "tonalRamp": ["oklch(0.30 0.09 128)", "oklch(0.40 0.12 128)", "oklch(0.50 0.15 128)", "oklch(0.60 0.17 128)", "oklch(0.70 0.185 128)", "oklch(0.79 0.19 128)", "oklch(0.86 0.20 128)", "oklch(0.93 0.15 128)"] },
+      "on-accent": { "role": "neutral", "displayName": "On-Accent Ink", "canonical": "oklch(0.190 0 0)", "dark": "oklch(0.190 0 0)", "note": "Theme-invariant: acid stays bright in both modes, so its text stays dark in both." },
+      "muted": { "role": "neutral", "displayName": "Muted Grey", "canonical": "oklch(0.440 0 0)", "dark": "oklch(0.700 0 0)" },
+      "line": { "role": "neutral", "displayName": "Hairline", "canonical": "oklch(0.885 0 0)", "dark": "oklch(0.285 0 0)" },
+      "focus-ring": { "role": "neutral", "displayName": "Focus Ring", "canonical": "oklch(0.190 0 0)", "dark": "oklch(0.860 0.200 128)", "note": "Ink in light mode (acid fails 3:1 non-text contrast on the light bg, ~1.4:1); acid in dark mode, where it passes comfortably." }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Hero and the final CTA statement only. Weight 560, tracking -0.03em; the 6rem clamp max IS the ceiling, tracking floor -0.04em." },
+      "headline": { "displayName": "Headline", "purpose": "Major section headings. No eyebrow/kicker above them, ever." },
+      "title": { "displayName": "Title", "purpose": "Sub-section and card titles; the clamp floor keeps a full >=1.25 step above body at every viewport." },
+      "body": { "displayName": "Body", "purpose": "Prose, capped at 68ch (--measure). Dark mode opens line-height 1.6 -> 1.68 and tracking 0 -> 0.012em." },
+      "label": { "displayName": "Label", "purpose": "UI labels, nav, captions, fine print. Sentence case. Button text runs a step up (0.9375rem, weight 500, 0.005em)." },
+      "mono": { "displayName": "Mono (support)", "purpose": "Machine artifacts only: the Voice Transform's generic-AI 'before' text and the founder-note's provenance receipt line. Nowhere else. Fragment Mono ships one weight (400)." }
+    },
+    "shadows": [
+      { "name": "shadow-lift", "value": "0 6px 20px oklch(0 0 0 / 0.14)", "dark": "0 6px 20px oklch(0 0 0 / 0.5)", "purpose": "State-lift: hover on interactive graphite elements only (primary buttons), paired with a -2px translate. Never a resting card shadow." },
+      { "name": "glow-signal", "value": "0 0 32px oklch(0.83 0.19 128 / 0.45)", "dark": "0 0 36px oklch(0.86 0.2 128 / 0.5)", "purpose": "Acid ignition glow on the Voice Transform at ignition and the acid CTA's hover. Motion material, not resting elevation; reduced-motion removes even the ignited panel's resting glow." }
+    ],
+    "motion": [
+      { "name": "ease-out", "value": "cubic-bezier(0.22, 1, 0.36, 1)", "purpose": "Quint ease-out for state changes (hover, toggles, theme flips)." },
+      { "name": "ease-out-expo", "value": "cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "Entrances: hero rise, scroll reveals, the Transform's per-word cascade." },
+      { "name": "t-fast", "value": "160ms", "purpose": "Buttons, hovers, chips." },
+      { "name": "t-med", "value": "260ms", "purpose": "Shadows, tags, nav bg." },
+      { "name": "t-slow", "value": "600ms", "purpose": "Scroll reveals (staggered 70ms per --i index) and the Transform crossfade." },
+      { "name": "signal-handoff", "value": "700ms ease-out-expo", "purpose": "The hero CTA draining from acid to graphite as the Transform mark ignites — exactly one acid element at any moment in the fold." }
+    ],
+    "breakpoints": [
+      { "name": "cal-prompt-indent", "value": "480px", "purpose": "Calibration prompt cards reduce their alternating indent." },
+      { "name": "footer-stack", "value": "600px", "purpose": "Footer row stacks vertically." },
+      { "name": "nav-mobile", "value": "760px", "purpose": "Nav links and bar tools move into the full-height <dialog> sheet; burger appears." },
+      { "name": "cal-stack", "value": "900px", "purpose": "Calibration two-column grid stacks; the wizard loses its sticky position." }
+    ],
+    "zIndex": [
+      { "name": "z-nav", "value": "10" },
+      { "name": "z-sheet", "value": "30" },
+      { "name": "z-skip", "value": "40" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Accent CTA",
+      "kind": "button",
+      "refersTo": "button-accent",
+      "description": "The conversion CTA of the fold that owns the signal (featured plan, final CTA, mobile sheet; the hero CTA only while the Transform is still grey). One per fold, always with theme-invariant dark On-Accent text.",
+      "html": "<button class=\"ds-btn-accent\">Começar o teste grátis</button>",
+      "css": ".ds-btn-accent { background: oklch(0.830 0.190 128); color: oklch(0.190 0 0); font: 500 0.9375rem/1.2 var(--font-grotesque, system-ui); letter-spacing: 0.005em; padding: 14px 28px; border: none; border-radius: 999px; cursor: pointer; transition: transform 160ms cubic-bezier(0.22,1,0.36,1), box-shadow 260ms cubic-bezier(0.22,1,0.36,1); } .ds-btn-accent:hover { transform: translateY(-2px); box-shadow: 0 0 32px oklch(0.83 0.19 128 / 0.45); } .ds-btn-accent:active { transform: translateY(0) scale(0.98); } .ds-btn-accent:focus-visible { outline: 2px solid oklch(0.190 0 0); outline-offset: 2px; } @media (prefers-color-scheme: dark) { .ds-btn-accent { background: oklch(0.860 0.200 128); } .ds-btn-accent:hover { box-shadow: 0 0 36px oklch(0.86 0.2 128 / 0.5); } .ds-btn-accent:focus-visible { outline-color: oklch(0.860 0.200 128); } }"
+    },
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Structural graphite action — the nav CTA (compact 10px 20px, 0.875rem; graphite everywhere, always) and the JS-off/reduced-motion hero CTA. Inverts to near-white in dark.",
+      "html": "<button class=\"ds-btn-primary\">Começar o teste grátis</button>",
+      "css": ".ds-btn-primary { background: oklch(0.240 0 0); color: oklch(0.990 0 0); font: 500 0.9375rem/1.2 var(--font-grotesque, system-ui); letter-spacing: 0.005em; padding: 14px 28px; border: none; border-radius: 999px; cursor: pointer; transition: transform 160ms cubic-bezier(0.22,1,0.36,1), box-shadow 260ms cubic-bezier(0.22,1,0.36,1); } .ds-btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px oklch(0 0 0 / 0.14); } .ds-btn-primary:active { transform: translateY(0) scale(0.98); } .ds-btn-primary:focus-visible { outline: 2px solid oklch(0.190 0 0); outline-offset: 2px; } @media (prefers-color-scheme: dark) { .ds-btn-primary { background: oklch(0.930 0 0); color: oklch(0.160 0 0); } .ds-btn-primary:hover { box-shadow: 0 6px 20px oklch(0 0 0 / 0.5); } .ds-btn-primary:focus-visible { outline-color: oklch(0.860 0.200 128); } }"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Tertiary action. Transparent with a hairline border that darkens to ink on hover; -2px lift, no shadow.",
+      "html": "<button class=\"ds-btn-ghost\">Ver funcionando</button>",
+      "css": ".ds-btn-ghost { background: transparent; color: oklch(0.190 0 0); font: 500 0.9375rem/1.2 var(--font-grotesque, system-ui); letter-spacing: 0.005em; padding: 13px 27px; border: 1px solid oklch(0.885 0 0); border-radius: 999px; cursor: pointer; transition: border-color 160ms cubic-bezier(0.22,1,0.36,1), transform 160ms cubic-bezier(0.22,1,0.36,1); } .ds-btn-ghost:hover { border-color: oklch(0.190 0 0); transform: translateY(-2px); } .ds-btn-ghost:active { transform: translateY(0) scale(0.98); } .ds-btn-ghost:focus-visible { outline: 2px solid oklch(0.190 0 0); outline-offset: 2px; } @media (prefers-color-scheme: dark) { .ds-btn-ghost { color: oklch(0.930 0 0); border-color: oklch(0.285 0 0); } .ds-btn-ghost:hover { border-color: oklch(0.930 0 0); } .ds-btn-ghost:focus-visible { outline-color: oklch(0.860 0.200 128); } }"
+    },
+    {
+      "name": "Chip",
+      "kind": "chip",
+      "refersTo": "chip",
+      "description": "Informational pill (the six generation intents). Not selectable; hairline border shifts to ink on hover.",
+      "html": "<span class=\"ds-chip\">Compartilhar uma ideia</span>",
+      "css": ".ds-chip { display: inline-flex; align-items: center; background: transparent; color: oklch(0.190 0 0); font: 500 0.8125rem/1.3 var(--font-grotesque, system-ui); letter-spacing: 0.01em; padding: 8px 16px; border: 1px solid oklch(0.885 0 0); border-radius: 999px; transition: border-color 160ms cubic-bezier(0.22,1,0.36,1); } .ds-chip:hover { border-color: oklch(0.190 0 0); } @media (prefers-color-scheme: dark) { .ds-chip { color: oklch(0.930 0 0); border-color: oklch(0.285 0 0); } .ds-chip:hover { border-color: oklch(0.930 0 0); } }"
+    },
+    {
+      "name": "Segmented Toggle",
+      "kind": "custom",
+      "refersTo": null,
+      "description": "Billing-period / currency control. Pill group with 3px inner padding; the active option fills graphite with bg-colored text. Script-only: hidden until JS wires it (height reserved so nothing reflows); the whole row collapses under html:not(.js).",
+      "html": "<div class=\"ds-toggle\" role=\"group\" aria-label=\"Período de cobrança\"><button class=\"ds-toggle-opt is-active\" aria-pressed=\"true\">Mensal</button><button class=\"ds-toggle-opt\" aria-pressed=\"false\">Anual · −20%</button></div>",
+      "css": ".ds-toggle { display: inline-flex; border: 1px solid oklch(0.885 0 0); border-radius: 999px; padding: 3px; gap: 2px; } .ds-toggle-opt { border: 0; background: transparent; color: oklch(0.440 0 0); font: 500 0.8125rem/1.3 var(--font-grotesque, system-ui); letter-spacing: 0.01em; padding: 8px 18px; border-radius: 999px; cursor: pointer; transition: background-color 160ms cubic-bezier(0.22,1,0.36,1), color 160ms cubic-bezier(0.22,1,0.36,1); } .ds-toggle-opt.is-active { background: oklch(0.240 0 0); color: oklch(0.990 0 0); } @media (prefers-color-scheme: dark) { .ds-toggle { border-color: oklch(0.285 0 0); } .ds-toggle-opt { color: oklch(0.700 0 0); } .ds-toggle-opt.is-active { background: oklch(0.930 0 0); color: oklch(0.160 0 0); } }"
+    },
+    {
+      "name": "Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Flat, tonally-layered container: Surface fill on a bg page (Transform panel, calibration prompts) OR transparent with a hairline border (plan cards); the featured plan drops the border for a Surface fill — a tonal step instead of a shadow. 12px radius, no resting shadow, nested cards prohibited.",
+      "html": "<div class=\"ds-card\"><h3 class=\"ds-card-title\">Criador</h3><p class=\"ds-card-body\">Para quem publica toda semana.</p></div>",
+      "css": ".ds-card { background: oklch(0.965 0 0); color: oklch(0.190 0 0); border-radius: 12px; padding: 24px; } .ds-card-title { font: 520 1.4rem/1.15 var(--font-grotesque, system-ui); letter-spacing: -0.01em; margin: 0 0 8px; } .ds-card-body { font: 400 1.0625rem/1.6 var(--font-grotesque, system-ui); color: oklch(0.440 0 0); margin: 0; max-width: 60ch; } @media (prefers-color-scheme: dark) { .ds-card { background: oklch(0.205 0 0); color: oklch(0.930 0 0); } .ds-card-body { color: oklch(0.700 0 0); } }"
+    },
+    {
+      "name": "Voice Transform (Signal Handoff)",
+      "kind": "custom",
+      "refersTo": null,
+      "description": "Signature moment: grey Fragment-Mono generic-AI text ignites into the author's grotesque voice, one sentence marked acid (accent fill, On-Accent text, 4px radius, 0.12em 0.28em padding, box-decoration-break: clone). The fold's acid lives on exactly one element at a time — the hero CTA holds it until ignition, then yields it to the mark over 700ms. Resting/JS-off default is the ignited state; reduced motion collapses to a crossfade with no glow and a never-acid CTA.",
+      "html": "<figure class=\"ds-vt\"><p class=\"ds-vt-before\">No cenário atual, produzir conteúdo de forma consistente é fundamental para construir uma audiência engajada.</p><p class=\"ds-vt-after\">Eu quase larguei a newsletter em março. <mark class=\"ds-vt-acid\">A voz é o único ativo que não se terceiriza.</mark> Foi isso que mudou.</p></figure>",
+      "css": ".ds-vt { display: grid; margin: 0; background: oklch(0.965 0 0); border-radius: 12px; padding: 40px; } .ds-vt > p { grid-area: 1 / 1; margin: 0; transition: opacity 600ms cubic-bezier(0.22,1,0.36,1), filter 600ms cubic-bezier(0.22,1,0.36,1); } .ds-vt-before { font: 400 0.9375rem/1.55 var(--font-mono, ui-monospace); color: oklch(0.440 0 0); max-width: 72ch; opacity: 0; } .ds-vt-after { font: 500 clamp(1.35rem, 2.6vw, 1.8rem)/1.38 var(--font-grotesque, system-ui); letter-spacing: -0.012em; color: oklch(0.190 0 0); } .ds-vt.is-before .ds-vt-before { opacity: 1; } .ds-vt.is-before .ds-vt-after { opacity: 0; } .ds-vt.is-ignited { box-shadow: 0 0 32px oklch(0.83 0.19 128 / 0.45); } .ds-vt-acid { background: oklch(0.830 0.190 128); color: oklch(0.190 0 0); padding: 0.12em 0.28em; border-radius: 4px; box-decoration-break: clone; -webkit-box-decoration-break: clone; } @media (prefers-color-scheme: dark) { .ds-vt { background: oklch(0.205 0 0); } .ds-vt-after { color: oklch(0.930 0 0); } .ds-vt-acid { background: oklch(0.860 0.200 128); } .ds-vt.is-ignited { box-shadow: 0 0 36px oklch(0.86 0.2 128 / 0.5); } } @media (prefers-reduced-motion: reduce) { .ds-vt.is-ignited { box-shadow: none; } }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Signal in the Noise",
+    "overview": "Cultiv is a near-silent instrument with one electric nerve. The surface is graphite — a disciplined monochrome architecture of near-black, off-white, and true greys that carries no hue and makes no noise. Against that quiet, a single acid chartreuse does every meaningful thing: the conversion CTA of the fold that owns the signal, the moment where flat generic-AI text ignites into the author's own voice, the marked sentence in the founder's note. On a page selling authenticity in a sea of generic AI, a loud multi-color palette would be the lie; a single unforgettable signal against monochrome is the argument rendered in color. The system is fully dual-mode (light is a bright gallery wall, dark a graphite room with the signal glowing), and motion is choreographed but never load-bearing: content is visible by default, and any signal that no human is present releases every reveal at once.",
+    "keyCharacteristics": [
+      "Monochrome graphite architecture (zero hue in the neutrals) + one saturated acid-chartreuse signal (hue 128°).",
+      "The acid appears on ≤10% of any screen; its rarity is what makes it a signal.",
+      "Single committed grotesque (Bricolage Grotesque, variable, self-hosted); scale and weight carry hierarchy, not color or ornament.",
+      "Choreographed motion with a signature Signal Handoff ('voice ignites') moment; content never depends on JS or motion to be visible; full reduced-motion path.",
+      "Light and dark are co-equal; contrast verified in both (body ≥4.5:1, ink ≥7:1); focus ring is Ink on light, acid on dark."
+    ],
+    "rules": [
+      { "name": "The One Signal Rule", "body": "Acid chartreuse appears on ≤10% of any screen and never carries body text. It marks the single most important action or the exact instant of transformation. Its final form is the Signal Handoff: within the hero fold the acid lives on exactly one element at a time — the CTA holds it until the Transform ignites, then yields it to the mark. The nav CTA is graphite everywhere, always.", "section": "colors" },
+      { "name": "The Zero-Hue Rule", "body": "Every neutral is chroma 0 — pure graphite, pure off-white, pure grey. No hidden warmth, no cool tint. The acid is the only color in the building.", "section": "colors" },
+      { "name": "The No-Eyebrow Rule", "body": "No tiny uppercase tracked kicker above section headings. Sections open on the Headline itself; if a section needs framing, it earns it with a full sentence or the acid signal, not a label.", "section": "typography" },
+      { "name": "The Weight-Not-Color Rule", "body": "Emphasis comes from weight and size, never from coloring a word — except the single acid mark permitted by The One Signal Rule. The one sanctioned tonal move is the crescendo: setup line in Muted, punch line in Ink.", "section": "typography" },
+      { "name": "The Flat-By-Default Rule", "body": "Surfaces are flat at rest and separated by tone. Shadows appear only as a response to state; the acid glow is a motion material, not resting elevation. Never pair a 1px border with a soft ≥16px drop shadow.", "section": "elevation" },
+      { "name": "The Never-Invisible Rule", "body": "Content must never stay hidden in a non-interactive context. Reveals release on reduced motion, hidden tabs (visibilitychange), print, the 3s no-input human-presence watchdog, and a head watchdog that drops the js class if the reveal module never runs. Choreography is a reward for a present human, not a gate.", "section": "components" }
+    ],
+    "dos": [
+      "Do keep every neutral at chroma 0 (The Zero-Hue Rule); the acid is the only color.",
+      "Do reserve acid chartreuse for ≤10% of the screen — one CTA per conversion fold, the transform mark, the note mark, the 2px nav hover underline, selection, the dark-mode focus ring.",
+      "Do put On-Accent (theme-invariant dark ink) text on every acid fill.",
+      "Do define and verify both light and dark for every token: body ≥4.5:1, ink ≥7:1 — and ring focus in Ink on light, acid on dark.",
+      "Do build hierarchy from weight and scale in one grotesque; display tracking ≥ -0.04em, clamp max ≤ 6rem.",
+      "Do keep cards flat and tonally layered; radius ≤ 12px; shadows only on state; a featured card is a Surface tonal step, not a glow.",
+      "Do keep content visible by default and hand choreography only to a present human (The Never-Invisible Rule).",
+      "Do self-host both fonts with the metric-matched fallback so the swap is layout-shift-free; never load type from a third-party CDN."
+    ],
+    "donts": [
+      "Don't drift toward generic AI-SaaS — no violet gradients, Inter-on-white template, sparkle/robot icons, hero-metric grids, or identical card grids.",
+      "Don't fall into the saturated editorial-magazine reflex — no display-serif italic + tracked mono labels + ruled broadsheet.",
+      "Don't ship timid minimalism; monochrome here is high-contrast and committed.",
+      "Don't tint the neutrals warm or cool 'for elegance'.",
+      "Don't let a second element glow acid on the same fold — the Signal Handoff exists so the hero never breaks this; the nav CTA stays graphite forever.",
+      "Don't color the carets — blinking cursors are Ink; they carry presence, not signal.",
+      "Don't use a tiny uppercase tracked eyebrow or ornamental 01/02 numbering as section scaffolding (the How-It-Works steps are the one earned sequence).",
+      "Don't pair a 1px border with a ≥16px soft shadow, over-round cards past 16px, or use gradient text.",
+      "Don't communicate errors or status with color alone — acid means 'signal', not 'success'."
+    ]
+  }
+}

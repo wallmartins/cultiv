@@ -1,0 +1,20 @@
+{
+  "id": "voice-fidelity-linkedin-technical-01",
+  "suite": "voice-fidelity",
+  "input": {
+    "contentType": "linkedin-post",
+    "briefing": "Write a LinkedIn post explaining one concrete technique for reducing API latency",
+    "voiceProfile": {
+      "type": "fixture",
+      "path": "voice-fidelity/profiles/technical-writer.json"
+    },
+    "qualityMode": "balanced"
+  },
+  "expectations": {
+    "mustContain": ["latency"],
+    "mustNotContain": ["seamlessly", "magic"],
+    "wordCountRange": { "min": 80, "max": 300 },
+    "minDriftScore": 70
+  },
+  "tags": ["linkedin", "technical", "precise"]
+}

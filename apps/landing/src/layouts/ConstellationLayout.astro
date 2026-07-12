@@ -1,0 +1,119 @@
+---
+// Head/shell da landing "constelação" (Cultiv Landing v3).
+// As páginas legais antigas continuam em Layout.astro; este layout serve a
+// home e as páginas por nó (/perfil-de-voz, /tom, …), que são o mesmo app
+// com um ponto pré-selecionado e meta próprios.
+import "../styles/fonts.css";
+import "@my-ai-orchestrator/ui/tokens.css";
+import { APP_ORIGIN } from "../config";
+import { SITE } from "../data/constellation";
+
+interface Props {
+  title: string;
+  description: string;
+  /** JSON-LD graph objects for this page. */
+  jsonLd: object[];
+}
+const { title, description, jsonLd } = Astro.props;
+
+const canonical = new URL(Astro.url.pathname, Astro.site).href;
+const ogImage = new URL("/og-image.png", Astro.site).href;
+const preconnectApp = Astro.site && new URL(Astro.site).origin !== APP_ORIGIN;
+---
+
+<!doctype html>
+<html lang="pt-BR" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <meta property="og:site_name" content={SITE.name} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:locale" content="pt_BR" />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Cultiv — Escreve como você pensa." />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+    {/* Ícones e manifest sincronizados de packages/ui/assets (sync-brand.mjs). */}
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    {/* O app abre no tema escuro (céu da constelação); o toggle persiste a escolha. */}
+    <meta name="theme-color" content="#FCFCFC" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#121212" />
+    {preconnectApp && <link rel="preconnect" href={APP_ORIGIN} />}
+    <script
+      is:inline
+      type="application/ld+json"
+      set:html={JSON.stringify({ "@context": "https://schema.org", "@graph": jsonLd })}
+    />
+    <script is:inline>
+      // Antes do primeiro paint: marca JS disponível (esconde o .doc de SEO,
+      // arma a cortina) e restaura o tema persistido. Padrão: escuro.
+      (function () {
+        var d = document.documentElement;
+        d.classList.add("js");
+        try {
+          var t = localStorage.getItem("cultiv-theme");
+          if (t === "light" || t === "dark") d.dataset.theme = t;
+        } catch (_) {}
+      })();
+    </script>
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>
+
+<style is:global>
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+    line-height: var(--lh-body);
+    letter-spacing: var(--ls-body);
+    font-optical-sizing: auto;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  /* Com JS o app vive em uma viewport fixa (a rolagem é interna, por
+     breakpoint); sem JS a página flui e o .doc fica legível abaixo. */
+  html.js body {
+    height: 100dvh;
+    overflow: hidden;
+  }
+  ::selection {
+    background: var(--accent);
+    color: var(--on-accent);
+  }
+  :focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+</style>

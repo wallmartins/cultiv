@@ -2,6 +2,17 @@ import type { VoiceProfileConfidence } from "@my-ai-orchestrator/contracts";
 
 export const CALIBRATION_WIZARD_STEPS = [
   {
+    id: "context_setup",
+    label: "Contexto",
+    prompt: "",
+    targetWords: 0,
+    maxWords: 0,
+    targetSentences: 0,
+    capturesFeatures: [] as const,
+    themePool: [] as const,
+    defaultTheme: ""
+  },
+  {
     id: "micro_opinion",
     label: "Opinião curta",
     prompt: "Qual é a sua opinião sobre {theme}?",

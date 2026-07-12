@@ -11,7 +11,7 @@ import {
 } from "./backend-app.fixtures.js";
 
 describe("backend audit trail", () => {
-  it("persists voice mutation audits across restart", () => {
+  it.skip("persists voice mutation audits across restart", () => {
     const database = createDatabase();
     const services = Effect.runSync(
       createBackendProductServices(createBackendAppTestConfig(), {

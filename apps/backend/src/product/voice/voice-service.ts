@@ -7,14 +7,13 @@ import type { BackendVoiceService } from "./voice-types.js";
 import type { BackendVoiceRebuildService } from "./voice-rebuild-types.js";
 import type { BackendObservabilityService } from "../core/observability-types.js";
 import type { BackendVoiceConsentService } from "../../safety/voice-consent-types.js";
-import { createVoiceLifecycleOperations } from "./voice-lifecycle.js";
 import { resolveEffectiveVoice as resolveEffectiveVoiceResolution } from "./voice-effective-resolution.js";
 import { recordTraitConfirmation } from "./trait-confirmation.js";
 import { toVoiceProfileScreenView } from "./voice-mappers.js";
 
 export function createBackendVoiceService(
   database: DatabaseClient,
-  voiceRebuild: BackendVoiceRebuildService,
+  _voiceRebuild: BackendVoiceRebuildService,
   now: () => Date,
   observability: BackendObservabilityService,
   logger?: AppLogger,
@@ -24,8 +23,6 @@ export function createBackendVoiceService(
     readonly config?: BackendConfig;
   }
 ): BackendVoiceService {
-  const lifecycle = createVoiceLifecycleOperations(database, voiceRebuild, now, logger, voiceConsent);
-
   return {
     getProfileScreen(userId) {
       return Effect.gen(function* () {
@@ -75,7 +72,6 @@ export function createBackendVoiceService(
         voiceConsent,
         options
       );
-    },
-    ...lifecycle
+    }
   };
 }

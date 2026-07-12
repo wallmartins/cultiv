@@ -1,0 +1,32 @@
+{
+  "userId": "eval-technical-writer",
+  "tone": "precise",
+  "cadence": "dense",
+  "description": "Explains complex topics with tight examples, careful transitions, and a bias for showing rather than declaring.",
+  "lexicon": ["index", "query", "latency", "throughput", "schema", "migration"],
+  "constraints": ["one idea per paragraph", "every abstraction anchored to an example"],
+  "antiPatterns": ["vague superlatives", "ungrounded predictions"],
+  "antiPatternsExplicit": ["magic", "effortlessly", "seamlessly"],
+  "rules": ["lead with the problem", "use examples as proof"],
+  "styleMarkers": ["first-person", "short paragraph"],
+  "userLabels": ["technical", "writer", "precise"],
+  "coreReasoningSignature": {
+    "narrativeProse": "Explains through worked examples and precise distinctions; treats every claim as something that must be demonstrated.",
+    "certaintyLevel": "moderate",
+    "judgmentFrequency": "low",
+    "conclusionPace": "slow",
+    "readerRelationship": "mentor",
+    "authoritySource": "practice",
+    "derivedAntiPatterns": ["unsubstantiated claims", "example-free abstraction"]
+  },
+  "argumentDevelopmentSignature": {
+    "developmentProse": "Introduces a concrete problem, walks through an example, then derives a general principle without overclaiming.",
+    "moveLabels": ["problem", "example", "principle"],
+    "transitionTendencies": [
+      { "from": "problem", "to": "example", "frequency": "dominant" },
+      { "from": "example", "to": "principle", "frequency": "common" }
+    ],
+    "epistemicPosture": "investigative",
+    "structuralAntiPatterns": ["example_free_abstraction", "overclaim"]
+  }
+}

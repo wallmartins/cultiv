@@ -1,0 +1,12 @@
+{
+  "id": "critic-filler-02",
+  "suite": "critic-regression",
+  "input": {
+    "text": "Na verdade, basicamente, o que acontece é que, no fundo, não há conteúdo aqui."
+  },
+  "expectations": {
+    "mustTriggerCritic": ["llmish"],
+    "maxCriticScore": 80
+  },
+  "tags": ["critic", "filler"]
+}

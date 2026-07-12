@@ -9,7 +9,7 @@ import {
 } from "@my-ai-orchestrator/contracts";
 import type { BackendProviderTransport } from "../../execution/pipeline/provider-transport.js";
 import type { AIPolicyProviderModelAttempt } from "../ai-policy/ai-policy-types.js";
-import { filterFormatExpressionsByCoverage, groupExamplesByContentType } from "./reasoning-extraction.js";
+import { groupExamplesByContentType } from "./reasoning-extraction.js";
 import { VoiceSignatureReconciliationError } from "./voice-extraction-errors.js";
 import { parseJsonFromLlmResponse } from "./voice-extraction-json.js";
 
@@ -65,18 +65,9 @@ export function reconcileVoiceSignatures(args: {
         continue;
       }
 
-      const filtered = filterFormatExpressionsByCoverage(
-        {
-          core: parsed.right.core,
-          formatExpressions: parsed.right.formatExpressions
-        },
-        grouped
-      );
-
       return {
-        core: filtered.core,
-        development: parsed.right.development,
-        formatExpressions: filtered.formatExpressions
+        core: parsed.right.core,
+        development: parsed.right.development
       };
     }
 
@@ -151,9 +142,6 @@ function buildReconciliationPrompt(
           ""
         ]
       : []),
-    "Draft Format Expressions:",
-    JSON.stringify(reasoning.formatExpressions, null, 2),
-    "",
     "Examples:",
     ...exampleSections,
     "",
@@ -168,8 +156,7 @@ function buildReconciliationSystemPrompt(): string {
     "Schema:",
     "{",
     '  "core": { narrativeProse, certaintyLevel, judgmentFrequency, conclusionPace, readerRelationship, authoritySource, derivedAntiPatterns },',
-    '  "development": { developmentProse, moveLabels, transitionTendencies, epistemicPosture, structuralAntiPatterns, traitProfile? },',
-    '  "formatExpressions": { "<contentType>": { contentType, narrativeProse, register, openingStyle, technicalDensity } }',
+    '  "development": { developmentProse, moveLabels, transitionTendencies, epistemicPosture, structuralAntiPatterns, traitProfile? }',
     "}"
   ].join("\n");
 }

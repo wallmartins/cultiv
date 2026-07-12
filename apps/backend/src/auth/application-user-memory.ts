@@ -24,6 +24,7 @@ export function createBackendApplicationUserMemoryRepository(): BackendApplicati
           id: args.id,
           externalSubject: args.externalSubject,
           status: args.status ?? "active",
+          onboardingCompletedAt: args.onboardingCompletedAt,
           createdAt: now,
           updatedAt: args.updatedAt ?? now
         };
@@ -35,6 +36,23 @@ export function createBackendApplicationUserMemoryRepository(): BackendApplicati
 
     findById(id) {
       return Effect.sync(() => store.get(id));
+    },
+
+    updateOnboardingStatus(id, completedAt) {
+      return Effect.sync(() => {
+        const existing = store.get(id);
+        if (!existing) {
+          throw new Error(`Application user not found: ${id}`);
+        }
+
+        const updated: BackendApplicationUser = {
+          ...existing,
+          onboardingCompletedAt: completedAt,
+          updatedAt: new Date()
+        };
+        store.set(id, updated);
+        return updated;
+      });
     }
   };
 }

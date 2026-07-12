@@ -1,0 +1,53 @@
+{
+  "id": "drift-structural-bullet-list-01",
+  "suite": "drift-regression",
+  "input": {
+    "voiceProfile": {
+      "userId": "eval-drift-structural-bullet-list-01",
+      "tone": "measured",
+      "cadence": "moderate",
+      "lexicon": [],
+      "constraints": [],
+      "antiPatterns": [],
+      "antiPatternsExplicit": [],
+      "rules": [],
+      "styleMarkers": [],
+      "userLabels": [
+        "drift-regression"
+      ],
+      "coreReasoningSignature": {
+        "narrativeProse": "Builds arguments through explicit tradeoffs and measured recommendations.",
+        "certaintyLevel": "moderate",
+        "judgmentFrequency": "low",
+        "conclusionPace": "fast",
+        "readerRelationship": "peer",
+        "authoritySource": "practice",
+        "derivedAntiPatterns": [
+          "numbered thesis proof list"
+        ]
+      },
+      "argumentDevelopmentSignature": {
+        "developmentProse": "Frames decisions through explicit tradeoffs and measured recommendations.",
+        "moveLabels": [
+          "constraint",
+          "tradeoff",
+          "recommendation"
+        ],
+        "transitionTendencies": [],
+        "epistemicPosture": "investigative",
+        "structuralAntiPatterns": [
+          "absolute_prescription"
+        ]
+      }
+    },
+    "candidate": "1. First obvious point. 2. Second obvious point. 3. Third obvious point.",
+    "stepName": "draft"
+  },
+  "expectations": {
+    "minDriftScore": 50
+  },
+  "tags": [
+    "drift",
+    "structural"
+  ]
+}

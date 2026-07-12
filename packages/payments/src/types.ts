@@ -1,5 +1,6 @@
 import type {
   BillingCreditPolicy,
+  BillingCurrency,
   BillingCycleState,
   BillingGenerationReservation,
   BillingLedgerEntry,
@@ -43,6 +44,7 @@ export interface BillingPlanDefinition {
   readonly dailyCredits?: number;
   readonly features: readonly BillingFeatureAllowance[];
   readonly allowedModels?: readonly string[];
+  readonly currency?: BillingCurrency;
 }
 
 export interface BillingSubscription {

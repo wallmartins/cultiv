@@ -1,0 +1,10 @@
+---
+// Alternador de tema claro/escuro. Puro: só marcação; o comportamento
+// (persistência em localStorage + rótulo) vive em scripts/constellation/theme.ts,
+// que se liga a todo [data-theme-toggle]. Sem JS o botão não aparece (CSS).
+---
+
+<button class="theme-toggle" data-theme-toggle aria-label="Alternar tema claro e escuro">
+  <span class="dot" aria-hidden="true"></span>
+  <span data-theme-label>TEMA ESCURO</span>
+</button>

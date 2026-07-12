@@ -114,7 +114,6 @@ describe("reasoning extraction", () => {
     );
 
     expect(result.core.certaintyLevel).toBe(TEST_REASONING_EXTRACTION_FIXTURE.core.certaintyLevel);
-    expect(result.formatExpressions["linkedin-post"]).toBeDefined();
   });
 
   it("builds Portuguese extraction prompts for pt-BR examples", () => {
@@ -149,7 +148,6 @@ describe("reasoning extraction", () => {
 
     expect(result.core.certaintyLevel).toBe(corpus.expected.core.certaintyLevel);
     expect(result.core.conclusionPace).toBe(corpus.expected.core.conclusionPace);
-    expect(Object.keys(result.formatExpressions).length).toBeGreaterThan(0);
   });
 
   it("resolves the dominant active example language for extraction copy", () => {

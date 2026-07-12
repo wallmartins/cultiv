@@ -128,9 +128,13 @@ _Avoid_: Example source, sample type, training data tag
 The author's chosen first way to teach Cultiv their voice — importing **authored** **Voice Examples** or completing a **Voice Calibration Session**.
 _Avoid_: Onboarding mode, setup track, user type
 
+> **Removed in v1** per ADR 0001. Calibration is the only entry point.
+
 **Voice Onboarding Gateway**:
 The first-time screen where an **End User** with no voice material yet chooses a **Voice Entry Path** before entering either the **Voice Example Composer** or a **Voice Calibration Session**.
 _Avoid_: Setup fork, onboarding menu, path picker
+
+> **Removed in v1** per ADR 0001. Calibration is the only entry point.
 
 **Voice Calibration Session**:
 A guided alternative to importing a writing portfolio: the author completes one or more **Calibration Rounds** instead of pasting existing texts, with optional depth (more rounds yield higher **Voice Confidence** up to **Voice Calibration Entitlement** limits).
@@ -163,6 +167,8 @@ _Avoid_: Conflict modal, merge wizard, profile override dialog
 **Voice Example Composer**:
 The shared multi-slot form used to ingest one or more **Voice Examples** at once; submitting one filled slot calls the single-create API path, while submitting two or more filled slots calls the batch commit path.
 _Avoid_: Example wizard, upload form, inline onboarding fields
+
+> **Removed in v1** per ADR 0001. The **Voice Calibration Session** is the sole entry point for voice profile creation.
 
 **Voice Confidence**:
 The trust level of the current **Derived Voice Profile**, based on attested example volume, diversity across **Calibration Rounds** or **Voice Examples**, and — for calibrated material — **Author Affirmation** rather than example count alone.
@@ -288,6 +294,8 @@ _Avoid_: Runtime toggle, live config flag
 The optional guided first-time flow that starts at the **Voice Onboarding Gateway**, then follows the chosen **Voice Entry Path** until the author has voice material and reaches the **Onboarding Welcome Step**. Can be skipped entirely, but skipped steps produce persistent reminders on the **Generation Screen**.
 _Avoid_: Tutorial, wizard, setup tour
 
+> **Simplified in v1** per ADR 0001. The **Voice Calibration Session** is the sole onboarding path.
+
 **Onboarding Completion**:
 The persisted signal that the **End User** has finished or explicitly dismissed the first-time **Onboarding** flow, used with voice-example presence to decide the post-login landing route.
 _Avoid_: Setup done flag, tutorial completed, first-run marker
@@ -319,6 +327,18 @@ _Avoid_: Result modal, quick-view popup, inline expansion
 **Execution Result View**:
 The read-only presentation of one completed generation's output, metadata, and recovery actions such as copy and regenerate.
 _Avoid_: Editor, output modal, result page
+
+**Execution Voice Alignment**:
+The per-execution readout of how closely a generated text follows the user's **Derived Voice Profile**, composed from drift heuristics and blended with the **Voice Judge** score when available; surfaced in the **Execution Result View** as a score and an expandable prose explanation, never overriding **Author Affirmation**.
+_Avoid_: Voice confidence, voice score, text alignment, match percentage
+
+**Execution Acceptance Score**:
+The internal per-execution score used to decide whether the runtime should stop retrying, computed as a weighted blend of **Execution Voice Alignment** (higher weight) and the candidate's composite `finalScore` (lower weight); not surfaced directly to the **End User**.
+_Avoid_: Final score, quality score, combined score
+
+**Execution Reaction**:
+The author's lightweight thumbs-up or thumbs-down signal on a completed generation, persisted for product metrics and diagnostics without triggering a **Voice Profile Rebuild**.
+_Avoid_: Feedback, rating, approval, rejection
 
 **Execution History Detail**:
 The dedicated route view for one past execution, hosting the full **Execution Result View** and regeneration entry points; distinct from the quick-reading **Active Execution Drawer**.
@@ -620,19 +640,20 @@ _Avoid_: AI Writing Engine, content-lib, my-ai-orchestrator
 - **Development Traits** and **Trait Confidence** extend **Argument Development Signature** with structured, evidence-backed answers to author development questions; **Author Trait Confirmation** is light validation only — authors still refine by adding examples, not editing traits (ADR 0008).
 - **Step-Scoped Reasoning Injection** applies **Core Reasoning Signature** and **Format Expression Profile** to every LLM step, with full narrative on structural steps (`hook`, `outline`, `structure`, `draft`, `expand`) and enum guardrails on refinement steps (`refine`, `tighten`).
 - **Reasoning Extraction** uses the primary provider via a dedicated extraction routing profile; **Voice Judge** uses **Voice Judge Routing Profile** (Groq preferred) and must not share the generation provider by default.
-- **Voice Judge** runs on finalist candidates when **Quality Mode** is `strict`, or in `balanced` when reasoning drift is borderline, **Argument Development Drift** is borderline, or top candidates tie; it never runs in `fast`. **Argument Development Drift** and reasoning drift heuristics run in every **Quality Mode**, including when the judge does not run.
+- **Voice Judge** runs on finalist candidates in every **Quality Mode**, using the **Voice Judge Routing Profile** independently from the generation provider. **Quality Mode** still differs by lane count, temperature, retries, and refinement depth — `fast` is the least refined but is evaluated by the same voice fidelity standard as `balanced` and `strict`. **Argument Development Drift** and reasoning drift heuristics run in every **Quality Mode** alongside the judge.
 - **Voice Profile Rebuild** runs when **Voice Examples** change, coalesces rapid updates per user, and keeps the previous profile active while rebuild is in progress.
 - **Reasoning Extraction** uses one structured LLM call per rebuild; on failure, the last valid profile remains active and heuristics-only derivation is not promoted without a successful extraction.
 - **Voice Reasoning Presentation** is read-only in Fase 1; authors refine inference by adding or improving **Voice Examples**, not by editing derived reasoning fields directly.
 - Dynamic example retrieval remains out of Fase 1 scope until per-format example volume routinely exceeds prompt budget.
 - A **Voice Example** contributes to the user's **Derived Voice Profile** and **Reasoning Signature**.
 - A **Voice Example** carries **Voice Example Provenance** (`authored` or `calibrated`); **authored** examples outrank **calibrated** ones when resolving a **Voice Direction Conflict** unless **Author Voice Preference Resolution** chooses otherwise.
-- A **Voice Onboarding Gateway** offers every new **End User** without voice material a choice between **Voice Entry Path** options; neither path is the default over the other.
-- **Onboarding** branches after the **Voice Onboarding Gateway**: one branch reuses the **Voice Example Composer**; the other enters a **Voice Calibration Session**.
+- **Onboarding** is a **Voice Calibration Session** only: the **Voice Example Composer** (import flow) is removed per ADR 0001. The calibration wizard is the sole entry point for voice profile creation.
 - A **Voice Calibration Session** produces **calibrated** **Voice Examples** through **Calibration Rounds** ending in **Author Affirmation**; **Voice Calibration Entitlement** caps how many rounds an **End User** may complete.
 - **Voice Calibration Entitlement** on the free plan: up to three **Calibration Rounds**, each completed round applies one **Calibration Quota Charge**, and calibrated profiles may reach `medium` **Voice Confidence** at most until upgrade or **authored** examples arrive.
 - **Voice Calibration Entitlement** on paid plans (Criador, Pro): up to ten **Calibration Rounds**, no **Calibration Quota Charge**, and calibrated profiles may reach `high` **Voice Confidence** when attestation and designed diversity thresholds are met.
 - Importing **authored** **Voice Examples** on any plan does not apply **Calibration Quota Charge**; only **Calibration Rounds** on the free plan debit generation quota.
+
+> **Note:** The import flow is removed in v1 per ADR 0001. Calibration is the sole entry point.
 - **Voice Confidence** for calibrated profiles rises with completed attested rounds and designed diversity across rounds, not only raw example count.
 - A **Voice Direction Conflict** triggers **Author Voice Preference Resolution** before the conflicting signal changes generation behavior; silent overwrite of the author's stated preference is not allowed.
 - **Format Expression Profile** is built only per **Content Type** with sufficient active examples; absence of per-type coverage does not block cold start when **Core Reasoning Signature** and calibrated examples exist.
@@ -667,12 +688,12 @@ _Avoid_: AI Writing Engine, content-lib, my-ai-orchestrator
 - A **Routing Profile** is resolved per LLM **Step Execution**, using internal product and pipeline rules that may depend on **Content Type** and **Quality Mode**.
 - The **Active AI Policy Pointer** selects which versioned **AI Policy** new executions and previews use.
 - An **Onboarding** step collects **Voice Examples** and tone preferences; skipped steps produce reminders on the **Generation Screen**.
-- The first **Onboarding** step reuses the same **Voice Example Composer** as `/app/voice/examples/new`, so first-time users learn the real ingestion flow instead of a simplified inline variant.
-- Web v2 **Onboarding** currently has two steps after voice material exists (**Voice Example Composer** on the import path, then **Onboarding Welcome Step**); the **Voice Onboarding Gateway** adds a preceding choice screen and a calibration branch — not a separate global tone-preferences step, because tone is derived from examples or calibration.
-- The **Voice Example Composer** starts with one example slot and can add more slots on demand; one submitted slot uses single-create ingestion, while multiple submitted slots use batch ingestion through the **Client Integration Surface**.
+- The **Voice Calibration Session** is the sole onboarding path. The **Voice Example Composer** is removed per ADR 0001; calibration wizard produces all initial voice examples.
+- Web v2 **Onboarding** is a **Voice Calibration Session** with 6 screens: context setup (domain, audience, strengths), 4 writing prompts, review/confirm, and success/error. No import path exists. The **Voice Onboarding Gateway** choice screen is removed — calibration is the only entry point.
+- The **Voice Calibration Session** produces **calibrated** **Voice Examples** through **Calibration Rounds** ending in **Author Affirmation**; **Voice Calibration Entitlement** caps how many rounds an **End User** may complete.
 - Editing an existing **Voice Example** reuses the same composer shape constrained to one slot and the update API path.
 - After authentication, the **Authenticated Workspace** uses a smart first-entry redirect: users with no **Voice Examples** and incomplete **Onboarding Completion** land on `/app/onboarding`; all other users land on `/app/generate`.
-- **Onboarding Completion** is backend-owned when available, with client persistence only as a temporary fallback until the backend exposes it.
+- **Onboarding Completion** is backend-owned: `POST /me/onboarding/complete` and `GET /me/onboarding/status` endpoints persist completion in the `application_users` table. Called after successful calibration wizard completion.
 - The **Generation Screen** is where the user selects a **Content Type**, fills the briefing, sees the **Generation Preview**, and triggers a **Generation Request**.
 - The **Briefing Form** is driven by the selected **Content Type** catalog schema and guidance; web v2 does not use one shared free-text briefing field for every format.
 - Web v2 exposes all three quality modes in the **Generation Screen** selector; blocked modes remain visible with plan reasons from **Generation Preview**.
@@ -716,6 +737,7 @@ _Avoid_: AI Writing Engine, content-lib, my-ai-orchestrator
 - The **Public API Surface** serves **End User** workflows only.
 - The **Client Integration Surface** consumes the **Public API Surface** and is the only frontend-owned layer allowed to know backend transport details.
 - Web and mobile applications must consume the backend only through the **Client Integration Surface** and must not own direct HTTP integrations to the **Public API Surface**.
+- The **Client Integration Surface** (`client-sdk`) is the **single source of truth** for frontend-backend communication. The frontend never makes direct HTTP calls — all requests go through SDK subclients (`preview`, `executions`, `voice`, `voiceCalibration`, `contentTypes`, `generationIntents`, `billing`). The SDK handles transport, auth token injection, retry, idempotency, SSE observation, and contract decoding automatically.
 - The **Client Integration Surface** is an authenticated consumer of the **Public API Surface** and receives tokens from a platform-owned identity integration instead of owning signup, signin, or redirect flows itself.
 - Web and mobile applications should consume the **Client Integration Surface** through product capabilities such as **Generation Preview**, **Execution History**, **Voice Profile**, and **Content Type**, instead of owning backend route semantics directly.
 - A **Job** remains a backend execution mechanism for **Async Run** orchestration and must not become a frontend-owned API concept.

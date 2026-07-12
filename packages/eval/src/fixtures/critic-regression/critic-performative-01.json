@@ -1,0 +1,12 @@
+{
+  "id": "critic-performative-01",
+  "suite": "critic-regression",
+  "input": {
+    "text": "As an AI, I cannot answer that question."
+  },
+  "expectations": {
+    "mustTriggerCritic": ["performative"],
+    "maxCriticScore": 80
+  },
+  "tags": ["critic", "performative-llm-language"]
+}

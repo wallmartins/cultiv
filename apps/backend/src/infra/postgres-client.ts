@@ -14,7 +14,6 @@ import { createPostgresVoiceExampleRepository } from "./postgres-repositories/po
 import { createPostgresVoiceProfileRepository } from "./postgres-repositories/postgres-voice-profile-repository.js";
 import { createPostgresVoiceProfileDiagnosticsRepository } from "./postgres-repositories/postgres-voice-profile-diagnostics-repository.js";
 import { createPostgresVoiceProfileSnapshotRepository } from "./postgres-repositories/postgres-voice-profile-snapshot-repository.js";
-import { createPostgresVoiceExampleBatchRepository } from "./postgres-repositories/postgres-voice-example-batch-repository.js";
 import { createPostgresVoiceTrainingConsentRepository } from "./postgres-repositories/postgres-voice-training-consent-repository.js";
 import { createPostgresAuditRepository } from "./postgres-repositories/postgres-audit-repository.js";
 
@@ -43,7 +42,6 @@ export function createPostgresDatabaseClient(db: Kysely<DatabaseTables>): Databa
     voiceProfiles: createPostgresVoiceProfileRepository(db),
     voiceProfileDiagnostics: createPostgresVoiceProfileDiagnosticsRepository(db),
     voiceProfileSnapshots: createPostgresVoiceProfileSnapshotRepository(db),
-    voiceExampleBatches: createPostgresVoiceExampleBatchRepository(db),
     voiceTrainingConsents: createPostgresVoiceTrainingConsentRepository(db),
     audit: createPostgresAuditRepository(db),
 

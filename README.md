@@ -340,6 +340,20 @@ Do not commit `.env` files.
 | `pnpm test:web` | Web + frontend-boundary tests |
 | `pnpm hitl:durable-smoke` | Manual smoke — async job survives API restart |
 | `pnpm lint` | `tsc --noEmit` across all workspaces |
+| `pnpm eval` | Run eval suite (deterministic + heuristic) |
+| `pnpm eval:ci` | Run eval with JSON report + baseline comparison |
+| `pnpm eval:nightly` | Run eval with Voice Judge + save baseline |
+
+Eval CLI options:
+- `--suite <name>` — filter to `voice-fidelity`, `drift-regression`, or `critic-regression`
+- `--include-judge` — enable Layer 3 Voice Judge (uses LLM tokens)
+- `--judge-provider <p>` / `--judge-model <m>` — override judge provider/model
+- `--generator <name>` — `placeholder` (default) or `orchestrator`
+- `--compare` — compare against the latest saved baseline
+- `--save-baseline` — persist results as a new baseline
+- `--report <format>` — `console`, `json`, or `markdown`
+
+Judge env vars: `EVAL_JUDGE_PROVIDER`, `EVAL_JUDGE_MODEL`, `GROQ_API_KEY` (or `<PROVIDER>_API_KEY`).
 | `pnpm showcase:voice-setup` | Dev helper — voice profile token for showcase |
 | `pnpm showcase:generate` | Dev helper — generate showcase sample via backend |
 

@@ -266,8 +266,7 @@ function renderTestResponse(providerRequest: AIProviderRequest): string {
   if (providerRequest.metadata?.purpose === "voice-signature-reconciliation") {
     return JSON.stringify({
       core: TEST_REASONING_EXTRACTION_FIXTURE_PT.core,
-      development: TEST_ARGUMENT_DEVELOPMENT_EXTRACTION_FIXTURE_PT.development,
-      formatExpressions: TEST_REASONING_EXTRACTION_FIXTURE_PT.formatExpressions
+      development: TEST_ARGUMENT_DEVELOPMENT_EXTRACTION_FIXTURE_PT.development
     });
   }
 

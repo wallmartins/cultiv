@@ -90,7 +90,8 @@ export function registerBillingRoutes(app: Hono, options: BillingRouteOptions): 
         monthlyCreditsRemaining: entitlement.monthlyCreditsRemaining,
         canonicalCreditCost,
         quotaRemaining: resolveQuotaRemaining(availableCredits, canonicalCreditCost),
-        quotaLimit: resolveQuotaLimit(monthlyCredits, canonicalCreditCost)
+        quotaLimit: resolveQuotaLimit(monthlyCredits, canonicalCreditCost),
+        currency: plan?.currency ?? "BRL"
       },
       "BillingEntitlementView"
     );

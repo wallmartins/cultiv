@@ -1,6 +1,6 @@
 /**
  * Heuristic reasoning drift checks aligned to Core Reasoning Signature enums.
- * Guarded by `pnpm eval:reasoning` and tests/fixtures/reasoning-regression/.
+ * Guarded by `pnpm eval --suite drift-regression` and packages/eval/src/fixtures/drift-regression/.
  * Extend patterns here together with corpus fixtures — not in isolation.
  */
 import type { CoreReasoningSignature } from "@my-ai-orchestrator/contracts";

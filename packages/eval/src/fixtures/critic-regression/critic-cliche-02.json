@@ -1,0 +1,12 @@
+{
+  "id": "critic-cliche-02",
+  "suite": "critic-regression",
+  "input": {
+    "text": "Esta abordagem revolucionario vai transformar completamente o seu negócio."
+  },
+  "expectations": {
+    "mustTriggerCritic": ["cliche"],
+    "maxCriticScore": 80
+  },
+  "tags": ["critic", "cliche"]
+}

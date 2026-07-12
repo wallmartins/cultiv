@@ -1,10 +1,9 @@
 import { Effect } from "effect";
 import type { DatabaseClient, VoiceExampleRecord } from "@my-ai-orchestrator/database";
 import type {
-  ContributionCode,
-  VoiceExampleCreateInput
+  ContributionCode
 } from "@my-ai-orchestrator/contracts";
-import { VoiceExampleValidationError, VoicePinnedLimitExceededError, type VoiceExample, type VoiceExampleDraft } from "@my-ai-orchestrator/domain";
+import { VoicePinnedLimitExceededError, type VoiceExample } from "@my-ai-orchestrator/domain";
 
 export function normalizeOptional(value?: string): string | undefined {
   const trimmed = value?.trim();
@@ -13,20 +12,6 @@ export function normalizeOptional(value?: string): string | undefined {
 
 export function buildExampleId(userId: string, nextIndex: number): string {
   return `voice-example:${userId}:${nextIndex}`;
-}
-
-export function validateVoiceExampleInput(input: VoiceExampleCreateInput) {
-  if (input.text.trim().length === 0) {
-    return Effect.fail(
-      new VoiceExampleValidationError({
-        reasonCode: "invalid_example_payload",
-        field: "text",
-        message: "Voice example text cannot be empty"
-      })
-    );
-  }
-
-  return Effect.succeed(undefined);
 }
 
 export function resolveContentTypeHints(
@@ -165,29 +150,6 @@ export function resolveTargetProfileVersion(database: DatabaseClient, userId: st
 
     return 1;
   });
-}
-
-export function toVoiceExampleDraft(input: VoiceExampleCreateInput): VoiceExampleDraft {
-  return {
-    text: input.text,
-    language: input.language,
-    channel: input.channel,
-    format: input.format,
-    explicitContentType: input.explicitContentType,
-    context: input.context,
-    antiPatternsExplicit: input.antiPatternsExplicit,
-    userLabels: input.userLabels,
-    pinned: input.pinned,
-    performance: input.performance
-      ? {
-          channel: input.performance.channel,
-          publishedAt: input.performance.publishedAt,
-          selfRating: input.performance.selfRating,
-          likes: input.performance.likes,
-          comments: input.performance.comments
-        }
-      : undefined
-  };
 }
 
 function resolveContributionCode(example: {

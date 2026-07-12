@@ -1,0 +1,37 @@
+---
+// Card de um plano — puro: recebe o plano e o índice (delay do popIn).
+// O CTA é o link real de checkout (login → /app/plans currency-routed).
+import { planUrl } from "../../config";
+import type { Plan } from "../../data/constellation";
+
+interface Props {
+  plan: Plan;
+  index: number;
+}
+const { plan: p, index } = Astro.props;
+---
+
+<article class:list={["plan", { featured: p.featured }]} style={`--pi:${index};`}>
+  {p.featured && <span class="plan-badge">Mais escolhido</span>}
+  <div>
+    <h3>{p.name}</h3>
+    <p class="plan-tag">{p.tag}</p>
+  </div>
+  <div class="plan-price">
+    <span class="amount">{p.price}</span>
+    {p.per && <span class="per mono">{p.per}</span>}
+  </div>
+  <ul>
+    {
+      p.features.map((f) => (
+        <li>
+          <span class="li-dot" aria-hidden="true" />
+          <span>{f}</span>
+        </li>
+      ))
+    }
+  </ul>
+  <a class:list={["btn", "wide", p.featured ? "solid" : "ghost"]} href={planUrl(p.id, "monthly")}>
+    {p.btn}
+  </a>
+</article>

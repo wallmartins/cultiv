@@ -1,0 +1,12 @@
+{
+  "id": "critic-repetition-01",
+  "suite": "critic-regression",
+  "input": {
+    "text": "Ship ship ship. We need to move faster."
+  },
+  "expectations": {
+    "mustTriggerCritic": ["redundant"],
+    "maxCriticScore": 80
+  },
+  "tags": ["critic", "repetition"]
+}

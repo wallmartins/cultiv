@@ -1,0 +1,20 @@
+{
+  "id": "voice-fidelity-thread-casual-01",
+  "suite": "voice-fidelity",
+  "input": {
+    "contentType": "thread",
+    "briefing": "Write a thread about a moment when you realized a project was gaining momentum",
+    "voiceProfile": {
+      "type": "fixture",
+      "path": "voice-fidelity/profiles/casual-creator.json"
+    },
+    "qualityMode": "balanced"
+  },
+  "expectations": {
+    "mustContain": ["momentum"],
+    "mustNotContain": ["leverage", "synergy"],
+    "wordCountRange": { "min": 200, "max": 600 },
+    "minDriftScore": 70
+  },
+  "tags": ["thread", "casual", "creative"]
+}

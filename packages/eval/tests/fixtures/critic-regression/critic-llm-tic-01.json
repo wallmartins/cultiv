@@ -1,0 +1,12 @@
+{
+  "id": "critic-llm-tic-01",
+  "suite": "critic-regression",
+  "input": {
+    "text": "It's important to note that leverage is key. Let's dive in."
+  },
+  "expectations": {
+    "mustTriggerCritic": ["performative-llm-language", "cliche"],
+    "maxCriticScore": 60
+  },
+  "tags": ["critic", "llm-tic"]
+}

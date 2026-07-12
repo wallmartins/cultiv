@@ -1,0 +1,51 @@
+{
+  "id": "drift-epistemic-overconfident-01",
+  "suite": "drift-regression",
+  "input": {
+    "voiceProfile": {
+      "userId": "eval-drift-epistemic-overconfident-01",
+      "tone": "measured",
+      "cadence": "moderate",
+      "lexicon": [],
+      "constraints": [],
+      "antiPatterns": [],
+      "antiPatternsExplicit": [],
+      "rules": [],
+      "styleMarkers": [],
+      "userLabels": [
+        "drift-regression"
+      ],
+      "coreReasoningSignature": {
+        "narrativeProse": "Builds arguments through explicit tradeoffs and measured recommendations.",
+        "certaintyLevel": "moderate",
+        "judgmentFrequency": "low",
+        "conclusionPace": "fast",
+        "readerRelationship": "peer",
+        "authoritySource": "practice",
+        "derivedAntiPatterns": []
+      },
+      "argumentDevelopmentSignature": {
+        "developmentProse": "Frames decisions through explicit tradeoffs and measured recommendations.",
+        "moveLabels": [
+          "constraint",
+          "tradeoff",
+          "recommendation"
+        ],
+        "transitionTendencies": [],
+        "epistemicPosture": "investigative",
+        "structuralAntiPatterns": [
+          "absolute_prescription"
+        ]
+      }
+    },
+    "candidate": "Sem dúvida, sempre e para todos, esta é a única forma correta de fazer.",
+    "stepName": "draft"
+  },
+  "expectations": {
+    "minDriftScore": 50
+  },
+  "tags": [
+    "drift",
+    "structural"
+  ]
+}

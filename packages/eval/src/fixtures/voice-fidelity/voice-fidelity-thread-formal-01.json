@@ -1,0 +1,20 @@
+{
+  "id": "voice-fidelity-thread-formal-01",
+  "suite": "voice-fidelity",
+  "input": {
+    "contentType": "thread",
+    "briefing": "Write a thread about the real cost of premature abstraction in software teams",
+    "voiceProfile": {
+      "type": "fixture",
+      "path": "voice-fidelity/profiles/formal-architect.json"
+    },
+    "qualityMode": "balanced"
+  },
+  "expectations": {
+    "mustContain": ["abstraction"],
+    "mustNotContain": ["obviously", "always"],
+    "wordCountRange": { "min": 200, "max": 600 },
+    "minDriftScore": 70
+  },
+  "tags": ["thread", "formal", "technical"]
+}
