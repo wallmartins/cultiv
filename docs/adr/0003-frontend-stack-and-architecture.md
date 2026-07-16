@@ -2,6 +2,7 @@
 
 **Status:** accepted
 **Emendada por:** ADR 0004 — o **fluxo de geração** descrito aqui e em `docs/frontend-application-flow.md` era intent-first (seletor de content type + formulário dinâmico). A ADR 0004 o substitui por um fluxo **tema-first guiado**. As decisões de **stack** desta ADR (Astro/Vite/WXT, data layer, auth, monorepo) permanecem vigentes.
+**Emendada por:** ADR 0007 (Errata 1) — a camada `packages/shared/services/` (um `Effect.Service` por subclient) é **removida**: o `client-sdk` já provê o seam Effect (`ClientSdkService`), então a orquestração passa a morar nos **hooks** de `packages/shared/hooks`. `packages/shared` fica `runtime/`+`hooks/`+`stores/`+`derive/`. O restante da data layer (Effect+Query+Zustand, `ManagedRuntime`+`useRun`) permanece vigente.
 
 O frontend do Cultiv é dividido em três entregas com runtimes desacoplados, unificados sob o mesmo domínio via proxy reverso, compartilhando serviços e design tokens centralizados no monorepo.
 
