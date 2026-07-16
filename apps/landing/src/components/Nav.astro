@@ -1,318 +1,181 @@
 ---
+// Persistent nav — design 179–193, ported markup/visuals exactly, with two
+// binding-contract deviations: (1) the CTA is "Começar grátis →" → trialUrl
+// instead of the design's "Testar a demo →" (that CTA stays inside the Hero
+// section itself, scrolling to #demo — this nav's job is conversion, not
+// wayfinding); (2) a pt·en language pill sits between brand and CTA (design
+// is pt-only; language toggle is a user-decided addition, see §i18n).
+//
+// State (background/blur/hairline, intro visibility) is driven by
+// `html[data-scrolled]`/`html[data-intro]`, normally written by HeroStory's
+// script (contract: "hero sets it"). This component also runs its own tiny
+// scroll listener for the same `data-scrolled` threshold (sy>24, matching
+// the design) so the nav still opacifies correctly on pages with no Hero —
+// /termos, /privacidade, /404 — which import this same Nav. Both listeners
+// compute the identical boolean, so the redundancy on the v5 home page is
+// harmless.
 import T from "./T.astro";
-import BrandMark from "./BrandMark.astro";
 import { trialUrl } from "../config";
-
-// Root-relative anchors: the nav also renders on /termos and /privacidade.
-const links = [
-  { href: "/#como-funciona", pt: "Como funciona", en: "How it works" },
-  { href: "/#calibracao", pt: "Calibração", en: "Calibration" },
-  { href: "/#planos", pt: "Planos", en: "Plans" },
-];
 ---
 
-<header class="nav" id="nav">
-  <div class="wrap nav__row">
-    <a class="nav__brand" href="/" aria-label="Cultiv">
-      <BrandMark size={26} id="nav" />
-      <span>Cultiv</span>
-    </a>
+<nav class="v5nav" aria-label="Principal">
+  <a class="v5nav__brand" href="/" aria-label="Cultiv — início">
+    <svg
+      data-cultiv-nav-brand="true"
+      class="v5nav__mark"
+      width="28"
+      height="28"
+      viewBox="0 0 96 96"
+      fill="none"
+      aria-hidden="true"
+    >
+      <defs>
+        <path
+          id="navQ"
+          d="M62 38c0-9.5-7-16-15.5-16C38 22 32 28.2 32 36.2c0 7.9 6 13.8 14 13.8 1.1 0 2.2-.1 3.2-.4C48 60 42.2 65.6 34.6 68.2l3.4 6.8C50.6 70.6 62 59.6 62 43.6Z"
+        ></path>
+      </defs>
+      <circle class="v5nav__ring" cx="48" cy="48" r="37" stroke-width="5"></circle>
+      <path d="M54.4 11.6A37 37 0 0 1 78.3 26.8" stroke="#95CB3E" stroke-width="5"></path>
+      <use class="v5nav__q" href="#navQ" transform="translate(26.5 31.6) scale(0.62) translate(-32 -22)"></use>
+      <use class="v5nav__q" href="#navQ" transform="translate(51 31.6) scale(0.62) translate(-32 -22)"></use>
+    </svg>
+    <span class="v5nav__word">Cultiv</span>
+  </a>
 
-    <nav class="nav__links" aria-label="Principal" data-aria-pt="Principal" data-aria-en="Main">
-      {links.map((l) => (
-        <a class="nav__link label" href={l.href}><T pt={l.pt} en={l.en} /></a>
-      ))}
-    </nav>
+  <button type="button" class="v5nav__lang" data-lang-toggle aria-label="Switch to English">
+    <span data-lang-label="pt" aria-hidden="true">pt</span>
+    <span aria-hidden="true"> · </span>
+    <span data-lang-label="en" aria-hidden="true">en</span>
+  </button>
 
-    <div class="nav__tools">
-      <button class="tool tool--bar" data-action="lang" type="button" aria-label="Switch to English">
-        <span data-l="pt" lang="pt-BR" aria-hidden="true">EN</span>
-        <span data-l="en" lang="en" aria-hidden="true">PT</span>
-      </button>
-      <button class="tool tool--bar" data-action="theme" type="button">
-        <span data-l="pt" lang="pt-BR" class="sr-only">Alternar tema claro/escuro</span>
-        <span data-l="en" lang="en" class="sr-only">Toggle light/dark theme</span>
-        <svg class="icon-sun" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-          <circle cx="8" cy="8" r="3.25" />
-          <path d="M8 1v1.8M8 13.2V15M1 8h1.8M13.2 8H15M3.05 3.05l1.27 1.27M11.68 11.68l1.27 1.27M12.95 3.05l-1.27 1.27M4.32 11.68l-1.27 1.27" />
-        </svg>
-        <svg class="icon-moon" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-          <path d="M13.5 9.5A6 6 0 1 1 6.5 2.5a4.75 4.75 0 0 0 7 7Z" />
-        </svg>
-      </button>
-      <a class="btn btn--primary nav__cta" href={trialUrl}>
-        <span class="nav__cta-full"><T pt="Começar o teste grátis" en="Start free trial" /></span>
-        <span class="nav__cta-short"><T pt="Teste grátis" en="Free trial" /></span>
-      </a>
-      <button class="tool nav__burger" id="nav-open" type="button" aria-expanded="false" aria-controls="nav-sheet">
-        <span data-l="pt" lang="pt-BR" class="sr-only">Abrir menu</span>
-        <span data-l="en" lang="en" class="sr-only">Open menu</span>
-        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-          <path d="M2 5.5h14M2 12.5h14" />
-        </svg>
-      </button>
-    </div>
-  </div>
-</header>
-
-<dialog class="sheet" id="nav-sheet" aria-label="Menu">
-  <div class="sheet__inner">
-    <button class="tool sheet__close" id="nav-close" type="button">
-      <span data-l="pt" lang="pt-BR" class="sr-only">Fechar menu</span>
-      <span data-l="en" lang="en" class="sr-only">Close menu</span>
-      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-        <path d="M4 4l10 10M14 4L4 14" />
-      </svg>
-    </button>
-    <nav class="sheet__links" aria-label="Principal (menu)" data-aria-pt="Principal (menu)" data-aria-en="Main (menu)">
-      {links.map((l) => (
-        <a class="sheet__link label" href={l.href}><T pt={l.pt} en={l.en} /></a>
-      ))}
-    </nav>
-    <a class="btn btn--accent" href={trialUrl}>
-      <T pt="Começar o teste grátis" en="Start free trial" />
-    </a>
-    <div class="sheet__tools">
-      <button class="tool" data-action="lang" type="button" aria-label="Switch to English">
-        <span data-l="pt" lang="pt-BR" aria-hidden="true">EN</span>
-        <span data-l="en" lang="en" aria-hidden="true">PT</span>
-      </button>
-      <button class="tool" data-action="theme" type="button">
-        <span data-l="pt" lang="pt-BR" class="sr-only">Alternar tema claro/escuro</span>
-        <span data-l="en" lang="en" class="sr-only">Toggle light/dark theme</span>
-        <svg class="icon-sun" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-          <circle cx="8" cy="8" r="3.25" />
-          <path d="M8 1v1.8M8 13.2V15M1 8h1.8M13.2 8H15M3.05 3.05l1.27 1.27M11.68 11.68l1.27 1.27M12.95 3.05l-1.27 1.27M4.32 11.68l-1.27 1.27" />
-        </svg>
-        <svg class="icon-moon" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-          <path d="M13.5 9.5A6 6 0 1 1 6.5 2.5a4.75 4.75 0 0 0 7 7Z" />
-        </svg>
-      </button>
-    </div>
-  </div>
-</dialog>
+  <a class="v5nav__cta" href={trialUrl}>
+    <T pt="Começar grátis →" en="Start free →" />
+  </a>
+</nav>
 
 <style>
-  .nav {
+  .v5nav {
     position: fixed;
-    inset: 0 0 auto;
-    z-index: var(--z-nav);
-    background: transparent;
-    border-bottom: 1px solid transparent;
-    transition:
-      background-color var(--t-med) var(--ease-out),
-      border-color var(--t-med) var(--ease-out);
-  }
-  .nav.is-scrolled {
-    background: color-mix(in oklch, var(--bg) 88%, transparent);
-    backdrop-filter: blur(12px);
-    border-bottom-color: var(--line);
-  }
-  .nav__row {
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 40;
     display: flex;
     align-items: center;
-    gap: var(--sp-lg);
-    height: 64px;
+    justify-content: space-between;
+    padding: 14px clamp(16px, 4vw, 40px);
+    background: transparent;
+    box-shadow: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    opacity: 1;
+    transition:
+      background-color 0.35s ease,
+      box-shadow 0.35s ease,
+      opacity 0.7s ease;
   }
-  .nav__brand {
-    display: inline-flex;
-    align-items: center;
-    gap: 9px;
-    font-family: var(--font-headline);
-    font-weight: 400;
-    font-size: 1.5rem;
-    letter-spacing: 0;
-    text-decoration: none;
+  :global(html[data-scrolled]) .v5nav {
+    background: var(--t-navbg, rgba(248, 247, 244, 0.88));
+    box-shadow: 0 1px 0 var(--t-line, rgba(52, 50, 46, 0.08));
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
   }
-  /* On hover the name is still being written: an ink caret blinks after it.
-     The 2px ::after is always in the layout (opacity 0), so nothing shifts. */
-  .nav__brand::after {
-    content: "";
-    display: inline-block;
-    width: 2px;
-    height: 0.85em;
-    margin-left: 3px;
-    vertical-align: -0.06em;
-    background: var(--ink);
+  /* Nav hides for the intro's "draw" phase (the pinned intro logo is the
+     only mark on screen); it's already back for "reveal"/"done". */
+  :global(html[data-intro="draw"]) .v5nav {
     opacity: 0;
   }
-  .nav__brand:hover::after,
-  .nav__brand:focus-visible::after {
-    opacity: 1;
-    animation: brand-caret 1.1s steps(1) infinite;
-  }
-  @keyframes brand-caret { 50% { opacity: 0; } }
-  .nav__links {
-    display: flex;
-    gap: var(--sp-lg);
-    margin-inline: auto;
-  }
-  .nav__link {
-    color: var(--muted);
-    text-decoration: none;
-    padding-block: 4px;
-    background-image: linear-gradient(var(--accent), var(--accent));
-    background-repeat: no-repeat;
-    background-size: 0 2px;
-    background-position: 0 100%;
-    transition: color var(--t-fast) var(--ease-out), background-size var(--t-med) var(--ease-out);
-  }
-  .nav__link:hover { color: var(--ink); background-size: 100% 2px; }
-  .nav__tools { display: flex; align-items: center; gap: var(--sp-sm); }
-  .tool {
-    position: relative;
+
+  .v5nav__brand {
     display: inline-flex;
     align-items: center;
-    justify-content: center;
-    min-width: 40px;
-    height: 40px;
-    padding: 0 10px;
-    border-radius: var(--r-pill);
-    border: 1px solid var(--line);
-    background: transparent;
-    color: var(--ink);
-    font: 500 0.8125rem var(--font-body);
+    gap: 10px;
+    text-decoration: none;
+    color: var(--t-ink, #34322e);
+  }
+  .v5nav__mark { display: block; }
+  .v5nav__ring { stroke: var(--t-logoink, #151515); }
+  .v5nav__q { fill: var(--t-logoink, #151515); }
+  .v5nav__word {
+    font-family: var(--font-ui);
+    font-weight: 560;
+    font-size: 1.15rem;
+    letter-spacing: -0.01em;
+  }
+
+  .v5nav__lang {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 10.5px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    color: var(--t-muted, #6b675f);
+    background: none;
+    border: none;
     cursor: pointer;
-    transition: border-color var(--t-fast) var(--ease-out), transform var(--t-fast) var(--ease-out);
+    padding: 6px;
+    margin-inline-start: auto;
+    margin-inline-end: clamp(14px, 2.4vw, 22px);
   }
-  .tool:hover { border-color: var(--ink); }
-  .tool:active { transform: scale(0.94); }
-  /* Invisible hit-area: 40px visual, 44px effective touch target. */
-  .tool::before {
-    content: "";
-    position: absolute;
-    inset: -2px;
-    border-radius: inherit;
+  .v5nav__lang [data-lang-label] {
+    opacity: 0.45;
+    transition: opacity 0.2s ease;
   }
-  /* One Signal Rule, final form: acid belongs to the Transform mark, the
-     note mark, and the conversion folds' own CTAs — the nav CTA is graphite
-     everywhere, always. No ignite choreography. */
-  .nav__cta { position: relative; padding: 10px 20px; font-size: 0.875rem; }
-  /* Invisible hit-area: ~38px visual, ≥44px effective touch target (same
-     pattern as .tool::before above). */
-  .nav__cta::before {
-    content: "";
-    position: absolute;
-    inset: -4px;
-    border-radius: inherit;
+  :global(html:not([data-lang="en"])) .v5nav__lang [data-lang-label="pt"],
+  :global(html[data-lang="en"]) .v5nav__lang [data-lang-label="en"] {
+    opacity: 1;
+    color: var(--t-ink, #34322e);
   }
-  .nav__cta-short { display: none; }
+  /* Script-only control — a toggle that does nothing without JS is dead UI;
+     same doctrine as the interim nav's theme/lang tools. */
+  :global(html:not(.js)) .v5nav__lang { display: none; }
 
-  .icon-moon { display: none; }
-  :global([data-theme="dark"]) .icon-sun { display: none; }
-  :global([data-theme="dark"]) .icon-moon { display: block; }
-  @media (prefers-color-scheme: dark) {
-    :global(:root:not([data-theme="light"])) .icon-sun { display: none; }
-    :global(:root:not([data-theme="light"])) .icon-moon { display: block; }
+  .v5nav__cta {
+    font-family: inherit;
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--t-bg, #f8f7f4);
+    background: var(--t-ink, #34322e);
+    border: none;
+    border-radius: 10px;
+    padding: 10px 18px;
+    text-decoration: none;
+    cursor: pointer;
+    transition:
+      background-color 0.2s ease,
+      color 0.2s ease,
+      transform 0.15s ease;
   }
-
-  .nav__burger { display: none; }
-
-  /* Script-only controls (lang, theme, burger): without JS they're dead
-     buttons — hide them, same doctrine as the pricing toggles. Links and
-     CTAs are real anchors and stay. */
-  html:not(.js) .tool { display: none; }
-
-  .sheet {
-    z-index: var(--z-sheet);
-    inset: 0;
-    width: 100%;
-    height: 100dvh;
-    max-width: none;
-    max-height: none;
-    border: 0;
-    margin: 0;
-    padding: 0;
-    background: var(--bg);
-    color: var(--ink);
+  .v5nav__cta:hover {
+    background: var(--accent);
+    color: var(--on-accent);
   }
-  .sheet::backdrop { background: oklch(0 0 0 / 0.4); }
-  .sheet__inner {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: var(--sp-xl);
-    padding: var(--sp-lg);
-    height: 100%;
-  }
-  .sheet__close { align-self: flex-end; }
-  .sheet__links { display: flex; flex-direction: column; gap: var(--sp-lg); }
-  .sheet__link { text-decoration: none; }
-  .sheet__tools { display: flex; gap: var(--sp-sm); margin-top: auto; }
+  .v5nav__cta:active { transform: translateY(1px); }
 
-  @media (max-width: 760px) {
-    /* Bar keeps brand + CTA + burger; lang/theme move into the sheet. */
-    .nav__links, .tool--bar { display: none; }
-    .nav__burger { display: inline-flex; }
-    .nav__cta-full { display: none; }
-    .nav__cta-short { display: inline; }
-    .nav__tools { margin-left: auto; }
+  @media (max-width: 480px) {
+    .v5nav__lang { margin-inline-end: 12px; }
+    .v5nav__cta { padding: 10px 14px; font-size: 0.88rem; }
   }
 </style>
 
 <script>
-  const nav = document.getElementById("nav")!;
-  const onScroll = () => nav.classList.toggle("is-scrolled", window.scrollY > 8);
-  onScroll();
-  window.addEventListener("scroll", onScroll, { passive: true });
+  import { getLang, setLang, onLangChange } from "../scripts/i18n";
 
-  const themeToggles = document.querySelectorAll<HTMLButtonElement>('[data-action="theme"]');
-  const isDark = () => {
-    const d = document.documentElement;
-    return (
-      d.dataset.theme === "dark" ||
-      (!d.dataset.theme && window.matchMedia("(prefers-color-scheme: dark)").matches)
-    );
+  const setScrolled = () => {
+    const sy = window.scrollY || document.documentElement.scrollTop || 0;
+    document.documentElement.toggleAttribute("data-scrolled", sy > 24);
   };
-  const syncThemeState = () =>
-    themeToggles.forEach((b) => b.setAttribute("aria-pressed", String(isDark())));
-  syncThemeState();
-  themeToggles.forEach((btn) =>
-    btn.addEventListener("click", () => {
-      document.documentElement.dataset.theme = isDark() ? "light" : "dark";
-      syncThemeState();
-      try { localStorage.setItem("cultiv-theme", document.documentElement.dataset.theme!); } catch {}
-    })
-  );
+  setScrolled();
+  window.addEventListener("scroll", setScrolled, { passive: true });
 
-  const langToggles = document.querySelectorAll<HTMLButtonElement>('[data-action="lang"]');
-  // ARIA labels follow the language like visible text does: any element with
-  // data-aria-pt/-en gets relabeled here (server default is pt, like the page).
-  const syncAria = () => {
-    const en = document.documentElement.dataset.lang === "en";
-    document.querySelectorAll<HTMLElement>("[data-aria-pt]").forEach((el) =>
-      el.setAttribute("aria-label", (en ? el.dataset.ariaEn : el.dataset.ariaPt) ?? "")
-    );
-    const toggleLabel = en ? "Mudar para português" : "Switch to English";
-    langToggles.forEach((b) => b.setAttribute("aria-label", toggleLabel));
-  };
-  syncAria();
-  langToggles.forEach((btn) =>
-    btn.addEventListener("click", () => {
-      const d = document.documentElement;
-      d.dataset.lang = d.dataset.lang === "en" ? "pt" : "en";
-      d.lang = d.dataset.lang === "en" ? "en" : "pt-BR";
-      syncAria();
-      (window as any).cultivApplyMeta?.(d.dataset.lang);
-      try { localStorage.setItem("cultiv-lang", d.dataset.lang); } catch {}
-    })
-  );
-
-  const sheet = document.getElementById("nav-sheet") as HTMLDialogElement;
-  const burger = document.getElementById("nav-open")!;
-  burger.addEventListener("click", () => {
-    sheet.showModal();
-    burger.setAttribute("aria-expanded", "true");
-  });
-  document.getElementById("nav-close")!.addEventListener("click", () => sheet.close());
-  sheet.addEventListener("click", (e) => {
-    const t = e.target instanceof Element ? e.target : null;
-    // Links close AND navigate (closest(): clicks land on the bilingual
-    // <span>s inside the <a>). Anything that isn't an interactive control is
-    // dead space — tapping it dismisses the sheet, the standard dialog
-    // pattern. Buttons (close, lang, theme) keep their own behavior.
-    if (t?.closest("a") || !t?.closest("button")) sheet.close();
-  });
-  // Covers every close path (button, link, Esc).
-  sheet.addEventListener("close", () => burger.setAttribute("aria-expanded", "false"));
+  const langBtn = document.querySelector<HTMLButtonElement>("[data-lang-toggle]");
+  if (langBtn) {
+    const sync = () => {
+      const en = getLang() === "en";
+      langBtn.setAttribute("aria-label", en ? "Mudar para português" : "Switch to English");
+    };
+    sync();
+    langBtn.addEventListener("click", () => setLang(getLang() === "en" ? "pt" : "en"));
+    onLangChange(sync);
+  }
 </script>

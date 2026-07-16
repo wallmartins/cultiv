@@ -38,7 +38,9 @@ const PLANS_PATH = "/app/plans";
 const login = (returnTo: string): string =>
   `${APP_ORIGIN}/login?returnTo=${encodeURIComponent(returnTo)}`;
 
-export type PlanId = "explorador" | "criador" | "pro";
+// ADR 0006: catálogo canônico — o tier alto é "profissional" (não "pro");
+// o id compõe o internalRef {planId}_{period}_{currency} do checkout.
+export type PlanId = "explorador" | "criador" | "profissional";
 export type PlanPeriod = "monthly" | "annual";
 
 /** Primary CTA: free trial → Auth0 → calibration onboarding. */

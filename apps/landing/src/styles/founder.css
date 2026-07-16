@@ -1,0 +1,448 @@
+/* ============================================================
+   Ato 6 — founder-vídeo ("julgue você mesmo"). Ported from the design's
+   inline styles (cultiv-hero-v5.dc.html 437–505). Chamber-internal colors
+   (#F1EFE9, #A8A399, #151512, #0E0E0C, #E7E4DC…) stay hardcoded per the
+   contract — this section is always dark-chamber content, never the light
+   `--t-*` palette (that's why the header/paragraph colors below are not
+   `var(--t-ink)`).
+
+   Layout state is driven by three data attributes the runtime module
+   (scripts/founder.ts) writes on the `.founder` root, mirroring the design's
+   `renderVals` ternaries exactly:
+     data-fphase="idle"|"play"|"split"  — the video-sim state machine
+     data-reduced                       — prefers-reduced-motion snapshot
+     data-pinned                        — true only when !reduced && !mobile
+                                           && phase==="idle" (the scroll-jack
+                                           pin is active)
+   Absence of `data-fphase` (no JS at all, or not yet hydrated) is the
+   resting/legible state: poster + the full FounderNote already visible,
+   side by side on desktop / stacked on mobile — per FOUNDER-PROOF-SPEC §5
+   ("JS-off: poster do vídeo + a FounderNote inteira visíveis").
+   ============================================================ */
+
+.founder {
+  position: relative;
+  height: auto;
+}
+.founder[data-pinned] {
+  height: 200vh;
+}
+
+.founder__sticky {
+  position: relative;
+  height: auto;
+  overflow: visible;
+  display: flex;
+  align-items: center;
+  /* Dark card by default so the light-on-dark content is legible with JS off;
+     founder.ts drives the light→dark scroll inversion via inline style once
+     mounted (starts light at the section entrance, darkens across the plateau). */
+  background: #151411;
+  /* Vertical padding tied to viewport HEIGHT (svh) so the split scales down on
+     short screens and fits the pinned 100svh viewport without clipping. */
+  padding: clamp(16px, 3svh, 56px) clamp(20px, 6vw, 64px);
+  box-sizing: border-box;
+}
+.founder[data-pinned] .founder__sticky {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  overflow: hidden;
+}
+
+.founder__inner {
+  width: min(100%, 1240px);
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+  will-change: transform, opacity;
+  /* JS-off / pre-hydration resting state: fully visible, no rise. JS
+     (founderTick) overrides opacity/transform inline once mounted, easing
+     them in as the pin progresses — same coordinated crossfade as the
+     background darkening, so the light-on-dark text (below) never appears
+     against a light background mid-transition (Fix E). */
+  opacity: 1;
+  transform: none;
+}
+
+.founder__head {
+  max-width: 56ch;
+}
+.founder__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #a8a399;
+}
+.founder__eyebrow-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--accent);
+  box-shadow: 0 0 10px rgba(163, 221, 66, 0.7);
+}
+.founder__h2 {
+  font-family: var(--font-headline);
+  font-weight: 400;
+  font-size: clamp(2rem, 4.6vw, 3.25rem);
+  line-height: 1.07;
+  letter-spacing: -0.012em;
+  margin: 14px 0 0;
+  color: #f1efe9;
+  text-wrap: balance;
+}
+
+/* ---- split: poster/video | note text (mobile-first: stacked) ---- */
+.founder__split {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(18px, 2.4vw, 40px);
+  align-items: stretch;
+  margin-top: clamp(14px, 2.4svh, 38px);
+}
+/* Pinned: founder.ts (fixSplitHeight) sets a fixed row height that fits the
+   note, so the row never grows. Clip each panel to that height so the note's
+   transient sliver-width wrap during the reveal can't push the block taller
+   than reserved (which is what re-centered the block and jumped the video). */
+.founder[data-pinned] .founder__video-panel,
+.founder[data-pinned] .founder__text {
+  min-height: 0;
+  overflow: hidden;
+}
+/* Both panels keep flex-grow:1 / flex-shrink:1 CONSTANT and animate ONLY
+   flex-basis. Transitioning flex-grow/flex-shrink (unitless) makes the two
+   columns' widths move non-monotonically — the video/text visibly overshoots
+   ("grows, goes tiny, comes back"). Animating basis alone (both columns share
+   the same duration/easing and their bases always sum to 100%) gives a clean,
+   monotonic resize. */
+.founder__video-panel {
+  /* grow:0 so the video holds ~its basis width (doesn't stretch); shrink:1 to
+     absorb the column gap. Only flex-basis animates → a clean monotonic
+     "retract to the left". */
+  flex: 0 1 auto;
+  min-width: 0;
+  transition: flex-basis 0.72s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.founder__text {
+  flex: 1 1 auto;
+  min-width: 0;
+  /* Resting/JS-off default: revealed. max-height is a real px value (not
+     `none`) so the reveal can transition smoothly (0px ⇄ 4000px), same as the
+     reference standalone's fTextMax. */
+  opacity: 1;
+  max-height: 4000px;
+  overflow: hidden;
+  pointer-events: auto;
+  transition:
+    flex-basis 0.72s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.5s ease 0.3s,
+    max-height 0.72s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (min-width: 720px) {
+  .founder__split {
+    flex-direction: row;
+  }
+  /* Only flex-basis changes between states (grow/shrink stay 1/1 from the base
+     rule) so the resize stays monotonic. JS-off / resting desktop default:
+     side-by-side, split-like proportions (poster left, full note right). */
+  .founder__video-panel {
+    flex-basis: 47%;
+  }
+  .founder__text {
+    flex-basis: 53%;
+  }
+  /* Hydrated + not yet split: the video reclaims full width, text collapses
+     to nothing (its opacity/max-height collapse below handles legibility). */
+  .founder[data-fphase="idle"]:not([data-reduced]) .founder__video-panel,
+  .founder[data-fphase="play"]:not([data-reduced]) .founder__video-panel {
+    flex-basis: 100%;
+  }
+  .founder[data-fphase="idle"]:not([data-reduced]) .founder__text,
+  .founder[data-fphase="play"]:not([data-reduced]) .founder__text {
+    flex-basis: 0%;
+  }
+}
+
+/* Collapse the note panel while idle/playing (JS + not reduced) — applies at
+   every width; on mobile the flex-basis stays "auto" (design formula never
+   varies fTextFlex by phase there) but max-height:0 still hides the block. */
+.founder[data-fphase="idle"]:not([data-reduced]) .founder__text,
+.founder[data-fphase="play"]:not([data-reduced]) .founder__text {
+  opacity: 0;
+  max-height: 0;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .founder__video-panel,
+  .founder__text {
+    transition: none;
+  }
+}
+
+/* ---- video frame ---- */
+.founder__frame {
+  position: relative;
+  /* FIXED height (not aspect-ratio): as the video panel narrows on the split,
+     the frame only shrinks in WIDTH — its height never changes. So the video
+     stays fully visible and the streaming text / replay button inside never
+     reflow out of view (the aspect-ratio version shrank the frame vertically
+     too, which is what broke the animation). Matches the reference standalone. */
+  height: 52svh;
+  width: 100%;
+  margin: 0 auto;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid rgba(241, 239, 233, 0.14);
+  background: #0e0e0c;
+  box-shadow: 0 30px 80px -40px rgba(0, 0, 0, 0.8);
+}
+
+/* poster / placeholder frame — asset to produce, see component comment */
+.founder__poster {
+  display: grid;
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    135deg,
+    rgba(241, 239, 233, 0.05) 0 10px,
+    rgba(241, 239, 233, 0.015) 10px 20px
+  );
+  place-items: center;
+}
+.founder__poster-text {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: rgba(183, 178, 168, 0.7);
+  text-align: center;
+  padding: 0 24px;
+  line-height: 1.7;
+}
+
+/* idle: play button */
+.founder__play {
+  display: none;
+  position: absolute;
+  inset: 0;
+  place-items: center;
+  background: linear-gradient(180deg, rgba(14, 14, 12, 0) 40%, rgba(14, 14, 12, 0.55));
+  border: none;
+  cursor: pointer;
+  color: #f1efe9;
+  padding: 0;
+}
+.founder__play-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+.founder__play-circle {
+  width: 74px;
+  height: 74px;
+  border-radius: 999px;
+  background: var(--accent);
+  display: grid;
+  place-items: center;
+  box-shadow: 0 14px 44px -14px rgba(163, 221, 66, 0.75);
+  transition: transform 0.2s ease;
+}
+.founder__play:hover .founder__play-circle {
+  transform: scale(1.06);
+}
+.founder__play-triangle {
+  width: 0;
+  height: 0;
+  border-left: 20px solid #151512;
+  border-top: 13px solid transparent;
+  border-bottom: 13px solid transparent;
+  margin-left: 5px;
+}
+.founder__play-label {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 11px;
+  letter-spacing: 0.09em;
+  color: #f1efe9;
+}
+
+/* video "live": geração acontecendo (stream em loop no clock do clipe) */
+.founder__live {
+  display: none;
+  position: absolute;
+  inset: 0;
+  flex-direction: column;
+  padding: clamp(16px, 2.6vw, 26px);
+  background: linear-gradient(180deg, rgba(14, 14, 12, 0.35), rgba(14, 14, 12, 0.86));
+}
+.founder__prompt-chip {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: #151512;
+  background: var(--accent);
+  padding: 5px 11px;
+  border-radius: 999px;
+}
+.founder__stream {
+  margin: 16px 0 0;
+  font-family: var(--font-ui);
+  font-weight: 440;
+  font-size: clamp(1rem, 1.7vw, 1.24rem);
+  line-height: 1.5;
+  color: #f1efe9;
+  text-wrap: pretty;
+}
+.founder__caret {
+  display: inline-block;
+  width: 2px;
+  height: 1.05em;
+  margin-left: 2px;
+  background: var(--accent);
+  vertical-align: -0.15em;
+  animation: cultivCaret 0.9s steps(1) infinite;
+}
+.founder__live-spacer {
+  flex: 1;
+}
+.founder__live-footer {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.founder__live-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: #a8a399;
+  white-space: nowrap;
+}
+.founder__live-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--accent);
+  box-shadow: 0 0 8px rgba(163, 221, 66, 0.8);
+}
+.founder__progress-track {
+  flex: 1;
+  height: 3px;
+  border-radius: 999px;
+  background: rgba(241, 239, 233, 0.16);
+  overflow: hidden;
+}
+.founder__progress-fill {
+  height: 100%;
+  width: 0%;
+  background: var(--accent);
+  border-radius: 999px;
+}
+.founder__replay {
+  flex: none;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: #f1efe9;
+  background: rgba(241, 239, 233, 0.08);
+  border: 1px solid rgba(241, 239, 233, 0.2);
+  border-radius: 999px;
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+.founder__replay:hover {
+  background: rgba(241, 239, 233, 0.16);
+}
+
+/* display toggling for poster / play / live — same at every width; only the
+   "reduced" escape hatch (poster always wins, play/live never show) differs. */
+.founder[data-fphase="idle"]:not([data-reduced]) .founder__play {
+  display: grid;
+}
+.founder[data-fphase="play"]:not([data-reduced]) .founder__poster,
+.founder[data-fphase="split"]:not([data-reduced]) .founder__poster {
+  display: none;
+}
+.founder[data-fphase="play"]:not([data-reduced]) .founder__live,
+.founder[data-fphase="split"]:not([data-reduced]) .founder__live {
+  display: flex;
+}
+
+/* ---- note panel: the FounderNote, in full ---- */
+.founder__note-caption {
+  display: block;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  color: #a8a399;
+  text-transform: uppercase;
+}
+.founder__note-body {
+  margin-top: clamp(8px, 1.2svh, 14px);
+  display: flex;
+  flex-direction: column;
+  gap: clamp(6px, 1svh, 12px);
+}
+.founder__note-p {
+  margin: 0;
+  font-family: var(--font-ui);
+  font-weight: 400;
+  /* Type scales with viewport HEIGHT (svh) so the whole 3-paragraph note fits
+     the pinned 100svh viewport at any screen height — the section no longer
+     releases the pin to reveal it (user request: constant height). */
+  font-size: clamp(0.82rem, 1.55svh, 1.12rem);
+  line-height: 1.5;
+  color: #e7e4dc;
+  text-wrap: pretty;
+}
+.founder__signature {
+  margin: 6px 0 0;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: #a8a399;
+}
+.founder__receipt {
+  margin: 2px 0 0;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  color: #8a8578;
+}
+.founder__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: clamp(22px, 3vw, 30px);
+  text-decoration: none;
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 0.98rem;
+  color: #151512;
+  background: var(--accent);
+  border: 1.5px solid var(--accent);
+  border-radius: 10px;
+  padding: 13px 22px;
+  transition:
+    box-shadow 0.2s ease,
+    transform 0.15s ease;
+}
+.founder__cta:hover {
+  box-shadow: 0 12px 30px -12px rgba(163, 221, 66, 0.8);
+  transform: translateY(-1px);
+}
+.founder__cta:active {
+  transform: translateY(1px);
+}

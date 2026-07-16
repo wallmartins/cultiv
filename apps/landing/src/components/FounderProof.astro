@@ -1,0 +1,145 @@
+---
+// Ato 6 — founder-vídeo: "julgue você mesmo" (FOUNDER-PROOF-SPEC.md). Ported
+// from the design's founder markup (cultiv-hero-v5.dc.html 437–505) and its
+// `fPlay`/`_fAlign`/`fReplay`/`fStreamTick`/`founderTick` state machine
+// (2591–2655) + the founder half of `readScroll` (1988–2020). Runtime
+// behavior lives in `../scripts/founder.ts` (registered on the shared
+// engine.ts rAF/scroll loop — see that module's header comment).
+//
+// FounderNote deviation (binding, user 2026-07-15): the design's own
+// `FOUNDER_NOTE` (851–857, "Passei anos…") is NOT an authentic Cultiv
+// generation and must not ship. The three paragraphs + signature + receipt
+// below are copied verbatim, character-for-character, from the real
+// calibrated-voice generation on file (foundernote-authentic.md, see the
+// v5 contract's binding-exceptions section for the path) — never rewrite
+// them. The generic design signature "— o fundador da Cultiv" is replaced
+// by the authentic signature+receipt pair (sanctioned deviation).
+//
+// Video asset: the design has no real <video> element here — it's a
+// JS-driven "video simulation" (poster → streaming text → split) because
+// there is no footage yet.
+// ponytail: swap the poster/stream simulation for a real
+// <video controls preload="metadata"> + VTT captions once the founder
+// records rosto→prompt→geração→resultado (FOUNDER-PROOF-SPEC.md §7 asset
+// brief) — the split choreography and copy stay the same either way.
+import "../styles/founder.css";
+import T from "./T.astro";
+import { trialUrl } from "../config";
+---
+
+<section id="founder" class="founder" aria-label="Prova em vídeo: o fundador e o texto gerado pela Cultiv">
+  <div class="founder__sticky" data-founder-sticky>
+    <div class="founder__inner" data-founder-inner>
+      <div class="founder__head">
+        <span class="founder__eyebrow">
+          <span class="founder__eyebrow-dot" aria-hidden="true"></span>
+          <T pt="Esta página foi escrita pela Cultiv" en="This page was written by Cultiv" />
+        </span>
+        <h2 class="founder__h2">
+          <T pt="Veja um texto nascer. E leia o resultado inteiro." en="Watch a text be born. Read the whole result." />
+        </h2>
+      </div>
+
+      <div class="founder__split">
+        <!-- painel do vídeo -->
+        <div class="founder__video-panel">
+          <div class="founder__frame">
+            <!-- poster / frame (asset de vídeo a produzir) -->
+            <div class="founder__poster" data-fposter aria-hidden="true">
+              <span class="founder__poster-text">
+                <T pt="[ vídeo do fundador ]" en="[ founder video ]" />
+                <br />
+                <T pt="rosto → prompt → geração da nota → resultado" en="face → prompt → note generation → result" />
+              </span>
+            </div>
+
+            <!-- idle: botão play -->
+            <button
+              type="button"
+              class="founder__play"
+              data-fplay
+              aria-label="Assistir a nota do fundador sendo gerada"
+            >
+              <span class="founder__play-inner">
+                <span class="founder__play-circle">
+                  <span class="founder__play-triangle" aria-hidden="true"></span>
+                </span>
+                <span class="founder__play-label"><T pt="assistir · 0:07" en="watch · 0:07" /></span>
+              </span>
+            </button>
+
+            <!-- vídeo rodando: geração acontecendo (stream em loop no clock do clipe) -->
+            <div class="founder__live" data-flive>
+              <span class="founder__prompt-chip">
+                <T pt="PROMPT · engajar a audiência" en="PROMPT · engage your audience" />
+              </span>
+              <p class="founder__stream">
+                <span data-fstream></span><span class="founder__caret" aria-hidden="true"></span>
+              </p>
+              <div class="founder__live-spacer"></div>
+              <div class="founder__live-footer">
+                <span class="founder__live-label">
+                  <span class="founder__live-dot" aria-hidden="true"></span>
+                  <T pt="gerando na voz do fundador" en="generating in the founder's voice" />
+                </span>
+                <div class="founder__progress-track">
+                  <div class="founder__progress-fill" data-fprogress></div>
+                </div>
+                <button type="button" class="founder__replay" data-freplay aria-label="Recomeçar do início">
+                  <T pt="↺ recomeçar" en="↺ replay" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- painel do texto: a FounderNote, na íntegra -->
+        <div class="founder__text" data-founder-text>
+          <span class="founder__note-caption">
+            <T
+              pt="A nota do fundador — gerada pela Cultiv, sem uma vírgula editada."
+              en="The founder's note — generated by Cultiv, zero commas edited."
+            />
+          </span>
+          <div class="founder__note-body">
+            <T
+              el="p"
+              class="founder__note-p"
+              pt="Tenho notado que o receio de perder nossa essência para as máquinas, muitas vezes, ignora a natureza técnica de como elas operam hoje. A maioria das ferramentas entrega textos plásticos porque se baseia em médias estatísticas genéricas, enquanto um modelo ajustado absorve sua bagagem, aprendendo seu ritmo e preferências vocabulares específicas."
+              en="I have noticed that most of what I read lately feels like a plastic, predictable version of human thought because these tools rely on statistical averages that erase our unique traits. When I observe my own way of writing, I realize that technology should act as an extension of our personal cadence, not as a substitute that impoverishes what we truly intend to convey."
+            />
+            <T
+              el="p"
+              class="founder__note-p"
+              pt="Estou usando este recurso agora para eliminar o atrito de encarar uma tela em branco, o que me permite investir minha energia na estratégia e no peso emocional que sustentam minhas palavras. Esta nota que você lê não nasceu de um comando genérico ou de um modelo pronto, mas foi construída diretamente do meu mapa de voz e das minhas escolhas vocabulares."
+              en="I am currently testing this support to remove the mechanical friction of staring at a blank screen, which allows me to invest my energy into the strategy and emotional weight that sustain my words. This note you are reading did not come from a generic command or a ready-made template, but was built directly from my own voice map and specific vocabulary choices."
+            />
+            <T
+              el="p"
+              class="founder__note-p"
+              pt="Se uma ferramenta consegue capturar meu ritmo e minha forma de pensar com tanta precisão, a pergunta que fica para você é: essa fronteira entre o humano e o artificial é realmente real, ou só existe quando a tecnologia é mal projetada e falha em respeitar nossa assinatura linguística?"
+              en="If a tool can capture my rhythm and way of thinking with such precision, the question that remains for you is whether the boundary between human and artificial is actually real, or if it only exists when the technology is poorly designed, failing to respect our linguistic signature?"
+            />
+            <p class="founder__signature">
+              <T pt="— Wallace Martins, fundador do Cultiv" en="— Wallace Martins, founder of Cultiv" />
+            </p>
+            <p class="founder__receipt">
+              <T
+                pt="intenção: engajar a audiência · edição humana: 0 frases"
+                en="intent: engage your audience · human edits: 0 sentences"
+              />
+            </p>
+          </div>
+          <a class="founder__cta" href={trialUrl}>
+            <T pt="Comece o teste grátis →" en="Start the free trial →" />
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  import { initFounder } from "../scripts/founder";
+  initFounder();
+</script>

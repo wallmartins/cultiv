@@ -1,0 +1,204 @@
+---
+// FAQ (Ato 7) — design 512–693. Objection-handling: 12 real questions in 5
+// labelled groups (Voz · Dados e privacidade · Resultado · Escopo · Planos),
+// native <details>/<summary> disclosure (works with zero JS, indexable).
+// Copy verbatim pt-BR (FAQ-SPEC §2/§0.1 — every claim already validated
+// against the code/ADR 0006, do not "improve" a sentence here) + EN
+// siblings via T.astro. Answers keep the design's inline <em>/<strong>
+// emphasis; styling for those moves to closing.css (`.faq__atext em/strong`)
+// since T.astro injects them via set:html, past Astro's scoped-style reach.
+import T from "./T.astro";
+import "../styles/closing.css";
+
+interface FaqItem {
+  q: { pt: string; en: string };
+  /** HTML (design's inline <em>/<strong> kept as plain tags — styled by
+      `.faq__atext em/strong` in closing.css). */
+  a: { pt: string; en: string };
+}
+interface FaqGroup {
+  label: { pt: string; en: string };
+  items: FaqItem[];
+}
+
+// Order = FAQ-SPEC §1 (strongest doubt first); groups exactly as design
+// 521–690. Do not reorder — the render order IS the objection-priority.
+const FAQ_GROUPS: FaqGroup[] = [
+  {
+    label: { pt: "Voz", en: "Voice" },
+    items: [
+      {
+        q: {
+          pt: "Isso realmente soa como eu, ou é mais uma IA imitando?",
+          en: "Does this really sound like me, or is it just AI doing an impression?",
+        },
+        a: {
+          pt: "A calibração capta <em>como você raciocina e argumenta</em> (Reasoning + Argument-Development Signature), não só a superfície do estilo. Não é uma IA genérica com um prompt bonito por cima — é o mapa do seu pensamento guiando cada texto.",
+          en: "Calibration captures <em>how you reason and build an argument</em> (Reasoning + Argument-Development Signature), not just surface style. It's not a generic AI with a nice prompt on top — it's the map of your thinking guiding every text.",
+        },
+      },
+      {
+        q: {
+          pt: "Preciso subir os meus textos antigos pra ele aprender?",
+          en: "Do I need to upload my old writing for it to learn?",
+        },
+        a: {
+          pt: "Não. A Cultiv <strong>não raspa uploads</strong>. Ela te guia por <strong>4 perguntas</strong> — você responde <em>escrevendo</em>, em alguns minutos — e é isso que vira o seu Perfil de Voz.",
+          en: "No. Cultiv <strong>doesn't scrape uploads</strong>. It guides you through <strong>4 questions</strong> — you answer <em>by writing</em>, in a few minutes — and that becomes your Voice Profile.",
+        },
+      },
+    ],
+  },
+  {
+    label: { pt: "Dados e privacidade", en: "Data & privacy" },
+    items: [
+      {
+        q: {
+          pt: "Vocês treinam com os meus textos? Meus dados ficam seguros?",
+          en: "Do you train on my writing? Is my data safe?",
+        },
+        a: {
+          pt: "Não pra treinar nada de ninguém. Os textos que você escreve na calibração servem só pra montar o <em>seu</em> Perfil de Voz — ficam <strong>criptografados</strong> e ligados só à sua conta, e o texto cru <strong>nunca é enviado ao modelo que escreve</strong>. A Cultiv gera a partir de sinais derivados da sua voz.",
+          en: "No, not to train anything for anyone. What you write during calibration only builds <em>your</em> Voice Profile — it's stored <strong>encrypted</strong> and tied only to your account, and the raw text is <strong>never sent to the model that writes</strong>. Cultiv generates from signals derived from your voice.",
+        },
+      },
+      {
+        q: {
+          pt: "A minha voz pode acabar no texto de outra pessoa?",
+          en: "Could my voice end up in someone else's text?",
+        },
+        a: {
+          pt: "Não. Tudo o que é da sua voz fica ligado <strong>só à sua conta</strong> — cada geração lê apenas a sua voz, e a Cultiv nunca a usa pra escrever pra outro usuário.",
+          en: "No. Everything about your voice stays tied <strong>only to your account</strong> — every generation reads only your voice, and Cultiv never uses it to write for another user.",
+        },
+      },
+      {
+        q: {
+          pt: "E se eu mudar de ideia? Consigo apagar a minha voz?",
+          en: "What if I change my mind? Can I delete my voice?",
+        },
+        a: {
+          pt: "Consegue, quando quiser. Ao revogar o consentimento, a Cultiv <strong>apaga tudo</strong> — os exemplos, o Perfil de Voz, as versões e os diagnósticos — e registra isso. Sua voz sai por completo.",
+          en: "Yes, whenever you want. When you revoke consent, Cultiv <strong>deletes everything</strong> — the examples, the Voice Profile, its versions, and the diagnostics — and logs it. Your voice leaves completely.",
+        },
+      },
+    ],
+  },
+  {
+    label: { pt: "Resultado", en: "Result" },
+    items: [
+      {
+        q: {
+          pt: "O texto já sai pronto pra publicar, ou ainda preciso editar?",
+          en: "Does the text come out ready to publish, or do I still need to edit it?",
+        },
+        a: {
+          pt: "Sai um <strong>rascunho na sua voz</strong> — forte, mas não um carimbo final. Você continua sendo o autor: lê, ajusta o que quiser e publica. A Cultiv acelera a escrita; ela não tira você da decisão.",
+          en: "You get a <strong>draft in your voice</strong> — strong, but not a final stamp. You're still the author: you read it, adjust what you want, and publish. Cultiv speeds up the writing; it doesn't take you out of the decision.",
+        },
+      },
+      {
+        q: { pt: "E se a voz sair errada?", en: "What if the voice comes out wrong?" },
+        a: {
+          pt: "Você recalibra. O Perfil de Voz é <strong>durável e ajustável</strong> — não é um chute de uma vez só.",
+          en: "You recalibrate. The Voice Profile is <strong>durable and adjustable</strong> — not a one-shot guess.",
+        },
+      },
+    ],
+  },
+  {
+    label: { pt: "Escopo", en: "Scope" },
+    items: [
+      {
+        q: { pt: "O que eu consigo escrever com ele?", en: "What can I write with it?" },
+        a: {
+          pt: "Você começa pelo que quer <em>dizer</em> — compartilhar uma ideia, explicar a fundo, engajar, contar uma história, atualizar assinantes ou registrar uma decisão. O canal (blog, e-mail, social, rede profissional) é um ajuste opcional, não um template a preencher.",
+          en: "You start with what you want to <em>say</em> — share an idea, explain something in depth, engage an audience, tell a story, update subscribers, or document a decision. The channel (blog, email, social, professional network) is an optional adjustment, not a template to fill in.",
+        },
+      },
+      {
+        q: {
+          pt: "Dá pra ter uma voz diferente pra cada canal?",
+          en: "Can I have a different voice for each channel?",
+        },
+        a: {
+          pt: "Hoje a Cultiv aprende <strong>uma</strong> voz: a sua. Ela é durável e você a afina recalibrando — não é um perfil por canal. O que muda entre um post e um e-mail é a <em>intenção</em> e o formato, não a sua voz.",
+          en: "Today Cultiv learns <strong>one</strong> voice: yours. It's durable, and you fine-tune it by recalibrating — it's not one profile per channel. What changes between a post and an email is the <em>intent</em> and the format, not your voice.",
+        },
+      },
+    ],
+  },
+  {
+    label: { pt: "Planos", en: "Plans" },
+    items: [
+      {
+        q: {
+          pt: "O que é o teste grátis? Preciso de cartão?",
+          en: "What is the free trial? Do I need a card?",
+        },
+        a: {
+          pt: "<strong>Não precisa de cartão pra começar</strong>, e o teste é o produto <strong>inteiro</strong> (Perfil de Voz completo, todos os formatos, a mesma qualidade dos planos). Vai até <strong>7 dias ou 5 gerações</strong>, o que vier primeiro. O cartão só entra quando você escolhe um plano.",
+          en: "<strong>No card needed to start</strong>, and the trial is the <strong>whole</strong> product (full Voice Profile, every format, the same quality as the paid plans). It runs up to <strong>7 days or 5 generations</strong>, whichever comes first. The card only comes in when you choose a plan.",
+        },
+      },
+      {
+        q: {
+          pt: "O que acontece quando o teste acaba? Qual plano eu escolho?",
+          en: "What happens when the trial ends? Which plan do I choose?",
+        },
+        a: {
+          pt: "<strong>Nada é cobrado sozinho</strong>: a geração pausa e a sua conta, voz e histórico ficam preservados até você escolher um plano. São três — Explorador, Criador e Profissional — e a diferença é <strong>quanto você gera por mês</strong> e os modelos disponíveis. O Criador é o melhor equilíbrio pra maioria, e dá pra trocar depois.",
+          en: "<strong>Nothing gets charged on its own</strong>: generation pauses and your account, voice, and history stay preserved until you choose a plan. There are three — Explorador, Criador, and Profissional — and the difference is <strong>how much you generate per month</strong> and which models are available. Criador is the best fit for most people, and you can switch later.",
+        },
+      },
+      {
+        q: {
+          pt: "Funciona em português e em inglês?",
+          en: "Does it work in Portuguese and English?",
+        },
+        a: {
+          pt: "A Cultiv <strong>escreve em português e inglês</strong>. As perguntas da calibração hoje são em português; a leitura e a geração cobrem os dois idiomas.",
+          en: "Cultiv <strong>writes in Portuguese and English</strong>. Calibration's questions are Portuguese-only for now; reading and generation cover both languages.",
+        },
+      },
+    ],
+  },
+];
+---
+
+<section id="faq" aria-label="Perguntas frequentes" class="faq">
+  <div class="faq__inner">
+    <div class="faq__head">
+      <span class="faq__eyebrow"><T pt="FAQ · antes de você decidir" en="FAQ · before you decide" /></span>
+      <h2 class="faq__title"><T pt="As dúvidas que todo mundo tem." en="The questions everyone has." /></h2>
+    </div>
+
+    {
+      FAQ_GROUPS.map((group) => (
+        <>
+          <p class="faq__group">
+            <T pt={group.label.pt} en={group.label.en} />
+          </p>
+          {group.items.map((item) => (
+            <details data-faq class="faq__item">
+              <summary class="faq__summary">
+                <span class="faq__q">
+                  <T pt={item.q.pt} en={item.q.en} />
+                </span>
+                <span class="faq__sign" data-sign aria-hidden="true">
+                  <span class="faq__sign-h" />
+                  <span class="faq__sign-v" />
+                </span>
+              </summary>
+              <div class="faq__answer" data-answer>
+                <p class="faq__atext">
+                  <T pt={item.a.pt} en={item.a.en} />
+                </p>
+              </div>
+            </details>
+          ))}
+        </>
+      ))
+    }
+  </div>
+</section>

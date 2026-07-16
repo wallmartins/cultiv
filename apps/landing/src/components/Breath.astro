@@ -1,0 +1,111 @@
+---
+// Ato 4 — "Respiração": the calm passage between the constellation takeover
+// and the plans decision. Design markup 325–341 (cultiv-hero-v5.dc.html),
+// choreography `breathTick` 2069–2118. See BREATH-SPEC.md.
+//
+// No island: this is static semantic HTML (both language blocks render
+// server-side for SEO/JS-off) plus a bundled script that drives the
+// scroll-timed ink reveal. `data-breath-box` is the walker hook the Hero
+// section's canvas queries lazily to route its guide figure past this box
+// (contract: "Walker reads … [data-breath-box] (Breath owns)").
+import "../styles/breath.css";
+---
+
+<section
+  id="respiracao"
+  class="breath"
+  data-screen-label="Respiração — a sua voz não cabe na pressa"
+  aria-label="Respiração: o respiro que quebra a pressa"
+>
+  <div class="breath__sticky">
+    <div class="breath__box" data-breath-box>
+      <h2 class="breath__h2" data-l="pt" lang="pt-BR">
+        <span class="breath__line"
+          ><span data-breath-word>Todo</span> <span data-breath-word>mundo</span>
+          <span data-breath-word>promete</span> <span data-breath-word>velocidade.</span>
+          <span data-breath-word>Tudo</span> <span data-breath-word>pronto</span>
+          <span data-breath-word>pra</span> <span data-breath-word>ontem.</span></span
+        >
+        <span class="breath__line"
+          ><span data-breath-word>Como</span> <span data-breath-word>se</span>
+          <span data-breath-word>você</span> <span data-breath-word>tivesse</span>
+          <span data-breath-word>que,</span> <span data-breath-word>obrigatoriamente,</span>
+          <span data-breath-word>escolher</span> <span data-breath-word>entre:</span></span
+        >
+        <span class="breath__line"
+          ><span data-breath-word>Entregar</span> <span data-breath-word>rápido</span>
+          <span data-breath-word>e</span> <span data-breath-word>manter</span>
+          <span data-breath-word>a</span> <span data-breath-word>sua</span>
+          <span data-breath-word>própria</span> <span data-breath-word>autenticidade.</span></span
+        >
+        <span class="breath__line"
+          ><span data-breath-word>Mas</span> <span data-breath-word>você</span>
+          <span data-breath-word>nunca</span> <span data-breath-word>precisou</span>
+          <span data-breath-word>abrir</span> <span data-breath-word>mão</span>
+          <span data-breath-word>de</span> <span data-breath-word>uma</span>
+          <span data-breath-word>pra</span> <span data-breath-word>ter</span>
+          <span data-breath-word>a</span> <span data-breath-word>outra.</span></span
+        >
+        <span class="breath__line"
+          ><span data-breath-word>A</span> <span data-breath-word>Cultiv</span>
+          <span data-breath-word>escreve</span> <span data-breath-word>a</span>
+          <span data-breath-word>partir</span> <span data-breath-word>de</span>
+          <span data-breath-word>como</span> <span data-breath-word>você</span>
+          <span data-breath-word>pensa.</span></span
+        >
+        <span class="breath__line"
+          ><span data-breath-word>No</span> <span data-breath-word>seu</span>
+          <span data-breath-word>tempo,</span> <span data-breath-word>com</span>
+          <span data-breath-word>as</span> <span data-breath-word>suas</span>
+          <span data-breath-word>palavras.</span></span
+        >
+      </h2>
+      <h2 class="breath__h2" data-l="en" lang="en">
+        <span class="breath__line"
+          ><span data-breath-word>Everyone</span> <span data-breath-word>promises</span>
+          <span data-breath-word>speed.</span> <span data-breath-word>Everything</span>
+          <span data-breath-word>due</span> <span data-breath-word>yesterday.</span></span
+        >
+        <span class="breath__line"
+          ><span data-breath-word>As</span> <span data-breath-word>if</span>
+          <span data-breath-word>you</span> <span data-breath-word>absolutely</span>
+          <span data-breath-word>had</span> <span data-breath-word>to</span>
+          <span data-breath-word>choose</span> <span data-breath-word>between:</span></span
+        >
+        <span class="breath__line"
+          ><span data-breath-word>Shipping</span> <span data-breath-word>fast</span>
+          <span data-breath-word>and</span> <span data-breath-word>staying</span>
+          <span data-breath-word>true</span> <span data-breath-word>to</span>
+          <span data-breath-word>yourself.</span></span
+        >
+        <span class="breath__line"
+          ><span data-breath-word>But</span> <span data-breath-word>you</span>
+          <span data-breath-word>never</span> <span data-breath-word>had</span>
+          <span data-breath-word>to</span> <span data-breath-word>give</span>
+          <span data-breath-word>up</span> <span data-breath-word>one</span>
+          <span data-breath-word>to</span> <span data-breath-word>have</span>
+          <span data-breath-word>the</span> <span data-breath-word>other.</span></span
+        >
+        <span class="breath__line"
+          ><span data-breath-word>Cultiv</span> <span data-breath-word>writes</span>
+          <span data-breath-word>from</span> <span data-breath-word>how</span>
+          <span data-breath-word>you</span> <span data-breath-word>think.</span></span
+        >
+        <span class="breath__line"
+          ><span data-breath-word>In</span> <span data-breath-word>your</span>
+          <span data-breath-word>own</span> <span data-breath-word>time,</span>
+          <span data-breath-word>your</span> <span data-breath-word>own</span>
+          <span data-breath-word>words.</span></span
+        >
+      </h2>
+    </div>
+  </div>
+</section>
+
+<script>
+  import { initBreath } from "../scripts/breath";
+  import { start } from "../scripts/engine";
+
+  initBreath();
+  start(); // idempotent — safe alongside every other section's own start() call
+</script>

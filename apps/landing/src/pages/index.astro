@@ -1,15 +1,41 @@
 ---
-// Home — a constelação Cultiv (Landing v3).
-import ConstellationLayout from "../layouts/ConstellationLayout.astro";
-import ConstellationApp from "../components/constellation/ConstellationApp.astro";
-import { SITE } from "../data/constellation";
+// Home — Cultiv landing v5 (hero scroll-story). Ordem dos atos fixada pelo
+// design cultiv-hero-v5: nav → hero pinado → demo → mapa da voz → respiração
+// → planos → founder-vídeo → FAQ → CTA final → footer.
+//
+// Root-organized (no v5/ subfolder) — every section import below resolves
+// once the section agents land their component; until then `astro build`
+// is EXPECTED red (scaffold does not create section components).
+import LandingLayout from "../layouts/LandingLayout.astro";
+import Nav from "../components/Nav.astro";
+import HeroStory from "../components/HeroStory.astro";
+import Demo from "../components/Demo.astro";
+import VoiceMap from "../components/VoiceMap.astro";
+import Breath from "../components/Breath.astro";
+import Plans from "../components/Plans.astro";
+import FounderProof from "../components/FounderProof.astro";
+import Faq from "../components/Faq.astro";
+import CtaFinal from "../components/CtaFinal.astro";
+import Footer from "../components/Footer.astro";
+import { SITE } from "../data/site";
 import { homeGraph } from "../data/seo";
 ---
 
-<ConstellationLayout
-  title={SITE.title}
-  description={SITE.description}
+<LandingLayout
+  title={SITE.pt.title}
+  description={SITE.pt.description}
   jsonLd={homeGraph(Astro.site!)}
 >
-  <ConstellationApp />
-</ConstellationLayout>
+  <Nav />
+  <main id="main">
+    <HeroStory />
+    <Demo />
+    <VoiceMap />
+    <Breath />
+    <Plans />
+    <FounderProof />
+    <Faq />
+    <CtaFinal />
+  </main>
+  <Footer />
+</LandingLayout>

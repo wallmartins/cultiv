@@ -1,0 +1,130 @@
+---
+// Hero — scroll-story (Ato 1). Ported from cultiv-hero-v5.dc.html 194–224
+// (pinned intro: canvas + real-HTML copy + scroll hint + act overlays),
+// 777–778 (walker canvas, fixed page-wide) and 786–805 (opening logo
+// curtain) — see HERO-SCROLL-SPEC.md for the narrative concept and
+// hero-story.ts's header comment for the JS-off/reduced-motion doctrine.
+//
+// The single <h1> on the page lives here — its pt/en pair is hand-rolled
+// (not <T/>) so the page never ends up with two <h1> elements (T renders
+// pt+en as sibling tags; fine for <span>/<p>, not for a heading that must
+// be unique).
+import "../styles/hero.css";
+import T from "./T.astro";
+import { trialUrl } from "../config";
+---
+
+<section
+  class="hero-intro"
+  data-hero-intro
+  data-screen-label="Hero — scroll story"
+  aria-label="Apresentação da Cultiv"
+>
+  <div class="hero-sticky" data-hero-sticky>
+    <canvas class="hero-canvas" data-hero-canvas aria-hidden="true"></canvas>
+
+    <!-- Copy real em HTML (SEO / leitores de tela) — legível sem JS -->
+    <div class="hero-copy" data-hero-copy>
+      <h1 class="hero-h1" data-hero-h1
+        ><span data-l="pt" lang="pt-BR">Escreve como você pensa.</span><span data-l="en" lang="en"
+          >Writes the way you think.</span
+        ></h1
+      >
+      <p class="hero-sub" data-hero-sub>
+        <T
+          pt="Textos que são uma extensão de você. Não de um modelo."
+          en="Words that are an extension of you. Not of a model."
+        />
+      </p>
+      <div class="hero-cta-wrap hero-cta-row" data-hero-cta-wrap>
+        <button type="button" class="hero-cta-primary" data-hero-cta-demo>
+          <T pt="Testar a demo →" en="Try the demo →" />
+        </button>
+        <a class="hero-cta-secondary" href={trialUrl}>
+          <T pt="Começar grátis →" en="Start free →" />
+        </a>
+      </div>
+      <p class="hero-support" data-hero-support>
+        <T
+          pt="Descubra seu perfil de voz em poucos minutos · sem login · sem cadastro · sem cartão de crédito"
+          en="Discover your voice profile in minutes · no login · no signup · no credit card"
+        />
+      </p>
+    </div>
+
+    <!-- Indicador de scroll -->
+    <div class="hero-hint" data-hero-hint aria-hidden="true">
+      <div class="hero-hint-inner">
+        <span class="hero-hint-label"><T pt="Role para explorar" en="Scroll to explore" /></span>
+        <span class="hero-hint-pill"><span class="hero-hint-dot"></span></span>
+      </div>
+    </div>
+
+    <!-- Overlays narrativos dos atos 2 e 3 -->
+    <p class="hero-act" data-hero-act2 aria-hidden="true">
+      <T
+        pt="A maioria das IAs transforma vozes únicas em textos que soam iguais."
+        en="Most AIs turn unique voices into text that all sounds the same."
+      />
+    </p>
+    <p class="hero-act" data-hero-act3 aria-hidden="true">
+      <T pt="A Cultiv aprende o que torna a sua escrita única." en="Cultiv learns what makes your writing unique." />
+    </p>
+  </div>
+</section>
+
+<!-- bonequinho-guia (Ato 3→4): caminha com o scroll até o texto, depois contorna e desce sozinho -->
+<canvas class="hero-walker-canvas" data-hero-walker aria-hidden="true"></canvas>
+
+<!-- ============ ABERTURA: a logo se constrói no centro ============
+     Default display:none (hero.css) — only hero-story.ts ever shows this,
+     and only when `prefers-reduced-motion: no-preference`. See the CSS
+     file's module comment for why the JS-off resting state is inverted
+     from the raw design (which renders this unconditionally). -->
+<div class="hero-curtain" data-hero-curtain aria-hidden="true">
+  <div class="hero-curtain-bg" data-hero-curtain-bg></div>
+  <div class="hero-curtain-logo" data-hero-curtain-logo data-cultiv-intro-logo="true">
+    <svg width="min(30vw, 210px)" height="min(30vw, 210px)" viewBox="0 0 96 96" fill="none" style="display:block;">
+      <defs>
+        <path
+          id="introQ"
+          d="M62 38c0-9.5-7-16-15.5-16C38 22 32 28.2 32 36.2c0 7.9 6 13.8 14 13.8 1.1 0 2.2-.1 3.2-.4C48 60 42.2 65.6 34.6 68.2l3.4 6.8C50.6 70.6 62 59.6 62 43.6Z"
+        ></path>
+      </defs>
+      <circle
+        cx="48"
+        cy="48"
+        r="37"
+        stroke="#151515"
+        stroke-width="5"
+        stroke-dasharray="233"
+        stroke-dashoffset="233"
+        transform="rotate(-52 48 48)"
+        style="animation:cultivDraw 0.9s cubic-bezier(0.25,0.1,0.25,1) forwards;"></circle>
+      <path
+        d="M54.4 11.6A37 37 0 0 1 78.3 26.8"
+        stroke="#95CB3E"
+        stroke-width="5"
+        stroke-dasharray="30"
+        stroke-dashoffset="30"
+        style="animation:cultivDraw 0.5s 0.7s cubic-bezier(0.34,1.56,0.64,1) forwards;"></path>
+      <use
+        href="#introQ"
+        transform="translate(26.5 31.6) scale(0.62) translate(-32 -22)"
+        fill="#151515"
+        opacity="0"
+        style="animation:cultivFadeIn 0.5s 0.4s cubic-bezier(0.25,0.1,0.25,1) forwards;"></use>
+      <use
+        href="#introQ"
+        transform="translate(51 31.6) scale(0.62) translate(-32 -22)"
+        fill="#151515"
+        opacity="0"
+        style="animation:cultivFadeIn 0.5s 0.55s cubic-bezier(0.25,0.1,0.25,1) forwards;"></use>
+    </svg>
+  </div>
+</div>
+
+<script>
+  import { initHeroStory } from "../scripts/hero-story";
+  initHeroStory();
+</script>

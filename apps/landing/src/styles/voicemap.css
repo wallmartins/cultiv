@@ -1,0 +1,344 @@
+/* ============================================================
+   VoiceMap (Ato 3, "Constelação") — the Voice Profile as a harmonic
+   synthesizer. Ported from the design's inline styles (cultiv-hero-v5.dc.html
+   278-324) into scoped classes; exact clamps/paddings/radii/colors kept.
+
+   Two structural modes, chosen by `voice-synth.ts` via `[data-motion]` on
+   the section root (JS-off default = "static", matching the design's own
+   `state.reduced` branch — legible without any scroll-jack or JS):
+     - static (default / JS-off / prefers-reduced-motion): an auto-height
+       dark card, legend always visible, no pin.
+     - scrub (`[data-motion="scrub"]`): the 320vh pinned takeover — canvas
+       fills the viewport, legend/rise fade in via inline styles the script
+       writes every tick (design cTick/cUpdateOverlays).
+   ============================================================ */
+
+.vmap {
+  position: relative;
+  box-sizing: border-box;
+  height: auto;
+  padding: clamp(72px, 10vw, 120px) clamp(16px, 5vw, 56px);
+}
+.vmap[data-motion="scrub"] {
+  height: 320vh;
+  padding: 0;
+}
+
+.vmap__frame {
+  position: relative;
+  height: clamp(540px, 80vh, 760px);
+  overflow: hidden;
+  border-radius: 20px;
+  background: #151411;
+  border: 1px solid rgba(52, 50, 46, 0.18);
+}
+.vmap[data-motion="scrub"] .vmap__frame {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  border-radius: 0;
+  background: transparent;
+  border: none;
+}
+
+.vmap__rise {
+  position: absolute;
+  inset: 0;
+  opacity: 1;
+  will-change: transform, opacity;
+}
+.vmap[data-motion="scrub"] .vmap__rise {
+  opacity: 0; /* script drives this per-tick once the section is in range */
+}
+
+.vmap__canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  touch-action: pan-y;
+}
+
+/* overlay do sintetizador: header, pilares-fader, tooltip e micro-CTA */
+.vmap__legend {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: none;
+  will-change: opacity, transform;
+}
+.vmap[data-motion="scrub"] .vmap__legend {
+  opacity: 0;
+  visibility: hidden; /* script fades this in across the plateau window (cUpdateOverlays) */
+}
+
+.vmap__head {
+  position: absolute;
+  left: clamp(20px, 4.5vw, 56px);
+  top: clamp(38px, 8vh, 84px);
+  max-width: min(86vw, 420px);
+}
+
+.vmap__eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.09em;
+  color: #b7b2a8;
+}
+.vmap__eyebrow-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--accent);
+  display: inline-block;
+  box-shadow: 0 0 10px rgba(163, 221, 66, 0.7);
+}
+
+.vmap__title {
+  font-family: var(--font-headline);
+  font-weight: 400;
+  font-size: clamp(1.7rem, 3.4vw, 2.6rem);
+  line-height: 1.06;
+  letter-spacing: -0.012em;
+  margin: 12px 0 0;
+  color: #f1efe9;
+  text-wrap: balance;
+}
+
+.vmap__body {
+  margin: 10px 0 0;
+  font-size: clamp(0.9rem, 1.6vw, 1rem);
+  line-height: 1.55;
+  color: #b7b2a8;
+  text-wrap: pretty;
+}
+
+/* pilares-fader (draggable equalizer chips) */
+.vmap__pillar {
+  position: absolute;
+  left: clamp(16px, 3vw, 44px);
+  /* top: set inline per-pillar via `pillarTopCss` (design p.topCss) */
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 14px;
+  border: 1px solid rgba(241, 239, 233, 0.22);
+  border-radius: 999px;
+  background: rgba(244, 242, 235, 0.06);
+  backdrop-filter: blur(10px) saturate(1.15);
+  -webkit-backdrop-filter: blur(10px) saturate(1.15);
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+  will-change: transform;
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease;
+}
+.vmap__pillar:hover {
+  border-color: rgba(241, 239, 233, 0.5);
+  background: rgba(244, 242, 235, 0.11);
+}
+.vmap__pillar:active {
+  cursor: grabbing;
+}
+.vmap__pillar-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--pillar-color);
+  box-shadow: 0 0 10px var(--pillar-glow);
+}
+.vmap__pillar-label {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.09em;
+  color: #f1efe9;
+}
+.vmap__pillar-grip {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin-left: 2px;
+  opacity: 0.55;
+}
+.vmap__pillar-grip span {
+  width: 0;
+  height: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+}
+.vmap__pillar-grip span:first-child {
+  border-bottom: 5px solid #f1efe9;
+}
+.vmap__pillar-grip span:last-child {
+  border-top: 5px solid #f1efe9;
+}
+
+/* tooltip do traço (hover/click num nó) */
+.vmap__tip {
+  position: absolute;
+  left: 0;
+  top: 0;
+  max-width: 268px;
+  padding: 13px 16px 15px;
+  border: 1px solid rgba(241, 239, 233, 0.18);
+  border-radius: 14px;
+  background: rgba(24, 23, 20, 0.58);
+  backdrop-filter: blur(18px) saturate(1.25);
+  -webkit-backdrop-filter: blur(18px) saturate(1.25);
+  box-shadow:
+    0 22px 60px -20px rgba(0, 0, 0, 0.65),
+    inset 0 1px 0 rgba(241, 239, 233, 0.09);
+  pointer-events: none;
+  opacity: 0;
+  transform: translate3d(var(--tip-x, -420px), var(--tip-y, -420px), 0) scale(var(--tip-scale, 0.94));
+  transform-origin: 0 100%;
+  transition:
+    opacity 0.28s ease,
+    transform 0.38s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform, opacity;
+  --tip-color: var(--accent);
+  --tip-glow: rgba(163, 221, 66, 0.7);
+}
+.vmap__tip.is-visible {
+  opacity: 1;
+  --tip-scale: 1;
+}
+.vmap__tip-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.11em;
+  color: var(--tip-color);
+}
+.vmap__tip-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--tip-color);
+  box-shadow: 0 0 8px var(--tip-glow);
+  display: inline-block;
+}
+.vmap__tip-label {
+  margin: 8px 0 0;
+  font-family: var(--font-ui);
+  font-weight: 560;
+  font-size: 1.12rem;
+  letter-spacing: -0.008em;
+  color: #f1efe9;
+}
+.vmap__tip-desc {
+  margin: 6px 0 0;
+  font-size: 0.84rem;
+  line-height: 1.55;
+  color: #b7b2a8;
+}
+
+/* micro-CTA */
+.vmap__cta {
+  position: absolute;
+  right: clamp(20px, 4.5vw, 56px);
+  bottom: clamp(16px, 4vh, 42px);
+  text-align: right;
+  pointer-events: auto;
+}
+.vmap__cta-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: #f1efe9;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-color: color-mix(in srgb, var(--accent) 75%, transparent);
+  transition: color 0.2s ease;
+  text-align: right;
+}
+.vmap__cta-btn:hover {
+  color: var(--accent);
+}
+
+/* dica de interação */
+.vmap__key {
+  position: absolute;
+  left: 50%;
+  bottom: clamp(14px, 3vh, 30px);
+  transform: translateX(-50%);
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 10px;
+  letter-spacing: 0.09em;
+  color: rgba(183, 178, 168, 0.66);
+  z-index: 2;
+  opacity: 1;
+  pointer-events: none;
+  white-space: nowrap;
+}
+.vmap[data-motion="scrub"] .vmap__key {
+  opacity: 0;
+}
+@media (max-width: 719.98px) {
+  .vmap__key {
+    display: none;
+  }
+  /* The body copy explains hover/drag — interactions that don't exist on
+     touch (the section runs in the non-scrub static mode on phones). Dropping
+     it keeps the header (eyebrow + title) short. */
+  .vmap__body {
+    display: none;
+  }
+  /* Portrait synth: the three pillar chips ride a row across the TOP (each on
+     its wave's launch column, --pillar-x), and voice-synth.ts descends the
+     braids from just below them. Overrides the inline `top:<base%>` +
+     left-column position from the landscape layout. */
+  .vmap__pillar {
+    top: clamp(138px, 17.5vh, 182px) !important;
+    left: var(--pillar-x) !important;
+    transform: translateX(-50%);
+    padding: 7px 10px;
+    gap: 7px;
+  }
+  .vmap__pillar:hover {
+    transform: translateX(-50%);
+  }
+}
+
+/* handoff (Fix F): 24vh spacer opening Ato 4 (respiração). Hidden by default
+   (static/reduced/JS-off — no scroll-jack to hand off from); voice-synth.ts
+   shows it once scrub mode is confirmed active. */
+.vmap__handoff {
+  display: none;
+  height: 24vh;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 48px;
+}
+/* The seed span is a position hook, not a visual — the Hero-owned walker
+   reads its `getBoundingClientRect()` via [data-cseed] to know where to walk
+   to. Deviation from the design's literal inline style: the source also sets
+   `display:none` on this element (cultiv-hero-v5.dc.html line 321), which
+   would zero out its layout box and break that contract. Opacity alone
+   (driven by `cUpdateOverlays`'s `sop`, same curve as the design) keeps it
+   invisible while leaving a real, positioned box for the walker to target. */
+.vmap__seed {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: #95cb3e;
+  box-shadow: 0 0 20px rgba(149, 203, 62, 0.55);
+  opacity: 0;
+}

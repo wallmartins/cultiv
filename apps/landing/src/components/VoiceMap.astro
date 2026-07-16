@@ -1,0 +1,109 @@
+---
+// VoiceMap — Ato 3 "Constelação": the Voice Profile as a harmonic
+// synthesizer. Design markup 278-324 + JS cInit 2524-2585, cResize
+// 2682-2701, cInteractive/sSample/pointers/hover/pillar-drag/overlays
+// 2702-2831, cTick/cRender 2832-3121, renderVals voicemap keys 3242-3272.
+//
+// Three braided waves (pillars TOM/RITMO/EMOÇÃO) are modulated by 13 trait
+// nodes; scroll scrubs `q` through entry -> zoom-in -> interactive plateau ->
+// collapse -> handoff (a position hook, `[data-cseed]`, for the Hero-owned
+// walker). Chamber inversion is routed through theme-breath's
+// `setChamberT('const', t)` — this component never writes `--t-*` itself.
+//
+// Structural HTML is static (SEO/JS-off legible: the legend copy, the three
+// pillar chips and their aria-labels, the micro-CTA link) — only the canvas
+// scene and the tooltip content are JS-authored. Default mode is the design's
+// own `reduced` presentation (auto-height dark card, legend always visible);
+// `voice-synth.ts` switches to the pinned 320vh scrub takeover once it
+// confirms JS is running and motion isn't reduced.
+import "../styles/voicemap.css";
+import T from "./T.astro";
+import { PILLARS, pillarGlow, pillarTopCss, PILLAR_X_PORTRAIT } from "../scripts/voice-synth";
+---
+
+<section
+  id="constelacao"
+  class="vmap"
+  data-screen-label="Constelação — sua voz tem forma"
+  aria-label="Constelação: o Perfil de Voz virando geometria"
+>
+  <div class="vmap__frame">
+    <div class="vmap__rise" data-vmap-rise>
+      <canvas
+        class="vmap__canvas"
+        data-vmap-canvas
+        role="img"
+        aria-label="Sintetizador harmônico do Perfil de Voz: três ondas — Tom, Ritmo e Emoção — se entrelaçam da esquerda para a direita. Treze nós modulam as ondas: formalidade, humor, pessoalidade, vocabulário, metáforas, cadência, pontuação, estrutura, respiração, convicção, raciocínio, argumentação e audiência. Passe pelos nós para ver cada traço; arraste um pilar para ajustar a intensidade."
+      ></canvas>
+
+      <!-- overlay do sintetizador: header, pilares-fader, tooltip e micro-CTA -->
+      <div class="vmap__legend" data-vmap-legend aria-hidden="false">
+        <div class="vmap__head">
+          <span class="vmap__eyebrow">
+            <span class="vmap__eyebrow-dot" aria-hidden="true"></span>
+            <T pt="MAPA DA VOZ · 13 TRAÇOS · 3 PILARES" en="VOICE MAP · 13 TRAITS · 3 PILLARS" />
+          </span>
+          <h2 class="vmap__title">
+            <T pt="A sua voz é uma frequência única." en="Your voice is a unique frequency." />
+          </h2>
+          <p class="vmap__body">
+            <T
+              pt="Treze traços modulam três pilares. Passe pelos nós para senti-los vibrar; arraste um pilar, como num equalizador, para ouvi-lo mais alto."
+              en="Thirteen traits modulate three pillars. Hover the nodes to feel them vibrate; drag a pillar, like an equalizer, to hear it louder."
+            />
+          </p>
+        </div>
+
+        {
+          PILLARS.map((p, i) => (
+            <div
+              class="vmap__pillar"
+              data-pillar={p.id}
+              role="slider"
+              aria-label={`Pilar ${p.labelPt} — arraste para ajustar a intensidade`}
+              style={`top:${pillarTopCss(p.base)}; --pillar-x:${(PILLAR_X_PORTRAIT[i] * 100).toFixed(1)}%; --pillar-color:${p.color}; --pillar-glow:${pillarGlow(p.rgb)};`}
+            >
+              <span class="vmap__pillar-dot" aria-hidden="true" />
+              <T pt={p.labelPt} en={p.labelEn} class="vmap__pillar-label" />
+              <span class="vmap__pillar-grip" aria-hidden="true">
+                <span />
+                <span />
+              </span>
+            </div>
+          ))
+        }
+
+        <div class="vmap__tip" data-vmap-tip aria-live="polite">
+          <span class="vmap__tip-eyebrow">
+            <span class="vmap__tip-dot" aria-hidden="true"></span>
+            <span data-vmap-tip-pillar></span>
+          </span>
+          <h3 class="vmap__tip-label" data-vmap-tip-label></h3>
+          <p class="vmap__tip-desc" data-vmap-tip-desc></p>
+        </div>
+
+        <div class="vmap__cta">
+          <button type="button" class="vmap__cta-btn" data-vmap-go>
+            <T pt="A sua não se parece com nenhuma outra → ver como" en="Yours looks like no other → see how" />
+          </button>
+        </div>
+      </div>
+
+      <!-- dica de interação -->
+      <div class="vmap__key" data-vmap-key aria-hidden="true">
+        <T pt="passe pelos nós · arraste os pilares" en="hover the nodes · drag the pillars" />
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- handoff (Fix F): a semente que abre a respiração (Ato 4) — o bonequinho
+     guia (walker, Hero-owned) lê a posição deste marcador. -->
+<div class="vmap__handoff" data-vmap-handoff aria-hidden="true">
+  <span class="vmap__seed" data-cseed></span>
+</div>
+
+<script>
+  import { initVoiceMap } from "../scripts/voice-synth";
+  initVoiceMap();
+</script>
