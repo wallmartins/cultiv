@@ -1306,6 +1306,11 @@ function resize(): void {
 function readScroll(sy: number): void {
   const intro = dom?.intro;
   if (!intro) return;
+  if (S.phase !== "done") {
+    S.targetP = 0;
+    S.needsRender = true;
+    return;
+  }
   const range = Math.max(1, intro.offsetHeight - window.innerHeight);
   const animFrac = window.innerWidth < 720 ? 0.77 : 1;
   S.targetP = clamp(sy / (range * animFrac), 0, 1);
@@ -1611,8 +1616,36 @@ function computeIntroTransform(): string {
   return tf;
 }
 
+const SCROLL_KEYS = new Set(["ArrowUp", "ArrowDown", "PageUp", "PageDown", "Home", "End", " ", "Spacebar"]);
+let scrollLocked = false;
+
+function blockScroll(e: Event): void {
+  e.preventDefault();
+}
+function blockScrollKey(e: KeyboardEvent): void {
+  if (!SCROLL_KEYS.has(e.key)) return;
+  const t = e.target as HTMLElement | null;
+  if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT|BUTTON|A)$/.test(t.tagName))) return;
+  e.preventDefault();
+}
+function lockScroll(lock: boolean): void {
+  if (lock === scrollLocked) return;
+  scrollLocked = lock;
+  const opts: AddEventListenerOptions = { passive: false };
+  if (lock) {
+    window.addEventListener("wheel", blockScroll, opts);
+    window.addEventListener("touchmove", blockScroll, opts);
+    window.addEventListener("keydown", blockScrollKey, opts);
+  } else {
+    window.removeEventListener("wheel", blockScroll);
+    window.removeEventListener("touchmove", blockScroll);
+    window.removeEventListener("keydown", blockScrollKey);
+  }
+}
+
 function setIntroAttr(phase: Phase): void {
   document.documentElement.setAttribute("data-intro", phase);
+  lockScroll(phase !== "done");
 }
 
 function armEntranceAnimations(): void {
