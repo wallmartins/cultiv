@@ -1,4 +1,5 @@
 import type { PlanId } from "../config";
+import { GENERATED_PLAN_NUMBERS } from "./plans.generated";
 
 export const ANNUAL_DISCOUNT = 0.2;
 
@@ -16,58 +17,55 @@ export interface Plan {
   features: { pt: string; en: string }[];
 }
 
-export const PLANS: Plan[] = [
-  {
-    id: "explorador",
-    name: "Explorador",
+// Cópia bilíngue hand-authored. Os NÚMEROS (preço/gerações/id/featured) vêm do catálogo canônico
+// do backend via plans.generated.ts (packages/payments/src/catalog-pricing.json) — não editar números
+// aqui. O trial não é um plano do catálogo (não tem preço), então não aparece nesta lista.
+const BILLED_MONTHLY = { pt: "por mês · cobrança mensal", en: "per month · billed monthly" };
+
+const PLAN_COPY: Record<PlanId, { tag: Plan["tag"]; priceSub: Plan["priceSub"]; features: Plan["features"] }> = {
+  explorador: {
     tag: { pt: "Pra experimentar de verdade.", en: "To really try it out." },
-    priceValue: 49,
-    price: {
-      brl: { monthly: "R$ 49", annual: "R$ 39,20" },
-      usd: { monthly: "$9", annual: "$7.20" },
-    },
-    priceSub: { pt: "por mês · cobrança mensal", en: "per month · billed monthly" },
+    priceSub: BILLED_MONTHLY,
     features: [
       { pt: "Perfil de Voz completo", en: "Full Voice Profile" },
       { pt: "1 perfil de audiência", en: "1 audience profile" },
       { pt: "15 gerações por mês", en: "15 generations per month" },
-      { pt: "Formatos essenciais", en: "Essential formats" },
-    ],
+      { pt: "Formatos essenciais", en: "Essential formats" }
+    ]
   },
-  {
-    id: "criador",
-    name: "Criador",
-    featured: true,
+  criador: {
     tag: { pt: "O melhor equilíbrio custo × benefício.", en: "The best value for money." },
-    priceValue: 99,
-    price: {
-      brl: { monthly: "R$ 99", annual: "R$ 79,20" },
-      usd: { monthly: "$19", annual: "$15.20" },
-    },
-    priceSub: { pt: "por mês · cobrança mensal", en: "per month · billed monthly" },
+    priceSub: BILLED_MONTHLY,
     features: [
       { pt: "Tudo do Explorador", en: "Everything in Explorador" },
       { pt: "3 perfis de audiência", en: "3 audience profiles" },
       { pt: "30 gerações por mês", en: "30 generations per month" },
       { pt: "Todos os formatos e canais", en: "All formats and channels" },
-      { pt: "Refinamento avançado", en: "Advanced refinement" },
-    ],
+      { pt: "Refinamento avançado", en: "Advanced refinement" }
+    ]
   },
-  {
-    id: "profissional",
-    name: "Profissional",
+  profissional: {
     tag: { pt: "Pra volume e uso pesado.", en: "For volume and heavy use." },
-    priceValue: 249,
-    price: {
-      brl: { monthly: "R$ 249", annual: "R$ 199,20" },
-      usd: { monthly: "$49", annual: "$39.20" },
-    },
-    priceSub: { pt: "por mês · cobrança mensal", en: "per month · billed monthly" },
+    priceSub: BILLED_MONTHLY,
     features: [
       { pt: "Tudo do Criador", en: "Everything in Criador" },
       { pt: "Perfis de audiência ilimitados", en: "Unlimited audience profiles" },
       { pt: "80 gerações por mês", en: "80 generations per month" },
-      { pt: "Suporte prioritário", en: "Priority support" },
-    ],
-  },
-];
+      { pt: "Suporte prioritário", en: "Priority support" }
+    ]
+  }
+};
+
+export const PLANS: Plan[] = GENERATED_PLAN_NUMBERS.map((numbers) => {
+  const copy = PLAN_COPY[numbers.id];
+  return {
+    id: numbers.id,
+    name: numbers.name,
+    ...(numbers.featured ? { featured: true } : {}),
+    tag: copy.tag,
+    priceValue: numbers.priceValue,
+    price: numbers.price,
+    priceSub: copy.priceSub,
+    features: copy.features
+  };
+});
