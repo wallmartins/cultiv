@@ -28,7 +28,7 @@ export interface PillarMeta {
 export const PILLARS: readonly PillarMeta[] = [
   { id: "tom", labelPt: "TOM", labelEn: "TONE", color: "#A3DD42", rgb: [163, 221, 66], base: 0.335 },
   { id: "ritmo", labelPt: "RITMO", labelEn: "RHYTHM", color: "#E8B44A", rgb: [232, 180, 74], base: 0.52 },
-  { id: "emocao", labelPt: "EMOÇÃO", labelEn: "EMOTION", color: "#63BCA9", rgb: [99, 188, 169], base: 0.705 },
+  { id: "emocao", labelPt: "PENSAMENTO", labelEn: "THOUGHT", color: "#63BCA9", rgb: [99, 188, 169], base: 0.705 },
 ];
 
 export function pillarGlow(rgb: readonly [number, number, number]): string {
@@ -75,10 +75,10 @@ const TRAITS: readonly TraitSeed[] = [
   {
     w: 0,
     t: 0.38,
-    labelPt: "Humor",
-    labelEn: "Humor",
-    descPt: "Ironia, leveza ou seriedade: o tempero que escapa sem querer.",
-    descEn: "Irony, lightness or gravity — the seasoning that slips out unplanned.",
+    labelPt: "Emotividade",
+    labelEn: "Emotionality",
+    descPt: "A carga emocional que atravessa o texto — do contido ao efusivo.",
+    descEn: "The emotional charge running through the text — from restrained to effusive.",
     tick: 0.9,
   },
   {

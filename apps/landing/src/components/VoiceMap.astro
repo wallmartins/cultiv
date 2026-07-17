@@ -16,22 +16,22 @@ import { PILLARS, pillarGlow, pillarTopCss, PILLAR_X_PORTRAIT } from "../scripts
         class="vmap__canvas"
         data-vmap-canvas
         role="img"
-        aria-label="Sintetizador harmônico do Perfil de Voz: três ondas — Tom, Ritmo e Emoção — se entrelaçam da esquerda para a direita. Treze nós modulam as ondas: formalidade, humor, pessoalidade, vocabulário, metáforas, cadência, pontuação, estrutura, respiração, convicção, raciocínio, argumentação e audiência. Passe pelos nós para ver cada traço; arraste um pilar para ajustar a intensidade."
+        aria-label="Sintetizador harmônico do Perfil de Voz: três ondas — Tom, Ritmo e Pensamento — se entrelaçam da esquerda para a direita. Os nós modulam as ondas: formalidade, emotividade, pessoalidade, vocabulário, metáforas, cadência, pontuação, estrutura, respiração, convicção, raciocínio, argumentação e audiência. Passe pelos nós para ver cada sinal; arraste uma faixa para ajustar a intensidade."
       ></canvas>
 
       <div class="vmap__legend" data-vmap-legend aria-hidden="false">
         <div class="vmap__head">
           <span class="vmap__eyebrow">
             <span class="vmap__eyebrow-dot" aria-hidden="true"></span>
-            <T pt="MAPA DA VOZ · 13 TRAÇOS · 3 PILARES" en="VOICE MAP · 13 TRAITS · 3 PILLARS" />
+            <T pt="MAPA DA VOZ · MUITOS SINAIS, UMA FREQUÊNCIA" en="VOICE MAP · MANY SIGNALS, ONE FREQUENCY" />
           </span>
           <h2 class="vmap__title">
             <T pt="A sua voz é uma frequência única." en="Your voice is a unique frequency." />
           </h2>
           <p class="vmap__body">
             <T
-              pt="Treze traços modulam três pilares. Passe pelos nós para senti-los vibrar; arraste um pilar, como num equalizador, para ouvi-lo mais alto."
-              en="Thirteen traits modulate three pillars. Hover the nodes to feel them vibrate; drag a pillar, like an equalizer, to hear it louder."
+              pt="Muitos sinais da sua escrita se agrupam em três faixas — tom, ritmo e pensamento. Passe pelos nós; arraste uma faixa como num equalizador."
+              en="Many signals in your writing gather into three bands — tone, rhythm and thought. Hover the nodes; drag a band like an equalizer."
             />
           </p>
         </div>
@@ -42,7 +42,7 @@ import { PILLARS, pillarGlow, pillarTopCss, PILLAR_X_PORTRAIT } from "../scripts
               class="vmap__pillar"
               data-pillar={p.id}
               role="slider"
-              aria-label={`Pilar ${p.labelPt} — arraste para ajustar a intensidade`}
+              aria-label={`Faixa ${p.labelPt} — arraste para ajustar a intensidade`}
               style={`top:${pillarTopCss(p.base)}; --pillar-x:${(PILLAR_X_PORTRAIT[i] * 100).toFixed(1)}%; --pillar-color:${p.color}; --pillar-glow:${pillarGlow(p.rgb)};`}
             >
               <span class="vmap__pillar-dot" aria-hidden="true" />
@@ -72,7 +72,7 @@ import { PILLARS, pillarGlow, pillarTopCss, PILLAR_X_PORTRAIT } from "../scripts
       </div>
 
       <div class="vmap__key" data-vmap-key aria-hidden="true">
-        <T pt="passe pelos nós · arraste os pilares" en="hover the nodes · drag the pillars" />
+        <T pt="passe pelos nós · arraste as faixas" en="hover the nodes · drag the bands" />
       </div>
     </div>
   </div>
