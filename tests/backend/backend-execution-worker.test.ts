@@ -34,7 +34,7 @@ describe("backend execution service worker path", () => {
       host: "127.0.0.1",
       port: 3000,
       version: "0.1.0",
-      billingPlanId: "pro",
+      billingPlanId: "criador",
       billingUserId: "backend"
     };
     const asyncConfig: BackendConfig = {

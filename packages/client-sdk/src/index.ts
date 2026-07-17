@@ -32,6 +32,7 @@ export type {
   VoiceCalibrationEntitlementInput
 } from "./voice-calibration.js";
 export type { GenerationIntentsClient, GenerationIntentsListInput } from "./generation-intents.js";
+export type { GenerationPrefillClient, GenerationPrefillInferInput } from "./generation-prefill.js";
 export type {
   BillingClient,
   BillingCreateCheckoutInput,

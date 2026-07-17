@@ -173,8 +173,8 @@ describe("monorepo governance", () => {
       )
     );
 
-    expect(billingPlan).toContain("free");
-    expect(billingPlan).toContain("pro");
+    expect(billingPlan).toContain("trial");
+    expect(billingPlan).toContain("profissional");
 
     const sdk = Effect.runSync(
       Effect.gen(function* () {

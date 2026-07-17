@@ -88,7 +88,7 @@ export interface DomainState {
   contentType?: ContentType;
 }
 
-const terminalJobStatuses = new Set<JobStatus>(["done", "failed"]);
+const terminalJobStatuses = new Set<JobStatus>(["done", "failed", "cancelled"]);
 
 export function isTerminalJobStatus(status: JobStatus): boolean {
   return terminalJobStatuses.has(status);

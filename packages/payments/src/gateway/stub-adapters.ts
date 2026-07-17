@@ -17,7 +17,11 @@ export function createStripeGateway(): BillingGatewayAdapter {
         transactionId: `stripe_${request.userId}_${request.subscriptionId}`,
         status: "paid",
         raw: request
-      })
+      }),
+    createPortalSession: () =>
+      Effect.fail(new BillingGatewayError({ gateway: "stripe", message: "portal session not implemented" })),
+    cancelSubscription: () =>
+      Effect.fail(new BillingGatewayError({ gateway: "stripe", message: "cancel not implemented" }))
   };
 }
 
@@ -36,6 +40,8 @@ export function createAsaasGateway(): BillingGatewayAdapter {
         transactionId: `asaas_${request.userId}_${request.subscriptionId}`,
         status: "paid",
         raw: request
-      })
+      }),
+    cancelSubscription: () =>
+      Effect.fail(new BillingGatewayError({ gateway: "asaas", message: "cancel not implemented" }))
   };
 }

@@ -16,7 +16,8 @@ export const ExecutionsListQuerySchema = Schema.Struct({
   status: Schema.optional(ExecutionsListStatusFilterSchema),
   contentType: Schema.optional(Schema.String),
   intent: Schema.optional(GenerationIntentSchema),
-  lengthTier: Schema.optional(GenerationLengthTierSchema)
+  lengthTier: Schema.optional(GenerationLengthTierSchema),
+  q: Schema.optional(Schema.String)
 });
 export type ExecutionsListQuery = typeof ExecutionsListQuerySchema.Type;
 
@@ -26,6 +27,7 @@ export type ExecutionsListFilters = {
   readonly contentType?: string;
   readonly intent?: GenerationIntent;
   readonly lengthTier?: GenerationLengthTier;
+  readonly q?: string;
 };
 
 export const decodeExecutionsListQuery = createSchemaDecoder("ExecutionsListQuery", ExecutionsListQuerySchema);
@@ -34,13 +36,15 @@ export function normalizeExecutionsListFilters(query: Partial<ExecutionsListQuer
   const contentType = query.contentType?.trim();
   const intent = query.intent;
   const lengthTier = query.lengthTier;
+  const q = query.q?.trim();
 
   return {
     period: query.period ?? "all",
     status: query.status ?? "all",
     ...(contentType && contentType !== "all" ? { contentType } : {}),
     ...(intent ? { intent } : {}),
-    ...(lengthTier ? { lengthTier } : {})
+    ...(lengthTier ? { lengthTier } : {}),
+    ...(q ? { q } : {})
   };
 }
 
@@ -62,6 +66,7 @@ export type ExecutionsListFilterItem = {
   readonly contentType: string;
   readonly generationIntent?: string;
   readonly lengthTier?: string;
+  readonly briefingTopic?: string;
 };
 
 export function matchesExecutionsListFilters(
@@ -86,6 +91,10 @@ export function matchesExecutionsListFilters(
   }
 
   if (filters.lengthTier && item.lengthTier !== filters.lengthTier) {
+    return false;
+  }
+
+  if (filters.q && !(item.briefingTopic ?? "").toLowerCase().includes(filters.q.toLowerCase())) {
     return false;
   }
 

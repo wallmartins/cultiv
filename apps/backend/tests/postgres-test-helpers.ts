@@ -10,6 +10,11 @@ import { up as migrate0004 } from "../src/infra/migrations/0004-add-voice-traini
 import { up as migrate0005 } from "../src/infra/migrations/0005-durable-runtime.js";
 import { up as migrate0006 } from "../src/infra/migrations/0006-billing-relational.js";
 import { up as migrate0012 } from "../src/infra/migrations/0012-billing-gateway.js";
+import { up as migrate0015 } from "../src/infra/migrations/0015-add-onboarding-completion.js";
+import { up as migrate0016 } from "../src/infra/migrations/0016-billing-status-lifecycle-fields.js";
+import { up as migrate0018 } from "../src/infra/migrations/0018-billing-lifecycle-management-fields.js";
+import { up as migrate0019 } from "../src/infra/migrations/0019-execution-reactions.js";
+import { up as migrate0021 } from "../src/infra/migrations/0021-application-users-tombstone.js";
 
 declare const process: {
   readonly env: Record<string, string | undefined>;
@@ -152,6 +157,41 @@ async function ensureTestSchema(db: Kysely<DatabaseTables>): Promise<void> {
 
     if (!existingTables.has("billing_gateway_catalog")) {
       await migrate0012(db);
+    }
+
+    // contract-08 — column-level additions on already-created tables need a column check, not a
+    // table-existence check.
+    const tablesWithColumns = await db.introspection.getTables({ withInternalKyselyTables: false });
+    const applicationUsersTableForOnboarding = tablesWithColumns.find((table) => table.name === "application_users");
+    if (
+      applicationUsersTableForOnboarding &&
+      !applicationUsersTableForOnboarding.columns.some((column) => column.name === "onboarding_completed_at")
+    ) {
+      await migrate0015(db);
+    }
+
+    const billingSubscriptionsTable = tablesWithColumns.find((table) => table.name === "billing_subscriptions");
+    if (billingSubscriptionsTable && !billingSubscriptionsTable.columns.some((column) => column.name === "trial_ends_at")) {
+      await migrate0016(db);
+    }
+
+    const billingGatewaySubscriptionsTable = tablesWithColumns.find(
+      (table) => table.name === "billing_gateway_subscriptions"
+    );
+    if (
+      billingGatewaySubscriptionsTable &&
+      !billingGatewaySubscriptionsTable.columns.some((column) => column.name === "outstanding_invoice_url")
+    ) {
+      await migrate0018(db);
+    }
+
+    if (!existingTables.has("execution_reactions")) {
+      await migrate0019(db);
+    }
+
+    const applicationUsersTable = tablesWithColumns.find((table) => table.name === "application_users");
+    if (applicationUsersTable && !applicationUsersTable.columns.some((column) => column.name === "deleted_at")) {
+      await migrate0021(db);
     }
   } finally {
     await sql`select pg_advisory_unlock(94021431)`.execute(db);

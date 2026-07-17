@@ -5,7 +5,7 @@ import { createSchemaDecoder } from "../shared.js";
 export const ExecutionModeSchema = Schema.Literal("sync", "async");
 export type ExecutionMode = typeof ExecutionModeSchema.Type;
 
-export const JobStatusSchema = Schema.Literal("queued", "running", "done", "failed");
+export const JobStatusSchema = Schema.Literal("queued", "running", "done", "failed", "cancelled");
 export type JobStatus = typeof JobStatusSchema.Type;
 
 export const PipelineTypeSchema = Schema.Literal(

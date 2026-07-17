@@ -1,6 +1,7 @@
 import { Effect } from "effect";
 import { matchesExecutionsListFilters, resolveExecutionPresentation } from "@my-ai-orchestrator/contracts";
 import type { PipelineRequest } from "@my-ai-orchestrator/contracts";
+import { isTerminalJobStatus } from "@my-ai-orchestrator/domain";
 import {
   DatabaseJobAlreadyExistsError,
   DatabaseJobNotFoundError
@@ -115,6 +116,23 @@ export function createJobRepository(stateRef: StateRef): JobRepository {
       };
       return Effect.succeed(true);
     },
+    removeByUser(userId) {
+      const entries = Object.entries(stateRef.current.jobs);
+      const remaining: Record<string, JobRecord> = {};
+      let removedCount = 0;
+      for (const [id, record] of entries) {
+        if (jobUserId(record) === userId) {
+          removedCount++;
+        } else {
+          remaining[id] = record;
+        }
+      }
+      stateRef.current = {
+        ...stateRef.current,
+        jobs: remaining
+      };
+      return Effect.succeed(removedCount);
+    },
     appendHistory(id, entry) {
       return Effect.gen(function* () {
         const current = yield* requireJob(stateRef.current, id);
@@ -143,6 +161,12 @@ export function createJobRepository(stateRef: StateRef): JobRepository {
     complete(id, result, at = new Date().toISOString()) {
       return Effect.gen(function* () {
         const current = yield* requireJob(stateRef.current, id);
+        // best-effort cancel doesn't stop the worker — a job already terminal (notably "cancelled")
+        // must not be resurrected by a late completion/failure landing after the cancel.
+        if (isTerminalJobStatus(current.status)) {
+          return cloneRecord(current);
+        }
+
         return yield* updateJob(stateRef, id, {
           status: "done",
           completedAt: at,
@@ -176,6 +200,11 @@ export function createJobRepository(stateRef: StateRef): JobRepository {
     fail(id, error, at = new Date().toISOString()) {
       return Effect.gen(function* () {
         const current = yield* requireJob(stateRef.current, id);
+        // same guard as complete() — a late failure must not overwrite an already-cancelled job.
+        if (isTerminalJobStatus(current.status)) {
+          return cloneRecord(current);
+        }
+
         return yield* updateJob(stateRef, id, {
           status: "failed",
           completedAt: at,
@@ -187,6 +216,25 @@ export function createJobRepository(stateRef: StateRef): JobRepository {
             type: "failed",
             at,
             payload: { error }
+          }
+        });
+      });
+    },
+    cancel(id, at = new Date().toISOString()) {
+      return Effect.gen(function* () {
+        const current = yield* requireJob(stateRef.current, id);
+        if (current.status !== "queued" && current.status !== "running") {
+          return cloneRecord(current);
+        }
+
+        return yield* updateJob(stateRef, id, {
+          status: "cancelled",
+          completedAt: at,
+          updatedAt: at,
+          historyEntry: {
+            type: "cancelled",
+            at,
+            payload: {}
           }
         });
       });

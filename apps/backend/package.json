@@ -14,6 +14,8 @@
     "migrate:dev": "tsx src/cli/migrate.ts",
     "billing:activate": "node dist/cli/billing-activate.js",
     "billing:activate:dev": "tsx src/cli/billing-activate.ts",
+    "billing:lifecycle-sweep": "node dist/cli/billing-lifecycle-sweep.js",
+    "billing:lifecycle-sweep:dev": "tsx src/cli/billing-lifecycle-sweep.ts",
     "billing:export-jobs": "node dist/scripts/export-calibration-jobs.js",
     "billing:calibration-sweep": "node dist/scripts/run-calibration-sweep.js",
     "billing:analyze-option-b": "node dist/scripts/analyze-calibration-option-b.js",

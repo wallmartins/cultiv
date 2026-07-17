@@ -33,7 +33,7 @@ export function observeViaSseEffect(
               return;
             }
             onTransition(transition);
-            if (transition.type === "completed" || transition.type === "failed") {
+            if (transition.type === "completed" || transition.type === "failed" || transition.type === "cancelled") {
               terminal = true;
             }
           },

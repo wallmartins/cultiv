@@ -53,6 +53,24 @@ export function createBackendApplicationUserMemoryRepository(): BackendApplicati
         store.set(id, updated);
         return updated;
       });
+    },
+
+    tombstone(id, deletedAt) {
+      return Effect.sync(() => {
+        const existing = store.get(id);
+        if (!existing) {
+          throw new Error(`Application user not found: ${id}`);
+        }
+
+        const updated: BackendApplicationUser = {
+          ...existing,
+          status: "deleted",
+          deletedAt,
+          updatedAt: deletedAt
+        };
+        store.set(id, updated);
+        return updated;
+      });
     }
   };
 }

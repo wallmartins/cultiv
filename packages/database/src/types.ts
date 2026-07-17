@@ -10,7 +10,13 @@ import type {
   VoiceProfileSnapshot,
   VoiceTrainingConsent
 } from "@my-ai-orchestrator/domain";
-import type { JobError, JobProgress, JobResult, ExecutionsListFilters } from "@my-ai-orchestrator/contracts";
+import type {
+  ExecutionReactionValue,
+  JobError,
+  JobProgress,
+  JobResult,
+  ExecutionsListFilters
+} from "@my-ai-orchestrator/contracts";
 import type {
   DatabaseError,
   DatabaseJobAlreadyExistsError,
@@ -21,7 +27,7 @@ import type {
 } from "./errors.js";
 
 export interface DatabaseHistoryEntry {
-  readonly type: "created" | "started" | "progress" | "completed" | "failed" | "updated";
+  readonly type: "created" | "started" | "progress" | "completed" | "failed" | "cancelled" | "updated";
   readonly at: string;
   readonly payload: Readonly<Record<string, unknown>>;
 }
@@ -76,6 +82,26 @@ export interface VoiceTrainingConsentRecord extends VoiceTrainingConsent {
   readonly version: number;
 }
 
+export interface ExecutionReactionRecord {
+  readonly executionId: string;
+  readonly userId: string;
+  readonly reaction: ExecutionReactionValue;
+  readonly reason?: string;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+}
+
+// contract-08 — voice_example_batches has no domain concept/writer yet (greenfield table, migration
+// 0001); this is the minimal shape needed to close the removeByUser gap for account reset/delete.
+export interface VoiceExampleBatchRecord {
+  readonly id: string;
+  readonly userId: string;
+  readonly data: Readonly<Record<string, unknown>>;
+  readonly version: number;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+}
+
 export interface AuditRecord {
   readonly id: string;
   readonly logicalKey: string;
@@ -99,6 +125,8 @@ export interface DatabaseState {
   readonly voiceProfileSnapshots: Record<string, VoiceProfileSnapshotRecord>;
   readonly voiceTrainingConsents: Record<string, VoiceTrainingConsentRecord>;
   readonly auditRecords: Record<string, AuditRecord>;
+  readonly executionReactions: Record<string, ExecutionReactionRecord>;
+  readonly voiceExampleBatches: Record<string, VoiceExampleBatchRecord>;
 }
 
 export interface JobCreateOptions {
@@ -126,6 +154,8 @@ export interface JobRepository {
   ) => Effect.Effect<readonly JobRecord[], DatabaseError>;
   countByUser: (userId: string, filters?: ExecutionsListFilters) => Effect.Effect<number, DatabaseError>;
   remove: (id: string) => Effect.Effect<boolean, DatabaseError>;
+  // contract-08 — bulk purge for account reset/delete.
+  removeByUser: (userId: string) => Effect.Effect<number, DatabaseError>;
   appendHistory: (
     id: string,
     entry: DatabaseHistoryEntry
@@ -145,6 +175,18 @@ export interface JobRepository {
     error: JobError,
     at?: string
   ) => Effect.Effect<JobRecord, DatabaseJobNotFoundError | DatabaseError>;
+  // guard queued|running — cancelling an already-terminal job is a no-op, not an error.
+  cancel: (
+    id: string,
+    at?: string
+  ) => Effect.Effect<JobRecord, DatabaseJobNotFoundError | DatabaseError>;
+}
+
+export interface ExecutionReactionRepository {
+  getByExecution: (executionId: string) => Effect.Effect<ExecutionReactionRecord | undefined, DatabaseError>;
+  upsert: (record: ExecutionReactionRecord) => Effect.Effect<ExecutionReactionRecord, DatabaseError>;
+  deleteByExecution: (executionId: string) => Effect.Effect<boolean, DatabaseError>;
+  removeByUser: (userId: string) => Effect.Effect<number, DatabaseError>;
 }
 
 export interface MemoryRepository {
@@ -152,6 +194,12 @@ export interface MemoryRepository {
   get: (userId: string, key: string) => Effect.Effect<MemoryEntryRecord | undefined, DatabaseError>;
   listByUser: (userId: string) => Effect.Effect<readonly MemoryEntryRecord[], DatabaseError>;
   remove: (userId: string, key: string) => Effect.Effect<boolean, DatabaseError>;
+  // contract-08 — bulk purge for account reset/delete.
+  removeByUser: (userId: string) => Effect.Effect<number, DatabaseError>;
+}
+
+export interface VoiceExampleBatchRepository {
+  removeByUser: (userId: string) => Effect.Effect<number, DatabaseError>;
 }
 
 export interface ContentTypeRepository {
@@ -237,6 +285,8 @@ export interface DatabaseClient {
   readonly voiceProfileDiagnostics: VoiceProfileDiagnosticsRepository;
   readonly voiceProfileSnapshots: VoiceProfileSnapshotRepository;
   readonly voiceTrainingConsents: VoiceTrainingConsentRepository;
+  readonly executionReactions: ExecutionReactionRepository;
+  readonly voiceExampleBatches: VoiceExampleBatchRepository;
   readonly audit: AuditRepository;
   readonly transaction: <T, E>(
     operation: (client: DatabaseClient) => Effect.Effect<T, E>
@@ -255,6 +305,8 @@ export interface DatabaseSnapshot {
   readonly voiceProfileSnapshots: Record<string, VoiceProfileSnapshotRecord>;
   readonly voiceTrainingConsents: Record<string, VoiceTrainingConsentRecord>;
   readonly auditRecords: Record<string, AuditRecord>;
+  readonly executionReactions: Record<string, ExecutionReactionRecord>;
+  readonly voiceExampleBatches: Record<string, VoiceExampleBatchRecord>;
 }
 
 export interface DatabaseSeed {
@@ -268,4 +320,6 @@ export interface DatabaseSeed {
   readonly voiceProfileSnapshots?: readonly VoiceProfileSnapshotRecord[];
   readonly voiceTrainingConsents?: readonly VoiceTrainingConsentRecord[];
   readonly auditRecords?: readonly AuditRecord[];
+  readonly executionReactions?: readonly ExecutionReactionRecord[];
+  readonly voiceExampleBatches?: readonly VoiceExampleBatchRecord[];
 }

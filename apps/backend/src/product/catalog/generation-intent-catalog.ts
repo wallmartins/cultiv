@@ -12,7 +12,7 @@ const FEATURED_INTENTS: readonly GenerationIntent[] = [
 
 const CATALOG_INTENTS: readonly GenerationIntent[] = [...FEATURED_INTENTS, "document-decision"];
 
-const INTENT_CATALOG_COPY: Readonly<
+export const INTENT_CATALOG_COPY: Readonly<
   Record<GenerationIntent, Readonly<Record<"pt-BR" | "en-US", { readonly label: string; readonly description: string }>>>
 > = {
   "share-idea": {
@@ -77,7 +77,7 @@ const INTENT_CATALOG_COPY: Readonly<
   }
 };
 
-function resolveLocaleCopy(locale: string): "pt-BR" | "en-US" {
+export function resolveLocaleCopy(locale: string): "pt-BR" | "en-US" {
   return locale.startsWith("en") ? "en-US" : "pt-BR";
 }
 

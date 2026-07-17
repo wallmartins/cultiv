@@ -1,4 +1,5 @@
 import { Effect } from "effect";
+import type { AppLogger } from "@my-ai-orchestrator/core";
 import type { BackendConfig } from "../config/config.js";
 import type { BackendProductServices } from "../product.js";
 import { getPostgresDatabase } from "../infra/postgres-client.js";
@@ -6,6 +7,7 @@ import { getSharedRedisClient } from "../infra/redis-client.js";
 import { createDurableJobRuntime } from "./durable-job-runtime.js";
 import { createExecutionQueue } from "./execution-queue.js";
 import { createOutboxRelay } from "./outbox-relay.js";
+import { createAuth0ManagementClient } from "../auth/auth0-management-client.js";
 import { createBackendJobStoreService } from "../jobs/job-store.js";
 import type { BackendJobStoreServiceContract } from "../jobs/job-store.js";
 import type { BillingServiceContract } from "@my-ai-orchestrator/payments";
@@ -42,6 +44,7 @@ export function createBackendRuntimeBundle(options: {
   readonly config: BackendConfig;
   readonly services: BackendProductServices;
   readonly now: () => Date;
+  readonly logger?: AppLogger;
 }): Effect.Effect<BackendRuntimeBundle, never> {
   return Effect.gen(function* () {
     const mode = resolveBackendRuntimeMode(options.config);
@@ -71,13 +74,30 @@ export function createBackendRuntimeBundle(options: {
       redis,
       billing: options.services.billing,
       billingRepository: options.services.billingRepository,
-      now: options.now
+      now: options.now,
+      queue,
+      logger: options.logger
     });
+    // contract-08 §5 task 5 — deploy-ops credential; account.auth0-delete events queue up
+    // (never lost, retried by the outbox pattern) until this is configured.
+    const auth0Management =
+      options.config.auth0ManagementDomain &&
+      options.config.auth0ManagementClientId &&
+      options.config.auth0ManagementClientSecret
+        ? createAuth0ManagementClient({
+            domain: options.config.auth0ManagementDomain,
+            clientId: options.config.auth0ManagementClientId,
+            clientSecret: options.config.auth0ManagementClientSecret,
+            audience: options.config.auth0ManagementAudience
+          })
+        : undefined;
+
     const relay = createOutboxRelay({
       db: postgres,
       redis,
       queue,
-      now: options.now
+      now: options.now,
+      auth0Management
     });
 
     return {

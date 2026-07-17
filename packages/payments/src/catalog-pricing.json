@@ -1,0 +1,9 @@
+{
+  "canonicalCreditCost": 2.5,
+  "plans": [
+    { "id": "trial", "name": "Teste", "monthlyGenerations": 5 },
+    { "id": "explorador", "name": "Explorador", "monthlyGenerations": 15, "featured": false, "priceCents": { "BRL": 4900, "USD": 900 } },
+    { "id": "criador", "name": "Criador", "monthlyGenerations": 30, "featured": true, "priceCents": { "BRL": 9900, "USD": 1900 } },
+    { "id": "profissional", "name": "Profissional", "monthlyGenerations": 80, "featured": false, "priceCents": { "BRL": 24900, "USD": 4900 } }
+  ]
+}

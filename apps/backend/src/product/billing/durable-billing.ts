@@ -73,6 +73,7 @@ export function createPersistingBillingService(
       return result;
     },
     getEntitlement: billing.getEntitlement.bind(billing),
+    getSubscription: billing.getSubscription.bind(billing),
     getWallet: billing.getWallet.bind(billing),
     consumeCredits(userId, planId, amount, kind) {
       return billing

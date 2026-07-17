@@ -347,7 +347,7 @@ describe("payments package", () => {
       }).pipe(Effect.provide(createBillingServiceLayer()))
     );
 
-    expect(result.defaultPlan).toBe("pro");
+    expect(result.defaultPlan).toBe("trial");
     expect(result.planCount).toBeGreaterThan(0);
     expect(result.manualGateway).toBe("manual");
     expect(result.asaasGateway).toBe("asaas");
@@ -366,8 +366,8 @@ describe("payments package", () => {
       )
     );
 
-    expect(result).toContain("free");
-    expect(result).toContain("pro");
+    expect(result).toContain("trial");
+    expect(result).toContain("criador");
   });
 
   it("fails with typed errors for invalid plan, missing top-up package and missing reservation", async () => {

@@ -2,11 +2,12 @@ import { randomUUID } from "node:crypto";
 import { Effect } from "effect";
 import { createBillingService, type BillingRepository, type BillingServiceContract } from "@my-ai-orchestrator/payments";
 import type { Kysely } from "kysely";
-import type {
-  ExecutionVoiceMetadataView,
-  JobCreatedResponse,
-  JobProgress,
-  PipelineRequest
+import {
+  resolveExecutionPresentation,
+  type ExecutionVoiceMetadataView,
+  type JobCreatedResponse,
+  type JobProgress,
+  type PipelineRequest
 } from "@my-ai-orchestrator/contracts";
 import type { JobRecord } from "@my-ai-orchestrator/database";
 import type { OrchestrationPlan } from "@my-ai-orchestrator/orchestrator";
@@ -165,6 +166,7 @@ export async function runExecutionEnqueueTransaction(
 ): Promise<void> {
   const estimatedSteps = resolveEnqueueEstimatedSteps(input.plan);
   const userId = resolveEnqueueUserId(input.request);
+  const briefingTopic = resolveExecutionPresentation(input.request, input.plan.contentType.id).briefingTopic;
   const runtimeBase = buildRuntimeBase({
     userId,
     request: input.request,
@@ -194,7 +196,8 @@ export async function runExecutionEnqueueTransaction(
             model: resolveUsagePolicyModel(
               input.request,
               input.plan.request.qualityMode ?? deps.config.qualityMode
-            )
+            ),
+            briefingTopic
           }
         )
       );
@@ -222,7 +225,7 @@ export async function runExecutionEnqueueTransaction(
       .values({
         id: input.jobId,
         user_id: userId,
-        data: JSON.stringify(record),
+        data: JSON.stringify({ ...record, briefingTopic }),
         version: 1,
         created_at: input.createdAt,
         updated_at: input.createdAt

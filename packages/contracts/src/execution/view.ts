@@ -24,6 +24,7 @@ import {
   JobStatusSchema,
   QualityModeSchema
 } from "./job.js";
+import { ExecutionReactionViewSchema } from "./reaction.js";
 
 export const PendingVoiceProfileRebuildViewSchema = Schema.Struct({
   status: Schema.Literal("idle", "in_progress", "failed"),
@@ -59,7 +60,8 @@ export const JobStatusResponseSchema = Schema.Struct({
   generationIntent: Schema.optional(GenerationIntentSchema),
   briefingTopic: Schema.optional(Schema.String),
   lengthTier: Schema.optional(GenerationLengthTierSchema),
-  channel: Schema.optional(GenerationChannelSchema)
+  channel: Schema.optional(GenerationChannelSchema),
+  reaction: Schema.optional(Schema.NullOr(ExecutionReactionViewSchema))
 });
 export type JobStatusResponse = typeof JobStatusResponseSchema.Type;
 
@@ -121,7 +123,8 @@ export const ExecutionStatusViewSchema = Schema.Struct({
   generationIntent: Schema.optional(GenerationIntentSchema),
   briefingTopic: Schema.optional(Schema.String),
   lengthTier: Schema.optional(GenerationLengthTierSchema),
-  channel: Schema.optional(GenerationChannelSchema)
+  channel: Schema.optional(GenerationChannelSchema),
+  reaction: Schema.optional(Schema.NullOr(ExecutionReactionViewSchema))
 });
 export type ExecutionStatusView = typeof ExecutionStatusViewSchema.Type;
 
@@ -169,11 +172,21 @@ export const ExecutionTransitionFailedSchema = Schema.Struct({
 });
 export type ExecutionTransitionFailed = typeof ExecutionTransitionFailedSchema.Type;
 
+export const ExecutionTransitionCancelledSchema = Schema.Struct({
+  type: Schema.Literal("cancelled"),
+  executionId: Schema.String,
+  snapshot: Schema.optional(ExecutionStatusViewSchema),
+  reason: Schema.optional(Schema.String),
+  occurredAt: Schema.String
+});
+export type ExecutionTransitionCancelled = typeof ExecutionTransitionCancelledSchema.Type;
+
 export const ExecutionTransitionSchema = Schema.Union(
   ExecutionTransitionStartedSchema,
   ExecutionTransitionProgressedSchema,
   ExecutionTransitionCompletedSchema,
-  ExecutionTransitionFailedSchema
+  ExecutionTransitionFailedSchema,
+  ExecutionTransitionCancelledSchema
 );
 export type ExecutionTransition = typeof ExecutionTransitionSchema.Type;
 

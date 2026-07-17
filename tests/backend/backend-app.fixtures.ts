@@ -103,7 +103,7 @@ export function seedExecutionVoiceState(
 export function seedBillingSubscription(
   services: ReturnType<typeof createBackendAppTestServices>,
   userId: string,
-  planId: "free" | "pro" = "pro"
+  planId: "criador" | "explorador" | "profissional" = "criador"
 ) {
   services.billing.upsertSubscription({
     id: `${userId}:${planId}:subscription`,
@@ -119,6 +119,23 @@ export function seedBillingSubscription(
       planId,
       cycleId: `${userId}:${planId}:cycle:test`,
       idempotencyKey: `test:${userId}:${planId}:cycle`
+    })
+  );
+}
+
+// ADR 0006 removed the "free" plan id from the canonical catalog, but the fast-only tier
+// (BillingPlanTier "free" in quality-mode-entitlements.ts) is still a real gate to cover —
+// register it as a local fixture plan instead of reintroducing it into DEFAULT_BILLING_PLANS.
+export function registerLegacyFreeTierPlan(services: ReturnType<typeof createBackendAppTestServices>) {
+  Effect.runSync(
+    services.billing.registerPlan({
+      id: "free",
+      tier: "free",
+      name: "Free (fixture)",
+      monthlyCredits: 20,
+      features: [{ key: "execution.sync_mode", enabled: true }],
+      // matches the backend-fast/balanced/strict union registerBackendBillingPlans() applies to catalog plans
+      allowedModels: ["backend-fast", "backend-balanced", "backend-strict", "gpt-4.1", "gpt-4o-mini"]
     })
   );
 }

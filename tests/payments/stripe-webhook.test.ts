@@ -24,8 +24,9 @@ describe("mapStripeEvent", () => {
       currency: "USD",
       externalSubscriptionId: "sub_test_subscription",
       externalCustomerId: "cus_test_customer",
-      internalRef: "pro",
-      productKind: "subscription"
+      internalRef: "criador",
+      productKind: "subscription",
+      paymentMethodKind: "card"
     });
   });
 

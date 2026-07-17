@@ -139,7 +139,8 @@ function persistRevocationPendingConsent(
   });
 }
 
-function removeProtectedVoiceArtifacts(
+// exported for reuse by account reset/delete (contract-08) — same voice-artifact purge primitive.
+export function removeProtectedVoiceArtifacts(
   userId: string,
   database: BackendVoiceConsentDependencies["database"]
 ) {
@@ -180,12 +181,24 @@ function removeProtectedVoiceArtifacts(
         })
       )
     );
+    // contract-08 — voice_example_batches is part of the same voice-artifact family; closing this
+    // gap here (root cause) means account reset/delete gets it for free by reusing this function.
+    const removedBatches = yield* database.voiceExampleBatches.removeByUser(userId).pipe(
+      Effect.mapError(() =>
+        new BackendVoiceTrainingConsentFailureError({
+          userId,
+          reason: "protection_failed",
+          message: "Failed to remove voice example batches during consent revocation"
+        })
+      )
+    );
 
     return {
       removedExamples,
       profileRemoved,
       diagnosticsRemoved,
-      removedSnapshots
+      removedSnapshots,
+      removedBatches
     };
   });
 }

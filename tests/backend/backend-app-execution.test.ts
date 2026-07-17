@@ -13,7 +13,7 @@ import {
 
 describe("backend app execution surface", () => {
   it("executes the main pipeline flow through the Effect service and preserves idempotency", async () => {
-    const config = createBackendAppTestConfig({ billingUserId: "user_1", billingPlanId: "pro" });
+    const config = createBackendAppTestConfig({ billingUserId: "user_1", billingPlanId: "criador" });
     const services = createBackendAppTestServices(config);
     seedExecutionVoiceState(services);
     const app = createBackendAppTestApp(config, services);
@@ -63,7 +63,7 @@ describe("backend app execution surface", () => {
   it("returns a queued job when the backend strategy is async", async () => {
     const config = createBackendAppTestConfig({
       billingUserId: "user_1",
-      billingPlanId: "pro",
+      billingPlanId: "criador",
       executionMode: "async"
     });
     const services = createBackendAppTestServices(config);

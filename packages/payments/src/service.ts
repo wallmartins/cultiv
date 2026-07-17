@@ -20,6 +20,7 @@ import {
   BillingTopUpPackageNotFoundError
 } from "./errors.js";
 import { createManualGateway } from "./gateway/index.js";
+import { computeEntitlementGate } from "./entitlement.js";
 import {
   appendLedgerEntry,
   createEntitlementFromRepository,
@@ -71,6 +72,9 @@ export function createBillingService(options: BillingServiceOptions = {}): Billi
       repository.subscriptions.set(subscription.id, subscription);
       return subscription;
     },
+    getSubscription(userId, planId) {
+      return findSubscription(repository, userId, planId);
+    },
     recordUsage(usage) {
       repository.usage.push(usage);
       return usage;
@@ -97,7 +101,17 @@ export function createBillingService(options: BillingServiceOptions = {}): Billi
         return Effect.fail(new BillingEntitlementNotFoundError({ userId, planId }));
       }
 
-      if (subscription.status !== "active") {
+      // ADR 0006 §5 — acesso vivo (active | trial na janela | past_due | canceled no ciclo
+      // pago), não só "active"; espelha computeEntitlementGate (mesmo critério do gate real).
+      const { hasLiveAccess } = computeEntitlementGate({
+        status: subscription.status,
+        availableCredits: wallet.availableCredits,
+        now: clock.now(),
+        trialEndsAt: subscription.trialEndsAt,
+        accessUntil: subscription.expiresAt,
+        everSubscribed: subscription.everSubscribed
+      });
+      if (!hasLiveAccess) {
         return Effect.fail(new BillingSubscriptionInactiveError({ userId, planId }));
       }
 

@@ -88,7 +88,7 @@ describe("Public Route Auth Integration", () => {
   });
 
   it("POST /me/executions/run returns 200 when token is valid", async () => {
-    const config = createBackendAppTestConfig({ billingUserId: "auth0|test-user", billingPlanId: "pro" });
+    const config = createBackendAppTestConfig({ billingUserId: "auth0|test-user", billingPlanId: "criador" });
     const services = createBackendAppTestServices(config);
     seedExecutionVoiceState(services, "auth0|test-user");
     const app = createBackendAppTestApp(config, services);

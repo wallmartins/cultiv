@@ -98,14 +98,14 @@ describe("backend policy activation", () => {
   it("rejects stale preview quotes after policy activation changes the active version", async () => {
     const config = createBackendAppTestConfig({
       billingUserId: "user_1",
-      billingPlanId: "pro",
+      billingPlanId: "criador",
       executionMode: "sync"
     });
     const services = Effect.runSync(createBackendProductServices(config, { now: () => backendAppTestStartedAt }));
     services.billing.upsertSubscription({
-      id: "sub_user_1_pro",
+      id: "sub_user_1_criador",
       userId: "user_1",
-      planId: "pro",
+      planId: "criador",
       status: "active",
       startedAt: backendAppTestStartedAt.toISOString()
     });

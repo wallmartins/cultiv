@@ -18,7 +18,7 @@ describe("backend execution service sync", () => {
       host: "127.0.0.1",
       port: 3000,
       version: "0.1.0",
-      billingPlanId: "pro",
+      billingPlanId: "criador",
       billingUserId: "backend"
     };
     const services = Effect.runSync(createBackendProductServices(config, { now: () => new Date("2026-05-11T00:00:05.000Z") }));
@@ -59,9 +59,9 @@ describe("backend execution service sync", () => {
     expect(response.pipelineName).toBe("validation-post");
     expect(response.content).toContain("Monorepo migration");
 
-    const ledger = services.billing.listLedger("backend", "pro");
+    const ledger = services.billing.listLedger("backend", "criador");
     expect(ledger.map((entry) => entry.entryType)).toEqual(["grant_cycle", "reserve", "capture"]);
-    expect(services.billing.getWallet("backend", "pro")?.availableCredits).toBe(147.5);
+    expect(services.billing.getWallet("backend", "criador")?.availableCredits).toBe(72.5);
   });
 
   it("fails trusted execution with integrity errors instead of recomputing policy", async () => {
@@ -74,7 +74,7 @@ describe("backend execution service sync", () => {
       host: "127.0.0.1",
       port: 3000,
       version: "0.1.0",
-      billingPlanId: "pro",
+      billingPlanId: "criador",
       billingUserId: "backend"
     };
     const services = Effect.runSync(createBackendProductServices(config, { now: () => new Date("2026-05-11T00:00:05.000Z") }));
@@ -132,7 +132,7 @@ describe("backend execution service sync", () => {
       host: "127.0.0.1",
       port: 3000,
       version: "0.1.0",
-      billingPlanId: "pro",
+      billingPlanId: "criador",
       billingUserId: "backend"
     };
     const services = Effect.runSync(createBackendProductServices(config, { now: () => new Date("2026-05-11T00:00:05.000Z") }));

@@ -24,10 +24,15 @@ function createBackendJobStoreState(): BackendJobStoreState {
   };
 }
 
+export interface BackendJobCancelledPayload {
+  readonly reason?: string;
+  readonly cancelledAt: string;
+}
+
 export interface BackendJobEvent {
-  readonly type: "progress" | "done" | "error";
+  readonly type: "progress" | "done" | "error" | "cancelled";
   readonly jobId: string;
-  readonly payload: JobProgress | JobResult | JobError;
+  readonly payload: JobProgress | JobResult | JobError | BackendJobCancelledPayload;
   readonly occurredAt: string;
 }
 
@@ -84,6 +89,14 @@ export interface BackendJobStoreServiceContract {
   readonly failJob: (
     jobId: string,
     error: JobError,
+    completedAt?: string
+  ) => Effect.Effect<JobStatusResponse | undefined, DatabaseError>;
+  // guard queued|running — cancelling an already-terminal job is a no-op, not an error; call sites
+  // (routes) are expected to check status before calling this so a duplicate "cancelled" SSE event
+  // isn't re-emitted for an already-cancelled job.
+  readonly cancelJob: (
+    jobId: string,
+    reason?: string,
     completedAt?: string
   ) => Effect.Effect<JobStatusResponse | undefined, DatabaseError>;
   readonly listJobEvents: (jobId: string) => Effect.Effect<readonly BackendJobEvent[], DatabaseError>;
@@ -181,9 +194,17 @@ export function createBackendJobStoreService(): Effect.Effect<BackendJobStoreSer
         }),
       completeJob: (jobId, result, completedAt = new Date().toISOString()) =>
         Effect.gen(function* () {
-          const job = yield* repository.completeJob(jobId, result, completedAt);
-          if (!job) {
+          const before = yield* repository.getJob(jobId);
+          if (!before) {
             return undefined;
+          }
+
+          // a cancelled job must not be resurrected — repository.completeJob() already no-ops the
+          // status for a terminal job, but without this pre-check we'd still emit a stray "done" SSE.
+          const wasActive = before.status === "queued" || before.status === "running";
+          const job = yield* repository.completeJob(jobId, result, completedAt);
+          if (!job || !wasActive) {
+            return job ? snapshotStoredJob(job) : undefined;
           }
 
           const event: BackendJobEvent = {
@@ -198,15 +219,47 @@ export function createBackendJobStoreService(): Effect.Effect<BackendJobStoreSer
         }),
       failJob: (jobId, error, completedAt = new Date().toISOString()) =>
         Effect.gen(function* () {
-          const job = yield* repository.failJob(jobId, error, completedAt);
-          if (!job) {
+          const before = yield* repository.getJob(jobId);
+          if (!before) {
             return undefined;
+          }
+
+          // same guard as completeJob() — an already-terminal job must not emit a stray "error" SSE.
+          const wasActive = before.status === "queued" || before.status === "running";
+          const job = yield* repository.failJob(jobId, error, completedAt);
+          if (!job || !wasActive) {
+            return job ? snapshotStoredJob(job) : undefined;
           }
 
           const event: BackendJobEvent = {
             type: "error",
             jobId,
             payload: error,
+            occurredAt: completedAt
+          };
+          yield* appendEvent(event);
+          yield* notifyListeners(jobId, event);
+          return snapshotStoredJob(job);
+        }),
+      cancelJob: (jobId, reason, completedAt = new Date().toISOString()) =>
+        Effect.gen(function* () {
+          const before = yield* repository.getJob(jobId);
+          if (!before) {
+            return undefined;
+          }
+
+          // snapshot pre-cancel status: cancelJob is a no-op on an already-terminal job (incl. an
+          // already-cancelled one), and post-cancel status can't tell "just cancelled" from "was cancelled".
+          const wasCancellable = before.status === "queued" || before.status === "running";
+          const job = yield* repository.cancelJob(jobId, completedAt);
+          if (!job || !wasCancellable) {
+            return job ? snapshotStoredJob(job) : undefined;
+          }
+
+          const event: BackendJobEvent = {
+            type: "cancelled",
+            jobId,
+            payload: { reason, cancelledAt: completedAt },
             occurredAt: completedAt
           };
           yield* appendEvent(event);

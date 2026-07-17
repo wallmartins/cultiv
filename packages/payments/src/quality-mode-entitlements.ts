@@ -1,7 +1,7 @@
 import type { QualityMode } from "@my-ai-orchestrator/contracts";
 
 export type BillingPlanTier = "free" | "starter" | "pro" | "enterprise";
-export type BillingPlanStatus = "active" | "trialing" | "past_due" | "canceled";
+export type BillingPlanStatus = "active" | "trialing" | "past_due" | "canceled" | "lapsed";
 
 export interface QualityModeEntitlement {
   readonly tier: BillingPlanTier;
@@ -31,8 +31,13 @@ export function resolveMinimumPlanTierForQualityMode(mode: QualityMode): Billing
   return "pro";
 }
 
+// contract-03 — espelha o hasLiveAccess do gate (entitlement.ts): status "trialing"/"canceled"
+// aqui já chega efetivo (pós lazy clock, ver deriveEffectiveSubscriptionStatus), então "trialing"
+// e "canceled" nunca aparecem além da janela/ciclo pago — só "lapsed" representaria isso.
+const LIVE_ACCESS_STATUSES: readonly BillingPlanStatus[] = ["active", "trialing", "past_due", "canceled"];
+
 export function hasActiveBillingSubscription(entitlement: QualityModeEntitlement): boolean {
-  return entitlement.status === "active";
+  return LIVE_ACCESS_STATUSES.includes(entitlement.status);
 }
 
 export function canUseQualityMode(entitlement: QualityModeEntitlement, mode: QualityMode): boolean {

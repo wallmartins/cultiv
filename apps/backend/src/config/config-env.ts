@@ -62,7 +62,12 @@ export function readBackendConfig(envVars: NodeJS.ProcessEnv = process.env): Bac
     asaasWebhookToken: readOptionalString(envVars.ASAAS_WEBHOOK_TOKEN),
     asaasBaseUrl: readOptionalString(envVars.ASAAS_BASE_URL),
     billingCheckoutSuccessUrl: readOptionalString(envVars.BILLING_CHECKOUT_SUCCESS_URL),
-    billingCheckoutCancelUrl: readOptionalString(envVars.BILLING_CHECKOUT_CANCEL_URL)
+    billingCheckoutCancelUrl: readOptionalString(envVars.BILLING_CHECKOUT_CANCEL_URL),
+    billingPortalReturnUrl: readOptionalString(envVars.BILLING_PORTAL_RETURN_URL),
+    auth0ManagementDomain: readOptionalString(envVars.AUTH0_MANAGEMENT_DOMAIN),
+    auth0ManagementClientId: readOptionalString(envVars.AUTH0_MANAGEMENT_CLIENT_ID),
+    auth0ManagementClientSecret: readOptionalString(envVars.AUTH0_MANAGEMENT_CLIENT_SECRET),
+    auth0ManagementAudience: readOptionalString(envVars.AUTH0_MANAGEMENT_AUDIENCE)
   };
 }
 
