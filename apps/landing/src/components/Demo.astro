@@ -1,24 +1,4 @@
 ---
-// Ato 2 — "Cole um parágrafo seu. Veja o que ele já entrega de você."
-// Design markup 225–277 (cultiv-hero-v5.dc.html), ported to static HTML +
-// a bundled script (`../scripts/demo-reader`). See DEMO-SPEC.md for the
-// strategic brief. No pin/scroll-scrub in this section (spec §6) — one
-// still fold, deliberately calmer than the hero.
-//
-// Deviation from the design source: the design's pseudo-JSX used
-// `<textarea value="{{ demoText }}">` (a React-ism). Real HTML textareas
-// take their default value from child text content, not a `value`
-// attribute — so the prefill is rendered as text content below, sourced
-// from the same constant the script re-applies on a pristine language
-// toggle (single source of truth, no copy duplicated between files).
-//
-// Per contract: the reading result (lines + metrics + boundary frame) only
-// exists after a click on "Ler minha escrita →" — the design's own initial
-// state is `demoReading: null` (no resting-default reading), and DEMO-SPEC's
-// "resting default" language is superseded by that (design + contract win
-// over the draft spec here). JS-off: textarea + button are real and legible;
-// the button is simply inert without JS (nothing sends a request, nothing
-// breaks).
 import "../styles/demo.css";
 import T from "./T.astro";
 import { trialUrl } from "../config";
@@ -62,7 +42,6 @@ import { DEMO_EXAMPLE_PT } from "../scripts/demo-reader";
       <div class="demo__metrics" id="demoMetrics"></div>
       <p class="demo__trunc" id="demoTrunc" hidden></p>
 
-      <!-- moldura de fronteira: a demo lê a superfície; o Perfil vem da calibração -->
       <div class="demo__frame" id="demoFrame">
         <h3 class="demo__frameTitle">
           <T pt="Isto é só a superfície." en="This is only the surface." />

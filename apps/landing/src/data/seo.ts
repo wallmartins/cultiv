@@ -1,14 +1,8 @@
-// JSON-LD da landing v5 — Organization / WebSite / SoftwareApplication /
-// FAQPage. GEO: motores generativos citam com mais confiança o que chega
-// estruturado. Fica em pt-BR de propósito: o en vive num toggle client-side
-// na MESMA URL, e anotar dois idiomas num só documento confundiria os parsers.
 import { PLANS } from "./plans";
 import { SITE } from "./site";
 
 const id = (site: URL, fragment: string): string => new URL(fragment, site).href;
 
-/** As 12 perguntas do Ato 7 (FAQ) — copy do design, verbatim, sem as tags
-    inline (<em>/<strong> ficam só no HTML da seção). */
 const FAQ: { q: string; a: string }[] = [
   {
     q: "Isso realmente soa como eu, ou é mais uma IA imitando?",
@@ -60,9 +54,6 @@ const FAQ: { q: string; a: string }[] = [
   },
 ];
 
-/** Home: Organization + WebSite + SoftwareApplication (offers ADR 0006, BRL
-    mensal) + FAQPage. Um objeto por entidade — o layout emite um <script>
-    JSON-LD para cada um. */
 export function homeGraph(site: URL): object[] {
   const org = {
     "@type": "Organization",

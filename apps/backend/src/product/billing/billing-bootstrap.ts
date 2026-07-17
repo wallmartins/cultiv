@@ -5,7 +5,6 @@ import { swallowWithDiagnostic } from "../../effects/non-blocking-diagnostics.js
 export function seedUserBillingState(
   billing: ReturnType<typeof createBillingService>,
   config: {
-    /** Dev bootstrap only — not used to resolve per-request entitlements. */
     readonly billingPlanId?: string;
     readonly serviceName: string;
     readonly version: string;
@@ -46,7 +45,6 @@ export function seedBillingState(
   },
   now: () => Date
 ): Effect.Effect<void, never> {
-  // ponytail: with PostgreSQL, entitlements live in the DB; env seed on boot can clobber paid plans after lazy catalog load
   if (config.databaseUrl) {
     return Effect.void;
   }

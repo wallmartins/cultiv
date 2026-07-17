@@ -1,5 +1,3 @@
-/// <reference path="./node-shims.d.ts" />
-
 export * from "./errors.js";
 export * from "./types.js";
 export * from "./context-path.js";

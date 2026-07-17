@@ -1,8 +1,5 @@
 import { Mono, Panel, Pill, Ring, Serif, c, f } from "../primitives";
 
-// 2e — Downgrade com excedente. O saldo atual supera o teto do novo plano;
-// nada é confiscado: parte vira crédito do plano, o excedente vira saldo avulso
-// sem validade. Diálogo elevado com a matemática explícita.
 export function DowngradeSurplus() {
   return (
     <div

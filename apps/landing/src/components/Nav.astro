@@ -1,19 +1,4 @@
 ---
-// Persistent nav — design 179–193, ported markup/visuals exactly, with two
-// binding-contract deviations: (1) the CTA is "Começar grátis →" → trialUrl
-// instead of the design's "Testar a demo →" (that CTA stays inside the Hero
-// section itself, scrolling to #demo — this nav's job is conversion, not
-// wayfinding); (2) a pt·en language pill sits between brand and CTA (design
-// is pt-only; language toggle is a user-decided addition, see §i18n).
-//
-// State (background/blur/hairline, intro visibility) is driven by
-// `html[data-scrolled]`/`html[data-intro]`, normally written by HeroStory's
-// script (contract: "hero sets it"). This component also runs its own tiny
-// scroll listener for the same `data-scrolled` threshold (sy>24, matching
-// the design) so the nav still opacifies correctly on pages with no Hero —
-// /termos, /privacidade, /404 — which import this same Nav. Both listeners
-// compute the identical boolean, so the redundancy on the v5 home page is
-// harmless.
 import T from "./T.astro";
 import { trialUrl } from "../config";
 ---
@@ -81,8 +66,6 @@ import { trialUrl } from "../config";
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
   }
-  /* Nav hides for the intro's "draw" phase (the pinned intro logo is the
-     only mark on screen); it's already back for "reveal"/"done". */
   :global(html[data-intro="draw"]) .v5nav {
     opacity: 0;
   }
@@ -126,8 +109,6 @@ import { trialUrl } from "../config";
     opacity: 1;
     color: var(--t-ink, #34322e);
   }
-  /* Script-only control — a toggle that does nothing without JS is dead UI;
-     same doctrine as the interim nav's theme/lang tools. */
   :global(html:not(.js)) .v5nav__lang { display: none; }
 
   .v5nav__cta {

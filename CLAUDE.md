@@ -2,6 +2,8 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+- **Comentários**: Mantenha os comentários no código estritamente mínimos. Adicione apenas se for estritamente necessário para explicar padrões complexos e incomuns. Não comente o óbvio ou o que a própria função já descreve.
+
 ## What this is
 
 Cultiv — an AI writing engine that learns an author's personal voice and generates text that sounds like them. A **pnpm 11 monorepo** (`cultiv`) requiring **Node ≥ 22.13**. Public product name is **Cultiv**; internal workspace packages use the `@my-ai-orchestrator/*` scope. See `README.md` for the product overview and `CONTEXT.md` for the authoritative domain glossary (Voice Profile, Reasoning Signature, Pipeline, Content Type, etc.) — use those exact terms and heed each entry's `_Avoid_` list.

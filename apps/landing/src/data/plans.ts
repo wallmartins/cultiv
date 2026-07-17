@@ -1,13 +1,3 @@
-// Plan catalog — ADR 0006 (canonical numbers; backend is the eventual SSOT,
-// this is the build-time landing copy of it). Replaces the design's card
-// numbers (which were pre-ADR placeholders: 50/500/"ilimitadas" gerações) —
-// every other word is verbatim from the design (`cultiv-hero-v5.dc.html`
-// 342–436) and its `renderVals` price strings (~3231–3234).
-//
-// Shape is consumed by two callers: `seo.ts` (JSON-LD Offers — reads
-// `p.name`, `p.tag.pt`, `p.features[].pt`, `p.priceValue`) and the Plans
-// section (`Plans.astro`/`plans-toggle.ts` — reads the full `price` table +
-// `priceSub`). Plans must NOT duplicate this catalog; it renders from here.
 import type { PlanId } from "../config";
 
 export const ANNUAL_DISCOUNT = 0.2;
@@ -17,17 +7,11 @@ export interface Plan {
   name: string;
   featured?: boolean;
   tag: { pt: string; en: string };
-  /** BRL monthly price, numeric — feeds the JSON-LD Offer.price (`seo.ts`). */
   priceValue: number;
   price: {
     brl: { monthly: string; annual: string };
     usd: { monthly: string; annual: string };
   };
-  /** Static JS-off default (monthly-cycle) caption under the price. The
-      annual-cycle variant ("por mês · cobrado anualmente" / "per month ·
-      billed annually") is cycle UI copy, not plan data — it lives in the
-      Plans section's own toggle script alongside the other segmented-control
-      strings, not duplicated per plan here. */
   priceSub: { pt: string; en: string };
   features: { pt: string; en: string }[];
 }

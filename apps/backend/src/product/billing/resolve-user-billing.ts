@@ -28,7 +28,6 @@ export function resolveStoredUserPlanTier(
   return (resolveStoredUserEntitlement(billing, userId)?.tier ?? "free") as BillingPlanTier;
 }
 
-/** Lazy backfill for users provisioned before JIT free subscription (issue 35). */
 export function ensureUserEntitlement(
   billing: BillingServiceContract,
   userId: string,

@@ -1,8 +1,5 @@
 import { Mono, Panel, Pill, Ring, Serif, StatusDot, c, f, warningA } from "../primitives";
 
-// 1c — Confiança baixa. As amostras da calibração apontam em direções
-// diferentes; dá pra gerar, mas o texto sai genérico. Política: mostra o placar
-// honesto (âmbar), aponta a amostra fraca e convida a reescrever antes de seguir.
 export function LowConfidenceReview() {
   return (
     <div

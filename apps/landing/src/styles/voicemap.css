@@ -1,17 +1,3 @@
-/* ============================================================
-   VoiceMap (Ato 3, "Constelação") — the Voice Profile as a harmonic
-   synthesizer. Ported from the design's inline styles (cultiv-hero-v5.dc.html
-   278-324) into scoped classes; exact clamps/paddings/radii/colors kept.
-
-   Two structural modes, chosen by `voice-synth.ts` via `[data-motion]` on
-   the section root (JS-off default = "static", matching the design's own
-   `state.reduced` branch — legible without any scroll-jack or JS):
-     - static (default / JS-off / prefers-reduced-motion): an auto-height
-       dark card, legend always visible, no pin.
-     - scrub (`[data-motion="scrub"]`): the 320vh pinned takeover — canvas
-       fills the viewport, legend/rise fade in via inline styles the script
-       writes every tick (design cTick/cUpdateOverlays).
-   ============================================================ */
 
 .vmap {
   position: relative;
@@ -48,7 +34,7 @@
   will-change: transform, opacity;
 }
 .vmap[data-motion="scrub"] .vmap__rise {
-  opacity: 0; /* script drives this per-tick once the section is in range */
+  opacity: 0;
 }
 
 .vmap__canvas {
@@ -60,7 +46,6 @@
   touch-action: pan-y;
 }
 
-/* overlay do sintetizador: header, pilares-fader, tooltip e micro-CTA */
 .vmap__legend {
   position: absolute;
   inset: 0;
@@ -72,7 +57,7 @@
 }
 .vmap[data-motion="scrub"] .vmap__legend {
   opacity: 0;
-  visibility: hidden; /* script fades this in across the plateau window (cUpdateOverlays) */
+  visibility: hidden;
 }
 
 .vmap__head {
@@ -119,11 +104,9 @@
   text-wrap: pretty;
 }
 
-/* pilares-fader (draggable equalizer chips) */
 .vmap__pillar {
   position: absolute;
   left: clamp(16px, 3vw, 44px);
-  /* top: set inline per-pillar via `pillarTopCss` (design p.topCss) */
   pointer-events: auto;
   display: flex;
   align-items: center;
@@ -183,7 +166,6 @@
   border-top: 5px solid #f1efe9;
 }
 
-/* tooltip do traço (hover/click num nó) */
 .vmap__tip {
   position: absolute;
   left: 0;
@@ -245,7 +227,6 @@
   color: #b7b2a8;
 }
 
-/* micro-CTA */
 .vmap__cta {
   position: absolute;
   right: clamp(20px, 4.5vw, 56px);
@@ -272,7 +253,6 @@
   color: var(--accent);
 }
 
-/* dica de interação */
 .vmap__key {
   position: absolute;
   left: 50%;
@@ -294,16 +274,9 @@
   .vmap__key {
     display: none;
   }
-  /* The body copy explains hover/drag — interactions that don't exist on
-     touch (the section runs in the non-scrub static mode on phones). Dropping
-     it keeps the header (eyebrow + title) short. */
   .vmap__body {
     display: none;
   }
-  /* Portrait synth: the three pillar chips ride a row across the TOP (each on
-     its wave's launch column, --pillar-x), and voice-synth.ts descends the
-     braids from just below them. Overrides the inline `top:<base%>` +
-     left-column position from the landscape layout. */
   .vmap__pillar {
     top: clamp(138px, 17.5vh, 182px) !important;
     left: var(--pillar-x) !important;
@@ -316,9 +289,6 @@
   }
 }
 
-/* handoff (Fix F): 24vh spacer opening Ato 4 (respiração). Hidden by default
-   (static/reduced/JS-off — no scroll-jack to hand off from); voice-synth.ts
-   shows it once scrub mode is confirmed active. */
 .vmap__handoff {
   display: none;
   height: 24vh;
@@ -326,13 +296,6 @@
   justify-content: center;
   padding-top: 48px;
 }
-/* The seed span is a position hook, not a visual — the Hero-owned walker
-   reads its `getBoundingClientRect()` via [data-cseed] to know where to walk
-   to. Deviation from the design's literal inline style: the source also sets
-   `display:none` on this element (cultiv-hero-v5.dc.html line 321), which
-   would zero out its layout box and break that contract. Opacity alone
-   (driven by `cUpdateOverlays`'s `sop`, same curve as the design) keeps it
-   invisible while leaving a real, positioned box for the walker to target. */
 .vmap__seed {
   display: inline-block;
   width: 10px;

@@ -1,16 +1,3 @@
-/* ============================================================
-   Closing: FAQ (Ato 7) + CTA final (Ato 8) + Footer (Ato 9).
-   Ported verbatim from cultiv-hero-v5.dc.html inline styles
-   (512–774) into scoped classes. FAQ + CTA final are the light
-   "--t-*" world; the footer is a fixed dark oklch base, independent
-   of the chamber-breath token system (design never varies it).
-   Imported (unscoped, plain stylesheet) by Faq.astro, CtaFinal.astro
-   and Footer.astro — safe to import from all three, Vite dedupes it.
-   FAQ disclosure motion (rotate + fade, reduced-motion guard) lives in
-   root.css already (`details[data-faq]…`) — not duplicated here.
-   ============================================================ */
-
-/* ---------------- FAQ (Ato 7) — design 512–693 ---------------- */
 
 .faq {
   background: var(--t-bg, #f8f7f4);
@@ -60,7 +47,6 @@
 .faq__item {
   border-top: 1px solid rgba(52, 50, 46, 0.12);
 }
-/* Only the very last item across all groups closes the list (design 679). */
 .faq__inner > details:last-of-type {
   border-bottom: 1px solid rgba(52, 50, 46, 0.12);
 }
@@ -118,7 +104,6 @@
   color: var(--t-muted, #6b675f);
   text-wrap: pretty;
 }
-/* Injected via T.astro's set:html — unscoped selectors on purpose. */
 .faq__atext em {
   font-style: italic;
 }
@@ -126,8 +111,6 @@
   font-weight: 600;
   color: var(--t-ink, #34322e);
 }
-
-/* ---------------- CTA final (Ato 8) — design 698–705 ---------------- */
 
 .cta-final {
   background: var(--t-bg, #f8f7f4);
@@ -183,10 +166,6 @@
   outline: 2.5px solid var(--t-ink, #34322e);
   outline-offset: 3px;
 }
-
-/* ---------------- Footer (Ato 9) — design 711–774 ---------------- */
-/* Fixed dark base — not part of the `--t-*` light/chamber system, hardcoded
-   oklch literals exactly as the design (it never breathes with scroll). */
 
 .footer-v5 {
   background: oklch(0.16 0 0);

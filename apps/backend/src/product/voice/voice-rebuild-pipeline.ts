@@ -289,7 +289,6 @@ function processUserRebuild(deps: VoiceRebuildPipelineDeps, userId: string) {
         signatureClosings = phrases.signatureClosings;
         metaphorSignature = deriveMetaphorSignature(wizardExamplesForSignals, resolveUsesAnalogiesTrait(development));
       } catch {
-        // ponytail: deterministic extraction is optional; rebuild continues without signals
       }
     }
 

@@ -1,10 +1,4 @@
 ---
-// Plans (Ato 5) — "Escolha por quanto você escreve." Markup ported from the
-// design (cultiv-hero-v5.dc.html 342–436); pricing/generation counts come
-// from the ADR 0006 catalog in src/data/plans.ts (contract binding
-// exception — replaces the design's pre-ADR card numbers). JS-off default
-// is BRL monthly, matching the static markup below 1:1; plans-toggle.ts only
-// upgrades it (currency/cycle segmented controls, CTA hrefs).
 import "../styles/plans.css";
 import T from "./T.astro";
 import { PLANS } from "../data/plans";
@@ -33,7 +27,6 @@ import { planUrl } from "../config";
       </p>
     </div>
 
-    <!-- toggle mensal/anual + moeda (island — plans-toggle.ts) -->
     <div class="plans-toggle-row">
       <div role="group" aria-label="Moeda" class="plans-toggle-group">
         <button type="button" data-currency="BRL" aria-pressed="true" class="plans-toggle-btn"
@@ -59,7 +52,6 @@ import { planUrl } from "../config";
       </div>
     </div>
 
-    <!-- os três cards -->
     <div class="plans-grid">
       {
         PLANS.map((plan) => (
@@ -111,7 +103,6 @@ import { planUrl } from "../config";
       }
     </div>
 
-    <!-- nota fina -->
     <p class="plans-footnote">
       <T pt="O cartão só entra quando você escolhe um plano." en="Your card only comes in when you pick a plan." />
     </p>

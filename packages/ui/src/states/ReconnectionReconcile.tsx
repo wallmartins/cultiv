@@ -1,8 +1,5 @@
 import { Banner, Mono, Pill, Ring, StatusDot, c, f, inkA } from "../primitives";
 
-// 2a — Reconexão. Volta do offline: uma barra do estado anterior (riscada), a
-// reconciliação em accent + glow ("aqui vai o que aconteceu") e a lista do que
-// ficou pronto / retomou. Nada se perde: as gerações seguem no servidor.
 export function ReconnectionReconcile() {
   return (
     <div

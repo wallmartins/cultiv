@@ -1,15 +1,3 @@
-/* ============================================================
-   Breath (Ato 4) — "Respiração" — design cultiv-hero-v5.dc.html
-   markup 325–341, choreography `breathTick` 2069–2118.
-
-   The only movement here is the ink reveal itself: a `sticky` box holds a
-   short passage that resolves word-by-word from a dim resting color to full
-   ink as the section's 210svh scroll range passes underneath it — see
-   BREATH-SPEC.md §1 ("o ritmo é o conteúdo"). Height/sticky follow the
-   design's reduced-motion branch (renderVals `breathSectionH`/
-   `breathStickyPos`) via a plain media query so the JS-off / OS-reduced
-   cases need zero script.
-   ============================================================ */
 
 .breath {
   height: 210vh;
@@ -46,10 +34,6 @@
   letter-spacing: -0.006em;
   margin: 0;
   text-wrap: pretty;
-  /* Resting/JS-off/reduced color is full ink (BREATH-SPEC §3): the dim
-     "unread" resting tone only applies once JS is confirmed AND the user
-     has not asked for reduced motion — see the media query below. Words
-     are then repainted per-frame by breath.ts as the reader scrolls past. */
   color: var(--t-ink, #34322e);
 }
 @media (prefers-reduced-motion: no-preference) {

@@ -1,24 +1,3 @@
-/* ============================================================
-   Ato 6 — founder-vídeo ("julgue você mesmo"). Ported from the design's
-   inline styles (cultiv-hero-v5.dc.html 437–505). Chamber-internal colors
-   (#F1EFE9, #A8A399, #151512, #0E0E0C, #E7E4DC…) stay hardcoded per the
-   contract — this section is always dark-chamber content, never the light
-   `--t-*` palette (that's why the header/paragraph colors below are not
-   `var(--t-ink)`).
-
-   Layout state is driven by three data attributes the runtime module
-   (scripts/founder.ts) writes on the `.founder` root, mirroring the design's
-   `renderVals` ternaries exactly:
-     data-fphase="idle"|"play"|"split"  — the video-sim state machine
-     data-reduced                       — prefers-reduced-motion snapshot
-     data-pinned                        — true only when !reduced && !mobile
-                                           && phase==="idle" (the scroll-jack
-                                           pin is active)
-   Absence of `data-fphase` (no JS at all, or not yet hydrated) is the
-   resting/legible state: poster + the full FounderNote already visible,
-   side by side on desktop / stacked on mobile — per FOUNDER-PROOF-SPEC §5
-   ("JS-off: poster do vídeo + a FounderNote inteira visíveis").
-   ============================================================ */
 
 .founder {
   position: relative;
@@ -34,12 +13,7 @@
   overflow: visible;
   display: flex;
   align-items: center;
-  /* Dark card by default so the light-on-dark content is legible with JS off;
-     founder.ts drives the light→dark scroll inversion via inline style once
-     mounted (starts light at the section entrance, darkens across the plateau). */
   background: #151411;
-  /* Vertical padding tied to viewport HEIGHT (svh) so the split scales down on
-     short screens and fits the pinned 100svh viewport without clipping. */
   padding: clamp(16px, 3svh, 56px) clamp(20px, 6vw, 64px);
   box-sizing: border-box;
 }
@@ -56,11 +30,6 @@
   position: relative;
   z-index: 1;
   will-change: transform, opacity;
-  /* JS-off / pre-hydration resting state: fully visible, no rise. JS
-     (founderTick) overrides opacity/transform inline once mounted, easing
-     them in as the pin progresses — same coordinated crossfade as the
-     background darkening, so the light-on-dark text (below) never appears
-     against a light background mid-transition (Fix E). */
   opacity: 1;
   transform: none;
 }
@@ -96,7 +65,6 @@
   text-wrap: balance;
 }
 
-/* ---- split: poster/video | note text (mobile-first: stacked) ---- */
 .founder__split {
   display: flex;
   flex-direction: column;
@@ -104,25 +72,12 @@
   align-items: stretch;
   margin-top: clamp(14px, 2.4svh, 38px);
 }
-/* Pinned: founder.ts (fixSplitHeight) sets a fixed row height that fits the
-   note, so the row never grows. Clip each panel to that height so the note's
-   transient sliver-width wrap during the reveal can't push the block taller
-   than reserved (which is what re-centered the block and jumped the video). */
 .founder[data-pinned] .founder__video-panel,
 .founder[data-pinned] .founder__text {
   min-height: 0;
   overflow: hidden;
 }
-/* Both panels keep flex-grow:1 / flex-shrink:1 CONSTANT and animate ONLY
-   flex-basis. Transitioning flex-grow/flex-shrink (unitless) makes the two
-   columns' widths move non-monotonically — the video/text visibly overshoots
-   ("grows, goes tiny, comes back"). Animating basis alone (both columns share
-   the same duration/easing and their bases always sum to 100%) gives a clean,
-   monotonic resize. */
 .founder__video-panel {
-  /* grow:0 so the video holds ~its basis width (doesn't stretch); shrink:1 to
-     absorb the column gap. Only flex-basis animates → a clean monotonic
-     "retract to the left". */
   flex: 0 1 auto;
   min-width: 0;
   transition: flex-basis 0.72s cubic-bezier(0.22, 1, 0.36, 1);
@@ -130,9 +85,6 @@
 .founder__text {
   flex: 1 1 auto;
   min-width: 0;
-  /* Resting/JS-off default: revealed. max-height is a real px value (not
-     `none`) so the reveal can transition smoothly (0px ⇄ 4000px), same as the
-     reference standalone's fTextMax. */
   opacity: 1;
   max-height: 4000px;
   overflow: hidden;
@@ -147,17 +99,12 @@
   .founder__split {
     flex-direction: row;
   }
-  /* Only flex-basis changes between states (grow/shrink stay 1/1 from the base
-     rule) so the resize stays monotonic. JS-off / resting desktop default:
-     side-by-side, split-like proportions (poster left, full note right). */
   .founder__video-panel {
     flex-basis: 47%;
   }
   .founder__text {
     flex-basis: 53%;
   }
-  /* Hydrated + not yet split: the video reclaims full width, text collapses
-     to nothing (its opacity/max-height collapse below handles legibility). */
   .founder[data-fphase="idle"]:not([data-reduced]) .founder__video-panel,
   .founder[data-fphase="play"]:not([data-reduced]) .founder__video-panel {
     flex-basis: 100%;
@@ -168,9 +115,6 @@
   }
 }
 
-/* Collapse the note panel while idle/playing (JS + not reduced) — applies at
-   every width; on mobile the flex-basis stays "auto" (design formula never
-   varies fTextFlex by phase there) but max-height:0 still hides the block. */
 .founder[data-fphase="idle"]:not([data-reduced]) .founder__text,
 .founder[data-fphase="play"]:not([data-reduced]) .founder__text {
   opacity: 0;
@@ -185,14 +129,8 @@
   }
 }
 
-/* ---- video frame ---- */
 .founder__frame {
   position: relative;
-  /* FIXED height (not aspect-ratio): as the video panel narrows on the split,
-     the frame only shrinks in WIDTH — its height never changes. So the video
-     stays fully visible and the streaming text / replay button inside never
-     reflow out of view (the aspect-ratio version shrank the frame vertically
-     too, which is what broke the animation). Matches the reference standalone. */
   height: 52svh;
   width: 100%;
   margin: 0 auto;
@@ -203,7 +141,6 @@
   box-shadow: 0 30px 80px -40px rgba(0, 0, 0, 0.8);
 }
 
-/* poster / placeholder frame — asset to produce, see component comment */
 .founder__poster {
   display: grid;
   position: absolute;
@@ -225,7 +162,6 @@
   line-height: 1.7;
 }
 
-/* idle: play button */
 .founder__play {
   display: none;
   position: absolute;
@@ -271,7 +207,6 @@
   color: #f1efe9;
 }
 
-/* video "live": geração acontecendo (stream em loop no clock do clipe) */
 .founder__live {
   display: none;
   position: absolute;
@@ -366,8 +301,6 @@
   background: rgba(241, 239, 233, 0.16);
 }
 
-/* display toggling for poster / play / live — same at every width; only the
-   "reduced" escape hatch (poster always wins, play/live never show) differs. */
 .founder[data-fphase="idle"]:not([data-reduced]) .founder__play {
   display: grid;
 }
@@ -380,7 +313,6 @@
   display: flex;
 }
 
-/* ---- note panel: the FounderNote, in full ---- */
 .founder__note-caption {
   display: block;
   font-family: ui-monospace, "SF Mono", Menlo, monospace;
@@ -399,9 +331,6 @@
   margin: 0;
   font-family: var(--font-ui);
   font-weight: 400;
-  /* Type scales with viewport HEIGHT (svh) so the whole 3-paragraph note fits
-     the pinned 100svh viewport at any screen height — the section no longer
-     releases the pin to reveal it (user request: constant height). */
   font-size: clamp(0.82rem, 1.55svh, 1.12rem);
   line-height: 1.5;
   color: #e7e4dc;

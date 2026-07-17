@@ -1,8 +1,5 @@
 import { Mono, Panel, Pill, Serif, StatusDot, c, f, accentA, inkA } from "../primitives";
 
-// 2g — Tema colado, formatado. O autor colou markdown cru de outro lugar; a
-// gente organiza sem interpretar demais: extrai título, canal e ângulos, guarda
-// links como referência (não abre) e pede confirmação antes de seguir.
 export function PastedThemeFormatted() {
   const pasted = `## Ideia pro LinkedIn
 **Por que times pequenos entregam mais**

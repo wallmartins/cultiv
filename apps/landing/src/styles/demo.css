@@ -1,11 +1,3 @@
-/* ============================================================
-   Demo section (Ato 2) — ported verbatim from the design's inline styles
-   (cultiv-hero-v5.dc.html, markup 225–277). Static fold, no pin/scroll-scrub
-   (DEMO-SPEC §6) — the only motion is the short result cascade, driven by
-   `demo-reader.ts` setting `animation` inline per line/badge/frame (reusing
-   `@keyframes cultivFadeUp` from root.css) and disabled under
-   prefers-reduced-motion (reader checks `engine.reducedMotion()`).
-   ============================================================ */
 
 .demo {
   min-height: 100svh;
@@ -131,8 +123,6 @@
   text-wrap: pretty;
 }
 
-/* Single acid beat per fold (DESIGN.md §3) — only the first, most
-   distinctive line gets it. */
 .demo__acid {
   background: color-mix(in srgb, var(--accent) 50%, transparent);
   box-decoration-break: clone;

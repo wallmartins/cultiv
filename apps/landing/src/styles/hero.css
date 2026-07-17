@@ -1,30 +1,8 @@
-/* ============================================================
-   Hero — scroll-story (Ato 1). Ported from cultiv-hero-v5.dc.html
-   194–224 (pinned intro markup), 777–778 (walker canvas), 786–805
-   (opening logo curtain) and 780–786 (dev scrub) — see HERO-SCROLL-SPEC.md
-   for the narrative concept these values encode. Values are copied
-   verbatim from the design's inline styles; only the *mechanism*
-   (inline style → scoped class) changed.
-
-   JS-off / reduced-motion doctrine (deviation from the raw design, which
-   is a React SPA with no no-JS state): the design computes `heroCopy`'s
-   opacity as 0 at first paint (only reaching 1 once the opening curtain's
-   timers resolve). That's fine for a client component but would leave a
-   crawler or no-JS reader staring at nothing forever. So here the resting
-   (no-JS) state is the OPPOSITE of the design's default: hero copy /
-   hint default to visible; the opening curtain (a pure animation flourish)
-   defaults to `display:none` and only `html.js` + hero-story.ts ever show
-   it. See hero-story.ts's module comment for the full rationale.
-   ============================================================ */
 
 .hero-intro {
   position: relative;
-  height: 440vh; /* design renderVals: s.reduced ? '100svh' : '440vh' */
+  height: 440vh;
 }
-/* Phones get a taller scroll range so the settled hero lingers: hero-story.ts
-   finishes the animation partway through (readScroll's mobile `animFrac`) and
-   then HOLDS the resting logo + copy for the remaining scroll before the demo
-   takes over — more dwell time on the hero. */
 @media (max-width: 719.98px) and (prefers-reduced-motion: no-preference) {
   .hero-intro {
     height: 540vh;
@@ -51,21 +29,16 @@
   display: block;
 }
 
-/* ---------- copy real em HTML (SEO / leitores de tela) ---------- */
 .hero-copy {
   position: absolute;
   left: 50%;
   top: 54%;
   transform: translate(-50%, -50%);
   text-align: center;
-  /* Explicit `width`, not `max-width`: this box is `position:absolute; left:50%`,
-     so with only a max-width it shrink-wraps to the space from the 50% mark to
-     the right edge (≈half the viewport) and collapses onto the longest word,
-     forcing every line to wrap. A real width gives the copy the full measure. */
   width: min(98vw, 760px);
   padding: clamp(8px, 2.5vw, 56px);
   background: radial-gradient(closest-side, rgba(248, 247, 244, 0.96) 62%, rgba(248, 247, 244, 0));
-  opacity: 1; /* JS-off default: visible. hero-story.ts drives this once mounted. */
+  opacity: 1;
   will-change: opacity, transform;
 }
 
@@ -77,6 +50,11 @@
   letter-spacing: -0.015em;
   margin: 0;
   color: var(--t-ink, #34322e);
+}
+@media (min-width: 720px) {
+  .hero-h1 {
+    white-space: nowrap;
+  }
 }
 .hero-sub {
   margin: 18px 0 0;
@@ -113,10 +91,6 @@
 .hero-cta-primary:active {
   transform: translateY(1px);
 }
-/* Secondary CTA — not in the raw design (which ships one hero CTA); the
-   v5 contract adds "Começar grátis →" alongside "Testar a demo →". Kept
-   visually quiet (text-link weight) so it never competes with the
-   primary CTA for attention. */
 .hero-cta-secondary {
   font-family: inherit;
   font-weight: 600;
@@ -140,7 +114,14 @@
   letter-spacing: 0.01em;
 }
 
-/* ---------- indicador de scroll ---------- */
+.hero-price {
+  display: block;
+  margin-top: 7px;
+  font-size: 0.8rem;
+  color: var(--t-muted, #6b675f);
+  opacity: 0.8;
+}
+
 .hero-hint {
   position: absolute;
   left: 0;
@@ -148,7 +129,7 @@
   bottom: 26px;
   display: flex;
   justify-content: center;
-  opacity: 1; /* JS-off default: visible affordance. */
+  opacity: 1;
   pointer-events: none;
   will-change: opacity;
 }
@@ -187,14 +168,13 @@
   }
 }
 
-/* ---------- overlays narrativos dos atos 2 e 3 ---------- */
 .hero-act {
   display: block;
   position: absolute;
   left: 50%;
   bottom: 14vh;
   transform: translate(-50%, 14px);
-  opacity: 0; /* decorative (aria-hidden), only ever shown by hero-story.ts */
+  opacity: 0;
   text-align: center;
   max-width: min(88vw, 30ch);
   font-family: var(--font-headline);
@@ -216,7 +196,6 @@
   }
 }
 
-/* ---------- bonequinho-guia (Ato 3→4): canvas fixo de página inteira ---------- */
 .hero-walker-canvas {
   position: fixed;
   inset: 0;
@@ -230,10 +209,6 @@
   }
 }
 
-/* ---------- abertura: a logo se constrói no centro ----------
-   Default hidden (no-JS / crawlers never see a stuck full-screen curtain);
-   hero-story.ts is the only thing that ever shows it, and only when
-   `prefers-reduced-motion: no-preference`. */
 .hero-curtain {
   display: none;
   position: fixed;
@@ -261,7 +236,6 @@
     opacity 0.75s cubic-bezier(0.25, 0.1, 0.25, 1);
 }
 
-/* ---------- scrub de dev (discreto; só existe com ?scrub na URL) ---------- */
 .hero-scrub {
   position: fixed;
   right: 16px;

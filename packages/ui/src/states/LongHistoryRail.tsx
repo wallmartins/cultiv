@@ -1,8 +1,5 @@
 import { Chip, Pill, c, f, accentA, inkA } from "../primitives";
 
-// 2f — Histórico longo. Rail de 247 gerações (busca + agrupamento por mês) ao
-// lado de um painel de busca vazia com filtro "falhas" ativo: o empty-state
-// honesto oferece limpar o filtro e revelar os 3 resultados dos outros status.
 export function LongHistoryRail() {
   return (
     <div

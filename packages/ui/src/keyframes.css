@@ -1,8 +1,3 @@
-/* Cultiv — keyframes de movimento compartilhados (SSOT visual).
-   Extraído de apps/landing constellation.css. Consumido via styles.css/primitives.
-   ============================================================ */
-
-/* ================= keyframes ================= */
 @keyframes fadeUp {
   from {
     opacity: 0;
@@ -79,4 +74,3 @@
     opacity: 1;
   }
 }
-

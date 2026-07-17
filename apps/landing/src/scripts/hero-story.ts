@@ -1,32 +1,3 @@
-// Hero — scroll-story (Ato 1). Ported from the design's DCLogic monolith
-// (cultiv-hero-v5.dc.html): constructor world/state/tokens/timeline `T`
-// (844–950), cast/seal geometry + Atos 1–4 position math (1087–1391),
-// drawHuman/puddle/quotes/logo (1392–1697), render2d/overlays/ambient/
-// renderStatic (1698–1987), the intro slice of readScroll + `_tick`
-// (1988–2068 shell — this module owns only the intro-progress part, not
-// the constellation/founder scroll math those sections compute
-// themselves), and the walker (2119–2340). See HERO-SCROLL-SPEC.md for
-// the narrative concept + the Fix A–F acceptance criteria this preserves.
-//
-// Architecture: one small mutable state object (`S`) instead of a class —
-// this *is* `this` from the design, just not attached to a component
-// instance. Per-frame work registers with the page's single rAF loop via
-// `engine.addTick`; there is no independent `requestAnimationFrame` here.
-//
-// JS-off / reduced-motion doctrine (deviation from the design, a client
-// SPA with no no-JS concept): the design's first React render already
-// computes `heroCopy` opacity as 0 (only reaching 1 once intro timers
-// resolve) and renders the full-screen opening curtain unconditionally.
-// Ported literally, a no-JS/crawler reader would see nothing (or a stuck
-// curtain) forever. So `hero.css` flips the *resting* state: hero copy /
-// scroll hint default to visible (`opacity:1` in the stylesheet), and the
-// opening curtain defaults to `display:none` — only this module ever
-// shows the curtain, and only when `prefers-reduced-motion: no-preference`.
-// Reduced-motion's *static scene* requirement is satisfied without any JS
-// branch at all: `renderStatic()` still runs (so the canvas isn't blank),
-// but the copy/hint/act-overlay visibility is handled declaratively by
-// `hero.css` media queries, which react to a live OS toggle for free.
-
 import {
   addTick,
   addScroll,
@@ -52,16 +23,13 @@ import {
 
 type RGB = readonly [number, number, number];
 
-/* ---------------- tokens (design 899–913, 916–928) ---------------- */
-
 const GRAPHITE: RGB = [52, 50, 46];
 const GRAY: RGB = [165, 160, 153];
-const LOGO_INK: RGB = [21, 21, 21]; // #151515 — SVG oficial
-const LOGO_GREEN: RGB = [149, 203, 62]; // #95CB3E — SVG oficial
+const LOGO_INK: RGB = [21, 21, 21];
+const LOGO_GREEN: RGB = [149, 203, 62];
 const GREEN_HEX = "#95CB3E";
 const INK_HEX = "#151515";
 
-// paleta terrosa das vozes (roupas)
 const PALETTE: RGB[] = [
   "#C0653B",
   "#B8892F",
@@ -81,7 +49,6 @@ const ACCESSORIES = ["none", "backpack", "coffee", "headphones", "book", "bag", 
 const QUOTE_D =
   "M62 38c0-9.5-7-16-15.5-16C38 22 32 28.2 32 36.2c0 7.9 6 13.8 14 13.8 1.1 0 2.2-.1 3.2-.4C48 60 42.2 65.6 34.6 68.2l3.4 6.8C50.6 70.6 62 59.6 62 43.6Z";
 
-// ângulos do arco da marca (M54.4 11.6 → A37 → 78.3 26.8, centro 48,48)
 const A0 = -1.3968;
 const A1 = -0.6107;
 
@@ -103,8 +70,6 @@ const T = {
   settleEnd: 0.98,
 };
 const DUR = 80;
-
-/* ---------------- shapes ---------------- */
 
 interface Appearance {
   skin: RGB;
@@ -241,8 +206,6 @@ interface WalkerDrawOpts {
 type Phase = "draw" | "reveal" | "done";
 type WalkPhase = "follow" | "auto" | "gone";
 
-/* ---------------- state ---------------- */
-
 const S = {
   reduced: false,
   phase: "done" as Phase,
@@ -271,7 +234,6 @@ const S = {
   timers: [] as number[],
   quotePath: null as Path2D | null,
 
-  // walker (design 2119–2340)
   walkDpr: 1,
   walker: null as WalkerIdentity | null,
   walkPhase: "follow" as WalkPhase,
@@ -306,8 +268,6 @@ interface HeroDom {
 }
 
 let dom: HeroDom | null = null;
-
-/* ---------------- utilidades locais (não cobertas por engine.ts) ---------------- */
 
 function makeAppearance(rand: () => number): Appearance {
   return {
@@ -349,7 +309,6 @@ function buildCast(): void {
       wanderP: rand() * Math.PI * 2,
       travelJit: (rand() - 0.5) * 0.03,
       lookDir: rand() > 0.5 ? 1 : -1,
-      // filled in by layoutGrid/assignPaths below
       rT: 0,
       path: { kind: "circle", u0: 0, span: 0 },
       mT: 0,
@@ -393,8 +352,6 @@ function layoutGrid(): void {
   }
 }
 
-// cada figura pertence a UM trecho do selo; a dissolução acontece na
-// ordem de pintura (anel → arco → aspas), um a um
 function assignPaths(rand: () => number): void {
   const isMobile = S.W < 720;
   const nCircle = isMobile ? 9 : 14;
@@ -418,12 +375,10 @@ function assignPaths(rand: () => number): void {
       qi++;
     }
     p.finalCol = p.path.kind === "arc" ? LOGO_GREEN : LOGO_INK;
-    p.ink = dark(p.color, 0.1); // pigmento: a própria paleta da pessoa
+    p.ink = dark(p.color, 0.1);
     p._mp = null;
   }
 }
-
-/* ---------------- geometria do selo (SVG oficial) ---------------- */
 
 function circlePoint(u: number): [number, number, number] {
   const a = u * Math.PI * 2 - Math.PI / 2;
@@ -446,13 +401,10 @@ function pathPoint(pr: Person, u: number): [number, number, number] {
   if (k === "arc") return arcPoint(clamp(u, 0, 1));
   return quoteLine(clamp(u, 0, 1), pr.path.lane ?? 0, pr.path.q ?? 0);
 }
-// deriva com propósito (pós-restauração): a figura caminha devagar na
-// direção do seu ponto do selo — e vai parar ali para se dissolver
 function driftPos(pr: Person, p: number): [number, number, number] {
   const slot = S.grid.slots[pr.i] ?? [0, 0];
   const tgt = pathPoint(pr, pr.path.u0);
   const t0 = pr.rT + 0.06;
-  // caminha até (quase) o seu ponto do selo — derrete já posicionado
   const kd = sm(t0, Math.max(t0 + 0.02, pr.mT - 0.004), p) * 0.94;
   const dxv = tgt[0] - slot[0];
   const dyv = tgt[1] - slot[1];
@@ -468,7 +420,6 @@ function meltPos(pr: Person): [number, number, number] {
   if (!pr._mp) pr._mp = driftPos(pr, pr.mT);
   return pr._mp;
 }
-// ordem de pintura (spec): 1 anel externo · 2 acento verde · 3 aspas
 function traceWin(pr: Person): [number, number] {
   const j = pr.travelJit * 0.35;
   if (pr.path.kind === "circle") return [0.735 + j, 0.802 + j];
@@ -479,8 +430,6 @@ function traceK(pr: Person, p: number): number {
   const w = traceWin(pr);
   return sm(w[0], w[1], p);
 }
-
-/* ---------------- posições (funções puras de p) ---------------- */
 
 function organicPos(pr: Person, p: number): [number, number, number] {
   const t = p * DUR;
@@ -527,7 +476,6 @@ function personState(pr: Person, p: number): PersonState {
     melt: 0,
   };
 
-  // ---- Ato 4: dissolução em tinta (a figura PARA e derrete no lugar) ----
   if (p >= pr.mT) {
     const mp = meltPos(pr);
     st.x = mp[0];
@@ -540,7 +488,6 @@ function personState(pr: Person, p: number): PersonState {
     return st;
   }
 
-  // ---- Ato 3: ripple de restauração ----
   if (p >= pr.rT) {
     const dt = p - pr.rT;
     const STOP = 0.014;
@@ -572,7 +519,6 @@ function personState(pr: Person, p: number): PersonState {
       st.size = lerp(1, pr.size, e) * (1 + 0.1 * Math.sin(k * Math.PI));
       st.accA = k;
     } else {
-      // segue devagar rumo ao seu ponto do selo; aquieta antes de derreter
       const w = driftPos(pr, p);
       st.x = w[0];
       st.y = w[1];
@@ -582,7 +528,6 @@ function personState(pr: Person, p: number): PersonState {
     return st;
   }
 
-  // ---- Ato 2: captura escalonada ----
   if (p >= pr.cT) {
     const k = eio(sm(pr.cT, pr.cT + T.captureBlend, p));
     const o = organicPos(pr, p);
@@ -596,15 +541,12 @@ function personState(pr: Person, p: number): PersonState {
     return st;
   }
 
-  // ---- Ato 1: caminhada orgânica ----
   const o = organicPos(pr, p);
   st.x = o[0];
   st.y = o[1];
   st.facing = o[2];
   return st;
 }
-
-/* ---------------- figura humana editorial (design 1392–1616) ---------------- */
 
 function drawHuman(c: CanvasRenderingContext2D, o: DrawHumanOpts): void {
   if (o.alpha <= 0.004) return;
@@ -630,7 +572,6 @@ function drawHuman(c: CanvasRenderingContext2D, o: DrawHumanOpts): void {
 
   c.save();
   c.translate(o.x, o.y);
-  // derretimento: o corpo cede e escorre para o chão (nada por cima dele)
   const collapse = eio(sm(0.28, 1, melt));
   c.rotate(o.app.lean * 0.6 * (1 - collapse));
   c.scale(o.facing * (1 + 0.85 * collapse), Math.max(0.04, 1 - 0.94 * collapse));
@@ -646,7 +587,6 @@ function drawHuman(c: CanvasRenderingContext2D, o: DrawHumanOpts): void {
   const shY = -31.5 * u + bob + sag;
   const swing = Math.sin(th) * 0.52 * amp;
 
-  // mochila (atrás do torso)
   if (o.accA > 0.02 && o.acc === "backpack") {
     c.globalAlpha = o.alpha * o.accA;
     c.fillStyle = rgb(mx([94, 76, 56]));
@@ -657,7 +597,6 @@ function drawHuman(c: CanvasRenderingContext2D, o: DrawHumanOpts): void {
     c.globalAlpha = o.alpha;
   }
 
-  // pernas + sapatos (traseira mais escura = volume)
   for (const s of [-1, 1]) {
     const sw = swing * s;
     const lift = Math.max(0, Math.cos(th) * s) * 2.6 * u * amp;
@@ -677,7 +616,6 @@ function drawHuman(c: CanvasRenderingContext2D, o: DrawHumanOpts): void {
     c.stroke();
   }
 
-  // braços: manga + antebraço em pele; devolve a mão da frente
   let handX = 0;
   let handY = shY + 10 * u;
   const arm = (s: number): void => {
@@ -703,7 +641,6 @@ function drawHuman(c: CanvasRenderingContext2D, o: DrawHumanOpts): void {
   };
   arm(-1);
 
-  // torso: silhueta muda com a peça (casaco/vestido alongam e alargam)
   const HEM: Record<string, number> = { coat: -10.5, dress: -11.5, blazer: -16, jacket: -16.5, hoodie: -17, tee: -17.5 };
   const hem = (HEM[o.app.topType] ?? -16.5) * u + bob * 0.4 + sag * 0.3;
   const flared = o.app.topType === "coat" || o.app.topType === "dress";
@@ -718,7 +655,6 @@ function drawHuman(c: CanvasRenderingContext2D, o: DrawHumanOpts): void {
   c.quadraticCurveTo(0, shY - 2.6 * u, -shW, shY + 0.4 * u);
   c.closePath();
   c.fill();
-  // sombra lateral sutil — luz suave vinda da frente
   c.fillStyle = "rgba(20,16,10,0.10)";
   c.beginPath();
   c.moveTo(-shW, shY + 0.4 * u);
@@ -728,7 +664,6 @@ function drawHuman(c: CanvasRenderingContext2D, o: DrawHumanOpts): void {
   c.closePath();
   c.fill();
 
-  // capuz atrás da cabeça
   if (o.app.topType === "hoodie") {
     c.fillStyle = rgb(topD);
     c.beginPath();
@@ -738,7 +673,6 @@ function drawHuman(c: CanvasRenderingContext2D, o: DrawHumanOpts): void {
 
   arm(1);
 
-  // pescoço + cabeça
   const headX = 0.8 * u + (o.look || 0) * 2.2 * u;
   const headY = shY - 6.6 * u + sag * 0.5;
   c.strokeStyle = rgb(skin);
@@ -752,7 +686,6 @@ function drawHuman(c: CanvasRenderingContext2D, o: DrawHumanOpts): void {
   c.arc(headX, headY, 3.4 * u, 0, Math.PI * 2);
   c.fill();
 
-  // cabelo — silhuetas distintas, zero detalhe facial
   c.fillStyle = rgb(hairC);
   const hr = 3.4 * u;
   switch (o.app.hairStyle) {
@@ -802,7 +735,6 @@ function drawHuman(c: CanvasRenderingContext2D, o: DrawHumanOpts): void {
       break;
   }
 
-  // acessórios ancorados (mão / cabeça / ombro)
   if (o.accA > 0.02 && o.acc !== "none" && o.acc !== "backpack") {
     c.globalAlpha = o.alpha * o.accA;
     switch (o.acc) {
@@ -857,8 +789,6 @@ function drawHuman(c: CanvasRenderingContext2D, o: DrawHumanOpts): void {
   c.restore();
 }
 
-/* ---------------- poça de tinta (borda orgânica, molhada) ---------------- */
-
 function drawPuddle(
   c: CanvasRenderingContext2D,
   x: number,
@@ -892,8 +822,6 @@ function drawPuddle(
   c.fill();
   c.restore();
 }
-
-/* ---------------- selo (geometria EXATA do SVG oficial) ---------------- */
 
 function drawQuotes(
   c: CanvasRenderingContext2D,
@@ -964,8 +892,6 @@ function drawLogo(c: CanvasRenderingContext2D, cx: number, cy: number, R: number
   c.restore();
 }
 
-/* ---------------- render principal (design 1698–1844) ---------------- */
-
 function render2d(p: number): void {
   const c = S.ctx;
   const L = S.logo;
@@ -974,13 +900,11 @@ function render2d(p: number): void {
   const f = S.introFade;
   const vis = copyVis(p);
 
-  // a câmera continua subindo, devagar, durante a dissolução
   const rise = S.H * 0.028 * win(p, 0.56, 0.64, 0.67, 0.78);
 
   c.save();
   c.translate(0, rise);
 
-  // poças de pigmento — multiply: ao se tocarem, as tintas se misturam
   if (p > 0.57 && p < T.resolveEnd) {
     c.save();
     c.globalCompositeOperation = "multiply";
@@ -1005,7 +929,6 @@ function render2d(p: number): void {
       const ang = Math.atan2(entry[1] - mp[1], entry[0] - mp[0]);
       const stretch = Math.sin(Math.PI * fk) * 0.9;
       drawPuddle(c, x, y, r, col, (0.55 + 0.4 * grow) * f, pr.wanderP, stretch, ang, wet);
-      // escorrido fino enquanto o corpo cede (tinta, não partícula)
       if (melt > 0.12 && melt < 0.9) {
         c.globalAlpha = 0.45 * f * (1 - sm(0.65, 0.9, melt));
         c.strokeStyle = rgb(pr.ink);
@@ -1021,7 +944,6 @@ function render2d(p: number): void {
     c.restore();
   }
 
-  // pessoas (desenhadas DEPOIS das poças — nada cobre a figura)
   if (p < 0.78) {
     const states = S.persons
       .map((pr) => ({ pr, st: personState(pr, p) }))
@@ -1049,7 +971,6 @@ function render2d(p: number): void {
     }
   }
 
-  // anel do ripple (Ato 3)
   if (p > T.rippleStart && p < T.rippleStart + T.rippleSpread + 0.02) {
     const k = (p - T.rippleStart) / (T.rippleSpread + 0.02);
     const r = k * S.grid.maxDist * 1.25;
@@ -1068,7 +989,6 @@ function render2d(p: number): void {
     c.restore();
   }
 
-  // Ato 5: a tinta escoa pelos canais do selo (carimbos molhados)
   if (p > T.traceStart && p < T.resolveEnd) {
     const wet = 1 - sm(T.resolveStart, T.resolveEnd, p);
     const fadeAll = (1 - sm(T.resolveStart, T.resolveEnd, p)) * f;
@@ -1082,7 +1002,6 @@ function render2d(p: number): void {
     for (const pr of S.persons) {
       const k = traceK(pr, p);
       if (k <= 0.002) continue;
-      // o traço nasce com o pigmento da pessoa e seca para a cor oficial
       const col = mix(pr.ink, pr.finalCol, Math.max(0.4, sm(0.25, 0.95, k)));
       if (pr.path.kind === "quote") {
         if (pr.path.q === 0) {
@@ -1118,9 +1037,8 @@ function render2d(p: number): void {
     c.restore();
   }
 
-  c.restore(); // rise
+  c.restore();
 
-  // a tinta seca: SVG oficial, sem mudança geométrica → assenta
   if (p >= T.resolveStart) {
     const rk = sm(T.resolveStart, T.resolveEnd, p);
     const sk = eio(sm(T.settleStart, T.settleEnd, p));
@@ -1129,7 +1047,6 @@ function render2d(p: number): void {
     drawLogo(c, L.cx, cy, R, rk * f, {});
   }
 
-  // estado permanente
   for (const a of S.ambient) {
     if (a.draw) {
       const zf = zoneFactor(a.draw.x, a.draw.y - 15, vis);
@@ -1139,8 +1056,6 @@ function render2d(p: number): void {
 
   updateOverlays(p);
 }
-
-/* ---------------- overlays HTML dirigidos por p (design 1847–1882) ---------------- */
 
 function updateOverlays(p: number): void {
   const d = dom;
@@ -1177,8 +1092,6 @@ function updateOverlays(p: number): void {
     d.hint.style.opacity = hint.toFixed(3);
   }
 }
-
-/* ---------------- estado permanente: pessoas nascem do selo (design 1885–1923) ---------------- */
 
 function updateAmbient(now: number, dt: number): void {
   if (S.reduced || S.targetP < 0.96 || document.hidden) {
@@ -1235,8 +1148,6 @@ function updateAmbient(now: number, dt: number): void {
   });
 }
 
-/* ---------------- cena estática (reduced-motion) (design 1926–1985) ---------------- */
-
 function renderStatic(): void {
   const c = S.ctx;
   if (!c) return;
@@ -1268,12 +1179,6 @@ function renderStatic(): void {
     return { ...base, ...over };
   };
 
-  // Narrow (phones): the copy is tall (H1 wraps + sub + two CTAs) and fills
-  // the safe zone, so `layoutLogo` has no room above it — settleY gets clamped
-  // down INTO the copy and the mark overlaps the H1. The mobile resting hero is
-  // just the (legible) HTML copy on the plain field; the mark still lives in the
-  // nav. So the static logo + ambient crowd are desktop-only, same as the crowd
-  // grid below already is.
   if (!narrow) {
     drawLogo(c, S.W / 2, L.settleY, L.Rs, 1, {});
     const gx = leftBand / 2;
@@ -1340,8 +1245,6 @@ function renderStatic(): void {
   }
 }
 
-/* ---------------- zona de segurança da copy (Fix A) ---------------- */
-
 function measureZone(): void {
   const el = dom?.heroCopy;
   if (!el) return;
@@ -1372,21 +1275,15 @@ function layoutLogo(): void {
   const H = S.H;
   const L = S.logo;
   L.R = Math.min(W, H) * (W < 720 ? 0.3 : 0.26);
-  L.lw = L.R * (5 / 37); // stroke-width 5 do SVG oficial
+  L.lw = L.R * (5 / 37);
   L.cx = W / 2;
   L.cy = H / 2 - H * 0.02;
   const zoneTop = S.zone.cy - S.zone.hh;
   const Rs0 = L.R * (W < 720 ? 0.42 : 0.36);
-  // Phones get extra top clearance so the settled mark doesn't crowd the fixed
-  // nav (short viewport, proportionally taller nav). The size cap uses the same
-  // clearance, so the mark self-shrinks to still clear the copy below it — no
-  // overlap at any width.
   const topClear = W < 720 ? 108 : 84;
   L.Rs = Math.max(34, Math.min(Rs0, (zoneTop - topClear) * 0.45));
   L.settleY = Math.max((W < 720 ? 108 : 80) + L.Rs, zoneTop - L.Rs - 26);
 }
-
-/* ---------------- setup do mundo / resize (design 1087–1103) ---------------- */
 
 function resize(): void {
   const d = dom;
@@ -1406,15 +1303,10 @@ function resize(): void {
   if (S.reduced) renderStatic();
 }
 
-/* ---------------- scroll (design 1988–2019, intro slice only) ---------------- */
-
 function readScroll(sy: number): void {
   const intro = dom?.intro;
   if (!intro) return;
   const range = Math.max(1, intro.offsetHeight - window.innerHeight);
-  // Phones give the hero a taller scroll range (hero.css: 540vh). Map the whole
-  // animation into the first ~3/4 of it so `p` reaches 1 early and the settled
-  // logo + copy HOLD for the last quarter — a brief dwell before the demo.
   const animFrac = window.innerWidth < 720 ? 0.77 : 1;
   S.targetP = clamp(sy / (range * animFrac), 0, 1);
   const scrolled = sy > 24;
@@ -1424,8 +1316,6 @@ function readScroll(sy: number): void {
   }
   S.needsRender = true;
 }
-
-/* ---------------- rAF tick (design 2021–2063, hero slice only) ---------------- */
 
 function tick(dt: number, ts: number): void {
   if (S.reduced) return;
@@ -1462,8 +1352,6 @@ function tick(dt: number, ts: number): void {
   syncScrub();
 }
 
-/* ---------------- walker (design 2119–2340) ---------------- */
-
 function resizeWalker(): void {
   const cv = dom?.walkerCanvas;
   if (!cv) return;
@@ -1492,10 +1380,6 @@ function pathAt(pts: Array<[number, number, number]>, t: number): { x: number; y
   return { x: first?.[1] ?? 0, y: first?.[2] ?? 0, facing: S.walkFacing || 1 };
 }
 
-// bonequinho-guia: caminha com o scroll até o texto da respiração, depois
-// contorna e desce sozinho. Lê `[data-breath-box]`/o container da seção de
-// respiração lazily a cada frame (Breath owns those nodes) — tolera ausência
-// (a seção pode não existir ainda, ou nunca, se integração falhar).
 function walkTick(dt: number): void {
   if (S.reduced) return;
   const cv = dom?.walkerCanvas;
@@ -1514,7 +1398,7 @@ function walkTick(dt: number): void {
     const rnd = mulberry(70714);
     S.walker = {
       app: makeAppearance(rnd),
-      color: PALETTE[3] ?? PALETTE[0], // roxo terroso — destaca-se do fundo claro
+      color: PALETTE[3] ?? PALETTE[0],
       ink: dark(PALETTE[3] ?? PALETTE[0], 0.1),
       acc: "backpack",
     };
@@ -1528,15 +1412,14 @@ function walkTick(dt: number): void {
 
   const sy = window.scrollY || document.documentElement.scrollTop || 0;
   const secTop = bsec.getBoundingClientRect().top + sy;
-  const S1 = secTop; // texto centralizado na viewport
-  const S0 = secTop - vh * 1.15; // começa a descer ~1 viewport antes
+  const S1 = secTop;
+  const S0 = secTop - vh * 1.15;
   const fp = clamp((sy - S0) / Math.max(1, S1 - S0), 0, 1);
 
   const last = S.walkLastSy == null ? sy : S.walkLastSy;
   const dScroll = sy - last;
   S.walkLastSy = sy;
 
-  // voltou pra cima da faixa → rearma a caminhada
   if (sy < S1 - vh * 0.4 && S.walkPhase !== "follow") {
     S.walkPhase = "follow";
     S.walkAutoT = 0;
@@ -1548,14 +1431,13 @@ function walkTick(dt: number): void {
   let amp = 0.9;
 
   if (S.walkPhase === "follow") {
-    S.walkTh += Math.abs(dScroll) * 0.011; // passo ∝ distância rolada
+    S.walkTh += Math.abs(dScroll) * 0.011;
     const e = eio(fp);
     const boxTop = box.getBoundingClientRect().top;
     y = vh * 0.13 + (boxTop - 10 - vh * 0.13) * e;
     x = vw * 0.5;
     facing = 1;
-    amp = clamp(Math.abs(dScroll) * 0.05 + 0.12, 0.12, 1); // pernas mexem com o scroll
-    // olha na direção do scroll: descendo → baixo, subindo → cima
+    amp = clamp(Math.abs(dScroll) * 0.05 + 0.12, 0.12, 1);
     if (dScroll > 0.4) S.followHeading = Math.PI / 2;
     else if (dScroll < -0.4) S.followHeading = -Math.PI / 2;
     if (S.followHeading == null) S.followHeading = Math.PI / 2;
@@ -1565,7 +1447,7 @@ function walkTick(dt: number): void {
     }
   } else if (S.walkPhase === "auto") {
     S.walkAutoT = Math.min(1, S.walkAutoT + dt / 4.2);
-    S.walkTh += dt * 6.5; // passo constante, sozinho
+    S.walkTh += dt * 6.5;
     amp = 1;
     const r = box.getBoundingClientRect();
     const m = 34;
@@ -1584,8 +1466,6 @@ function walkTick(dt: number): void {
     if (S.walkAutoT >= 1) S.walkPhase = "gone";
   }
 
-  // some ANTES da seção de planos entrar (não no meio dela): força o fade quando o topo
-  // de #planos se aproxima da viewport, independente da fase auto (que é por tempo)
   let beforePlanos = true;
   const planosEl = document.getElementById("planos");
   if (planosEl) beforePlanos = planosEl.getBoundingClientRect().top > vh * 0.9;
@@ -1593,7 +1473,6 @@ function walkTick(dt: number): void {
   S.walkAlpha = clamp(S.walkAlpha + (wantVisible ? 0.07 : -0.09), 0, 1);
   S.walkFacing = facing;
 
-  // rumo (heading): follow olha na direção do scroll; auto segue o caminho
   if (S.walkPhase === "follow") {
     S.walkHeading = S.walkHeading == null ? S.followHeading : angLerp(S.walkHeading, S.followHeading ?? Math.PI / 2, 0.2);
   } else if (S.walkPrevX != null && S.walkPrevY != null) {
@@ -1604,7 +1483,7 @@ function walkTick(dt: number): void {
       S.walkHeading = S.walkHeading == null ? target : angLerp(S.walkHeading, target, 0.18);
     }
   }
-  if (S.walkHeading == null) S.walkHeading = Math.PI / 2; // padrão: descendo
+  if (S.walkHeading == null) S.walkHeading = Math.PI / 2;
   S.walkPrevX = x;
   S.walkPrevY = y;
 
@@ -1625,7 +1504,6 @@ function walkTick(dt: number): void {
   });
 }
 
-// visão de cima do bonequinho — gira para o rumo do movimento (forward = +x local)
 function drawWalkerTop(c: CanvasRenderingContext2D, o: WalkerDrawOpts): void {
   const u = 3.1 * o.size;
   const top = o.top;
@@ -1644,7 +1522,6 @@ function drawWalkerTop(c: CanvasRenderingContext2D, o: WalkerDrawOpts): void {
   c.lineCap = "round";
   c.lineJoin = "round";
 
-  // sombra de contato no chão
   c.save();
   c.globalAlpha = o.alpha * 0.14;
   c.fillStyle = "#2A2620";
@@ -1653,14 +1530,12 @@ function drawWalkerTop(c: CanvasRenderingContext2D, o: WalkerDrawOpts): void {
   c.fill();
   c.restore();
 
-  // mochila (atrás = -x)
   c.fillStyle = rgb(dark(top, 0.12));
   c.beginPath();
   if (c.roundRect) c.roundRect(-5.2 * u, -2.6 * u, 2.8 * u, 5.2 * u, 1.2 * u);
   else c.rect(-5.2 * u, -2.6 * u, 2.8 * u, 5.2 * u);
   c.fill();
 
-  // pernas + pés (passada fore/aft, alternada)
   for (const s of [-1, 1]) {
     const stepX = s === 1 ? sw : -sw;
     c.strokeStyle = rgb(s === 1 ? bot : botD);
@@ -1671,7 +1546,6 @@ function drawWalkerTop(c: CanvasRenderingContext2D, o: WalkerDrawOpts): void {
     c.stroke();
   }
 
-  // braços (opostos às pernas): manga + antebraço de pele
   for (const s of [-1, 1]) {
     const swingA = (s === 1 ? -sw : sw) * 0.85;
     c.strokeStyle = rgb(s === 1 ? top : topD);
@@ -1682,7 +1556,6 @@ function drawWalkerTop(c: CanvasRenderingContext2D, o: WalkerDrawOpts): void {
     c.stroke();
   }
 
-  // torso (ombros largos na lateral, corpo curto no eixo do movimento)
   c.fillStyle = rgb(top);
   c.beginPath();
   c.ellipse(-0.2 * u, 0, 3.2 * u, 4.4 * u, 0, 0, Math.PI * 2);
@@ -1692,17 +1565,14 @@ function drawWalkerTop(c: CanvasRenderingContext2D, o: WalkerDrawOpts): void {
   c.ellipse(-1.2 * u, 0, 1.6 * u, 4.2 * u, 0, 0, Math.PI * 2);
   c.fill();
 
-  // cabeça (à frente do torso)
   c.fillStyle = rgb(skin);
   c.beginPath();
   c.arc(2.4 * u, 0, 2.7 * u, 0, Math.PI * 2);
   c.fill();
-  // cabelo cobrindo a parte de trás da cabeça
   c.fillStyle = rgb(hair);
   c.beginPath();
   c.arc(2.1 * u, 0, 2.75 * u, Math.PI * 0.5, Math.PI * 1.5);
   c.fill();
-  // nariz — dica de direção (aponta para +x)
   c.fillStyle = rgb(skinD);
   c.beginPath();
   c.moveTo(4.9 * u, -0.9 * u);
@@ -1714,8 +1584,6 @@ function drawWalkerTop(c: CanvasRenderingContext2D, o: WalkerDrawOpts): void {
   c.restore();
 }
 
-/* ---------------- CTAs ---------------- */
-
 function goDemo(): void {
   const el = document.getElementById("demo");
   if (!el) return;
@@ -1723,13 +1591,9 @@ function goDemo(): void {
   smoothScrollTo(y);
   const textarea = el.querySelector<HTMLTextAreaElement>("textarea");
   if (textarea) {
-    // preventScroll: smoothScrollTo already owns the scroll animation —
-    // a focus-triggered jump would fight it.
     window.setTimeout(() => textarea.focus({ preventScroll: true }), 60);
   }
 }
-
-/* ---------------- abertura: a logo se constrói no centro (design 995–1012) ---------------- */
 
 function computeIntroTransform(): string {
   let tf = "translate(-40vw, -46vh) scale(0.14)";
@@ -1767,8 +1631,6 @@ function clearTimers(): void {
   S.timers = [];
 }
 
-// Roda a abertura em curtain apenas quando !reduced — reduced-motion pula
-// direto para 'done' (spec §7: "sem pin, sem scrub, sem animação").
 function runIntro(): void {
   const d = dom;
   clearTimers();
@@ -1803,9 +1665,6 @@ function runIntro(): void {
   S.timers = [t1, t2];
 }
 
-// Reduced-motion pode mudar em runtime (OS toggle com a aba aberta) —
-// design's applyMotion (1069–1084): cancela a abertura, força o estado
-// final e refaz a medição/render (estática se reduced, animada se não).
 function applyMotion(): void {
   const reduced = reducedMotion();
   S.reduced = reduced;
@@ -1819,8 +1678,6 @@ function applyMotion(): void {
   resize();
   readScroll(window.scrollY || document.documentElement.scrollTop || 0);
 }
-
-/* ---------------- scrub de dev (gate: location.search contém "scrub") ---------------- */
 
 let scrubInput: HTMLInputElement | null = null;
 let scrubValEl: HTMLSpanElement | null = null;
@@ -1850,8 +1707,6 @@ function syncScrub(): void {
     scrubInput.value = String(Math.round(S.targetP * 1000));
   }
 }
-
-/* ---------------- init ---------------- */
 
 export function initHeroStory(): void {
   const intro = document.querySelector<HTMLElement>("[data-hero-intro]");
@@ -1889,7 +1744,7 @@ export function initHeroStory(): void {
     !curtainBg ||
     !curtainLogo
   ) {
-    return; // markup incomplete — nothing safe to wire up
+    return;
   }
 
   dom = {

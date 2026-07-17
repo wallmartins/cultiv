@@ -1,8 +1,5 @@
 import { Pill, Ring, StatusDot, c, f } from "../primitives";
 
-// 1e — Pós-reset. Conta zerada (voz, exemplos e histórico apagados), mas login
-// e plano mantidos. Oferece retomar do último contexto ou começar do zero.
-// A marca vem de um anel inline enquanto o asset logo-on-dark.svg não é ligado.
 export function PostResetReturn() {
   return (
     <div

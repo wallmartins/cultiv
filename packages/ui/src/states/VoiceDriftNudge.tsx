@@ -1,8 +1,5 @@
 import { Chip, Mono, Pill, Ring, Serif, c, f } from "../primitives";
 
-// 2c — Voz degradando. Três "nem tanto" seguidos derrubaram a confiança (78→65).
-// Feedback honesto (âmbar) + convite a recalibrar só as amostras que mudaram.
-// A escrita de todo mundo evolui; realinhar é rápido.
 export function VoiceDriftNudge() {
   return (
     <div

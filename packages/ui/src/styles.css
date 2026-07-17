@@ -1,15 +1,3 @@
-/* ============================================================
-   Cultiv — núcleo de identidade visual (SSOT). Ponto de entrada único:
-     import "@my-ai-orchestrator/ui/styles.css";
-   Traz tokens + fontes + keyframes + base universal. É o mínimo que toda
-   superfície carrega para herdar a identidade Cultiv. Camadas opcionais,
-   importadas por superfície:
-     "@my-ai-orchestrator/ui/type.css"               (type ramp / prosa)
-     "@my-ai-orchestrator/ui/primitives.css"         (constelação: .btn.solid/.ghost, chips…)
-     "@my-ai-orchestrator/ui/primitives-classic.css" (BEM .btn--accent/--primary/--ghost)
-   Ajustar aqui replica a identidade por todas as camadas da aplicação.
-   ============================================================ */
-
 @import "./tokens.css";
 @import "./fonts.css";
 @import "./keyframes.css";

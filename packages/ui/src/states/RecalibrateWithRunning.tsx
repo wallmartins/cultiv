@@ -1,8 +1,5 @@
 import { Mono, Panel, Pill, Ring, Serif, c, f } from "../primitives";
 
-// 2d — Recalibrar com fila. Há textos ainda sendo escritos na voz atual; a
-// recalibração não interrompe nada: o que já roda termina na v3, o que vier
-// depois usa a v4. Diálogo elevado com confirmação honesta.
 export function RecalibrateWithRunning() {
   return (
     <div

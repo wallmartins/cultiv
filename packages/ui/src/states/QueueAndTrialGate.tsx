@@ -1,8 +1,5 @@
 import { Pill, Ring, Serif, StatusDot, c, f } from "../primitives";
 
-// 2b — Fila e trial gate. A última geração do teste: o anel numerado ("1"),
-// a fila viva (2 rodando agora) e a escolha honesta — guardar pra depois ou
-// usar a última e entrar na fila. A voz e o histórico ficam; o limite é volume.
 export function QueueAndTrialGate() {
   return (
     <div

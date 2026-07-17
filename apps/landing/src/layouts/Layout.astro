@@ -2,28 +2,11 @@
 import "../styles/global.css";
 import T from "../components/T.astro";
 import { APP_ORIGIN } from "../config";
+import { SITE } from "../data/site";
 
-// Origin comes from astro.config.mjs `site` (see its TODO about confirming
-// the production domain).
-// Warm the connection to the app origin only when it's actually cross-origin —
-// every conversion path (trial + plan CTAs) navigates there.
 const preconnectApp = Astro.site && new URL(Astro.site).origin !== APP_ORIGIN;
-// No hreflang alternates on purpose: both languages live at the same URL via
-// a client-side toggle, and hreflang requires distinct URLs per language —
-// annotating identical hrefs would be an SEO error, not a feature.
 const canonical = new URL(Astro.url.pathname, Astro.site).href;
-const meta = {
-  pt: {
-    title: "Cultiv — Sua autenticidade, em escala",
-    description:
-      "Um motor de escrita com IA que aprende como você pensa e argumenta — e escreve textos que só poderiam ser seus.",
-  },
-  en: {
-    title: "Cultiv — Your authenticity, at scale",
-    description:
-      "An AI writing engine that learns how you think and argue — and drafts what only you could have written.",
-  },
-};
+const meta = { pt: SITE.pt, en: SITE.en };
 
 interface Props {
   title?: string;
@@ -48,12 +31,12 @@ const { title = meta.pt.title } = Astro.props;
     <meta property="og:locale" content="pt_BR" />
     <meta property="og:locale:alternate" content="en_US" />
     <meta property="og:image" content={new URL("/og-image.png", Astro.site).href} />
+    <meta property="og:image:type" content="image/png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="Cultiv — Sua autenticidade, em escala." />
+    <meta property="og:image:alt" content={meta.pt.title} />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:image" content={new URL("/og-image.png", Astro.site).href} />
-    {/* Ícones e manifest sincronizados de packages/ui/assets (sync-brand.mjs). */}
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="icon" href="/favicon.ico" sizes="48x48" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
@@ -61,20 +44,13 @@ const { title = meta.pt.title } = Astro.props;
     <meta name="theme-color" media="(prefers-color-scheme: light)" content="#FCFCFC" />
     <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#121212" />
     {preconnectApp && <link rel="preconnect" href={APP_ORIGIN} />}
-    {/* Fonts are self-hosted (see global.css) — no fonts.googleapis.com. */}
     <script is:inline define:vars={{ meta }}>
-      // Runs before paint: restore persisted theme/language, mark JS available.
       (function () {
         var d = document.documentElement;
         d.classList.add("js");
-        // Watchdog: `js` hides .reveal content that only the reveal module can
-        // release. If that module never runs (CSP, network), drop back to the
-        // no-JS resting state instead of shipping a blank page.
         setTimeout(function () {
           if (!d.classList.contains("reveal-armed")) d.classList.remove("js");
         }, 3000);
-        // <title>/description follow the language toggle (crawlers see pt-BR).
-        // Pages with their own title (legal pages) are left untouched.
         window.cultivApplyMeta = function (l) {
           if (document.title !== meta.pt.title && document.title !== meta.en.title) return;
           document.title = meta[l].title;
@@ -102,14 +78,8 @@ const { title = meta.pt.title } = Astro.props;
     </a>
     <slot />
     <script>
-      // Scroll reveals — content is visible without JS; html.js arms the hidden
-      // resting state, IO releases it as the reader scrolls. Robustness rule:
-      // content must NEVER stay invisible in a non-interactive context (link
-      // unfurlers, SERP thumbnailers, background tabs, print), so any signal
-      // that no human is scrolling here releases every reveal at once.
-      document.documentElement.classList.add("reveal-armed"); // check in with the head watchdog
+      document.documentElement.classList.add("reveal-armed");
 
-      // For the reader who inspects even the code.
       console.log(
         document.documentElement.dataset.lang === "en"
           ? "You inspect the code too. Calibration is going to like you.\n— Cultiv"
@@ -120,8 +90,6 @@ const { title = meta.pt.title } = Astro.props;
       let io: IntersectionObserver | undefined;
       let watchdog: ReturnType<typeof setTimeout> | undefined;
       const releaseAll = () => {
-        // reveal-now zeroes the transition (global.css) so a capture taken
-        // while rendering is paused can't photograph a half-faded section.
         document.documentElement.classList.add("reveal-now");
         els.forEach((el) => el.classList.add("is-in"));
         io?.disconnect();
@@ -130,7 +98,6 @@ const { title = meta.pt.title } = Astro.props;
 
       const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       if (reduce || document.visibilityState !== "visible") {
-        // Reduced motion, or loaded hidden/prerendered: no choreography.
         releaseAll();
       } else {
         io = new IntersectionObserver(
@@ -146,32 +113,21 @@ const { title = meta.pt.title } = Astro.props;
         );
         els.forEach((el) => io!.observe(el));
 
-        // Human-presence watchdog: headless captures scroll programmatically
-        // (or capture beyond the viewport without scrolling at all) and never
-        // produce input events. If no human input arrives shortly after load,
-        // release everything off-screen. A real reader almost always moves,
-        // scrolls, or types within 3s — which cancels this and preserves the
-        // full reveal choreography.
         const inputs = ["pointerdown", "pointermove", "wheel", "touchstart", "keydown"] as const;
         const confirmHuman = () => {
           clearTimeout(watchdog);
           inputs.forEach((t) => window.removeEventListener(t, confirmHuman));
         };
         watchdog = setTimeout(() => {
-          confirmHuman(); // just detaches the listeners
+          confirmHuman();
           releaseAll();
         }, 3000);
         inputs.forEach((t) => window.addEventListener(t, confirmHuman, { passive: true }));
       }
 
-      // A tab hidden mid-visit can be snapshotted (thumbnailers, bfcache/
-      // prerender) with transitions paused — never stay unrevealed while
-      // not visible.
       document.addEventListener("visibilitychange", () => {
         if (document.visibilityState !== "visible") releaseAll();
       });
-      // Printing must include every section (paired with the @media print
-      // rule in global.css for engines that skip this event).
       window.addEventListener("beforeprint", releaseAll);
     </script>
   </body>

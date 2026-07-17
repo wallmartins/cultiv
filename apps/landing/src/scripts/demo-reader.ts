@@ -1,39 +1,11 @@
-// Demo section (Ato 2 — "leia a minha escrita"). Ported from the design's
-// DCLogic monolith (cultiv-hero-v5.dc.html): the deterministic reader
-// (`_demoTokens` 2362, `_demoSentences` 2366, `_demoLang` 2373, `_readWriting`
-// 2381 — pt branch 2437, en branch 2461 — and `demoRead` 2506) plus the
-// `renderVals` demo keys (~3125–3210: line cascade, metrics strip,
-// truncation note) and the DOM wiring the design expressed as JSX bindings.
-//
-// Pure analysis (no LLM, no network, no DOM) lives in `readWriting` and its
-// helpers — DEMO-SPEC §3/§9 requires it deterministic, client-side, and
-// testable; `initDemo` below is the only part that touches the page.
-
 import { reducedMotion, smoothScrollTo } from "./engine";
 import { getLang, onLangChange, type Lang } from "./i18n";
 
-/* =====================================================================
-   Prefill examples (design `DEMO_EXAMPLE`, line 848 — pt verbatim). The EN
-   sibling is written in the same spirit per DEMO-SPEC/contract: first
-   person, rhythm-aware, ~55 words, short↔long alternation, an em dash and a
-   question — so the EN resting example exercises the same reader branches
-   the pt one does.
-   ===================================================================== */
 export const DEMO_EXAMPLE_PT =
   "Eu reescrevo tudo. Não por perfeccionismo — por ritmo. Uma frase curta abre espaço; a seguinte estica, respira, dá a volta e só então entrega o que veio entregar. É assim que eu penso, e é assim que eu quero soar. Sabe quando um texto parece falado? Era isso que eu procurava nos meus rascunhos, e quase nunca achava.";
 
 export const DEMO_EXAMPLE_EN =
   "I rewrite everything. Not for perfectionism — for rhythm. A short sentence opens space; the next one stretches, breathes, circles back, and only then delivers what it came to say. Do you know when a piece of writing sounds spoken? That's what I kept chasing in my drafts, and I rarely found it.";
-
-/* =====================================================================
-   Pure analyzer — design 2362–2504, ported 1:1 (tokenizer regex, sentence
-   split, per-language stopword lists, z-score ranking against an embedded
-   baseline). The only addition vs. the design is `fallbackLang`: the design
-   is pt-only, so `_readWriting`'s error branches never needed a language —
-   ours do (DEMO-SPEC §7: "detectar de forma barata; se ambíguo, usar o
-   locale ativo da página"). The success path's language is still decided
-   purely by the submitted text, exactly like the design.
-   ===================================================================== */
 
 function demoTokens(text: string): string[] {
   return text.toLowerCase().match(/[\p{L}\p{N}’'-]+/gu) || [];
@@ -59,8 +31,6 @@ const EN_STOP = [
   "have", "but", "not", "be", "at", "or", "what", "so", "we", "my", "your", "from", "one", "all", "would", "there",
 ];
 
-/** Design's `_demoLang` (2373) — used on the SUCCESS path only, where there
-    are enough tokens (≥40) for a tie to default meaningfully to pt. */
 function detectLang(tokens: string[]): Lang {
   let pt = 0;
   let en = 0;
@@ -71,9 +41,6 @@ function detectLang(tokens: string[]): Lang {
   return en > pt ? "en" : "pt";
 }
 
-/** Error-only language pick (contract addition, not in the design): a tie
-    (including 0–0, e.g. empty input) is "ambíguo" per DEMO-SPEC §7 — defer
-    to the page's active UI locale instead of defaulting to pt. */
 function fallbackLang(tokens: string[], uiLang: Lang): Lang {
   if (tokens.length === 0) return uiLang;
   let pt = 0;
@@ -103,11 +70,6 @@ export type ReadResult =
   | { ok: false; error: string }
   | { ok: true; lines: string[]; metrics: DemoMetric[]; truncated: boolean; lang: Lang };
 
-/** Deterministic reading of a pasted/typed paragraph — pure function of
-    `(raw, uiLang)`. Design `_readWriting` (2381–2504). `uiLang` only ever
-    affects the two error messages (see `fallbackLang` above); the success
-    path is 100% a function of `raw`, matching DEMO-SPEC acceptance #2
-    (same text ⇒ same reading, always). */
 export function readWriting(raw: string, uiLang: Lang): ReadResult {
   const text = (raw || "").trim();
   if (!text) return { ok: false, error: ERROR_COPY.empty[fallbackLang([], uiLang)] };
@@ -168,7 +130,6 @@ export function readWriting(raw: string, uiLang: Lang): ReadResult {
   }
   const openRate = opens / n;
 
-  /* baseline embutida (média, desvio) por idioma */
   const B =
     lang === "pt"
       ? {
@@ -183,8 +144,6 @@ export function readWriting(raw: string, uiLang: Lang): ReadResult {
   const per = (c: number) => Math.max(1, Math.round(n / c));
   const pc = (v: number) => Math.round(v * 100);
 
-  /* grupos = dimensões do spec: cad(ência+amplitude), punct(uação-assinatura),
-     lex(densidade), pers(aproximação), open(aberturas) */
   const cand: { z: number; group: string; txt: string }[] = [];
   const push = (zv: number, group: string, txt: string) => {
     if (isFinite(zv)) cand.push({ z: zv, group, txt });
@@ -272,14 +231,6 @@ export function readWriting(raw: string, uiLang: Lang): ReadResult {
   return { ok: true, lines, metrics, truncated, lang };
 }
 
-/* =====================================================================
-   DOM wiring — design `demoRead` (2506) + the `renderVals` demo keys
-   (~3201–3210: `onDemoInput`, `onDemoRead`, line cascade, acid first line,
-   metrics strip, truncation note, boundary-frame reveal) reassembled as
-   direct DOM mutation instead of React state. Truncation-note / cascade
-   copy ported verbatim (renderVals 3206–3210).
-   ===================================================================== */
-
 const CASCADE_DUR = 0.55;
 const CASCADE_STEP = 0.07;
 const CASCADE_BASE = 0.05;
@@ -290,9 +241,6 @@ function cascadeAnim(index: number): string {
   return `cultivFadeUp ${CASCADE_DUR}s ${(CASCADE_BASE + index * CASCADE_STEP).toFixed(2)}s ${CASCADE_EASE} both`;
 }
 
-/** Wires one Demo section rooted at `root` (the `#demo` element). Tolerates
-    a missing/partial DOM (mirrors the walker's "tolerate absence" pattern)
-    rather than throwing, since this runs from a plain component `<script>`. */
 export function initDemo(root: HTMLElement): void {
   const textarea = root.querySelector<HTMLTextAreaElement>("#demoText");
   const readBtn = root.querySelector<HTMLButtonElement>("#demoReadBtn");
@@ -328,7 +276,6 @@ export function initDemo(root: HTMLElement): void {
     hideResult();
   });
 
-  // Prefill swaps with the language toggle ONLY while pristine (contract).
   onLangChange((lang) => {
     if (dirty) return;
     textarea.value = lang === "en" ? DEMO_EXAMPLE_EN : DEMO_EXAMPLE_PT;
@@ -337,9 +284,6 @@ export function initDemo(root: HTMLElement): void {
   });
 
   const render = (r: Extract<ReadResult, { ok: true }>) => {
-    /* remonta o bloco da leitura para reiniciar a cascata (rerun limpo) —
-       fresh DOM nodes restart the CSS animation every time, same effect as
-       the design's setState({ demoReading: null }) → setState({ demoReading: r }). */
     linesEl.replaceChildren();
     r.lines.forEach((text, i) => {
       const p = document.createElement("p");
@@ -393,8 +337,6 @@ export function initDemo(root: HTMLElement): void {
     render(r);
   });
 
-  // Design's `goConstellation` (renderVals 3274–3280): find #constelacao,
-  // fall back to full page height if it hasn't mounted yet.
   goConstBtn?.addEventListener("click", () => {
     const el = document.getElementById("constelacao");
     const sy = window.scrollY || document.documentElement.scrollTop || 0;
@@ -403,12 +345,6 @@ export function initDemo(root: HTMLElement): void {
   });
 }
 
-/* ponytail: this agent's file-ownership scope is Demo.astro / demo-reader.ts
-   / demo.css only — no dedicated vitest file. This dev-only self-check
-   (stripped from the production bundle, runs on `pnpm dev`) is the "one
-   runnable check" the non-trivial z-score ranking above leaves behind; it
-   proves DEMO-SPEC acceptance #2 (determinism) and #4 (leads with the
-   distinctive signal, not a fixed template). */
 if (import.meta.env?.DEV) {
   const a = readWriting(DEMO_EXAMPLE_PT, "pt");
   const b = readWriting(DEMO_EXAMPLE_PT, "pt");

@@ -1,19 +1,4 @@
 ---
-// Shell for the v5 scroll-story home. Modeled on `Layout.astro` (head
-// pattern, inline lang-bootstrap, `html.js` marker + reveal watchdog,
-// skip-link) but landing-v5-specific: no theme toggle (this page has none —
-// its "dark mode" is the scroll-driven chamber breath in `theme-breath.ts`,
-// not a user preference), no fixed-viewport body lock. Loads the shared
-// `@my-ai-orchestrator/ui` identity layer (the design SSOT) plus this page's
-// breath layer (`root.css`), which projects the ui field tokens through the
-// chamber breath as `--t-*` — no rival palette.
-//
-// The `<html>` below is pinned to ui's light theme (`data-theme="light"`):
-// with no toggle, that keeps ui's `--x*` duals as the STABLE dark endpoint the
-// breath (and the always-dark footer) read, immune to the visitor's OS
-// `prefers-color-scheme`. Keep the doctype and <html> contiguous — an Astro
-// expression between them stops Astro emitting the <html> element at all
-// (dropping lang + data-theme).
 import "@my-ai-orchestrator/ui/styles.css";
 import "../styles/root.css";
 import T from "../components/T.astro";
@@ -28,14 +13,7 @@ interface Props {
 const { title, description, jsonLd } = Astro.props;
 
 const canonical = new URL(Astro.url.pathname, Astro.site).href;
-// Warm the connection to the app origin only when it's actually cross-origin
-// — every conversion path (trial + plan CTAs) navigates there (same guard as
-// Layout.astro).
 const preconnectApp = Astro.site && new URL(Astro.site).origin !== APP_ORIGIN;
-// Both languages for the runtime <title>/description swap (`i18n.ts` calls
-// `window.cultivApplyMeta`, defined below) — independent of the `title`/
-// `description` props, which are the pt-BR values actually rendered
-// server-side (crawl/JS-off default, per §i18n).
 const meta = {
   pt: { title: SITE.pt.title, description: SITE.pt.description },
   en: { title: SITE.en.title, description: SITE.en.description },
@@ -59,35 +37,26 @@ const meta = {
     <meta property="og:locale" content="pt_BR" />
     <meta property="og:locale:alternate" content="en_US" />
     <meta property="og:image" content={new URL("/og-image.png", Astro.site).href} />
+    <meta property="og:image:type" content="image/png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta property="og:image:alt" content={title} />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:image" content={new URL("/og-image.png", Astro.site).href} />
     {preconnectApp && <link rel="preconnect" href={APP_ORIGIN} />}
-    {/* Ícones e manifest sincronizados de packages/ui/assets (sync-brand.mjs). */}
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="icon" href="/favicon.ico" sizes="48x48" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
-    {/* Single light default — `theme-breath.ts` flips this as chambers breathe dark. */}
     <meta name="theme-color" content="#F8F7F4" />
-    {/* Fonts are self-hosted (see @my-ai-orchestrator/ui/fonts.css) — no fonts.googleapis.com. */}
     {jsonLd.map((entry) => <script type="application/ld+json" is:inline set:html={JSON.stringify(entry)} />)}
     <script is:inline define:vars={{ meta }}>
-      // Runs before paint: restore persisted language, mark JS available.
-      // No theme restore here — this page has no light/dark toggle.
       (function () {
         var d = document.documentElement;
         d.classList.add("js");
-        // Watchdog: `js` hides anything gated on it that only a section's
-        // own script releases. If that script never runs (CSP, network),
-        // drop back to the no-JS resting state instead of shipping a page
-        // stuck mid-animation.
         setTimeout(function () {
           if (!d.classList.contains("reveal-armed")) d.classList.remove("js");
         }, 3000);
-        // <title>/description follow the language toggle (crawlers see pt-BR).
         window.cultivApplyMeta = function (l) {
           if (document.title !== meta.pt.title && document.title !== meta.en.title) return;
           document.title = meta[l].title;
@@ -112,14 +81,7 @@ const meta = {
     </a>
     <slot />
     <script>
-      // Same reveal-watchdog contract as `Layout.astro`: content must NEVER
-      // stay invisible in a non-interactive context (link unfurlers, SERP
-      // thumbnailers, background tabs, print). No v5 section currently uses
-      // the shared `.reveal` class (each drives its own JS-off-safe CSS —
-      // see each section's spec), but this stays wired so any section that
-      // adopts it later gets the same robustness for free, and so `html.js`
-      // never sticks around unconfirmed by a human.
-      document.documentElement.classList.add("reveal-armed"); // check in with the head watchdog
+      document.documentElement.classList.add("reveal-armed");
 
       const els = document.querySelectorAll<HTMLElement>(".reveal");
       let io: IntersectionObserver | undefined;

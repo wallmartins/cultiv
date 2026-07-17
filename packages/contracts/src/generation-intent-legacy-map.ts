@@ -1,6 +1,5 @@
 import type { GenerationIntent, GenerationLengthTier, GenerationScope } from "./generation-intent.js";
 
-/** @phase1-legacy — replaced by generationProfile in Phase 2 */
 export const PHASE1_LEGACY_INTENT_MAP: Record<
   GenerationIntent,
   Record<GenerationLengthTier, string>

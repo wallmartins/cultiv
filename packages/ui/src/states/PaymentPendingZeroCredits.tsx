@@ -1,8 +1,5 @@
 import { Pill, Ring, c, f } from "../primitives";
 
-// 1d — Pendente e zerado. Créditos acabaram e a renovação do ciclo não passou.
-// Anel danger com arco mínimo + rótulo "0 / CRÉDITOS". Compra avulsa fica
-// desabilitada até regularizar o pagamento.
 export function PaymentPendingZeroCredits() {
   return (
     <div

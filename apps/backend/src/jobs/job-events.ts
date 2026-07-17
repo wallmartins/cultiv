@@ -1,7 +1,6 @@
 import { runEffectOrThrow } from "../http/http.js";
 import type { BackendJobEvent, BackendJobStoreServiceContract } from "./job-store.js";
 
-/** Keep proxies (e.g. Cloudflare Free) from closing idle SSE streams between pipeline steps. */
 export const SSE_HEARTBEAT_INTERVAL_MS = 25_000;
 
 export async function createJobEventStream(

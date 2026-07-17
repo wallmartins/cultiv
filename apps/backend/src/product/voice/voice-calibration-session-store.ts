@@ -10,7 +10,6 @@ import type {
 } from "@my-ai-orchestrator/contracts";
 import { buildStepPrompt } from "./voice-calibration-candidates.js";
 
-// ponytail: global in-memory map; upgrade to postgres for durable sessions
 const sessions = new Map<string, VoiceCalibrationSessionRecord>();
 
 export interface VoiceCalibrationSessionRecord {

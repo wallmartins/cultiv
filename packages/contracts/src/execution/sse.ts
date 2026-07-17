@@ -9,7 +9,6 @@ export const SSEEventSchema = Schema.Struct({
 });
 export type SSEEvent = typeof SSEEventSchema.Type;
 
-/** Wire format for SSE `data:` payloads on `/me/executions/:id/events`. */
 export const ExecutionSseEventSchema = Schema.Struct({
   type: Schema.Literal("progress", "done", "error"),
   payload: Schema.Union(JobProgressSchema, JobResultSchema, JobErrorSchema),

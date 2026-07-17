@@ -1,8 +1,5 @@
 import { Mono, Panel, Pill, Ring, Serif, accentA, c, f } from "../primitives";
 
-// 1b — Timeout longo. A geração passou do tempo esperado, mas segue viva; o
-// texto continua sendo escrito. Política: nada de erro seco — tranquiliza,
-// oferece cancelar+estornar ou seguir esperando.
 export function LongTimeoutWatch() {
   return (
     <div

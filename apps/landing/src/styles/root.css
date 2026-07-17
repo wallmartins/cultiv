@@ -1,33 +1,5 @@
-/* ============================================================
-   Cultiv landing v5 — page-scoped breath layer + base + keyframes.
-
-   The `--t-*` tokens are NOT a rival palette anymore: they are the
-   packages/ui field tokens (SSOT — tokens.css) *projected through the
-   chamber color-breath*. Each one color-mixes the ui light field token with
-   its dual `--x*` inverse (which, in light mode, IS the ui dark-theme value)
-   by a scroll-driven progress var — exactly the mechanism LANDING-FLOW-SPEC
-   §2 prescribes. So there is one source of colour truth (ui `--bg/--ink/
-   --surface/--muted/--line` + their `--x*` duals); `--t-*` is just how this
-   page breathes between the two. `theme-breath.ts` only writes the progress
-   (`--theme-bg-k` / `--theme-ink-k` / `--theme-t`); the cascade does the rest.
-
-   The page is pinned to ui's light theme (LandingLayout sets
-   `data-theme="light"`) — it has no theme toggle, so `--x*` stays the stable
-   dark endpoint the breath (and the dark footer) rely on.
-
-   Fix E (contrast safety mid-breath) is preserved: bg/surface follow the
-   slow `--theme-bg-k` curve while ink/muted/line follow the fast
-   `--theme-ink-k` curve, so the text tint always leads the background and no
-   sampled frame drops below AA.
-
-   Loaded by `LandingLayout.astro`, after @my-ai-orchestrator/ui/styles.css.
-   ============================================================ */
 
 :root {
-  /* Chamber-breath progress, written by theme-breath.ts (0 = light "world",
-     1 = dark "engine"). Two curves so ink resolves before the background
-     (Fix E); --theme-t is the raw chamber depth for any section keying off it
-     directly. All default 0 → resting state === ui light tokens verbatim. */
   --theme-t: 0;
   --theme-bg-k: 0;
   --theme-ink-k: 0;
@@ -37,7 +9,6 @@
   --t-ink: color-mix(in oklch, var(--ink) calc((1 - var(--theme-ink-k)) * 100%), var(--xink));
   --t-muted: color-mix(in oklch, var(--muted) calc((1 - var(--theme-ink-k)) * 100%), var(--xmuted));
   --t-line: color-mix(in oklch, var(--line) calc((1 - var(--theme-ink-k)) * 100%), var(--xline));
-  /* Nav scrim + logo derive from the breathing field tokens — free tint. */
   --t-navbg: color-mix(in srgb, var(--t-bg) 88%, transparent);
   --t-logoink: var(--t-ink);
 }
@@ -46,13 +17,9 @@ html,
 body {
   margin: 0;
   padding: 0;
-  /* Breathe the page background (ui base.css pins it to the fixed --bg). */
   background: var(--t-bg);
 }
 body {
-  /* font-family / smoothing / line-height come from ui base.css (--font-body);
-     only the breathing text colour + the landing's horizontal-scroll guard
-     (wide canvases / motion) live here. */
   color: var(--t-ink);
   overflow-x: hidden;
 }
@@ -62,9 +29,6 @@ a {
 a:hover {
   color: var(--t-muted);
 }
-/* Softer-than-ui selection tint + an acid focus ring that reads on BOTH the
-   light world and the dark chambers (ui base.css's ink focus ring would
-   vanish on the dark chambers) — both sourced from ui --accent. */
 ::selection {
   background: color-mix(in srgb, var(--accent) 42%, transparent);
 }
@@ -84,7 +48,6 @@ a:hover {
 }
 @keyframes cultivCaret { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
 
-/* FAQ (Ato 7): disclosure nativo — o único movimento é o do próprio item abrindo. */
 details[data-faq] > summary { list-style: none; }
 details[data-faq] > summary::-webkit-details-marker { display: none; }
 details[data-faq] [data-sign] { transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1); }
@@ -95,17 +58,9 @@ details[data-faq][open] [data-answer] { animation: cultivFadeIn 0.3s ease both; 
   details[data-faq][open] [data-answer] { animation: none; }
 }
 
-/* ---------- bilingual switching (JS-off default: pt) ----------
-   Same pattern as global.css (legal surface) — T.astro renders both
-   siblings; CSS shows one based on html[data-lang]. */
 html:not([data-lang="en"]) [data-l="en"] { display: none !important; }
 html[data-lang="en"] [data-l="pt"] { display: none !important; }
 
-/* ---------- hero CTA row: two CTAs, stack full-width on narrow phones ----------
-   Not part of the raw design (which shows one hero CTA) — the v5 contract
-   adds a secondary "Começar grátis →" next to "Testar a demo →". Utility
-   lives here so it's available regardless of which section needs a
-   side-by-side-then-stacked CTA pair (Hero today). */
 .hero-cta-row {
   display: flex;
   align-items: center;

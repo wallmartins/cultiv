@@ -1,27 +1,3 @@
-// VoiceMap "harmonic synthesizer" — Ato 3, the Voice Profile made geometry.
-// Ported from the design's DCLogic monolith (cultiv-hero-v5.dc.html):
-// cInit (2524-2585, S_PILLARS + 13-trait S_NODES), cResize (2682-2701),
-// cInteractive/sSample/cBindPointers/sSetHover/sPillarDown/cUpdateOverlays
-// (2702-2831), cTick/cRender (2832-3121), plus the constellation slice of
-// `readScroll` (1994-2002) and the voicemap renderVals keys (3242-3272).
-//
-// Three braided waves (pillars TOM/RITMO/EMOÇÃO) are modulated by 13 trait
-// nodes; scroll scrubs `q` through entry -> zoom-in -> interactive plateau ->
-// collapse -> handoff. Chamber inversion is routed through theme-breath's
-// `setChamberT('const', t)` — this module never touches `--t-*` directly.
-//
-// Deviation from the source (documented, not silently ported): the design's
-// `_tick` bails out entirely when `state.reduced` (2024), which makes the
-// `cTick` branch that sets `sGrow = [1, 1, 1]` under reduced motion (2872-2873)
-// dead code — under reduced motion `sGrow` is permanently `[0, 0, 0]` (only
-// ever initialized in `cInit`), so every trait node's `born` test evaluates
-// to 0 and NOTHING is drawn: an empty canvas. That directly contradicts
-// CONSTELLATION-SPEC.md Fix G ("constelação legível" — a labeled, static
-// scene). `render()` below substitutes a local `grow = reduced ? [1,1,1] :
-// this.sGrow` so the reduced-motion scene is actually legible, matching the
-// spec's explicit acceptance criterion instead of the source's unreachable
-// branch.
-
 import {
   addResize,
   addScroll,
@@ -40,19 +16,15 @@ import {
 import { setChamberT } from "./theme-breath";
 import { getLang, onLangChange, type Lang } from "./i18n";
 
-/* ---------------- shared pillar data (also consumed by VoiceMap.astro) ---------------- */
-
 export interface PillarMeta {
   readonly id: "tom" | "ritmo" | "emocao";
   readonly labelPt: string;
   readonly labelEn: string;
   readonly color: string;
   readonly rgb: readonly [number, number, number];
-  /** Vertical baseline of the pillar's wave, as a 0..1 fraction of frame height (design `p.base`). */
   readonly base: number;
 }
 
-// design cInit 2536-2538 (S_PILLARS).
 export const PILLARS: readonly PillarMeta[] = [
   { id: "tom", labelPt: "TOM", labelEn: "TONE", color: "#A3DD42", rgb: [163, 221, 66], base: 0.335 },
   { id: "ritmo", labelPt: "RITMO", labelEn: "RHYTHM", color: "#E8B44A", rgb: [232, 180, 74], base: 0.52 },
@@ -63,16 +35,10 @@ export function pillarGlow(rgb: readonly [number, number, number]): string {
   return `rgba(${rgb.join(",")},0.7)`;
 }
 
-/** design renderVals `p.topCss` (3255). */
 export function pillarTopCss(base: number): string {
   return `calc(${(base * 100).toFixed(1)}% - 19px)`;
 }
 
-/** Portrait (phone) horizontal spread of the three pillars, left→right in
-    pillar order [tom, ritmo, emoção]. Shared by the canvas geometry
-    (`sample()` origin X) and the chip CSS (`--pillar-x`) so a chip sits exactly
-    where its wave launches from. The narrow layout flips the synth 90°: pillars
-    ride a row across the top and the braids descend down the viewport. */
 export const PILLAR_X_PORTRAIT = [0.24, 0.5, 0.76] as const;
 
 export function pillarAriaLabel(labelPt: string, lang: Lang): string {
@@ -81,7 +47,6 @@ export function pillarAriaLabel(labelPt: string, lang: Lang): string {
     : `Pilar ${labelPt} — arraste para cima ou para baixo para ajustar a intensidade`;
 }
 
-// design markup line 281, verbatim pt.
 const CANVAS_ARIA_PT =
   "Sintetizador harmônico do Perfil de Voz: três ondas — Tom, Ritmo e Emoção — se entrelaçam da esquerda para a direita. Treze nós modulam as ondas: formalidade, humor, pessoalidade, vocabulário, metáforas, cadência, pontuação, estrutura, respiração, convicção, raciocínio, argumentação e audiência. Passe pelos nós para ver cada traço; arraste um pilar para ajustar a intensidade.";
 const CANVAS_ARIA_EN =
@@ -97,9 +62,7 @@ interface TraitSeed {
   readonly tick: number;
 }
 
-// design cInit 2542-2559 (S_NODES) — pt verbatim; en is a faithful sibling.
 const TRAITS: readonly TraitSeed[] = [
-  // TOM — como você soa
   {
     w: 0,
     t: 0.2,
@@ -145,7 +108,6 @@ const TRAITS: readonly TraitSeed[] = [
     descEn: "The images you reach for to explain the world.",
     tick: 1.7,
   },
-  // RITMO — como você flui
   {
     w: 1,
     t: 0.27,
@@ -182,7 +144,6 @@ const TRAITS: readonly TraitSeed[] = [
     descEn: "The pauses that give the reader time.",
     tick: -1.8,
   },
-  // EMOÇÃO — como você pensa
   {
     w: 2,
     t: 0.235,
@@ -221,16 +182,14 @@ const TRAITS: readonly TraitSeed[] = [
   },
 ];
 
-/* ---------------- runtime types ---------------- */
-
 interface RuntimePillar {
   readonly meta: PillarMeta;
   readonly el: HTMLElement;
-  off: number; // raw drag offset, px
-  dOff: number; // damped/display offset, px
-  amp: number; // raw target amplitude
-  dAmp: number; // damped/display amplitude
-  flash: number; // pulse-arrival glow decay
+  off: number;
+  dOff: number;
+  amp: number;
+  dAmp: number;
+  flash: number;
 }
 
 interface RuntimeNode extends TraitSeed {
@@ -258,8 +217,6 @@ interface WavePoint {
   nx: number;
   ny: number;
 }
-
-/* ---------------- the synth ---------------- */
 
 class VoiceSynth {
   private readonly section: HTMLElement;
@@ -333,7 +290,6 @@ class VoiceSynth {
     }));
     this.nodes = TRAITS.map((t) => ({ ...t, sx: -99, sy: -99 }));
 
-    // film grain — deterministic (mulberry32 seed 77), design cInit 2570-2574.
     const grand = mulberry(77);
     this.grain = [];
     for (let gi = 0; gi < 150; gi++) {
@@ -342,8 +298,6 @@ class VoiceSynth {
 
     this.sTime = reducedMotion() ? 4.2 : 0;
   }
-
-  /* ---------------- mount ---------------- */
 
   mount(): void {
     this.bindPointers();
@@ -380,10 +334,8 @@ class VoiceSynth {
     this.onScroll(currentScrollY());
   }
 
-  /* ---------------- resize (design cResize 2682-2701) ---------------- */
-
   private resize(): void {
-    const dpr = Math.min(2, window.devicePixelRatio || 1); // Fix H
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
     this.cW = this.canvas.clientWidth;
     this.cH = this.canvas.clientHeight;
     this.canvas.width = Math.max(1, Math.round(this.cW * dpr));
@@ -399,8 +351,6 @@ class VoiceSynth {
     }
   }
 
-  /* ---------------- scroll progress (design readScroll 1994-2002) ---------------- */
-
   private onScroll(sy: number): void {
     if (reducedMotion()) return;
     const vh = window.innerHeight;
@@ -411,25 +361,16 @@ class VoiceSynth {
     this.cTargetQ = clamp((sy - start) / Math.max(1, end - start), 0, 1);
   }
 
-  /* ---------------- interaction (design cInteractive 2702-2705) ---------------- */
-
   private interactive(): boolean {
     if (reducedMotion()) return true;
     return this.cQ > 0.24 && this.cQ < 0.7;
   }
-
-  /* ---------------- braid geometry (design sSample 2707-2737) ---------------- */
 
   private sample(pIdx: number, t: number): WavePoint {
     const p = this.pillars[pIdx]!;
     const W = this.cW;
     const H = this.cH;
 
-    // Portrait (phones): the whole synth is transposed 90°. `t` now sweeps
-    // top→bottom (waves descend), the braid oscillates in X, and each wave's
-    // origin is a column across the top (PILLAR_X_PORTRAIT) — the pillar chip
-    // rides that column via CSS. Everything downstream (line drawing, normals,
-    // node sx/sy, tooltip, seed collapse) reads these x/y, so it all follows.
     if (W < 720) {
       const y0 = clamp(H * 0.235, 200, 272);
       const y1 = H * 0.93;
@@ -496,8 +437,6 @@ class VoiceSynth {
     return { x: px, y: py, s, z: Z, nx: 0, ny: 0 };
   }
 
-  /* ---------------- pointers (design cBindPointers 2739-2779) ---------------- */
-
   private bindPointers(): void {
     const cv = this.canvas;
     cv.addEventListener("pointermove", (e) => {
@@ -520,7 +459,6 @@ class VoiceSynth {
           found = n;
         }
       }
-      // hysteresis: keep the current hover until the cursor truly moves away.
       const cur = this.hover;
       if (!found && cur && Math.hypot(mx - cur.sx, my - cur.sy) < 56) found = cur;
       cv.style.cursor = found ? "pointer" : "default";
@@ -546,8 +484,6 @@ class VoiceSynth {
     });
   }
 
-  /* ---------------- hover (design sSetHover 2781-2793) ---------------- */
-
   private setHover(n: RuntimeNode | null): void {
     if (n === this.hover) return;
     this.hover = n;
@@ -568,9 +504,6 @@ class VoiceSynth {
     if (reducedMotion()) this.render();
   }
 
-  /** Fills the tooltip's text/color from the active language — split out of
-      `setHover` so a language change can refresh an already-open tooltip
-      without tripping `setHover`'s "same node, no-op" guard. */
   private renderTipContent(n: RuntimeNode): void {
     const pillar = this.pillars[n.w]!;
     this.tip.style.setProperty("--tip-color", pillar.meta.color);
@@ -581,15 +514,10 @@ class VoiceSynth {
     this.tipDesc.textContent = this.lang === "en" ? n.descEn : n.descPt;
   }
 
-  /* ---------------- pillar drag (design sPillarDown 2795-2812) ---------------- */
-
   private bindPillars(): void {
     for (const p of this.pillars) {
       p.el.addEventListener("pointerdown", (e) => {
         e.preventDefault();
-        // Portrait pillars sit on a top row and their waves run down the
-        // screen, so the fader axis is horizontal there (drag ←/→); landscape
-        // keeps the vertical drag.
         const portrait = this.cW < 720;
         const startAxis = portrait ? e.clientX : e.clientY;
         const startOff = p.off;
@@ -616,8 +544,6 @@ class VoiceSynth {
     }
   }
 
-  /* ---------------- overlays (design cUpdateOverlays 2814-2830) ---------------- */
-
   private updateOverlays(q: number): void {
     const lop = win(q, 0.3, 0.37, 0.6, 0.67);
     if (Math.abs(lop - this.lastLegOp) > 0.004) {
@@ -635,10 +561,8 @@ class VoiceSynth {
     }
   }
 
-  /* ---------------- tick (design cTick 2832-2912) ---------------- */
-
   private tick(dt: number): void {
-    if (reducedMotion()) return; // design `_tick` bails out entirely under reduced motion.
+    if (reducedMotion()) return;
     if (!this.ctx) return;
 
     const diff = this.cTargetQ - this.cQ;
@@ -663,10 +587,6 @@ class VoiceSynth {
       p.dAmp += (p.amp - p.dAmp) * kA;
       p.dOff += (p.off - p.dOff) * kA;
       p.flash *= Math.exp(-dt * 3.2);
-      // Portrait: the chip is centred on its wave's column (translateX(-50%),
-      // matching the CSS), and the fader drag rides the X axis; landscape keeps
-      // the vertical fader. This inline transform replaces the CSS one each
-      // frame, so the centring has to live here too or the chips drift right.
       p.el.style.transform = portrait
         ? `translateX(-50%) translateX(${p.dOff.toFixed(1)}px)`
         : `translateY(${p.dOff.toFixed(1)}px)`;
@@ -690,8 +610,6 @@ class VoiceSynth {
       }
     }
 
-    // wave birth: fires once the section settles (q > 0.30); rearms if the
-    // reader scrolls back above the entry.
     if (q > 0.3) {
       if (this.sGrowStart < 0) {
         this.sGrowStart = this.cClock;
@@ -708,15 +626,12 @@ class VoiceSynth {
       this.sGrow = [0, 0, 0];
     }
 
-    // page-wide color breath — routed through the shared chamber, never
-    // written directly (design `_applyTheme`/`cApplyTheme`, 2586/2656-2674).
     this.cThemeT = sm(0.02, 0.16, q) * (1 - sm(0.68, 0.85, q));
     if (Math.abs(this.cThemeT - this.lastT) > 0.001) {
       this.lastT = this.cThemeT;
       setChamberT("const", this.cThemeT);
     }
 
-    // entrance: rises from below.
     const ty = (1 - sm(0, 0.15, q)) * 42;
     const ro = sm(0, 0.08, q);
     if (Math.abs(ty - this.lastRiseTy) > 0.05 || Math.abs(ro - this.lastRiseOp) > 0.004) {
@@ -728,7 +643,6 @@ class VoiceSynth {
 
     this.updateOverlays(q);
 
-    // permanent state: the waves keep breathing on a real clock, not scrub.
     if (q > 0.01 && q < 0.995 && !document.hidden) {
       this.cClock += dt;
       this.sTime += dt;
@@ -741,8 +655,6 @@ class VoiceSynth {
     }
   }
 
-  /* ---------------- render (design cRender 2914-3119) ---------------- */
-
   private render(): void {
     const c = this.ctx;
     if (!c) return;
@@ -753,9 +665,6 @@ class VoiceSynth {
     const q = red ? 0.5 : this.cQ;
     if (!red && (q <= 0.005 || q >= 0.999)) return;
     const mobile = W < 720;
-    // Fix G: the source's own reduced branch that sets sGrow to [1,1,1]
-    // (design cTick 2872-2873) is unreachable dead code — substitute the
-    // intended value locally so the reduced-motion scene is legible.
     const grow: [number, number, number] = red ? [1, 1, 1] : this.sGrow;
 
     const ent = red ? 1 : sm(0.1, 0.3, q);
@@ -763,9 +672,6 @@ class VoiceSynth {
     const seedRise = red ? 0 : sm(0.86, 0.99, q);
     const fadeOut = 1 - sm(0.66, 0.82, q);
     this.sEnt = ent;
-    // Landscape collapses the braid up to the rising seed; portrait descends,
-    // so it converges DOWN toward the bottom-centre where the walker handoff
-    // (Ato 4) lives.
     this.seedPos = {
       x: lerp(W * 0.56, W * 0.5, eio(seedRise)),
       y: W < 720 ? lerp(H * 0.6, H * 0.9, eio(seedRise)) : lerp(H * 0.53, H * 0.12, eio(seedRise)),
@@ -784,7 +690,6 @@ class VoiceSynth {
       }
     }
 
-    // ripple echo of the hero's act 3 zoom-in.
     if (!red && q > 0.12 && q < 0.34) {
       const rk = (q - 0.12) / 0.22;
       const r = rk * Math.max(W, H) * 0.42;
@@ -919,7 +824,6 @@ class VoiceSynth {
       try {
         c.letterSpacing = "0.08em";
       } catch {
-        /* Safari < 17 has no CanvasRenderingContext2D.letterSpacing — cosmetic only. */
       }
       for (const n of this.nodes) {
         const born = sm(n.t, n.t + 0.05, grow[n.w]!);
@@ -977,11 +881,6 @@ class VoiceSynth {
           c.arc(pt.x, pt.y, r + 5.5 * k, 0, Math.PI * 2);
           c.stroke();
         }
-        // Per-node trait labels are drawn beneath each node. On a narrow canvas
-        // the 13 nodes compress horizontally and the labels pile into an
-        // illegible smear, so they're desktop-only — the nodes/dials still read
-        // as the signature, the eyebrow already says "13 TRAÇOS", and the
-        // tooltip surfaces a trait's name on interaction.
         const la = mobile ? 0 : Math.max(0, (ent - 0.5) / 0.5) * nodeFade;
         if (la > 0.02) {
           c.font = `500 ${mobile ? 9 : 10}px ui-monospace, "SF Mono", Menlo, monospace`;
@@ -994,16 +893,12 @@ class VoiceSynth {
     }
   }
 
-  /* ---------------- micro-CTA (design renderVals cGoNext 3266-3272) ---------------- */
-
   private goNext(): void {
     const sy = currentScrollY();
     const y =
       this.section.getBoundingClientRect().top + sy + this.section.offsetHeight - window.innerHeight * 0.6;
     smoothScrollTo(y);
   }
-
-  /* ---------------- i18n ---------------- */
 
   private syncAriaLabels(): void {
     this.canvas.setAttribute("aria-label", this.lang === "en" ? CANVAS_ARIA_EN : CANVAS_ARIA_PT);
@@ -1015,12 +910,10 @@ class VoiceSynth {
   private onLangChange(lang: Lang): void {
     this.lang = lang;
     this.syncAriaLabels();
-    if (this.hover) this.renderTipContent(this.hover); // refresh open tooltip in place
+    if (this.hover) this.renderTipContent(this.hover);
     this.render();
   }
 }
-
-/* ---------------- helpers ---------------- */
 
 function req<T extends Element = HTMLElement>(root: ParentNode, selector: string): T {
   const el = root.querySelector<T>(selector);
@@ -1031,8 +924,6 @@ function req<T extends Element = HTMLElement>(root: ParentNode, selector: string
 function currentScrollY(): number {
   return window.scrollY || document.documentElement.scrollTop || 0;
 }
-
-/* ---------------- entry point ---------------- */
 
 export function initVoiceMap(): void {
   const section = document.querySelector<HTMLElement>("#constelacao");

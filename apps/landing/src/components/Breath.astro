@@ -1,13 +1,4 @@
 ---
-// Ato 4 — "Respiração": the calm passage between the constellation takeover
-// and the plans decision. Design markup 325–341 (cultiv-hero-v5.dc.html),
-// choreography `breathTick` 2069–2118. See BREATH-SPEC.md.
-//
-// No island: this is static semantic HTML (both language blocks render
-// server-side for SEO/JS-off) plus a bundled script that drives the
-// scroll-timed ink reveal. `data-breath-box` is the walker hook the Hero
-// section's canvas queries lazily to route its guide figure past this box
-// (contract: "Walker reads … [data-breath-box] (Breath owns)").
 import "../styles/breath.css";
 ---
 
@@ -107,5 +98,5 @@ import "../styles/breath.css";
   import { start } from "../scripts/engine";
 
   initBreath();
-  start(); // idempotent — safe alongside every other section's own start() call
+  start();
 </script>

@@ -1,17 +1,5 @@
-/* ============================================================
-   Plans (Ato 5) — "Escolha por quanto você escreve."
-   Ported verbatim from the design's inline styles (cultiv-hero-v5.dc.html
-   342–436) into scoped classes. Values (clamps, radii, colors, easings) are
-   copied exactly; only the generation counts differ (ADR 0006 — see
-   src/data/plans.ts). `style-hover`/`style-active` attributes in the design
-   become real :hover/:active rules here.
-   ============================================================ */
 
 .plans-section {
-  /* Follows the chamber palette (like the FAQ section) so that when the
-     adjacent founder chamber darkens, this section's BACKGROUND darkens with
-     its text/cards — instead of dark cards + inverted text sitting on a
-     hardcoded light background during the transition. */
   background: var(--t-bg, #f8f7f4);
   color: var(--t-ink, #34322e);
   padding: clamp(88px, 12vw, 148px) clamp(20px, 6vw, 64px);
@@ -57,8 +45,6 @@
   text-wrap: pretty;
 }
 
-/* ---------- toggle (currency + cycle) ---------- */
-
 .plans-toggle-row {
   display: flex;
   align-items: center;
@@ -90,8 +76,6 @@
     background-color 0.22s ease,
     color 0.22s ease;
 }
-/* Only the active segment gets the ink fill — no acid here, the single acid
-   of the fold is the featured card's CTA. */
 .plans-toggle-btn[aria-pressed="true"] {
   background: var(--t-ink, #34322e);
   color: var(--t-bg, #f8f7f4);
@@ -112,8 +96,6 @@
   border-radius: 999px;
   border: 1px solid currentColor;
 }
-
-/* ---------- cards ---------- */
 
 .plans-grid {
   display: grid;
@@ -142,8 +124,6 @@
   padding: clamp(26px, 2.6vw, 32px);
   box-shadow: 0 14px 44px -22px rgba(149, 203, 62, 0.55);
 }
-/* Featured card is already accent-bordered at rest (design 387) — no extra
-   hover rule needed; it never "arrives" at accent because it starts there. */
 
 .plan-badge {
   position: absolute;
@@ -273,8 +253,6 @@
   transform: translateY(1px);
 }
 
-/* ---------- footnote ---------- */
-
 .plans-footnote {
   margin: clamp(24px, 3vw, 32px) 0 0;
   text-align: center;
@@ -282,11 +260,6 @@
   color: var(--t-muted, #6b675f);
 }
 
-/* ---------- reduced motion ----------
-   Spec (PRICING-SPEC §3): "hover sem lift (só borda→accent)". The design has
-   no card-entrance animation to strip here (none of this section's elements
-   carry an `animation:` rule) — only the featured CTA's hover/active lift
-   needs to go quiet. */
 @media (prefers-reduced-motion: reduce) {
   .plan-card,
   .plan-card__cta,

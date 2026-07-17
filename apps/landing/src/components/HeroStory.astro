@@ -1,17 +1,10 @@
 ---
-// Hero — scroll-story (Ato 1). Ported from cultiv-hero-v5.dc.html 194–224
-// (pinned intro: canvas + real-HTML copy + scroll hint + act overlays),
-// 777–778 (walker canvas, fixed page-wide) and 786–805 (opening logo
-// curtain) — see HERO-SCROLL-SPEC.md for the narrative concept and
-// hero-story.ts's header comment for the JS-off/reduced-motion doctrine.
-//
-// The single <h1> on the page lives here — its pt/en pair is hand-rolled
-// (not <T/>) so the page never ends up with two <h1> elements (T renders
-// pt+en as sibling tags; fine for <span>/<p>, not for a heading that must
-// be unique).
 import "../styles/hero.css";
 import T from "./T.astro";
 import { trialUrl } from "../config";
+import { PLANS } from "../data/plans";
+
+const entryPlan = PLANS.reduce((lo, p) => (p.priceValue < lo.priceValue ? p : lo), PLANS[0]);
 ---
 
 <section
@@ -23,7 +16,6 @@ import { trialUrl } from "../config";
   <div class="hero-sticky" data-hero-sticky>
     <canvas class="hero-canvas" data-hero-canvas aria-hidden="true"></canvas>
 
-    <!-- Copy real em HTML (SEO / leitores de tela) — legível sem JS -->
     <div class="hero-copy" data-hero-copy>
       <h1 class="hero-h1" data-hero-h1
         ><span data-l="pt" lang="pt-BR">Escreve como você pensa.</span><span data-l="en" lang="en"
@@ -49,10 +41,15 @@ import { trialUrl } from "../config";
           pt="Descubra seu perfil de voz em poucos minutos · sem login · sem cadastro · sem cartão de crédito"
           en="Discover your voice profile in minutes · no login · no signup · no credit card"
         />
+        <T
+          el="span"
+          class="hero-price"
+          pt={`Depois do teste, planos a partir de ${entryPlan.price.brl.monthly}/mês`}
+          en={`After the trial, plans from ${entryPlan.price.usd.monthly}/mo`}
+        />
       </p>
     </div>
 
-    <!-- Indicador de scroll -->
     <div class="hero-hint" data-hero-hint aria-hidden="true">
       <div class="hero-hint-inner">
         <span class="hero-hint-label"><T pt="Role para explorar" en="Scroll to explore" /></span>
@@ -60,7 +57,6 @@ import { trialUrl } from "../config";
       </div>
     </div>
 
-    <!-- Overlays narrativos dos atos 2 e 3 -->
     <p class="hero-act" data-hero-act2 aria-hidden="true">
       <T
         pt="A maioria das IAs transforma vozes únicas em textos que soam iguais."
@@ -73,14 +69,8 @@ import { trialUrl } from "../config";
   </div>
 </section>
 
-<!-- bonequinho-guia (Ato 3→4): caminha com o scroll até o texto, depois contorna e desce sozinho -->
 <canvas class="hero-walker-canvas" data-hero-walker aria-hidden="true"></canvas>
 
-<!-- ============ ABERTURA: a logo se constrói no centro ============
-     Default display:none (hero.css) — only hero-story.ts ever shows this,
-     and only when `prefers-reduced-motion: no-preference`. See the CSS
-     file's module comment for why the JS-off resting state is inverted
-     from the raw design (which renders this unconditionally). -->
 <div class="hero-curtain" data-hero-curtain aria-hidden="true">
   <div class="hero-curtain-bg" data-hero-curtain-bg></div>
   <div class="hero-curtain-logo" data-hero-curtain-logo data-cultiv-intro-logo="true">

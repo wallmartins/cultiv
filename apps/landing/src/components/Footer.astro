@@ -1,19 +1,4 @@
 ---
-// Footer (Ato 9) — design 711–774. REPLACES the interim StackedFooter-style
-// component: this one is the v5 dark "chão" of the page — belief line (the
-// memorable beat) first, utilitarian links (Produto/Legal/Redes) and the ©
-// line last, in low visual weight, per CTA-FOOTER-SPEC §2/§5.2-3. Also
-// rendered on /privacidade, /termos and /404 (only Footer in the tree) —
-// every color here is a hardcoded oklch literal (not `--t-*`), so it reads
-// identically regardless of which layout/token surface hosts it.
-//
-// Deviations from design markup (both non-copy, see report):
-// 1. Produto links point to in-page anchors `#demo` / `#constelacao` /
-//    `#planos` (this landing's real section ids) instead of the design's
-//    dead-end `/demo` `/mapa-da-voz` `/planos` routes.
-// 2. "Falar com a gente" uses `mailto:contato@cultiv.app` (the same address
-//    /privacidade already points readers to) instead of the design's `href="#"`
-//    placeholder — Redes stays `#` since those channels genuinely don't exist yet.
 import T from "./T.astro";
 import "../styles/closing.css";
 ---

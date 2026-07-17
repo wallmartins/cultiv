@@ -1,27 +1,4 @@
 ---
-// Ato 6 — founder-vídeo: "julgue você mesmo" (FOUNDER-PROOF-SPEC.md). Ported
-// from the design's founder markup (cultiv-hero-v5.dc.html 437–505) and its
-// `fPlay`/`_fAlign`/`fReplay`/`fStreamTick`/`founderTick` state machine
-// (2591–2655) + the founder half of `readScroll` (1988–2020). Runtime
-// behavior lives in `../scripts/founder.ts` (registered on the shared
-// engine.ts rAF/scroll loop — see that module's header comment).
-//
-// FounderNote deviation (binding, user 2026-07-15): the design's own
-// `FOUNDER_NOTE` (851–857, "Passei anos…") is NOT an authentic Cultiv
-// generation and must not ship. The three paragraphs + signature + receipt
-// below are copied verbatim, character-for-character, from the real
-// calibrated-voice generation on file (foundernote-authentic.md, see the
-// v5 contract's binding-exceptions section for the path) — never rewrite
-// them. The generic design signature "— o fundador da Cultiv" is replaced
-// by the authentic signature+receipt pair (sanctioned deviation).
-//
-// Video asset: the design has no real <video> element here — it's a
-// JS-driven "video simulation" (poster → streaming text → split) because
-// there is no footage yet.
-// ponytail: swap the poster/stream simulation for a real
-// <video controls preload="metadata"> + VTT captions once the founder
-// records rosto→prompt→geração→resultado (FOUNDER-PROOF-SPEC.md §7 asset
-// brief) — the split choreography and copy stay the same either way.
 import "../styles/founder.css";
 import T from "./T.astro";
 import { trialUrl } from "../config";
@@ -41,10 +18,8 @@ import { trialUrl } from "../config";
       </div>
 
       <div class="founder__split">
-        <!-- painel do vídeo -->
         <div class="founder__video-panel">
           <div class="founder__frame">
-            <!-- poster / frame (asset de vídeo a produzir) -->
             <div class="founder__poster" data-fposter aria-hidden="true">
               <span class="founder__poster-text">
                 <T pt="[ vídeo do fundador ]" en="[ founder video ]" />
@@ -53,7 +28,6 @@ import { trialUrl } from "../config";
               </span>
             </div>
 
-            <!-- idle: botão play -->
             <button
               type="button"
               class="founder__play"
@@ -68,7 +42,6 @@ import { trialUrl } from "../config";
               </span>
             </button>
 
-            <!-- vídeo rodando: geração acontecendo (stream em loop no clock do clipe) -->
             <div class="founder__live" data-flive>
               <span class="founder__prompt-chip">
                 <T pt="PROMPT · engajar a audiência" en="PROMPT · engage your audience" />
@@ -93,7 +66,6 @@ import { trialUrl } from "../config";
           </div>
         </div>
 
-        <!-- painel do texto: a FounderNote, na íntegra -->
         <div class="founder__text" data-founder-text>
           <span class="founder__note-caption">
             <T
