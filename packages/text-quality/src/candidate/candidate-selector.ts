@@ -29,8 +29,8 @@ export function selectBestCandidate(
   const pool = eligible.length > 0 ? eligible : candidates;
 
   const ranked = [...pool].sort((left, right) => {
-    const rightScore = scoreCandidate(right, context, qualityProfile);
-    const leftScore = scoreCandidate(left, context, qualityProfile);
+    const rightScore = scoreCandidateForSelection(right, context, qualityProfile);
+    const leftScore = scoreCandidateForSelection(left, context, qualityProfile);
     if (rightScore !== leftScore) return rightScore - leftScore;
     if (right.score.finalScore !== left.score.finalScore) return right.score.finalScore - left.score.finalScore;
     const rightDiversity = lexicalDiversity(right.refinedDraft);
@@ -43,7 +43,10 @@ export function selectBestCandidate(
   return Effect.succeed(ranked[0] as CandidateText);
 }
 
-function scoreCandidate(
+// Selection-only ranking: starts from the candidate's finalScore (the quality blend, plus
+// the judge blend when it runs) and subtracts disqualifier penalties for the sort. Ephemeral,
+// never persisted — distinct from scorer.ts's scoreCandidate, which produces the finalScore.
+function scoreCandidateForSelection(
   candidate: CandidateText,
   context: CandidateSelectionContext,
   qualityProfile: ReturnType<typeof resolveContentTypeQualityProfile>

@@ -6,7 +6,7 @@ import { filterLexiconForDomain } from "../../product/voice/voice-hints.js";
 import { resolveGenerationRuntimeContext } from "./generation-runtime.js";
 import { createBackendSkillDefinition } from "../skills.js";
 import { createExecutionFailure, normalizeExecutionFailure } from "./execution-failure.js";
-import { scoreExecution } from "../quality/quality.js";
+import { estimateStepProgressScore } from "../quality/quality.js";
 import { createBackendExecutionAdapter } from "./pipeline-execution-adapter.js";
 import { filterConfiguredProviderAttempts } from "./provider-availability.js";
 import { evaluateLanguageGate } from "./pipeline-language-gate.js";
@@ -204,7 +204,7 @@ export function executePipelineAttempt(
         }
         yield* contextManager.set(
           "__score",
-          scoreExecution(stepOutput, options.plan.pipeline.steps.length, options.selection.qualityMode)
+          estimateStepProgressScore(stepOutput, options.plan.pipeline.steps.length, options.selection.qualityMode)
         );
       } else if (typeof stepOutput === "string") {
         yield* traceRecorder.recordLanguageGateResult({
