@@ -56,7 +56,15 @@ describe("monorepo governance", () => {
       ]),
       // Visual tokens (ADR 0003): leaf package, zero runtime deps by design —
       // it must stay consumable by Astro, React, and the extension alike.
-      ui: new Set<string>([])
+      ui: new Set<string>([]),
+      shared: new Set([
+        "@my-ai-orchestrator/client-sdk",
+        "@my-ai-orchestrator/contracts",
+        "effect",
+        "@tanstack/react-query",
+        "zustand",
+        "react"
+      ])
     } as const;
 
     for (const [name, expected] of Object.entries(allowed)) {
