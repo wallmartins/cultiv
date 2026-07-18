@@ -2,6 +2,7 @@ import type {
   DevelopmentTraitProfile,
   TraitKey,
   TraitRecord,
+  VoiceMaterialBaseSample,
   VoiceProfileDiagnosticsView,
   VoiceProfileScreenView,
   VoiceProfileView,
@@ -12,7 +13,67 @@ import type {
   DerivedVoiceProfile,
   VoiceProfileDiagnostics
 } from "@my-ai-orchestrator/domain";
+import type { VoiceExampleRecord } from "@my-ai-orchestrator/database";
 import { mergeTraitConfirmations } from "./trait-confirmation-overlay.js";
+
+// GAP #13 — known channel/content-type ids get a curated pt-BR label; anything else falls back
+// to a humanized version of the raw id, same convention as apps/web/src/routes/voice-mappers.ts
+// contentTypeLabel (never leak a raw enum/id into the DOM).
+const MATERIAL_BASE_SAMPLE_LABELS: Record<string, string> = {
+  linkedin: "LinkedIn",
+  "linkedin-post": "LinkedIn",
+  newsletter: "Newsletter",
+  blog: "Blog",
+  "long-form-blog": "Blog longo",
+  "validation-post": "Post de validação",
+  "architecture-post": "Post técnico",
+  "twitter-thread": "Thread"
+};
+
+function humanizeMaterialBaseSampleLabel(id: string): string {
+  return (
+    MATERIAL_BASE_SAMPLE_LABELS[id]
+    ?? id
+      .split(/[-_]/)
+      .filter(Boolean)
+      .map((word) => word[0].toUpperCase() + word.slice(1))
+      .join(" ")
+  );
+}
+
+const MATERIAL_BASE_SAMPLE_MONTHS_PT = [
+  "jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"
+];
+
+function formatMaterialBaseSampleDate(iso: string): string {
+  const date = new Date(iso);
+  return `${date.getUTCDate()} ${MATERIAL_BASE_SAMPLE_MONTHS_PT[date.getUTCMonth()]}`;
+}
+
+function truncateMaterialBaseSampleQuote(text: string, maxLength = 150): string {
+  const trimmed = text.trim();
+  if (trimmed.length <= maxLength) {
+    return trimmed;
+  }
+
+  const cut = trimmed.slice(0, maxLength);
+  const lastSpace = cut.lastIndexOf(" ");
+  const wholeWordCut = lastSpace > 40 ? cut.slice(0, lastSpace) : cut;
+  return `${wholeWordCut.trimEnd()}…`;
+}
+
+// Formats already-selected examples (selectMaterialBaseSampleExamples) into display-ready quotes
+// — pure presentation, no re-inference of voice signals (voice-profile-centralization stays green).
+export function toMaterialBaseSamples(
+  examples: readonly VoiceExampleRecord[]
+): readonly VoiceMaterialBaseSample[] {
+  return examples.map((example) => ({
+    q: truncateMaterialBaseSampleQuote(example.text),
+    meta: `${humanizeMaterialBaseSampleLabel(
+      example.channel ?? example.explicitContentType ?? example.format ?? "geral"
+    )} · ${formatMaterialBaseSampleDate(example.createdAt)}`
+  }));
+}
 
 export function toVoiceProfileView(profile: DerivedVoiceProfile): VoiceProfileView {
   return {
@@ -71,7 +132,10 @@ export function toVoiceProfileDiagnosticsView(
 export function toVoiceProfileScreenView(
   profile: DerivedVoiceProfile,
   diagnostics: VoiceProfileDiagnostics,
-  options?: { readonly includeReasoning?: boolean }
+  options?: {
+    readonly includeReasoning?: boolean;
+    readonly samples?: readonly VoiceMaterialBaseSample[];
+  }
 ): VoiceProfileScreenView {
   return {
     profile: toVoiceProfileView(profile),
@@ -80,7 +144,8 @@ export function toVoiceProfileScreenView(
       ...diagnostics.materialBase,
       byClassification: { ...diagnostics.materialBase.byClassification },
       byContentType: { ...diagnostics.materialBase.byContentType },
-      byLanguage: { ...diagnostics.materialBase.byLanguage }
+      byLanguage: { ...diagnostics.materialBase.byLanguage },
+      ...(options?.samples ? { samples: options.samples } : {})
     },
     ...(options?.includeReasoning && profile.coreReasoningSignature
       ? {

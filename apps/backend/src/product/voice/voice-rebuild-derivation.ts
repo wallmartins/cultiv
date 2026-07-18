@@ -165,6 +165,23 @@ export function buildVoiceMaterialBase(examples: readonly VoiceExampleRecord[]) 
   };
 }
 
+// Read-time selection for the material-base sample quotes (GAP #13) — pinned examples (the
+// author's own curated references) come first, then the most recent remaining active examples.
+// Pure and I/O-free: voice-service.ts supplies the already-fetched examples.
+export function selectMaterialBaseSampleExamples(
+  examples: readonly VoiceExampleRecord[],
+  limit = 4
+): readonly VoiceExampleRecord[] {
+  const byRecency = (left: VoiceExampleRecord, right: VoiceExampleRecord) =>
+    new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime();
+
+  const activeExamples = examples.filter((example) => example.state === "active");
+  const pinned = activeExamples.filter((example) => example.pinned).sort(byRecency);
+  const unpinned = activeExamples.filter((example) => !example.pinned).sort(byRecency);
+
+  return [...pinned, ...unpinned].slice(0, limit);
+}
+
 export function resolveNextProfileVersion(
   currentProfile?: { readonly profileVersion: number },
   currentDiagnostics?: { readonly activeVersion: number; readonly pendingVersion?: number }

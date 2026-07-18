@@ -18,6 +18,7 @@ import {
   buildConsentSinceLabel,
   buildCoverage,
   buildDescriptorChips,
+  buildMaterialBaseSamples,
   buildProse,
   buildRing,
   buildTraits,
@@ -104,7 +105,8 @@ export function VoiceContainer() {
         activeExamples: profile.materialBase.activeExamples,
         excludedExamples: profile.materialBase.excludedExamples,
         pinnedExamples: profile.materialBase.pinnedExamples,
-        footnote: "novos exemplos só entram recalibrando"
+        footnote: "novos exemplos só entram recalibrando",
+        samples: buildMaterialBaseSamples(profile)
       },
       coverage: buildCoverage(profile.diagnostics),
       consent: {

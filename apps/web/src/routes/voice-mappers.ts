@@ -92,6 +92,15 @@ export function buildRing(profile: VoiceProfileScreenView): { readonly value: nu
   };
 }
 
+// GAP #13 — materialBase.samples are already display-ready {q, meta} strings from the backend
+// (truncated quote + humanized pt-BR label + short date, computed live from the author's own
+// stored examples) — no further mapping needed, just a graceful fallback when there's nothing yet.
+export function buildMaterialBaseSamples(
+  profile: VoiceProfileScreenView
+): readonly { readonly q: string; readonly meta: string }[] {
+  return profile.materialBase.samples ?? [];
+}
+
 // No calibration timestamp exists on VoiceProfileView — versionLabel sticks to real fields
 // (version + example count) instead of fabricating a "calibrada em" date the contract doesn't give.
 export function buildVersionLabel(profile: VoiceProfileScreenView): string {

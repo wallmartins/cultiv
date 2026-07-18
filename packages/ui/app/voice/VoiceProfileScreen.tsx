@@ -3,7 +3,7 @@ import { Mono, Panel, Pill, type RingTone } from "../primitives/index.js";
 import { ConfidenceRing } from "./ConfidenceRing.js";
 import { ConsentPanel } from "./ConsentPanel.js";
 import { MaterialBaseCoverage } from "./MaterialBaseCoverage.js";
-import { MaterialBaseSamples } from "./MaterialBaseSamples.js";
+import { MaterialBaseSamples, type MaterialBaseSampleVM } from "./MaterialBaseSamples.js";
 import { RevokeConfirmDialog } from "./RevokeConfirmDialog.js";
 import { TraitReviewList } from "./TraitReviewList.js";
 import { VoiceDescriptorChips } from "./VoiceDescriptorChips.js";
@@ -33,6 +33,7 @@ export interface VoiceProfileReadyState {
     readonly excludedExamples: number;
     readonly pinnedExamples: number;
     readonly footnote: string;
+    readonly samples?: readonly MaterialBaseSampleVM[];
   };
   readonly coverage: { readonly items: readonly CoverageItemVM[]; readonly nextStep: string };
   readonly consent: {
@@ -127,6 +128,7 @@ function ReadyScreen({ state }: { state: VoiceProfileReadyState }) {
             excludedExamples={state.materialBase.excludedExamples}
             pinnedExamples={state.materialBase.pinnedExamples}
             footnote={state.materialBase.footnote}
+            samples={state.materialBase.samples}
           />
           <MaterialBaseCoverage coverage={state.coverage.items} nextStep={state.coverage.nextStep} />
         </div>

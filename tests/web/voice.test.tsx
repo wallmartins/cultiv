@@ -37,6 +37,16 @@ const readyProfile: VoiceProfileScreenView = {
     underrepresentedContentTypes: [{ contentType: "long-form-blog", coverage: "low", reasonCodes: [] }],
     traitConfirmations: { openingMode: { response: "confirmed", recordedAt: "2026-07-02T00:00:00Z" } }
   },
+  materialBase: {
+    ...voiceProfileFixture.materialBase,
+    samples: [
+      {
+        q: "Ninguém aprende a escrever lendo sobre escrita — aprende revisando o que já escreveu com olhos de leitor.",
+        meta: "LinkedIn · 12 mar"
+      },
+      { q: "A pergunta que fica costuma valer mais que a resposta que eu daria.", meta: "Newsletter · 2 fev" }
+    ]
+  },
   reasoning: {
     core: {
       narrativeProse: "Você parte quase sempre de uma tensão concreta antes de generalizar.",
@@ -151,6 +161,53 @@ describe("voice route (S5)", () => {
     expect(text).not.toContain("linkedin-post");
     expect(text).not.toContain("long-form-blog");
     expect(text).not.toContain("confirmed");
+  });
+
+  it("renders real calibration sample quotes in material-base instead of count tiles (GAP #13)", async () => {
+    const queryClient = newQueryClient();
+    queryClient.setQueryData(queryKeys.voiceProfile(), readyProfile);
+    queryClient.setQueryData(queryKeys.voiceConsent(), consentGranted);
+
+    const { container } = renderVoice(queryClient);
+
+    expect(await screen.findByText("Voz sólida")).toBeInTheDocument();
+    expect(
+      screen.getByText(/Ninguém aprende a escrever lendo sobre escrita/)
+    ).toBeInTheDocument();
+    expect(screen.getByText("LinkedIn · 12 mar")).toBeInTheDocument();
+    expect(screen.getByText("Newsletter · 2 fev")).toBeInTheDocument();
+
+    // No internal jargon (raw ids/enums) leaks through the sample metadata either.
+    const text = container.textContent ?? "";
+    expect(text).not.toContain("linkedin-post");
+    expect(text).not.toContain("explicitContentType");
+  });
+
+  it("falls back to the count tiles when there are no calibration samples to quote yet", async () => {
+    const queryClient = newQueryClient();
+    const profileWithoutSamples = {
+      ...readyProfile,
+      materialBase: {
+        ...readyProfile.materialBase,
+        totalExamples: 12,
+        activeExamples: 10,
+        excludedExamples: 2,
+        pinnedExamples: 1,
+        samples: undefined
+      }
+    };
+    queryClient.setQueryData(queryKeys.voiceProfile(), profileWithoutSamples);
+    queryClient.setQueryData(queryKeys.voiceConsent(), consentGranted);
+
+    renderVoice(queryClient);
+
+    expect(await screen.findByText("Voz sólida")).toBeInTheDocument();
+    expect(screen.getByText("12")).toBeInTheDocument();
+    expect(screen.getByText("10")).toBeInTheDocument();
+    expect(screen.getByText("2")).toBeInTheDocument();
+    expect(screen.getByText("1")).toBeInTheDocument();
+    expect(screen.getByText("total")).toBeInTheDocument();
+    expect(screen.getByText("ativos")).toBeInTheDocument();
   });
 
   it("gates Revogar behind a confirm dialog — the dialog copy only appears after the click", async () => {

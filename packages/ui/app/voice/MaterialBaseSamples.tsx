@@ -1,4 +1,9 @@
-import { Mono, Panel } from "../primitives/index.js";
+import { Mono, Panel, Serif } from "../primitives/index.js";
+
+export interface MaterialBaseSampleVM {
+  readonly q: string;
+  readonly meta: string;
+}
 
 export interface MaterialBaseSamplesProps {
   readonly heading: string;
@@ -7,29 +12,45 @@ export interface MaterialBaseSamplesProps {
   readonly excludedExamples: number;
   readonly pinnedExamples: number;
   readonly footnote: string;
+  readonly samples?: readonly MaterialBaseSampleVM[];
 }
 
-// The screen view only exposes example counts, not the calibration prompts themselves — this
-// reads the real breakdown (active/excluded/pinned) rather than fabricating sample quotes.
+// Prefers real calibration quotes — the author's own stored examples, truncated and labeled by
+// the backend — over the count tiles (GAP #13). Falls back to the counts when there's nothing to
+// quote yet (e.g. every example excluded), so this card never renders empty.
 export function MaterialBaseSamples({
   heading,
   totalExamples,
   activeExamples,
   excludedExamples,
   pinnedExamples,
-  footnote
+  footnote,
+  samples
 }: MaterialBaseSamplesProps) {
   return (
     <Panel className="voice-material-card">
       <Mono as="div" className="voice-material-card-heading">
         {heading}
       </Mono>
-      <div className="voice-material-stats">
-        <Stat value={totalExamples} label="total" />
-        <Stat value={activeExamples} label="ativos" />
-        <Stat value={excludedExamples} label="excluídos" />
-        <Stat value={pinnedExamples} label="fixados" />
-      </div>
+      {samples && samples.length > 0 ? (
+        <div className="voice-material-samples">
+          {samples.map((sample, index) => (
+            <div className="voice-sample" key={`${sample.meta}-${index}`}>
+              <Serif as="p" size="0.92rem" lineHeight="1.5" className="voice-sample-quote">
+                “{sample.q}”
+              </Serif>
+              <div className="voice-sample-meta">{sample.meta}</div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="voice-material-stats">
+          <Stat value={totalExamples} label="total" />
+          <Stat value={activeExamples} label="ativos" />
+          <Stat value={excludedExamples} label="excluídos" />
+          <Stat value={pinnedExamples} label="fixados" />
+        </div>
+      )}
       <div className="voice-material-footnote">{footnote}</div>
     </Panel>
   );
