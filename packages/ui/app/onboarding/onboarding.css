@@ -1,0 +1,322 @@
+/* /app/calibrate + recalibration overlay — colocated (mirrors voice.css/generate.css). Imported
+   by CalibrationWizard.tsx. */
+
+.wizard-full-screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px;
+  background: var(--bg);
+  color: var(--ink);
+}
+.wizard-full-inner {
+  width: 100%;
+  max-width: 620px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  animation: fadeUp 0.4s var(--ease-standard);
+}
+.wizard-full-body {
+  display: flex;
+  flex-direction: column;
+}
+
+.wizard-overlay-backdrop {
+  position: fixed;
+  inset: 0;
+  background: color-mix(in oklch, var(--scrim) 55%, transparent);
+  z-index: 90;
+  display: flex;
+  justify-content: flex-end;
+}
+.wizard-overlay-panel {
+  width: 100%;
+  max-width: 480px;
+  height: 100%;
+  background: var(--bg);
+  color: var(--ink);
+  border-left: 1px solid var(--line);
+  box-shadow: var(--shadow-panel);
+  padding: 24px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  animation: popIn 0.3s var(--ease-standard);
+}
+.wizard-overlay-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.wizard-overlay-close {
+  font-size: 16px;
+}
+.wizard-overlay-body {
+  display: flex;
+  flex-direction: column;
+}
+
+.wizard-progress {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+.wizard-progress-step {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  opacity: 0.5;
+}
+.wizard-progress-step.is-active,
+.wizard-progress-step.is-done {
+  opacity: 1;
+}
+.wizard-progress-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.wizard-progress-step.is-active .wizard-progress-label {
+  color: var(--ink);
+}
+
+.wizard-step-panel {
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.wizard-step-eyebrow {
+  color: var(--dim);
+}
+.wizard-step-heading {
+  margin: 0;
+}
+.wizard-step-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 4px;
+  flex-wrap: wrap;
+}
+
+.wizard-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.wizard-field-label {
+  font-size: 0.86rem;
+  font-weight: 500;
+}
+.wizard-field-optional {
+  color: var(--dim);
+  font-weight: 400;
+}
+.wizard-field-input,
+.wizard-field-textarea,
+.wizard-writing-textarea {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-input);
+  padding: 11px 14px;
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 0.92rem;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+.wizard-field-input:focus,
+.wizard-field-textarea:focus,
+.wizard-writing-textarea:focus {
+  border-color: var(--accent);
+  box-shadow: var(--glow-ring);
+}
+.wizard-field-textarea {
+  resize: vertical;
+}
+.wizard-consent-notice {
+  font-size: 0.84rem;
+}
+.wizard-skip-link {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--dim);
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.wizard-skip-link:hover {
+  color: var(--muted);
+}
+.wizard-writing-forward {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.wizard-writing-helper {
+  color: var(--muted);
+  font-size: 0.86rem;
+  line-height: 1.55;
+  margin: -6px 0 0;
+}
+.wizard-writing-textarea {
+  font-family: var(--font-headline);
+  font-size: 1.05rem;
+  line-height: 1.6;
+  resize: vertical;
+}
+.wizard-writing-textarea.is-read-only {
+  opacity: 0.65;
+  cursor: default;
+  resize: none;
+}
+.wizard-word-counter {
+  color: var(--dim);
+  transition: color 0.2s;
+}
+.wizard-word-counter.is-in-range {
+  color: var(--accent);
+}
+.wizard-word-counter.is-over {
+  color: var(--muted);
+}
+
+.wizard-building-voice {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 56px 24px;
+}
+.wizard-building-voice-label {
+  color: var(--muted);
+}
+
+.wizard-review-step {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.wizard-consent-authorization {
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.wizard-consent-heading {
+  margin: 0;
+}
+.wizard-consent-body {
+  color: var(--muted);
+  font-size: 0.86rem;
+  line-height: 1.6;
+  margin: 0;
+}
+.wizard-consent-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+.wizard-consent-toggle input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+.wizard-trial-line {
+  color: var(--dim);
+}
+.wizard-consent-skip {
+  align-self: center;
+}
+
+.wizard-voice-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.wizard-voice-preview-summary {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+.wizard-voice-preview-headline {
+  margin: 0;
+}
+.wizard-voice-preview-prose {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 12px;
+}
+
+.wizard-low-confidence {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.wizard-low-confidence-banner {
+  font-size: 0.84rem;
+}
+
+.wizard-result-step {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  animation: fadeUp 0.35s var(--ease-standard);
+}
+.wizard-result-step.is-error {
+  align-items: flex-start;
+}
+.wizard-result-error-message {
+  color: var(--muted);
+  font-size: 0.88rem;
+  line-height: 1.6;
+}
+
+.wizard-welcome-bridge {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  animation: fadeUp 0.4s var(--ease-standard);
+}
+.wizard-welcome-headline {
+  margin: 0;
+}
+.wizard-welcome-highlights {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+.wizard-welcome-highlights li {
+  padding-left: 18px;
+  position: relative;
+}
+.wizard-welcome-highlights li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.55em;
+  width: 6px;
+  height: 6px;
+  border-radius: var(--r-pill);
+  background: var(--accent);
+}

@@ -1,0 +1,409 @@
+/* /app/voice — colocated so S5 never touches the shared shell.css. Imported by
+   VoiceProfileScreen.tsx; VoiceCompanion.tsx reuses these classes on the shared components. */
+
+.voice-screen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 32px 48px 48px;
+  overflow-y: auto;
+}
+.voice-screen-inner {
+  width: 100%;
+  max-width: 680px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  animation: fadeUp 0.4s var(--ease-standard);
+}
+.voice-page-eyebrow {
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+}
+
+.voice-header-row {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.voice-header-text {
+  flex: 1;
+  min-width: 220px;
+}
+.voice-header-headline {
+  margin: 0;
+}
+.voice-header-meta {
+  color: var(--muted);
+  margin-top: 6px;
+}
+
+.confidence-ring-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.confidence-ring-value {
+  font-family: var(--font-ui);
+  line-height: 1;
+}
+.confidence-ring-eyebrow {
+  color: var(--muted);
+  margin-top: 3px;
+}
+
+.voice-prose-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 12px;
+}
+.voice-prose-card {
+  padding: 18px;
+}
+.voice-prose-card-heading {
+  color: var(--dim);
+  text-transform: uppercase;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  margin-bottom: 10px;
+}
+
+.voice-descriptor-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.voice-descriptor-chip {
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  padding: 5px 11px;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.voice-traits-heading-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+.voice-traits-heading {
+  margin: 0;
+}
+.voice-traits-hint {
+  color: var(--dim);
+}
+.voice-trait-list {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  margin-top: 10px;
+}
+.voice-trait-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 16px;
+  border-bottom: 1px solid var(--line);
+  flex-wrap: wrap;
+  transition: background 0.2s;
+}
+.voice-trait-row:last-child {
+  border-bottom: none;
+}
+.voice-trait-row:hover {
+  background: var(--hover);
+}
+.voice-trait-ring {
+  flex: none;
+  font-family: var(--font-ui);
+}
+.voice-trait-body {
+  flex: 1;
+  min-width: 180px;
+}
+.voice-trait-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+.voice-trait-desc {
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin-top: 2px;
+  line-height: 1.5;
+}
+.voice-trait-badge {
+  padding: 4px 10px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--line);
+  color: var(--muted);
+  text-transform: uppercase;
+  flex: none;
+}
+.voice-trait-badge.is-accent {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.voice-trait-badge.is-danger {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+.voice-trait-badge.is-neutral {
+  border-color: var(--line);
+  color: var(--muted);
+}
+.voice-trait-actions {
+  display: flex;
+  gap: 6px;
+  flex: none;
+}
+.voice-trait-pill-confirm,
+.voice-trait-pill-contest {
+  padding: 6px 13px;
+  font-size: 0.78rem;
+}
+.voice-trait-pill-confirm:hover {
+  border-color: var(--accent);
+}
+.voice-trait-pill-contest:hover {
+  border-color: var(--danger);
+}
+.voice-trait-pill-confirm.is-active {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.voice-trait-pill-contest.is-active {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.voice-material-heading {
+  margin: 0 0 10px;
+}
+.voice-material-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 12px;
+}
+.voice-material-card {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.voice-material-card-heading {
+  color: var(--dim);
+  text-transform: uppercase;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+}
+.voice-material-stats {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.voice-material-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.voice-material-stat-value {
+  font-family: var(--font-ui);
+  font-size: 1.3rem;
+}
+.voice-material-stat-label {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+.voice-material-footnote {
+  font-size: 0.78rem;
+  color: var(--dim);
+  font-style: italic;
+  margin-top: 2px;
+}
+
+.voice-coverage-empty {
+  color: var(--muted);
+  font-size: 0.84rem;
+}
+.voice-coverage-row-head {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.82rem;
+  margin-bottom: 5px;
+}
+.voice-coverage-caption {
+  font-family: var(--font-ui);
+  color: var(--muted);
+}
+.voice-coverage-track {
+  height: 3px;
+  border-radius: var(--r-pill);
+  background: var(--line2);
+  overflow: hidden;
+}
+.voice-coverage-fill {
+  width: 100%;
+  height: 100%;
+  background: var(--accent);
+  border-radius: var(--r-pill);
+  transform-origin: left;
+  transition: transform 0.3s var(--ease-standard);
+}
+.voice-coverage-next {
+  border-top: 1px solid var(--line);
+  padding-top: 12px;
+  font-size: 0.84rem;
+  color: var(--muted);
+  line-height: 1.55;
+}
+.voice-coverage-next-eyebrow {
+  color: var(--accent);
+}
+
+.voice-consent-panel {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  padding: 18px;
+}
+.voice-consent-body {
+  flex: 1;
+  min-width: 220px;
+}
+.voice-consent-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+.voice-consent-title.is-revoked {
+  color: var(--danger);
+}
+.voice-consent-meta {
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin-top: 2px;
+  line-height: 1.5;
+}
+.voice-consent-revoke-btn {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+.voice-consent-revoke-btn:hover {
+  box-shadow: 0 0 12px color-mix(in oklch, var(--danger) 30%, transparent);
+}
+
+.voice-revoke-backdrop {
+  position: fixed;
+  inset: 0;
+  background: color-mix(in oklch, var(--scrim) 60%, transparent);
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.voice-revoke-dialog {
+  max-width: 420px;
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--danger);
+  border-radius: var(--r-lg);
+  padding: 28px;
+  box-shadow: var(--shadow-panel);
+  animation: popIn 0.3s var(--ease-standard);
+}
+.voice-revoke-dialog-eyebrow {
+  color: var(--danger);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  margin-bottom: 10px;
+}
+.voice-revoke-dialog-title {
+  margin-top: 4px;
+}
+.voice-revoke-dialog-body {
+  color: var(--muted);
+  font-size: 0.86rem;
+  line-height: 1.6;
+  margin-top: 14px;
+}
+.voice-revoke-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 22px;
+  flex-wrap: wrap;
+}
+
+.voice-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+  background: var(--surface);
+  border: 1px dashed var(--line);
+  border-radius: var(--r-lg);
+  padding: 24px 16px;
+}
+.voice-empty-state-copy {
+  color: var(--muted);
+  line-height: 1.55;
+  max-width: 220px;
+  font-size: 0.84rem;
+}
+.voice-empty-state-cta {
+  color: var(--accent);
+  cursor: pointer;
+  background: none;
+  border: none;
+  font: inherit;
+}
+
+.voice-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 24px 0;
+}
+.voice-skeleton-ring {
+  width: 96px;
+  height: 96px;
+  border-radius: var(--r-pill);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  animation: breathe 1.6s var(--ease-standard) infinite;
+}
+.voice-skeleton-bar {
+  height: 64px;
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  animation: breathe 1.6s var(--ease-standard) infinite;
+}
+.voice-skeleton-bar.is-narrow {
+  height: 40px;
+}
+
+.voice-error-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 24px;
+  color: var(--muted);
+}
+.voice-error-text {
+  font-size: 0.9rem;
+}

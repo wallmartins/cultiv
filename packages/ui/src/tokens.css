@@ -8,6 +8,10 @@
   --muted: oklch(0.44 0 0);
   --line: oklch(0.885 0 0);
   --frame: oklch(1 0 0);
+  --danger: oklch(0.55 0.16 25);
+  --warning: oklch(0.72 0.14 85);
+  --dim: oklch(0.55 0 0);
+  --scrim: oklch(0 0 0);
 
   --xbg: oklch(0.16 0 0);
   --xsurface: oklch(0.205 0 0);
@@ -30,6 +34,7 @@
   --font-headline: "Instrument Serif", Georgia, "Times New Roman", serif;
   --font-body: "Mona Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-ui: "Fraunces", Georgia, "Times New Roman", serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
   --lh-body: 1.6;
   --ls-body: 0em;
@@ -37,7 +42,7 @@
   --r-sm: 4px; --r-md: 8px; --r-lg: 12px;
   --r-input: 16px; --r-card: 24px; --r-pill: 100px;
   --radius-control: var(--r-md);
-  --radius-panel: var(--r-lg);
+  --radius-panel: var(--r-input);
   --radius-input: var(--r-input);
   --radius-card: var(--r-card);
   --radius-sheet: 18px;
@@ -72,6 +77,8 @@
   --muted: oklch(0.7 0 0);
   --line: oklch(0.285 0 0);
   --frame: oklch(0.08 0 0);
+  --danger: oklch(0.68 0.16 25);
+  --warning: oklch(0.8 0.15 85);
 
   --xbg: oklch(0.99 0 0);
   --xsurface: oklch(0.965 0 0);
@@ -102,6 +109,8 @@
     --muted: oklch(0.7 0 0);
     --line: oklch(0.285 0 0);
     --frame: oklch(0.08 0 0);
+    --danger: oklch(0.68 0.16 25);
+    --warning: oklch(0.8 0.15 85);
 
     --xbg: oklch(0.99 0 0);
     --xsurface: oklch(0.965 0 0);

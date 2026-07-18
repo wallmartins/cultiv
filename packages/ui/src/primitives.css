@@ -22,6 +22,10 @@
 .btn.ghost:hover {
   border-color: var(--accent);
 }
+.btn.ghost.is-danger:hover {
+  border-color: var(--danger);
+  color: var(--danger);
+}
 .btn.solid {
   background: var(--accent);
   color: var(--on-accent);
@@ -50,6 +54,34 @@
 .btn.ghost.wide:hover {
   box-shadow: var(--glow);
 }
+.btn.danger {
+  background: var(--danger);
+  color: var(--bg);
+  border: none;
+  padding: 11px 22px;
+}
+.btn.danger:hover {
+  filter: brightness(0.92);
+}
+.btn.outline {
+  background: none;
+  border: 1px solid var(--line);
+  color: var(--ink);
+  padding: 10px 20px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+.btn.outline:hover {
+  border-color: var(--accent);
+}
+.btn.outline.is-accent {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.btn.outline.is-warning {
+  border-color: var(--warning);
+  color: var(--warning);
+}
 
 .kicker {
   font-size: 10.5px;
@@ -57,6 +89,94 @@
   text-transform: uppercase;
   color: var(--accent);
   font-weight: 400;
+}
+.mono {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.07em;
+}
+.mono.eyebrow {
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-weight: 400;
+}
+.status-dot {
+  display: inline-block;
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: var(--r-pill);
+  border: 1px solid transparent;
+}
+.status-dot.is-live {
+  background: var(--accent);
+  animation: breathe 1.6s var(--ease-standard) infinite;
+}
+.status-dot.is-neutral {
+  background: none;
+  border-color: var(--dim);
+}
+.status-dot.is-danger {
+  background: var(--danger);
+}
+.status-dot.is-accent {
+  background: var(--accent);
+}
+.status-dot.is-warning {
+  background: var(--warning);
+}
+.status-dot.is-pulse {
+  animation: breathe 1.6s var(--ease-standard) infinite;
+}
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-panel);
+}
+.panel.is-dialog {
+  box-shadow: var(--shadow-panel);
+}
+.banner {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-sm);
+  padding: var(--sp-sm) var(--sp-md);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-panel);
+  background: var(--surface);
+}
+.banner .icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+}
+.banner .label {
+  flex: 1;
+}
+.banner .action {
+  flex: none;
+}
+.banner.is-warning {
+  border-color: var(--warning);
+}
+.banner.is-warning .label {
+  color: var(--warning);
+}
+.banner.is-danger {
+  border-color: var(--danger);
+}
+.banner.is-danger .label {
+  color: var(--danger);
+}
+.banner.is-accent {
+  border-color: var(--accent);
+}
+.banner.is-accent .label {
+  color: var(--accent);
+}
+.banner.is-glow {
+  box-shadow: var(--glow-soft);
 }
 .fine {
   font-size: 11px;
@@ -97,6 +217,22 @@
 .chip:hover {
   border-color: var(--accent);
   color: var(--accent);
+}
+.chip.is-accent {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.chip.is-neutral {
+  border-color: var(--line);
+  color: var(--muted);
+}
+.chip.is-danger {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+.chip.is-mono {
+  font-family: var(--font-mono);
+  letter-spacing: 0.05em;
 }
 .theme-toggle {
   display: flex;
