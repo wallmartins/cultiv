@@ -38,6 +38,14 @@ export type {
   BillingCreateCheckoutInput,
   BillingGetEntitlementInput
 } from "./billing.js";
+export type {
+  AccountClient,
+  AccountDeleteInput,
+  AccountExportBundle,
+  AccountExportJobInput,
+  AccountRequestExportInput,
+  AccountResetInput
+} from "./account.js";
 
 export {
   ClientSdkService,
