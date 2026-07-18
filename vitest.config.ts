@@ -32,7 +32,9 @@ export default defineConfig({
       '@': resolve(rootDir, 'src'),
       '~': resolve(rootDir, 'apps/web/src'),
       '@tanstack/react-router': resolve(rootDir, 'apps/web/node_modules/@tanstack/react-router'),
-      '@auth0/auth0-react': resolve(rootDir, 'apps/web/node_modules/@auth0/auth0-react')
+      '@auth0/auth0-react': resolve(rootDir, 'apps/web/node_modules/@auth0/auth0-react'),
+      '@tanstack/react-query': resolve(rootDir, 'apps/web/node_modules/@tanstack/react-query'),
+      zustand: resolve(rootDir, 'apps/web/node_modules/zustand')
     }
   }
 });
