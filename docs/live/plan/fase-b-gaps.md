@@ -12,7 +12,7 @@ Após investigação adversarial (1 investigador read-only por GAP) + implementa
 | **#13** citações material-base | GO — client que descriptografa já injetado no voice-service | **RESOLVIDO** — `samples[]` lidos live via `listByUser` no `getProfileScreen`, sem persistência/migração |
 | **#12** reabrir passo | Manter forward-only na v1 (padrão "Recalibrar = nova sessão", ADR 0005 §3) | **DEFERIDO** (reopen) + CTA "Reescrever esta amostra" → "Ver esta amostra" (era affordance enganosa). Único caso real: free-tier (`maxWizards:1`, sem Recalibrar) — decisão de produto. |
 | **#6** reativação | Cancel do ASAAS é `DELETE` imediato — nada a reverter; re-checkout é o correto (bate com contract-03 v1) | **WON'T-FIX v1** — fallback banner→/plans mantido. Ver **#15** (bug adjacente do webhook Stripe). |
-| **#14** intent na ambiguidade | Nenhuma correção mecânica cabe na ADR 0004 | **DECISÃO PENDENTE** — (b) endpoint LLM-reclassify como addendum à ADR 0004, ou (c) aceitar o risco (status quo). |
+| **#14** intent na ambiguidade | Nenhuma correção mecânica cabe na ADR 0004 | **FECHADO — risco aceito v1** (2026-07-18). Decisão do usuário: manter a resposta como contexto/keyPoints; corrigir o intent exigiria endpoint LLM-reclassify (addendum à ADR 0004 + eval), não vale p/ v1. |
 
 ## GAP #6 (continuação) — "Reativar assinatura" sem contrato
 
@@ -78,7 +78,7 @@ Não existe, em nenhum lugar desse serviço, uma transição pra reabrir um pass
 
 ---
 
-## GAP #14 (novo) — pergunta de ambiguidade não tem como corrigir o `intent` no front
+## GAP #14 (novo) — ⏹️ FECHADO / risco aceito v1 (2026-07-18) — pergunta de ambiguidade não tem como corrigir o `intent` no front
 
 **Onde dói:** `apps/web/src/routes/generate.tsx` (~:78-83 no `previewInput`, ~:156 no `handleGenerate`) sempre envia o `intent` originalmente inferido (`prefill.intent`); a resposta da pergunta de ambiguidade (`generate-view.ts` `buildGuidedSteps`, step `kind: "ambiguity"`) é texto livre e cai em `keyPoints[]` via `buildBriefing` — nunca substitui/corrige o `intent` enviado.
 

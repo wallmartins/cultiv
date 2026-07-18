@@ -77,8 +77,8 @@ export function GenerateContainer() {
   const currentStep = steps[qIndex];
   const briefing = buildBriefing(theme, steps, answers);
 
-  // ponytail: intent is always the original inference here (and in handleGenerate below) — the
-  // ambiguity step's answer never corrects it (GAP #14, docs/live/plan/fase-b-gaps.md).
+  // intent stays the original inference here (and in handleGenerate below) — the ambiguity answer
+  // is drafting context, not an intent correction. Accepted risk for v1 (GAP #14, closed).
   const previewInput: GenerationPreviewRequest = {
     intent: prefill?.intent,
     scope: channel ? { ...(prefill?.scope ?? defaultScope(prefill?.intent)), channel } : prefill?.scope,

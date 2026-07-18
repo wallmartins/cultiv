@@ -57,9 +57,9 @@ export function buildGuidedSteps(
   const steps: GuidedStep[] = [];
 
   if (intentAmbiguity?.ambiguous && intentAmbiguity.alternative && intent) {
-    // ponytail: the answer to this step still can't correct `intent` — no contract carries a
-    // free-text answer back to a resolution, and ADR 0004 rejects a chip/choice UI here. See
-    // docs/live/plan/fase-b-gaps.md GAP #14.
+    // The answer to this step feeds keyPoints (context for drafting) but does not correct `intent`:
+    // ADR 0004 rejects a chip/choice UI here and no contract reclassifies a free-text answer. This
+    // is an accepted-risk decision for v1 (GAP #14, closed in docs/live/plan/fase-b-gaps.md).
     steps.push({
       kind: "ambiguity",
       id: "ambiguity",
