@@ -2,6 +2,18 @@
 
 > Numeração continua a série de GAPs já usada em `.scratch/implementacao-app-web/research/breakdown-*.md` (GAP #1–#10). Este arquivo é o registro vivo em `docs/live/plan/` — a pasta `.scratch/` é só o research original, não é atualizada.
 
+## Status (2026-07-18)
+
+Após investigação adversarial (1 investigador read-only por GAP) + implementação:
+
+| GAP | Veredicto | Estado |
+| :-- | :-- | :-- |
+| **#11** custo de estorno | GO — o número já era calculado no enqueue e descartado | **RESOLVIDO** — `reservedCredits` threaded contrato→enqueue→mapper→front; `LongTimeoutWatch` mostra o valor real |
+| **#13** citações material-base | GO — client que descriptografa já injetado no voice-service | **RESOLVIDO** — `samples[]` lidos live via `listByUser` no `getProfileScreen`, sem persistência/migração |
+| **#12** reabrir passo | Manter forward-only na v1 (padrão "Recalibrar = nova sessão", ADR 0005 §3) | **DEFERIDO** (reopen) + CTA "Reescrever esta amostra" → "Ver esta amostra" (era affordance enganosa). Único caso real: free-tier (`maxWizards:1`, sem Recalibrar) — decisão de produto. |
+| **#6** reativação | Cancel do ASAAS é `DELETE` imediato — nada a reverter; re-checkout é o correto (bate com contract-03 v1) | **WON'T-FIX v1** — fallback banner→/plans mantido. Ver **#15** (bug adjacente do webhook Stripe). |
+| **#14** intent na ambiguidade | Nenhuma correção mecânica cabe na ADR 0004 | **DECISÃO PENDENTE** — (b) endpoint LLM-reclassify como addendum à ADR 0004, ou (c) aceitar o risco (status quo). |
+
 ## GAP #6 (continuação) — "Reativar assinatura" sem contrato
 
 **Onde dói:** `packages/ui/app/billing/PlanCard.tsx` não tem CTA de reativação; `BillingRoute` (`apps/web/src/routes/billing.tsx`) cai no fallback de banner (`bannerActionFor` → `openPortal`/`goPlans`) para o estado `canceled` em vez de um botão dedicado "Reativar assinatura →".
@@ -17,7 +29,7 @@
 
 ---
 
-## GAP #11 (novo) — Valor de estorno em `LongTimeoutWatch` sem contrato
+## GAP #11 (novo) — ✅ RESOLVIDO (2026-07-18) — Valor de estorno em `LongTimeoutWatch` sem contrato
 
 **Onde dói:** `packages/ui/app/states/LongTimeoutWatch.tsx` (view do watch de execução após 2 min) — o botão de cancelar precisa comunicar quanto será estornado ao usuário.
 
@@ -52,7 +64,7 @@ Não existe, em nenhum lugar desse serviço, uma transição pra reabrir um pass
 
 ---
 
-## GAP #13 (novo) — `VoiceMaterialBaseBreakdownSchema` só carrega contagens, nunca o texto das amostras
+## GAP #13 (novo) — ✅ RESOLVIDO (2026-07-18) — `VoiceMaterialBaseBreakdownSchema` só carrega contagens, nunca o texto das amostras
 
 **Onde dói:** `packages/ui/app/voice/MaterialBaseSamples.tsx` renderiza tiles de contagem (total/ativos/excluídos/fixados) em vez das citações das amostras que o design pede — o mock/spec (`.scratch/implementacao-app-web/issues/10-breakdown-voz.md`: "material-base (4 amostras read-only + cobertura + próximo passo)") quer trechos citados de verdade (`samples: {q, meta}[]`), não só contagens agregadas.
 
@@ -79,3 +91,16 @@ Além disso, ADR 0004 (`docs/adr/0004-theme-first-generation-flow.md:21,61`) dei
 **Falta:**
 - Contrato: um campo (ex.: em `MeExecutionRequest`) que carregue a resposta do usuário — ou já um intent escolhido — de volta pro backend, OU um endpoint que receba `{theme, answer}` e devolva um intent confirmado/corrigido.
 - Front (quando o contrato existir): `packages/shared/src/stores/wizard-session.ts` ganha uma ação tipo `setIntentOverride(intent)`; `apps/web/src/routes/generate.tsx` passa a usar esse intent corrigido no preview e no `handleGenerate`.
+
+---
+
+## GAP #15 (novo) — sinal de "un-cancel" do webhook Stripe é descartado
+
+**Onde dói:** um usuário que reativa a assinatura pelo próprio Stripe Customer Portal (desfaz o `cancel_at_period_end`) não vê o `status` local voltar de `"canceled"` para `"active"` — fica preso até a próxima fatura de renovação se auto-corrigir.
+
+**Causa raiz:** `apps/backend/.../stripe-adapter.ts:135-139` só emite sinal quando `cancel_at_period_end === true` (comentário: "só a intenção de cancelar… produz sinal aqui"); o evento `customer.subscription.updated` com `cancel_at_period_end: false` (reativação via portal) é silenciosamente ignorado.
+
+**Achado adjacente** ao investigar #6 (não é o que o #6 pedia). Independente e bem-escopado.
+
+**Falta:**
+- Backend: no parser do webhook Stripe, tratar `cancel_at_period_end: false` → emitir um sinal de resume/active que reconcilia o `status` local. Pequeno, sem migração.
