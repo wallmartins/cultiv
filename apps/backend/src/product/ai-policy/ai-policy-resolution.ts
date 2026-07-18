@@ -8,6 +8,7 @@ import {
 } from "./ai-policy-version-index.js";
 import type {
   BillingPlanTier,
+  ExecutionEntryInput,
   ResolvedExecutionSnapshot,
   ResolvedPricingEnvelope
 } from "./ai-policy-types.js";
@@ -47,7 +48,7 @@ export function resolvePolicyPricing(args: {
 export function resolvePolicyExecutionSnapshot(args: {
   readonly index: ResolvedPolicyVersionIndex;
   readonly policyVersion: string;
-  readonly request: import("@my-ai-orchestrator/contracts").PipelineRequest;
+  readonly request: ExecutionEntryInput;
   readonly planTier: BillingPlanTier;
   readonly executionMode: import("@my-ai-orchestrator/contracts").ExecutionMode;
   readonly qualityMode: import("@my-ai-orchestrator/contracts").QualityMode;
