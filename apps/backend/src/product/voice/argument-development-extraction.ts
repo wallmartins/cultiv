@@ -9,28 +9,51 @@ import {
 } from "@my-ai-orchestrator/contracts";
 import type { BackendProviderTransport } from "../../execution/pipeline/provider-transport.js";
 import type { AIPolicyProviderModelAttempt } from "../ai-policy/ai-policy-types.js";
-import {
-  isLikelyPortugueseText,
-  resolveReasoningOutputLanguage,
-  type ReasoningOutputLanguage
-} from "./reasoning-extraction.js";
 import { ArgumentDevelopmentExtractionError } from "./voice-extraction-errors.js";
-import { parseJsonFromLlmResponse } from "./voice-extraction-json.js";
-import { resolveWizardStepId } from "./wizard-voice-examples.js";
 import {
   ANTI_TOPIC_EXTRACTION_RULES,
-  TOPIC_LEAKAGE_RETRY_SUFFIX,
-  detectTopicLeakage,
   formatBriefForPrompt,
   type VoiceSignatureBrief
 } from "./voice-signature-brief.js";
+import {
+  buildExampleBlocks,
+  dedupeStrings,
+  resolveLanguageInstruction,
+  resolveReasoningOutputLanguage,
+  runSignatureExtraction,
+  type ReasoningOutputLanguage,
+  type SignatureExtractionConfig
+} from "./voice-signature-extraction.js";
 
 export { ArgumentDevelopmentExtractionError } from "./voice-extraction-errors.js";
 
-const decodeDevelopmentExtraction = Schema.decodeUnknown(ArgumentDevelopmentExtractionResultSchema);
-
 const LANGUAGE_RETRY_SUFFIX =
   "\n\nRETRY: Your previous JSON used the wrong language. Rewrite developmentProse in Brazilian Portuguese. Do not use English in developmentProse.";
+
+const argumentDevelopmentExtractionConfig: SignatureExtractionConfig<
+  ArgumentDevelopmentExtractionResult,
+  ArgumentDevelopmentExtractionError
+> = {
+  purpose: "argument-development-extraction",
+  buildMessages: (examples, outputLanguage, brief) => ({
+    system: buildDevelopmentExtractionSystemPrompt(outputLanguage),
+    user: buildDevelopmentExtractionPrompt(examples, outputLanguage, brief)
+  }),
+  decode: Schema.decodeUnknown(ArgumentDevelopmentExtractionResultSchema),
+  normalize: normalizeDevelopmentExtractionResult,
+  selectProse: (result) => result.development.developmentProse,
+  languageRetrySuffix: LANGUAGE_RETRY_SUFFIX,
+  makeError: (message) => new ArgumentDevelopmentExtractionError({ message }),
+  failMessage: "Argument development extraction failed",
+  precondition: (activeExamples) =>
+    activeExamples.length < 2
+      ? Effect.fail(
+          new ArgumentDevelopmentExtractionError({
+            message: "At least two active examples are required for development extraction"
+          })
+        )
+      : Effect.void
+};
 
 export function extractArgumentDevelopmentSignature(args: {
   readonly examples: readonly VoiceExampleRecord[];
@@ -39,81 +62,7 @@ export function extractArgumentDevelopmentSignature(args: {
   readonly providerTransport: BackendProviderTransport;
   readonly brief?: VoiceSignatureBrief;
 }): Effect.Effect<ArgumentDevelopmentExtractionResult, ArgumentDevelopmentExtractionError> {
-  return Effect.gen(function* () {
-    const activeExamples = args.examples.filter((example) => example.state === "active");
-    if (activeExamples.length < 2) {
-      return yield* Effect.fail(
-        new ArgumentDevelopmentExtractionError({
-          message: "At least two active examples are required for development extraction"
-        })
-      );
-    }
-
-    const outputLanguage = resolveReasoningOutputLanguage(activeExamples);
-    const systemPrompt = buildDevelopmentExtractionSystemPrompt(outputLanguage);
-    let userPrompt = buildDevelopmentExtractionPrompt(activeExamples, outputLanguage, args.brief);
-
-    let lastError: ArgumentDevelopmentExtractionError | undefined;
-
-    for (const attempt of args.attempts) {
-      for (let languageRetry = 0; languageRetry < 2; languageRetry += 1) {
-        const completion = yield* Effect.either(
-          args.aiAdapters.complete({
-            request: {
-              provider: attempt.provider,
-              model: attempt.model,
-              messages: [
-                { role: "system", content: systemPrompt },
-                { role: "user", content: userPrompt }
-              ],
-              temperature: 0.2,
-              metadata: {
-                purpose: "argument-development-extraction",
-                adapter: attempt.provider,
-                model: attempt.model,
-                ...(typeof attempt.timeoutMs === "number" ? { timeoutMs: attempt.timeoutMs } : {})
-              }
-            },
-            transport: args.providerTransport.complete
-          })
-        );
-
-        if (completion._tag === "Left") {
-          lastError = new ArgumentDevelopmentExtractionError({ message: completion.left.message });
-          break;
-        }
-
-        const parsed = yield* parseDevelopmentExtractionResponse(completion.right.response.text).pipe(Effect.either);
-        if (parsed._tag === "Left") {
-          lastError = parsed.left;
-          break;
-        }
-
-        if (
-          outputLanguage.primary === "pt"
-          && languageRetry === 0
-          && !isLikelyPortugueseText(parsed.right.development.developmentProse)
-        ) {
-          userPrompt = `${buildDevelopmentExtractionPrompt(activeExamples, outputLanguage, args.brief)}${LANGUAGE_RETRY_SUFFIX}`;
-          continue;
-        }
-
-        if (
-          languageRetry === 0
-          && detectTopicLeakage(parsed.right.development.developmentProse, activeExamples)
-        ) {
-          userPrompt = `${buildDevelopmentExtractionPrompt(activeExamples, outputLanguage, args.brief)}${TOPIC_LEAKAGE_RETRY_SUFFIX}`;
-          continue;
-        }
-
-        return normalizeDevelopmentExtractionResult(parsed.right);
-      }
-    }
-
-    return yield* Effect.fail(
-      lastError ?? new ArgumentDevelopmentExtractionError({ message: "Argument development extraction failed" })
-    );
-  });
+  return runSignatureExtraction(argumentDevelopmentExtractionConfig, args);
 }
 
 export function buildDevelopmentExtractionMessages(
@@ -129,26 +78,6 @@ export function buildDevelopmentExtractionMessages(
   };
 }
 
-function parseDevelopmentExtractionResponse(
-  content: string
-): Effect.Effect<ArgumentDevelopmentExtractionResult, ArgumentDevelopmentExtractionError> {
-  return Effect.gen(function* () {
-    const parsed = yield* parseJsonFromLlmResponse(content).pipe(
-      Effect.mapError((message) => new ArgumentDevelopmentExtractionError({ message }))
-    );
-    const decoded = yield* decodeDevelopmentExtraction(parsed).pipe(
-      Effect.mapError(
-        (error) =>
-          new ArgumentDevelopmentExtractionError({
-            message: error instanceof Error ? error.message : "Invalid argument development extraction schema"
-          })
-      )
-    );
-
-    return normalizeDevelopmentExtractionResult(decoded);
-  });
-}
-
 function normalizeDevelopmentExtractionResult(
   result: ArgumentDevelopmentExtractionResult
 ): ArgumentDevelopmentExtractionResult {
@@ -159,10 +88,8 @@ function normalizeDevelopmentExtractionResult(
     ...(result.traitEvidence ? { traitEvidence: result.traitEvidence } : {}),
     development: {
       ...developmentCore,
-      moveLabels: [...new Set(developmentCore.moveLabels.map((item) => item.trim()).filter(Boolean))],
-      structuralAntiPatterns: [
-        ...new Set(developmentCore.structuralAntiPatterns.map((item) => item.trim()).filter(Boolean))
-      ],
+      moveLabels: dedupeStrings(developmentCore.moveLabels),
+      structuralAntiPatterns: dedupeStrings(developmentCore.structuralAntiPatterns),
       transitionTendencies: developmentCore.transitionTendencies.filter(
         (tendency) => tendency.from.trim().length > 0 && tendency.to.trim().length > 0
       )
@@ -175,14 +102,6 @@ function buildDevelopmentExtractionPrompt(
   outputLanguage: ReasoningOutputLanguage,
   brief?: VoiceSignatureBrief
 ): string {
-  const exampleBlocks = examples
-    .map((example, index) => {
-      const stepId = resolveWizardStepId(example);
-      const stepLabel = stepId ? `, step: ${stepId}` : "";
-      return `Example ${index + 1} (language: ${example.language}${stepLabel}):\n${example.text.trim()}`;
-    })
-    .join("\n\n");
-
   return [
     `Dominant example language: ${outputLanguage.bcp47} (${outputLanguage.label}).`,
     `Write developmentProse and moveLabels in ${outputLanguage.label}.`,
@@ -193,24 +112,16 @@ function buildDevelopmentExtractionPrompt(
     ANTI_TOPIC_EXTRACTION_RULES,
     brief ? formatBriefForPrompt(brief) : "",
     "Return JSON only matching the agreed schema.",
-    resolveDevelopmentLanguageInstruction(outputLanguage),
+    resolveLanguageInstruction(outputLanguage, {
+      pt: "CRITICAL: developmentProse and moveLabels MUST be written in Brazilian Portuguese (pt-BR). Use short snake_case slugs in Portuguese (for example experiencia_vivida, duvida) or natural Portuguese phrases — never English move labels when examples are Portuguese.",
+      en: "CRITICAL: developmentProse and moveLabels MUST be written in English.",
+      fallback: "CRITICAL: developmentProse and moveLabels MUST match the majority example language."
+    }),
     "",
-    exampleBlocks
+    buildExampleBlocks(examples)
   ]
     .filter((section) => section.length > 0)
     .join("\n");
-}
-
-function resolveDevelopmentLanguageInstruction(outputLanguage: ReasoningOutputLanguage): string {
-  if (outputLanguage.primary === "pt") {
-    return "CRITICAL: developmentProse and moveLabels MUST be written in Brazilian Portuguese (pt-BR). Use short snake_case slugs in Portuguese (for example experiencia_vivida, duvida) or natural Portuguese phrases — never English move labels when examples are Portuguese.";
-  }
-
-  if (outputLanguage.primary === "en") {
-    return "CRITICAL: developmentProse and moveLabels MUST be written in English.";
-  }
-
-  return "CRITICAL: developmentProse and moveLabels MUST match the majority example language.";
 }
 
 function buildDevelopmentExtractionSystemPrompt(outputLanguage: ReasoningOutputLanguage): string {
