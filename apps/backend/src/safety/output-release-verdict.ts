@@ -26,6 +26,9 @@ export function requireAllowedOutputDecision(
   );
 }
 
+// ponytail: `require_override` stays in this return union as a reserved output-release
+// outcome; the runtime never produces it yet — a consumed operator-override grant is not
+// wired back into this gate decision. See createBackendOperationalOverrideService.
 export function determineOutputReleaseOutcome(args: {
   readonly findings: readonly OutputReleaseFinding[];
   readonly hasUnsafeCode: boolean;

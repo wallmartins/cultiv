@@ -55,8 +55,6 @@ export type {
 
 export {
   createManualGateway,
-  createStripeGateway,
-  createAsaasGateway,
   createStripeGatewayAdapter,
   createAsaasGatewayAdapter,
   mapStripeEvent,

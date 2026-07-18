@@ -4,9 +4,9 @@ import {
   BillingPlanNotFoundError,
   createBillingRepository,
   createBillingService,
-  createStripeGateway,
   defineBillingPlan
 } from "../../packages/payments/src/index.js";
+import { createStripeGateway } from "./stub-gateways.js";
 import { dispatchGatewayWebhookEvent } from "../../packages/payments/src/gateway/webhook-dispatch.js";
 
 describe("dispatchGatewayWebhookEvent", () => {

@@ -1,6 +1,12 @@
 import { Effect } from "effect";
-import { BillingGatewayError, BillingGatewayWebhookVerificationError } from "../errors.js";
-import type { BillingGatewayAdapter } from "./types.js";
+import {
+  BillingGatewayError,
+  BillingGatewayWebhookVerificationError,
+  type BillingGatewayAdapter
+} from "../../packages/payments/src/index.js";
+
+// Test-only fake BillingGatewayAdapter: paid charges succeed, everything else is "not implemented".
+// Lives here (not in the package) so production never ships a stub gateway.
 
 export function createStripeGateway(): BillingGatewayAdapter {
   return {

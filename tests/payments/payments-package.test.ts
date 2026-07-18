@@ -7,18 +7,17 @@ import {
   BillingTopUpPackageNotFoundError,
   calculateDebitForMode,
   calculateRolloverCredits,
-  createAsaasGateway,
   createBillingEntitlement,
   createBillingRepository,
   createBillingService,
   createBillingServiceLayer,
   createManualGateway,
-  createStripeGateway,
   defineBillingPlan,
   listBillingFeatures,
   resolveDefaultPlanId,
   withBilling
 } from "../../packages/payments/src/index.js";
+import { createAsaasGateway, createStripeGateway } from "./stub-gateways.js";
 
 describe("payments package", () => {
   it("defines billing plans and derives entitlements", () => {
