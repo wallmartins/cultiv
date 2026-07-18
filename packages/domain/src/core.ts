@@ -50,6 +50,7 @@ export interface LanguageProfile extends Entity<string> {
 }
 
 export interface Job extends Entity {
+  userId: string;
   status: JobStatus;
   pipelineId?: string;
   executionMode: ExecutionMode;

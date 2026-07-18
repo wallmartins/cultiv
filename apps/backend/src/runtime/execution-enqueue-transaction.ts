@@ -88,6 +88,7 @@ export function buildExecutionJobRecord(input: {
 
   return {
     id: input.jobId,
+    userId: input.runtime.userId,
     status: "queued",
     executionMode: input.plan.request.executionMode,
     contentType: input.plan.contentType.id,

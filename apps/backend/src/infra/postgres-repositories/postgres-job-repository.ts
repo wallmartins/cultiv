@@ -35,6 +35,7 @@ function serializeJob(record: JobRecord) {
 
   return {
     id: record.id,
+    user_id: record.userId,
     data: JSON.stringify({ ...record, briefingTopic }),
     version: record.version,
     created_at: record.createdAt,
@@ -44,13 +45,20 @@ function serializeJob(record: JobRecord) {
 
 function parseJob(row: {
   id: string;
+  user_id: string | null;
   data: unknown;
   version: number;
   created_at: string;
   updated_at: string;
 }): JobRecord {
   const parsed = parseStoredJsonRecord<JobRecord>(row.data);
-  return { ...parsed, version: row.version, createdAt: row.created_at, updatedAt: row.updated_at };
+  return {
+    ...parsed,
+    userId: parsed.userId ?? row.user_id ?? "anonymous",
+    version: row.version,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at
+  };
 }
 
 export function createPostgresJobRepository(

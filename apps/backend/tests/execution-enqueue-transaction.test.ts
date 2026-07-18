@@ -115,6 +115,7 @@ describe("execution enqueue transaction builders", () => {
       })
     ).toEqual({
       id: "job-1",
+      userId: "user-42",
       status: "queued",
       executionMode: plan.request.executionMode,
       contentType: plan.contentType.id,

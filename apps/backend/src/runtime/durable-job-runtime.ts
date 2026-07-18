@@ -178,6 +178,7 @@ export function createDurableJobRuntime(options: DurableJobRuntimeOptions): Dura
         yield* options.database.jobs.create(
           {
             id: jobId,
+            userId,
             status: "queued",
             executionMode: "async",
             contentType,
@@ -203,12 +204,6 @@ export function createDurableJobRuntime(options: DurableJobRuntimeOptions): Dura
             ]
           }
         );
-
-        yield* Effect.tryPromise({
-          try: () =>
-            options.postgres.updateTable("jobs").set({ user_id: userId }).where("id", "=", jobId).execute(),
-          catch: () => undefined
-        }).pipe(Effect.catchAll(() => Effect.void));
 
         const event: BackendJobEvent = {
           type: "progress",
