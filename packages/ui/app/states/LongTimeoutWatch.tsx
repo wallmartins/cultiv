@@ -4,14 +4,13 @@ export interface LongTimeoutWatchProps {
   readonly theme: string;
   readonly progress: number;
   readonly elapsed: string;
+  readonly refundCredits?: number;
   readonly onCancel: () => void;
   readonly onWait: () => void;
 }
 
 // 1b — the live-progress view once the watch passes 2/5 min (breakdown-15 §1).
-// The refund amount itself has no home on ExecutionStatusView (no reservedCredits/cost field —
-// GAP registered in docs/live/plan/fase-b-gaps.md) — the copy stays honest instead of a fabricated number.
-export function LongTimeoutWatch({ theme, progress, elapsed, onCancel, onWait }: LongTimeoutWatchProps) {
+export function LongTimeoutWatch({ theme, progress, elapsed, refundCredits, onCancel, onWait }: LongTimeoutWatchProps) {
   return (
     <div
       style={{
@@ -45,7 +44,11 @@ export function LongTimeoutWatch({ theme, progress, elapsed, onCancel, onWait }:
       </Panel>
 
       <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-        <Pill variant="secondary" onClick={onCancel}>Cancelar e estornar os créditos reservados</Pill>
+        <Pill variant="secondary" onClick={onCancel}>
+          {refundCredits !== undefined
+            ? `Cancelar e estornar ${refundCredits} crédito${refundCredits === 1 ? "" : "s"}`
+            : "Cancelar e estornar os créditos reservados"}
+        </Pill>
         <Pill variant="primary" onClick={onWait} style={{ padding: "8px 16px", fontSize: "0.84rem" }}>
           Continuar esperando →
         </Pill>

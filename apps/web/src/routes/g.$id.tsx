@@ -39,6 +39,7 @@ export function ExecutionDetailContainer() {
           theme={execution.briefingTopic ?? ""}
           progress={(execution.progress?.percent ?? 0) / 100}
           elapsed={formatElapsed(execution.createdAt, now)}
+          refundCredits={execution.reservedCredits}
           onCancel={() => cancelMutation.mutate(undefined)}
           onWait={() => setTimeoutAcknowledged(true)}
         />

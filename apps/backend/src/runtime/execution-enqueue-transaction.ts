@@ -32,6 +32,7 @@ export interface ExecutionRuntimePayload {
   readonly pricingEnvelope?: ResolvedPricingEnvelope;
   readonly simulateCredits?: boolean;
   readonly creditReservationId?: string;
+  readonly reservedCredits?: number;
 }
 
 export interface ExecutionJobDocument {
@@ -179,6 +180,7 @@ export async function runExecutionEnqueueTransaction(
 
   await deps.postgres.transaction().execute(async (trx) => {
     let creditReservationId: string | undefined;
+    let reservedCredits: number | undefined;
 
     if (!input.simulateCredits) {
       const txnBilling = createBillingService({ repository: deps.billingRepository });
@@ -202,6 +204,7 @@ export async function runExecutionEnqueueTransaction(
         )
       );
       creditReservationId = reservation.reservationId;
+      reservedCredits = reservation.reservedCredits;
       await Effect.runPromise(
         persistBillingUserSliceInTransaction(trx, deps.billingRepository, userId)
       );
@@ -209,7 +212,8 @@ export async function runExecutionEnqueueTransaction(
 
     const runtime: ExecutionRuntimePayload = {
       ...runtimeBase,
-      creditReservationId
+      creditReservationId,
+      reservedCredits
     };
 
     const record = buildExecutionJobRecord({

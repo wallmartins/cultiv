@@ -136,7 +136,8 @@ describe("execution detail (S4)", () => {
         status: "running",
         createdAt,
         progress: { currentStep: "draft", stepIndex: 1, totalSteps: 4, percent: 55 },
-        briefingTopic: "Por que abandonei o roadmap trimestral"
+        briefingTopic: "Por que abandonei o roadmap trimestral",
+        reservedCredits: 3
       })
     );
 
@@ -144,6 +145,7 @@ describe("execution detail (S4)", () => {
 
     expect(await screen.findByText(/Por que abandonei o roadmap trimestral · há 3 min/)).toBeInTheDocument();
     expect(screen.getByText("Continuar esperando →")).toBeInTheDocument();
+    expect(screen.getByText("Cancelar e estornar 3 créditos")).toBeInTheDocument();
 
     fireEvent.click(screen.getByText("Continuar esperando →"));
     expect(await screen.findByText("escrevendo com a sua voz…")).toBeInTheDocument();

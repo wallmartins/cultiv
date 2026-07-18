@@ -61,7 +61,8 @@ export const JobStatusResponseSchema = Schema.Struct({
   briefingTopic: Schema.optional(Schema.String),
   lengthTier: Schema.optional(GenerationLengthTierSchema),
   channel: Schema.optional(GenerationChannelSchema),
-  reaction: Schema.optional(Schema.NullOr(ExecutionReactionViewSchema))
+  reaction: Schema.optional(Schema.NullOr(ExecutionReactionViewSchema)),
+  reservedCredits: Schema.optional(Schema.Number)
 });
 export type JobStatusResponse = typeof JobStatusResponseSchema.Type;
 
@@ -124,7 +125,8 @@ export const ExecutionStatusViewSchema = Schema.Struct({
   briefingTopic: Schema.optional(Schema.String),
   lengthTier: Schema.optional(GenerationLengthTierSchema),
   channel: Schema.optional(GenerationChannelSchema),
-  reaction: Schema.optional(Schema.NullOr(ExecutionReactionViewSchema))
+  reaction: Schema.optional(Schema.NullOr(ExecutionReactionViewSchema)),
+  reservedCredits: Schema.optional(Schema.Number)
 });
 export type ExecutionStatusView = typeof ExecutionStatusViewSchema.Type;
 

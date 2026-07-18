@@ -41,6 +41,22 @@ describe("edge states (S10a) — mount + no jargon", () => {
     expect(screen.getByText("Continuar esperando →")).toBeInTheDocument();
   });
 
+  it("LongTimeoutWatch — refundCredits absent falls back to the generic honest copy", () => {
+    render(<LongTimeoutWatch theme="tema" progress={0.5} elapsed="há 3 min" onCancel={noop} onWait={noop} />);
+    expect(screen.getByText("Cancelar e estornar os créditos reservados")).toBeInTheDocument();
+  });
+
+  it("LongTimeoutWatch — refundCredits present renders the real reserved amount", () => {
+    render(<LongTimeoutWatch theme="tema" progress={0.5} elapsed="há 3 min" refundCredits={3} onCancel={noop} onWait={noop} />);
+    expect(screen.getByText("Cancelar e estornar 3 créditos")).toBeInTheDocument();
+    expect(screen.queryByText("Cancelar e estornar os créditos reservados")).not.toBeInTheDocument();
+  });
+
+  it("LongTimeoutWatch — refundCredits of 1 uses the singular", () => {
+    render(<LongTimeoutWatch theme="tema" progress={0.5} elapsed="há 3 min" refundCredits={1} onCancel={noop} onWait={noop} />);
+    expect(screen.getByText("Cancelar e estornar 1 crédito")).toBeInTheDocument();
+  });
+
   it("PaymentPendingZeroCredits — plan name and cycle credits come from props", () => {
     render(<PaymentPendingZeroCredits planName="Criador" cycleCredits={30} onRegularize={noop} />);
     expect(screen.getByText(/Não conseguimos cobrar o Criador este mês/)).toBeInTheDocument();
