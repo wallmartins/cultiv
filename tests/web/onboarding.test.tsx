@@ -210,7 +210,7 @@ describe("CalibrationWizard (presentational)", () => {
   });
 
   it("ResultStep — low-confidence success points at the weak sample instead of just the ring", async () => {
-    const onRewrite = vi.fn();
+    const onViewSample = vi.fn();
     await renderWithRouter(
       <CalibrationWizard
         variant="full"
@@ -221,7 +221,7 @@ describe("CalibrationWizard (presentational)", () => {
             state: {
               kind: "success",
               preview: { ringValue: 0.35, ringCaption: "Baixa", headline: "Voz emergente", proseCore: "", descriptorChips: [] },
-              lowConfidence: { weakStepLabel: "Versatilidade", onRewrite },
+              lowConfidence: { weakStepLabel: "Versatilidade", onViewSample },
               onContinue: () => {}
             }
           }
@@ -229,8 +229,8 @@ describe("CalibrationWizard (presentational)", () => {
       />
     );
     expect(screen.getByText(/Versatilidade/)).toBeInTheDocument();
-    fireEvent.click(screen.getByText("Reescrever esta amostra"));
-    expect(onRewrite).toHaveBeenCalledTimes(1);
+    fireEvent.click(screen.getByText("Ver esta amostra"));
+    expect(onViewSample).toHaveBeenCalledTimes(1);
   });
 
   it("ResultStep — error state renders Refazer and calls onRetry", async () => {

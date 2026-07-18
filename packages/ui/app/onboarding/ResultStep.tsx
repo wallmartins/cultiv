@@ -7,7 +7,7 @@ export type ResultStepState =
   | {
       readonly kind: "success";
       readonly preview: VoicePreviewVM;
-      readonly lowConfidence?: { readonly weakStepLabel: string; readonly onRewrite: () => void };
+      readonly lowConfidence?: { readonly weakStepLabel: string; readonly onViewSample: () => void };
       readonly trialLine?: string;
       readonly onContinue: () => void;
     }
@@ -44,7 +44,7 @@ export function ResultStep({ state }: ResultStepProps) {
         <LowConfidenceReview
           preview={state.preview}
           weakStepLabel={state.lowConfidence.weakStepLabel}
-          onRewrite={state.lowConfidence.onRewrite}
+          onViewSample={state.lowConfidence.onViewSample}
           onContinueAnyway={state.onContinue}
         />
       ) : (

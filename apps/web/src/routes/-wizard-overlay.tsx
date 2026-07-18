@@ -139,7 +139,7 @@ export function WizardOverlay() {
       lowConfidence: low
         ? {
             weakStepLabel: low.label,
-            onRewrite: () => {
+            onViewSample: () => {
               setDisplayStepId(low.stepId);
               setResultState(undefined);
             }

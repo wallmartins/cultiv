@@ -187,7 +187,7 @@ export function CalibrateContainer() {
       lowConfidence: low
         ? {
             weakStepLabel: low.label,
-            onRewrite: () => {
+            onViewSample: () => {
               setDisplayStepId(low.stepId);
               setPhase("wizard");
             }
