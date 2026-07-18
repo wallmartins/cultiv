@@ -4,6 +4,7 @@ import type {
   SanitizedGenerationInputEnvelope
 } from "./public-input-safety-types.js";
 import { inputFieldKeys, type InspectableInputRequest } from "./public-input-safety-shared.js";
+import { containsSecretLikeValue, isSecretLikeFieldName } from "./secret-signal.js";
 
 const personalDataPatterns = [
   /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/i,
@@ -26,22 +27,12 @@ const operationalDataPatterns = [
   /\bops[-\s]?only\b/i
 ] as const;
 
-const securitySensitivePatterns = [
-  /\bapi[_\s-]?key\b/i,
-  /\bauthorization:\s*bearer\b/i,
-  /\bsecret[_\s-]?access[_\s-]?key\b/i,
-  /\bpassword\s*[:=]/i,
-  /-----BEGIN [A-Z ]*PRIVATE KEY-----/,
-  /\bssh-rsa\b/
-] as const;
-
 const prohibitedPatterns = [
   /\bcvv\b/i,
   /\bsocial security number\b/i,
   /\bfull card number\b/i
 ] as const;
 
-const securitySensitiveKeyPattern = /(password|secret|token|api[_-]?key|authorization)/i;
 const importedContextMaxLength = 8_000;
 
 interface InspectionResult {
@@ -157,7 +148,7 @@ function inspectValue(value: unknown, fieldPath: string): InspectionResult {
   if (value && typeof value === "object") {
     const findings: InputSafetyGatewayFinding[] = [];
     const sanitizedEntries = Object.entries(value as Record<string, unknown>).map(([key, entryValue]) => {
-      if (securitySensitiveKeyPattern.test(key)) {
+      if (isSecretLikeFieldName(key)) {
         findings.push({
           category: "security_sensitive_data",
           field: `${fieldPath}.${key}`,
@@ -186,7 +177,7 @@ function inspectText(value: string, fieldPath: string): InspectionResult {
   const normalized = normalizeWhitespace(stripMarkup(value));
   const markupSanitized = normalized !== value;
 
-  if (matchesAny(securitySensitivePatterns, normalized)) {
+  if (containsSecretLikeValue(normalized)) {
     return blockedResult("security_sensitive_data", fieldPath, normalized, markupSanitized);
   }
 
