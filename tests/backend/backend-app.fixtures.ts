@@ -55,7 +55,6 @@ export function seedExecutionVoiceState(
       version: 2,
       snapshotId: `voice-profile-snapshot:${userId}:v2`,
       confidence: "high",
-      adaptationMode: "standard",
       primaryLanguage: "pt-BR",
       tone: "direct",
       cadence: "balanced",

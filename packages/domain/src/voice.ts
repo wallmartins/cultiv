@@ -90,7 +90,6 @@ export interface DerivedVoiceProfile extends Entity<string> {
   readonly version: number;
   readonly snapshotId: string;
   readonly confidence: VoiceProfileConfidence;
-  readonly adaptationMode: VoiceAdaptationMode;
   readonly primaryLanguage: string;
   readonly tone: string;
   readonly cadence: string;

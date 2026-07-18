@@ -131,7 +131,6 @@ export const VoiceProfileViewSchema = Schema.Struct({
   snapshotId: Schema.String,
   version: Schema.Number,
   confidence: VoiceProfileConfidenceSchema,
-  adaptationMode: VoiceAdaptationModeSchema,
   primaryLanguage: Schema.String,
   tone: Schema.String,
   cadence: Schema.String,

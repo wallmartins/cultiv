@@ -54,7 +54,6 @@ function seedProfileAndDiagnostics(database: DatabaseClient, userId: string): vo
       version: 1,
       snapshotId: "snapshot_1",
       confidence: "medium",
-      adaptationMode: "standard",
       primaryLanguage: "pt-BR",
       tone: "professional",
       cadence: "balanced",

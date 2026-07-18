@@ -19,7 +19,6 @@ export const voiceProfileFixture: VoiceProfileScreenView = {
     snapshotId: "snapshot-1",
     version: 3,
     confidence: "high",
-    adaptationMode: "standard",
     primaryLanguage: "pt-BR",
     tone: "direto",
     cadence: "curta",

@@ -72,7 +72,6 @@ export function deriveVoiceRebuildState(args: {
     version: args.version,
     snapshotId: `voice-profile-snapshot:${args.userId}:v${args.version}`,
     confidence,
-    adaptationMode: confidence === "low" ? "conservative" : "standard",
     primaryLanguage: resolvePrimaryLanguage(activeExamples),
     tone: resolveTone(activeExamples),
     cadence: resolveCadence(activeExamples),
