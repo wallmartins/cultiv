@@ -5,6 +5,7 @@ import { buildRefinementSkillContext } from "@my-ai-orchestrator/skills";
 import type { GenerationContext, VoiceProfile } from "@my-ai-orchestrator/text-quality";
 import { replaceEmDashesWithCommas } from "@my-ai-orchestrator/text-quality";
 import { normalizeText, stripTemplateHeaders } from "./quality/quality.js";
+import { readGenerationIntent } from "./pipeline-metadata.js";
 import type { BackendSkillOptions } from "./skill-types.js";
 import {
   resolveGenerationDomainLabel,
@@ -191,12 +192,9 @@ function pickGenerationIntent(
     return fromInputs;
   }
 
-  const context = inputs.context;
-  if (typeof context === "object" && context !== null) {
-    const nestedIntent = (context as Record<string, unknown>).generationIntent;
-    if (typeof nestedIntent === "string" && nestedIntent.trim().length > 0) {
-      return nestedIntent;
-    }
+  const nestedIntent = readGenerationIntent(inputs.context);
+  if (nestedIntent) {
+    return nestedIntent;
   }
 
   const fromState = state.generationIntent;
