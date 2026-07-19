@@ -4,28 +4,36 @@ import "@my-ai-orchestrator/ui/primitives.css";
 import "@my-ai-orchestrator/ui/workspace.css";
 import "@my-ai-orchestrator/ui/shell.css";
 
-import { StrictMode, useEffect, useMemo } from "react";
+import { StrictMode, useCallback, useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { Auth0Provider, useAuth0 } from "@auth0/auth0-react";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { RouterProvider } from "@tanstack/react-router";
-import { makeAppRuntime, RuntimeProvider } from "@my-ai-orchestrator/shared";
+import { RuntimeProvider, type AppRuntime } from "@my-ai-orchestrator/shared/light";
 import { captureReturnTo, router, type AppAuth } from "./router.js";
+import { loadRuntime } from "./runtime-loader.js";
 import { queryClient } from "./query-client.js";
 
 function App() {
   const auth0 = useAuth0();
+  const [runtime, setRuntime] = useState<AppRuntime>();
 
-  // Built once (empty deps) — beforeLoad's runtime.runPromise() needs the same instance
-  // RuntimeProvider hands to hooks. getAccessTokenSilently is stable across renders.
-  const runtime = useMemo(
-    () =>
-      makeAppRuntime({
-        baseUrl: import.meta.env.VITE_API_URL,
-        getToken: () => auth0.getAccessTokenSilently()
-      }),
-    []
-  );
+  // Uma promessa memoizada (runtime-loader): beforeLoad e os hooks recebem a MESMA instância, do
+  // contrário haveria dois caches de SDK. getAccessTokenSilently é estável entre renders.
+  const requestRuntime = useCallback(() => loadRuntime(() => auth0.getAccessTokenSilently()), []);
+
+  // Só quem tem sessão precisa do runtime. Visitante sem login é redirecionado pro Auth0 pelo
+  // beforeLoad e nunca paga por Effect/client-sdk.
+  useEffect(() => {
+    if (!auth0.isAuthenticated) return;
+    let alive = true;
+    void requestRuntime().then((loaded) => {
+      if (alive) setRuntime(loaded);
+    });
+    return () => {
+      alive = false;
+    };
+  }, [auth0.isAuthenticated, requestRuntime]);
 
   const auth: AppAuth = {
     isLoading: auth0.isLoading,
@@ -43,15 +51,19 @@ function App() {
     }
   }, [auth0.isLoading, auth.isAuthenticated]);
 
-  if (auth0.isLoading) {
+  // Autenticado sem runtime = ele ainda está descendo; as superfícies leem o runtime pelos hooks,
+  // então montar o router antes disso quebraria a primeira que renderizasse.
+  if (auth0.isLoading || (auth0.isAuthenticated && !runtime)) {
     return <p>Carregando…</p>;
   }
 
+  const routerTree = (
+    <RouterProvider router={router} context={{ queryClient, auth, loadRuntime: requestRuntime }} />
+  );
+
   return (
     <QueryClientProvider client={queryClient}>
-      <RuntimeProvider runtime={runtime}>
-        <RouterProvider router={router} context={{ queryClient, auth, runtime }} />
-      </RuntimeProvider>
+      {runtime ? <RuntimeProvider runtime={runtime}>{routerTree}</RuntimeProvider> : routerTree}
     </QueryClientProvider>
   );
 }

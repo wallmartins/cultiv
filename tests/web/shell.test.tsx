@@ -4,6 +4,7 @@
 import { createMemoryHistory, RouterProvider } from "@tanstack/react-router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render, screen } from "@testing-library/react";
+import { renderAndSettle } from "./render-with-router.js";
 import React from "react";
 import { afterEach, describe, expect, it } from "vitest";
 import { makeAppRuntime, queryKeys, RuntimeProvider, useShellStore, useToastStore } from "@my-ai-orchestrator/shared";
@@ -26,7 +27,7 @@ function renderShell(initialPath: string) {
 
   router.update({
     history: createMemoryHistory({ initialEntries: [initialPath] }),
-    context: { queryClient, auth: mockAuth, runtime }
+    context: { queryClient, auth: mockAuth, loadRuntime: async () => runtime }
   });
 
   return { queryClient, runtime };
@@ -34,7 +35,7 @@ function renderShell(initialPath: string) {
 
 async function mountShell(queryClient: QueryClient, runtime: ReturnType<typeof makeAppRuntime>) {
   await router.load();
-  return render(
+  return renderAndSettle(
     <QueryClientProvider client={queryClient}>
       <RuntimeProvider runtime={runtime}>
         <RouterProvider router={router} />

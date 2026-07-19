@@ -4,6 +4,7 @@
 import { createMemoryHistory, createRootRoute, createRoute, createRouter, Outlet, RouterProvider } from "@tanstack/react-router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render, screen } from "@testing-library/react";
+import { renderAndSettle } from "./render-with-router.js";
 import React from "react";
 import { afterEach, describe, expect, it } from "vitest";
 import { TRAIT_KEYS, type VoiceProfileScreenView } from "@my-ai-orchestrator/contracts";
@@ -101,7 +102,7 @@ function renderShellAt(initialPath: string) {
 
   router.update({
     history: createMemoryHistory({ initialEntries: [initialPath] }),
-    context: { queryClient, auth: mockAuth, runtime }
+    context: { queryClient, auth: mockAuth, loadRuntime: async () => runtime }
   });
 
   return { queryClient, runtime };
@@ -109,7 +110,7 @@ function renderShellAt(initialPath: string) {
 
 async function mountShellAt(queryClient: QueryClient, runtime: ReturnType<typeof makeAppRuntime>) {
   await router.load();
-  return render(
+  return renderAndSettle(
     <QueryClientProvider client={queryClient}>
       <RuntimeProvider runtime={runtime}>
         <RouterProvider router={router} />
