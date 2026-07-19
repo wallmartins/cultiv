@@ -21,6 +21,7 @@ import { BillingRoute as BillingContainer } from "./routes/billing.js";
 import { VoiceContainer } from "./routes/voice.js";
 import { SettingsContainer } from "./routes/settings.js";
 import { CalibrateContainer } from "./routes/calibrate.js";
+import { PendingCheckoutWatcher } from "./routes/pending-checkout.js";
 
 export interface AppAuth {
   readonly isLoading: boolean;
@@ -65,8 +66,21 @@ async function resolveAppMode(qc: QueryClient, runtime: AppRuntime): Promise<App
 }
 
 const rootRoute = createRootRouteWithContext<RouterContext>()({
-  component: () => <Outlet />
+  component: () => (
+    <>
+      <Outlet />
+      <PendingCheckoutWatcher />
+    </>
+  )
 });
+
+// Auth0 devolve o appState só pro onRedirectCallback (main.tsx), que roda fora da árvore do
+// router — este handoff leva o destino original até a rota /callback.
+let pendingReturnTo: string | undefined;
+
+export function captureReturnTo(returnTo: unknown): void {
+  pendingReturnTo = typeof returnTo === "string" ? returnTo : undefined;
+}
 
 const callbackRoute = createRoute({
   getParentRoute: () => rootRoute,
@@ -80,9 +94,18 @@ function CallbackRoute() {
 
   // Auth0Provider processes the redirect (code exchange) itself; once it settles, move on.
   useEffect(() => {
-    if (!auth.isLoading) {
+    if (auth.isLoading) return;
+    const returnTo = pendingReturnTo;
+    pendingReturnTo = undefined;
+    if (!returnTo) {
       void navigate({ to: "/generate" });
+      return;
     }
+    // beforeLoad guarda location.href (já sem o basepath). Passar isso inteiro como `to` monta um
+    // pathname com a query grudada e `search` vazio — só volta ao normal porque o commit
+    // re-parseia a URL. Separar aqui não depende dessa normalização.
+    const url = new URL(returnTo, window.location.origin);
+    void navigate({ to: url.pathname, search: Object.fromEntries(url.searchParams) });
   }, [auth.isLoading, navigate]);
 
   return null;
@@ -110,7 +133,9 @@ const shellRoute = createRoute({
     }
 
     const appMode = await resolveAppMode(qc, runtime);
-    if (appMode === "calibrate") {
+    // Quem chega decidido pela landing (card de plano) assina antes de calibrar — só /plans
+    // escapa do gate; toda outra rota continua atrás dele.
+    if (appMode === "calibrate" && !location.pathname.endsWith("/plans")) {
       throw redirect({ to: "/calibrate" });
     }
     return { appMode };

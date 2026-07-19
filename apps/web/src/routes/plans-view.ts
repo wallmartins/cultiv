@@ -20,6 +20,13 @@ export function parseTrigger(raw: unknown): PaywallTrigger | undefined {
   return typeof raw === "string" && KNOWN_TRIGGERS.has(raw) ? (raw as PaywallTrigger) : undefined;
 }
 
+const KNOWN_PERIODS: ReadonlySet<string> = new Set(["monthly", "annual"]);
+
+// `?period=` chega dos cards da landing (apps/landing/src/config.ts) — mesma defesa.
+export function parsePeriod(raw: unknown): BillingPeriodUI | undefined {
+  return typeof raw === "string" && KNOWN_PERIODS.has(raw) ? (raw as BillingPeriodUI) : undefined;
+}
+
 // Mirrors apps/landing/scripts/sync-plans.mjs's formatBRL/formatUSD — same rounding/decimal
 // convention across both surfaces, now applied to the real per-request `amountCents` (backend
 // already baked the annual −20% in; this never recomputes a discount).
@@ -36,7 +43,8 @@ export function mapPlanToCard(
   period: BillingPeriodUI,
   currency: BillingCurrencyUI,
   checkoutInFlight: boolean,
-  onSelect: () => void
+  onSelect: () => void,
+  highlightPlanId?: string
 ): PlanCardData {
   const priceEntry = plan.prices[currency][period];
   const billNote =
@@ -49,7 +57,8 @@ export function mapPlanToCard(
     id: plan.id,
     name: plan.name,
     tag: plan.tag,
-    featured: plan.featured,
+    // O plano que o autor escolheu na landing rouba o destaque do catálogo — ele chegou por ele.
+    featured: highlightPlanId ? plan.id === highlightPlanId : plan.featured,
     current,
     priceLabel: formatCents(priceEntry.amountCents, currency),
     billNote,
@@ -66,9 +75,14 @@ export function mapCatalogToCards(
   period: BillingPeriodUI,
   currency: BillingCurrencyUI,
   checkoutInFlight: boolean,
-  onSelectPlan: (plan: BillingPlanView) => void
+  onSelectPlan: (plan: BillingPlanView) => void,
+  highlightPlanId?: string
 ): PlanCardData[] {
-  return catalog.plans.map((plan) => mapPlanToCard(plan, period, currency, checkoutInFlight, () => onSelectPlan(plan)));
+  // Um ?plan= desconhecido não pode apagar o destaque que o catálogo já traz.
+  const highlight = catalog.plans.some((plan) => plan.id === highlightPlanId) ? highlightPlanId : undefined;
+  return catalog.plans.map((plan) =>
+    mapPlanToCard(plan, period, currency, checkoutInFlight, () => onSelectPlan(plan), highlight)
+  );
 }
 
 // Top-up packages are currency-scoped in the real catalog (no cross-currency fallback exists

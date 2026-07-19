@@ -4,6 +4,8 @@ import { useRun } from "../runtime/useRun.js";
 import { queryKeys } from "./query-keys.js";
 import { withSdk } from "./with-sdk.js";
 
+const CHECKOUT_POLL_MS = 4000;
+
 export function useEntitlement() {
   const run = useRun();
   return useQuery({
@@ -41,7 +43,10 @@ export function useCheckoutStatus(intentId: string, enabled = true) {
   return useQuery({
     queryKey: queryKeys.billingCheckoutStatus(intentId),
     queryFn: () => run(withSdk((sdk) => sdk.billing.getCheckoutStatus({ intentId }))),
-    enabled: enabled && Boolean(intentId)
+    enabled: enabled && Boolean(intentId),
+    // O usuário volta do gateway antes do webhook aterrissar — sem isso, "pending" congela até
+    // um remount. Para nos dois estados terminais.
+    refetchInterval: (query) => (query.state.data?.status === "pending" ? CHECKOUT_POLL_MS : false)
   });
 }
 

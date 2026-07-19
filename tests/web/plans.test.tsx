@@ -2,7 +2,12 @@
  * @vitest-environment jsdom
  */
 import { screen } from "@testing-library/react";
-import type { BillingEntitlementView, BillingPlanView, BillingTopUpPackage } from "@my-ai-orchestrator/contracts";
+import type {
+  BillingEntitlementView,
+  BillingPlanView,
+  BillingTopUpPackage,
+  PlanCatalogView
+} from "@my-ai-orchestrator/contracts";
 import React from "react";
 import { describe, expect, it } from "vitest";
 import { PlansScreen, type PlanCardData } from "@my-ai-orchestrator/ui/app/plans";
@@ -13,6 +18,8 @@ import {
   findTopUpPackage,
   formatCents,
   gatewayLabel,
+  mapCatalogToCards,
+  parsePeriod,
   parseTrigger,
   trialBannerData
 } from "~/routes/plans-view.js";
@@ -21,6 +28,23 @@ import { renderWithRouter } from "./render-with-router.js";
 
 const NOW = new Date("2026-07-17T12:00:00Z");
 
+function catalogPlan(id: string, featured: boolean): BillingPlanView {
+  return {
+    id,
+    name: id,
+    featured,
+    monthlyGenerations: 20,
+    monthlyCredits: 30,
+    features: [],
+    prices: { BRL: { monthly: { amountCents: 2900, internalRef: `${id}_m` } } }
+  } as unknown as BillingPlanView;
+}
+
+// "criador" é o destaque que o catálogo traz de fábrica (ADR 0006 §3).
+const planCatalogFixture = {
+  plans: [catalogPlan("explorador", false), catalogPlan("criador", true)]
+} as PlanCatalogView;
+
 describe("plans-view: parseTrigger (defensive URL param)", () => {
   it("keeps a known trigger, drops anything else", () => {
     expect(parseTrigger("trial_expired")).toBe("trial_expired");
@@ -28,6 +52,27 @@ describe("plans-view: parseTrigger (defensive URL param)", () => {
     expect(parseTrigger("bogus")).toBeUndefined();
     expect(parseTrigger(undefined)).toBeUndefined();
     expect(parseTrigger(42)).toBeUndefined();
+  });
+});
+
+describe("plans-view: landing handoff (?plan= / ?period=)", () => {
+  it("keeps a known period, drops anything else", () => {
+    expect(parsePeriod("monthly")).toBe("monthly");
+    expect(parsePeriod("annual")).toBe("annual");
+    expect(parsePeriod("weekly")).toBeUndefined();
+    expect(parsePeriod(undefined)).toBeUndefined();
+  });
+
+  it("moves the highlight to the plan the author picked on the landing", () => {
+    const cards = mapCatalogToCards(planCatalogFixture, "monthly", "BRL", false, () => {}, "explorador");
+    expect(cards.find((card) => card.id === "explorador")?.featured).toBe(true);
+    expect(cards.find((card) => card.id === "criador")?.featured).toBe(false);
+  });
+
+  it("an unknown ?plan= leaves the catalog's own highlight alone", () => {
+    const cards = mapCatalogToCards(planCatalogFixture, "monthly", "BRL", false, () => {}, "inexistente");
+    expect(cards.find((card) => card.id === "criador")?.featured).toBe(true);
+    expect(cards.find((card) => card.id === "explorador")?.featured).toBe(false);
   });
 });
 
