@@ -10,6 +10,7 @@ import { queryClient } from "./query-client.js";
 export function App() {
   const auth0 = useAuth0();
   const [runtime, setRuntime] = useState<AppRuntime>();
+  const [runtimeFailed, setRuntimeFailed] = useState(false);
 
   // Uma promessa memoizada (runtime-loader): beforeLoad e os hooks recebem a MESMA instância, do
   // contrário haveria dois caches de SDK. getAccessTokenSilently é estável entre renders.
@@ -20,9 +21,16 @@ export function App() {
   useEffect(() => {
     if (!auth0.isAuthenticated) return;
     let alive = true;
-    void requestRuntime().then((loaded) => {
-      if (alive) setRuntime(loaded);
-    });
+    void requestRuntime().then(
+      (loaded) => {
+        if (alive) setRuntime(loaded);
+      },
+      // Sem isto o app fica no "Carregando…" para sempre: o gate abaixo espera o runtime, e uma
+      // rejeição silenciosa nunca o resolve.
+      () => {
+        if (alive) setRuntimeFailed(true);
+      }
+    );
     return () => {
       alive = false;
     };
@@ -52,6 +60,19 @@ export function App() {
     if (loadedOnce.current) router.invalidate();
     else loadedOnce.current = true;
   }, [routerMounted, auth.isAuthenticated]);
+
+  // Recarregar, e não só tentar de novo: a causa provável é um deploy novo que trocou os hashes
+  // dos chunks, e só um index.html fresco aponta pros que existem.
+  if (runtimeFailed) {
+    return (
+      <p role="alert">
+        Não foi possível carregar o app.{" "}
+        <button type="button" onClick={() => window.location.reload()}>
+          Recarregar
+        </button>
+      </p>
+    );
+  }
 
   if (!routerMounted) {
     return <p>Carregando…</p>;
