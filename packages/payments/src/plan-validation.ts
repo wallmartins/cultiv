@@ -26,6 +26,14 @@ export function validatePlan(plan: BillingPlanDefinition): Effect.Effect<Billing
       })
     );
   }
+  if (plan.prices && (plan.prices.BRL.monthlyCents <= 0 || plan.prices.USD.monthlyCents <= 0)) {
+    return Effect.fail(
+      new BillingPlanInvalidError({
+        planId: plan.id,
+        message: `Billing plan "${plan.id}" must have positive monthly prices for BRL and USD`
+      })
+    );
+  }
   return Effect.succeed(plan);
 }
 

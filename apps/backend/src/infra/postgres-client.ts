@@ -6,15 +6,16 @@ import {
   type DatabaseSnapshot
 } from "@my-ai-orchestrator/database";
 import type { DatabaseTables } from "./postgres-tables.js";
+import { createPostgresExecutionReactionRepository } from "./postgres-repositories/postgres-execution-reaction-repository.js";
 import { createPostgresJobRepository } from "./postgres-repositories/postgres-job-repository.js";
 import { createPostgresMemoryRepository } from "./postgres-repositories/postgres-memory-repository.js";
 import { createPostgresContentTypeRepository } from "./postgres-repositories/postgres-content-type-repository.js";
 import { createPostgresPipelineRepository } from "./postgres-repositories/postgres-pipeline-repository.js";
 import { createPostgresVoiceExampleRepository } from "./postgres-repositories/postgres-voice-example-repository.js";
+import { createPostgresVoiceExampleBatchRepository } from "./postgres-repositories/postgres-voice-example-batch-repository.js";
 import { createPostgresVoiceProfileRepository } from "./postgres-repositories/postgres-voice-profile-repository.js";
 import { createPostgresVoiceProfileDiagnosticsRepository } from "./postgres-repositories/postgres-voice-profile-diagnostics-repository.js";
 import { createPostgresVoiceProfileSnapshotRepository } from "./postgres-repositories/postgres-voice-profile-snapshot-repository.js";
-import { createPostgresVoiceExampleBatchRepository } from "./postgres-repositories/postgres-voice-example-batch-repository.js";
 import { createPostgresVoiceTrainingConsentRepository } from "./postgres-repositories/postgres-voice-training-consent-repository.js";
 import { createPostgresAuditRepository } from "./postgres-repositories/postgres-audit-repository.js";
 
@@ -43,8 +44,9 @@ export function createPostgresDatabaseClient(db: Kysely<DatabaseTables>): Databa
     voiceProfiles: createPostgresVoiceProfileRepository(db),
     voiceProfileDiagnostics: createPostgresVoiceProfileDiagnosticsRepository(db),
     voiceProfileSnapshots: createPostgresVoiceProfileSnapshotRepository(db),
-    voiceExampleBatches: createPostgresVoiceExampleBatchRepository(db),
     voiceTrainingConsents: createPostgresVoiceTrainingConsentRepository(db),
+    executionReactions: createPostgresExecutionReactionRepository(db),
+    voiceExampleBatches: createPostgresVoiceExampleBatchRepository(db),
     audit: createPostgresAuditRepository(db),
 
     transaction<T, E>(

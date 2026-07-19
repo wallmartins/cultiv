@@ -55,8 +55,6 @@ export type {
 
 export {
   createManualGateway,
-  createStripeGateway,
-  createAsaasGateway,
   createStripeGatewayAdapter,
   createAsaasGatewayAdapter,
   mapStripeEvent,
@@ -87,15 +85,32 @@ export {
   withBilling
 } from "./service.js";
 export {
-  DEFAULT_FREE_PLAN_ID,
+  DEFAULT_TRIAL_PLAN_ID,
   activateSubscription,
   ensureBillingCycleInitialized,
   ensureDefaultFreeSubscription
 } from "./activation.js";
 export type { BillingActivationOptions, ActivateSubscriptionRequest } from "./activation.js";
-export { createBillingEntitlement, listBillingFeatures } from "./entitlement.js";
+export {
+  computeEntitlementGate,
+  createBillingEntitlement,
+  deriveEffectiveSubscriptionStatus,
+  listBillingFeatures
+} from "./entitlement.js";
+export type { EffectiveStatusInputs, EntitlementGate, EntitlementGateInputs } from "./entitlement.js";
+export { sweepLapsedSubscriptions } from "./lifecycle-sweeper.js";
+export type { LapsedSweepResult, SweepLapsedSubscriptionsOptions } from "./lifecycle-sweeper.js";
+export { patchSubscriptionStatus, resolveAccessUntilOnCancel } from "./subscription-status-patch.js";
 export {
   resolveQuotaCost,
   resolveQuotaLimit,
   resolveQuotaRemaining
 } from "./quota-presentation.js";
+export { listPlanCatalog } from "./plan-catalog.js";
+export type { ListPlanCatalogOptions } from "./plan-catalog.js";
+export {
+  FEATURED_PLAN_TAG,
+  GENERATIONS_DISCLAIMER,
+  mapPlanFeaturesToBullets
+} from "./plan-catalog-presentation.js";
+export { curateLedger } from "./statement.js";

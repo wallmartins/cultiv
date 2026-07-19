@@ -11,6 +11,7 @@ import type { BackendUsagePolicy } from "../usage/usage-policy-types.js";
 import type { BackendAIPolicyServiceContract } from "../ai-policy/ai-policy-types.js";
 import type { BackendSafetyPolicyServiceContract } from "../safety-policy/safety-policy-types.js";
 import type { BackendGenerationPreviewService } from "../generation/generation-preview-types.js";
+import type { BackendGenerationPrefillService } from "../generation/generation-prefill-types.js";
 import type { BackendPublicInputSafetyGatewayService } from "../../safety/public-input-safety-types.js";
 import type { BackendOutputReleaseGateService } from "../../safety/output-release-types.js";
 import type { BackendVoiceConsentService } from "../../safety/voice-consent-types.js";
@@ -24,6 +25,10 @@ import type { BackendRedactionService } from "../../safety/redaction-types.js";
 import type { BackendOperationalOverrideService } from "../../safety/operational-override-types.js";
 import type { BillingCheckoutService } from "../billing/billing-checkout-service.js";
 import type { BillingWebhookService } from "../billing/billing-webhook-service.js";
+import type { BillingLifecycleService } from "../billing/billing-lifecycle-service.js";
+import type { PostgresBillingGatewayStore } from "../../infra/postgres-billing-gateway-store.js";
+import type { BackendAccountService } from "../account/account-service.js";
+import type { AccountExportService } from "../account/account-export-service.js";
 
 export interface BackendProductServices {
   readonly database: DatabaseClient;
@@ -42,6 +47,7 @@ export interface BackendProductServices {
   readonly outputSafety: BackendOutputReleaseGateService;
   readonly usagePolicy: BackendUsagePolicy;
   readonly generationPreview: BackendGenerationPreviewService;
+  readonly generationPrefill: BackendGenerationPrefillService;
   readonly voiceRebuild: BackendVoiceRebuildService;
   readonly voice: BackendVoiceService;
   readonly voiceCalibration: BackendVoiceCalibrationService;
@@ -53,4 +59,8 @@ export interface BackendProductServices {
   readonly operators: BackendOperatorRepository;
   readonly billingCheckout?: BillingCheckoutService;
   readonly billingWebhook?: BillingWebhookService;
+  readonly billingLifecycle?: BillingLifecycleService;
+  readonly billingGatewayStore?: PostgresBillingGatewayStore;
+  readonly accountOps?: BackendAccountService;
+  readonly accountExport?: AccountExportService;
 }

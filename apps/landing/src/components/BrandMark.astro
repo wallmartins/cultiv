@@ -1,0 +1,22 @@
+---
+import { readFile } from "node:fs/promises";
+import { createRequire } from "node:module";
+
+interface Props {
+  size?: number;
+  id: string;
+}
+const { size = 24, id } = Astro.props;
+
+const require = createRequire(import.meta.url);
+const raw = await readFile(
+  require.resolve("@my-ai-orchestrator/ui/assets/svg/icon.svg"),
+  "utf-8"
+);
+const svg = raw
+  .replaceAll('id="q"', `id="q-${id}"`)
+  .replaceAll('href="#q"', `href="#q-${id}"`)
+  .replace("<svg ", `<svg width="${size}" height="${size}" aria-hidden="true" `);
+---
+
+<Fragment set:html={svg} />

@@ -15,7 +15,9 @@ export const PACKAGE_DIRS = [
   "ai-adapters",
   "feature-flags",
   "payments",
-  "client-sdk"
+  "client-sdk",
+  "ui",
+  "shared"
 ] as const;
 
 export async function readPackageJson(name: string): Promise<Record<string, unknown>> {

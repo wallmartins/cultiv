@@ -1,0 +1,58 @@
+/* /app workspace travado — colocated (mirrors voice.css/generate.css). Imported by LockedCenter.tsx. */
+
+.locked-center {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.locked-center-cta-bar {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 14px 48px;
+  background: color-mix(in oklch, var(--accent) 10%, var(--bg));
+  border-bottom: 1px solid var(--line);
+}
+.locked-center-cta-label {
+  color: var(--muted);
+  text-transform: none;
+  letter-spacing: 0;
+}
+.locked-center-body {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  padding: 32px 48px 48px;
+  overflow-y: auto;
+}
+
+.locked-demo-generation {
+  width: 100%;
+  max-width: 620px;
+  padding: 28px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  animation: fadeUp 0.4s var(--ease-standard);
+}
+.locked-demo-seal {
+  align-self: flex-start;
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  padding: 4px 10px;
+  color: var(--dim);
+}
+.locked-demo-topic {
+  margin: 0;
+}
+.locked-demo-paragraph {
+  margin: 0;
+  color: var(--muted);
+}

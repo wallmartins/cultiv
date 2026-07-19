@@ -96,6 +96,11 @@ export const BillingTopUpPackageSchema = Schema.Struct({
 });
 export type BillingTopUpPackage = typeof BillingTopUpPackageSchema.Type;
 
+export const BillingTopUpCatalogViewSchema = Schema.Struct({
+  packages: Schema.Array(BillingTopUpPackageSchema)
+});
+export type BillingTopUpCatalogView = typeof BillingTopUpCatalogViewSchema.Type;
+
 export const BillingCycleStateSchema = Schema.Struct({
   cycleId: Schema.String,
   subscriptionId: Schema.String,
@@ -108,9 +113,43 @@ export const BillingCycleStateSchema = Schema.Struct({
 });
 export type BillingCycleState = typeof BillingCycleStateSchema.Type;
 
+export const LedgerStatementCategorySchema = Schema.Literal(
+  "monthly_credits",
+  "rollover",
+  "topup",
+  "generation",
+  "refund",
+  "expiration"
+);
+export type LedgerStatementCategory = typeof LedgerStatementCategorySchema.Type;
+
+export const LedgerStatementRowSchema = Schema.Struct({
+  id: Schema.String,
+  category: LedgerStatementCategorySchema,
+  creditsDelta: Schema.Number,
+  occurredAt: Schema.String,
+  planName: Schema.optional(Schema.String),
+  topic: Schema.optional(Schema.String),
+  note: Schema.optional(Schema.String)
+});
+export type LedgerStatementRow = typeof LedgerStatementRowSchema.Type;
+
+export const LedgerStatementViewSchema = Schema.Struct({
+  items: Schema.Array(LedgerStatementRowSchema),
+  total: Schema.Number,
+  limit: Schema.Number,
+  offset: Schema.Number
+});
+export type LedgerStatementView = typeof LedgerStatementViewSchema.Type;
+
 export const decodeBillingLedgerEntry = createSchemaDecoder("BillingLedgerEntry", BillingLedgerEntrySchema);
 export const decodeBillingWallet = createSchemaDecoder("BillingWallet", BillingWalletSchema);
 export const decodeBillingGenerationReservation = createSchemaDecoder(
   "BillingGenerationReservation",
   BillingGenerationReservationSchema
 );
+export const decodeBillingTopUpCatalogView = createSchemaDecoder(
+  "BillingTopUpCatalogView",
+  BillingTopUpCatalogViewSchema
+);
+export const decodeLedgerStatementView = createSchemaDecoder("LedgerStatementView", LedgerStatementViewSchema);

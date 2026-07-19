@@ -97,6 +97,16 @@ export function createPostgresMemoryRepository(
 
         return result.numDeletedRows > 0n;
       });
+    },
+
+    removeByUser(userId) {
+      return Effect.gen(function* () {
+        const result = yield* postgresTryPromise("memories.removeByUser", () =>
+          db.deleteFrom("memories").where("user_id", "=", userId).executeTakeFirst()
+        );
+
+        return Number(result.numDeletedRows);
+      });
     }
   };
 }

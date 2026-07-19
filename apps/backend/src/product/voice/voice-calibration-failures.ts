@@ -10,7 +10,6 @@ export interface VoiceCalibrationFailureRecord {
   readonly phase: "deterministic_extraction" | "example_save" | "llm_extraction" | "confidence";
 }
 
-// ponytail: in-memory DLQ; upgrade to durable queue (wizard-step-failures) in production
 const failures: VoiceCalibrationFailureRecord[] = [];
 
 export function recordWizardStepFailure(record: VoiceCalibrationFailureRecord): void {

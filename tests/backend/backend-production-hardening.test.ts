@@ -136,9 +136,9 @@ describe("backend production hardening", () => {
       "x-forwarded-for": "203.0.113.10"
     };
 
-    const first = await app.request("/me/content-types", { headers });
-    const second = await app.request("/me/content-types", { headers });
-    const third = await app.request("/me/content-types", { headers });
+    const first = await app.request("/me/onboarding/status", { headers });
+    const second = await app.request("/me/onboarding/status", { headers });
+    const third = await app.request("/me/onboarding/status", { headers });
 
     expect(first.status).toBe(200);
     expect(second.status).toBe(200);
@@ -165,6 +165,9 @@ function createProductionConfig(overrides: Partial<BackendConfig> = {}): Backend
     authAudience: authProfile.audience,
     authJwksUrl: authProfile.jwksUrl,
     databaseUrl: "postgres://backend:secret@example.com:5432/content_lib",
+    // A policy oficial roteia para gemini + groq; em produção o boot exige as duas credenciais.
+    geminiApiKey: "test-gemini-key",
+    groqApiKey: "test-groq-key",
     ...overrides
   };
 }

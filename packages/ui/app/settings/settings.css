@@ -1,0 +1,270 @@
+/* /app/settings — colocated so S9 never touches the shared shell.css (mirrors voice.css). */
+
+.settings-screen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 32px 48px 48px;
+  overflow-y: auto;
+}
+.settings-screen-inner {
+  width: 100%;
+  max-width: 620px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  animation: fadeUp 0.4s var(--ease-standard);
+}
+.settings-page-eyebrow {
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+}
+
+.settings-section {
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.settings-section-eyebrow {
+  color: var(--dim);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 10px;
+}
+
+.settings-identity-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.settings-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: var(--r-pill);
+  background: var(--line2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  font-weight: 600;
+  flex: none;
+}
+.settings-identity-body {
+  flex: 1;
+  min-width: 0;
+}
+.settings-identity-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+.settings-identity-meta {
+  color: var(--dim);
+  margin-top: 2px;
+}
+
+.settings-pref-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.settings-pref-label {
+  font-size: 0.88rem;
+}
+.settings-pref-sub {
+  font-size: 0.78rem;
+  color: var(--dim);
+  margin-top: 2px;
+}
+.settings-theme-note {
+  font-size: 0.78rem;
+  color: var(--dim);
+  border-top: 1px solid var(--line);
+  padding-top: 10px;
+}
+
+.settings-lang-toggle {
+  display: flex;
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  padding: 3px;
+  gap: 2px;
+}
+.settings-lang-option {
+  padding: 4px 12px;
+  border-radius: var(--r-pill);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: var(--muted);
+  font-family: var(--font-body);
+  transition: background 0.2s, color 0.2s;
+}
+.settings-lang-option.is-active {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.settings-toggle {
+  width: 40px;
+  height: 22px;
+  border-radius: var(--r-pill);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  position: relative;
+  cursor: pointer;
+  flex: none;
+  padding: 0;
+  transition: background 0.2s, border-color 0.2s;
+}
+.settings-toggle.is-on {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+.settings-toggle.is-denied {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.settings-toggle-knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: var(--r-pill);
+  background: var(--ink);
+  transition: left 0.2s var(--ease-standard);
+}
+.settings-toggle.is-on .settings-toggle-knob {
+  left: 20px;
+  background: var(--on-accent);
+}
+
+.settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.settings-row + .settings-row {
+  border-top: 1px solid var(--line);
+  padding-top: 12px;
+}
+.settings-row-label {
+  font-size: 0.88rem;
+}
+.settings-row-label.is-danger {
+  color: var(--danger);
+}
+.settings-row-sub {
+  font-size: 0.78rem;
+  color: var(--dim);
+  margin-top: 2px;
+}
+.settings-row-sub.is-revoked {
+  color: var(--danger);
+}
+
+.settings-deep-link {
+  font-size: 0.82rem;
+  white-space: nowrap;
+  background: none;
+  border: none;
+  color: var(--ink);
+  cursor: pointer;
+  padding: 0;
+  font-family: inherit;
+  transition: color 0.2s;
+}
+.settings-deep-link:hover {
+  color: var(--accent);
+}
+
+.settings-reset-btn {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+.settings-reset-btn:hover {
+  box-shadow: 0 0 12px color-mix(in oklch, var(--danger) 30%, transparent);
+}
+
+.settings-plan-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.settings-plan-value {
+  font-size: 0.88rem;
+}
+
+.settings-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  background: color-mix(in oklch, var(--scrim) 60%, transparent);
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.settings-dialog {
+  max-width: 420px;
+  width: 100%;
+  border-color: var(--danger);
+  padding: 28px;
+  animation: popIn 0.3s var(--ease-standard);
+}
+.settings-dialog.is-delete {
+  max-width: 440px;
+}
+.settings-dialog-eyebrow {
+  color: var(--danger);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  margin-bottom: 10px;
+}
+.settings-dialog-title {
+  margin-top: 4px;
+}
+.settings-dialog-body {
+  color: var(--muted);
+  font-size: 0.88rem;
+  line-height: 1.6;
+  margin: 14px 0 18px;
+}
+.settings-dialog-confirm-field {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  padding: 12px 14px;
+  margin-bottom: 16px;
+}
+.settings-dialog-confirm-field:focus-within {
+  border-color: var(--danger);
+}
+.settings-dialog-confirm-label {
+  color: var(--dim);
+  margin-bottom: 6px;
+}
+.settings-dialog-confirm-input {
+  width: 100%;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--ink);
+  font-size: 0.93rem;
+  font-family: var(--font-mono);
+  box-sizing: border-box;
+}
+.settings-dialog-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}

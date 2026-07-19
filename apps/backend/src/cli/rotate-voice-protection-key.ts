@@ -43,7 +43,7 @@ async function main() {
 
     console.info(dryRun ? "Voice protection key rotation dry-run completed:" : "Voice protection key rotation completed:", result);
 
-    if (result.voiceExamplesRotated === 0 && result.voiceExampleBatchesRotated === 0) {
+    if (result.voiceExamplesRotated === 0) {
       console.info(
         encryptPlaintext
           ? "No voice fields required rotation or plaintext encryption."

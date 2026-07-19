@@ -1,8 +1,11 @@
 import type {
   BillingCreditPolicy,
+  BillingCurrency,
   BillingCycleState,
+  BillingGenerationGate,
   BillingGenerationReservation,
   BillingLedgerEntry,
+  BillingPaymentMethodInfo,
   BillingTopUpPackage,
   BillingWallet,
   QualityMode
@@ -34,6 +37,10 @@ export interface BillingFeatureAllowance {
   readonly limit?: number;
 }
 
+export interface BillingPlanPeriodPriceDefinition {
+  readonly monthlyCents: number; // canonical monthly price; annual (-20%) is derived in plan-catalog.ts
+}
+
 export interface BillingPlanDefinition {
   readonly id: string;
   readonly tier: BillingPlanTier;
@@ -43,6 +50,12 @@ export interface BillingPlanDefinition {
   readonly dailyCredits?: number;
   readonly features: readonly BillingFeatureAllowance[];
   readonly allowedModels?: readonly string[];
+  readonly currency?: BillingCurrency;
+  readonly featured?: boolean;
+  readonly prices?: {
+    readonly BRL: BillingPlanPeriodPriceDefinition;
+    readonly USD: BillingPlanPeriodPriceDefinition;
+  };
 }
 
 export interface BillingSubscription {
@@ -52,7 +65,10 @@ export interface BillingSubscription {
   readonly status: BillingPlanStatus;
   readonly startedAt: string;
   readonly renewedAt?: string;
-  readonly expiresAt?: string;
+  readonly expiresAt?: string; // fim do ciclo pago; dobra como accessUntil no gate
+  readonly trialEndsAt?: string;
+  readonly renewsAt?: string;
+  readonly everSubscribed?: boolean;
 }
 
 export interface BillingUsageRecord {
@@ -76,6 +92,12 @@ export interface BillingEntitlement {
   readonly dailyCreditsRemaining: number | null;
   readonly canGenerate: boolean;
   readonly canRefine: boolean;
+  readonly gate: BillingGenerationGate;
+  readonly trialEndsAt?: string;
+  readonly renewsAt?: string;
+  readonly accessUntil?: string;
+  readonly everSubscribed?: boolean;
+  readonly paymentMethod: BillingPaymentMethodInfo | null;
   readonly allowedModels: readonly string[];
   readonly features: Readonly<Record<string, boolean>>;
   readonly wallet: BillingWallet;
@@ -142,6 +164,7 @@ export interface BillingRepository {
 export interface BillingServiceContract {
   readonly registerPlan: (plan: BillingPlanDefinition) => Effect.Effect<BillingPlanDefinition, BillingPlanInvalidError>;
   readonly upsertSubscription: (subscription: BillingSubscription) => BillingSubscription;
+  readonly getSubscription: (userId: string, planId: string) => BillingSubscription | undefined;
   readonly recordUsage: (usage: BillingUsageRecord) => BillingUsageRecord;
   readonly getEntitlement: (userId: string, planId?: string) => BillingEntitlement | undefined;
   readonly getWallet: (userId: string, planId?: string) => BillingWallet | undefined;

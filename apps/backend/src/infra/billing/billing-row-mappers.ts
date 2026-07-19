@@ -43,7 +43,10 @@ export function mapBillingSubscriptionFromRow(row: BillingSubscriptionsTable): B
     status: row.status as BillingSubscription["status"],
     startedAt: row.started_at,
     ...(row.renewed_at ? { renewedAt: row.renewed_at } : {}),
-    ...(row.expires_at ? { expiresAt: row.expires_at } : {})
+    ...(row.expires_at ? { expiresAt: row.expires_at } : {}),
+    ...(row.trial_ends_at ? { trialEndsAt: row.trial_ends_at } : {}),
+    ...(row.renews_at ? { renewsAt: row.renews_at } : {}),
+    ...(row.ever_subscribed ? { everSubscribed: row.ever_subscribed } : {})
   };
 }
 
@@ -57,7 +60,10 @@ export function mapBillingSubscriptionToRow(
     status: subscription.status,
     started_at: subscription.startedAt,
     renewed_at: subscription.renewedAt ?? null,
-    expires_at: subscription.expiresAt ?? null
+    expires_at: subscription.expiresAt ?? null,
+    trial_ends_at: subscription.trialEndsAt ?? null,
+    renews_at: subscription.renewsAt ?? null,
+    ever_subscribed: subscription.everSubscribed ?? false
   };
 }
 

@@ -1,0 +1,33 @@
+
+@import "@my-ai-orchestrator/ui/styles.css";
+@import "@my-ai-orchestrator/ui/type.css";
+@import "@my-ai-orchestrator/ui/primitives-classic.css";
+
+body {
+  font-size: 1rem;
+  font-weight: 425;
+  font-kerning: normal;
+  transition: background-color var(--t-med) var(--ease-out), color var(--t-med) var(--ease-out);
+}
+
+[id] { scroll-margin-top: 84px; }
+
+html:not([data-lang="en"]) [data-l="en"] { display: none !important; }
+html[data-lang="en"] [data-l="pt"] { display: none !important; }
+
+.wrap {
+  width: min(100% - clamp(2.5rem, 8vw, 5rem), 74rem);
+  margin-inline: auto;
+}
+
+section { padding-block: clamp(5rem, 12vw, 9rem); }
+
+.legal {
+  padding-block: clamp(8rem, 18vh, 11rem) clamp(5rem, 12vw, 9rem);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-lg);
+}
+.legal h1 { max-width: 20ch; }
+.legal h2 { margin-top: var(--sp-lg); }
+.legal p { max-width: 62ch; }

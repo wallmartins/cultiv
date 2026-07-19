@@ -1,7 +1,6 @@
 import { runEffectOrThrow } from "../http/http.js";
 import type { BackendJobEvent, BackendJobStoreServiceContract } from "./job-store.js";
 
-/** Keep proxies (e.g. Cloudflare Free) from closing idle SSE streams between pipeline steps. */
 export const SSE_HEARTBEAT_INTERVAL_MS = 25_000;
 
 export async function createJobEventStream(
@@ -65,7 +64,9 @@ async function resolveTerminalReplayEvent(
   jobId: string,
   initialEvents: readonly BackendJobEvent[]
 ): Promise<BackendJobEvent | undefined> {
-  const hasTerminal = initialEvents.some((event) => event.type === "done" || event.type === "error");
+  const hasTerminal = initialEvents.some(
+    (event) => event.type === "done" || event.type === "error" || event.type === "cancelled"
+  );
   if (hasTerminal) {
     return undefined;
   }
@@ -91,6 +92,15 @@ async function resolveTerminalReplayEvent(
       type: "error",
       jobId,
       payload: status.error,
+      occurredAt
+    };
+  }
+
+  if (status.status === "cancelled") {
+    return {
+      type: "cancelled",
+      jobId,
+      payload: { cancelledAt: occurredAt },
       occurredAt
     };
   }

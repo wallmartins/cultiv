@@ -8,6 +8,7 @@ import { BackendAIPolicyCatalogError as BackendAIPolicyCatalogFailure } from "..
 import type {
   AIPolicyPipelineDefinition,
   BillingPlanTier,
+  ExecutionEntryInput,
   ResolvedAIPolicyVersion,
   ResolvedExecutionSnapshot,
   ResolvedExecutionStep,
@@ -58,7 +59,7 @@ function resolveExplicitPlanStep(
 export function resolveExecutionSnapshot(args: {
   readonly policy: ResolvedAIPolicyVersion;
   readonly pricingEnvelope: ResolvedPricingEnvelope;
-  readonly request: import("@my-ai-orchestrator/contracts").PipelineRequest;
+  readonly request: ExecutionEntryInput;
   readonly planTier: BillingPlanTier;
   readonly executionMode: import("@my-ai-orchestrator/contracts").ExecutionMode;
   readonly qualityMode: import("@my-ai-orchestrator/contracts").QualityMode;

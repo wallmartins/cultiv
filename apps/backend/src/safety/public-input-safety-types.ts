@@ -15,6 +15,21 @@ export interface SanitizedGenerationInputEnvelope {
   readonly inputs?: Record<string, unknown>;
 }
 
+// Nominal brands so a raw, unsanitized request is never structurally
+// assignable where sanitized or explicitly-trusted input is required.
+declare const SanitizedGenerationInputBrand: unique symbol;
+export type SanitizedGenerationInput<T> = T & { readonly [SanitizedGenerationInputBrand]: true };
+
+declare const TrustedOperatorInputBrand: unique symbol;
+export type TrustedOperatorInput<T> = T & { readonly [TrustedOperatorInputBrand]: true };
+
+// Sole minting point for Trusted Operator Input (see CONTEXT.md). Callers
+// must already have enforced operator authorization (role, environment,
+// feature flag) before calling this — it performs no checks of its own.
+export function mintTrustedOperatorInput<T>(request: T): TrustedOperatorInput<T> {
+  return request as TrustedOperatorInput<T>;
+}
+
 export interface InputSafetyGatewayFinding {
   readonly category: SafetyClassificationCategory;
   readonly field: string;
@@ -40,17 +55,20 @@ export type InputSafetyGatewayDecision =
   | InputSafetyGatewayApprovedDecision
   | InputSafetyGatewayRejectedDecision;
 
-export type SanitizedGenerationPreviewRequest =
+export type SanitizedGenerationPreviewRequest = SanitizedGenerationInput<
   Omit<BackendGenerationPreviewGatewayRequest, keyof SanitizedGenerationInputEnvelope>
-  & SanitizedGenerationInputEnvelope;
+  & SanitizedGenerationInputEnvelope
+>;
 
-export type SanitizedPublicGenerationRequest =
+export type SanitizedPublicGenerationRequest = SanitizedGenerationInput<
   Omit<BackendPublicGenerationGatewayRequest, keyof SanitizedGenerationInputEnvelope>
-  & SanitizedGenerationInputEnvelope;
+  & SanitizedGenerationInputEnvelope
+>;
 
-export type SanitizedPipelineRequest =
+export type SanitizedPipelineRequest = SanitizedGenerationInput<
   Omit<BackendPipelineGatewayRequest, keyof SanitizedGenerationInputEnvelope>
-  & SanitizedGenerationInputEnvelope;
+  & SanitizedGenerationInputEnvelope
+>;
 
 export type BackendGenerationPreviewGatewayRequest = GenerationPreviewRequest & {
   readonly userId: string;

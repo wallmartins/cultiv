@@ -1,0 +1,20 @@
+{
+  "id": "voice-fidelity-thread-technical-01",
+  "suite": "voice-fidelity",
+  "input": {
+    "contentType": "thread",
+    "briefing": "Write a thread walking through a schema migration that taught you something important",
+    "voiceProfile": {
+      "type": "fixture",
+      "path": "voice-fidelity/profiles/technical-writer.json"
+    },
+    "qualityMode": "balanced"
+  },
+  "expectations": {
+    "mustContain": ["migration"],
+    "mustNotContain": ["effortlessly", "magic"],
+    "wordCountRange": { "min": 200, "max": 600 },
+    "minDriftScore": 70
+  },
+  "tags": ["thread", "technical", "precise"]
+}

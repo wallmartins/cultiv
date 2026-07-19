@@ -1,9 +1,12 @@
 import { Effect } from "effect";
 import {
+  decodeExecutionReactionView,
   decodeExecutionsPageView,
   decodeExecutionStatusView,
   decodeMeExecutionRequest,
   decodeQueuedExecutionView,
+  type ExecutionReactionValue,
+  type ExecutionReactionView,
   type ExecutionsListPeriod,
   type ExecutionsListStatusFilter,
   type ExecutionsPageView,
@@ -12,7 +15,7 @@ import {
   type QueuedExecutionView
 } from "@my-ai-orchestrator/contracts";
 import type { ClientSdkConfig } from "./config.js";
-import { decodeOkResponseEffect } from "./decode-response.js";
+import { assertOkResponseEffect, decodeOkResponseEffect } from "./decode-response.js";
 import type { ClientSdkError } from "./errors.js";
 import { ClientSdkInvalidRequestError } from "./errors.js";
 import { startExecutionWatch, type ExecutionWatchInput, type ObservationHandle } from "./execution-watch.js";
@@ -36,6 +39,25 @@ export interface ExecutionsListInput {
   readonly contentType?: string;
   readonly intent?: string;
   readonly lengthTier?: string;
+  readonly q?: string;
+  readonly signal?: AbortSignal;
+}
+
+export interface ExecutionsSubmitReactionInput {
+  readonly executionId: string;
+  readonly reaction: ExecutionReactionValue;
+  readonly reason?: string;
+  readonly signal?: AbortSignal;
+}
+
+export interface ExecutionsClearReactionInput {
+  readonly executionId: string;
+  readonly signal?: AbortSignal;
+}
+
+export interface ExecutionsCancelInput {
+  readonly executionId: string;
+  readonly reason?: string;
   readonly signal?: AbortSignal;
 }
 
@@ -44,6 +66,11 @@ export interface ExecutionsClient {
   readonly get: (input: ExecutionsGetInput) => Effect.Effect<ExecutionStatusView, ClientSdkError>;
   readonly list: (input?: ExecutionsListInput) => Effect.Effect<ExecutionsPageView, ClientSdkError>;
   readonly watch: (input: ExecutionWatchInput) => ObservationHandle;
+  readonly submitReaction: (
+    input: ExecutionsSubmitReactionInput
+  ) => Effect.Effect<ExecutionReactionView, ClientSdkError>;
+  readonly clearReaction: (input: ExecutionsClearReactionInput) => Effect.Effect<void, ClientSdkError>;
+  readonly cancel: (input: ExecutionsCancelInput) => Effect.Effect<ExecutionStatusView, ClientSdkError>;
 }
 
 export function createExecutionsClient(config: ClientSdkConfig, transport: HttpTransport): ExecutionsClient {
@@ -98,7 +125,8 @@ export function createExecutionsClient(config: ClientSdkConfig, transport: HttpT
             status: input.status,
             contentType: input.contentType,
             intent: input.intent,
-            lengthTier: input.lengthTier
+            lengthTier: input.lengthTier,
+            q: input.q
           },
           signal: input.signal
         });
@@ -109,6 +137,44 @@ export function createExecutionsClient(config: ClientSdkConfig, transport: HttpT
 
     watch(input) {
       return startExecutionWatch(config, transport, input);
+    },
+
+    submitReaction(input) {
+      return Effect.gen(function* () {
+        const response = yield* transport.send({
+          method: "POST",
+          path: `/me/executions/${encodeURIComponent(input.executionId)}/reaction`,
+          body: { reaction: input.reaction, ...(input.reason ? { reason: input.reason } : {}) },
+          signal: input.signal
+        });
+
+        return yield* decodeOkResponseEffect(response, "execution reaction submit", decodeExecutionReactionView);
+      });
+    },
+
+    clearReaction(input) {
+      return Effect.gen(function* () {
+        const response = yield* transport.send({
+          method: "DELETE",
+          path: `/me/executions/${encodeURIComponent(input.executionId)}/reaction`,
+          signal: input.signal
+        });
+
+        yield* assertOkResponseEffect(response, "execution reaction clear");
+      });
+    },
+
+    cancel(input) {
+      return Effect.gen(function* () {
+        const response = yield* transport.send({
+          method: "POST",
+          path: `/me/executions/${encodeURIComponent(input.executionId)}/cancel`,
+          body: input.reason ? { reason: input.reason } : {},
+          signal: input.signal
+        });
+
+        return yield* decodeOkResponseEffect(response, "execution cancel", decodeExecutionStatusView);
+      });
     }
   };
 }

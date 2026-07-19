@@ -93,6 +93,29 @@ describe("execution list filters", () => {
     vi.useRealTimers();
   });
 
+  it("#1 matches briefingTopic by case-insensitive substring (q)", () => {
+    const filters = normalizeExecutionsListFilters({ q: "Voz" });
+
+    expect(
+      matchesExecutionsListFilters(
+        { createdAt: "2026-06-20T00:00:00.000Z", status: "done", contentType: "newsletter", briefingTopic: "Mapa de VOZ" },
+        filters
+      )
+    ).toBe(true);
+    expect(
+      matchesExecutionsListFilters(
+        { createdAt: "2026-06-20T00:00:00.000Z", status: "done", contentType: "newsletter", briefingTopic: "Outro tema" },
+        filters
+      )
+    ).toBe(false);
+    expect(
+      matchesExecutionsListFilters(
+        { createdAt: "2026-06-20T00:00:00.000Z", status: "done", contentType: "newsletter" },
+        filters
+      )
+    ).toBe(false);
+  });
+
   it("filters in-memory jobs by resolved presentation metadata", () => {
     const jobsRef = Effect.runSync(Ref.make(new Map()));
     const repository = createInMemoryJobRepository(jobsRef);
@@ -125,6 +148,26 @@ describe("execution list filters", () => {
     expect(page.items.some((item) => item.jobId === old.jobId)).toBe(false);
   });
 
+  it("#1 filters in-memory jobs by q against the resolved briefingTopic", () => {
+    const jobsRef = Effect.runSync(Ref.make(new Map()));
+    const repository = createInMemoryJobRepository(jobsRef);
+    const expedition = Effect.runSync(
+      repository.createQueuedJob(createIntentPipelineRequest("user-a"), {
+        createdAt: "2026-06-20T00:00:00.000Z"
+      })
+    );
+    Effect.runSync(
+      repository.createQueuedJob(createPipelineRequest("user-a", "newsletter"), {
+        createdAt: "2026-06-21T00:00:00.000Z"
+      })
+    );
+
+    const page = Effect.runSync(repository.listJobsForUser("user-a", 10, 0, { period: "all", status: "all", q: "expedição" }));
+
+    expect(page.total).toBe(1);
+    expect(page.items[0]?.jobId).toBe(expedition.jobId);
+  });
+
   it("passes decoded filters from GET /me/executions to listJobsForUser", async () => {
     const config = createTestConfig();
     const users = createBackendApplicationUserMemoryRepository();
@@ -140,7 +183,7 @@ describe("execution list filters", () => {
     const token = createBackendTestAccessToken({ userId: "auth0|test-user" });
 
     const response = await app.request(
-      "/me/executions?period=30d&status=done&intent=share-idea&lengthTier=short&limit=5&offset=10",
+      "/me/executions?period=30d&status=done&intent=share-idea&lengthTier=short&q=voz&limit=5&offset=10",
       {
         headers: { Authorization: `Bearer ${token}` }
       }
@@ -151,7 +194,8 @@ describe("execution list filters", () => {
       period: "30d",
       status: "done",
       intent: "share-idea",
-      lengthTier: "short"
+      lengthTier: "short",
+      q: "voz"
     });
   });
 });

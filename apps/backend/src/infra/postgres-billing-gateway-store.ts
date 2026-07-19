@@ -48,6 +48,9 @@ export interface BillingGatewaySubscription {
   readonly status: string;
   readonly currency: string;
   readonly updatedAt: string;
+  readonly paymentMethodKind?: string;
+  readonly paymentMethodBrandLast4?: string;
+  readonly outstandingInvoiceUrl?: string;
 }
 
 export interface CreateCheckoutIntentInput {
@@ -75,6 +78,9 @@ export interface UpsertGatewaySubscriptionInput {
   readonly status: string;
   readonly currency: string;
   readonly updatedAt: string;
+  readonly paymentMethodKind?: string;
+  readonly paymentMethodBrandLast4?: string;
+  readonly outstandingInvoiceUrl?: string;
 }
 
 export interface RecordGatewayEventInput {
@@ -114,6 +120,9 @@ export interface PostgresBillingGatewayStore {
   readonly upsertGatewaySubscription: (
     input: UpsertGatewaySubscriptionInput
   ) => Effect.Effect<void, Error>;
+  readonly getGatewaySubscription: (
+    subscriptionId: string
+  ) => Effect.Effect<Option.Option<BillingGatewaySubscription>, Error>;
   readonly recordGatewayEvent: (input: RecordGatewayEventInput) => Effect.Effect<boolean, Error>;
 }
 
@@ -166,6 +175,20 @@ function parseGatewayCustomerRow(row: BillingGatewayCustomersTable): BillingGate
     gateway: row.gateway,
     externalCustomerId: row.external_customer_id,
     createdAt: row.created_at
+  };
+}
+
+function parseGatewaySubscriptionRow(row: BillingGatewaySubscriptionsTable): BillingGatewaySubscription {
+  return {
+    subscriptionId: row.subscription_id,
+    gateway: row.gateway,
+    externalSubscriptionId: row.external_subscription_id,
+    status: row.status,
+    currency: row.currency,
+    updatedAt: row.updated_at,
+    ...(row.payment_method_kind ? { paymentMethodKind: row.payment_method_kind } : {}),
+    ...(row.payment_method_brand_last4 ? { paymentMethodBrandLast4: row.payment_method_brand_last4 } : {}),
+    ...(row.outstanding_invoice_url ? { outstandingInvoiceUrl: row.outstanding_invoice_url } : {})
   };
 }
 
@@ -297,7 +320,10 @@ export function createPostgresBillingGatewayStore(
         external_subscription_id: input.externalSubscriptionId,
         status: input.status,
         currency: input.currency,
-        updated_at: input.updatedAt
+        updated_at: input.updatedAt,
+        payment_method_kind: input.paymentMethodKind ?? null,
+        payment_method_brand_last4: input.paymentMethodBrandLast4 ?? null,
+        outstanding_invoice_url: input.outstandingInvoiceUrl ?? null
       };
 
       return Effect.tryPromise({
@@ -311,12 +337,34 @@ export function createPostgresBillingGatewayStore(
                 external_subscription_id: input.externalSubscriptionId,
                 status: input.status,
                 currency: input.currency,
-                updated_at: input.updatedAt
+                updated_at: input.updatedAt,
+                // só sobrescreve quando o evento traz o dado; preserva o já capturado.
+                ...(input.paymentMethodKind ? { payment_method_kind: input.paymentMethodKind } : {}),
+                ...(input.paymentMethodBrandLast4
+                  ? { payment_method_brand_last4: input.paymentMethodBrandLast4 }
+                  : {}),
+                ...(input.outstandingInvoiceUrl
+                  ? { outstanding_invoice_url: input.outstandingInvoiceUrl }
+                  : {})
               })
             )
             .execute(),
         catch: toError
       }).pipe(Effect.asVoid);
+    },
+
+    getGatewaySubscription(subscriptionId) {
+      return Effect.tryPromise({
+        try: () =>
+          db
+            .selectFrom("billing_gateway_subscriptions")
+            .selectAll()
+            .where("subscription_id", "=", subscriptionId)
+            .executeTakeFirst(),
+        catch: toError
+      }).pipe(
+        Effect.map((row) => (row ? Option.some(parseGatewaySubscriptionRow(row)) : Option.none()))
+      );
     },
 
     recordGatewayEvent(input) {

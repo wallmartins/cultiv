@@ -84,7 +84,6 @@ function isValidUrl(value: string): boolean {
   }
 }
 
-/** Auth0 JWT `iss` claim includes a trailing slash. */
 function normalizeIssuerUrl(value: string | undefined): string | undefined {
   if (!value) {
     return undefined;

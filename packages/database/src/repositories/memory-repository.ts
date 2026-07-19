@@ -38,6 +38,23 @@ export function createMemoryRepository(stateRef: StateRef): MemoryRepository {
         memories
       };
       return Effect.succeed(true);
+    },
+    removeByUser(userId) {
+      const entries = Object.entries(stateRef.current.memories);
+      const remaining: Record<string, MemoryEntryRecord> = {};
+      let removedCount = 0;
+      for (const [composite, record] of entries) {
+        if (record.userId === userId) {
+          removedCount++;
+        } else {
+          remaining[composite] = record;
+        }
+      }
+      stateRef.current = {
+        ...stateRef.current,
+        memories: remaining
+      };
+      return Effect.succeed(removedCount);
     }
   };
 }

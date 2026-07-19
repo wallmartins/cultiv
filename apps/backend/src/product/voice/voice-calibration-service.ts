@@ -277,7 +277,7 @@ export function createBackendVoiceCalibrationService(
         const session = yield* requireSession(sessionId, userId);
         yield* assertSessionInProgress(session);
 
-        if (session.currentStepId !== "micro_opinion") {
+        if (session.currentStepId !== "context_setup" && session.currentStepId !== "micro_opinion") {
           return yield* Effect.fail(
             new BackendVoiceCalibrationValidationError({
               sessionId,
@@ -288,6 +288,11 @@ export function createBackendVoiceCalibrationService(
 
         session.context = context;
         refreshSessionStepPrompts(session, now);
+
+        if (session.currentStepId === "context_setup") {
+          advanceSessionStep(session, now);
+        }
+
         saveVoiceCalibrationSession(session);
         return toSessionView(session);
       });

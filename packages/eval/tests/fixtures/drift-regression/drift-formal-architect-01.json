@@ -1,0 +1,16 @@
+{
+  "id": "drift-formal-architect-01",
+  "suite": "drift-regression",
+  "input": {
+    "voiceProfile": {
+      "type": "fixture",
+      "path": "fixtures/drift-regression/profiles/formal-architect.json"
+    },
+    "candidate": "Obviamente microsserviços são sempre a escolha certa para qualquer produto.",
+    "stepName": "draft"
+  },
+  "expectations": {
+    "minDriftScore": 70
+  },
+  "tags": ["drift", "absolute"]
+}

@@ -1,0 +1,35 @@
+---
+import LandingLayout from "../layouts/LandingLayout.astro";
+import Nav from "../components/Nav.astro";
+import HeroStory from "../components/HeroStory.astro";
+import Demo from "../components/Demo.astro";
+import VoiceMap from "../components/VoiceMap.astro";
+import Breath from "../components/Breath.astro";
+import Plans from "../components/Plans.astro";
+// ponytail: FounderProof oculto até o vídeo real ser gravado — reativar restaurando o import e o <FounderProof /> abaixo
+// import FounderProof from "../components/FounderProof.astro";
+import Faq from "../components/Faq.astro";
+import CtaFinal from "../components/CtaFinal.astro";
+import Footer from "../components/Footer.astro";
+import { SITE } from "../data/site";
+import { homeGraph } from "../data/seo";
+---
+
+<LandingLayout
+  title={SITE.pt.title}
+  description={SITE.pt.description}
+  jsonLd={homeGraph(Astro.site!)}
+>
+  <Nav />
+  <main id="main">
+    <HeroStory />
+    <Demo />
+    <VoiceMap />
+    <Breath />
+    <Plans />
+    {/* <FounderProof /> */}
+    <Faq />
+    <CtaFinal />
+  </main>
+  <Footer />
+</LandingLayout>

@@ -10,6 +10,7 @@ import type {
   ExecutionVoiceMetadataView
 } from "@my-ai-orchestrator/contracts";
 import { matchesExecutionsListFilters, resolveExecutionPresentation, type ExecutionsListFilters } from "@my-ai-orchestrator/contracts";
+import { isTerminalJobStatus } from "@my-ai-orchestrator/domain";
 import { resolveContentType, resolveEstimatedSteps } from "./job-status-mappers.js";
 
 export interface StoredJob {
@@ -60,6 +61,11 @@ export interface InMemoryJobRepository {
   readonly failJob: (
     jobId: string,
     error: JobError,
+    completedAt?: string
+  ) => Effect.Effect<StoredJob | undefined, never>;
+  // guard queued|running — cancelling an already-terminal job is a no-op, not an error.
+  readonly cancelJob: (
+    jobId: string,
     completedAt?: string
   ) => Effect.Effect<StoredJob | undefined, never>;
 }
@@ -211,6 +217,12 @@ export function createInMemoryJobRepository(
           return undefined;
         }
 
+        // best-effort cancel doesn't stop the worker — a job already terminal (notably "cancelled")
+        // must not be resurrected by a late completion/failure landing after the cancel.
+        if (isTerminalJobStatus(job.status)) {
+          return job;
+        }
+
         const nextJob: StoredJob = {
           ...job,
           status: "done",
@@ -241,10 +253,42 @@ export function createInMemoryJobRepository(
           return undefined;
         }
 
+        // same guard as completeJob() — a late failure must not overwrite an already-cancelled job.
+        if (isTerminalJobStatus(job.status)) {
+          return job;
+        }
+
         const nextJob: StoredJob = {
           ...job,
           status: "failed",
           error,
+          completedAt,
+          updatedAt: completedAt
+        };
+
+        yield* Ref.update(jobsRef, (current) => {
+          const next = new Map(current);
+          next.set(jobId, nextJob);
+          return next;
+        });
+
+        return nextJob;
+      }),
+    cancelJob: (jobId, completedAt = new Date().toISOString()) =>
+      Effect.gen(function* () {
+        const jobs = yield* Ref.get(jobsRef);
+        const job = jobs.get(jobId);
+        if (!job) {
+          return undefined;
+        }
+
+        if (job.status !== "queued" && job.status !== "running") {
+          return job;
+        }
+
+        const nextJob: StoredJob = {
+          ...job,
+          status: "cancelled",
           completedAt,
           updatedAt: completedAt
         };

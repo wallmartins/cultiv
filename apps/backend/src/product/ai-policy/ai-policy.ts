@@ -12,6 +12,7 @@ import {
   loadResolvedPolicyDocuments
 } from "./ai-policy-loader.js";
 import { createBackendAIPolicyService } from "./ai-policy-runtime.js";
+import { findMissingProviderCredentials } from "../../execution/pipeline/provider-availability.js";
 
 export function loadBackendAIPolicyService(
   config: BackendConfig,
@@ -66,6 +67,29 @@ export function loadBackendAIPolicyService(
           details: { activeVersion: manifest.activeVersion }
         })
       );
+    }
+
+    // Sem isto, uma chave ausente só falha na primeira geração de um usuário real: os attempts do
+    // provider somem silenciosamente em filterConfiguredProviderAttempts. Só a policy oficial trava
+    // o boot — a experimental é opcional e pode rotear para providers que a produção não contrata.
+    if (config.environment === "production" && options.optional !== true) {
+      const missingCredentials = findMissingProviderCredentials(
+        config,
+        activePolicy.catalog.routingProfiles.flatMap((profile) => [
+          ...profile.preferredAttempts,
+          ...profile.fallbackAttempts
+        ])
+      );
+
+      if (missingCredentials.length > 0) {
+        return yield* Effect.fail(
+          new BackendAIPolicyValidationError({
+            path: manifestPath,
+            message: `Active policy "${manifest.activeVersion}" routes to providers without credentials: ${missingCredentials.join(", ")}`,
+            details: { activeVersion: manifest.activeVersion, missingCredentials }
+          })
+        );
+      }
     }
 
     if (!dependencies.database) {

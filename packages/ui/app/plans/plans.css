@@ -1,0 +1,241 @@
+/* /app/plans — colocated so S7 never touches the shared shell.css. Imported by PlansScreen.tsx;
+   Vite resolves it through the module graph regardless of package boundary. */
+
+.plans-screen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 32px 48px 48px;
+  overflow-y: auto;
+}
+.plans-screen-inner {
+  width: 100%;
+  max-width: 760px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  animation: fadeUp 0.4s var(--ease-standard);
+}
+
+.paywall-header {
+  border-color: var(--accent);
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.paywall-header-sub {
+  color: var(--muted);
+  margin-top: 4px;
+  line-height: 1.55;
+  font-size: 0.86rem;
+}
+
+.trial-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+}
+
+.plans-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.plans-heading-title {
+  font-size: 34px;
+}
+.billing-toggles {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.billing-toggle-group {
+  display: flex;
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  padding: 3px;
+  gap: 2px;
+}
+.billing-toggle-option {
+  padding: 5px 13px;
+  border-radius: var(--r-pill);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: var(--muted);
+  font-family: var(--font-body);
+  transition: background 0.2s, color 0.2s;
+}
+.billing-toggle-option.is-active {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.plan-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 14px;
+}
+.plan-grid.is-loading .plan-card-skeleton {
+  animation: breathe 1.6s var(--ease-standard) infinite;
+}
+
+.plan-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  position: relative;
+}
+.plan-card.is-featured {
+  border-color: var(--accent);
+  box-shadow: var(--glow-soft);
+}
+.plan-card-tag {
+  position: absolute;
+  top: -11px;
+  left: 18px;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border-radius: var(--r-pill);
+  padding: 4px 11px;
+}
+.plan-card-name {
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+.plan-card-price {
+  font-size: 2rem;
+}
+.plan-card-price-note {
+  color: var(--dim);
+  font-size: 10.5px;
+}
+.plan-card-features {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  font-size: 0.84rem;
+  color: var(--muted);
+  line-height: 1.5;
+}
+.plan-card-feature {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+}
+.plan-card-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: var(--r-pill);
+  background: var(--accent);
+  flex: none;
+  transform: translateY(-2px);
+}
+.plan-card-cta {
+  margin-top: auto;
+  width: 100%;
+}
+
+.plans-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.plans-disclaimer {
+  color: var(--dim);
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+.top-up-link {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: inherit;
+  padding: 0;
+}
+.top-up-link:hover {
+  color: var(--accent);
+}
+
+.plans-catalog-error {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  color: var(--muted);
+  padding: 24px 0;
+}
+
+.checkout-overlay {
+  position: fixed;
+  inset: 0;
+  background: color-mix(in oklch, var(--scrim) 60%, transparent);
+  z-index: 85;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.checkout-overlay-panel {
+  max-width: 420px;
+  width: 100%;
+  padding: 30px;
+  box-shadow: var(--shadow-panel);
+  text-align: center;
+  animation: popIn 0.3s var(--ease-standard);
+}
+.checkout-overlay-title {
+  margin-top: 14px;
+}
+.checkout-overlay-sub {
+  color: var(--muted);
+  margin-top: 8px;
+  line-height: 1.6;
+  font-size: 0.86rem;
+}
+.checkout-overlay-meta {
+  color: var(--muted);
+  margin-top: 8px;
+  line-height: 1.7;
+}
+.checkout-overlay-actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 18px;
+  flex-wrap: wrap;
+}
+.checkout-ring-dashed circle {
+  stroke: var(--line);
+}
+.checkout-ring-dashed {
+  animation: breathe 1.6s var(--ease-standard) infinite;
+}
+.checkout-fail-badge {
+  width: 52px;
+  height: 52px;
+  border-radius: var(--r-pill);
+  border: 2px solid var(--danger);
+  color: var(--danger);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+}

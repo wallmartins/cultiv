@@ -1,5 +1,6 @@
 import { Effect, Either, Schema } from "effect";
 import { resolveExecutionSnapshot as composeExecutionSnapshot } from "./ai-policy-snapshot.js";
+import { readCompositorMetadata } from "../../execution/pipeline-metadata.js";
 import {
   resolvePolicyPricingEnvelope,
   resolvePolicyVersion,
@@ -7,6 +8,7 @@ import {
 } from "./ai-policy-version-index.js";
 import type {
   BillingPlanTier,
+  ExecutionEntryInput,
   ResolvedExecutionSnapshot,
   ResolvedPricingEnvelope
 } from "./ai-policy-types.js";
@@ -46,7 +48,7 @@ export function resolvePolicyPricing(args: {
 export function resolvePolicyExecutionSnapshot(args: {
   readonly index: ResolvedPolicyVersionIndex;
   readonly policyVersion: string;
-  readonly request: import("@my-ai-orchestrator/contracts").PipelineRequest;
+  readonly request: ExecutionEntryInput;
   readonly planTier: BillingPlanTier;
   readonly executionMode: import("@my-ai-orchestrator/contracts").ExecutionMode;
   readonly qualityMode: import("@my-ai-orchestrator/contracts").QualityMode;
@@ -116,19 +118,14 @@ export function resolveCompositorPricingKeys(request: PipelineRequest): {
 function extractCompositorMetadata(
   request: PipelineRequest
 ): { readonly planSignature?: string; readonly lengthTier?: string } | undefined {
-  if (!("context" in request) || !request.context || typeof request.context !== "object") {
+  const compositor = readCompositorMetadata("context" in request ? request.context : undefined);
+  if (!compositor) {
     return undefined;
   }
 
-  const compositor = (request.context as Record<string, unknown>).compositor;
-  if (!compositor || typeof compositor !== "object") {
-    return undefined;
-  }
-
-  const record = compositor as Record<string, unknown>;
   return {
-    planSignature: typeof record.planSignature === "string" ? record.planSignature : undefined,
-    lengthTier: typeof record.lengthTier === "string" ? record.lengthTier : undefined
+    planSignature: typeof compositor.planSignature === "string" ? compositor.planSignature : undefined,
+    lengthTier: typeof compositor.lengthTier === "string" ? compositor.lengthTier : undefined
   };
 }
 

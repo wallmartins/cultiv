@@ -11,6 +11,8 @@ type ApplicationUserRow = {
   id: string;
   external_subject: string;
   status: string;
+  onboarding_completed_at: string | null;
+  deleted_at: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -20,6 +22,8 @@ function parseApplicationUser(row: ApplicationUserRow): BackendApplicationUser {
     id: row.id,
     externalSubject: row.external_subject,
     status: row.status as BackendApplicationUser["status"],
+    onboardingCompletedAt: row.onboarding_completed_at ? new Date(row.onboarding_completed_at) : undefined,
+    deletedAt: row.deleted_at ? new Date(row.deleted_at) : undefined,
     createdAt: new Date(row.created_at),
     updatedAt: new Date(row.updated_at)
   };
@@ -50,6 +54,8 @@ export function createPostgresApplicationUserRepository(
           id: args.id,
           external_subject: args.externalSubject,
           status: args.status ?? "active",
+          onboarding_completed_at: args.onboardingCompletedAt?.toISOString() ?? null,
+          deleted_at: null,
           created_at: createdAt.toISOString(),
           updated_at: updatedAt.toISOString()
         };
@@ -72,6 +78,55 @@ export function createPostgresApplicationUserRepository(
         );
 
         return row ? parseApplicationUser(row) : undefined;
+      });
+    },
+
+    updateOnboardingStatus(id, completedAt) {
+      return Effect.gen(function* () {
+        const updatedAt = new Date().toISOString();
+        yield* postgresTryPromise("application_users.updateOnboardingStatus", () =>
+          db.updateTable("application_users")
+            .set({
+              onboarding_completed_at: completedAt.toISOString(),
+              updated_at: updatedAt
+            })
+            .where("id", "=", id)
+            .execute()
+        );
+
+        const row = yield* postgresTryPromise("application_users.findById", () =>
+          db.selectFrom("application_users")
+            .where("id", "=", id)
+            .selectAll()
+            .executeTakeFirstOrThrow()
+        );
+
+        return parseApplicationUser(row);
+      });
+    },
+
+    tombstone(id, deletedAt) {
+      return Effect.gen(function* () {
+        const deletedAtIso = deletedAt.toISOString();
+        yield* postgresTryPromise("application_users.tombstone", () =>
+          db.updateTable("application_users")
+            .set({
+              status: "deleted",
+              deleted_at: deletedAtIso,
+              updated_at: deletedAtIso
+            })
+            .where("id", "=", id)
+            .execute()
+        );
+
+        const row = yield* postgresTryPromise("application_users.findById", () =>
+          db.selectFrom("application_users")
+            .where("id", "=", id)
+            .selectAll()
+            .executeTakeFirstOrThrow()
+        );
+
+        return parseApplicationUser(row);
       });
     }
   };

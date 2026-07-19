@@ -150,10 +150,7 @@ function processUserRebuild(deps: VoiceRebuildPipelineDeps, userId: string) {
 
         if (reasoningResult._tag === "Right") {
           reasoning = reasoningResult.right;
-          logger?.info("Reasoning extraction succeeded", {
-            userId,
-            formatExpressionCount: Object.keys(reasoningResult.right.formatExpressions).length
-          });
+          logger?.info("Reasoning extraction succeeded", { userId });
         } else {
           reasoningExtractionFailed = true;
           logger?.warn("Reasoning extraction failed; keeping previous reasoning snapshot", {
@@ -223,8 +220,7 @@ function processUserRebuild(deps: VoiceRebuildPipelineDeps, userId: string) {
 
             if (reconciled._tag === "Right") {
               reasoning = {
-                core: reconciled.right.core,
-                formatExpressions: reconciled.right.formatExpressions
+                core: reconciled.right.core
               };
               development = reconciled.right.development;
               yield* observability.recordVoiceSignatureReconciliationInvoked({
@@ -293,7 +289,6 @@ function processUserRebuild(deps: VoiceRebuildPipelineDeps, userId: string) {
         signatureClosings = phrases.signatureClosings;
         metaphorSignature = deriveMetaphorSignature(wizardExamplesForSignals, resolveUsesAnalogiesTrait(development));
       } catch {
-        // ponytail: deterministic extraction is optional; rebuild continues without signals
       }
     }
 

@@ -68,7 +68,6 @@ export function runTextQualityPipeline(
             score: scored
           };
         }),
-      // ponytail: request-scoped cap; upgrade path is per-plan limits from billing tier
       { concurrency: request.laneConcurrencyCap ?? DEFAULT_LANE_CONCURRENCY_CAP }
     );
 

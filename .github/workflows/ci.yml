@@ -130,6 +130,22 @@ jobs:
         if: needs.changes.outputs.shared != 'true' && needs.changes.outputs.web != 'true' && needs.changes.outputs.backend != 'true'
         run: pnpm smoke
 
+  eval:
+    name: Eval — Voice Fidelity
+    needs: changes
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-monorepo
+      - run: pnpm eval:ci
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: eval-report
+          path: packages/eval/dist/eval-report.json
+          if-no-files-found: ignore
+
   build-backend:
     name: Build backend
     needs: changes
@@ -209,15 +225,32 @@ jobs:
           BACKEND_ALLOW_IN_MEMORY_RUNTIME: "false"
         run: pnpm test:durable
 
+  eval-nightly:
+    name: Eval — Nightly (with Voice Judge)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-monorepo
+      - run: pnpm eval:nightly
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: eval-nightly-report
+          path: packages/eval/dist/eval-report.json
+          if-no-files-found: ignore
+
   deploy-vps:
     name: Deploy VPS
-    needs: [changes, lint, test, build-backend, durable-runtime]
+    needs: [changes, lint, test, eval, build-backend, durable-runtime]
     if: >
       github.event_name == 'push' &&
       github.ref == 'refs/heads/main' &&
       needs.changes.outputs.run_backend == 'true' &&
       needs.lint.result == 'success' &&
       needs.test.result == 'success' &&
+      needs.eval.result == 'success' &&
       needs.build-backend.result == 'success' &&
       (needs.durable-runtime.result == 'success' || needs.durable-runtime.result == 'skipped')
     runs-on: [self-hosted, integrator]
@@ -266,6 +299,7 @@ jobs:
       - changes
       - lint
       - test
+      - eval
       - build-backend
       - build-web
       - durable-runtime
@@ -280,6 +314,7 @@ jobs:
           CHANGES_RESULT: ${{ needs.changes.result }}
           LINT_RESULT: ${{ needs.lint.result }}
           TEST_RESULT: ${{ needs.test.result }}
+          EVAL_RESULT: ${{ needs.eval.result }}
           BUILD_BACKEND_RESULT: ${{ needs.build-backend.result }}
           BUILD_WEB_RESULT: ${{ needs.build-web.result }}
           DURABLE_RESULT: ${{ needs.durable-runtime.result }}
@@ -330,6 +365,7 @@ jobs:
           require_success "Path filter" "$CHANGES_RESULT"
           require_success "Lint" "$LINT_RESULT"
           require_success "Test" "$TEST_RESULT"
+          require_success "Eval" "$EVAL_RESULT"
           require_when_enabled "$RUN_BACKEND" "Build backend" "$BUILD_BACKEND_RESULT"
           require_when_enabled "$RUN_WEB" "Build web" "$BUILD_WEB_RESULT"
           require_when_enabled "$RUN_DURABLE" "Durable runtime" "$DURABLE_RESULT"
@@ -355,6 +391,7 @@ jobs:
           RUN_DURABLE: ${{ needs.changes.outputs.run_durable }}
           LINT_RESULT: ${{ needs.lint.result }}
           TEST_RESULT: ${{ needs.test.result }}
+          EVAL_RESULT: ${{ needs.eval.result }}
           BUILD_BACKEND_RESULT: ${{ needs.build-backend.result }}
           BUILD_WEB_RESULT: ${{ needs.build-web.result }}
           DURABLE_RESULT: ${{ needs.durable-runtime.result }}
@@ -368,6 +405,7 @@ jobs:
             echo "|--------|-----------|--------|"
             echo "| Lint | always | $LINT_RESULT |"
             echo "| Unit tests | always | $TEST_RESULT |"
+            echo "| Eval | always | $EVAL_RESULT |"
             echo "| Build backend | $RUN_BACKEND | $BUILD_BACKEND_RESULT |"
             echo "| Build web | $RUN_WEB | $BUILD_WEB_RESULT |"
             echo "| Durable runtime | $RUN_DURABLE | $DURABLE_RESULT |"

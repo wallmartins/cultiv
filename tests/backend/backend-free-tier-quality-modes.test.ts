@@ -9,6 +9,7 @@ import {
   createBackendAppTestApp,
   createBackendAppTestConfig,
   createBackendAppTestServices,
+  registerLegacyFreeTierPlan,
   seedExecutionVoiceState
 } from "./backend-app.fixtures.js";
 
@@ -17,6 +18,7 @@ describe("backend free tier quality modes", () => {
     const userId = "user_free";
     const config = createBackendAppTestConfig({ billingUserId: userId });
     const services = createBackendAppTestServices(config);
+    registerLegacyFreeTierPlan(services);
 
     services.billing.upsertSubscription({
       id: "sub_user_free",
@@ -37,15 +39,6 @@ describe("backend free tier quality modes", () => {
 
     const app = createBackendAppTestApp(config, services);
     const authHeader = createBackendTestAuthorizationHeader({ userId });
-
-    const contentTypesResponse = await app.request("/me/content-types", {
-      headers: { authorization: authHeader }
-    });
-    expect(contentTypesResponse.status).toBe(200);
-    const contentTypesBody = await contentTypesResponse.json();
-    expect(contentTypesBody.items.length).toBe(6);
-    expect(contentTypesBody.items.every((item: { available: boolean }) => item.available)).toBe(true);
-    expect(contentTypesBody.commercial.allowedQualityModes).toEqual(["fast"]);
 
     const previewResponse = await app.request("/api/generation-preview", {
       method: "POST",
@@ -75,14 +68,14 @@ describe("backend free tier quality modes", () => {
     expect(decoded.pricingSnapshot.qualityMode).toBe("fast");
   });
 
-  it("uses the pro subscription stored in billing without BILLING_PLAN_ID in config", async () => {
+  it("uses the pro-tier subscription stored in billing without BILLING_PLAN_ID in config", async () => {
     const config = createBackendAppTestConfig({ billingUserId: "user_pro_db" });
     const services = createBackendAppTestServices(config);
 
     services.billing.upsertSubscription({
       id: "sub_user_pro_db",
       userId: "user_pro_db",
-      planId: "pro",
+      planId: "criador",
       status: "active",
       startedAt: backendAppTestStartedAt.toISOString()
     });
@@ -90,9 +83,9 @@ describe("backend free tier quality modes", () => {
     await Effect.runPromise(
       services.billing.startCycle({
         userId: "user_pro_db",
-        planId: "pro",
-        cycleId: "user_pro_db:pro:cycle:test",
-        idempotencyKey: "test:user_pro_db:pro:cycle"
+        planId: "criador",
+        cycleId: "user_pro_db:criador:cycle:test",
+        idempotencyKey: "test:user_pro_db:criador:cycle"
       })
     );
 
@@ -119,7 +112,7 @@ describe("backend free tier quality modes", () => {
     expect(decoded.options.qualityModes.find((mode) => mode.id === "balanced")?.allowed).toBe(true);
   });
 
-  it("provisions a free subscription on the first authenticated catalog request", async () => {
+  it("provisions a trial subscription on the first authenticated catalog request", async () => {
     const config = createBackendAppTestConfig();
     const services = createBackendAppTestServices(config);
     const app = createBackendApp(config, {
@@ -129,7 +122,7 @@ describe("backend free tier quality modes", () => {
     });
     const externalSubject = "user_jit_catalog";
 
-    const response = await app.request("/me/content-types", {
+    const response = await app.request("/me/onboarding/status", {
       headers: {
         authorization: createBackendTestAuthorizationHeader({ userId: externalSubject })
       }
@@ -140,9 +133,9 @@ describe("backend free tier quality modes", () => {
     expect(provisioned).toBeDefined();
 
     const entitlement = services.billing.getEntitlement(provisioned!.id);
-    expect(entitlement?.planId).toBe("free");
-    expect(entitlement?.status).toBe("active");
-    expect(entitlement?.wallet.availableCredits).toBe(20);
+    expect(entitlement?.planId).toBe("trial");
+    expect(entitlement?.status).toBe("trialing");
+    expect(entitlement?.wallet.availableCredits).toBe(13);
   });
 
   it("allows fast generation on free plan when server default quality mode is balanced", async () => {
@@ -153,6 +146,7 @@ describe("backend free tier quality modes", () => {
       executionMode: "sync"
     });
     const services = createBackendAppTestServices(config);
+    registerLegacyFreeTierPlan(services);
     const userId = "user_cultiv_fast";
 
     services.billing.upsertSubscription({

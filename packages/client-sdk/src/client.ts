@@ -1,10 +1,12 @@
 import { Cause, Context, Effect, Exit, Layer } from "effect";
+import { createAccountClient, type AccountClient } from "./account.js";
 import { createBillingClient, type BillingClient } from "./billing.js";
 import type { ClientSdkConfig } from "./config.js";
-import { createContentTypesClient, type ContentTypesClient } from "./content-types.js";
 import { createGenerationIntentsClient, type GenerationIntentsClient } from "./generation-intents.js";
+import { createGenerationPrefillClient, type GenerationPrefillClient } from "./generation-prefill.js";
 import type { ClientSdkError } from "./errors.js";
 import { createExecutionsClient, type ExecutionsClient } from "./executions.js";
+import { createOnboardingClient, type OnboardingClient } from "./onboarding.js";
 import { createPreviewClient, type PreviewClient } from "./preview.js";
 import { createHttpTransport, type HttpTransport } from "./transport.js";
 import { createVoiceClient, type VoiceClient } from "./voice.js";
@@ -18,9 +20,11 @@ export interface ClientSdk {
   readonly executions: ExecutionsClient;
   readonly voice: VoiceClient;
   readonly voiceCalibration: VoiceCalibrationClient;
-  readonly contentTypes: ContentTypesClient;
+  readonly onboarding: OnboardingClient;
   readonly generationIntents: GenerationIntentsClient;
+  readonly generationPrefill: GenerationPrefillClient;
   readonly billing: BillingClient;
+  readonly account: AccountClient;
   readonly transport: HttpTransport;
   readonly toPromise: <A>(effect: Effect.Effect<A, ClientSdkError, never>) => Promise<A>;
 }
@@ -37,9 +41,11 @@ export function createClientSdk(config: ClientSdkConfig): ClientSdk {
     executions: createExecutionsClient(config, transport),
     voice: createVoiceClient(transport),
     voiceCalibration: createVoiceCalibrationClient(transport),
-    contentTypes: createContentTypesClient(transport),
+    onboarding: createOnboardingClient(transport),
     generationIntents: createGenerationIntentsClient(transport),
+    generationPrefill: createGenerationPrefillClient(transport),
     billing: createBillingClient(transport),
+    account: createAccountClient(transport),
     transport,
     toPromise(effect) {
       return Effect.runPromiseExit(effect).then((exit) => {

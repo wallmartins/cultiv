@@ -14,6 +14,9 @@ import {
   createPersistedOperationalOverrideGrant
 } from "./operational-override-repository.js";
 
+// ponytail: deliberate v1 stub — the request/grant/consume lifecycle and audit exist, but a
+// consumed grant is not yet wired back into evaluateInput/evaluateOutput, so an approved
+// override does not change any gate outcome. Wiring that seam is the roadmap follow-up.
 export function createBackendOperationalOverrideService(
   deps: BackendOperationalOverrideDependencies
 ): BackendOperationalOverrideService {

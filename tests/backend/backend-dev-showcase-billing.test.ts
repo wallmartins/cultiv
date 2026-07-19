@@ -11,7 +11,7 @@ describe("dev showcase billing activation", () => {
   it("activates billing for the authenticated user in development", async () => {
     const config = createBackendAppTestConfig({
       environment: "development",
-      billingPlanId: "pro"
+      billingPlanId: "criador"
     });
     const services = createBackendAppTestServices(config);
     const app = createBackendApp(config, {
@@ -31,11 +31,11 @@ describe("dev showcase billing activation", () => {
     expect(response.status).toBe(200);
 
     const body = await response.json();
-    expect(body.planId).toBe("pro");
+    expect(body.planId).toBe("criador");
     expect(body.active).toBe(true);
     expect(body.availableCredits).toBeGreaterThan(0);
 
-    const entitlement = services.billing.getEntitlement(body.userId, "pro");
+    const entitlement = services.billing.getEntitlement(body.userId, "criador");
     expect(entitlement?.canGenerate).toBe(true);
   });
 

@@ -16,11 +16,14 @@ export function persistQueuedJob(
   }
 ): Effect.Effect<void, never> {
   const actor = resolveQueuedJobActor(requestActorSource(args.request));
+  const jobUserId =
+    "userId" in args.request && typeof args.request.userId === "string" ? args.request.userId : "anonymous";
   return database.transaction((trxDatabase) =>
     Effect.gen(function* () {
       yield* trxDatabase.jobs.create(
         {
           id: args.jobId,
+          userId: jobUserId,
           status: "queued",
           executionMode: args.plan.request.executionMode,
           contentType: args.plan.contentType.id,

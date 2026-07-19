@@ -19,7 +19,8 @@ export type { ObservationHandle, ExecutionWatchInput } from "./execution-watch.j
 
 export type { PreviewClient, PreviewGetInput } from "./preview.js";
 export type { ExecutionsClient, ExecutionsCreateInput, ExecutionsGetInput, ExecutionsListInput } from "./executions.js";
-export type { VoiceClient, VoiceGetProfileInput, VoiceListExamplesInput } from "./voice.js";
+export type { OnboardingClient, OnboardingCompleteInput, OnboardingGetStatusInput } from "./onboarding.js";
+export type { VoiceClient, VoiceGetProfileInput } from "./voice.js";
 export type {
   VoiceCalibrationClient,
   VoiceCalibrationStartSessionInput,
@@ -30,13 +31,21 @@ export type {
   VoiceCalibrationCompleteReviewInput,
   VoiceCalibrationEntitlementInput
 } from "./voice-calibration.js";
-export type { ContentTypesClient, ContentTypesListInput } from "./content-types.js";
 export type { GenerationIntentsClient, GenerationIntentsListInput } from "./generation-intents.js";
+export type { GenerationPrefillClient, GenerationPrefillInferInput } from "./generation-prefill.js";
 export type {
   BillingClient,
   BillingCreateCheckoutInput,
   BillingGetEntitlementInput
 } from "./billing.js";
+export type {
+  AccountClient,
+  AccountDeleteInput,
+  AccountExportBundle,
+  AccountExportJobInput,
+  AccountRequestExportInput,
+  AccountResetInput
+} from "./account.js";
 
 export {
   ClientSdkService,

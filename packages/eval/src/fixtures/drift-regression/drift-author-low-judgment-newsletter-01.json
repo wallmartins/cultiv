@@ -1,0 +1,67 @@
+{
+  "id": "drift-author-low-judgment-newsletter-01",
+  "suite": "drift-regression",
+  "input": {
+    "voiceProfile": {
+      "userId": "eval-author-low-judgment-newsletter",
+      "tone": "measured",
+      "cadence": "moderate",
+      "lexicon": [],
+      "constraints": [],
+      "antiPatterns": [],
+      "antiPatternsExplicit": [],
+      "rules": [],
+      "styleMarkers": [],
+      "userLabels": [
+        "drift-regression"
+      ],
+      "coreReasoningSignature": {
+        "narrativeProse": "Describes situations without telling the reader what to do, preferring questions and open comparisons over prescriptions.",
+        "certaintyLevel": "low",
+        "judgmentFrequency": "low",
+        "conclusionPace": "slow",
+        "readerRelationship": "observer",
+        "authoritySource": "personal_observation",
+        "derivedAntiPatterns": [
+          "prescriptive coaching tone",
+          "you should",
+          "you must"
+        ]
+      },
+      "argumentDevelopmentSignature": {
+        "developmentProse": "Describes situations and comparisons without prescribing what the reader should do.",
+        "moveLabels": [
+          "situation",
+          "comparison",
+          "open_question"
+        ],
+        "transitionTendencies": [
+          {
+            "from": "situation",
+            "to": "comparison",
+            "frequency": "common"
+          },
+          {
+            "from": "comparison",
+            "to": "open_question",
+            "frequency": "occasional"
+          }
+        ],
+        "epistemicPosture": "exploratory",
+        "structuralAntiPatterns": [
+          "prescriptive_coaching",
+          "advocacy_arc"
+        ]
+      }
+    },
+    "candidate": "Você deve implementar esta rotina imediatamente para ter sucesso, obviamente.",
+    "stepName": "draft"
+  },
+  "expectations": {
+    "minDriftScore": 50
+  },
+  "tags": [
+    "drift",
+    "author-low-judgment-newsletter"
+  ]
+}

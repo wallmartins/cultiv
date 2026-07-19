@@ -16,15 +16,15 @@ describe("backend generation preview", () => {
     const services = createBackendAppTestServices(config);
 
     services.billing.upsertSubscription({
-      id: "sub_user_1_pro",
+      id: "sub_user_1_criador",
       userId: "user_1",
-      planId: "pro",
+      planId: "criador",
       status: "active",
       startedAt: backendAppTestStartedAt.toISOString()
     });
 
     const app = createBackendAppTestApp(config, services);
-    const reservationsBefore = services.billing.listReservations("user_1", "pro");
+    const reservationsBefore = services.billing.listReservations("user_1", "criador");
 
     const payload = {
       contentType: "newsletter",
@@ -59,8 +59,8 @@ describe("backend generation preview", () => {
     expect(secondDecoded.pricingSnapshot.quoteId).toBe(decoded.pricingSnapshot.quoteId);
     expect(decoded.recommendation?.qualityMode).toBeDefined();
     expect(decoded.recommendation?.reasonCodes.length).toBeGreaterThan(0);
-    expect(decoded.currentBalance).toBe(150);
-    expect(decoded.projectedBalanceAfterGeneration).toBe(140);
+    expect(decoded.currentBalance).toBe(75);
+    expect(decoded.projectedBalanceAfterGeneration).toBe(65);
     expect(decoded.quotaCost).toBeGreaterThanOrEqual(1);
     expect(decoded.quotaLimit).toBeGreaterThan(0);
     expect(decoded.quotaRemaining).toBeLessThanOrEqual(decoded.quotaLimit);
@@ -72,7 +72,7 @@ describe("backend generation preview", () => {
     expect(recommended).toHaveLength(1);
     expect(recommended[0]?.recommendation?.reasonCodes.length).toBeGreaterThan(0);
     expect(recommended[0]?.recommendation?.explanation.length).toBeGreaterThan(0);
-    expect(services.billing.listReservations("user_1", "pro")).toEqual(reservationsBefore);
+    expect(services.billing.listReservations("user_1", "criador")).toEqual(reservationsBefore);
   });
 
   it("keeps the recommendation inside the currently allowed quality modes", async () => {
@@ -80,15 +80,15 @@ describe("backend generation preview", () => {
     const services = createBackendAppTestServices(config);
 
     services.billing.upsertSubscription({
-      id: "sub_user_2_pro",
+      id: "sub_user_2_criador",
       userId: "user_2",
-      planId: "pro",
+      planId: "criador",
       status: "active",
       startedAt: backendAppTestStartedAt.toISOString()
     });
     seedExecutionVoiceState(services, "user_2");
 
-    await Effect.runPromise(services.billing.consumeCredits("user_2", "pro", 148, "generation"));
+    await Effect.runPromise(services.billing.consumeCredits("user_2", "criador", 73, "generation"));
 
     const app = createBackendAppTestApp(config, services);
     const response = await app.request("/api/generation-preview", {

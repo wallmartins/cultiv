@@ -152,11 +152,6 @@ export function buildOrchestrationPlan(
     qualityMode: normalized.qualityMode
   });
   const estimatedSteps = estimateStepCount(normalized.pipeline);
-  const qualityLanes = buildQualityLanes(normalized.pipeline, {
-    laneCount: normalized.qualityMode === "strict" ? 3 : normalized.qualityMode === "balanced" ? 2 : 1,
-    adapter: normalized.executionMode === "async" ? "backend-async" : "backend-sync",
-    model: `${normalized.contentTypeId}-${normalized.qualityMode}`
-  });
 
   return {
     request: normalized,
@@ -171,8 +166,7 @@ export function buildOrchestrationPlan(
       totalSteps: estimatedSteps,
       percent: 0
     },
-    stepProgress: buildStepProgress(normalized.pipeline),
-    qualityLanes
+    stepProgress: buildStepProgress(normalized.pipeline)
   };
 }
 

@@ -25,7 +25,7 @@ describe("backend Auth0 public authentication", () => {
       services
     });
 
-    const response = await app.request("/me/content-types", {
+    const response = await app.request("/me/onboarding/status", {
       headers: {
         authorization: createBackendTestAuthorizationHeader({ userId: "user_1" })
       }
@@ -42,7 +42,7 @@ describe("backend Auth0 public authentication", () => {
       services
     });
 
-    const response = await app.request("/me/content-types");
+    const response = await app.request("/me/onboarding/status");
     expect(response.status).toBe(401);
 
     const body = await response.json();
@@ -60,7 +60,7 @@ describe("backend Auth0 public authentication", () => {
       services
     });
 
-    const response = await app.request("/me/content-types", {
+    const response = await app.request("/me/onboarding/status", {
       headers: {
         authorization: createBackendTestAuthorizationHeader({
           userId: "user_1",

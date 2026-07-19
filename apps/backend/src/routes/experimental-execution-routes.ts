@@ -14,6 +14,7 @@ import {
   BackendExperimentalAccessError,
   BackendRequestBodyParseError
 } from "../http/errors.js";
+import { mintTrustedOperatorInput } from "../safety/public-input-safety-types.js";
 import type { BackendProductServices } from "../product.js";
 import { readJsonBody, runEffectOrThrow, validateResponseBody } from "../http/http.js";
 import { resolveStoredUserPlanTier } from "../product/billing/resolve-user-billing.js";
@@ -50,9 +51,11 @@ export function registerExperimentalExecutionRoutes(
     }
 
     const planTier = resolveStoredUserPlanTier(options.services.billing, actor.userId);
+    // Operator-only, non-prod, feature-flagged debug path: bypasses the Input
+    // Safety Gateway by design, so the trust decision is minted explicitly here.
     const executionSnapshot = await runEffectOrThrow(
       experimentalAIPolicy.resolveExecutionSnapshot({
-        request,
+        request: mintTrustedOperatorInput(request),
         planTier,
         executionMode: options.config.executionMode,
         qualityMode: options.config.qualityMode,

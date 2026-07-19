@@ -37,19 +37,6 @@ export interface VoiceExamplePerformance extends ValueObject {
   readonly comments?: number;
 }
 
-export interface VoiceExampleDraft extends ValueObject {
-  readonly text: string;
-  readonly language?: string;
-  readonly channel?: string;
-  readonly format?: string;
-  readonly explicitContentType?: string;
-  readonly context?: string;
-  readonly antiPatternsExplicit?: readonly string[];
-  readonly userLabels?: readonly string[];
-  readonly pinned?: boolean;
-  readonly performance?: VoiceExamplePerformance;
-}
-
 export interface VoiceExample extends Entity {
   readonly userId: string;
   readonly text: string;
@@ -103,7 +90,6 @@ export interface DerivedVoiceProfile extends Entity<string> {
   readonly version: number;
   readonly snapshotId: string;
   readonly confidence: VoiceProfileConfidence;
-  readonly adaptationMode: VoiceAdaptationMode;
   readonly primaryLanguage: string;
   readonly tone: string;
   readonly cadence: string;
@@ -166,30 +152,6 @@ export interface VoiceProfileSnapshot extends Entity<string> {
   readonly createdAt: string;
 }
 
-export interface VoiceExampleBatchItem extends Entity<string> {
-  readonly batchId: string;
-  readonly clientItemId: string;
-  readonly accepted: boolean;
-  readonly exampleId?: string;
-  readonly stagedInput?: VoiceExampleDraft;
-  readonly reasonCode?: ReasonCode;
-  readonly message?: string;
-  readonly createdAt: string;
-}
-
-export interface VoiceExampleBatch extends Entity<string> {
-  readonly userId: string;
-  readonly status: "open" | "committed" | "expired";
-  readonly expiresAt: string;
-  readonly committedAt?: string;
-  readonly targetProfileVersion?: number;
-  readonly acceptedItems: number;
-  readonly rejectedItems: number;
-  readonly items: readonly VoiceExampleBatchItem[];
-  readonly createdAt: string;
-  readonly updatedAt: string;
-}
-
 export interface VoiceTrainingConsent extends Entity<string> {
   readonly userId: string;
   readonly granted: boolean;
@@ -214,8 +176,4 @@ export function createVoiceProfileDiagnostics(diagnostics: VoiceProfileDiagnosti
 
 export function createVoiceProfileSnapshot(snapshot: VoiceProfileSnapshot): VoiceProfileSnapshot {
   return snapshot;
-}
-
-export function createVoiceExampleBatch(batch: VoiceExampleBatch): VoiceExampleBatch {
-  return batch;
 }

@@ -30,9 +30,6 @@ describe("orchestrator package", () => {
     expect(plan.estimatedSteps).toBe(4);
     expect(plan.progress.currentStep).toBe("analyze");
     expect(plan.stepProgress[0]?.status).toBe("running");
-    expect(plan.qualityLanes).toHaveLength(2);
-    expect(plan.qualityLanes[0]?.strategy).toBe("conservative");
-    expect(plan.qualityLanes[1]?.strategy).toBe("balanced");
   });
 
   it("supports explicit pipelines and progress helpers", () => {
@@ -56,9 +53,6 @@ describe("orchestrator package", () => {
       importedContext: "External plain-text notes"
     });
     expect(calculateProgressPercent(1, 2)).toBe(50);
-    expect(plan.qualityLanes).toHaveLength(2);
-    expect(plan.qualityLanes[0]?.strategy).toBe("conservative");
-    expect(plan.qualityLanes[1]?.strategy).toBe("balanced");
   });
 
   it("exposes policy helpers through Effect layers", () => {

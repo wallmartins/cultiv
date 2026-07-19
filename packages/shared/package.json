@@ -1,0 +1,29 @@
+{
+  "name": "@my-ai-orchestrator/shared",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "build": "tsc --noEmit",
+    "lint": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@my-ai-orchestrator/client-sdk": "workspace:*",
+    "@my-ai-orchestrator/contracts": "workspace:*",
+    "effect": "^3.21.2",
+    "@tanstack/react-query": "^5.0.0",
+    "zustand": "^5.0.0"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "typescript": "^5.8.2"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./package.json": "./package.json"
+  }
+}

@@ -10,9 +10,10 @@ import type { BackendProductServices } from "../product.js";
 import { createErrorBody, runEffectOrThrow, validateResponseBody } from "../http/http.js";
 import type { BackendJobStoreServiceContract } from "../jobs/job-store.js";
 import { registerExecutionRoutes } from "../routes/execution-routes.js";
-import { registerContentTypeRoutes } from "../routes/content-type-routes.js";
 import { registerGenerationIntentRoutes } from "../routes/generation-intent-routes.js";
+import { registerOnboardingRoutes } from "../routes/onboarding-routes.js";
 import { registerGenerationPreviewRoutes } from "../routes/generation-preview-routes.js";
+import { registerGenerationPrefillRoutes } from "../routes/generation-prefill-routes.js";
 import { registerExperimentalExecutionRoutes } from "../routes/experimental-execution-routes.js";
 import { registerInternalPolicyRoutes } from "../routes/internal-policy-routes.js";
 import { registerInternalOverrideRoutes } from "../routes/internal-override-routes.js";
@@ -21,6 +22,7 @@ import { registerVoiceCalibrationRoutes } from "../routes/voice-calibration-rout
 import { registerDevShowcaseRoutes } from "../routes/dev-showcase-routes.js";
 import { registerBillingRoutes } from "../routes/billing-routes.js";
 import { registerBillingWebhookRoutes } from "../routes/billing-webhook-routes.js";
+import { registerAccountRoutes } from "../routes/account-routes.js";
 export interface BackendRouteOptions {
   readonly config: BackendConfig;
   readonly startedAt: Date;
@@ -84,7 +86,7 @@ export function registerBackendRoutes(app: Hono, options: BackendRouteOptions): 
     config: options.config,
     services: options.services
   });
-  registerContentTypeRoutes(app, {
+  registerOnboardingRoutes(app, {
     config: options.config,
     services: options.services
   });
@@ -93,6 +95,10 @@ export function registerBackendRoutes(app: Hono, options: BackendRouteOptions): 
     services: options.services
   });
   registerGenerationPreviewRoutes(app, {
+    config: options.config,
+    services: options.services
+  });
+  registerGenerationPrefillRoutes(app, {
     config: options.config,
     services: options.services
   });
@@ -127,6 +133,11 @@ export function registerBackendRoutes(app: Hono, options: BackendRouteOptions): 
   registerBillingWebhookRoutes(app, {
     config: options.config,
     services: options.services
+  });
+  registerAccountRoutes(app, {
+    config: options.config,
+    services: options.services,
+    jobs: options.jobs
   });
 
   app.route("/health", health);

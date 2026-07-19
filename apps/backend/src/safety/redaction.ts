@@ -1,4 +1,5 @@
 import type { AppLogger } from "@my-ai-orchestrator/core";
+import { SECRET_LIKE_FIELD_PATTERNS, isSecretLikeFieldName } from "./secret-signal.js";
 import type {
   BackendObservabilityEvent,
   BackendObservabilitySnapshot
@@ -40,11 +41,6 @@ function resolveClassificationReason(classification: SafetyClassificationCategor
     default:
       return "classification_secret";
   }
-}
-
-function isSecretLikeFieldName(fieldName: string, patterns: readonly string[]): boolean {
-  const lower = fieldName.toLowerCase();
-  return patterns.some((pattern) => lower.includes(pattern.toLowerCase()));
 }
 
 function determineReason(
@@ -165,23 +161,7 @@ function traverseAndRedact(
 
 function createDefaultConfig(): RedactionPolicyConfig {
   return {
-    secretLikeFieldPatterns: [
-      "api_key",
-      "apikey",
-      "secret",
-      "token",
-      "password",
-      "private_key",
-      "privatekey",
-      "credential",
-      "auth",
-      "authorization",
-      "access_key",
-      "accesskey",
-      "key_id",
-      "keyid",
-      "bearer"
-    ],
+    secretLikeFieldPatterns: [...SECRET_LIKE_FIELD_PATTERNS],
     redactedClassifications: [
       "personal_data",
       "customer_confidential_data",

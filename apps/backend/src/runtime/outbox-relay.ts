@@ -3,6 +3,7 @@ import type { Kysely } from "kysely";
 import type { Redis } from "ioredis";
 import type { DatabaseTables } from "../infra/postgres-tables.js";
 import { listUnpublishedOutboxEvents, markOutboxEventPublished } from "../infra/durable-store.js";
+import type { Auth0ManagementClient } from "../auth/auth0-management-client.js";
 import type { ExecutionQueue } from "./execution-queue.js";
 
 export interface OutboxRelay {
@@ -17,6 +18,9 @@ export function createOutboxRelay(options: {
   readonly queue: ExecutionQueue;
   readonly now: () => Date;
   readonly intervalMs?: number;
+  // contract-08 §5 task 5 — optional: account.auth0-delete events are only published when
+  // configured (AUTH0_MANAGEMENT_*); without it they stay queued, which is the honest state.
+  readonly auth0Management?: Auth0ManagementClient;
 }): OutboxRelay {
   let timer: NodeJS.Timeout | undefined;
   let running = false;
@@ -35,6 +39,33 @@ export function createOutboxRelay(options: {
       for (const event of events) {
         if (event.eventType === "ExecutionEnqueued") {
           await options.queue.enqueue({ executionId: event.aggregateId });
+        }
+
+        if (event.eventType === "account.auth0-delete") {
+          if (!options.auth0Management) {
+            console.warn("Skipping account.auth0-delete: Auth0 Management client is not configured", {
+              aggregateId: event.aggregateId
+            });
+            continue;
+          }
+
+          const externalSubject = event.payload.externalSubject;
+          if (typeof externalSubject !== "string") {
+            console.error("Skipping malformed account.auth0-delete event", { aggregateId: event.aggregateId });
+            continue;
+          }
+
+          // failure here leaves published_at null, so the same event is retried next tick — this
+          // IS the durable retry (decision 5), no separate backoff/idempotency table needed since
+          // deleteUser treats a 404 (already gone) as success.
+          const result = await Effect.runPromiseExit(options.auth0Management.deleteUser(externalSubject));
+          if (result._tag === "Failure") {
+            console.error("account.auth0-delete failed, will retry", {
+              aggregateId: event.aggregateId,
+              cause: result.cause
+            });
+            continue;
+          }
         }
 
         await Effect.runPromise(

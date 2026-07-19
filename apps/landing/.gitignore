@@ -1,0 +1,26 @@
+# Build artifacts
+/.astro/
+/dist/
+
+# Sincronizados de packages/ui/assets por scripts/sync-brand.mjs — não editar aqui.
+/public/favicon.svg
+/public/favicon.ico
+/public/favicon-16.png
+/public/favicon-32.png
+/public/favicon-48.png
+/public/apple-touch-icon.png
+/public/icon-192.png
+/public/icon-512.png
+/public/icon-maskable-512.png
+/public/site.webmanifest
+/public/og-image.png
+/public/brand/
+
+# Gerados pelo aeo.js (build → dist/; `astro dev` regenera em public/) — não editar.
+/public/robots.txt
+/public/llms.txt
+/public/llms-full.txt
+/public/docs.json
+/public/ai-index.json
+/public/schema.json
+/public/*.md

@@ -6,13 +6,32 @@ import {
 } from "@my-ai-orchestrator/payments";
 import { createHttpErrorResponse } from "../http/error-response-core.js";
 import type { HttpErrorResponse } from "../http/error-response-core.js";
-import { BackendBillingNotConfiguredError } from "../http/errors.js";
+import {
+  BackendBillingCheckoutIntentNotFoundError,
+  BackendBillingManagementActionNotAllowedError,
+  BackendBillingNotConfiguredError
+} from "../http/errors.js";
 
 export function mapBillingError(error: unknown, path: string): HttpErrorResponse | undefined {
   if (error instanceof BackendBillingNotConfiguredError) {
     return createHttpErrorResponse(503, "service_unavailable", {
       message: error.message ?? "Billing checkout is not configured",
       details: { path, route: error.route }
+    });
+  }
+
+  if (error instanceof BackendBillingCheckoutIntentNotFoundError) {
+    return createHttpErrorResponse(404, "resource_not_found", {
+      message: "Checkout intent not found",
+      details: { path, userId: error.userId, intentId: error.intentId }
+    });
+  }
+
+  if (error instanceof BackendBillingManagementActionNotAllowedError) {
+    // gated pelas flags de `management` na view; chegar aqui é UI desatualizada ou uso direto da API.
+    return createHttpErrorResponse(400, "invalid_request", {
+      message: error.reason,
+      details: { path, userId: error.userId, action: error.action }
     });
   }
 

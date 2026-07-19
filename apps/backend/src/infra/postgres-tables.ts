@@ -76,6 +76,8 @@ export interface ApplicationUsersTable {
   id: string;
   external_subject: string;
   status: string;
+  onboarding_completed_at: string | null;
+  deleted_at: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -129,6 +131,9 @@ export interface BillingSubscriptionsTable {
   started_at: string;
   renewed_at: string | null;
   expires_at: string | null;
+  trial_ends_at: string | null;
+  renews_at: string | null;
+  ever_subscribed: boolean;
 }
 
 export interface BillingUsageRecordsTable {
@@ -223,6 +228,9 @@ export interface BillingGatewaySubscriptionsTable {
   status: string;
   currency: string;
   updated_at: string;
+  payment_method_kind: string | null;
+  payment_method_brand_last4: string | null;
+  outstanding_invoice_url: string | null;
 }
 
 export interface BillingCheckoutIntentsTable {
@@ -254,6 +262,15 @@ export interface OutboxEventsTable {
   payload: unknown;
   occurred_at: string;
   published_at: string | null;
+}
+
+export interface ExecutionReactionsTable {
+  execution_id: string;
+  user_id: string;
+  reaction: string;
+  reason: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface ExecutionIdempotencyTable {
@@ -295,4 +312,5 @@ export interface DatabaseTables {
   billing_gateway_events: BillingGatewayEventsTable;
   outbox_events: OutboxEventsTable;
   execution_idempotency: ExecutionIdempotencyTable;
+  execution_reactions: ExecutionReactionsTable;
 }

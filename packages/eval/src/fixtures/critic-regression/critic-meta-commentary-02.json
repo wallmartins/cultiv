@@ -1,0 +1,12 @@
+{
+  "id": "critic-meta-commentary-02",
+  "suite": "critic-regression",
+  "input": {
+    "text": "Aqui está a versão refinada para o LinkedIn, como você pediu."
+  },
+  "expectations": {
+    "mustTriggerCritic": ["llmish"],
+    "maxCriticScore": 80
+  },
+  "tags": ["critic", "meta-commentary"]
+}

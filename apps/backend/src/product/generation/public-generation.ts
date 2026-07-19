@@ -9,12 +9,14 @@ import { isGenerationCompositorEnabled } from "./is-compositor-enabled.js";
 import { isGenerationStepPlannerEnabled } from "./is-step-planner-enabled.js";
 import type { BackendExecutionService } from "../../execution/service-types.js";
 import { assertQuoteConsistency, toGenerationPricingSnapshot } from "../billing/generation-pricing-snapshot.js";
+import { canAfford } from "../billing/commercial-access.js";
 import type { QualityMode } from "@my-ai-orchestrator/contracts";
 import { canUseQualityMode, hasActiveBillingSubscription } from "@my-ai-orchestrator/payments";
 import { resolveUsagePolicyModel } from "../usage/resolve-usage-policy-model.js";
 import { resolveStoredUserEntitlement, resolveStoredUserPlanId, resolveStoredUserPlanTier } from "../billing/resolve-user-billing.js";
 import type { BackendProductServices } from "../core/types.js";
 import type { BackendPublicGenerationRequest, BackendPublicGenerationService } from "./public-generation-types.js";
+import type { SanitizedGenerationInput } from "../../safety/public-input-safety-types.js";
 
 export function createBackendPublicGenerationService(options: {
   readonly config: BackendConfig;
@@ -37,7 +39,7 @@ export function createBackendPublicGenerationService(options: {
         );
         const planTier = resolveStoredUserPlanTier(options.services.billing, request.userId);
         const executionSnapshot = yield* options.services.aiPolicy.resolveExecutionSnapshot({
-          request: internalRequest,
+          request: markPipelineRequestSanitized(internalRequest),
           planTier,
           executionMode: options.config.executionMode,
           qualityMode: options.config.qualityMode,
@@ -81,6 +83,12 @@ export function createBackendPublicGenerationService(options: {
       });
     }
   };
+}
+
+// internalRequest is rebuilt purely from fields authorizeGenerationInput already
+// sanitized above; carry the brand forward for the execution-snapshot boundary.
+function markPipelineRequestSanitized(request: PipelineRequest): SanitizedGenerationInput<PipelineRequest> {
+  return request as SanitizedGenerationInput<PipelineRequest>;
 }
 
 function toInternalPipelineRequest(
@@ -215,7 +223,7 @@ function assertPublicGenerationAccess(args: {
     );
   }
 
-  if (entitlement.wallet.availableCredits < args.pricing.creditPrice) {
+  if (!canAfford(entitlement.wallet.availableCredits, args.pricing.creditPrice)) {
     return Effect.fail(
       new BackendUsageAuthorizationError({
         userId: args.request.userId,

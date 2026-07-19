@@ -1,0 +1,67 @@
+{
+  "id": "drift-author-conversational-linkedin-01",
+  "suite": "drift-regression",
+  "input": {
+    "voiceProfile": {
+      "userId": "eval-author-conversational-linkedin",
+      "tone": "measured",
+      "cadence": "moderate",
+      "lexicon": [],
+      "constraints": [],
+      "antiPatterns": [],
+      "antiPatternsExplicit": [],
+      "rules": [],
+      "styleMarkers": [],
+      "userLabels": [
+        "drift-regression"
+      ],
+      "coreReasoningSignature": {
+        "narrativeProse": "Opens with a concrete observation, keeps the narrator present, and avoids prescribing universal rules.",
+        "certaintyLevel": "moderate",
+        "judgmentFrequency": "low",
+        "conclusionPace": "slow",
+        "readerRelationship": "peer",
+        "authoritySource": "personal_observation",
+        "derivedAntiPatterns": [
+          "generic linkedin tone",
+          "the problem",
+          "the solution"
+        ]
+      },
+      "argumentDevelopmentSignature": {
+        "developmentProse": "Starts from a concrete moment, keeps the narrator present, and resists closing with a universal rule.",
+        "moveLabels": [
+          "moment",
+          "reflection",
+          "open_end"
+        ],
+        "transitionTendencies": [
+          {
+            "from": "moment",
+            "to": "reflection",
+            "frequency": "common"
+          },
+          {
+            "from": "reflection",
+            "to": "open_end",
+            "frequency": "occasional"
+          }
+        ],
+        "epistemicPosture": "exploratory",
+        "structuralAntiPatterns": [
+          "premature_thesis",
+          "framework_prescription"
+        ]
+      }
+    },
+    "candidate": "Todo mundo precisa seguir este framework de produtividade agora, obviamente.",
+    "stepName": "draft"
+  },
+  "expectations": {
+    "minDriftScore": 50
+  },
+  "tags": [
+    "drift",
+    "author-conversational-linkedin"
+  ]
+}

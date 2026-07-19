@@ -6,6 +6,7 @@ import type {
   DatabaseSeed,
   DatabaseSnapshot,
   DatabaseState,
+  ExecutionReactionRepository,
   JobRepository,
   MemoryRepository,
   PipelineRepository,
@@ -19,11 +20,12 @@ import type {
 import { cloneState, indexBy } from "./shared.js";
 import { createAuditRepository } from "./audit-repository.js";
 import { createContentTypeRepository } from "./content-type-repository.js";
+import { createExecutionReactionRepository } from "./execution-reaction-repository.js";
 import { createJobRepository } from "./job-repository.js";
 import { createMemoryRepository } from "./memory-repository.js";
 import { createPipelineRepository } from "./pipeline-repository.js";
-import { createVoiceExampleBatchRepository } from "./voice-example-batch-repository.js";
 import { createVoiceExampleRepository } from "./voice-example-repository.js";
+import { createVoiceExampleBatchRepository } from "./voice-example-batch-repository.js";
 import { createVoiceProfileDiagnosticsRepository } from "./voice-profile-diagnostics-repository.js";
 import { createVoiceProfileRepository } from "./voice-profile-repository.js";
 import { createVoiceProfileSnapshotRepository } from "./voice-profile-snapshot-repository.js";
@@ -39,9 +41,10 @@ export function createState(seed: DatabaseSeed): DatabaseState {
     voiceProfiles: indexBy(seed.voiceProfiles ?? [], (record) => record.userId),
     voiceProfileDiagnostics: indexBy(seed.voiceProfileDiagnostics ?? [], (record) => record.userId),
     voiceProfileSnapshots: indexBy(seed.voiceProfileSnapshots ?? [], (record) => record.id),
-    voiceExampleBatches: indexBy(seed.voiceExampleBatches ?? [], (record) => record.id),
     voiceTrainingConsents: indexBy(seed.voiceTrainingConsents ?? [], (record) => record.userId),
-    auditRecords: indexBy(seed.auditRecords ?? [], (record) => record.id)
+    auditRecords: indexBy(seed.auditRecords ?? [], (record) => record.id),
+    executionReactions: indexBy(seed.executionReactions ?? [], (record) => record.executionId),
+    voiceExampleBatches: indexBy(seed.voiceExampleBatches ?? [], (record) => record.id)
   };
 }
 
@@ -57,8 +60,9 @@ export function createClient(state: DatabaseState): DatabaseClient {
     voiceProfiles: createVoiceProfileRepository(stateRef),
     voiceProfileDiagnostics: createVoiceProfileDiagnosticsRepository(stateRef),
     voiceProfileSnapshots: createVoiceProfileSnapshotRepository(stateRef),
-    voiceExampleBatches: createVoiceExampleBatchRepository(stateRef),
     voiceTrainingConsents: createVoiceTrainingConsentRepository(stateRef),
+    executionReactions: createExecutionReactionRepository(stateRef),
+    voiceExampleBatches: createVoiceExampleBatchRepository(stateRef),
     audit: createAuditRepository(stateRef),
     transaction: (operation) =>
       Effect.gen(function* () {
@@ -106,14 +110,18 @@ export function createVoiceProfileSnapshotRepositoryFromClient(client: DatabaseC
   return client.voiceProfileSnapshots;
 }
 
-export function createVoiceExampleBatchRepositoryFromClient(client: DatabaseClient): VoiceExampleBatchRepository {
-  return client.voiceExampleBatches;
-}
-
 export function createAuditRepositoryFromClient(client: DatabaseClient): AuditRepository {
   return client.audit;
 }
 
 export function createVoiceTrainingConsentRepositoryFromClient(client: DatabaseClient): VoiceTrainingConsentRepository {
   return client.voiceTrainingConsents;
+}
+
+export function createExecutionReactionRepositoryFromClient(client: DatabaseClient): ExecutionReactionRepository {
+  return client.executionReactions;
+}
+
+export function createVoiceExampleBatchRepositoryFromClient(client: DatabaseClient): VoiceExampleBatchRepository {
+  return client.voiceExampleBatches;
 }

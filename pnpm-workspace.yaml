@@ -7,3 +7,4 @@ allowBuilds:
   browser-tabs-lock: true
   esbuild: true
   msgpackr-extract: false
+  sharp: true

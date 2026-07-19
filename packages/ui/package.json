@@ -8,23 +8,33 @@
     "build": "tsc -p tsconfig.json --noEmit",
     "lint": "tsc -p tsconfig.json --noEmit"
   },
-  "dependencies": {
-    "tailwind-merge": "^3.6.0"
-  },
-  "peerDependencies": {
-    "react": ">=18.0.0",
-    "react-dom": ">=18.0.0"
-  },
-  "devDependencies": {
-    "@types/react": "^19.0.8",
-    "@types/react-dom": "^19.0.3",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "typescript": "^5.8.2"
-  },
   "exports": {
     ".": "./src/index.ts",
-    "./styles/theme.css": "./src/styles/theme.css",
+    "./app": "./app/index.ts",
+    "./app/*": "./app/*/index.ts",
+    "./styles.css": "./src/styles.css",
+    "./tokens.css": "./src/tokens.css",
+    "./tokens/tokens.css": "./tokens/tokens.css",
+    "./workspace.css": "./src/workspace.css",
+    "./shell.css": "./src/shell.css",
+    "./fonts.css": "./src/fonts.css",
+    "./keyframes.css": "./src/keyframes.css",
+    "./base.css": "./src/base.css",
+    "./type.css": "./src/type.css",
+    "./primitives.css": "./src/primitives.css",
+    "./primitives-classic.css": "./src/primitives-classic.css",
+    "./assets/*": "./assets/*",
     "./package.json": "./package.json"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@fontsource-variable/fraunces": "^5.2.9",
+    "@fontsource-variable/mona-sans": "^5.2.8",
+    "@fontsource/instrument-serif": "^5.2.8",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0"
   }
 }

@@ -15,8 +15,7 @@ const core: CoreReasoningSignature = {
 };
 
 const reasoning: ReasoningExtractionResult = {
-  core,
-  formatExpressions: {}
+  core
 };
 
 describe("trait-aware voice signature divergence", () => {
@@ -55,8 +54,7 @@ describe("trait-aware voice signature divergence", () => {
 
     const divergence = evaluateVoiceSignatureDivergence({
       reasoning: {
-        core: { ...core, conclusionPace: "slow", certaintyLevel: "moderate" },
-        formatExpressions: {}
+        core: { ...core, conclusionPace: "slow", certaintyLevel: "moderate" }
       },
       development: TEST_ARGUMENT_DEVELOPMENT_EXTRACTION_FIXTURE.development,
       traitProfile
@@ -87,8 +85,7 @@ describe("trait-aware voice signature divergence", () => {
 
     const divergence = evaluateVoiceSignatureDivergence({
       reasoning: {
-        core: { ...core, conclusionPace: "slow", certaintyLevel: "moderate" },
-        formatExpressions: {}
+        core: { ...core, conclusionPace: "slow", certaintyLevel: "moderate" }
       },
       development: TEST_ARGUMENT_DEVELOPMENT_EXTRACTION_FIXTURE.development,
       traitProfile

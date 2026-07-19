@@ -1,0 +1,66 @@
+{
+  "id": "drift-author-formal-architect-01",
+  "suite": "drift-regression",
+  "input": {
+    "voiceProfile": {
+      "userId": "eval-author-formal-architect",
+      "tone": "measured",
+      "cadence": "moderate",
+      "lexicon": [],
+      "constraints": [],
+      "antiPatterns": [],
+      "antiPatternsExplicit": [],
+      "rules": [],
+      "styleMarkers": [],
+      "userLabels": [
+        "drift-regression"
+      ],
+      "coreReasoningSignature": {
+        "narrativeProse": "Builds arguments through explicit tradeoffs, technical constraints, and implementation realities rather than slogans.",
+        "certaintyLevel": "moderate",
+        "judgmentFrequency": "moderate",
+        "conclusionPace": "moderate",
+        "readerRelationship": "peer",
+        "authoritySource": "practice",
+        "derivedAntiPatterns": [
+          "hand-wavy wording",
+          "impersonal whitepaper tone"
+        ]
+      },
+      "argumentDevelopmentSignature": {
+        "developmentProse": "Frames decisions through explicit tradeoffs, names constraints, and lands on a measured recommendation.",
+        "moveLabels": [
+          "constraint",
+          "tradeoff",
+          "recommendation"
+        ],
+        "transitionTendencies": [
+          {
+            "from": "constraint",
+            "to": "tradeoff",
+            "frequency": "common"
+          },
+          {
+            "from": "tradeoff",
+            "to": "recommendation",
+            "frequency": "occasional"
+          }
+        ],
+        "epistemicPosture": "investigative",
+        "structuralAntiPatterns": [
+          "hand_wavy_claim",
+          "absolute_prescription"
+        ]
+      }
+    },
+    "candidate": "Obviamente microsserviços são sempre a escolha certa para qualquer produto.",
+    "stepName": "draft"
+  },
+  "expectations": {
+    "minDriftScore": 50
+  },
+  "tags": [
+    "drift",
+    "author-formal-architect"
+  ]
+}

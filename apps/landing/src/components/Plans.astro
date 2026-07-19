@@ -1,0 +1,115 @@
+---
+import "../styles/plans.css";
+import T from "./T.astro";
+import { PLANS } from "../data/plans";
+import { planUrl } from "../config";
+---
+
+<section
+  id="planos"
+  class="plans-section"
+  data-screen-label="Planos — escolha por quanto você escreve"
+  aria-label="Planos"
+>
+  <div class="plans-container">
+    <div class="plans-header">
+      <span class="plans-eyebrow">
+        <T pt="Planos · sem cartão pra começar" en="Plans · no card to start" />
+      </span>
+      <h2 class="plans-title">
+        <T pt="Escolha por quanto você escreve." en="Choose by how much you write." />
+      </h2>
+      <p class="plans-subtitle">
+        <T
+          pt="Teste o produto inteiro sem cartão. Vai até 7 dias ou o limite de gerações do trial — o que vier primeiro."
+          en="Try the whole product with no card. Runs up to 7 days or your trial's generation limit — whichever comes first."
+        />
+      </p>
+    </div>
+
+    <div class="plans-toggle-row">
+      <div role="group" aria-label="Moeda" class="plans-toggle-group">
+        <button type="button" data-currency="BRL" aria-pressed="true" class="plans-toggle-btn"
+          >R$ BRL</button
+        >
+        <button type="button" data-currency="USD" aria-pressed="false" class="plans-toggle-btn"
+          >$ USD</button
+        >
+      </div>
+      <div role="group" aria-label="Ciclo de cobrança" class="plans-toggle-group">
+        <button type="button" data-cycle="monthly" aria-pressed="true" class="plans-toggle-btn">
+          <T pt="Mensal" en="Monthly" />
+        </button>
+        <button
+          type="button"
+          data-cycle="annual"
+          aria-pressed="false"
+          class="plans-toggle-btn plans-toggle-btn--annual"
+        >
+          <T pt="Anual" en="Annual" />
+          <span class="plans-badge-discount" aria-hidden="true">−20%</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="plans-grid">
+      {
+        PLANS.map((plan) => (
+          <article class={`plan-card${plan.featured ? " plan-card--featured" : ""}`}>
+            {plan.featured && (
+              <span class="plan-badge">
+                <T pt="Melhor equilíbrio" en="Best balance" />
+              </span>
+            )}
+            <h3 class="plan-card__title">{plan.name}</h3>
+            <p class="plan-card__tag">
+              <T pt={plan.tag.pt} en={plan.tag.en} />
+            </p>
+            <div class="plan-card__price-row">
+              <span class="plan-card__price" data-plan-price={plan.id}>
+                {plan.price.brl.monthly}
+              </span>
+              <span class="plan-card__price-period">
+                <T pt="/mês" en="/mo" />
+              </span>
+            </div>
+            <span class="plan-card__price-sub">
+              <span data-l="pt" lang="pt-BR" data-plan-sub={plan.id}>
+                {plan.priceSub.pt}
+              </span><span data-l="en" lang="en" data-plan-sub={plan.id}>
+                {plan.priceSub.en}
+              </span>
+            </span>
+            <ul class="plan-card__features">
+              {plan.features.map((f) => (
+                <li class="plan-card__feature">
+                  <span aria-hidden="true" class="plan-card__feature-check">
+                    ✓
+                  </span>
+                  <T pt={f.pt} en={f.en} />
+                </li>
+              ))}
+            </ul>
+            <div class="plan-card__spacer" />
+            <a
+              class={`plan-card__cta${plan.featured ? " plan-card__cta--featured" : ""}`}
+              href={planUrl(plan.id, "monthly")}
+              data-plan-cta={plan.id}
+            >
+              <T pt="Comece o teste grátis →" en="Start the free trial →" />
+            </a>
+          </article>
+        ))
+      }
+    </div>
+
+    <p class="plans-footnote">
+      <T pt="O cartão só entra quando você escolhe um plano." en="Your card only comes in when you pick a plan." />
+    </p>
+  </div>
+</section>
+
+<script>
+  import { initPlansToggle } from "../scripts/plans-toggle";
+  initPlansToggle();
+</script>

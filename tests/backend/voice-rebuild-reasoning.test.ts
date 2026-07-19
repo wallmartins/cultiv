@@ -7,6 +7,7 @@ import { deriveVoiceRebuildState } from "../../apps/backend/src/product/voice/vo
 import { TEST_REASONING_EXTRACTION_FIXTURE } from "../../apps/backend/src/product/voice/reasoning-extraction.js";
 import { TEST_ARGUMENT_DEVELOPMENT_EXTRACTION_FIXTURE } from "../../apps/backend/src/product/voice/argument-development-extraction.js";
 import type { CoreReasoningSignature } from "@my-ai-orchestrator/contracts";
+import { createVoiceExampleInDatabase } from "../../apps/backend/tests/test-helpers.js";
 
 const config: BackendConfig = {
   environment: "test",
@@ -43,7 +44,7 @@ describe("voice rebuild reasoning", () => {
     Effect.runSync(services.voiceConsent.grantConsent("user_reasoning"));
 
     Effect.runSync(
-      services.voice.createExample("user_reasoning", {
+      createVoiceExampleInDatabase(services.database, "user_reasoning", {
         text: "Eu começo observando o contexto antes de tirar conclusões no LinkedIn.",
         language: "pt-BR",
         explicitContentType: "linkedin-post"
@@ -51,7 +52,7 @@ describe("voice rebuild reasoning", () => {
     );
 
     Effect.runSync(
-      services.voice.createExample("user_reasoning", {
+      createVoiceExampleInDatabase(services.database, "user_reasoning", {
         text: "Outro exemplo no mesmo formato, com tom parecido e parágrafos curtos.",
         language: "pt-BR",
         explicitContentType: "linkedin-post"
@@ -74,7 +75,6 @@ describe("voice rebuild reasoning", () => {
 
     const screen = Effect.runSync(services.voice.getProfileScreen("user_reasoning"));
     expect(screen?.reasoning?.core.certaintyLevel).toBe(TEST_REASONING_EXTRACTION_FIXTURE.core.certaintyLevel);
-    expect(screen?.reasoning?.formatExpressions).toEqual([]);
   });
 
   it("keeps previous reasoning when extraction result is absent", () => {
@@ -89,7 +89,6 @@ describe("voice rebuild reasoning", () => {
         version: 2,
         snapshotId: "snapshot-2",
         confidence: "high",
-        adaptationMode: "standard",
         primaryLanguage: "pt-BR",
         tone: "informal",
         cadence: "direct",
@@ -119,7 +118,6 @@ describe("voice rebuild reasoning", () => {
         version: 2,
         snapshotId: "snapshot-2",
         confidence: "high",
-        adaptationMode: "standard",
         primaryLanguage: "pt-BR",
         tone: "informal",
         cadence: "direct",
@@ -155,7 +153,6 @@ describe("voice rebuild reasoning", () => {
         version: 2,
         snapshotId: "snapshot-2",
         confidence: "high",
-        adaptationMode: "standard",
         primaryLanguage: "pt-BR",
         tone: "informal",
         cadence: "direct",

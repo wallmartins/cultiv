@@ -1,14 +1,8 @@
 import type {
-  AttentionLevel,
-  AttentionReasonCode,
-  ContributionCode,
   DevelopmentTraitProfile,
   TraitKey,
   TraitRecord,
-  VoiceExampleBatchCommitResultView,
-  VoiceExampleBatchView,
-  VoiceExampleListItemView,
-  VoiceExamplesPageView,
+  VoiceMaterialBaseSample,
   VoiceProfileDiagnosticsView,
   VoiceProfileScreenView,
   VoiceProfileView,
@@ -17,11 +11,69 @@ import type {
 import { TRAIT_KEYS } from "@my-ai-orchestrator/contracts";
 import type {
   DerivedVoiceProfile,
-  VoiceExample,
-  VoiceExampleBatch,
   VoiceProfileDiagnostics
 } from "@my-ai-orchestrator/domain";
+import type { VoiceExampleRecord } from "@my-ai-orchestrator/database";
 import { mergeTraitConfirmations } from "./trait-confirmation-overlay.js";
+
+// GAP #13 — known channel/content-type ids get a curated pt-BR label; anything else falls back
+// to a humanized version of the raw id, same convention as apps/web/src/routes/voice-mappers.ts
+// contentTypeLabel (never leak a raw enum/id into the DOM).
+const MATERIAL_BASE_SAMPLE_LABELS: Record<string, string> = {
+  linkedin: "LinkedIn",
+  "linkedin-post": "LinkedIn",
+  newsletter: "Newsletter",
+  blog: "Blog",
+  "long-form-blog": "Blog longo",
+  "validation-post": "Post de validação",
+  "architecture-post": "Post técnico",
+  "twitter-thread": "Thread"
+};
+
+function humanizeMaterialBaseSampleLabel(id: string): string {
+  return (
+    MATERIAL_BASE_SAMPLE_LABELS[id]
+    ?? id
+      .split(/[-_]/)
+      .filter(Boolean)
+      .map((word) => word[0].toUpperCase() + word.slice(1))
+      .join(" ")
+  );
+}
+
+const MATERIAL_BASE_SAMPLE_MONTHS_PT = [
+  "jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"
+];
+
+function formatMaterialBaseSampleDate(iso: string): string {
+  const date = new Date(iso);
+  return `${date.getUTCDate()} ${MATERIAL_BASE_SAMPLE_MONTHS_PT[date.getUTCMonth()]}`;
+}
+
+function truncateMaterialBaseSampleQuote(text: string, maxLength = 150): string {
+  const trimmed = text.trim();
+  if (trimmed.length <= maxLength) {
+    return trimmed;
+  }
+
+  const cut = trimmed.slice(0, maxLength);
+  const lastSpace = cut.lastIndexOf(" ");
+  const wholeWordCut = lastSpace > 40 ? cut.slice(0, lastSpace) : cut;
+  return `${wholeWordCut.trimEnd()}…`;
+}
+
+// Formats already-selected examples (selectMaterialBaseSampleExamples) into display-ready quotes
+// — pure presentation, no re-inference of voice signals (voice-profile-centralization stays green).
+export function toMaterialBaseSamples(
+  examples: readonly VoiceExampleRecord[]
+): readonly VoiceMaterialBaseSample[] {
+  return examples.map((example) => ({
+    q: truncateMaterialBaseSampleQuote(example.text),
+    meta: `${humanizeMaterialBaseSampleLabel(
+      example.channel ?? example.explicitContentType ?? example.format ?? "geral"
+    )} · ${formatMaterialBaseSampleDate(example.createdAt)}`
+  }));
+}
 
 export function toVoiceProfileView(profile: DerivedVoiceProfile): VoiceProfileView {
   return {
@@ -29,7 +81,6 @@ export function toVoiceProfileView(profile: DerivedVoiceProfile): VoiceProfileVi
     snapshotId: profile.snapshotId,
     version: profile.version,
     confidence: profile.confidence,
-    adaptationMode: profile.adaptationMode,
     primaryLanguage: profile.primaryLanguage,
     tone: profile.tone,
     cadence: profile.cadence,
@@ -80,7 +131,10 @@ export function toVoiceProfileDiagnosticsView(
 export function toVoiceProfileScreenView(
   profile: DerivedVoiceProfile,
   diagnostics: VoiceProfileDiagnostics,
-  options?: { readonly includeReasoning?: boolean }
+  options?: {
+    readonly includeReasoning?: boolean;
+    readonly samples?: readonly VoiceMaterialBaseSample[];
+  }
 ): VoiceProfileScreenView {
   return {
     profile: toVoiceProfileView(profile),
@@ -89,7 +143,8 @@ export function toVoiceProfileScreenView(
       ...diagnostics.materialBase,
       byClassification: { ...diagnostics.materialBase.byClassification },
       byContentType: { ...diagnostics.materialBase.byContentType },
-      byLanguage: { ...diagnostics.materialBase.byLanguage }
+      byLanguage: { ...diagnostics.materialBase.byLanguage },
+      ...(options?.samples ? { samples: options.samples } : {})
     },
     ...(options?.includeReasoning && profile.coreReasoningSignature
       ? {
@@ -114,8 +169,6 @@ export function toVoiceReasoningPresentationView(
     return undefined;
   }
 
-  const formatExpressions: VoiceReasoningPresentationView["formatExpressions"] = [];
-
   const rawTraitProfile = profile.argumentDevelopmentSignature?.traitProfile;
   const traitProfile = rawTraitProfile
     ? overlayTraitConfirmations(rawTraitProfile, options?.traitConfirmations)
@@ -123,7 +176,6 @@ export function toVoiceReasoningPresentationView(
 
   return {
     core: { ...profile.coreReasoningSignature, derivedAntiPatterns: [...profile.coreReasoningSignature.derivedAntiPatterns] },
-    formatExpressions,
     reasoningVersion: profile.version,
     ...(profile.argumentDevelopmentSignature
       ? {
@@ -177,166 +229,4 @@ function overlayTraitConfirmations(
   return mergeTraitConfirmations(traitProfile, confirmationResponses);
 }
 
-export function toVoiceExampleListItemView(
-  example: VoiceExample,
-  version: number
-): VoiceExampleListItemView {
-  return {
-    exampleId: example.id,
-    version,
-    state: example.state,
-    text: example.text,
-    previewText: buildPreviewText(example.text),
-    language: example.language,
-    channel: example.channel,
-    format: example.format,
-    explicitContentType: example.explicitContentType,
-    effectiveContentTypeHints: [...example.effectiveContentTypeHints],
-    classificationLabels: [...example.classificationLabels],
-    pinned: example.pinned,
-    pendingProfileImpact: example.pendingProfileImpact,
-    targetProfileVersion: example.targetProfileVersion,
-    evaluation: {
-      systemWeight: example.evaluation.systemWeight,
-      attentionLevel: example.evaluation.attentionLevel,
-      attentionReasonCodes: deriveAttentionReasonCodes(example),
-      contributionCode: example.evaluation.contributionCode,
-      contributionPreview: example.evaluation.contributionPreview,
-      userPinned: example.evaluation.userPinned
-    },
-    createdAt: example.createdAt,
-    updatedAt: example.updatedAt
-  };
-}
 
-export function sortVoiceExamples(
-  items: readonly VoiceExampleListItemView[]
-): readonly VoiceExampleListItemView[] {
-  return [...items].sort((left, right) => {
-    const attention = attentionRank(right.evaluation.attentionLevel) - attentionRank(left.evaluation.attentionLevel);
-    if (attention !== 0) {
-      return attention;
-    }
-
-    return right.updatedAt.localeCompare(left.updatedAt);
-  });
-}
-
-export function paginateVoiceExamples(
-  items: readonly VoiceExampleListItemView[],
-  limit: number,
-  offset: number
-): VoiceExamplesPageView {
-  return {
-    items: items.slice(offset, offset + limit),
-    total: items.length,
-    limit,
-    offset
-  };
-}
-
-export function toVoiceExampleBatchView(batch: VoiceExampleBatch): VoiceExampleBatchView {
-  return {
-    batchId: batch.id,
-    status: batch.status,
-    expiresAt: batch.expiresAt,
-    acceptedItems: batch.acceptedItems,
-    rejectedItems: batch.rejectedItems,
-    itemResults: batch.items.map((item) => ({
-      clientItemId: item.clientItemId,
-      accepted: item.accepted,
-      exampleId: item.exampleId,
-      reasonCode: item.reasonCode,
-      message: item.message
-    }))
-  };
-}
-
-export function toVoiceExampleBatchCommitResultView(batch: VoiceExampleBatch): VoiceExampleBatchCommitResultView {
-  return {
-    batchId: batch.id,
-    committedAt: batch.committedAt ?? batch.updatedAt,
-    acceptedItems: batch.acceptedItems,
-    rejectedItems: batch.rejectedItems,
-    targetProfileVersion: batch.targetProfileVersion
-  };
-}
-
-export function resolveContributionCode(example: {
-  readonly explicitContentType?: string;
-  readonly channel?: string;
-  readonly text: string;
-}): ContributionCode {
-  if (example.explicitContentType === "linkedin-post" || example.channel === "linkedin") {
-    return "useful_for_linkedin";
-  }
-
-  if (example.explicitContentType === "newsletter" || example.channel === "newsletter") {
-    return "useful_for_newsletter";
-  }
-
-  if (example.explicitContentType === "long-form-blog" || example.channel === "blog") {
-    return "useful_for_blog";
-  }
-
-  if (/\b(eu|minha|minhas|meu|meus)\b/i.test(example.text)) {
-    return "supports_first_person_voice";
-  }
-
-  return "reinforces_informal_tone";
-}
-
-export function resolveContributionPreview(code: ContributionCode): string {
-  switch (code) {
-    case "useful_for_linkedin":
-      return "Útil para LinkedIn.";
-    case "useful_for_newsletter":
-      return "Útil para newsletter.";
-    case "useful_for_blog":
-      return "Útil para blog.";
-    case "supports_first_person_voice":
-      return "Sustenta escrita em primeira pessoa.";
-    case "reinforces_formal_tone":
-      return "Reforça um tom mais formal.";
-    case "redundant_with_recent_examples":
-      return "Redundante em relação a exemplos recentes.";
-    case "signals_negative_pattern":
-      return "Sinaliza um padrão a evitar.";
-    default:
-      return "Reforça um tom mais informal.";
-  }
-}
-
-function buildPreviewText(text: string): string {
-  const normalized = text.trim();
-  if (normalized.length <= 160) {
-    return normalized;
-  }
-
-  return `${normalized.slice(0, 157)}...`;
-}
-
-function attentionRank(level: AttentionLevel): number {
-  switch (level) {
-    case "high":
-      return 3;
-    case "medium":
-      return 2;
-    default:
-      return 1;
-  }
-}
-
-function deriveAttentionReasonCodes(example: VoiceExample): readonly AttentionReasonCode[] {
-  const reasons: AttentionReasonCode[] = [];
-
-  if (example.text.trim().length < 80) {
-    reasons.push("too_short");
-  }
-
-  if (example.state === "excluded") {
-    reasons.push("excluded_from_profile");
-  }
-
-  return reasons;
-}

@@ -61,6 +61,7 @@ function createInMemoryGatewayStore(seed?: {
     upsertGatewayCustomer: () => Effect.succeed(undefined),
     getGatewayCustomer: () => Effect.succeed(Option.none()),
     upsertGatewaySubscription: () => Effect.succeed(undefined),
+    getGatewaySubscription: () => Effect.succeed(Option.none()),
     recordGatewayEvent: (input) =>
       Effect.succeed(events.has(input.eventId) ? false : (events.add(input.eventId), true))
   };
@@ -75,7 +76,7 @@ function createWebhookTestContext() {
         id: "chk_test_intent",
         userId: "user_test_1",
         productKind: "subscription",
-        internalRef: "pro",
+        internalRef: "criador",
         currency: "BRL",
         gateway: "asaas",
         status: "pending",
@@ -142,7 +143,7 @@ describe("POST /webhooks/stripe", () => {
 
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({ received: true });
-    expect(entitlementFor(billing, "user_test_1", "pro")?.status).toBe("active");
+    expect(entitlementFor(billing, "user_test_1", "criador")?.status).toBe("active");
   });
 
   it("is idempotent on duplicate event id", async () => {
@@ -157,7 +158,7 @@ describe("POST /webhooks/stripe", () => {
 
     expect(first.status).toBe(200);
     expect(second.status).toBe(200);
-    expect(entitlementFor(billing, "user_test_1", "pro")?.wallet.availableCredits).toBe(150);
+    expect(entitlementFor(billing, "user_test_1", "criador")?.wallet.availableCredits).toBe(75);
   });
 });
 
@@ -196,7 +197,7 @@ describe("POST /webhooks/asaas", () => {
 
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({ received: true });
-    expect(entitlementFor(billing, "user_test_1", "pro")?.status).toBe("active");
+    expect(entitlementFor(billing, "user_test_1", "criador")?.status).toBe("active");
   });
 
   it("is idempotent on duplicate event id", async () => {
@@ -211,10 +212,106 @@ describe("POST /webhooks/asaas", () => {
 
     expect(first.status).toBe(200);
     expect(second.status).toBe(200);
-    expect(entitlementFor(billing, "user_test_1", "pro")?.wallet.availableCredits).toBe(150);
+    expect(entitlementFor(billing, "user_test_1", "criador")?.wallet.availableCredits).toBe(75);
   });
 });
 
 function entitlementFor(billing: BillingServiceContract, userId: string, planId: string) {
   return billing.getEntitlement(userId, planId);
 }
+
+// integrity fix — recordGatewayEvent used to run BEFORE dispatch; a dispatch (or side-effect)
+// failure still marked the event processed, so the gateway's retry hit isNew=false and gave up,
+// permanently losing a paid checkout. This proves the invariant: dispatch failure => retriable.
+function createFlakyGatewayStore(options: {
+  readonly intents: readonly BillingCheckoutIntent[];
+  readonly failUpsertSubscriptionOnAttempt: number;
+}): PostgresBillingGatewayStore & { readonly recordedEventIds: ReadonlySet<string> } {
+  const events = new Set<string>();
+  const intents = new Map(options.intents.map((intent) => [intent.id, intent] as const));
+  let upsertSubscriptionAttempts = 0;
+
+  return {
+    findCatalogEntry: () => Effect.succeed(Option.none<BillingGatewayCatalogEntry>()),
+    createCheckoutIntent: (intent) => Effect.succeed({ ...intent, externalSessionId: null, completedAt: null }),
+    completeCheckoutIntent: (id, completedAt) =>
+      Effect.sync(() => {
+        const intent = intents.get(id);
+        if (intent) {
+          intents.set(id, { ...intent, status: "completed", completedAt });
+        }
+      }),
+    getCheckoutIntent: (id) => Effect.succeed(Option.fromNullable(intents.get(id))),
+    attachSessionToIntent: () => Effect.succeed(undefined),
+    upsertGatewayCustomer: () => Effect.succeed(undefined),
+    getGatewayCustomer: () => Effect.succeed(Option.none()),
+    upsertGatewaySubscription: () => {
+      upsertSubscriptionAttempts += 1;
+      if (upsertSubscriptionAttempts === options.failUpsertSubscriptionOnAttempt) {
+        return Effect.fail(new Error("injected transient failure (test)"));
+      }
+      return Effect.succeed(undefined);
+    },
+    getGatewaySubscription: () => Effect.succeed(Option.none()),
+    recordGatewayEvent: (input) =>
+      Effect.succeed(events.has(input.eventId) ? false : (events.add(input.eventId), true)),
+    recordedEventIds: events
+  };
+}
+
+describe("webhook dedup ordering", () => {
+  const rawBody = readFileSync(stripeFixturePath, "utf8");
+
+  it("does not mark a failed dispatch as processed, so a retry re-runs it and succeeds", async () => {
+    const config = createTestConfig();
+    const services = createMinimalServices();
+    const gatewayStore = createFlakyGatewayStore({
+      intents: [
+        {
+          id: "chk_test_intent",
+          userId: "user_test_1",
+          productKind: "subscription",
+          internalRef: "criador",
+          currency: "BRL",
+          gateway: "asaas",
+          status: "pending",
+          externalSessionId: null,
+          createdAt: FIXED_NOW.toISOString(),
+          completedAt: null
+        }
+      ],
+      // upsertGatewaySubscription is the LAST side-effect before recordGatewayEvent — failing
+      // it on the first attempt proves the whole pipeline (not just dispatch itself) gates dedup.
+      failUpsertSubscriptionOnAttempt: 1
+    });
+    const billingWebhook = createBillingWebhookService({
+      billing: services.billing,
+      gatewayStore,
+      stripeAdapter: createStripeGatewayAdapter({
+        secretKey: "sk_test_signing_only",
+        webhookSecret: STRIPE_WEBHOOK_SECRET
+      }),
+      config,
+      now: () => FIXED_NOW
+    });
+    const app = createTestApp(config, { ...services, billingWebhook });
+    const headers = {
+      "Content-Type": "application/json",
+      "stripe-signature": signStripePayload(rawBody)
+    };
+
+    const first = await app.request("/webhooks/stripe", { method: "POST", headers, body: rawBody });
+    expect(first.status).toBeGreaterThanOrEqual(500);
+    // dispatch itself already ran and succeeded (it's not transactionally coupled to the later
+    // gateway-store side-effects) — the point of the fix is that the event isn't marked
+    // processed yet, so a gateway retry doesn't bail out early with isNew=false.
+    expect(entitlementFor(services.billing, "user_test_1", "criador")?.status).toBe("active");
+    expect(gatewayStore.recordedEventIds.has("evt_test_checkout_completed")).toBe(false);
+
+    const second = await app.request("/webhooks/stripe", { method: "POST", headers, body: rawBody });
+    expect(second.status).toBe(200);
+    expect(gatewayStore.recordedEventIds.has("evt_test_checkout_completed")).toBe(true);
+    // dispatch is idempotent (activeCycleId already set) — the retry must not double-grant credits.
+    expect(entitlementFor(services.billing, "user_test_1", "criador")?.wallet.availableCredits).toBe(75);
+  });
+});

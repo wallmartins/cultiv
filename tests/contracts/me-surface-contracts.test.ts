@@ -1,11 +1,8 @@
 import { Effect, Schema } from "effect";
 import { describe, expect, it } from "vitest";
 import {
-  ContentTypeCatalogViewSchema,
   ExecutionStatusViewSchema,
   MeExecutionRequestSchema,
-  VoiceExampleCreateInputSchema,
-  VoiceExamplesPageViewSchema,
   VoiceProfileScreenViewSchema,
   decodeVoiceProfileScreenView
 } from "../../packages/contracts/src/index.js";
@@ -18,7 +15,6 @@ describe("me surface contracts", () => {
         snapshotId: "voice-snapshot-effective-12",
         version: 12,
         confidence: "medium",
-        adaptationMode: "conservative",
         primaryLanguage: "pt-BR",
         tone: "informal",
         cadence: "direct",
@@ -80,109 +76,6 @@ describe("me surface contracts", () => {
     expect(value.profile.snapshotId).toBe("voice-snapshot-effective-12");
     expect(value.diagnostics.pendingVersion).toBe(13);
     expect(value.materialBase.byContentType["linkedin-post"]).toBe(4);
-  });
-
-  it("decodes the voice examples page view", () => {
-    const value = Schema.decodeUnknownSync(VoiceExamplesPageViewSchema)({
-      items: [
-        {
-          exampleId: "example_1",
-          version: 2,
-          state: "active",
-          text: "Eu gosto de abrir textos com observações concretas.",
-          previewText: "Eu gosto de abrir textos...",
-          language: "pt-BR",
-          channel: "linkedin",
-          format: "post",
-          explicitContentType: "linkedin-post",
-          effectiveContentTypeHints: ["linkedin-post"],
-          classificationLabels: ["positive", "representative"],
-          pinned: true,
-          pendingProfileImpact: true,
-          targetProfileVersion: 14,
-          evaluation: {
-            systemWeight: 0.92,
-            attentionLevel: "low",
-            attentionReasonCodes: [],
-            contributionCode: "supports_first_person_voice",
-            contributionPreview: "Ajuda a sustentar primeira pessoa.",
-            userPinned: true
-          },
-          createdAt: "2026-05-14T10:00:00.000Z",
-          updatedAt: "2026-05-14T10:05:00.000Z"
-        }
-      ],
-      total: 1,
-      limit: 20,
-      offset: 0
-    });
-
-    expect(value.items).toHaveLength(1);
-    expect(value.items[0]?.evaluation.userPinned).toBe(true);
-    expect(value.items[0]?.targetProfileVersion).toBe(14);
-  });
-
-  it("decodes a create input for voice examples", () => {
-    const value = Schema.decodeUnknownSync(VoiceExampleCreateInputSchema)({
-      text: "Escrevo assim quando quero soar mais técnico.",
-      language: "pt-BR",
-      explicitContentType: "architecture-post",
-      context: "Post técnico após revisão de arquitetura",
-      pinned: false,
-      performance: {
-        channel: "linkedin",
-        selfRating: 4,
-        likes: 120,
-        comments: 18
-      }
-    });
-
-    expect(value.explicitContentType).toBe("architecture-post");
-    expect(value.performance?.likes).toBe(120);
-  });
-
-  it("decodes the content types catalog view", () => {
-    const value = Schema.decodeUnknownSync(ContentTypeCatalogViewSchema)({
-      items: [
-        {
-          id: "linkedin-post",
-          label: "LinkedIn Post",
-          available: false,
-          reasonCode: "plan_restriction",
-          defaultLanguage: "pt-BR",
-          supportedLanguages: ["pt-BR", "en-US"],
-          steps: ["hook", "draft", "refine"],
-          inputSchema: [
-            {
-              key: "topic",
-              label: "Tema",
-              type: "string",
-              required: true,
-              highImpact: true,
-              helpText: "Descreva o ponto central do post."
-            }
-          ],
-          briefingGuidance: {
-            objective: "Gerar um post curto, humano e publicável.",
-            tips: ["Use um insight concreto.", "Evite briefing genérico."],
-            exampleBriefing: "Quero um post sobre trade-offs de monorepo.",
-            commonMistakes: ["Tema amplo demais"]
-          },
-          briefingGuidanceByLanguage: {
-            "en-US": {
-              objective: "Generate a concise, publishable LinkedIn post.",
-              tips: ["Use a concrete insight."],
-              exampleBriefing: "I want a post about monorepo trade-offs.",
-              commonMistakes: ["Topic too broad"]
-            }
-          }
-        }
-      ]
-    });
-
-    expect(value.items[0]?.available).toBe(false);
-    expect(value.items[0]?.reasonCode).toBe("plan_restriction");
-    expect(value.items[0]?.inputSchema[0]?.highImpact).toBe(true);
   });
 
   it("decodes the authenticated execution request", () => {
@@ -252,7 +145,6 @@ describe("me surface contracts", () => {
             snapshotId: "snapshot_1",
             version: 1,
             confidence: "medium",
-            adaptationMode: "standard",
             primaryLanguage: "pt-BR",
             tone: "informal",
             cadence: "direct",

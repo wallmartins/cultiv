@@ -34,7 +34,8 @@ describe("mapAsaasWebhookEvent", () => {
       externalSubscriptionId: "sub_asaas_test",
       externalCustomerId: "cus_asaas_test",
       internalRef: "pro",
-      productKind: "subscription"
+      productKind: "subscription",
+      paymentMethodKind: "card"
     });
   });
 

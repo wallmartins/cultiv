@@ -1,0 +1,67 @@
+{
+  "id": "drift-author-high-confidence-twelve-01",
+  "suite": "drift-regression",
+  "input": {
+    "voiceProfile": {
+      "userId": "eval-author-high-confidence-twelve",
+      "tone": "measured",
+      "cadence": "moderate",
+      "lexicon": [],
+      "constraints": [],
+      "antiPatterns": [],
+      "antiPatternsExplicit": [],
+      "rules": [],
+      "styleMarkers": [],
+      "userLabels": [
+        "drift-regression"
+      ],
+      "coreReasoningSignature": {
+        "narrativeProse": "Combines observational openings with measured claims, letting examples carry the argument before naming the insight.",
+        "certaintyLevel": "moderate",
+        "judgmentFrequency": "low",
+        "conclusionPace": "slow",
+        "readerRelationship": "peer",
+        "authoritySource": "lived_experience",
+        "derivedAntiPatterns": [
+          "generic ai phrasing",
+          "numbered thesis proof list",
+          "rhetorical inflation"
+        ]
+      },
+      "argumentDevelopmentSignature": {
+        "developmentProse": "Grounds claims in lived scenes, tests ideas against examples, and names insight only after the reader has context.",
+        "moveLabels": [
+          "scene",
+          "test",
+          "insight"
+        ],
+        "transitionTendencies": [
+          {
+            "from": "scene",
+            "to": "test",
+            "frequency": "common"
+          },
+          {
+            "from": "test",
+            "to": "insight",
+            "frequency": "occasional"
+          }
+        ],
+        "epistemicPosture": "investigative",
+        "structuralAntiPatterns": [
+          "rhetorical_inflation",
+          "numbered_proof_list"
+        ]
+      }
+    },
+    "candidate": "Esta abordagem revolucionária vai transformar completamente sua carreira para sempre.",
+    "stepName": "draft"
+  },
+  "expectations": {
+    "minDriftScore": 50
+  },
+  "tags": [
+    "drift",
+    "author-high-confidence-twelve"
+  ]
+}

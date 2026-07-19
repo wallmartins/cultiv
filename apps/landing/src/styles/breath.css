@@ -1,0 +1,51 @@
+
+.breath {
+  height: 210vh;
+  position: relative;
+  background: var(--t-bg);
+}
+.breath__sticky {
+  position: sticky;
+  top: 0;
+  min-height: 100svh;
+  display: grid;
+  place-items: center;
+  padding: clamp(96px, 16vh, 180px) clamp(20px, 6vw, 56px);
+}
+@media (prefers-reduced-motion: reduce) {
+  .breath {
+    height: auto;
+  }
+  .breath__sticky {
+    position: relative;
+  }
+}
+
+.breath__box {
+  width: min(100%, 1034px);
+  text-align: center;
+}
+
+.breath__h2 {
+  font-family: var(--font-headline);
+  font-weight: 400;
+  font-size: clamp(1.55rem, 4.4vw, 3.3rem);
+  line-height: 1.38;
+  letter-spacing: -0.006em;
+  margin: 0;
+  text-wrap: pretty;
+  color: var(--t-ink, #34322e);
+}
+@media (prefers-reduced-motion: no-preference) {
+  html.js .breath__h2 [data-breath-word] {
+    color: rgb(206, 203, 196);
+  }
+}
+
+.breath__line {
+  display: block;
+  margin: 0 0 0.32em;
+}
+.breath__line:last-child {
+  margin-bottom: 0;
+}

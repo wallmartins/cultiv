@@ -6,6 +6,7 @@ import {
   isSameUtcDay,
   roundCredits
 } from "./billing-utils.js";
+import { computeEntitlementGate, deriveEffectiveSubscriptionStatus } from "./entitlement.js";
 import type { BillingEntitlement, BillingRepository } from "./types.js";
 import { findSubscription, resolveDefaultPlanId } from "./subscription-lookup.js";
 
@@ -80,15 +81,38 @@ export function createEntitlementFromRepository(
               .reduce((total, entry) => total + entry.credits, 0)
         );
 
+  const effectiveStatus = deriveEffectiveSubscriptionStatus({
+    status: subscription.status,
+    availableCredits: wallet.availableCredits,
+    now: referenceDate,
+    trialEndsAt: subscription.trialEndsAt,
+    accessUntil: subscription.expiresAt
+  });
+
+  const { hasLiveAccess, canGenerate, gate } = computeEntitlementGate({
+    status: effectiveStatus,
+    availableCredits: wallet.availableCredits,
+    now: referenceDate,
+    trialEndsAt: subscription.trialEndsAt,
+    accessUntil: subscription.expiresAt,
+    everSubscribed: subscription.everSubscribed
+  });
+
   return {
     userId,
     planId,
     tier: plan.tier,
-    status: subscription.status,
+    status: effectiveStatus,
     monthlyCreditsRemaining: wallet.availableCredits,
     dailyCreditsRemaining,
-    canGenerate: subscription.status === "active" && wallet.availableCredits > 0,
-    canRefine: subscription.status === "active" && hasFeature(plan, "content.language.refinement"),
+    canGenerate,
+    canRefine: hasLiveAccess && hasFeature(plan, "content.language.refinement"),
+    gate,
+    trialEndsAt: subscription.trialEndsAt,
+    renewsAt: subscription.renewsAt,
+    accessUntil: subscription.expiresAt,
+    everSubscribed: subscription.everSubscribed,
+    paymentMethod: null, // ponytail: filled by backend route from PostgresBillingGatewayStore
     allowedModels: plan.allowedModels ?? [],
     features: Object.fromEntries(plan.features.map((feature) => [feature.key, feature.enabled])),
     wallet,

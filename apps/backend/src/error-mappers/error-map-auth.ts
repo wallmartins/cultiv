@@ -6,6 +6,7 @@ import {
   BackendRequestBodyParseError,
   BackendRequestRateLimitError,
   BackendUserSuspendedError,
+  BackendUserDeletedError,
   BackendValidationError
 } from "../http/errors.js";
 import { createHttpErrorResponse, normalizeAuthenticationCode, normalizeAuthorizationCode } from "../http/error-response-core.js";
@@ -66,6 +67,13 @@ export function mapAuthError(error: unknown, path: string): HttpErrorResponse | 
 
   if (error instanceof BackendUserSuspendedError) {
     return createHttpErrorResponse(403, "user_suspended", {
+      message: error.message,
+      details: { userId: error.userId, externalSubject: error.externalSubject, path }
+    });
+  }
+
+  if (error instanceof BackendUserDeletedError) {
+    return createHttpErrorResponse(401, "authentication_invalid_token", {
       message: error.message,
       details: { userId: error.userId, externalSubject: error.externalSubject, path }
     });

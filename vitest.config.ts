@@ -11,7 +11,7 @@ export default defineConfig({
     globals: true,
     environment: 'node',
     setupFiles: ['./tests/vitest.setup.ts'],
-    include: ['tests/**/*.test.ts', 'tests/**/*.test.tsx', 'apps/backend/tests/**/*.test.ts'],
+    include: ['tests/**/*.test.ts', 'tests/**/*.test.tsx', 'apps/backend/tests/**/*.test.ts', 'packages/*/tests/**/*.test.ts'],
     pool: process.env.VITEST_DURABLE_SUITE === "true" ? "forks" : "threads",
     fileParallelism: process.env.VITEST_DURABLE_SUITE === "true" ? false : true,
     dangerouslyIgnoreUnhandledErrors: process.env.VITEST_DURABLE_SUITE === "true",
@@ -32,7 +32,9 @@ export default defineConfig({
       '@': resolve(rootDir, 'src'),
       '~': resolve(rootDir, 'apps/web/src'),
       '@tanstack/react-router': resolve(rootDir, 'apps/web/node_modules/@tanstack/react-router'),
-      '@auth0/auth0-react': resolve(rootDir, 'apps/web/node_modules/@auth0/auth0-react')
+      '@auth0/auth0-react': resolve(rootDir, 'apps/web/node_modules/@auth0/auth0-react'),
+      '@tanstack/react-query': resolve(rootDir, 'apps/web/node_modules/@tanstack/react-query'),
+      zustand: resolve(rootDir, 'apps/web/node_modules/zustand')
     }
   }
 });

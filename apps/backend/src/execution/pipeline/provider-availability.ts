@@ -1,4 +1,5 @@
 import type { BackendConfig } from "../../config/config.js";
+import { dedupeStrings } from "../../internal/utils.js";
 
 export interface ProviderModelAttempt {
   readonly provider: string;
@@ -34,6 +35,33 @@ export function isProviderConfigured(
     default:
       return false;
   }
+}
+
+const providerCredentialEnvVar: Readonly<Record<string, string>> = {
+  openai: "OPENAI_API_KEY",
+  anthropic: "ANTHROPIC_API_KEY",
+  gemini: "GEMINI_API_KEY",
+  deepseek: "DEEPSEEK_API_KEY",
+  groq: "GROQ_API_KEY",
+  ollama: "OLLAMA_BASE_URL"
+};
+
+export function findMissingProviderCredentials(
+  config: Pick<
+    BackendConfig,
+    | "openAIApiKey"
+    | "anthropicApiKey"
+    | "geminiApiKey"
+    | "deepSeekApiKey"
+    | "groqApiKey"
+    | "ollamaBaseUrl"
+  >,
+  attempts: readonly ProviderModelAttempt[]
+): readonly string[] {
+  const providers = dedupeStrings(attempts.map((attempt) => attempt.provider));
+  return providers
+    .filter((provider) => !isProviderConfigured(config, provider))
+    .map((provider) => providerCredentialEnvVar[provider] ?? provider);
 }
 
 export function filterConfiguredProviderAttempts<T extends ProviderModelAttempt>(

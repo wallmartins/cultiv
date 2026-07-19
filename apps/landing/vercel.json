@@ -1,0 +1,30 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "astro",
+  "installCommand": "cd ../.. && npx -y pnpm@11.3.0 install --frozen-lockfile",
+  "buildCommand": "pnpm build",
+  "outputDirectory": "dist",
+  "rewrites": [
+    { "source": "/app", "destination": "https://cultiv-web.vercel.app/app" },
+    { "source": "/app/:path*", "destination": "https://cultiv-web.vercel.app/app/:path*" },
+    { "source": "/sitemap.xml", "destination": "/sitemap-index.xml" }
+  ],
+  "redirects": [
+    { "source": "/demo", "destination": "/#demo", "statusCode": 308 },
+    { "source": "/planos", "destination": "/#planos", "statusCode": 308 },
+    { "source": "/mapa-da-voz", "destination": "/#constelacao", "statusCode": 308 },
+    { "source": "/perfil-de-voz", "destination": "/#constelacao", "statusCode": 308 },
+    { "source": "/tom", "destination": "/#constelacao", "statusCode": 308 },
+    { "source": "/vocabulario", "destination": "/#constelacao", "statusCode": 308 },
+    { "source": "/ritmo", "destination": "/#constelacao", "statusCode": 308 },
+    { "source": "/estrutura", "destination": "/#constelacao", "statusCode": 308 },
+    { "source": "/argumentacao", "destination": "/#constelacao", "statusCode": 308 },
+    { "source": "/raciocinio", "destination": "/#constelacao", "statusCode": 308 },
+    { "source": "/audiencia", "destination": "/#constelacao", "statusCode": 308 },
+    { "source": "/intencao", "destination": "/#constelacao", "statusCode": 308 },
+    { "source": "/briefing", "destination": "/#constelacao", "statusCode": 308 },
+    { "source": "/motor-de-escrita", "destination": "/#constelacao", "statusCode": 308 },
+    { "source": "/refinamento", "destination": "/#constelacao", "statusCode": 308 },
+    { "source": "/texto-gerado", "destination": "/#constelacao", "statusCode": 308 }
+  ]
+}

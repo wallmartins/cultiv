@@ -1,0 +1,53 @@
+{
+  "id": "drift-structural-slow-warmup-01",
+  "suite": "drift-regression",
+  "input": {
+    "voiceProfile": {
+      "userId": "eval-drift-structural-slow-warmup-01",
+      "tone": "measured",
+      "cadence": "moderate",
+      "lexicon": [],
+      "constraints": [],
+      "antiPatterns": [],
+      "antiPatternsExplicit": [],
+      "rules": [],
+      "styleMarkers": [],
+      "userLabels": [
+        "drift-regression"
+      ],
+      "coreReasoningSignature": {
+        "narrativeProse": "Builds arguments through explicit tradeoffs and measured recommendations.",
+        "certaintyLevel": "moderate",
+        "judgmentFrequency": "low",
+        "conclusionPace": "fast",
+        "readerRelationship": "peer",
+        "authoritySource": "practice",
+        "derivedAntiPatterns": [
+          "slow narrative warmup"
+        ]
+      },
+      "argumentDevelopmentSignature": {
+        "developmentProse": "Frames decisions through explicit tradeoffs and measured recommendations.",
+        "moveLabels": [
+          "constraint",
+          "tradeoff",
+          "recommendation"
+        ],
+        "transitionTendencies": [],
+        "epistemicPosture": "investigative",
+        "structuralAntiPatterns": [
+          "absolute_prescription"
+        ]
+      }
+    },
+    "candidate": "Antes de concluir, vamos percorrer vários contextos históricos sem chegar ao ponto.",
+    "stepName": "draft"
+  },
+  "expectations": {
+    "minDriftScore": 50
+  },
+  "tags": [
+    "drift",
+    "structural"
+  ]
+}

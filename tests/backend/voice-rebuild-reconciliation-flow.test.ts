@@ -10,6 +10,7 @@ import {
 import {
   TEST_REASONING_EXTRACTION_FIXTURE_PT
 } from "../../apps/backend/src/product/voice/reasoning-extraction.js";
+import { createVoiceExampleInDatabase } from "../../apps/backend/tests/test-helpers.js";
 
 const config: BackendConfig = {
   environment: "test",
@@ -75,7 +76,7 @@ describe("voice rebuild reconciliation flow", () => {
     Effect.runSync(services.voiceConsent.grantConsent("user_reconcile_skip"));
 
     Effect.runSync(
-      services.voice.createExample("user_reconcile_skip", {
+      createVoiceExampleInDatabase(services.database, "user_reconcile_skip", {
         text: "Eu começo observando o contexto antes de tirar conclusões no LinkedIn.",
         language: "pt-BR",
         explicitContentType: "linkedin-post"
@@ -83,7 +84,7 @@ describe("voice rebuild reconciliation flow", () => {
     );
 
     Effect.runSync(
-      services.voice.createExample("user_reconcile_skip", {
+      createVoiceExampleInDatabase(services.database, "user_reconcile_skip", {
         text: "Outro exemplo no mesmo formato, com tom parecido e parágrafos curtos.",
         language: "pt-BR",
         explicitContentType: "linkedin-post"
@@ -169,7 +170,7 @@ describe("voice rebuild reconciliation flow", () => {
     Effect.runSync(services.voiceConsent.grantConsent("user_reconcile_invoke"));
 
     Effect.runSync(
-      services.voice.createExample("user_reconcile_invoke", {
+      createVoiceExampleInDatabase(services.database, "user_reconcile_invoke", {
         text: "Eu começo observando o contexto antes de tirar conclusões no LinkedIn.",
         language: "pt-BR",
         explicitContentType: "linkedin-post"
@@ -177,7 +178,7 @@ describe("voice rebuild reconciliation flow", () => {
     );
 
     Effect.runSync(
-      services.voice.createExample("user_reconcile_invoke", {
+      createVoiceExampleInDatabase(services.database, "user_reconcile_invoke", {
         text: "Outro exemplo no mesmo formato, com tom parecido e parágrafos curtos.",
         language: "pt-BR",
         explicitContentType: "linkedin-post"
@@ -217,7 +218,7 @@ describe("voice rebuild reconciliation flow", () => {
     Effect.runSync(services.voiceConsent.grantConsent("user_reconcile_fail"));
 
     Effect.runSync(
-      services.voice.createExample("user_reconcile_fail", {
+      createVoiceExampleInDatabase(services.database, "user_reconcile_fail", {
         text: "Eu começo observando o contexto antes de tirar conclusões no LinkedIn.",
         language: "pt-BR",
         explicitContentType: "linkedin-post"
@@ -225,7 +226,7 @@ describe("voice rebuild reconciliation flow", () => {
     );
 
     Effect.runSync(
-      services.voice.createExample("user_reconcile_fail", {
+      createVoiceExampleInDatabase(services.database, "user_reconcile_fail", {
         text: "Outro exemplo no mesmo formato, com tom parecido e parágrafos curtos.",
         language: "pt-BR",
         explicitContentType: "linkedin-post"

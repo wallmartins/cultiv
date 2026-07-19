@@ -10,6 +10,7 @@ import {
   createBackendAppTestApp,
   createBackendAppTestConfig,
   createBackendAppTestServices,
+  registerLegacyFreeTierPlan,
   seedExecutionVoiceState
 } from "./backend-app.fixtures.js";
 import { createExecutionApp } from "./backend-app-executions.shared.js";
@@ -21,6 +22,7 @@ describe("backend app execution quotes and telemetry", () => {
       executionMode: "sync"
     });
     const services = createBackendAppTestServices(config);
+    registerLegacyFreeTierPlan(services);
     services.billing.upsertSubscription({
       id: "sub_user_1_free",
       userId: "user_1",
@@ -79,14 +81,7 @@ describe("backend app execution quotes and telemetry", () => {
   });
 
   it("accepts a matching quote and rejects a stale quote on the /me execution surface", async () => {
-    const { app, services } = createExecutionApp("sync");
-    services.billing.upsertSubscription({
-      id: "sub_user_1_pro",
-      userId: "user_1",
-      planId: "pro",
-      status: "active",
-      startedAt: backendAppTestStartedAt.toISOString()
-    });
+    const { app } = createExecutionApp("sync");
     const previewPayload = {
       contentType: "newsletter",
       qualityMode: "balanced",
@@ -140,14 +135,7 @@ describe("backend app execution quotes and telemetry", () => {
   });
 
   it("accepts intent-based preview and execution with matching quote; rejects stale quote", async () => {
-    const { app, services } = createExecutionApp("sync");
-    services.billing.upsertSubscription({
-      id: "sub_user_1_pro",
-      userId: "user_1",
-      planId: "pro",
-      status: "active",
-      startedAt: backendAppTestStartedAt.toISOString()
-    });
+    const { app } = createExecutionApp("sync");
     const previewPayload = {
       intent: "share-idea",
       scope: { lengthTier: "short" },
@@ -211,9 +199,9 @@ describe("backend app execution quotes and telemetry", () => {
     });
     const services = createBackendAppTestServices(config);
     services.billing.upsertSubscription({
-      id: "sub_user_1_pro",
+      id: "sub_user_1_criador",
       userId: "user_1",
-      planId: "pro",
+      planId: "criador",
       status: "active",
       startedAt: backendAppTestStartedAt.toISOString()
     });
@@ -283,14 +271,7 @@ describe("backend app execution quotes and telemetry", () => {
   });
 
   it("keeps preview-confirmed execution aligned with direct execution for minimized runtime input", async () => {
-    const { app, services } = createExecutionApp("sync");
-    services.billing.upsertSubscription({
-      id: "sub_user_1_pro",
-      userId: "user_1",
-      planId: "pro",
-      status: "active",
-      startedAt: backendAppTestStartedAt.toISOString()
-    });
+    const { app } = createExecutionApp("sync");
     const sharedPayload = {
       contentType: "newsletter",
       qualityMode: "balanced" as const,

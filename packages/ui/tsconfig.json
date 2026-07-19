@@ -1,22 +1,13 @@
 {
+  "extends": "../config/tsconfig/base.json",
   "compilerOptions": {
-    "target": "ES2022",
-    "lib": ["ES2022", "DOM", "DOM.Iterable"],
-    "jsx": "react-jsx",
-    "module": "ESNext",
-    "moduleResolution": "Bundler",
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true,
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
-    "rootDir": "./src",
+    "rootDir": ".",
     "outDir": "./dist",
-    "noEmit": true
+    "jsx": "react-jsx",
+    // Base is ES2022-only (shared with non-DOM packages); this package renders real form
+    // controls (e.g. RailSearch's <input onChange>) that need HTMLInputElement/EventTarget.
+    "lib": ["ES2022", "DOM"]
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "app/**/*"],
   "exclude": ["dist", "node_modules"]
 }

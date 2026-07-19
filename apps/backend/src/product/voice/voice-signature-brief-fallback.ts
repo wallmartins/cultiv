@@ -223,7 +223,6 @@ export function synthesizeReasoningExtractionFromBrief(
       authoritySource: brief.suggestedReasoning.authoritySource,
       derivedAntiPatterns: []
     },
-    formatExpressions: {}
   };
 }
 

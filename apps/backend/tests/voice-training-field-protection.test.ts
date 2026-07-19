@@ -6,6 +6,7 @@ import type { BackendConfig } from "../src/config/config.js";
 import { createProtectedVoiceTrainingDatabaseClient } from "../src/product/voice/protected-voice-training-database.js";
 import { createBackendProductServices } from "../src/product/core/services.js";
 import { createBackendVoiceFieldProtectionService } from "../src/safety/voice-field-protection.js";
+import { createVoiceExampleInDatabase } from "./test-helpers.js";
 
 const config: BackendConfig = {
   environment: "test",
@@ -33,7 +34,7 @@ describe("Voice training field protection and protected persistence", () => {
     Effect.runSync(services.voiceConsent.grantConsent("user_protected_example"));
 
     const created = Effect.runSync(
-      services.voice.createExample("user_protected_example", {
+      createVoiceExampleInDatabase(services.database, "user_protected_example", {
         text: "Eu escrevo com precisão, contexto e transições curtas.",
         context: "Notas privadas sobre preferência de narrativa.",
         language: "pt-BR",
@@ -41,50 +42,15 @@ describe("Voice training field protection and protected persistence", () => {
       })
     );
 
-    const stored = rawDatabase.snapshot().voiceExamples[created.exampleId];
+    const stored = rawDatabase.snapshot().voiceExamples[created.id];
     expect(stored).toBeDefined();
     expect(stored?.text).toMatch(/^voiceprot:v1:/);
     expect(stored?.text).not.toContain("Eu escrevo com precisão");
     expect(stored?.context).toMatch(/^voiceprot:v1:/);
 
-    const authorized = Effect.runSync(services.database.voiceExamples.get(created.exampleId));
-    expect(authorized?.text).toBe("Eu escrevo com precisão, contexto e transições curtas.");
-    expect(authorized?.context).toBe("Notas privadas sobre preferência de narrativa.");
-  });
-
-  it("updates protected fields without reintroducing plain persisted payloads", () => {
-    const rawDatabase = createDatabase();
-    const services = Effect.runSync(
-      createBackendProductServices(config, {
-        database: rawDatabase,
-        now: () => new Date("2026-06-02T00:00:00.000Z")
-      })
-    );
-
-    Effect.runSync(services.voiceConsent.grantConsent("user_protected_update"));
-    const created = Effect.runSync(
-      services.voice.createExample("user_protected_update", {
-        text: "Texto inicial protegido.",
-        context: "Contexto inicial protegido.",
-        language: "pt-BR"
-      })
-    );
-
-    Effect.runSync(
-      services.voice.updateExample("user_protected_update", created.exampleId, {
-        text: "Texto atualizado ainda protegido.",
-        context: "Contexto atualizado ainda protegido."
-      })
-    );
-
-    const stored = rawDatabase.snapshot().voiceExamples[created.exampleId];
-    expect(stored?.text).toMatch(/^voiceprot:v1:/);
-    expect(stored?.text).not.toContain("Texto atualizado ainda protegido.");
-    expect(stored?.context).toMatch(/^voiceprot:v1:/);
-
-    const authorized = Effect.runSync(services.database.voiceExamples.get(created.exampleId));
-    expect(authorized?.text).toBe("Texto atualizado ainda protegido.");
-    expect(authorized?.context).toBe("Contexto atualizado ainda protegido.");
+    const authorized = Effect.runSync(services.database.voiceExamples.listByUser("user_protected_example"));
+    expect(authorized[0]?.text).toBe("Eu escrevo com precisão, contexto e transições curtas.");
+    expect(authorized[0]?.context).toBe("Notas privadas sobre preferência de narrativa.");
   });
 
   it("protects committed examples created through the direct ingestion path", () => {
@@ -99,7 +65,7 @@ describe("Voice training field protection and protected persistence", () => {
     Effect.runSync(services.voiceConsent.grantConsent("user_protected_batch"));
 
     Effect.runSync(
-      services.voice.createExample("user_protected_batch", {
+      createVoiceExampleInDatabase(services.database, "user_protected_batch", {
         text: "Exemplo sensível criado diretamente.",
         context: "Contexto sensível do exemplo.",
         language: "pt-BR"

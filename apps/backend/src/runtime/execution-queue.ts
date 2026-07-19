@@ -10,6 +10,7 @@ export interface ExecutionQueuePayload {
 export interface ExecutionQueue {
   readonly enqueue: (payload: ExecutionQueuePayload) => Promise<void>;
   readonly getJob: (executionId: string) => Promise<ExecutionQueuePayload | undefined>;
+  readonly remove: (executionId: string) => Promise<void>;
   readonly createWorker: (
     processor: (payload: ExecutionQueuePayload) => Promise<void>
   ) => Worker<ExecutionQueuePayload>;
@@ -52,6 +53,10 @@ export function createExecutionQueue(config: BackendConfig): ExecutionQueue {
       const job = await queue.getJob(executionId);
       return job?.data;
     },
+    async remove(executionId) {
+      const job = await queue.getJob(executionId);
+      await job?.remove();
+    },
     createWorker(processor) {
       return new Worker<ExecutionQueuePayload>(
         EXECUTION_QUEUE_NAME,
@@ -68,7 +73,6 @@ export function createExecutionQueue(config: BackendConfig): ExecutionQueue {
       try {
         await queue.close();
       } catch {
-        // BullMQ/ioredis can reject while draining in-flight commands during shutdown.
       }
 
       await new Promise<void>((resolve) => setImmediate(resolve));

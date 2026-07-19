@@ -1,10 +1,9 @@
 import { createCipheriv, createDecipheriv, createHash, randomBytes } from "node:crypto";
 import { Effect } from "effect";
 import type {
-  VoiceExampleBatchRecord,
   VoiceExampleRecord
 } from "@my-ai-orchestrator/database";
-import type { VoiceExample, VoiceExampleBatch } from "@my-ai-orchestrator/domain";
+import type { VoiceExample } from "@my-ai-orchestrator/domain";
 import { BackendVoiceTrainingConsentFailureError } from "../http/errors.js";
 import type { BackendVoiceFieldProtectionService } from "./voice-field-protection-types.js";
 
@@ -61,82 +60,6 @@ export function createBackendVoiceFieldProtectionService(
           ...record,
           text,
           context
-        };
-      }),
-    protectVoiceExampleBatch: (record) =>
-      Effect.gen(function* () {
-        const items = yield* Effect.forEach(record.items, (item) => {
-          if (!item.stagedInput) {
-            return Effect.succeed(item);
-          }
-
-          return Effect.gen(function* () {
-            const stagedInput = item.stagedInput!;
-            const protectedText = yield* protectStringField(
-              record.userId,
-              "voice_example_batch.staged_input.text",
-              stagedInput.text,
-              key
-            );
-            const protectedContext = yield* protectOptionalStringField(
-              record.userId,
-              "voice_example_batch.staged_input.context",
-              stagedInput.context,
-              key
-            );
-            return {
-              ...item,
-              stagedInput: {
-                ...stagedInput,
-                text: protectedText,
-                context: protectedContext
-              }
-            };
-          });
-        }, { concurrency: 1 });
-
-        return {
-          ...record,
-          items
-        };
-      }),
-    unprotectVoiceExampleBatch: (record) =>
-      Effect.gen(function* () {
-        const items = yield* Effect.forEach(record.items, (item) => {
-          if (!item.stagedInput) {
-            return Effect.succeed(item);
-          }
-
-          return Effect.gen(function* () {
-            const stagedInput = item.stagedInput!;
-            const text = yield* unprotectStringFieldWithFallback(
-              record.userId,
-              "voice_example_batch.staged_input.text",
-              stagedInput.text,
-              key,
-              previousKey
-            );
-            const context = yield* unprotectOptionalStringFieldWithFallback(
-              record.userId,
-              "voice_example_batch.staged_input.context",
-              stagedInput.context,
-              key,
-              previousKey
-            );
-            return {
-              ...item,
-              stagedInput: {
-                ...stagedInput,
-                text,
-                context
-              }
-            };
-          });
-        }, { concurrency: 1 });
-
-        return {
-          ...record,
-          items
         };
       })
   };

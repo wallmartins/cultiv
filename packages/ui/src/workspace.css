@@ -1,0 +1,17 @@
+/* App-only interaction tokens, scoped to [data-surface="workspace"] (bootstrap-spec §4).
+   Not part of tokens.css — this sheet never reaches the landing (Astro). */
+[data-surface="workspace"] {
+  --line2: oklch(0.24 0 0);
+  --halo: oklch(0.86 0.2 128 / 0.07);
+  --hover: oklch(0.93 0 0 / 0.04);
+  --activebg: oklch(0.93 0 0 / 0.06);
+}
+/* higher specificity than the block above, so it also wins with no explicit
+   [data-theme] present — light is the product default (DESIGN.md), not dark. */
+[data-surface="workspace"][data-theme="light"],
+[data-surface="workspace"]:not([data-theme="dark"]) {
+  --line2: oklch(0.86 0 0);
+  --halo: oklch(0.83 0.19 128 / 0.09);
+  --hover: oklch(0.19 0 0 / 0.04);
+  --activebg: oklch(0.19 0 0 / 0.06);
+}

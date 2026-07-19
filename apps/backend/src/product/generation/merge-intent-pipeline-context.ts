@@ -1,6 +1,7 @@
 import type { CompositorMetadata, ExecutionPlan } from "@my-ai-orchestrator/contracts";
 import type { ResolvedGenerationIntent } from "./intent-resolver.js";
 import type { StepPlannerTelemetry } from "./resolve-generation-target.js";
+import { PIPELINE_METADATA_KEYS } from "../../execution/pipeline-metadata.js";
 
 function toCompositorMetadata(plan: ExecutionPlan): CompositorMetadata {
   return {
@@ -35,8 +36,8 @@ export function mergeIntentPipelineContext(
 
     return {
       ...requestContext,
-      ...(compositorMetadata ? { compositor: compositorMetadata } : {}),
-      ...(plannerMetadata ? { stepPlanner: plannerMetadata } : {})
+      ...(compositorMetadata ? { [PIPELINE_METADATA_KEYS.compositor]: compositorMetadata } : {}),
+      ...(plannerMetadata ? { [PIPELINE_METADATA_KEYS.stepPlanner]: plannerMetadata } : {})
     };
   }
 
@@ -44,9 +45,9 @@ export function mergeIntentPipelineContext(
     ...requestContext,
     wordTarget: resolvedIntent.wordTarget,
     lengthTier: resolvedIntent.scope.lengthTier,
-    generationIntent: resolvedIntent.intent,
+    [PIPELINE_METADATA_KEYS.generationIntent]: resolvedIntent.intent,
     generationChannel: resolvedIntent.channelHint,
-    ...(compositorMetadata ? { compositor: compositorMetadata } : {}),
-    ...(plannerMetadata ? { stepPlanner: plannerMetadata } : {})
+    ...(compositorMetadata ? { [PIPELINE_METADATA_KEYS.compositor]: compositorMetadata } : {}),
+    ...(plannerMetadata ? { [PIPELINE_METADATA_KEYS.stepPlanner]: plannerMetadata } : {})
   };
 }

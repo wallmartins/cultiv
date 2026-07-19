@@ -1,0 +1,131 @@
+---
+import "@my-ai-orchestrator/ui/styles.css";
+import "../styles/root.css";
+import T from "../components/T.astro";
+import { SITE } from "../data/site";
+import { APP_ORIGIN } from "../config";
+
+interface Props {
+  title: string;
+  description: string;
+  jsonLd: object[];
+}
+const { title, description, jsonLd } = Astro.props;
+
+const canonical = new URL(Astro.url.pathname, Astro.site).href;
+const preconnectApp = Astro.site && new URL(Astro.site).origin !== APP_ORIGIN;
+const meta = {
+  pt: { title: SITE.pt.title, description: SITE.pt.description },
+  en: { title: SITE.en.title, description: SITE.en.description },
+};
+---
+
+<!doctype html>
+<html lang="pt-BR" data-lang="pt" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <meta property="og:site_name" content={SITE.name} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:locale" content="pt_BR" />
+    <meta property="og:locale:alternate" content="en_US" />
+    <meta property="og:image" content={new URL("/og-image.png", Astro.site).href} />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={title} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content={new URL("/og-image.png", Astro.site).href} />
+    {preconnectApp && <link rel="preconnect" href={APP_ORIGIN} />}
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="theme-color" content="#F8F7F4" />
+    {jsonLd.map((entry) => <script type="application/ld+json" is:inline set:html={JSON.stringify(entry)} />)}
+    <script is:inline define:vars={{ meta }}>
+      (function () {
+        var d = document.documentElement;
+        d.classList.add("js");
+        setTimeout(function () {
+          if (!d.classList.contains("reveal-armed")) d.classList.remove("js");
+        }, 3000);
+        window.cultivApplyMeta = function (l) {
+          if (document.title !== meta.pt.title && document.title !== meta.en.title) return;
+          document.title = meta[l].title;
+          var m = document.querySelector('meta[name="description"]');
+          if (m) m.setAttribute("content", meta[l].description);
+        };
+        try {
+          var l = localStorage.getItem("cultiv-lang");
+          if (l === "pt" || l === "en") d.dataset.lang = l;
+          else if (navigator.language && !/^pt/i.test(navigator.language)) d.dataset.lang = "en";
+        } catch (_) {}
+        if (d.dataset.lang === "en") {
+          d.lang = "en";
+          window.cultivApplyMeta("en");
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <a class="skip-link label" href="#main">
+      <T pt="Pular para o conteúdo" en="Skip to content" />
+    </a>
+    <slot />
+    <script>
+      document.documentElement.classList.add("reveal-armed");
+
+      const els = document.querySelectorAll<HTMLElement>(".reveal");
+      let io: IntersectionObserver | undefined;
+      let watchdog: ReturnType<typeof setTimeout> | undefined;
+      const releaseAll = () => {
+        document.documentElement.classList.add("reveal-now");
+        els.forEach((el) => el.classList.add("is-in"));
+        io?.disconnect();
+        clearTimeout(watchdog);
+      };
+
+      const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (reduce || document.visibilityState !== "visible") {
+        releaseAll();
+      } else {
+        io = new IntersectionObserver(
+          (entries) => {
+            for (const e of entries) {
+              if (e.isIntersecting) {
+                e.target.classList.add("is-in");
+                io!.unobserve(e.target);
+              }
+            }
+          },
+          { rootMargin: "0px 0px -8% 0px" }
+        );
+        els.forEach((el) => io!.observe(el));
+
+        const inputs = ["pointerdown", "pointermove", "wheel", "touchstart", "keydown"] as const;
+        const confirmHuman = () => {
+          clearTimeout(watchdog);
+          inputs.forEach((t) => window.removeEventListener(t, confirmHuman));
+        };
+        watchdog = setTimeout(() => {
+          confirmHuman();
+          releaseAll();
+        }, 3000);
+        inputs.forEach((t) => window.addEventListener(t, confirmHuman, { passive: true }));
+      }
+
+      document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState !== "visible") releaseAll();
+      });
+      window.addEventListener("beforeprint", releaseAll);
+    </script>
+  </body>
+</html>

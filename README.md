@@ -6,7 +6,7 @@ Cultiv is an AI writing engine that learns an author's personal voice and genera
 
 This repository is a **pnpm monorepo** containing the marketing site, the authenticated workspace, the writing backend, shared domain packages, and the client SDK. The public product name is **Cultiv**; internal workspace packages use the `@my-ai-orchestrator/*` scope.
 
-**Status:** Pre-launch — marketing surface and authenticated workspace are implemented in code; production deploy (Vercel + Railway) and final QA are pending.
+**Status:** Pre-launch — marketing surface and authenticated workspace are implemented in code; production deploy (Vercel for the web surfaces, Integrator VPS for the backend) and final QA are pending.
 
 ---
 
@@ -36,7 +36,8 @@ Full domain language: [`CONTEXT.md`](./CONTEXT.md).
                                       │ client-sdk (HTTPS)
                                       ▼
                          ┌──────────────────────────────────┐
-                         │  Railway — apps/backend          │
+                         │  Integrator VPS — apps/backend   │
+                         │  Cloudflare Tunnel → nginx → PM2 │
                          │  api  → dist/cli/main.js         │
                          │  worker → dist/cli/worker-main.js│
                          └────────────┬─────────────────────┘
@@ -59,7 +60,7 @@ Full domain language: [`CONTEXT.md`](./CONTEXT.md).
 - **Auth** (login/signup) is Auth0 — not the client SDK.
 - **Production** uses durable async execution (`EXECUTION_MODE=async`): API enqueues jobs; a separate **worker** process drains the queue.
 
-Operational runbooks: [`docs/live/runbooks/production-go-live.md`](./docs/live/runbooks/production-go-live.md) · [`docs/live/runbooks/durable-async-runtime-hitl.md`](./docs/live/runbooks/durable-async-runtime-hitl.md).
+Operational runbooks: [`infra/integrator/docs/runbooks/`](./infra/integrator/docs/runbooks/) (go-live, disaster recovery, graceful shutdown, monitoring).
 
 ---
 
@@ -230,10 +231,10 @@ Shared tokens and components for marketing and workspace UI.
 │   ├── feature-flags/       # Feature flags
 │   └── config/              # Shared tooling config
 ├── tests/                   # Unit, integration, governance
-├── docs/live/               # PRD, plans, issues, ADRs, runbooks
+├── docs/live/               # Plans and issues (ADRs live in docs/adr/)
+├── infra/integrator/        # Deploy real: scripts, configs e runbooks da VPS
 ├── scripts/                 # CI helpers, showcase, restructure tooling
-├── railway.toml             # Railway api service config
-├── railway.worker.toml      # Railway worker service config
+├── ecosystem.config.cjs     # PM2 — processos api + worker em produção
 ├── docker-compose.yml       # Local Postgres + Redis
 └── CONTEXT.md               # Domain glossary
 ```
@@ -340,6 +341,20 @@ Do not commit `.env` files.
 | `pnpm test:web` | Web + frontend-boundary tests |
 | `pnpm hitl:durable-smoke` | Manual smoke — async job survives API restart |
 | `pnpm lint` | `tsc --noEmit` across all workspaces |
+| `pnpm eval` | Run eval suite (deterministic + heuristic) |
+| `pnpm eval:ci` | Run eval with JSON report + baseline comparison |
+| `pnpm eval:nightly` | Run eval with Voice Judge + save baseline |
+
+Eval CLI options:
+- `--suite <name>` — filter to `voice-fidelity`, `drift-regression`, or `critic-regression`
+- `--include-judge` — enable Layer 3 Voice Judge (uses LLM tokens)
+- `--judge-provider <p>` / `--judge-model <m>` — override judge provider/model
+- `--generator <name>` — `placeholder` (default) or `orchestrator`
+- `--compare` — compare against the latest saved baseline
+- `--save-baseline` — persist results as a new baseline
+- `--report <format>` — `console`, `json`, or `markdown`
+
+Judge env vars: `EVAL_JUDGE_PROVIDER`, `EVAL_JUDGE_MODEL`, `GROQ_API_KEY` (or `<PROVIDER>_API_KEY`).
 | `pnpm showcase:voice-setup` | Dev helper — voice profile token for showcase |
 | `pnpm showcase:generate` | Dev helper — generate showcase sample via backend |
 
@@ -355,18 +370,29 @@ Do not commit `.env` files.
    `cd ../.. && npx -y pnpm@11.3.0 install --frozen-lockfile`
 4. Production env: `SITE_URL`, `VITE_*`, Auth0 vars
 
-### Railway (backend)
+### Integrator VPS (backend) — o deploy real
 
-One GitHub repo, monorepo root `/`. See [`railway.toml`](./railway.toml) and [`railway.worker.toml`](./railway.worker.toml).
+O backend **não** roda em Railway. Roda numa VPS (Integrator, datacenter Brasil) com Cloudflare Tunnel
+como único ingresso (zero portas abertas), nginx em `127.0.0.1` e PM2 rodando `api` + `worker`.
+Postgres e Redis sobem por `docker compose` na própria VPS.
 
-| Service | Config file | Start command |
-|---------|-------------|---------------|
-| `api` | `/railway.toml` (auto) | `pnpm --filter @my-ai-orchestrator/backend start` |
-| `worker` | `/railway.worker.toml` (set in service settings) | `pnpm --filter @my-ai-orchestrator/backend worker` |
+| Processo | Config | Entrypoint |
+|----------|--------|------------|
+| `cultiv-api` | [`ecosystem.config.cjs`](./ecosystem.config.cjs) | `apps/backend/dist/cli/main.js` |
+| `cultiv-worker` | [`ecosystem.config.cjs`](./ecosystem.config.cjs) | `apps/backend/dist/cli/worker-main.js` |
 
-Plugins: **PostgreSQL** + **Redis**. Migrations run via `preDeployCommand` on `api`.
+O deploy é automático: push em `main` que toque o backend dispara o job `deploy-vps`
+(`.github/workflows/ci.yml`), que só roda depois de lint + testes + eval + build + suíte durable
+passarem. Ele executa [`infra/integrator/scripts/deploy-app.sh`](./infra/integrator/scripts/deploy-app.sh)
+— que roda as migrations antes de recarregar o PM2.
 
-Full checklist: [`docs/live/runbooks/production-go-live.md`](./docs/live/runbooks/production-go-live.md).
+Toda a infra, scripts e runbooks: [`infra/integrator/`](./infra/integrator/README.md).
+Checklist de go-live: [`infra/integrator/scripts/go-live-check.sh`](./infra/integrator/scripts/go-live-check.sh)
+e [`infra/integrator/docs/runbooks/integrator-deploy-go-live.md`](./infra/integrator/docs/runbooks/integrator-deploy-go-live.md).
+Primeiro deploy, passo a passo: [`first-deploy-step-by-step.md`](./infra/integrator/docs/runbooks/first-deploy-step-by-step.md).
+
+> `railway.toml` / `railway.worker.toml` são de uma tentativa anterior de deploy e **não são usados
+> por nada**. Mantidos só como referência até a decisão de removê-los.
 
 ---
 
@@ -384,10 +410,10 @@ GitHub Actions (`.github/workflows/ci.yml`):
 | Resource | Description |
 |----------|-------------|
 | [`CONTEXT.md`](./CONTEXT.md) | Domain glossary |
-| [`docs/live/prd/`](./docs/live/prd/) | Product requirements |
+| [`docs/adr/`](./docs/adr/) | Architecture decision records (0001–0008) |
 | [`docs/live/plan/`](./docs/live/plan/) | Implementation plans |
-| [`docs/live/runbooks/`](./docs/live/runbooks/) | Production & HITL runbooks |
-| [`docs/progress-log.md`](./docs/progress-log.md) | Development log |
+| [`docs/live/issues/`](./docs/live/issues/) | Issue breakdowns |
+| [`infra/integrator/docs/runbooks/`](./infra/integrator/docs/runbooks/) | Production runbooks (deploy, DR, monitoring) |
 
 ---
 
@@ -397,7 +423,7 @@ GitHub Actions (`.github/workflows/ci.yml`):
 |-------|--------|--------|
 | **Marketing Surface** | Landing, showcase, signup CTAs, legal, SEO | Code complete |
 | **Authenticated Workspace** | Auth0, `/app`, generation, voice, history, billing | Implemented in repo; production hardening in progress |
-| **Go-live** | Vercel + Railway + Auth0 + Cloudflare + smoke tests | Pending |
+| **Go-live** | Vercel (web) + Integrator VPS (backend) + Auth0 + Cloudflare + smoke tests | Pending |
 
 ---
 

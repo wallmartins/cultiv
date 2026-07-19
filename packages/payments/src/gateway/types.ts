@@ -48,6 +48,9 @@ export interface GatewayWebhookEvent {
   readonly externalCustomerId?: string;
   readonly internalRef?: string;
   readonly productKind?: BillingProductKind;
+  readonly paymentMethodKind?: BillingPaymentMethod; // contract-03 §3 — captura no checkout.completed
+  readonly outstandingInvoiceUrl?: string; // contract-03 §3/§4 — regularizeUrl (Q4), setado no past_due
+  readonly periodEndsAt?: string; // contract-03 Q2 — cross-check do gateway p/ accessUntil no cancelamento
 }
 
 export interface BillingGatewayChargeRequest {
@@ -65,6 +68,15 @@ export interface BillingGatewayChargeResult {
   readonly raw?: unknown;
 }
 
+export interface PortalSessionRequest {
+  readonly externalCustomerId: string;
+  readonly returnUrl: string;
+}
+
+export interface PortalSessionResult {
+  readonly url: string;
+}
+
 export interface BillingGatewayAdapter {
   readonly name: BillingGatewayName;
   createCheckoutSession?(
@@ -75,4 +87,7 @@ export interface BillingGatewayAdapter {
     signature: string
   ): Effect.Effect<GatewayWebhookEvent, BillingGatewayWebhookVerificationError>;
   charge(request: BillingGatewayChargeRequest): Effect.Effect<BillingGatewayChargeResult, BillingGatewayError>;
+  // contract-03 §2 — money ops: Stripe via Customer Portal (redirect), ASAAS in-app cancel.
+  createPortalSession?(request: PortalSessionRequest): Effect.Effect<PortalSessionResult, BillingGatewayError>;
+  cancelSubscription?(gatewaySubscriptionId: string): Effect.Effect<void, BillingGatewayError>;
 }

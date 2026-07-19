@@ -59,8 +59,7 @@ describe("voice signature reconciliation", () => {
   it("parses reconciled unified signature from valid JSON", async () => {
     const response = JSON.stringify({
       core: TEST_REASONING_EXTRACTION_FIXTURE_PT.core,
-      development: TEST_ARGUMENT_DEVELOPMENT_EXTRACTION_FIXTURE_PT.development,
-      formatExpressions: TEST_REASONING_EXTRACTION_FIXTURE_PT.formatExpressions
+      development: TEST_ARGUMENT_DEVELOPMENT_EXTRACTION_FIXTURE_PT.development
     });
 
     const result = await Effect.runPromise(

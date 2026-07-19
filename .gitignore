@@ -36,3 +36,12 @@ apps/web/.nitro/
 # Production billing calibration exports (may contain real usage telemetry)
 tests/fixtures/billing/calibration-jobs-production.json
 docs/superpowers/reports/2026-06-18-hybrid-pricing-calibration.md
+
+# Blair — brand profiles contain private strategy and competitor intel
+.opencode/cmo/brand.md
+.opencode/cmo/brands/*/brand.md
+.opencode/cmo/active-brand
+.opencode/cmo/learnings.md
+.opencode/cmo/stakeholders.md
+.opencode/cmo/marquee.md
+.opencode/cmo/pipeline.md
