@@ -10,7 +10,7 @@ import { Auth0Provider, useAuth0 } from "@auth0/auth0-react";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { RouterProvider } from "@tanstack/react-router";
 import { makeAppRuntime, RuntimeProvider } from "@my-ai-orchestrator/shared";
-import { router, type AppAuth } from "./router.js";
+import { captureReturnTo, router, type AppAuth } from "./router.js";
 import { queryClient } from "./query-client.js";
 
 function App() {
@@ -67,6 +67,7 @@ createRoot(document.getElementById("app")!).render(
       }}
       cacheLocation="localstorage"
       useRefreshTokens
+      onRedirectCallback={(appState) => captureReturnTo(appState?.returnTo)}
     >
       <App />
     </Auth0Provider>

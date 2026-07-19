@@ -21,18 +21,15 @@ const parsed = (() => {
 
 export const APP_ORIGIN = parsed.origin;
 
-const CALIBRATION_PATH = "/app/calibration";
+const CALIBRATE_PATH = "/app/calibrate";
 const PLANS_PATH = "/app/plans";
-
-const login = (returnTo: string): string =>
-  `${APP_ORIGIN}/login?returnTo=${encodeURIComponent(returnTo)}`;
 
 export type PlanId = "explorador" | "criador" | "profissional";
 export type PlanPeriod = "monthly" | "annual";
 
-export const trialUrl = login(CALIBRATION_PATH);
-
-export const loginUrl = login("/app");
+// Não existe rota /login: as rotas do app disparam o Auth0 no próprio beforeLoad e o callback
+// devolve o usuário ao destino original (appState.returnTo).
+export const trialUrl = `${APP_ORIGIN}${CALIBRATE_PATH}`;
 
 export const planUrl = (plan: PlanId, period: PlanPeriod): string =>
-  login(`${PLANS_PATH}?plan=${plan}&period=${period}`);
+  `${APP_ORIGIN}${PLANS_PATH}?plan=${plan}&period=${period}`;

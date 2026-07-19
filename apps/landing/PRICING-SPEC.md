@@ -40,10 +40,12 @@ Mensal ⇄ anual (**−20%**), moeda segue o locale (R$ pt-BR / $ en). A diferen
 - **Toggle mensal/anual** instantâneo (island), sem reload. Anual mostra o preço/mês + selo `−20%`.
 - Diferenciar tiers por **resultado/volume**, não por planilha de 40 linhas. Poucas linhas, as
   que o criador se importa (quanto escreve, quantos perfis de voz, canais).
-- **CTA de cada plano é `<a>` real → Auth0**, `returnTo` = onboarding da calibração; checkout
-  currency-routed (**BRL → Asaas, USD → Stripe**). Puxar domínio Auth0 + shape da URL de
-  config/`packages/payments` no build; se um valor exato não for descobrível, fiar o **shape**
-  correto e marcar TODO de uma linha — **nunca chutar**.
+- **CTA de cada plano é `<a>` real → `/app/plans?plan=<id>&period=<mensal|anual>`** (`src/config.ts`).
+  Não há rota `/login`: a própria rota do app dispara o Auth0 no `beforeLoad` e o callback devolve
+  o autor ao destino original. O plano chega **destacado**, pronto pra assinar num clique — quem
+  já decidiu pula o trial; quem não decidiu segue no trial normalmente. Checkout currency-routed
+  (**BRL → Asaas, USD → Stripe**). O gate de calibração **isenta `/plans`**: assina-se antes de
+  calibrar, e o wizard vem logo após o retorno do gateway.
 
 ---
 
@@ -73,7 +75,7 @@ Mensal ⇄ anual (**−20%**), moeda segue o locale (R$ pt-BR / $ en). A diferen
 
 1. Três planos, Criador em destaque (borda `--accent` + `--glow`, sem sombra em repouso).
 2. Toggle mensal/anual altera os seis preços corretamente (R$ e $).
-3. CTA de cada plano é `<a>` real apontando para a URL de conversão Auth0 (ou TODO sinalizado).
+3. CTA de cada plano é `<a>` real para `/app/plans?plan=…&period=…`, e o toggle reescreve o `period`.
 4. Sem menção a plano gratuito permanente; microcopy do teste presente.
 5. Um único acid no fold (botão do destaque).
 6. pt-BR não transborda em 360/390px; contraste AA nos dois temas.

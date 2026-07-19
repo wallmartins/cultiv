@@ -1,17 +1,19 @@
 import { useEffect, useRef, useState } from "react";
-import { useNavigate, useRouterState } from "@tanstack/react-router";
+import { useNavigate, useRouteContext, useRouterState } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import type { BillingPlanView } from "@my-ai-orchestrator/contracts";
 import { creditsAsTexts, queryKeys, useCheckout, useCheckoutStatus, useEntitlement, usePlans, useTopUps } from "@my-ai-orchestrator/shared";
 import { CheckoutOverlay, PlansScreen, type CheckoutPhase, type CheckoutProductKind } from "@my-ai-orchestrator/ui/app/plans";
 import { DowngradeSurplus } from "@my-ai-orchestrator/ui/app/states";
 import { resolvePlanName } from "./billing-view.js";
+import { rememberPendingCheckout } from "./pending-checkout.js";
 import {
   checkDowngradeSurplus,
   deriveCheckoutKind,
   findTopUpPackage,
   gatewayLabel,
   mapCatalogToCards,
+  parsePeriod,
   parseTrigger,
   trialBannerData,
   type DowngradeSurplusCheck
@@ -34,7 +36,9 @@ export function PlansRoute() {
   const search = useRouterState({ select: (state) => state.location.search as Record<string, string | undefined> });
   const queryClient = useQueryClient();
 
-  const [period, setPeriod] = useState<"monthly" | "annual">("monthly");
+  // `?plan=`/`?period=` são o handoff dos cards da landing — o período entra já aplicado e o
+  // plano escolhido chega destacado, pronto pra assinar num clique.
+  const [period, setPeriod] = useState<"monthly" | "annual">(() => parsePeriod(search.period) ?? "monthly");
   const [currency, setCurrency] = useState<"BRL" | "USD">("BRL");
   const [pending, setPending] = useState<PendingCheckout | undefined>();
   const [downgradeConfirm, setDowngradeConfirm] = useState<DowngradeConfirm | undefined>();
@@ -46,6 +50,15 @@ export function PlansRoute() {
 
   const intentId = search.intentId;
   const checkoutStatusQuery = useCheckoutStatus(intentId ?? "");
+
+  // Voltou do gateway sem ter calibrado: o wizard é o próximo passo do produto, e a confirmação
+  // da cobrança viaja junto (PendingCheckoutWatcher) em vez de segurar o autor nesta tela.
+  const { appMode } = useRouteContext({ from: "/_shell" });
+  useEffect(() => {
+    if (!intentId || appMode !== "calibrate") return;
+    rememberPendingCheckout(intentId);
+    void navigate({ to: "/calibrate" });
+  }, [intentId, appMode, navigate]);
 
   const invalidatedOnReturn = useRef(false);
   useEffect(() => {
@@ -159,7 +172,9 @@ export function PlansRoute() {
   const checkoutInFlight = checkout.isPending;
 
   const plansState = plansQuery.isPending ? "loading" : plansQuery.isError ? "error" : "ready";
-  const plans = plansQuery.data ? mapCatalogToCards(plansQuery.data, period, currency, checkoutInFlight, selectPlan) : [];
+  const plans = plansQuery.data
+    ? mapCatalogToCards(plansQuery.data, period, currency, checkoutInFlight, selectPlan, search.plan)
+    : [];
 
   return (
     <>
