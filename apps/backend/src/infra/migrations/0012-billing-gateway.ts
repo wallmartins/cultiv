@@ -1,7 +1,6 @@
 import { Kysely } from "kysely";
 import type { DatabaseTables } from "../postgres-tables.js";
 
-// Dev placeholder external IDs — replace with real provider IDs in production.
 const DEV_CATALOG_SEED_ROWS = [
   {
     id: "gw-catalog-pro-monthly-brl",

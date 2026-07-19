@@ -1,29 +1,6 @@
 {
   "policyVersion": "2026-05-16",
-  "lifecycle": "legacy-supported",
-  "canonicalCreditCost": 2.5,
-  "pricesByPlan": {
-    "short-piece": {
-      "short": { "fast": 1, "balanced": 2.5, "strict": 10 },
-      "medium": { "fast": 2, "balanced": 4, "strict": 12 },
-      "long": { "fast": 3, "balanced": 5, "strict": 14 }
-    },
-    "long-piece": {
-      "short": { "fast": 2, "balanced": 4, "strict": 12 },
-      "medium": { "fast": 3, "balanced": 6, "strict": 16 },
-      "long": { "fast": 4, "balanced": 8, "strict": 20 }
-    },
-    "serial-piece": {
-      "short": { "fast": 1, "balanced": 2.5, "strict": 10 },
-      "medium": { "fast": 2, "balanced": 3.5, "strict": 11 },
-      "long": { "fast": 2.5, "balanced": 4, "strict": 12 }
-    },
-    "edition-piece": {
-      "short": { "fast": 1.5, "balanced": 3, "strict": 11 },
-      "medium": { "fast": 2, "balanced": 4, "strict": 12 },
-      "long": { "fast": 2.5, "balanced": 5, "strict": 14 }
-    }
-  },
+  "lifecycle": "active",
   "pricing": [
     { "planTier": "free", "contentType": "long-form-blog", "qualityMode": "fast", "creditPrice": 1 },
     { "planTier": "free", "contentType": "long-form-blog", "qualityMode": "balanced", "creditPrice": 2.5 },
