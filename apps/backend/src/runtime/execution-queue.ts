@@ -68,7 +68,6 @@ export function createExecutionQueue(config: BackendConfig): ExecutionQueue {
       try {
         await queue.close();
       } catch {
-        // BullMQ/ioredis can reject while draining in-flight commands during shutdown.
       }
 
       await new Promise<void>((resolve) => setImmediate(resolve));

@@ -1,0 +1,74 @@
+
+:root {
+  --theme-t: 0;
+  --theme-bg-k: 0;
+  --theme-ink-k: 0;
+
+  --t-bg: color-mix(in oklch, var(--bg) calc((1 - var(--theme-bg-k)) * 100%), var(--xbg));
+  --t-surface: color-mix(in oklch, var(--surface) calc((1 - var(--theme-bg-k)) * 100%), var(--xsurface));
+  --t-ink: color-mix(in oklch, var(--ink) calc((1 - var(--theme-ink-k)) * 100%), var(--xink));
+  --t-muted: color-mix(in oklch, var(--muted) calc((1 - var(--theme-ink-k)) * 100%), var(--xmuted));
+  --t-line: color-mix(in oklch, var(--line) calc((1 - var(--theme-ink-k)) * 100%), var(--xline));
+  --t-navbg: color-mix(in srgb, var(--t-bg) 88%, transparent);
+  --t-logoink: var(--t-ink);
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--t-bg);
+}
+body {
+  color: var(--t-ink);
+  overflow-x: hidden;
+}
+a {
+  color: var(--t-ink);
+}
+a:hover {
+  color: var(--t-muted);
+}
+::selection {
+  background: color-mix(in srgb, var(--accent) 42%, transparent);
+}
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+@keyframes cultivDraw { to { stroke-dashoffset: 0; } }
+@keyframes cultivFadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes cultivFadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes cultivScrollDot {
+  0% { transform: translateY(0); opacity: 1; }
+  70% { transform: translateY(12px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 0; }
+}
+@keyframes cultivCaret { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+details[data-faq] > summary { list-style: none; }
+details[data-faq] > summary::-webkit-details-marker { display: none; }
+details[data-faq] [data-sign] { transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1); }
+details[data-faq][open] [data-sign] { transform: rotate(45deg); }
+details[data-faq][open] [data-answer] { animation: cultivFadeIn 0.3s ease both; }
+@media (prefers-reduced-motion: reduce) {
+  details[data-faq] [data-sign] { transition: none; }
+  details[data-faq][open] [data-answer] { animation: none; }
+}
+
+html:not([data-lang="en"]) [data-l="en"] { display: none !important; }
+html[data-lang="en"] [data-l="pt"] { display: none !important; }
+
+.hero-cta-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+@media (max-width: 420px) {
+  .hero-cta-row { flex-direction: column; align-items: stretch; }
+  .hero-cta-row > * { width: 100%; text-align: center; }
+}

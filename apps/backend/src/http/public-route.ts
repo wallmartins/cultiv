@@ -35,19 +35,6 @@ interface PublicRouteWithBodyOptions<TInput, TResponse> extends PublicRouteBaseO
   ) => Promise<TResponse> | Effect.Effect<TResponse, unknown>;
 }
 
-/**
- * Encapsulates the public Hono handler pipeline: auth → optional JSON decode → handler → response validation.
- *
- * @example
- * app.get("/me/billing/entitlement", createPublicRouteHandler({
- *   route: Routes.GetMeBillingEntitlement,
- *   config: options.config,
- *   services: options.services,
- *   responseSchema: BillingEntitlementViewSchema,
- *   responseSchemaName: "BillingEntitlementView",
- *   handler: ({ actor }) => options.services.billing.getEntitlement(actor.userId, "free")
- * }));
- */
 type PublicRouteOptions<TInput, TResponse> =
   | PublicRouteWithoutBodyOptions<TResponse>
   | PublicRouteWithBodyOptions<TInput, TResponse>;

@@ -1,0 +1,73 @@
+---
+import "../styles/demo.css";
+import T from "./T.astro";
+import { trialUrl } from "../config";
+import { DEMO_EXAMPLE_PT } from "../scripts/demo-reader";
+---
+
+<section
+  id="demo"
+  class="demo"
+  data-screen-label="Demo — leia a minha escrita"
+  aria-label="Demo: leia a minha escrita"
+>
+  <div class="demo__inner">
+    <h2 class="demo__title">
+      <T pt="Cole um parágrafo seu. Veja o que ele já entrega de você." en="Paste a paragraph of yours. See what it already gives away about you." />
+    </h2>
+
+    <div class="demo__card">
+      <label for="demoText" class="demo__label">
+        <T
+          pt="Escreva ou cole aqui algo que você mesmo escreveu — um e-mail, um post, um trecho."
+          en="Write or paste something you wrote yourself — an email, a post, a passage."
+        />
+      </label>
+      <textarea id="demoText" class="demo__textarea">{DEMO_EXAMPLE_PT}</textarea>
+
+      <div class="demo__actions">
+        <button type="button" id="demoReadBtn" class="demo__btn">
+          <T pt="Ler minha escrita →" en="Read my writing →" />
+        </button>
+        <span class="demo__privacy">
+          <T pt="Roda no seu navegador. Nada do que você escreve sai daqui. Sem cadastro." en="Runs in your browser. Nothing you write leaves this page. No sign-up." />
+        </span>
+      </div>
+
+      <p role="alert" id="demoError" class="demo__error" hidden></p>
+    </div>
+
+    <div id="demoResult" class="demo__result" aria-live="polite" hidden>
+      <div class="demo__lines" id="demoLines"></div>
+      <div class="demo__metrics" id="demoMetrics"></div>
+      <p class="demo__trunc" id="demoTrunc" hidden></p>
+
+      <div class="demo__frame" id="demoFrame">
+        <h3 class="demo__frameTitle">
+          <T pt="Isto é só a superfície." en="This is only the surface." />
+        </h3>
+        <p class="demo__frameBody">
+          <T
+            pt="Ritmo, vocabulário, pontuação — o que um parágrafo revela. O seu Perfil de Voz completo vai além: como você pensa, argumenta e desenvolve uma ideia. A Cultiv aprende isso numa calibração de minutos — não de um texto colado."
+            en="Rhythm, vocabulary, punctuation — what one paragraph reveals. Your full Voice Profile goes further: how you think, argue, and develop an idea. Cultiv learns that in a few minutes of calibration — not from a pasted paragraph."
+          />
+        </p>
+        <div class="demo__frameActions">
+          <a class="demo__frameCta" href={trialUrl}>
+            <T pt="Comece o teste grátis →" en="Start the free trial →" />
+          </a>
+          <button type="button" id="demoGoConstellation" class="demo__frameLink">
+            <T pt="ou veja a sua voz virar um mapa ↓" en="or watch your voice become a map ↓" />
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  import { initDemo } from "../scripts/demo-reader";
+
+  const root = document.getElementById("demo");
+  if (root) initDemo(root);
+</script>

@@ -1,16 +1,7 @@
-/* ============================================================
-   Cultiv landing — superfície clássica/prosa (home legada + páginas
-   legais /termos, /privacidade). A identidade (tokens, fontes, keyframes,
-   base, type ramp e botões) vem do SSOT compartilhado @my-ai-orchestrator/ui;
-   este arquivo só contém o que é específico desta superfície.
-   Doutrina visual: apps/landing/DESIGN.md.
-   ============================================================ */
 
-@import "@my-ai-orchestrator/ui/styles.css";            /* tokens + fontes + keyframes + base */
-@import "@my-ai-orchestrator/ui/type.css";              /* type ramp / prosa */
-@import "@my-ai-orchestrator/ui/primitives-classic.css"; /* botões BEM .btn--* */
-
-/* ---------- extras de corpo desta superfície (peso/kerning/transição de tema) ---------- */
+@import "@my-ai-orchestrator/ui/styles.css";
+@import "@my-ai-orchestrator/ui/type.css";
+@import "@my-ai-orchestrator/ui/primitives-classic.css";
 
 body {
   font-size: 1rem;
@@ -19,15 +10,10 @@ body {
   transition: background-color var(--t-med) var(--ease-out), color var(--t-med) var(--ease-out);
 }
 
-/* Âncoras não ficam sob a nav fixa de 64px. */
 [id] { scroll-margin-top: 84px; }
-
-/* ---------- bilingual switching (JS-off default: pt) ---------- */
 
 html:not([data-lang="en"]) [data-l="en"] { display: none !important; }
 html[data-lang="en"] [data-l="pt"] { display: none !important; }
-
-/* ---------- primitivos de layout desta superfície ---------- */
 
 .wrap {
   width: min(100% - clamp(2.5rem, 8vw, 5rem), 74rem);
@@ -36,7 +22,6 @@ html[data-lang="en"] [data-l="pt"] { display: none !important; }
 
 section { padding-block: clamp(5rem, 12vw, 9rem); }
 
-/* Páginas legais (/termos, /privacidade): prosa quieta em coluna única. */
 .legal {
   padding-block: clamp(8rem, 18vh, 11rem) clamp(5rem, 12vw, 9rem);
   display: flex;

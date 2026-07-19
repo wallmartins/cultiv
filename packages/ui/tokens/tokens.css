@@ -1,18 +1,4 @@
-/* ============================================================
-   Cultiv — design tokens da landing (mapa de matéria-prima, ADR 0003).
-   Paleta "precise · modern · electric": grafite monocromático + um
-   único sinal acid-chartreuse. Regra 60-30-10: bg domina, ink/primary
-   estruturam, accent é sempre detalhe — nunca bloco.
-
-   NOTA: o artefato CONSUMIDO é ../src/tokens.css (importado como
-   "@my-ai-orchestrator/ui/tokens.css"). Este arquivo é o mapa anotado
-   -light/-dark + opacidade; mantém os mesmos valores da doutrina
-   (apps/landing/DESIGN.md). Consumidores: apps/landing (hoje),
-   apps/web e apps/extension.
-   ============================================================ */
-
 :root {
-  /* Cores (Light Mode) */
   --color-bg-light: oklch(0.99 0 0);
   --color-surface-light: oklch(0.965 0 0);
   --color-ink-light: oklch(0.19 0 0);
@@ -21,7 +7,6 @@
   --color-accent-light: oklch(0.83 0.19 128);
   --color-frame-light: oklch(1 0 0);
 
-  /* Cores (Dark Mode) */
   --color-bg-dark: oklch(0.16 0 0);
   --color-surface-dark: oklch(0.205 0 0);
   --color-ink-dark: oklch(0.93 0 0);
@@ -30,21 +15,16 @@
   --color-accent-dark: oklch(0.86 0.20 128);
   --color-frame-dark: oklch(0.08 0 0);
 
-  /* Fontes */
   --font-headline: 'Instrument Serif', Georgia, serif;
   --font-body: 'Mona Sans', sans-serif;
   --font-ui: 'Fraunces', serif;
 
-  /* Opacidades (hierarquia visual, 01_DESIGN_SYSTEM) */
   --op-100: 1;
   --op-90: 0.9;
   --op-75: 0.75;
   --op-60: 0.6;
   --op-15: 0.15;
 
-  /* ---- Aliases semânticos: resolvem para o tema ativo. ----
-     Os consumidores usam estes; os -light/-dark acima são a
-     matéria-prima e permanecem estáveis nos dois temas. */
   --color-bg: var(--color-bg-light);
   --color-surface: var(--color-surface-light);
   --color-ink: var(--color-ink-light);
@@ -52,28 +32,21 @@
   --color-muted: var(--color-muted-light);
   --color-accent: var(--color-accent-light);
   --color-frame: var(--color-frame-light);
-  /* Tinta sobre preenchimento chartreuse — invariante ao tema:
-     o acid continua claro no dark, então a tinta continua escura. */
   --color-on-accent: oklch(0.19 0 0);
-  /* Linhas/hairlines: ink no nível "ambiente" da escala. */
   --color-line: oklch(0.19 0 0 / var(--op-15));
 
-  /* ---- Dualidade: a "outra metade" (coluna de identidade).
-     No modo claro (padrão) resolve para o escuro; o bloco [dark] inverte. */
   --color-x-bg: var(--color-bg-dark);
   --color-x-surface: var(--color-surface-dark);
   --color-x-ink: var(--color-ink-dark);
   --color-x-muted: var(--color-muted-dark);
 
-  /* Glow (assinatura de interação) e elevação de superfícies flutuantes. */
   --glow-signal: 0 0 32px oklch(0.83 0.19 128 / 0.45);
   --glow-soft: 0 0 16px oklch(0.83 0.19 128 / 0.4);
   --shadow-lift: 0 6px 20px oklch(0 0 0 / 0.14);
   --shadow-panel: 0 18px 50px oklch(0 0 0 / 0.2);
 
-  /* Motion (03_ANIMATIONS) */
   --ease-standard: cubic-bezier(0.25, 0.1, 0.25, 1);
-  --ease-electric: cubic-bezier(0.34, 1.56, 0.64, 1); /* spring */
+  --ease-electric: cubic-bezier(0.34, 1.56, 0.64, 1);
   --ease-decel: cubic-bezier(0.22, 1, 0.36, 1);
   --dur-short: 200ms;
   --dur-medium: 350ms;

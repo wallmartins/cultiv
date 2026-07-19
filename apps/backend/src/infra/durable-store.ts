@@ -39,7 +39,6 @@ export function loadBillingRepository(
   return Effect.gen(function* () {
     const relationalEnabled = yield* hasPostgresBillingTables(db);
     if (relationalEnabled) {
-      // ponytail: catalog-only at boot; per-user slices hydrate on auth (issue 107)
       return yield* loadPostgresBillingCatalog(db).pipe(
         Effect.catchAll(() => Effect.succeed(createBillingRepository()))
       );
@@ -78,7 +77,6 @@ export function reloadBillingRepositoryInto(
   });
 }
 
-// ponytail: merges one user's PG slice into the in-memory repo; other users' cached rows may be stale until their job runs
 export function reloadBillingRepositoryForUserInto(
   db: Kysely<DatabaseTables>,
   target: BillingRepository,

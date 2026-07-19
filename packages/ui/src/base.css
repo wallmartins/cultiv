@@ -1,17 +1,7 @@
-/* ============================================================
-   Cultiv — base universal (SSOT visual). Reset, defaults de <body>,
-   seleção, foco, acessibilidade e reduced-motion que TODA superfície
-   compartilha (landing hoje; web/extension ao nascerem). Consumido via
-   styles.css. Não contém type ramp nem componentes — esses ficam em
-   type.css / primitives*.css.
-   ============================================================ */
-
 *, *::before, *::after { box-sizing: border-box; }
 
 html { scroll-behavior: smooth; }
 
-/* Base compartilhada do corpo. Cada superfície pode adicionar peso/kerning/
-   transição de tema (ver global.css da landing) sem duplicar isto. */
 body {
   margin: 0;
   background: var(--bg);
@@ -26,9 +16,6 @@ body {
 
 ::selection { background: var(--accent); color: var(--on-accent); }
 
-/* Selecionar uma frase marcada em acid a inverte para grafite — pequena
-   recompensa para quem seleciona enquanto lê. (O seletor descendente cobre
-   os spans por-palavra do Transform dentro do <mark>.) */
 mark::selection,
 mark ::selection { background: var(--primary); color: var(--bg); }
 
@@ -37,7 +24,6 @@ mark ::selection { background: var(--primary); color: var(--bg); }
   outline-offset: 2px;
 }
 
-/* Primeiro tab de quem usa teclado; oculto até receber foco. */
 .skip-link {
   position: fixed;
   top: var(--sp-sm);

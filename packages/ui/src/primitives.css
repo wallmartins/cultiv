@@ -1,9 +1,3 @@
-/* Cultiv — primitivos da superfície constelação (botões, chips, labels,
-   close, theme-toggle). SSOT visual em packages/ui; usados também pelo DOM
-   que o script clona/cria. Sistema de botão .btn.solid/.ghost (a superfície
-   clássica/legal usa primitives-classic.css — ambos preservados). */
-
-/* ================= primitivos (usados também por DOM criado em JS) ===== */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -132,4 +126,3 @@
 html:not(.js) .theme-toggle {
   display: none;
 }
-

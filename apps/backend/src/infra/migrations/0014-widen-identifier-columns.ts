@@ -1,7 +1,6 @@
 import { Kysely } from "kysely";
 import type { DatabaseTables } from "../postgres-tables.js";
 
-/** Widen varchar(64) identifier columns that exceed 64 chars in production (voice snapshots, external subjects). */
 export async function up(db: Kysely<DatabaseTables>): Promise<void> {
   await db.schema
     .alterTable("voice_profile_snapshots")

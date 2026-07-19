@@ -1,12 +1,3 @@
-/* ============================================================
-   Cultiv — type ramp e prosa (SSOT visual). Papéis:
-   H1/headers de página e card = Instrument Serif 400 (peso único);
-   H2/subtítulos = Mona Sans 600; H3/títulos internos = Fraunces 600;
-   navegação e labels = Mona Sans 500; números/preços = Fraunces 700–800.
-   Consumido pelas superfícies de prosa (páginas clássicas/legais hoje;
-   web ao nascer). A superfície constelação usa tipografia própria.
-   ============================================================ */
-
 h1, h2, h3 { margin: 0; text-wrap: balance; }
 
 h1, .headline {
@@ -16,7 +7,6 @@ h1, .headline {
   line-height: 1.15;
   letter-spacing: 0;
 }
-/* Variante display do H1 (heros): mesma voz, mais fôlego. */
 .display {
   font-family: var(--font-headline);
   font-size: clamp(2.8rem, 6vw, 4.5rem);
@@ -44,7 +34,6 @@ h3, .title {
   line-height: 1.3;
   letter-spacing: 0.01em;
 }
-/* Números, métricas e preços vivem em Fraunces, dentro de badges/círculos. */
 .num {
   font-family: var(--font-ui);
   font-weight: 700;
@@ -56,8 +45,6 @@ p { margin: 0; max-width: var(--measure); text-wrap: pretty; }
 
 a { color: inherit; }
 
-/* ---------- scroll reveals (conteúdo visível por padrão; JS os arma) ---------- */
-
 html.js .reveal {
   opacity: 0;
   transform: translateY(18px);
@@ -66,8 +53,6 @@ html.js .reveal {
 }
 html.js .reveal.is-in { opacity: 1; transform: none; }
 
-/* Bulk release (aba oculta, print, watchdog sem humano): tudo aparece sem
-   transição, então uma captura com render pausado nunca fotografa meia-seção. */
 html.reveal-now .reveal { transition: none; }
 
 @media print {

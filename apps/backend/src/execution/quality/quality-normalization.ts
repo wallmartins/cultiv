@@ -54,8 +54,6 @@ const headerRegex = new RegExp(
 );
 
 export function stripTemplateHeaders(content: string): string {
-  // Estratégia 1: O LLM frequentemente separa o texto real com "Previous content:"
-  // ou variações. Tentamos extrair o que vem DEPOIS do último marcador de conteúdo.
   const contentMarkers = [
     /Previous content:\s*(.+)/s,
     /Previous material:\s*(.+)/s,
@@ -73,7 +71,6 @@ export function stripTemplateHeaders(content: string): string {
     }
   }
 
-  // Estratégia 2: Filtragem linha a linha para textos com quebras
   const lines = content.split("\n");
   const lineFiltered = lines.filter((line) => {
     const trimmed = line.trim();
@@ -86,8 +83,6 @@ export function stripTemplateHeaders(content: string): string {
     return lineResult;
   }
 
-  // Estratégia 3: Fallback para texto contínuo (sem quebras de linha)
-  // Remove cada header e o texto que vem imediatamente após ele até o próximo header
   let cleaned = content;
   let previousLength = -1;
 
@@ -101,7 +96,5 @@ export function stripTemplateHeaders(content: string): string {
     return continuousResult;
   }
 
-  // Estratégia 4: Se tudo falhou, o texto pode ser quase todo meta.
-  // Retornamos o texto original normalizado como último recurso.
   return normalizeText(content);
 }

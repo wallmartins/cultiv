@@ -144,7 +144,6 @@ export const VoiceProfileViewSchema = Schema.Struct({
 });
 export type VoiceProfileView = typeof VoiceProfileViewSchema.Type;
 
-/** Canonical pipeline voice profile — single source for text-quality and domain mappers. */
 export const TextQualityVoiceProfileSchema = Schema.Struct({
   userId: Schema.String,
   tone: Schema.String,

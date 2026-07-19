@@ -43,7 +43,6 @@ export async function subscribeExecutionEventsReady(
   try {
     await subscriber.subscribe(channel);
   } catch {
-    // ignore closed connections during teardown
   }
 
   subscriber.on("message", (incomingChannel, message) => {

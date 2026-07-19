@@ -39,7 +39,6 @@ import {
 
 export type BillingDbExecutor = Kysely<DatabaseTables> | Transaction<DatabaseTables>;
 
-/** Runtime must never replace billing tables from in-memory snapshots. Tests/migrations opt in explicitly. */
 export class BillingDestructivePersistBlockedError extends Error {
   constructor() {
     super(
@@ -454,7 +453,6 @@ async function upsertBillingIdempotencyRow(
     .execute();
 }
 
-/** ponytail: upsert-only — never DELETE user billing rows; DB remains source of truth */
 export async function persistPostgresBillingUserSlice(
   executor: BillingDbExecutor,
   repository: BillingRepository,

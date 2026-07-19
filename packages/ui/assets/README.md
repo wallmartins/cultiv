@@ -4,63 +4,69 @@
 
 ```
 svg/
-  icon.svg                    símbolo, currentColor (herda o tema no inline)
-  icon-light-bg.svg           tinta #1A1A1A fixa (usar sobre fundo claro)
-  icon-dark-bg.svg            tinta #F2F2F2 fixa (usar sobre fundo escuro)
-  logo-horizontal[...].svg    selo + CULTIV, mesmas 3 variantes
-  logo-vertical[...].svg      selo sobre CULTIV, mesmas 3 variantes
+  icon.svg                    símbolo, currentColor (arco = var(--accent) no inline)
+  icon-light-bg.svg           tinta #141414 fixa (usar sobre fundo claro)
+  icon-dark-bg.svg            tinta #e8e8e8 fixa (usar sobre fundo escuro)
+  logo-horizontal[...].svg    selo + Cultiv, wordmark Instrument Serif em outline
+  logo-vertical[...].svg      selo sobre Cultiv, mesmas 3 variantes
 favicon/
   favicon.svg                 auto light/dark via prefers-color-scheme
+  build-icons.mjs             regenera os PNGs/ico a partir dos SVGs (offline)
   favicon.ico                 16+32+48 embutidos (fallback legado)
   favicon-{16,32,48}.png      tinta escura, fundo transparente
   apple-touch-icon.png        180x180, fundo #121212 solido
   icon-{192,512}.png          PWA, fundo solido
   icon-maskable-512.png       selo na zona segura de 52%
 og/
-  og-image.png                1200x630 — wordmark em Poppins (PLACEHOLDER, ver abaixo)
-  og-image.html               template com a Bricolage real
+  og-image.png                1200x630 — card social (gerado, nao editar a mao)
+  og-image.svg                fonte do card (gerada por build-og.mjs)
+  build-og.mjs                gera o card a partir dos tokens (offline, deterministico)
+  InstrumentSerif-Regular.ttf fonte OFL local p/ render sem rede
 site.webmanifest
 ```
 
-## OG image definitivo
+## OG image
 
-O container nao tem acesso a rede, entao o `og-image.png` atual usa Poppins no
-wordmark. Para gerar a versao final com Bricolage Grotesque:
+Fonte da verdade unica: os **tokens** (`../src/tokens.css`) e o **wordmark em
+Instrument Serif** (`--font-headline`). O `build-og.mjs` le as cores do bloco
+`[data-theme="dark"]`, recolore o selo de `svg/icon-dark-bg.svg` e renderiza o
+wordmark com o TTF local — nada de rede, nada de fallback (o PNG antigo caia em
+Poppins justamente porque puxava a fonte do Google Fonts num container sem rede).
 
 ```bash
-npx playwright screenshot --viewport-size "1200,630" og/og-image.html og/og-image.png
+node og/build-og.mjs        # rodar da raiz de packages/ui/assets
 ```
 
-(ou abra o HTML no navegador em janela 1200x630 e capture). Edite a tagline no
-proprio HTML se quiser outro texto.
+Gera `og-image.svg` + `og-image.png` (1200x630). Requer o binario `resvg` no
+PATH. Para trocar a linha, edite `SLOGAN` no proprio script e regenere; comite
+o PNG. O `apps/landing` copia esse PNG para `public/` via `sync-brand.mjs`.
 
-## Snippet para o <head>
+## Wiring no <head>
+
+Icones e manifest (caminhos fixos que browsers e o `site.webmanifest` esperam):
 
 ```html
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="/favicon.ico" sizes="48x48">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="manifest" href="/site.webmanifest">
-<meta name="theme-color" content="#121212">
-
-<meta property="og:title" content="Cultiv">
-<meta property="og:description" content="Engine de escrita com IA que aprende e replica a sua voz autoral.">
-<meta property="og:image" content="https://cultiv.app/og-image.png">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-<meta property="og:type" content="website">
-<meta property="og:url" content="https://cultiv.app">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://cultiv.app/og-image.png">
 ```
+
+As tags `og:*` / `twitter:*` (titulo, descricao, url, `og:image`) sao emitidas
+pelos layouts do app — `apps/landing/src/layouts/{LandingLayout,Layout}.astro`,
+que leem a copy de `data/site.ts`. Nao duplicar aqui: um so lugar por tag.
 
 ## Tokens
 
-| Token | Valor |
-|---|---|
-| Acento | oklch(0.830 0.190 128) = #A3DD42 |
-| Tinta claro / escuro | #1A1A1A / #F2F2F2 |
-| Fundo claro / escuro | #F5F5F5 / #121212 |
+Fonte da verdade = `../src/tokens.css` (oklch). Os hex abaixo são derivados dele
+(claro = `:root`, escuro = `[data-theme="dark"]`) — se divergirem do token, o
+token vence. Não usar valores fora desta tabela nos assets.
+
+| Token | Claro | Escuro |
+|---|---|---|
+| Acento | oklch(0.83 0.19 128) = #a3dd42 | oklch(0.86 0.20 128) = #abe841 |
+| Tinta | oklch(0.19 0 0) = #141414 | oklch(0.93 0 0) = #e8e8e8 |
+| Fundo | oklch(0.99 0 0) = #fcfcfc | oklch(0.16 0 0) = #0d0d0d |
 
 ## Regras
 
@@ -69,6 +75,8 @@ proprio HTML se quiser outro texto.
 3. `favicon.svg` e os PNGs pequenos usam optica reforcada: traco 7 e aspas
    em escala 0.68 (contra 5 e 0.62 no tamanho pleno). Manter essa distincao
    ao exportar novos tamanhos <= 48px.
-4. Wordmark nos SVGs usa `<text>` + Bricolage. Para contextos sem a fonte
-   (e-mail, PDF), converter para outlines: `inkscape --export-text-to-path`.
+4. Wordmark nos logos = "Cultiv" em **Instrument Serif** (`--font-headline`),
+   já em **outline** (paths, sem dependência de fonte — renderiza igual em
+   e-mail/PDF/inline). Para regerar após mudar o texto/tamanho, use opentype.js
+   sobre `og/InstrumentSerif-Regular.ttf` (mesma fonte do og-image).
 5. Area de respiro: 1/4 da altura do selo em todos os lados.

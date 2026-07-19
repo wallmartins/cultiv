@@ -1,10 +1,3 @@
-/* ============================================================
-   Cultiv — primitivos da superfície clássica/prosa (SSOT visual).
-   Sistema de botão BEM .btn--accent/--primary/--ghost usado pelas páginas
-   legais e (ao nascer) pela web. A superfície constelação usa o sistema
-   .btn.solid/.ghost em primitives.css — ambos são preservados de propósito.
-   ============================================================ */
-
 .btn {
   display: inline-flex;
   align-items: center;
@@ -41,7 +34,5 @@
 }
 .btn--ghost:hover { border-color: var(--ink); transform: translateY(-2px); }
 
-/* Complementa o :focus-visible da base com raio (prosa: cantos suaves;
-   botões: pill). A base já define outline + offset. */
 :focus-visible { border-radius: var(--r-sm); }
 .btn:focus-visible { border-radius: var(--r-pill); }

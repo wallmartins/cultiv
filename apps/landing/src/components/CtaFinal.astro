@@ -1,0 +1,26 @@
+---
+import T from "./T.astro";
+import { trialUrl } from "../config";
+import "../styles/closing.css";
+---
+
+<section id="cta-final" aria-label="Comece agora" class="cta-final">
+  <div class="cta-final__inner" data-close-reveal>
+    <h2 class="cta-final__title">
+      <T
+        pt="A sua voz não devia sumir só porque você precisa publicar mais."
+        en="Your voice shouldn't disappear just because you need to publish more."
+      />
+    </h2>
+    <div class="cta-final__row">
+      <a class="cta-final__btn" href={trialUrl}>
+        <T pt="Comece o teste grátis →" en="Start the free trial →" />
+      </a>
+    </div>
+  </div>
+</section>
+
+<script>
+  import { initCloseReveal } from "../scripts/closing";
+  initCloseReveal();
+</script>

@@ -1,5 +1,3 @@
-/// <reference path="./console-shim.d.ts" />
-
 import { Context, Effect, Layer } from "effect";
 import type { ExecutionMode, QualityMode } from "@my-ai-orchestrator/contracts";
 export * from "./errors.js";
