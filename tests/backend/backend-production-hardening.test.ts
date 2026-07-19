@@ -165,6 +165,9 @@ function createProductionConfig(overrides: Partial<BackendConfig> = {}): Backend
     authAudience: authProfile.audience,
     authJwksUrl: authProfile.jwksUrl,
     databaseUrl: "postgres://backend:secret@example.com:5432/content_lib",
+    // A policy oficial roteia para gemini + groq; em produção o boot exige as duas credenciais.
+    geminiApiKey: "test-gemini-key",
+    groqApiKey: "test-groq-key",
     ...overrides
   };
 }
