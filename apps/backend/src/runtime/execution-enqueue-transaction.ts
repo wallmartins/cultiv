@@ -2,11 +2,12 @@ import { randomUUID } from "node:crypto";
 import { Effect } from "effect";
 import { createBillingService, type BillingRepository, type BillingServiceContract } from "@my-ai-orchestrator/payments";
 import type { Kysely } from "kysely";
-import type {
-  ExecutionVoiceMetadataView,
-  JobCreatedResponse,
-  JobProgress,
-  PipelineRequest
+import {
+  resolveExecutionPresentation,
+  type ExecutionVoiceMetadataView,
+  type JobCreatedResponse,
+  type JobProgress,
+  type PipelineRequest
 } from "@my-ai-orchestrator/contracts";
 import type { JobRecord } from "@my-ai-orchestrator/database";
 import type { OrchestrationPlan } from "@my-ai-orchestrator/orchestrator";
@@ -31,6 +32,7 @@ export interface ExecutionRuntimePayload {
   readonly pricingEnvelope?: ResolvedPricingEnvelope;
   readonly simulateCredits?: boolean;
   readonly creditReservationId?: string;
+  readonly reservedCredits?: number;
 }
 
 export interface ExecutionJobDocument {
@@ -86,6 +88,7 @@ export function buildExecutionJobRecord(input: {
 
   return {
     id: input.jobId,
+    userId: input.runtime.userId,
     status: "queued",
     executionMode: input.plan.request.executionMode,
     contentType: input.plan.contentType.id,
@@ -165,6 +168,7 @@ export async function runExecutionEnqueueTransaction(
 ): Promise<void> {
   const estimatedSteps = resolveEnqueueEstimatedSteps(input.plan);
   const userId = resolveEnqueueUserId(input.request);
+  const briefingTopic = resolveExecutionPresentation(input.request, input.plan.contentType.id).briefingTopic;
   const runtimeBase = buildRuntimeBase({
     userId,
     request: input.request,
@@ -177,6 +181,7 @@ export async function runExecutionEnqueueTransaction(
 
   await deps.postgres.transaction().execute(async (trx) => {
     let creditReservationId: string | undefined;
+    let reservedCredits: number | undefined;
 
     if (!input.simulateCredits) {
       const txnBilling = createBillingService({ repository: deps.billingRepository });
@@ -194,11 +199,13 @@ export async function runExecutionEnqueueTransaction(
             model: resolveUsagePolicyModel(
               input.request,
               input.plan.request.qualityMode ?? deps.config.qualityMode
-            )
+            ),
+            briefingTopic
           }
         )
       );
       creditReservationId = reservation.reservationId;
+      reservedCredits = reservation.reservedCredits;
       await Effect.runPromise(
         persistBillingUserSliceInTransaction(trx, deps.billingRepository, userId)
       );
@@ -206,7 +213,8 @@ export async function runExecutionEnqueueTransaction(
 
     const runtime: ExecutionRuntimePayload = {
       ...runtimeBase,
-      creditReservationId
+      creditReservationId,
+      reservedCredits
     };
 
     const record = buildExecutionJobRecord({
@@ -222,7 +230,7 @@ export async function runExecutionEnqueueTransaction(
       .values({
         id: input.jobId,
         user_id: userId,
-        data: JSON.stringify(record),
+        data: JSON.stringify({ ...record, briefingTopic }),
         version: 1,
         created_at: input.createdAt,
         updated_at: input.createdAt

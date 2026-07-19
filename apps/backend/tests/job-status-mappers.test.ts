@@ -80,8 +80,61 @@ describe("job status mappers", () => {
       completedAt: null,
       voice: undefined,
       userId: "user-1",
+      reservedCredits: undefined,
       generationIntent: "tell-story",
       lengthTier: "medium"
     });
+  });
+
+  it("toJobStatusResponse surfaces reservedCredits from the runtime payload for a queued/running execution", () => {
+    const record: JobRecord = {
+      id: "job-2",
+      status: "queued",
+      contentType: "twitter-thread",
+      progress: {
+        currentStep: "queued",
+        stepIndex: 0,
+        totalSteps: 3,
+        percent: 0
+      },
+      result: null,
+      error: null,
+      createdAt: "2026-06-18T10:00:00.000Z",
+      completedAt: null,
+      executionMode: "async",
+      pipelineId: "twitter-thread",
+      version: 1,
+      progressHistory: [],
+      updatedAt: "2026-06-18T10:00:00.000Z",
+      history: []
+    };
+
+    expect(toJobStatusResponse(record, { userId: "user-1", reservedCredits: 5 }).reservedCredits).toBe(5);
+  });
+
+  it("toJobStatusResponse leaves reservedCredits undefined when the runtime has none (sync/simulate)", () => {
+    const record: JobRecord = {
+      id: "job-3",
+      status: "running",
+      contentType: "twitter-thread",
+      progress: {
+        currentStep: "draft",
+        stepIndex: 1,
+        totalSteps: 3,
+        percent: 33
+      },
+      result: null,
+      error: null,
+      createdAt: "2026-06-18T10:00:00.000Z",
+      completedAt: null,
+      executionMode: "async",
+      pipelineId: "twitter-thread",
+      version: 1,
+      progressHistory: [],
+      updatedAt: "2026-06-18T10:05:00.000Z",
+      history: []
+    };
+
+    expect(toJobStatusResponse(record, { userId: "user-1" }).reservedCredits).toBeUndefined();
   });
 });

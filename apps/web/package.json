@@ -4,9 +4,31 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "node scripts/serve.mjs",
-    "build": "node scripts/build.mjs",
-    "preview": "node scripts/serve.mjs"
+    "dev": "vite",
+    "build": "vite build && tsc --noEmit",
+    "preview": "vite preview",
+    "lint": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@my-ai-orchestrator/ui": "workspace:*",
+    "@my-ai-orchestrator/shared": "workspace:*",
+    "@my-ai-orchestrator/client-sdk": "workspace:*",
+    "@my-ai-orchestrator/contracts": "workspace:*",
+    "@auth0/auth0-react": "^2.18.0",
+    "@tanstack/react-router": "^1.170.15",
+    "@tanstack/react-query": "^5.0.0",
+    "zustand": "^5.0.0",
+    "effect": "^3.21.2",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@tanstack/router-plugin": "^1.168.20",
+    "@vitejs/plugin-react": "^6.0.1",
+    "vite": "^8.0.0",
+    "typescript": "^5.8.2",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0"
   },
   "engines": {
     "node": ">=22.13.0"

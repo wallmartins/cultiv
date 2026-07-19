@@ -10,6 +10,7 @@ export interface ExecutionQueuePayload {
 export interface ExecutionQueue {
   readonly enqueue: (payload: ExecutionQueuePayload) => Promise<void>;
   readonly getJob: (executionId: string) => Promise<ExecutionQueuePayload | undefined>;
+  readonly remove: (executionId: string) => Promise<void>;
   readonly createWorker: (
     processor: (payload: ExecutionQueuePayload) => Promise<void>
   ) => Worker<ExecutionQueuePayload>;
@@ -51,6 +52,10 @@ export function createExecutionQueue(config: BackendConfig): ExecutionQueue {
     async getJob(executionId) {
       const job = await queue.getJob(executionId);
       return job?.data;
+    },
+    async remove(executionId) {
+      const job = await queue.getJob(executionId);
+      await job?.remove();
     },
     createWorker(processor) {
       return new Worker<ExecutionQueuePayload>(

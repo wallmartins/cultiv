@@ -12,7 +12,7 @@ import {
   createExecutionControls,
   createExecutionTelemetry,
   resolveSelection,
-  scoreExecution
+  estimateStepProgressScore
 } from "../src/execution/quality/quality.js";
 import type { PipelineRequest, QualityMode } from "@my-ai-orchestrator/contracts";
 
@@ -374,11 +374,11 @@ describe("M2-26: Paridade Funcional - Quality Execution", () => {
     });
   });
 
-  describe("scoreExecution", () => {
+  describe("estimateStepProgressScore", () => {
     it("retorna score entre 0 e 100", () => {
-      const short = scoreExecution("Hi", 1, "fast");
-      const medium = scoreExecution("Medium length tweet content", 2, "balanced");
-      const long = scoreExecution(
+      const short = estimateStepProgressScore("Hi", 1, "fast");
+      const medium = estimateStepProgressScore("Medium length tweet content", 2, "balanced");
+      const long = estimateStepProgressScore(
         "Long content with multiple paragraphs and detailed information about the topic",
         5,
         "strict"
@@ -395,9 +395,9 @@ describe("M2-26: Paridade Funcional - Quality Execution", () => {
     it("strict mode resulta em score mais alto que fast", () => {
       const content = "This is a medium length content that should score higher with strict mode";
 
-      const fastScore = scoreExecution(content, 3, "fast");
-      const balancedScore = scoreExecution(content, 3, "balanced");
-      const strictScore = scoreExecution(content, 3, "strict");
+      const fastScore = estimateStepProgressScore(content, 3, "fast");
+      const balancedScore = estimateStepProgressScore(content, 3, "balanced");
+      const strictScore = estimateStepProgressScore(content, 3, "strict");
 
       expect(strictScore).toBeGreaterThan(fastScore);
       expect(balancedScore).toBeGreaterThan(fastScore);

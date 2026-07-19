@@ -6,6 +6,7 @@ const backendRequiredEnvVars = [
   "ANTHROPIC_API_KEY",
   "GEMINI_API_KEY",
   "DEEPSEEK_API_KEY",
+  "GROQ_API_KEY",
   "OLLAMA_BASE_URL"
 ] as const;
 
@@ -66,6 +67,12 @@ export interface BackendConfig extends RuntimeConfig, BackendAuthConfig {
   readonly asaasBaseUrl?: string;
   readonly billingCheckoutSuccessUrl?: string;
   readonly billingCheckoutCancelUrl?: string;
+  readonly billingPortalReturnUrl?: string;
+  // contract-08 — Auth0 Management M2M creds for the account-delete outbox consumer (deploy-ops).
+  readonly auth0ManagementDomain?: string;
+  readonly auth0ManagementClientId?: string;
+  readonly auth0ManagementClientSecret?: string;
+  readonly auth0ManagementAudience?: string;
 }
 
 export interface LoadBackendEnvironmentOptions {

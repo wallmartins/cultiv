@@ -9,7 +9,8 @@ import type {
   BackendGenerationPreviewGatewayRequest,
   BackendPipelineGatewayRequest,
   BackendPublicGenerationGatewayRequest,
-  BackendPublicInputSafetyGatewayService
+  BackendPublicInputSafetyGatewayService,
+  SanitizedGenerationInput
 } from "./public-input-safety-types.js";
 import { createHeuristicInstructionOverrideDetector } from "./instruction-override-detector.js";
 import { determineDecisionOutcome, requireAllowedDecision } from "./public-input-safety-decision.js";
@@ -54,7 +55,7 @@ export function createBackendPublicInputSafetyGatewayService(args: {
           instructionOverrideDetector,
           policyEvidence: args.policyEvidence
         }),
-        (decision) => Effect.map(requireAllowedDecision(decision), (sanitizedInput) => ({
+        (decision) => Effect.map(requireAllowedDecision(decision), (sanitizedInput) => brandSanitizedGenerationInput({
           ...request,
           ...sanitizedInput
         }))
@@ -69,13 +70,19 @@ export function createBackendPublicInputSafetyGatewayService(args: {
           instructionOverrideDetector,
           policyEvidence: args.policyEvidence
         }),
-        (decision) => Effect.map(requireAllowedDecision(decision), (sanitizedInput) => ({
+        (decision) => Effect.map(requireAllowedDecision(decision), (sanitizedInput) => brandSanitizedGenerationInput({
           ...request,
           ...sanitizedInput
         }))
       );
     }
   };
+}
+
+// The only place SanitizedGenerationInput is minted: right after the gateway
+// decision has been checked allowed by requireAllowedDecision.
+function brandSanitizedGenerationInput<T>(value: T): SanitizedGenerationInput<T> {
+  return value as SanitizedGenerationInput<T>;
 }
 
 function evaluateInput(args: {

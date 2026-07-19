@@ -10,6 +10,7 @@ import type {
   BackendAIPolicyPricingError,
   BackendAIPolicyValidationError
 } from "../../http/errors.js";
+import type { SanitizedGenerationInput, TrustedOperatorInput } from "../../safety/public-input-safety-types.js";
 
 export type AIPolicyLifecycle = "active" | "legacy-supported";
 export type StepExecutionType = "local" | "llm";
@@ -85,11 +86,16 @@ export interface ResolvedExecutionStep {
   readonly fallbackOn: readonly AIPolicyRoutingFallbackCondition[];
 }
 
+// The Input Safety Gateway's two trust classes: a request must have been
+// sanitized by the gateway, or explicitly minted as trusted operator input.
+// A raw, unsanitized PipelineRequest is assignable to neither.
+export type ExecutionEntryInput = SanitizedGenerationInput<PipelineRequest> | TrustedOperatorInput<PipelineRequest>;
+
 export interface ResolvedExecutionSnapshot {
   readonly policyVersion: string;
   readonly lifecycle: AIPolicyLifecycle;
   readonly planTier: BillingPlanTier;
-  readonly request: PipelineRequest;
+  readonly request: ExecutionEntryInput;
   readonly plan: OrchestrationPlan;
   readonly pricingEnvelope: ResolvedPricingEnvelope;
   readonly steps: readonly ResolvedExecutionStep[];
@@ -174,7 +180,7 @@ export interface BackendAIPolicyServiceContract {
   >;
   readonly resolveExecutionSnapshot: (
     args: {
-      readonly request: PipelineRequest;
+      readonly request: ExecutionEntryInput;
       readonly planTier: BillingPlanTier;
       readonly executionMode: ExecutionMode;
       readonly qualityMode: QualityMode;

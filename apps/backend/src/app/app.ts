@@ -44,7 +44,8 @@ export function createBackendApp(config: BackendConfig, options: BackendAppOptio
     createBackendRuntimeBundle({
       config,
       services,
-      now
+      now,
+      logger
     })
   );
   if (!options.runtime) {

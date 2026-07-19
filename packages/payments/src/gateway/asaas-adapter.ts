@@ -43,12 +43,24 @@ interface AsaasWebhookPayload {
     readonly status?: string;
     readonly externalReference?: string;
     readonly billingType?: string;
+    readonly invoiceUrl?: string;
+    readonly bankSlipUrl?: string;
   };
   readonly subscription?: {
     readonly id?: string;
     readonly customer?: string;
     readonly externalReference?: string;
   };
+}
+
+function toPaymentMethodKind(billingType: string | undefined): BillingPaymentMethod | undefined {
+  if (billingType === "PIX") {
+    return "pix";
+  }
+  if (billingType === "CREDIT_CARD") {
+    return "card";
+  }
+  return undefined; // BOLETO etc. — fora do contrato BillingPaymentMethodSchema (card|pix)
 }
 
 const DEFAULT_BASE_URL = "https://api-sandbox.asaas.com/v3";
@@ -153,7 +165,8 @@ export function mapAsaasWebhookEvent(
       externalSubscriptionId: payment.subscription,
       externalCustomerId: payment.customer,
       internalRef: metadata.internalRef,
-      productKind: metadata.productKind === "topup" ? "topup" : metadata.productKind === "subscription" ? "subscription" : undefined
+      productKind: metadata.productKind === "topup" ? "topup" : metadata.productKind === "subscription" ? "subscription" : undefined,
+      paymentMethodKind: toPaymentMethodKind(payment.billingType)
     };
   }
 
@@ -170,7 +183,8 @@ export function mapAsaasWebhookEvent(
       amount: payment.value ?? 0,
       currency: "BRL",
       externalSubscriptionId: payment.subscription,
-      externalCustomerId: payment.customer
+      externalCustomerId: payment.customer,
+      outstandingInvoiceUrl: payment.invoiceUrl ?? payment.bankSlipUrl
     };
   }
 
@@ -348,6 +362,30 @@ export function createAsaasGatewayAdapter(options: AsaasGatewayAdapterOptions): 
           gateway: "asaas",
           message: "direct charge not supported; use checkout"
         })
-      )
+      ),
+    cancelSubscription: (gatewaySubscriptionId: string) =>
+      Effect.tryPromise({
+        try: async () => {
+          const response = await fetch(`${baseUrl}/subscriptions/${gatewaySubscriptionId}`, {
+            method: "DELETE",
+            headers: asaasHeaders(options.apiKey)
+          });
+          if (!response.ok) {
+            const body = await response.text();
+            throw new BillingGatewayError({
+              gateway: "asaas",
+              message: `Asaas API ${response.status}: ${body}`
+            });
+          }
+        },
+        catch: (cause) =>
+          cause instanceof BillingGatewayError
+            ? cause
+            : new BillingGatewayError({
+                gateway: "asaas",
+                message: "cancel subscription failed",
+                cause
+              })
+      })
   };
 }

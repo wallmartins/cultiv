@@ -50,6 +50,7 @@ export interface LanguageProfile extends Entity<string> {
 }
 
 export interface Job extends Entity {
+  userId: string;
   status: JobStatus;
   pipelineId?: string;
   executionMode: ExecutionMode;
@@ -88,7 +89,7 @@ export interface DomainState {
   contentType?: ContentType;
 }
 
-const terminalJobStatuses = new Set<JobStatus>(["done", "failed"]);
+const terminalJobStatuses = new Set<JobStatus>(["done", "failed", "cancelled"]);
 
 export function isTerminalJobStatus(status: JobStatus): boolean {
   return terminalJobStatuses.has(status);

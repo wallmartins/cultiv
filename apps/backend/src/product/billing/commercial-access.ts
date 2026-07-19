@@ -8,6 +8,12 @@ export type CommercialBlockedReason =
   | "quality_mode_plan_restriction"
   | "insufficient_credits";
 
+// One affordability definition for the whole backend: preview gating (below) and the
+// generation authorization path both go through this, off the wallet's available credits.
+export function canAfford(availableCredits: number, creditPrice: number): boolean {
+  return !(availableCredits < creditPrice);
+}
+
 export function resolveQualityModeBlockedReason(args: {
   readonly entitlement: BillingEntitlement | null;
   readonly qualityMode: QualityMode;
@@ -26,7 +32,7 @@ export function resolveQualityModeBlockedReason(args: {
     return "quality_mode_plan_restriction";
   }
 
-  if (args.currentBalance < args.creditPrice) {
+  if (!canAfford(args.currentBalance, args.creditPrice)) {
     return "insufficient_credits";
   }
 

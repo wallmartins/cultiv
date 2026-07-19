@@ -17,7 +17,7 @@ describe("backend product bundle", () => {
       host: "127.0.0.1",
       port: 3000,
       version: "0.1.0",
-      billingPlanId: "pro",
+      billingPlanId: "criador",
       billingUserId: "user_1"
     };
     const startedAt = new Date("2026-05-11T00:00:00.000Z");
@@ -49,14 +49,14 @@ describe("backend product bundle", () => {
     const decoded = await Effect.runPromise(decodeSyncExecutionView(body));
     expect(decoded.telemetry?.cost?.estimatedUsdCost).toBeGreaterThan(0);
     expect(decoded.telemetry?.selection?.reason).toBe("request");
-    expect(decoded.telemetry?.billing?.planId).toBe("pro");
+    expect(decoded.telemetry?.billing?.planId).toBe("criador");
     expect(decoded.content).toContain("provider:gemini:");
 
     const snapshot = services.database.snapshot();
     expect(Object.keys(snapshot.contentTypes).length).toBeGreaterThan(0);
     expect(Object.keys(snapshot.memories).length).toBeGreaterThan(0);
 
-    const ledger = services.billing.listLedger("user_1", "pro");
+    const ledger = services.billing.listLedger("user_1", "criador");
     expect(ledger.map((entry) => entry.entryType)).toEqual(["grant_cycle", "reserve", "capture"]);
   });
 });

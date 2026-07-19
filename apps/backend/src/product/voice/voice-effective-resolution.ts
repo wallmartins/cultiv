@@ -7,6 +7,7 @@ import type { BackendObservabilityService } from "../core/observability-types.js
 import type { BackendVoiceConsentService } from "../../safety/voice-consent-types.js";
 import type { EffectiveVoiceContext, EffectiveVoiceResolution } from "./voice-types.js";
 import {
+  buildAppliedSignals,
   buildEffectiveVoiceMetadata,
   buildVoiceProfileSnapshotId,
   resolveAdaptationMode,
@@ -81,7 +82,6 @@ export function resolveEffectiveVoice(
         profileVersion: profile.version,
         snapshotId: profile.snapshotId,
         confidence: profile.confidence,
-        adaptationMode: profile.adaptationMode,
         primaryLanguage: profile.primaryLanguage
       },
       diagnostics,
@@ -101,38 +101,7 @@ export function resolveEffectiveVoice(
       contentType: context.contentType,
       confidence,
       adaptationMode,
-      appliedSignals: {
-        styleMarkers: voiceHints.styleMarkers ?? [],
-        rules: voiceHints.rules ?? [],
-        antiPatterns: voiceHints.antiPatterns ?? [],
-        ...(reasoningSignatureEnabled && voiceHints.coreReasoningSignature
-          ? {
-              reasoningApplied: true,
-              certaintyLevel: voiceHints.coreReasoningSignature.certaintyLevel,
-              conclusionPace: voiceHints.coreReasoningSignature.conclusionPace
-            }
-          : {}),
-        ...(reasoningSignatureEnabled && voiceHints.argumentDevelopmentSignature
-          ? {
-              developmentApplied: true,
-              epistemicPosture: voiceHints.argumentDevelopmentSignature.epistemicPosture,
-              ...(voiceHints.argumentDevelopmentSignature.traitProfile
-                ? {
-                    developmentTraitsApplied: true,
-                    ...(voiceHints.argumentDevelopmentSignature.traitProfile.traits.openingMode
-                      ? { openingMode: voiceHints.argumentDevelopmentSignature.traitProfile.traits.openingMode }
-                      : {}),
-                    ...(voiceHints.argumentDevelopmentSignature.traitProfile.traits.closingMode
-                      ? { closingMode: voiceHints.argumentDevelopmentSignature.traitProfile.traits.closingMode }
-                      : {}),
-                    ...(voiceHints.argumentDevelopmentSignature.traitProfile.traits.insightTiming
-                      ? { insightTiming: voiceHints.argumentDevelopmentSignature.traitProfile.traits.insightTiming }
-                      : {})
-                  }
-                : {})
-            }
-          : {})
-      },
+      appliedSignals: buildAppliedSignals(voiceHints),
       resolutionContext: {
         contentType: context.contentType,
         requestedLanguage: context.requestedLanguage,

@@ -10,6 +10,7 @@ export interface JobStatusRuntimeView {
   readonly userId?: string;
   readonly voice?: ExecutionVoiceMetadataView;
   readonly request?: PipelineRequest;
+  readonly reservedCredits?: number;
 }
 
 export function resolveContentType(request: PipelineRequest, unknownFallback?: string): string {
@@ -46,6 +47,7 @@ export function toJobStatusResponse(record: JobRecord, runtime?: JobStatusRuntim
     completedAt: record.completedAt,
     voice: runtime?.voice,
     userId: runtime?.userId,
+    reservedCredits: runtime?.reservedCredits,
     ...presentation
   };
 }

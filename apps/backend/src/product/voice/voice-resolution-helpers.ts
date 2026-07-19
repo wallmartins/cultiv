@@ -3,18 +3,50 @@ import type {
   ExecutionVoiceMetadataView,
   FallbackReasonCode,
   VoiceAdaptationMode,
-  VoiceProfileConfidence
+  VoiceProfileConfidence,
+  VoiceSignalSummary
 } from "@my-ai-orchestrator/contracts";
 import type { NextActionCode } from "@my-ai-orchestrator/contracts";
 import type { VoiceProfile } from "@my-ai-orchestrator/text-quality";
 import { normalizeLanguage } from "./voice-utils.js";
+
+export function buildAppliedSignals(voiceHints: Partial<VoiceProfile>): VoiceSignalSummary {
+  const development = voiceHints.argumentDevelopmentSignature;
+  const traitProfile = development?.traitProfile;
+
+  return {
+    styleMarkers: voiceHints.styleMarkers ?? [],
+    rules: voiceHints.rules ?? [],
+    antiPatterns: voiceHints.antiPatterns ?? [],
+    ...(voiceHints.coreReasoningSignature
+      ? {
+          reasoningApplied: true,
+          certaintyLevel: voiceHints.coreReasoningSignature.certaintyLevel,
+          conclusionPace: voiceHints.coreReasoningSignature.conclusionPace
+        }
+      : {}),
+    ...(development
+      ? {
+          developmentApplied: true,
+          epistemicPosture: development.epistemicPosture,
+          ...(traitProfile
+            ? {
+                developmentTraitsApplied: true,
+                ...(traitProfile.traits.openingMode ? { openingMode: traitProfile.traits.openingMode } : {}),
+                ...(traitProfile.traits.closingMode ? { closingMode: traitProfile.traits.closingMode } : {}),
+                ...(traitProfile.traits.insightTiming ? { insightTiming: traitProfile.traits.insightTiming } : {})
+              }
+            : {})
+        }
+      : {})
+  };
+}
 
 export function buildEffectiveVoiceMetadata(args: {
   readonly profile: {
     readonly profileVersion: number;
     readonly snapshotId: string;
     readonly confidence: VoiceProfileConfidence;
-    readonly adaptationMode: "conservative" | "standard";
     readonly primaryLanguage: string;
   };
   readonly diagnostics: {
@@ -45,24 +77,7 @@ export function buildEffectiveVoiceMetadata(args: {
     voiceProfileSnapshotId: args.snapshotId,
     usedFallbackVoiceProfile: args.usedFallbackVoiceProfile,
     fallbackReasonCode: args.fallbackReasonCode,
-    appliedSignals: {
-      styleMarkers: args.voiceHints.styleMarkers ?? [],
-      rules: args.voiceHints.rules ?? [],
-      antiPatterns: args.voiceHints.antiPatterns ?? [],
-      ...(args.voiceHints.coreReasoningSignature
-        ? {
-            reasoningApplied: true,
-            certaintyLevel: args.voiceHints.coreReasoningSignature.certaintyLevel,
-            conclusionPace: args.voiceHints.coreReasoningSignature.conclusionPace
-          }
-        : {}),
-      ...(args.voiceHints.argumentDevelopmentSignature
-        ? {
-            developmentApplied: true,
-            epistemicPosture: args.voiceHints.argumentDevelopmentSignature.epistemicPosture
-          }
-        : {})
-    },
+    appliedSignals: buildAppliedSignals(args.voiceHints),
     pendingProfileRebuild: {
       status: args.diagnostics.pendingRebuild.status,
       reasonCode: args.diagnostics.pendingRebuild.reasonCode as FallbackReasonCode | undefined,

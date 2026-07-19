@@ -1,6 +1,7 @@
 import { Effect } from "effect";
 import {
   BillingEntitlementNotFoundError,
+  DEFAULT_TRIAL_PLAN_ID,
   ensureDefaultFreeSubscription,
   type BillingActivationOptions,
   type BillingEntitlement,
@@ -18,7 +19,7 @@ export function resolveStoredUserEntitlement(
 }
 
 export function resolveStoredUserPlanId(billing: BillingServiceContract, userId: string): string {
-  return billing.getPrimarySubscriptionPlanId(userId) ?? billing.getEntitlement(userId)?.planId ?? "free";
+  return billing.getPrimarySubscriptionPlanId(userId) ?? billing.getEntitlement(userId)?.planId ?? DEFAULT_TRIAL_PLAN_ID;
 }
 
 export function resolveStoredUserPlanTier(

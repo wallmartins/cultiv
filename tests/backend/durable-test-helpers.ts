@@ -100,7 +100,7 @@ export function createDurableTestConfig(
     redisUrl,
     allowInMemoryRuntime: false,
     billingUserId: "durable-test-user",
-    billingPlanId: "free",
+    billingPlanId: "criador",
     executionWorkerConcurrency: 1,
     ...overrides
   } as BackendConfig;

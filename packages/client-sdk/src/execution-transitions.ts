@@ -1,4 +1,5 @@
 import type {
+  ExecutionCancelledPayload,
   ExecutionSseEvent,
   ExecutionStatusView,
   ExecutionTransition,
@@ -36,6 +37,16 @@ export function mapSseEventToTransition(executionId: string, event: ExecutionSse
     };
   }
 
+  if (event.type === "cancelled") {
+    const cancelled = event.payload as ExecutionCancelledPayload;
+    return {
+      type: "cancelled",
+      executionId,
+      reason: cancelled.reason,
+      occurredAt: event.occurredAt
+    };
+  }
+
   return {
     type: "failed",
     executionId,
@@ -69,6 +80,16 @@ export function mapStatusSnapshotToTransitions(
       executionId,
       snapshot: current,
       error: current.error,
+      occurredAt
+    });
+    return transitions;
+  }
+
+  if (current.status === "cancelled") {
+    transitions.push({
+      type: "cancelled",
+      executionId,
+      snapshot: current,
       occurredAt
     });
     return transitions;

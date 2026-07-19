@@ -19,7 +19,8 @@ export function reserveRuntimeCredits(
   context: RuntimeSelectionContext,
   pipelineName: string,
   contentType: string,
-  now: () => Date
+  now: () => Date,
+  briefingTopic?: string
 ): Effect.Effect<ReservedRuntimeCredits | undefined, BackendExecutionFailedError> {
   if (!context.billingEnabled) {
     return Effect.succeed(undefined);
@@ -37,7 +38,8 @@ export function reserveRuntimeCredits(
       pipelineName,
       contentType,
       adapter: context.selection.adapter,
-      model: context.selection.model
+      model: context.selection.model,
+      briefingTopic
     }
   ).pipe(
     Effect.map((reservation) => ({

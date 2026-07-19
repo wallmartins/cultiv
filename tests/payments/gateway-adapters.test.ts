@@ -1,10 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { Effect } from "effect";
-import {
-  createAsaasGateway,
-  createManualGateway,
-  createStripeGateway
-} from "@my-ai-orchestrator/payments";
+import { createManualGateway } from "@my-ai-orchestrator/payments";
+import { createAsaasGateway, createStripeGateway } from "./stub-gateways.js";
 
 const sampleChargeRequest = {
   userId: "user_1",

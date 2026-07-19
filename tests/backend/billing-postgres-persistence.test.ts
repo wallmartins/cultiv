@@ -9,7 +9,7 @@ import {
 } from "../../apps/backend/src/infra/postgres-billing-store.js";
 import { registerBackendBillingPlans } from "../../apps/backend/src/product/billing/billing-bootstrap.js";
 import { createPersistingBillingService } from "../../apps/backend/src/product/billing/durable-billing.js";
-import { ensureDefaultFreeSubscription } from "@my-ai-orchestrator/payments";
+import { DEFAULT_TRIAL_PLAN_ID, ensureDefaultFreeSubscription } from "@my-ai-orchestrator/payments";
 import {
   clearBillingRelationalTables,
   clearDurableRuntimeTables,
@@ -49,9 +49,9 @@ describeIfPostgres("billing postgres persistence", () => {
 
     await Effect.runPromise(registerBackendBillingPlans(billing));
     billing.upsertSubscription({
-      id: "user-relational:pro:subscription",
+      id: "user-relational:criador:subscription",
       userId: "user-relational",
-      planId: "pro",
+      planId: "criador",
       status: "active",
       startedAt: now().toISOString()
     });
@@ -59,8 +59,8 @@ describeIfPostgres("billing postgres persistence", () => {
     await Effect.runPromise(
       billing.startCycle({
         userId: "user-relational",
-        planId: "pro",
-        cycleId: "user-relational:pro:cycle:1",
+        planId: "criador",
+        cycleId: "user-relational:criador:cycle:1",
         idempotencyKey: "billing-postgres:test:cycle"
       })
     );
@@ -69,7 +69,7 @@ describeIfPostgres("billing postgres persistence", () => {
 
     const reloaded = await Effect.runPromise(loadPostgresBillingRepository(postgres.db));
 
-    expect(reloaded.subscriptions.has("user-relational:pro:subscription")).toBe(true);
+    expect(reloaded.subscriptions.has("user-relational:criador:subscription")).toBe(true);
     expect(reloaded.plans.size).toBeGreaterThan(0);
     expect(reloaded.ledger.length).toBeGreaterThan(0);
 
@@ -80,7 +80,7 @@ describeIfPostgres("billing postgres persistence", () => {
       .execute();
 
     expect(subscriptionRows).toHaveLength(1);
-    expect(subscriptionRows[0]?.plan_id).toBe("pro");
+    expect(subscriptionRows[0]?.plan_id).toBe("criador");
   });
 
   it("backfills legacy billing snapshots into relational tables once", async () => {
@@ -249,7 +249,7 @@ describeIfPostgres("billing postgres persistence", () => {
     await clearBillingRelationalTables(postgres.db);
   });
 
-  it("persists ensureDefaultFreeSubscription across reload", async () => {
+  it("persists the default trial subscription across reload", async () => {
     await clearDurableRuntimeTables(postgres.db);
 
     const repository = createBillingRepository();
@@ -258,7 +258,7 @@ describeIfPostgres("billing postgres persistence", () => {
 
     await Effect.runPromise(registerBackendBillingPlans(billing));
     await Effect.runPromise(
-      ensureDefaultFreeSubscription(billing, "user-jit-free", {
+      ensureDefaultFreeSubscription(billing, "user-jit-trial", {
         now,
         idempotencyNamespace: "jit"
       })
@@ -267,9 +267,9 @@ describeIfPostgres("billing postgres persistence", () => {
     await Effect.runPromise(saveBillingRepository(postgres.db, repository, now().toISOString(), { allowDestructiveReplace: true }));
 
     const reloaded = await Effect.runPromise(loadPostgresBillingRepository(postgres.db));
-    const subscriptionId = "user-jit-free:free:subscription";
+    const subscription = reloaded.subscriptions.get(`user-jit-trial:${DEFAULT_TRIAL_PLAN_ID}:subscription`);
 
-    expect(reloaded.subscriptions.has(subscriptionId)).toBe(true);
+    expect(subscription?.status).toBe("trialing");
     expect(reloaded.ledger.length).toBeGreaterThan(0);
   });
 });

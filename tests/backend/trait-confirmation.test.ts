@@ -47,7 +47,6 @@ describe("trait confirmation API", () => {
         profileVersion: 1,
         snapshotId: "voice-profile-snapshot:user_trait:v1",
         confidence: "medium",
-        adaptationMode: "standard",
         primaryLanguage: "pt-BR",
         tone: "informal",
         cadence: "direct",

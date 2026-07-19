@@ -1,0 +1,21 @@
+// Inline mark (not an <img>) so it inherits `color` (--ink) and reads var(--accent) directly —
+// one asset, both themes, no theme-conditional src swap.
+export function RailBrand() {
+  return (
+    <div className="rail-brand">
+      <svg width="26" height="26" viewBox="0 0 96 96" fill="none" className="rail-brand-mark" aria-hidden="true">
+        <defs>
+          <path
+            id="rail-brand-quote"
+            d="M62 38c0-9.5-7-16-15.5-16C38 22 32 28.2 32 36.2c0 7.9 6 13.8 14 13.8 1.1 0 2.2-.1 3.2-.4C48 60 42.2 65.6 34.6 68.2l3.4 6.8C50.6 70.6 62 59.6 62 43.6Z"
+          />
+        </defs>
+        <circle cx="48" cy="48" r="37" stroke="currentColor" strokeWidth="5" />
+        <path d="M54.4 11.6A37 37 0 0 1 78.3 26.8" stroke="var(--accent)" strokeWidth="5" />
+        <use href="#rail-brand-quote" transform="translate(26.5 31.6) scale(0.62) translate(-32 -22)" fill="currentColor" />
+        <use href="#rail-brand-quote" transform="translate(51 31.6) scale(0.62) translate(-32 -22)" fill="currentColor" />
+      </svg>
+      <span className="rail-brand-word">Cultiv</span>
+    </div>
+  );
+}

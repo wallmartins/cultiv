@@ -42,7 +42,6 @@ describe("backend voice rebuilds", () => {
     expect(screen).toBeDefined();
     expect(screen?.profile.version).toBe(1);
     expect(screen?.profile.confidence).toBe("low");
-    expect(screen?.profile.adaptationMode).toBe("conservative");
     expect(screen?.diagnostics.activeVersion).toBe(1);
     expect(screen?.diagnostics.updating).toBe(false);
     expect(screen?.diagnostics.pendingRebuild.status).toBe("idle");
@@ -139,7 +138,6 @@ describe("backend voice rebuilds", () => {
 
     const screen = Effect.runSync(services.voice.getProfileScreen("user_1"));
     expect(screen?.profile.confidence).toBe("high");
-    expect(screen?.profile.adaptationMode).toBe("standard");
     expect(screen?.diagnostics.reasonCodes).toEqual([]);
     expect(screen?.diagnostics.nextActionCodes).toEqual([]);
     expect(screen?.diagnostics.summary).toContain("bem representada");

@@ -118,7 +118,11 @@ export function startExecutionWatch(
         input.onTransition(transition);
       }
 
-      if (pollResult.right.status === "done" || pollResult.right.status === "failed") {
+      if (
+        pollResult.right.status === "done" ||
+        pollResult.right.status === "failed" ||
+        pollResult.right.status === "cancelled"
+      ) {
         return;
       }
 

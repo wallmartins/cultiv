@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { filterConfiguredProviderAttempts, isProviderConfigured } from "../../apps/backend/src/execution/pipeline/provider-availability.js";
+import { filterConfiguredProviderAttempts, findMissingProviderCredentials, isProviderConfigured } from "../../apps/backend/src/execution/pipeline/provider-availability.js";
 
 describe("provider availability", () => {
   const geminiOnlyConfig = {
@@ -26,6 +26,24 @@ describe("provider availability", () => {
     expect(isProviderConfigured(geminiOnlyConfig, "gemini")).toBe(true);
     expect(isProviderConfigured(geminiOnlyConfig, "openai")).toBe(false);
     expect(isProviderConfigured(geminiOnlyConfig, "groq")).toBe(true);
+  });
+
+  it("names the missing credential env var per routed provider, deduped", () => {
+    expect(
+      findMissingProviderCredentials(geminiOnlyConfig, [
+        { provider: "gemini", model: "gemini-3.1-flash-lite" },
+        { provider: "groq", model: "llama-3.3-70b-versatile" }
+      ])
+    ).toEqual([]);
+
+    expect(
+      findMissingProviderCredentials({ geminiApiKey: "gemini-key" }, [
+        { provider: "gemini", model: "gemini-3.1-flash-lite" },
+        { provider: "groq", model: "llama-3.3-70b-versatile" },
+        { provider: "groq", model: "llama-3.3-70b-versatile" },
+        { provider: "openai", model: "gpt-4o-mini" }
+      ])
+    ).toEqual(["GROQ_API_KEY", "OPENAI_API_KEY"]);
   });
 
   it("keeps all attempts in test environment regardless of API keys", () => {

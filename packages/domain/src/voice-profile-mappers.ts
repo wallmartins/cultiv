@@ -7,7 +7,6 @@ export function toVoiceProfileView(profile: DerivedVoiceProfile): VoiceProfileVi
     snapshotId: profile.snapshotId,
     version: profile.version,
     confidence: profile.confidence,
-    adaptationMode: profile.adaptationMode,
     primaryLanguage: profile.primaryLanguage,
     tone: profile.tone,
     cadence: profile.cadence,

@@ -7,18 +7,36 @@ import {
   type JobRecord,
   type JobRepository
 } from "@my-ai-orchestrator/database";
+import { isTerminalJobStatus } from "@my-ai-orchestrator/domain";
 import {
+  resolveExecutionPresentation,
   resolveExecutionsPeriodCutoff,
-  type ExecutionsListFilters
+  type ExecutionsListFilters,
+  type PipelineRequest
 } from "@my-ai-orchestrator/contracts";
 import type { DatabaseTables } from "../postgres-tables.js";
 import { parseStoredJsonRecord } from "./json-column.js";
 import { postgresTryPromise } from "./postgres-try-promise.js";
 
+// #1 topic search: briefingTopic is derived at read time (presentation.ts), not a JobRecord field —
+// denormalize it as a top-level `data` key on every write so postgres can ILIKE it (mirrors status/contentType below).
+function extractRuntimeRequest(record: JobRecord): PipelineRequest | undefined {
+  const created = record.history.find((entry) => entry.type === "created");
+  const payload = created?.payload;
+  if (payload && typeof payload === "object" && "runtime" in payload) {
+    return (payload as { runtime?: { request?: PipelineRequest } }).runtime?.request;
+  }
+
+  return undefined;
+}
+
 function serializeJob(record: JobRecord) {
+  const briefingTopic = resolveExecutionPresentation(extractRuntimeRequest(record), record.contentType).briefingTopic;
+
   return {
     id: record.id,
-    data: JSON.stringify(record),
+    user_id: record.userId,
+    data: JSON.stringify({ ...record, briefingTopic }),
     version: record.version,
     created_at: record.createdAt,
     updated_at: record.updatedAt
@@ -27,13 +45,20 @@ function serializeJob(record: JobRecord) {
 
 function parseJob(row: {
   id: string;
+  user_id: string | null;
   data: unknown;
   version: number;
   created_at: string;
   updated_at: string;
 }): JobRecord {
   const parsed = parseStoredJsonRecord<JobRecord>(row.data);
-  return { ...parsed, version: row.version, createdAt: row.created_at, updatedAt: row.updated_at };
+  return {
+    ...parsed,
+    userId: parsed.userId ?? row.user_id ?? "anonymous",
+    version: row.version,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at
+  };
 }
 
 export function createPostgresJobRepository(
@@ -155,6 +180,16 @@ export function createPostgresJobRepository(
       });
     },
 
+    removeByUser(userId) {
+      return Effect.gen(function* () {
+        const result = yield* postgresTryPromise("jobs.removeByUser", () =>
+          db.deleteFrom("jobs").where("user_id", "=", userId).executeTakeFirst()
+        );
+
+        return Number(result.numDeletedRows);
+      });
+    },
+
     appendHistory(id, entry) {
       return Effect.gen(function* () {
         const current = yield* postgresTryPromise("jobs.appendHistory.lookup", () =>
@@ -214,6 +249,12 @@ export function createPostgresJobRepository(
         }
 
         const record = parseJob(current);
+        // best-effort cancel doesn't stop the worker — a job already terminal (notably "cancelled")
+        // must not be resurrected by a late completion/failure landing after the cancel.
+        if (isTerminalJobStatus(record.status)) {
+          return record;
+        }
+
         const next = {
           ...record,
           status: "done" as const,
@@ -244,6 +285,11 @@ export function createPostgresJobRepository(
         }
 
         const record = parseJob(current);
+        // same guard as complete() — a late failure must not overwrite an already-cancelled job.
+        if (isTerminalJobStatus(record.status)) {
+          return record;
+        }
+
         const next = {
           ...record,
           status: "failed" as const,
@@ -254,6 +300,31 @@ export function createPostgresJobRepository(
         };
 
         yield* postgresTryPromise("jobs.fail.update", () =>
+          db.updateTable("jobs").set(serializeJob(next)).where("id", "=", id).execute()
+        );
+
+        return next;
+      });
+    },
+
+    cancel(id, at = new Date().toISOString()) {
+      return Effect.gen(function* () {
+        const current = yield* postgresTryPromise("jobs.cancel.lookup", () =>
+          db.selectFrom("jobs").where("id", "=", id).selectAll().executeTakeFirst()
+        );
+
+        if (!current) {
+          return yield* Effect.fail(new DatabaseJobNotFoundError({ jobId: id }));
+        }
+
+        const record = parseJob(current);
+        if (record.status !== "queued" && record.status !== "running") {
+          return record;
+        }
+
+        const next = { ...record, status: "cancelled" as const, updatedAt: at, completedAt: at };
+
+        yield* postgresTryPromise("jobs.cancel.update", () =>
           db.updateTable("jobs").set(serializeJob(next)).where("id", "=", id).execute()
         );
 
@@ -283,6 +354,10 @@ function applyJobListFilters<QB extends SelectQueryBuilder<DatabaseTables, "jobs
 
   if (filters.contentType) {
     next = next.where(sql`data->>'contentType'`, "=", filters.contentType) as QB;
+  }
+
+  if (filters.q) {
+    next = next.where(sql`data->>'briefingTopic'`, "ilike", `%${filters.q}%`) as QB;
   }
 
   return next;

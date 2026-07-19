@@ -225,6 +225,15 @@ export class BackendUserSuspendedError extends Data.TaggedError("BackendUserSusp
   readonly message: string;
 }> {}
 
+// contract-08 decision 4 — a tombstoned account is terminal (unlike suspended, never reversible);
+// the token is treated as no longer valid rather than "forbidden", so a deleted account can never
+// be silently auto-recreated by resolveOrProvisionApplicationUser.
+export class BackendUserDeletedError extends Data.TaggedError("BackendUserDeletedError")<{
+  readonly userId: string;
+  readonly externalSubject: string;
+  readonly message: string;
+}> {}
+
 export class BackendVoiceTrainingConsentRequiredError extends Data.TaggedError("BackendVoiceTrainingConsentRequiredError")<{
   readonly userId: string;
   readonly message: string;
@@ -269,4 +278,42 @@ export class BackendOperationalOverrideStateError extends Data.TaggedError("Back
 export class BackendBillingNotConfiguredError extends Data.TaggedError("BackendBillingNotConfiguredError")<{
   readonly route: string;
   readonly message?: string;
+}> {}
+
+export class BackendBillingCheckoutIntentNotFoundError extends Data.TaggedError(
+  "BackendBillingCheckoutIntentNotFoundError"
+)<{
+  readonly userId: string;
+  readonly intentId: string;
+}> {}
+
+export class BackendBillingManagementActionNotAllowedError extends Data.TaggedError(
+  "BackendBillingManagementActionNotAllowedError"
+)<{
+  readonly userId: string;
+  readonly action: "portal-session" | "cancel";
+  readonly reason: string;
+}> {}
+
+export class PrefillInferenceInfraError extends Data.TaggedError("PrefillInferenceInfraError")<{
+  readonly message: string;
+}> {}
+
+// contract-08 decision 6 — type-to-confirm is re-validated server-side; mismatch/absence is a 4xx
+// with zero mutation (checked before the idempotency short-circuit, so a retry still proves intent).
+export class BackendAccountConfirmationMismatchError extends Data.TaggedError(
+  "BackendAccountConfirmationMismatchError"
+)<{
+  readonly userId: string;
+}> {}
+
+export class BackendAccountNotConfiguredError extends Data.TaggedError("BackendAccountNotConfiguredError")<{
+  readonly route: string;
+}> {}
+
+// one-time download already consumed, expired (TTL), never existed, or belongs to another user —
+// deliberately not distinguished from each other in the response (avoids leaking existence to a
+// caller probing someone else's jobId).
+export class BackendAccountExportNotFoundError extends Data.TaggedError("BackendAccountExportNotFoundError")<{
+  readonly jobId: string;
 }> {}

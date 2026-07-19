@@ -154,7 +154,6 @@ describe('domain package', () => {
       version: 2,
       snapshotId: 'snap_1',
       confidence: 'high' as const,
-      adaptationMode: 'standard' as const,
       primaryLanguage: 'pt-BR',
       tone: 'direct',
       cadence: 'short',

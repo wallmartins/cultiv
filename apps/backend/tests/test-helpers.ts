@@ -277,6 +277,13 @@ export function createMinimalServices(
         contentType: "twitter-thread"
       })
     } as any,
+    generationPrefill: {
+      infer: () => Effect.succeed({
+        prefill: { intent: "share-idea", scope: { lengthTier: "short" } },
+        intentAmbiguity: null,
+        questionPlan: []
+      })
+    } as any,
     policyEvidence: {
       recordInputEvidence: () => Effect.succeed(undefined),
       recordOutputEvidence: () => Effect.succeed(undefined),

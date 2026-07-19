@@ -1,20 +1,10 @@
-import type { ExecutionTelemetry, PipelineRequest, PlanSignature, QualityMode } from "@my-ai-orchestrator/contracts";
+import type { ExecutionTelemetry, PipelineRequest, QualityMode } from "@my-ai-orchestrator/contracts";
 import type { ResolvedPricingEnvelope } from "../../product/ai-policy/ai-policy-types.js";
 import { resolveCompositorPricingKeys } from "../../product/ai-policy/ai-policy-resolution.js";
 import type { BackendStepProviderAttempt } from "../pipeline/pipeline-attempt-types.js";
 import type { ExecutionSelection } from "./quality-selection.js";
 import { resolveExecutionPreviewCorrelation } from "../pipeline/preview-correlation.js";
-
-const PLAN_SIGNATURES = new Set<PlanSignature>([
-  "short-piece",
-  "long-piece",
-  "serial-piece",
-  "edition-piece"
-]);
-
-function isPlanSignature(value: string): value is PlanSignature {
-  return PLAN_SIGNATURES.has(value as PlanSignature);
-}
+import { readCompositorMetadata, readStepPlannerTelemetry } from "../pipeline-metadata.js";
 
 export type { ExecutionTelemetry };
 
@@ -157,53 +147,16 @@ function resolveCompositorTelemetryContext(
 function extractCompositorPlanId(
   request: PipelineRequest
 ): { readonly planId?: string } | undefined {
-  if (!("context" in request) || !request.context || typeof request.context !== "object") {
+  const compositor = readCompositorMetadata("context" in request ? request.context : undefined);
+  if (!compositor) {
     return undefined;
   }
 
-  const compositor = (request.context as Record<string, unknown>).compositor;
-  if (!compositor || typeof compositor !== "object") {
-    return undefined;
-  }
-
-  const planId = (compositor as Record<string, unknown>).planId;
-  return typeof planId === "string" ? { planId } : undefined;
+  return typeof compositor.planId === "string" ? { planId: compositor.planId } : undefined;
 }
 
 function extractStepPlannerTelemetry(
   request: PipelineRequest | undefined
 ): ExecutionTelemetry["planner"] {
-  if (!request || !("context" in request) || !request.context || typeof request.context !== "object") {
-    return undefined;
-  }
-
-  const stepPlanner = (request.context as Record<string, unknown>).stepPlanner;
-  if (!stepPlanner || typeof stepPlanner !== "object") {
-    return undefined;
-  }
-
-  const record = stepPlanner as Record<string, unknown>;
-  const patchCount = record.patchCount;
-  const ops = record.ops;
-  const basePlanSignature = record.basePlanSignature;
-  const finalPlanSignature = record.finalPlanSignature;
-
-  if (
-    typeof patchCount !== "number" ||
-    !Array.isArray(ops) ||
-    ops.some((entry) => typeof entry !== "string") ||
-    typeof basePlanSignature !== "string" ||
-    typeof finalPlanSignature !== "string" ||
-    !isPlanSignature(basePlanSignature) ||
-    !isPlanSignature(finalPlanSignature)
-  ) {
-    return undefined;
-  }
-
-  return {
-    patchCount,
-    ops: [...ops],
-    basePlanSignature,
-    finalPlanSignature
-  };
+  return readStepPlannerTelemetry(request && "context" in request ? request.context : undefined);
 }

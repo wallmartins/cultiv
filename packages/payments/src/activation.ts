@@ -11,7 +11,15 @@ import type {
 } from "./types.js";
 import { createSubscriptionId } from "./subscription-lookup.js";
 
-export const DEFAULT_FREE_PLAN_ID = "free";
+// ADR 0006 §2 — plano free removido; novos usuários entram no free trial.
+export const DEFAULT_TRIAL_PLAN_ID = "trial";
+const TRIAL_DURATION_DAYS = 7; // contract-03 §4/Q7 — lapsa em min(pool esgotado, dia 7)
+
+function computeTrialEndsAt(now: Date): string {
+  const deadline = new Date(now);
+  deadline.setUTCDate(deadline.getUTCDate() + TRIAL_DURATION_DAYS);
+  return deadline.toISOString();
+}
 
 export interface BillingActivationOptions {
   readonly now: () => Date;
@@ -24,6 +32,8 @@ export interface ActivateSubscriptionRequest extends BillingActivationOptions {
   readonly status?: BillingSubscription["status"];
   readonly startedAt?: string;
   readonly cycleId?: string;
+  readonly trialEndsAt?: string;
+  readonly everSubscribed?: boolean;
 }
 
 function defaultBillingCycleId(userId: string, planId: string): string {
@@ -100,7 +110,9 @@ export function activateSubscription(
       userId: request.userId,
       planId: request.planId,
       status: request.status ?? "active",
-      startedAt: request.startedAt ?? request.now().toISOString()
+      startedAt: request.startedAt ?? request.now().toISOString(),
+      trialEndsAt: request.trialEndsAt,
+      everSubscribed: request.everSubscribed
     });
 
     const namespace = request.idempotencyNamespace ?? "billing";
@@ -144,7 +156,10 @@ export function ensureDefaultFreeSubscription(
 
     return yield* activateSubscription(billing, {
       userId,
-      planId: DEFAULT_FREE_PLAN_ID,
+      planId: DEFAULT_TRIAL_PLAN_ID,
+      status: "trialing",
+      trialEndsAt: computeTrialEndsAt(options.now()),
+      everSubscribed: false,
       now: options.now,
       idempotencyNamespace: options.idempotencyNamespace
     });

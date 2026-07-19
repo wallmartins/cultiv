@@ -7,18 +7,17 @@ import {
   BillingTopUpPackageNotFoundError,
   calculateDebitForMode,
   calculateRolloverCredits,
-  createAsaasGateway,
   createBillingEntitlement,
   createBillingRepository,
   createBillingService,
   createBillingServiceLayer,
   createManualGateway,
-  createStripeGateway,
   defineBillingPlan,
   listBillingFeatures,
   resolveDefaultPlanId,
   withBilling
 } from "../../packages/payments/src/index.js";
+import { createAsaasGateway, createStripeGateway } from "./stub-gateways.js";
 
 describe("payments package", () => {
   it("defines billing plans and derives entitlements", () => {
@@ -347,7 +346,7 @@ describe("payments package", () => {
       }).pipe(Effect.provide(createBillingServiceLayer()))
     );
 
-    expect(result.defaultPlan).toBe("pro");
+    expect(result.defaultPlan).toBe("trial");
     expect(result.planCount).toBeGreaterThan(0);
     expect(result.manualGateway).toBe("manual");
     expect(result.asaasGateway).toBe("asaas");
@@ -366,8 +365,8 @@ describe("payments package", () => {
       )
     );
 
-    expect(result).toContain("free");
-    expect(result).toContain("pro");
+    expect(result).toContain("trial");
+    expect(result).toContain("criador");
   });
 
   it("fails with typed errors for invalid plan, missing top-up package and missing reservation", async () => {

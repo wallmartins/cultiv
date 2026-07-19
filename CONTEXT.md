@@ -112,6 +112,10 @@ _Avoid_: Style settings, persona editor, cognitive profile form, uppercase mono 
 The structured LLM call inside **Voice Profile Rebuild** that infers the draft **Core Reasoning Signature**, per-format **Format Expression Profile**, and **Derived Anti-Patterns** from all active examples, using the primary generation provider family rather than the **Voice Judge** provider; its output is reconciled before persistence.
 _Avoid_: Per-example extraction, per-format rebuild calls, runtime reasoning inference, author-visible draft state
 
+**Signature Extraction**:
+The shared offline mechanism behind **Reasoning Extraction** and **Argument Development Extraction**: one attempt-and-retry loop that resolves output language, calls the provider, parses and normalizes the result, and reissues once on wrong language or topic leakage — parameterized per extraction by prompt, schema, and normalizer. The two extractions remain distinct concepts and run in parallel; they share the runner, not state.
+_Avoid_: A third extraction call, a merged extraction that collapses reasoning and development, shared mutable extraction state
+
 **Derived Voice Profile**:
 The persisted voice projection recalculated from the user's examples and anti-pattern inputs, used by the writing pipeline as the current source of truth for voice alignment.
 _Avoid_: Cached prompt, temporary profile
@@ -215,8 +219,8 @@ A job-backed execution path used for operational processing and SSE progress.
 _Avoid_: Background task, queue job
 
 **Job**:
-A persisted execution instance that can be resumed, observed, and completed later.
-_Avoid_: Task, request
+A persisted execution instance that can be resumed, observed, and completed later, owned by the **Application User** who started it; ownership (`userId`) is a first-class field of the Job, not smuggled inside its execution history.
+_Avoid_: Task, request, ownerless job
 
 **Credit Budget**:
 The amount of billing credits reserved for a generation before execution starts, then fully captured according to the selected pricing envelope for that generation.
@@ -238,6 +242,10 @@ _Avoid_: Checkout, final bill
 The versioned commercial rule that determines the fixed credit price for one generation based on plan tier, quality mode, and content type or pipeline.
 _Avoid_: Token price, step cost
 
+**Generation Pricing**:
+The single backend resolution of what one generation costs: the versioned **Pricing Envelope** lookup with a quality-mode fallback, plus the affordability check, decided once and read by preview, **Credit Reservation**, and **Credit Capture**. The `payments` package holds no pricing decision — it debits the resolved price.
+_Avoid_: Per-caller price derivation, override-or-fallback ambiguity, pricing math in the ledger
+
 **Structured Prompt**:
 A prompt split into `system` (rules, voice, format constraints) and `user` (content, briefing, previous text) messages, sent to the LLM as separate roles to prevent prompt echo and preserve output purity.
 _Avoid_: Monolithic prompt, single-message prompt
@@ -245,6 +253,10 @@ _Avoid_: Monolithic prompt, single-message prompt
 **Sanitized Generation Input**:
 The validated and policy-approved input envelope that remains after classification, minimization, and safety filtering, and is the only user-derived payload allowed to enter generation steps.
 _Avoid_: Raw prompt, unchecked input
+
+**Trusted Operator Input**:
+Generation input supplied through the **Operational API Surface** by an internal operator on a debug or audit path such as a **Sync Run**, explicitly minted as trusted instead of passing through the **Input Safety Gateway**. A nominal type distinct from **Sanitized Generation Input**, so a raw request can enter generation as neither without a named, auditable trust decision.
+_Avoid_: Bypassed input, unchecked operator payload, sanitized input alias
 
 **Input Safety Gateway**:
 The first backend-controlled policy boundary that classifies, sanitizes, validates, and either approves, quarantines, or blocks user-derived input before it can affect preview, persistence, or generation.

@@ -1,5 +1,5 @@
 import { Effect } from "effect";
-import type { SyncRunResponse } from "@my-ai-orchestrator/contracts";
+import { resolveExecutionPresentation, type SyncRunResponse } from "@my-ai-orchestrator/contracts";
 import type { BackendExecutionFailedError } from "../http/errors.js";
 import {
   captureRuntimeCredits,
@@ -23,7 +23,8 @@ export function executeSyncRun(options: ExecutePipelineOptions): Effect.Effect<S
           context,
           options.plan.pipeline.name,
           options.plan.contentType.id,
-          options.now
+          options.now,
+          resolveExecutionPresentation(options.request, options.plan.contentType.id).briefingTopic
         );
 
     const finalized = yield* executeRuntimeAttemptLoop(options, context).pipe(

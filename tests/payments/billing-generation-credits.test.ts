@@ -7,7 +7,7 @@ import {
   reserveGenerationCredits
 } from "../../packages/payments/src/billing-generation-credits.js";
 import { createBillingRepository } from "../../packages/payments/src/repository.js";
-import { appendLedgerEntry } from "../../packages/payments/src/ledger.js";
+import { appendLedgerEntry, createWalletFromRepository } from "../../packages/payments/src/ledger.js";
 import { createAccountId } from "../../packages/payments/src/billing-utils.js";
 
 describe("billing generation credits", () => {
@@ -152,5 +152,82 @@ describe("billing generation credits", () => {
 
     expect(firstReserve.value.reservationId).toBe(secondReserve.value.reservationId);
     expect(repository.ledger.filter((entry) => entry.entryType === "reserve")).toHaveLength(1);
+  });
+
+  it("N3 cancel-in-flight: release restores credits, and a late capture on the released reservation is a no-op", () => {
+    const repository = createBillingRepository({
+      plans: [{ id: "pro", tier: "pro", name: "Pro", monthlyCredits: 1000, features: [], allowedModels: [] }]
+    });
+
+    repository.subscriptions.set("sub_1", {
+      id: "sub_1",
+      userId: "user_1",
+      planId: "pro",
+      status: "active",
+      startedAt: "2026-05-09T00:00:00.000Z"
+    });
+
+    appendLedgerEntry(repository, {
+      subscriptionId: "sub_1",
+      accountId: createAccountId("user_1", "pro"),
+      entryType: "grant_cycle",
+      creditsDelta: 1000,
+      referenceType: "subscription_cycle",
+      referenceId: "cycle_1",
+      idempotencyKey: "cycle:1",
+      createdAt: "2026-05-09T00:00:00.000Z"
+    });
+
+    const ctx = createBillingGenerationCreditsContext({ repository });
+    const availableBeforeReserve = createWalletFromRepository(repository, "user_1", "pro")?.availableCredits;
+
+    const reservation = Effect.runSync(
+      reserveGenerationCredits(ctx)({
+        userId: "user_1",
+        planId: "pro",
+        generationCycleId: "gen_cancel",
+        qualityMode: "balanced",
+        retryCount: 0,
+        idempotencyKey: "reserve:gen_cancel"
+      })
+    );
+    expect(createWalletFromRepository(repository, "user_1", "pro")?.availableCredits).toBe(
+      (availableBeforeReserve ?? 0) - reservation.value.reservedCredits
+    );
+
+    // cancel (job was "running") releases the reserve — full refund.
+    const released = Effect.runSync(
+      releaseReservedCredits(ctx)({
+        reservationId: reservation.value.reservationId,
+        idempotencyKey: "release:gen_cancel",
+        metadata: { reason: "execution_cancelled" }
+      })
+    );
+    expect(released.value.status).toBe("released");
+    expect(createWalletFromRepository(repository, "user_1", "pro")?.availableCredits).toBe(availableBeforeReserve);
+
+    // the worker didn't know it was cancelled and finishes into the void — its capture must not re-spend.
+    const lateCapture = Effect.runSync(
+      captureReservedCredits(ctx)({
+        reservationId: reservation.value.reservationId,
+        idempotencyKey: "capture:gen_cancel"
+      })
+    );
+    expect(lateCapture.value.status).toBe("released"); // unchanged — the status guard short-circuited
+    expect(createWalletFromRepository(repository, "user_1", "pro")?.availableCredits).toBe(availableBeforeReserve);
+    expect(
+      repository.ledger.filter((entry) => entry.referenceId === "gen_cancel").map((entry) => entry.entryType)
+    ).toEqual(["reserve", "release"]); // no spurious "capture" entry appended
+
+    // a duplicate cancel (double release) is likewise inert.
+    const secondRelease = Effect.runSync(
+      releaseReservedCredits(ctx)({
+        reservationId: reservation.value.reservationId,
+        idempotencyKey: "release:gen_cancel:retry",
+        metadata: { reason: "execution_cancelled" }
+      })
+    );
+    expect(secondRelease.value.status).toBe("released");
+    expect(createWalletFromRepository(repository, "user_1", "pro")?.availableCredits).toBe(availableBeforeReserve);
   });
 });

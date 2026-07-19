@@ -115,6 +115,7 @@ describe("execution enqueue transaction builders", () => {
       })
     ).toEqual({
       id: "job-1",
+      userId: "user-42",
       status: "queued",
       executionMode: plan.request.executionMode,
       contentType: plan.contentType.id,
@@ -140,6 +141,37 @@ describe("execution enqueue transaction builders", () => {
         }
       ]
     });
+  });
+
+  it("buildExecutionJobRecord threads reservedCredits through the persisted runtime history payload", () => {
+    const request = createPipelineRequest();
+    const plan = buildOrchestrationPlan(request, {
+      executionMode: "async",
+      qualityMode: "balanced",
+      defaultLanguage: "pt-BR"
+    });
+    const estimatedSteps = resolveEnqueueEstimatedSteps(plan);
+    const createdAt = "2026-06-18T12:00:00.000Z";
+    const runtime = {
+      ...buildRuntimeBase({
+        userId: "user-42",
+        request,
+        plan,
+        estimatedSteps
+      }),
+      creditReservationId: "reservation-1",
+      reservedCredits: 5
+    };
+
+    const record = buildExecutionJobRecord({
+      jobId: "job-1",
+      plan,
+      runtime,
+      estimatedSteps,
+      createdAt
+    });
+
+    expect((record.history[0]?.payload as { runtime: { reservedCredits?: number } }).runtime.reservedCredits).toBe(5);
   });
 
   it("buildEnqueueCreatedResponse maps API response fields", () => {

@@ -14,7 +14,6 @@ import type {
   ContentType,
   ExecutionPlan
 } from "@my-ai-orchestrator/domain";
-import type { QualityLane } from "@my-ai-orchestrator/text-quality";
 
 export type OrchestrationRequest = PipelineRequest;
 
@@ -70,7 +69,6 @@ export interface OrchestrationPlan {
   readonly estimatedSteps: number;
   readonly progress: JobProgress;
   readonly stepProgress: readonly OrchestrationStepProgress[];
-  readonly qualityLanes: readonly QualityLane[];
 }
 
 export interface OrchestrationCatalog {

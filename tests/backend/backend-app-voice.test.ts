@@ -18,7 +18,6 @@ function seedVoiceProfileState(services: ReturnType<typeof createBackendAppTestS
       version: 4,
       snapshotId: "voice-profile-snapshot:user_1:v4",
       confidence: "medium",
-      adaptationMode: "standard",
       primaryLanguage: "pt-BR",
       tone: "informal",
       cadence: "direct",

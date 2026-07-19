@@ -9,6 +9,7 @@ import { mapSafetyError } from "../error-mappers/error-map-safety.js";
 import { mapVoiceError } from "../error-mappers/error-map-voice.js";
 import { mapBillingError } from "../error-mappers/error-map-billing.js";
 import { mapDatabaseError } from "../error-mappers/error-map-database.js";
+import { mapAccountError } from "../error-mappers/error-map-account.js";
 
 export { createHttpErrorResponse };
 export type { HttpErrorResponse };
@@ -40,6 +41,9 @@ export function mapErrorToHttp(error: unknown, path: string): HttpErrorResponse 
 
   const billingResult = mapBillingError(error, path);
   if (billingResult) return billingResult;
+
+  const accountResult = mapAccountError(error, path);
+  if (accountResult) return accountResult;
 
   if (error instanceof Error) {
     return createHttpErrorResponse(500, "internal_error", {

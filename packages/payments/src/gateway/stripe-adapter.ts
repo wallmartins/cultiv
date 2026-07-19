@@ -45,6 +45,13 @@ function amountFromStripeTotal(amountTotal: number | null | undefined): number {
   return amountTotal / 100;
 }
 
+// SDKs recentes moveram current_period_end de Subscription p/ cada SubscriptionItem
+// (suporte a multi-item); um único item por assinatura neste app, então o primeiro basta.
+function subscriptionPeriodEndsAt(subscription: Stripe.Subscription): string | undefined {
+  const periodEnd = subscription.items.data[0]?.current_period_end;
+  return periodEnd === undefined ? undefined : new Date(periodEnd * 1000).toISOString();
+}
+
 export function mapStripeEvent(event: Stripe.Event): GatewayWebhookEvent | null {
   switch (event.type) {
     case "checkout.session.completed": {
@@ -66,7 +73,10 @@ export function mapStripeEvent(event: Stripe.Event): GatewayWebhookEvent | null 
         externalCustomerId:
           typeof session.customer === "string" ? session.customer : session.customer?.id,
         internalRef: readMetadataString(session.metadata, "internal_ref"),
-        productKind: toProductKind(readMetadataString(session.metadata, "product_kind"))
+        productKind: toProductKind(readMetadataString(session.metadata, "product_kind")),
+        // ponytail: Stripe checkout neste app é sempre cartão (BRL vai por ASAAS/PIX); brand+last4
+        // exigiriam expandir payment_method num round-trip extra à API, fora do escopo v1.
+        paymentMethodKind: "card"
       };
     }
     case "invoice.paid": {
@@ -95,6 +105,55 @@ export function mapStripeEvent(event: Stripe.Event): GatewayWebhookEvent | null 
         internalRef: readMetadataString(invoice.metadata, "internal_ref")
       };
     }
+    case "invoice.payment_failed": {
+      const invoice = event.data.object as Stripe.Invoice & {
+        readonly subscription?: string | Stripe.Subscription | null;
+        readonly subscription_details?: { readonly metadata?: Stripe.Metadata | null };
+      };
+      const userId =
+        readMetadataString(invoice.metadata, "application_user_id") ??
+        readMetadataString(invoice.subscription_details?.metadata, "application_user_id");
+      if (!userId) {
+        return null;
+      }
+      const subscription = invoice.subscription;
+      return {
+        eventId: event.id,
+        gateway: "stripe",
+        type: "payment.failed",
+        userId,
+        amount: amountFromStripeTotal(invoice.amount_due),
+        currency: toBillingCurrency(invoice.currency),
+        externalSubscriptionId:
+          typeof subscription === "string" ? subscription : subscription?.id,
+        externalCustomerId:
+          typeof invoice.customer === "string" ? invoice.customer : invoice.customer?.id,
+        internalRef: readMetadataString(invoice.metadata, "internal_ref"),
+        outstandingInvoiceUrl: invoice.hosted_invoice_url ?? undefined
+      };
+    }
+    case "customer.subscription.updated": {
+      const subscription = event.data.object as Stripe.Subscription;
+      if (!subscription.cancel_at_period_end) {
+        return null; // contract-03 §3 — só a intenção de cancelar (portal) produz sinal aqui
+      }
+      const userId = readMetadataString(subscription.metadata, "application_user_id");
+      if (!userId) {
+        return null;
+      }
+      return {
+        eventId: event.id,
+        gateway: "stripe",
+        type: "subscription.cancelled",
+        userId,
+        amount: 0,
+        currency: toBillingCurrency(subscription.currency),
+        externalSubscriptionId: subscription.id,
+        externalCustomerId:
+          typeof subscription.customer === "string" ? subscription.customer : subscription.customer?.id,
+        periodEndsAt: subscriptionPeriodEndsAt(subscription)
+      };
+    }
     case "customer.subscription.deleted": {
       const subscription = event.data.object as Stripe.Subscription;
       const userId = readMetadataString(subscription.metadata, "application_user_id");
@@ -110,7 +169,8 @@ export function mapStripeEvent(event: Stripe.Event): GatewayWebhookEvent | null 
         currency: toBillingCurrency(subscription.currency),
         externalSubscriptionId: subscription.id,
         externalCustomerId:
-          typeof subscription.customer === "string" ? subscription.customer : subscription.customer?.id
+          typeof subscription.customer === "string" ? subscription.customer : subscription.customer?.id,
+        periodEndsAt: subscriptionPeriodEndsAt(subscription)
       };
     }
     case "charge.dispute.created": {
@@ -210,6 +270,37 @@ export function createStripeGatewayAdapter(options: StripeGatewayAdapterOptions)
           gateway: "stripe",
           message: "direct charge not supported; use checkout"
         })
-      )
+      ),
+    createPortalSession: (request) =>
+      Effect.tryPromise({
+        try: async () => {
+          const session = await stripe.billingPortal.sessions.create({
+            customer: request.externalCustomerId,
+            return_url: request.returnUrl
+          });
+          return { url: session.url };
+        },
+        catch: (cause) =>
+          new BillingGatewayError({
+            gateway: "stripe",
+            message: "portal session failed",
+            cause
+          })
+      }),
+    // contract-03 §2 — user-initiated cancel goes through the Customer Portal (redirect), so this
+    // was a stub until now. contract-08 (account delete) can't redirect to a portal, so it needs
+    // the real programmatic cancel: exposed here for that path only.
+    cancelSubscription: (gatewaySubscriptionId: string) =>
+      Effect.tryPromise({
+        try: async () => {
+          await stripe.subscriptions.cancel(gatewaySubscriptionId);
+        },
+        catch: (cause) =>
+          new BillingGatewayError({
+            gateway: "stripe",
+            message: "cancel subscription failed",
+            cause
+          })
+      })
   };
 }

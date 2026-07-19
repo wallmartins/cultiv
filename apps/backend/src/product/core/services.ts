@@ -6,6 +6,7 @@ import type { BackendAIPolicyBootstrapError } from "../ai-policy/ai-policy-types
 import type { BackendSafetyPolicyBootstrapError } from "../safety-policy/safety-policy-types.js";
 import { createBackendUsagePolicy } from "../usage/usage-policy.js";
 import { createBackendGenerationPreviewService } from "../generation/generation-preview.js";
+import { createBackendGenerationPrefillService } from "../generation/generation-prefill.js";
 import { createBackendPublicInputSafetyGatewayService } from "../../safety/public-input-safety.js";
 import { createBackendOutputReleaseGateService } from "../../safety/output-release.js";
 import { createBackendVoiceConsentService } from "../../safety/voice-consent.js";
@@ -38,6 +39,12 @@ import {
   createBillingWebhookService,
   type BillingWebhookService
 } from "../billing/billing-webhook-service.js";
+import {
+  createBillingLifecycleService,
+  type BillingLifecycleService
+} from "../billing/billing-lifecycle-service.js";
+import { createBackendAccountService, type BackendAccountService } from "../account/account-service.js";
+import { createBackendAccountExportService } from "../account/account-export-service.js";
 
 export function createBackendProductServices(
   config: BackendConfig,
@@ -73,6 +80,7 @@ export function createBackendProductServices(
       redaction
     });
     const voiceConsent = createBackendVoiceConsentService({ database: dependencies.database, now, policyEvidence });
+    const providerTransport = options.providerTransport ?? createBackendProviderTransport(config);
     const voiceRebuild = createBackendVoiceRebuildService(
       dependencies.database,
       now,
@@ -81,7 +89,7 @@ export function createBackendProductServices(
       voiceConsent,
       {
         aiAdapters: dependencies.aiAdapters,
-        providerTransport: options.providerTransport ?? createBackendProviderTransport(config),
+        providerTransport,
         featureFlags: dependencies.featureFlags,
         aiPolicy: dependencies.aiPolicy,
         config
@@ -103,8 +111,10 @@ export function createBackendProductServices(
 
     let billingCheckout: BillingCheckoutService | undefined;
     let billingWebhook: BillingWebhookService | undefined;
-    if (postgresDatabase) {
-      const gatewayStore = createPostgresBillingGatewayStore(postgresDatabase);
+    let billingLifecycle: BillingLifecycleService | undefined;
+    let accountOps: BackendAccountService | undefined;
+    const gatewayStore = postgresDatabase ? createPostgresBillingGatewayStore(postgresDatabase) : undefined;
+    if (postgresDatabase && gatewayStore) {
       const adapters = createBillingGatewayAdapters(config);
       const billingDeps = {
         billing: dependencies.billing,
@@ -116,7 +126,34 @@ export function createBackendProductServices(
       };
       billingCheckout = createBillingCheckoutService(billingDeps);
       billingWebhook = createBillingWebhookService(billingDeps);
+      billingLifecycle = createBillingLifecycleService(billingDeps);
+
+      // contract-08 — account delete's storage transaction (tombstone, billing anonymization,
+      // execution_idempotency) is Postgres-only, same gate as the billing services above.
+      accountOps = createBackendAccountService({
+        users,
+        database: dependencies.database,
+        gatewayCancel: {
+          billing: dependencies.billing,
+          gatewayStore,
+          stripeAdapter: adapters.stripe,
+          asaasAdapter: adapters.asaas
+        },
+        now
+      });
     }
+
+    // export doesn't need Postgres (services.database works in-memory too) — gated on Redis only,
+    // the storage backing the short-TTL/one-time download handle.
+    const accountExport = config.redisUrl
+      ? createBackendAccountExportService({
+          database: dependencies.database,
+          billing: dependencies.billing,
+          users,
+          redis: getSharedRedisClient(config),
+          now
+        })
+      : undefined;
 
     return {
       ...dependencies,
@@ -151,6 +188,11 @@ export function createBackendProductServices(
         inputSafety,
         featureFlags: dependencies.featureFlags
       }),
+      generationPrefill: createBackendGenerationPrefillService({
+        aiAdapters: dependencies.aiAdapters,
+        providerTransport,
+        aiPolicy: dependencies.aiPolicy
+      }),
       voiceRebuild,
       voiceConsent,
       voice: createBackendVoiceService(
@@ -179,7 +221,11 @@ export function createBackendProductServices(
       users,
       operators,
       billingCheckout,
-      billingWebhook
+      billingWebhook,
+      billingLifecycle,
+      billingGatewayStore: gatewayStore,
+      accountOps,
+      accountExport
     };
   }) as Effect.Effect<
     BackendProductServices,

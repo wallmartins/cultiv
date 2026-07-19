@@ -61,6 +61,13 @@ export function createBillingGatewayAdapters(
   return { stripe, asaas };
 }
 
+// N2 — intentId viaja na URL de retorno só como handle (não status); a tela de retorno
+// resolve a verdade via GET /me/billing/checkout-status/:intentId.
+function appendIntentIdParam(url: string, intentId: string): string {
+  const separator = url.includes("?") ? "&" : "?";
+  return `${url}${separator}intentId=${encodeURIComponent(intentId)}`;
+}
+
 export function createBillingCheckoutService(deps: {
   readonly billing: BillingServiceContract;
   readonly gatewayStore: PostgresBillingGatewayStore;
@@ -163,8 +170,8 @@ export function createBillingCheckoutService(deps: {
           externalCustomerId: Option.isSome(customerOption)
             ? customerOption.value.externalCustomerId
             : undefined,
-          successUrl: deps.config.billingCheckoutSuccessUrl,
-          cancelUrl: deps.config.billingCheckoutCancelUrl,
+          successUrl: appendIntentIdParam(deps.config.billingCheckoutSuccessUrl, intentId),
+          cancelUrl: appendIntentIdParam(deps.config.billingCheckoutCancelUrl, intentId),
           paymentMethod: input.paymentMethod
         });
 

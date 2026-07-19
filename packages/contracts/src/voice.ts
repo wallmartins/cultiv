@@ -131,7 +131,6 @@ export const VoiceProfileViewSchema = Schema.Struct({
   snapshotId: Schema.String,
   version: Schema.Number,
   confidence: VoiceProfileConfidenceSchema,
-  adaptationMode: VoiceAdaptationModeSchema,
   primaryLanguage: Schema.String,
   tone: Schema.String,
   cadence: Schema.String,
@@ -166,6 +165,12 @@ export const TextQualityVoiceProfileSchema = Schema.Struct({
 });
 export type TextQualityVoiceProfile = typeof TextQualityVoiceProfileSchema.Type;
 
+export const VoiceMaterialBaseSampleSchema = Schema.Struct({
+  q: Schema.String,
+  meta: Schema.String
+});
+export type VoiceMaterialBaseSample = typeof VoiceMaterialBaseSampleSchema.Type;
+
 export const VoiceMaterialBaseBreakdownSchema = Schema.Struct({
   totalExamples: Schema.Number,
   activeExamples: Schema.Number,
@@ -173,7 +178,8 @@ export const VoiceMaterialBaseBreakdownSchema = Schema.Struct({
   pinnedExamples: Schema.Number,
   byClassification: Schema.Record({ key: Schema.String, value: Schema.Number }),
   byContentType: Schema.Record({ key: Schema.String, value: Schema.Number }),
-  byLanguage: Schema.Record({ key: Schema.String, value: Schema.Number })
+  byLanguage: Schema.Record({ key: Schema.String, value: Schema.Number }),
+  samples: Schema.optional(Schema.Array(VoiceMaterialBaseSampleSchema))
 });
 export type VoiceMaterialBaseBreakdown = typeof VoiceMaterialBaseBreakdownSchema.Type;
 

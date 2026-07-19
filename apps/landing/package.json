@@ -4,8 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "node scripts/sync-brand.mjs && astro dev",
-    "build": "node scripts/sync-brand.mjs && astro build",
+    "dev": "node scripts/sync-brand.mjs && node scripts/sync-plans.mjs && astro dev",
+    "build": "node scripts/sync-brand.mjs && node scripts/sync-plans.mjs && astro build",
     "preview": "astro preview",
     "lint": "astro check"
   },

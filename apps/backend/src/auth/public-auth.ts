@@ -11,7 +11,7 @@ import {
   type BillingServiceContract
 } from "@my-ai-orchestrator/payments";
 import type { BackendConfig } from "../config/config.js";
-import { BackendAuthenticationError, BackendUserSuspendedError } from "../http/errors.js";
+import { BackendAuthenticationError, BackendUserDeletedError, BackendUserSuspendedError } from "../http/errors.js";
 import { dedupeStrings } from "../internal/utils.js";
 import { reloadBillingRepositoryForUserInto } from "../infra/durable-store.js";
 import type { DatabaseTables } from "../infra/postgres-tables.js";
@@ -28,7 +28,7 @@ export function resolveBackendPublicAuthenticatedActor(args: {
   readonly postgres?: Kysely<DatabaseTables>;
 }): Effect.Effect<
   BackendAuthenticatedActor,
-  BackendAuthenticationError | BackendUserSuspendedError | DatabaseError | BillingPlanNotFoundError | BillingEntitlementNotFoundError | BillingOperationConflictError,
+  BackendAuthenticationError | BackendUserSuspendedError | BackendUserDeletedError | DatabaseError | BillingPlanNotFoundError | BillingEntitlementNotFoundError | BillingOperationConflictError,
   ApplicationUserService
 > {
   return Effect.gen(function* () {
@@ -36,6 +36,19 @@ export function resolveBackendPublicAuthenticatedActor(args: {
 
     const users = yield* ApplicationUserService;
     const { user, provisioned } = yield* resolveOrProvisionApplicationUser(users, claims.sub);
+
+    // contract-08 decision 4 — checked before any billing side effect: a tombstoned row is never
+    // resurrected (resolveOrProvisionApplicationUser already found it via findByExternalSubject, so
+    // no create() ran) and must not touch billing/gateway infra for a deleted account.
+    if (user.status === "deleted") {
+      return yield* Effect.fail(
+        new BackendUserDeletedError({
+          userId: user.id,
+          externalSubject: user.externalSubject,
+          message: "User account has been deleted"
+        })
+      );
+    }
 
     if (args.postgres && args.billingRepository) {
       yield* reloadBillingRepositoryForUserInto(args.postgres, args.billingRepository, user.id);

@@ -360,7 +360,10 @@ async function upsertBillingSubscriptionRow(
         status: row.status,
         started_at: row.started_at,
         renewed_at: row.renewed_at,
-        expires_at: row.expires_at
+        expires_at: row.expires_at,
+        trial_ends_at: row.trial_ends_at,
+        renews_at: row.renews_at,
+        ever_subscribed: row.ever_subscribed
       })
     )
     .execute();

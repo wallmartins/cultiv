@@ -4,8 +4,25 @@ import { buildOrchestrationPlan, DEFAULT_ORCHESTRATION_CATALOG } from "@my-ai-or
 import { createBackendApp } from "../../apps/backend";
 import type { BackendConfig } from "../../apps/backend";
 import { createBackendProductServices } from "../../apps/backend";
-import { createBackendAppTestApp, seedExecutionVoiceState } from "./backend-app.fixtures.js";
+import { createBackendAppTestApp, registerLegacyFreeTierPlan, seedExecutionVoiceState } from "./backend-app.fixtures.js";
 import { createBackendTestAuthorizationHeader } from "../../apps/backend/src/auth/index.js";
+
+// ADR 0006 removed the "free" plan id; seed a subscription directly instead of relying on
+// config.billingPlanId's bootstrap auto-seed (which only knows about DEFAULT_BILLING_PLANS ids).
+function seedLegacyFreeTierSubscription(
+  services: Parameters<typeof registerLegacyFreeTierPlan>[0],
+  userId: string,
+  now: () => Date
+) {
+  registerLegacyFreeTierPlan(services);
+  services.billing.upsertSubscription({
+    id: `${userId}:free:subscription`,
+    userId,
+    planId: "free",
+    status: "active",
+    startedAt: now().toISOString()
+  });
+}
 
 function buildPlanRequest(overrides: Record<string, unknown> = {}) {
   return {
@@ -50,7 +67,7 @@ describe("backend usage policy", () => {
       host: "127.0.0.1",
       port: 3000,
       version: "0.1.0",
-      billingPlanId: "pro",
+      billingPlanId: "criador",
       billingUserId: "backend"
     };
     const asyncConfig: BackendConfig = {
@@ -71,7 +88,7 @@ describe("backend usage policy", () => {
         executionMode: "sync",
         qualityMode: "balanced",
         userId: "backend",
-        planId: "pro",
+        planId: "criador",
         model: "gpt-4.1",
         adapter: "openai"
       })
@@ -83,16 +100,16 @@ describe("backend usage policy", () => {
         executionMode: "async",
         qualityMode: "balanced",
         userId: "backend",
-        planId: "pro",
+        planId: "criador",
         model: "gpt-4.1",
         adapter: "openai"
       })
     );
 
     expect(syncAuthorization.executionMode).toBe("sync");
-    expect(syncAuthorization.planId).toBe("pro");
+    expect(syncAuthorization.planId).toBe("criador");
     expect(asyncAuthorization.executionMode).toBe("async");
-    expect(asyncAuthorization.planId).toBe("pro");
+    expect(asyncAuthorization.planId).toBe("criador");
   });
 
   it("enforces plan model entitlements and daily traffic limits", async () => {
@@ -110,6 +127,7 @@ describe("backend usage policy", () => {
       billingUserId: "backend"
     };
     const services = Effect.runSync(createBackendProductServices(config, { now }));
+    seedLegacyFreeTierSubscription(services, "backend", now);
     const request = buildPlanRequest();
     const plan = buildPlan(config, request);
 
@@ -189,10 +207,11 @@ describe("backend usage policy", () => {
     };
     const proConfig: BackendConfig = {
       ...freeConfig,
-      billingPlanId: "pro"
+      billingPlanId: "criador"
     };
 
     const freeServices = Effect.runSync(createBackendProductServices(freeConfig, { now }));
+    seedLegacyFreeTierSubscription(freeServices, "backend", now);
     const proServices = Effect.runSync(createBackendProductServices(proConfig, { now }));
     const request = buildPlanRequest();
     const freePlan = buildPlan(freeConfig, request);
@@ -220,7 +239,7 @@ describe("backend usage policy", () => {
         executionMode: "sync",
         qualityMode: "balanced",
         userId: "backend",
-        planId: "pro",
+        planId: "criador",
         model: "gpt-4.1",
         adapter: "openai"
       })
@@ -250,6 +269,7 @@ describe("backend usage policy", () => {
       billingUserId: "backend"
     };
     const services = Effect.runSync(createBackendProductServices(config, { now }));
+    seedLegacyFreeTierSubscription(services, "backend", now);
     seedExecutionVoiceState(services, "backend");
     const app = createBackendAppTestApp(
       createBackendApp(config, {

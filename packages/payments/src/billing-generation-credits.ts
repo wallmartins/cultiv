@@ -129,6 +129,12 @@ export function captureReservedCredits(ctx: BillingGenerationCreditsContext) {
           return yield* Effect.fail(new BillingReservationNotFoundError({ reservationId: request.reservationId }));
         }
 
+        // N3 (cancel-in-flight): a reservation already released by a cancel must not be re-captured
+        // by a late worker completion — no-op instead of corrupting the ledger with a second entry.
+        if (reservation.status !== "reserved") {
+          return reservation;
+        }
+
         const next: BillingGenerationReservation = {
           ...reservation,
           status: "captured",
@@ -186,6 +192,11 @@ export function releaseReservedCredits(ctx: BillingGenerationCreditsContext) {
         const reservation = ctx.repository.reservations.get(request.reservationId);
         if (!reservation) {
           return yield* Effect.fail(new BillingReservationNotFoundError({ reservationId: request.reservationId }));
+        }
+
+        // guards a double cancel (or cancel racing a completed capture) from releasing twice.
+        if (reservation.status !== "reserved") {
+          return reservation;
         }
 
         const next: BillingGenerationReservation = {

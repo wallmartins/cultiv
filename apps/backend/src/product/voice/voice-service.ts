@@ -9,7 +9,8 @@ import type { BackendObservabilityService } from "../core/observability-types.js
 import type { BackendVoiceConsentService } from "../../safety/voice-consent-types.js";
 import { resolveEffectiveVoice as resolveEffectiveVoiceResolution } from "./voice-effective-resolution.js";
 import { recordTraitConfirmation } from "./trait-confirmation.js";
-import { toVoiceProfileScreenView } from "./voice-mappers.js";
+import { toMaterialBaseSamples, toVoiceProfileScreenView } from "./voice-mappers.js";
+import { selectMaterialBaseSampleExamples } from "./voice-rebuild-derivation.js";
 
 export function createBackendVoiceService(
   database: DatabaseClient,
@@ -42,6 +43,10 @@ export function createBackendVoiceService(
           return undefined;
         }
 
+        // Read-time only (GAP #13) — the decrypting `database` client already injected here
+        // reads the author's own stored examples; nothing is re-inferred or persisted back.
+        const examples = yield* database.voiceExamples.listByUser(userId);
+
         return toVoiceProfileScreenView(
           {
             ...profile,
@@ -53,7 +58,8 @@ export function createBackendVoiceService(
               options?.featureFlags?.isEnabled("voice.reasoningSignatureV1", {
                 userId,
                 environment: options?.config?.environment
-              }) ?? false
+              }) ?? false,
+            samples: toMaterialBaseSamples(selectMaterialBaseSampleExamples(examples))
           }
         );
       });

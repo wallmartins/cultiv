@@ -42,17 +42,13 @@ export function createBillingWebhookService(deps: {
 
       const event = yield* adapter.parseWebhook(payload, signature);
       const resolvedEvent = yield* resolveWebhookEvent(deps.gatewayStore, event);
-      const isNew = yield* deps.gatewayStore.recordGatewayEvent({
-        eventId: resolvedEvent.eventId,
-        gateway: resolvedEvent.gateway,
-        eventType: resolvedEvent.type,
-        processedAt: deps.now().toISOString(),
-        payloadHash: hashPayload(payload)
-      });
-      if (!isNew) {
-        return;
-      }
 
+      // dedup só é gravado DEPOIS que o dispatch + os side-effects terminam com sucesso —
+      // se recordGatewayEvent rodasse antes e o dispatch falhasse, o retry do gateway bateria
+      // em isNew=false e desistiria, perdendo o evento pra sempre mesmo o cliente tendo pago.
+      // Toda operação abaixo é idempotente (idempotencyKey no startCycle, upsert no
+      // patchSubscriptionStatus/completeCheckoutIntent/upsertGateway*), então reprocessar um
+      // retry legítimo do mesmo evento é seguro.
       yield* dispatchGatewayWebhookEvent(deps.billing, resolvedEvent, {
         now: deps.now,
         idempotencyNamespace: deps.config.serviceName
@@ -75,23 +71,51 @@ export function createBillingWebhookService(deps: {
       }
 
       if (resolvedEvent.externalSubscriptionId) {
-        const planId =
-          resolvedEvent.internalRef ?? deps.billing.getPrimarySubscriptionPlanId(resolvedEvent.userId) ?? "pro";
-        yield* deps.gatewayStore.upsertGatewaySubscription({
-          subscriptionId: createSubscriptionId(resolvedEvent.userId, planId),
-          gateway: resolvedEvent.gateway,
-          externalSubscriptionId: resolvedEvent.externalSubscriptionId,
-          status: resolvedEvent.type === "subscription.cancelled" ? "canceled" : "active",
-          currency: resolvedEvent.currency,
-          updatedAt: deps.now().toISOString()
-        });
+        // sem fallback a um plano-default aqui — se não dá pra resolver, não adivinha; dispatch
+        // (acima) já resolveu/validou o mesmo planId p/ eventos de assinatura, então isto só
+        // fica indefinido em casos que dispatch já teria rejeitado antes de chegar aqui.
+        const planId = resolvedEvent.internalRef ?? deps.billing.getPrimarySubscriptionPlanId(resolvedEvent.userId);
+        if (planId) {
+          yield* deps.gatewayStore.upsertGatewaySubscription({
+            subscriptionId: createSubscriptionId(resolvedEvent.userId, planId),
+            gateway: resolvedEvent.gateway,
+            externalSubscriptionId: resolvedEvent.externalSubscriptionId,
+            status: resolveGatewaySubscriptionStatus(resolvedEvent.type),
+            currency: resolvedEvent.currency,
+            updatedAt: deps.now().toISOString(),
+            ...(resolvedEvent.paymentMethodKind ? { paymentMethodKind: resolvedEvent.paymentMethodKind } : {}),
+            ...(resolvedEvent.outstandingInvoiceUrl
+              ? { outstandingInvoiceUrl: resolvedEvent.outstandingInvoiceUrl }
+              : {})
+          });
+        }
       }
+
+      yield* deps.gatewayStore.recordGatewayEvent({
+        eventId: resolvedEvent.eventId,
+        gateway: resolvedEvent.gateway,
+        eventType: resolvedEvent.type,
+        processedAt: deps.now().toISOString(),
+        payloadHash: hashPayload(payload)
+      });
     });
 
   return {
     handleStripeWebhook: (rawBody, signature) => handleWebhook(deps.stripeAdapter, rawBody, signature),
     handleAsaasWebhook: (rawBody, token) => handleWebhook(deps.asaasAdapter, rawBody, token)
   };
+}
+
+function resolveGatewaySubscriptionStatus(type: GatewayWebhookEvent["type"]): string {
+  switch (type) {
+    case "subscription.cancelled":
+      return "canceled";
+    case "payment.failed":
+    case "chargeback":
+      return "past_due";
+    default:
+      return "active";
+  }
 }
 
 function hashPayload(payload: unknown): string {
