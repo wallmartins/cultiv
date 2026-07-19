@@ -1,10 +1,8 @@
 ---
 import "../styles/global.css";
 import T from "../components/T.astro";
-import { APP_ORIGIN } from "../config";
 import { SITE } from "../data/site";
 
-const preconnectApp = Astro.site && new URL(Astro.site).origin !== APP_ORIGIN;
 const canonical = new URL(Astro.url.pathname, Astro.site).href;
 const meta = { pt: SITE.pt, en: SITE.en };
 
@@ -43,7 +41,6 @@ const { title = meta.pt.title } = Astro.props;
     <link rel="manifest" href="/site.webmanifest" />
     <meta name="theme-color" media="(prefers-color-scheme: light)" content="#FCFCFC" />
     <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#121212" />
-    {preconnectApp && <link rel="preconnect" href={APP_ORIGIN} />}
     <script is:inline define:vars={{ meta }}>
       (function () {
         var d = document.documentElement;

@@ -6,7 +6,7 @@ import { creditsAsTexts, queryKeys, useCheckout, useCheckoutStatus, useEntitleme
 import { CheckoutOverlay, PlansScreen, type CheckoutPhase, type CheckoutProductKind } from "@my-ai-orchestrator/ui/app/plans";
 import { DowngradeSurplus } from "@my-ai-orchestrator/ui/app/states";
 import { resolvePlanName } from "./billing-view.js";
-import { rememberPendingCheckout } from "./pending-checkout.js";
+import { rememberPendingCheckout } from "./pending-checkout-storage.js";
 import {
   checkDowngradeSurplus,
   deriveCheckoutKind,

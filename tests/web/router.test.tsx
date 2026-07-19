@@ -3,11 +3,12 @@
  */
 import { createMemoryHistory, RouterProvider } from "@tanstack/react-router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, waitFor } from "@testing-library/react";
+import { waitFor } from "@testing-library/react";
+import { renderAndSettle } from "./render-with-router.js";
 import React from "react";
 import { describe, expect, it } from "vitest";
 import { makeAppRuntime, queryKeys, RuntimeProvider } from "@my-ai-orchestrator/shared";
-import { captureReturnTo, router } from "~/router.js";
+import { captureReturnTo, router, type AppAuth } from "~/router.js";
 import {
   consentGranted,
   emptyExecutionsPage,
@@ -32,7 +33,7 @@ function mountAt(initialPath: string, onboardingDone: boolean) {
 
   router.update({
     history: createMemoryHistory({ initialEntries: [initialPath] }),
-    context: { queryClient, auth: mockAuth, runtime }
+    context: { queryClient, auth: mockAuth, loadRuntime: async () => runtime }
   });
 
   return { queryClient, runtime };
@@ -54,11 +55,11 @@ describe("app router bootstrap", () => {
 
     router.update({
       history: createMemoryHistory({ initialEntries: ["/app/generate"] }),
-      context: { queryClient, auth: mockAuth, runtime }
+      context: { queryClient, auth: mockAuth, loadRuntime: async () => runtime }
     });
     await router.load();
 
-    const { container } = render(
+    const { container } = await renderAndSettle(
       <QueryClientProvider client={queryClient}>
         <RuntimeProvider runtime={runtime}>
           <RouterProvider router={router} />
@@ -82,7 +83,7 @@ describe("landing entry flow", () => {
     captureReturnTo("/plans?plan=criador&period=annual");
     await router.load();
 
-    render(
+    await renderAndSettle(
       <QueryClientProvider client={queryClient}>
         <RuntimeProvider runtime={runtime}>
           <RouterProvider router={router} />
@@ -99,7 +100,7 @@ describe("landing entry flow", () => {
     captureReturnTo(undefined);
     await router.load();
 
-    render(
+    await renderAndSettle(
       <QueryClientProvider client={queryClient}>
         <RuntimeProvider runtime={runtime}>
           <RouterProvider router={router} />
@@ -110,13 +111,45 @@ describe("landing entry flow", () => {
     await waitFor(() => expect(router.state.location.pathname).toBe("/generate"));
   });
 
+  // O que torna seguro adiar o runtime (runtime-loader.ts): visitante sem sessão é redirecionado
+  // pro Auth0 sem nunca tocar em Effect/client-sdk. Se alguém acoplar o runtime a esse caminho,
+  // o carregamento inicial volta a pagar ~59 kB gzip — e este teste quebra antes disso.
+  it.each(["/app/calibrate", "/app/plans"])(
+    "redirects %s to Auth0 without ever loading the runtime",
+    async (path) => {
+      const queryClient = new QueryClient({ defaultOptions: { queries: { staleTime: Infinity, retry: false } } });
+      let logins = 0;
+      const anonymous: AppAuth = {
+        ...mockAuth,
+        isAuthenticated: false,
+        loginWithRedirect: async () => {
+          logins += 1;
+        }
+      };
+
+      router.update({
+        history: createMemoryHistory({ initialEntries: [path] }),
+        context: {
+          queryClient,
+          auth: anonymous,
+          loadRuntime: () => {
+            throw new Error("runtime carregado antes do login");
+          }
+        }
+      });
+      await router.load();
+
+      expect(logins).toBeGreaterThan(0);
+    }
+  );
+
   it("lets an uncalibrated author reach /plans, but still gates every other route", async () => {
     const { queryClient, runtime } = mountAt("/app/plans", false);
     await router.load();
     expect(router.state.location.pathname).toBe("/plans");
 
     // O container lê appMode do contexto do shell — num modo que antes nunca chegava aqui.
-    const { container } = render(
+    const { container } = await renderAndSettle(
       <QueryClientProvider client={queryClient}>
         <RuntimeProvider runtime={runtime}>
           <RouterProvider router={router} />

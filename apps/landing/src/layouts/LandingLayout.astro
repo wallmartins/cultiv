@@ -3,7 +3,6 @@ import "@my-ai-orchestrator/ui/styles.css";
 import "../styles/root.css";
 import T from "../components/T.astro";
 import { SITE } from "../data/site";
-import { APP_ORIGIN } from "../config";
 
 interface Props {
   title: string;
@@ -13,7 +12,6 @@ interface Props {
 const { title, description, jsonLd } = Astro.props;
 
 const canonical = new URL(Astro.url.pathname, Astro.site).href;
-const preconnectApp = Astro.site && new URL(Astro.site).origin !== APP_ORIGIN;
 const meta = {
   pt: { title: SITE.pt.title, description: SITE.pt.description },
   en: { title: SITE.en.title, description: SITE.en.description },
@@ -43,7 +41,6 @@ const meta = {
     <meta property="og:image:alt" content={title} />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:image" content={new URL("/og-image.png", Astro.site).href} />
-    {preconnectApp && <link rel="preconnect" href={APP_ORIGIN} />}
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="icon" href="/favicon.ico" sizes="48x48" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />

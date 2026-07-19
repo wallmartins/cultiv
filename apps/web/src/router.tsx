@@ -1,27 +1,38 @@
-import { useEffect } from "react";
+import { Suspense, lazy, useEffect, useState } from "react";
 import {
   Outlet,
   createRootRouteWithContext,
   createRoute,
   createRouter,
+  lazyRouteComponent,
   redirect,
   useNavigate
 } from "@tanstack/react-router";
 import type { QueryClient } from "@tanstack/react-query";
-import { Effect } from "effect";
-import { ClientSdkService, type ClientSdk, type ClientSdkError } from "@my-ai-orchestrator/client-sdk";
+import type { Effect } from "effect";
+import type { ClientSdk, ClientSdkError } from "@my-ai-orchestrator/client-sdk";
 import type { LogoutOptions, RedirectLoginOptions, User as Auth0User } from "@auth0/auth0-react";
-import { deriveAppMode, queryKeys, useUnreadStore, type AppMode, type AppRuntime } from "@my-ai-orchestrator/shared";
+// "/light" e não o barrel: o barrel reexporta makeAppRuntime (ManagedRuntime) e traria
+// Effect + client-sdk pro chunk inicial. Ver packages/shared/src/light.ts.
+import { deriveAppMode, queryKeys, useUnreadStore, type AppMode, type AppRuntime } from "@my-ai-orchestrator/shared/light";
 import { queryClient } from "./query-client.js";
-import { WorkspaceShellContainer } from "./shell/WorkspaceShellContainer.js";
-import { GenerateContainer } from "./routes/generate.js";
-import { ExecutionDetailContainer } from "./routes/g.$id.js";
-import { PlansRoute as PlansContainer } from "./routes/plans.js";
-import { BillingRoute as BillingContainer } from "./routes/billing.js";
-import { VoiceContainer } from "./routes/voice.js";
-import { SettingsContainer } from "./routes/settings.js";
-import { CalibrateContainer } from "./routes/calibrate.js";
-import { PendingCheckoutWatcher } from "./routes/pending-checkout.js";
+import { readPendingCheckout } from "./routes/pending-checkout-storage.js";
+
+// Cada superfície vira um chunk próprio: o primeiro carregamento (que muitas vezes só redireciona
+// pro Auth0) não paga por telas que o autor ainda não abriu. As rotas continuam declaradas aqui,
+// só o componente é que desce sob demanda.
+const WorkspaceShellContainer = lazyRouteComponent(
+  () => import("./shell/WorkspaceShellContainer.js"),
+  "WorkspaceShellContainer"
+);
+const GenerateContainer = lazyRouteComponent(() => import("./routes/generate.js"), "GenerateContainer");
+const ExecutionDetailContainer = lazyRouteComponent(() => import("./routes/g.$id.js"), "ExecutionDetailContainer");
+const PlansContainer = lazyRouteComponent(() => import("./routes/plans.js"), "PlansRoute");
+const BillingContainer = lazyRouteComponent(() => import("./routes/billing.js"), "BillingRoute");
+const VoiceContainer = lazyRouteComponent(() => import("./routes/voice.js"), "VoiceContainer");
+const SettingsContainer = lazyRouteComponent(() => import("./routes/settings.js"), "SettingsContainer");
+const CalibrateContainer = lazyRouteComponent(() => import("./routes/calibrate.js"), "CalibrateContainer");
+const PendingCheckoutWatcher = lazy(() => import("./routes/pending-checkout.js"));
 
 export interface AppAuth {
   readonly isLoading: boolean;
@@ -35,13 +46,26 @@ export interface AppAuth {
 export interface RouterContext {
   readonly queryClient: QueryClient;
   readonly auth: AppAuth;
-  readonly runtime: AppRuntime;
+  // Função, não valor: o runtime carrega sob demanda (runtime-loader.ts), então quem precisa dele
+  // aguarda aqui em vez de forçá-lo para dentro do chunk inicial.
+  readonly loadRuntime: () => Promise<AppRuntime>;
 }
 
 // packages/shared's hooks reach the SDK through useRun() (a hook), which beforeLoad/loader can't
 // call — this mirrors hooks/with-sdk.ts's withSdk() + useRun()'s runtime.runPromise() inline.
-function runSdk<A>(runtime: AppRuntime, f: (sdk: ClientSdk) => Effect.Effect<A, ClientSdkError>): Promise<A> {
-  return runtime.runPromise(Effect.flatMap(ClientSdkService, f));
+// Effect e o client-sdk entram por import dinâmico: já estão em memória quando o runtime existe,
+// e ficam fora do carregamento inicial de quem só vai ser redirecionado pro login.
+async function runSdk<A>(
+  runtime: AppRuntime,
+  f: (sdk: ClientSdk) => Effect.Effect<A, ClientSdkError>
+): Promise<A> {
+  // "effect/Effect", não "effect": o barrel raiz reexporta 179 módulos e um import dinâmico dele
+  // desliga o tree-shaking (o chunk vai de ~190 kB para ~926 kB — medido).
+  const [E, { ClientSdkService }] = await Promise.all([
+    import("effect/Effect"),
+    import("@my-ai-orchestrator/client-sdk")
+  ]);
+  return runtime.runPromise(E.flatMap(ClientSdkService, f));
 }
 
 // Seeds the same query keys useOnboarding/useConsentStatus/useVoiceProfile read, so the shell's
@@ -66,13 +90,28 @@ async function resolveAppMode(qc: QueryClient, runtime: AppRuntime): Promise<App
 }
 
 const rootRoute = createRootRouteWithContext<RouterContext>()({
-  component: () => (
+  component: RootLayout
+});
+
+function RootLayout() {
+  // Ler o handle é síncrono e sem dependências; o watcher em si (SDK + overlay) só desce quando
+  // existe mesmo um checkout aguardando confirmação — o caso raro. Exige sessão: os hooks dele
+  // leem o runtime, que só existe depois do login.
+  const { auth } = rootRoute.useRouteContext();
+  const [hasPendingCheckout] = useState(() => Boolean(readPendingCheckout()));
+  const watchCheckout = hasPendingCheckout && auth.isAuthenticated;
+
+  return (
     <>
       <Outlet />
-      <PendingCheckoutWatcher />
+      {watchCheckout ? (
+        <Suspense fallback={null}>
+          <PendingCheckoutWatcher />
+        </Suspense>
+      ) : null}
     </>
-  )
-});
+  );
+}
 
 // Auth0 devolve o appState só pro onRedirectCallback (main.tsx), que roda fora da árvore do
 // router — este handoff leva o destino original até a rota /callback.
@@ -126,13 +165,13 @@ const shellRoute = createRoute({
   getParentRoute: () => rootRoute,
   id: "_shell",
   beforeLoad: async ({ context, location }) => {
-    const { auth, queryClient: qc, runtime } = context;
+    const { auth, queryClient: qc } = context;
     if (!auth.isAuthenticated) {
       await auth.loginWithRedirect({ appState: { returnTo: location.href } });
       return { appMode: "locked" as const }; // unreachable — loginWithRedirect navigates away
     }
 
-    const appMode = await resolveAppMode(qc, runtime);
+    const appMode = await resolveAppMode(qc, await context.loadRuntime());
     // Quem chega decidido pela landing (card de plano) assina antes de calibrar — só /plans
     // escapa do gate; toda outra rota continua atrás dele.
     if (appMode === "calibrate" && !location.pathname.endsWith("/plans")) {
@@ -173,9 +212,10 @@ const executionDetailRoute = createRoute({
   // (e.g. the voice alignment band) leaks across generations.
   remountDeps: ({ params }) => params.executionId,
   loader: async ({ context, params }) => {
+    const runtime = await context.loadRuntime();
     const execution = await context.queryClient.ensureQueryData({
       queryKey: queryKeys.execution(params.executionId),
-      queryFn: () => runSdk(context.runtime, (sdk) => sdk.executions.get({ executionId: params.executionId }))
+      queryFn: () => runSdk(runtime, (sdk) => sdk.executions.get({ executionId: params.executionId }))
     });
     useUnreadStore.getState().markRead(params.executionId);
     return execution;
@@ -229,9 +269,12 @@ export const router = createRouter({
   context: {
     queryClient,
     auth: undefined!,
-    runtime: undefined!
+    loadRuntime: undefined!
   },
-  defaultPreload: "intent"
+  defaultPreload: "intent",
+  // Com as superfícies em chunks separados, uma navegação pode esperar um download. O padrão de
+  // defaultPendingMs (1s) segura este aviso: carregamento rápido não pisca nada na tela.
+  defaultPendingComponent: () => <p className="route-pending">Carregando…</p>
 });
 
 declare module "@tanstack/react-router" {
