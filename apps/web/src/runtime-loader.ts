@@ -10,7 +10,18 @@ let pending: Promise<AppRuntime> | undefined;
 
 export function loadRuntime(getToken: () => Promise<string>): Promise<AppRuntime> {
   pending ??= import("@my-ai-orchestrator/shared").then((shared) =>
-    shared.makeAppRuntime({ baseUrl: import.meta.env.VITE_API_URL, getToken })
+    shared.makeAppRuntime({ baseUrl: resolveBaseUrl(), getToken })
   );
   return pending;
+}
+
+// Vite inlina `undefined` quando a var não existe no build, e o erro só aparece muito depois, como
+// "URL constructor: /me/... is not a valid URL" dentro de um fiber. ImportMetaEnv tem index
+// signature `any`, então o tsc não pega o nome errado — a checagem precisa ser em runtime.
+function resolveBaseUrl(): string {
+  const baseUrl = import.meta.env.VITE_API_BASE_URL;
+  if (!baseUrl) {
+    throw new Error("VITE_API_BASE_URL ausente no build do app — nenhuma chamada ao backend funciona sem ela.");
+  }
+  return baseUrl;
 }
