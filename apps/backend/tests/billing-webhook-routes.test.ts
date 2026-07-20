@@ -158,7 +158,7 @@ describe("POST /webhooks/stripe", () => {
 
     expect(first.status).toBe(200);
     expect(second.status).toBe(200);
-    expect(entitlementFor(billing, "user_test_1", "criador")?.wallet.availableCredits).toBe(75);
+    expect(entitlementFor(billing, "user_test_1", "criador")?.wallet.availableCredits).toBe(300);
   });
 });
 
@@ -212,7 +212,7 @@ describe("POST /webhooks/asaas", () => {
 
     expect(first.status).toBe(200);
     expect(second.status).toBe(200);
-    expect(entitlementFor(billing, "user_test_1", "criador")?.wallet.availableCredits).toBe(75);
+    expect(entitlementFor(billing, "user_test_1", "criador")?.wallet.availableCredits).toBe(300);
   });
 });
 
@@ -312,6 +312,6 @@ describe("webhook dedup ordering", () => {
     expect(second.status).toBe(200);
     expect(gatewayStore.recordedEventIds.has("evt_test_checkout_completed")).toBe(true);
     // dispatch is idempotent (activeCycleId already set) — the retry must not double-grant credits.
-    expect(entitlementFor(services.billing, "user_test_1", "criador")?.wallet.availableCredits).toBe(75);
+    expect(entitlementFor(services.billing, "user_test_1", "criador")?.wallet.availableCredits).toBe(300);
   });
 });

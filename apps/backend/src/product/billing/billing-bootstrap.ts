@@ -59,12 +59,13 @@ export function registerBackendBillingPlans(
   return Effect.gen(function* () {
     const plans = billing.listPlans().length > 0 ? billing.listPlans() : DEFAULT_BILLING_PLANS;
     for (const plan of plans) {
+      // `backend-*` são os pseudo-modelos do caminho do produto (resolveUsagePolicyModel
+      // devolve `backend-${qualityMode}` quando a request não pede modelo explícito); sem
+      // eles o gate de usage barraria toda geração. Modelos reais vêm do plano.
       const allowedModels = new Set(plan.allowedModels ?? []);
       allowedModels.add("backend-fast");
       allowedModels.add("backend-balanced");
       allowedModels.add("backend-strict");
-      allowedModels.add("gpt-4.1");
-      allowedModels.add("gpt-4o-mini");
 
       yield* billing.registerPlan({
         ...plan,

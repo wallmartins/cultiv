@@ -160,6 +160,9 @@ export function GenerateContainer() {
         intent: prefill.intent,
         scope: channel ? { ...(prefill.scope ?? defaultScope(prefill.intent)), channel } : prefill.scope,
         briefing,
+        // quoteId hashes the quality mode it was priced under, so the mode has to travel with
+        // it — otherwise the backend re-defaults (config QUALITY_MODE) and rejects as quote_stale.
+        qualityMode: previewQuery.data?.pricingSnapshot.qualityMode,
         quoteId: previewQuery.data?.pricingSnapshot.quoteId,
         previewRecommendation: previewQuery.data?.recommendation
       },

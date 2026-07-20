@@ -13,11 +13,14 @@ import type {
 import { resolveCompositorPricingKeys } from "../ai-policy/ai-policy-resolution.js";
 import { resolveStoredUserPlanTier } from "./resolve-user-billing.js";
 
+// O quote protege o preço mostrado ao usuário, então o seed carrega só o que move preço.
+// qualityMode ficou de fora a partir da policy 2026-07-20: o preço passou a ser por tamanho
+// e o modo é decidido pelo sistema (ADR 0009), não pelo cliente — mantê-lo no hash fazia o
+// quote recusar requisições que seriam cobradas exatamente igual.
 interface GenerationQuoteSeed {
   readonly policyVersion: string;
   readonly planTier: BillingPlanTier;
   readonly contentType: string;
-  readonly qualityMode: string;
   readonly creditPrice: number;
   readonly planSignature?: string;
   readonly lengthTier?: string;
@@ -29,7 +32,6 @@ export function toGenerationPricingSnapshot(pricingEnvelope: ResolvedPricingEnve
       policyVersion: pricingEnvelope.policyVersion,
       planTier: pricingEnvelope.planTier,
       contentType: pricingEnvelope.contentType,
-      qualityMode: pricingEnvelope.qualityMode,
       creditPrice: pricingEnvelope.creditPrice,
       planSignature: pricingEnvelope.planSignature,
       lengthTier: pricingEnvelope.lengthTier
@@ -98,7 +100,6 @@ function createGenerationQuoteId(seed: GenerationQuoteSeed): string {
     seed.policyVersion,
     seed.planTier,
     seed.contentType,
-    seed.qualityMode,
     seed.creditPrice,
     seed.planSignature ?? null,
     seed.lengthTier ?? null

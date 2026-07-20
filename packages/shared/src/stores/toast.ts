@@ -7,6 +7,9 @@ export interface ToastItem {
   readonly kind: ToastKind;
   readonly topic?: string;
   readonly message?: string;
+  // Only completion toasts point at a real execution; id alone is not a route param
+  // (export-*/calibrate-*/dispatch-error ids would resolve to /g/<id> and 404).
+  readonly executionId?: string;
 }
 
 interface ToastState {

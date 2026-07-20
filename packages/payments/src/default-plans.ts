@@ -21,6 +21,14 @@ interface PlanMetadata {
 
 // tier + features (quality-mode/refino) + allowedModels são fatos de backend; ficam aqui, indexados por id.
 // trial reusa a tier "pro" (acesso full, ADR 0006 §2) — id + status="trialing" marcam o trial.
+
+// Modelos que a policy ativa realmente roteia, com o Groq llama-3.3-70b como teto. Uniforme
+// entre planos de propósito: por ADR 0009 o plano gate o *refino* (quality mode), não o modelo —
+// todos os tiers roteiam pelos mesmos perfis. Este campo só é consultado quando um cliente de
+// API pede um `model` explícito (usage-policy.ts); o caminho do produto passa por
+// `backend-${qualityMode}`, injetado em billing-bootstrap.
+const ROUTED_MODELS = ["gemini-3.1-flash-lite", "gemini-2.5-flash", "llama-3.3-70b-versatile"] as const;
+
 const PLAN_METADATA: Record<string, PlanMetadata> = {
   trial: {
     tier: "pro",
@@ -28,7 +36,7 @@ const PLAN_METADATA: Record<string, PlanMetadata> = {
       { key: "execution.sync_mode", enabled: true },
       { key: "content.language.refinement", enabled: true }
     ],
-    allowedModels: ["gpt-4o-mini", "gpt-4.1", "claude-3-5-sonnet"]
+    allowedModels: ROUTED_MODELS
   },
   explorador: {
     tier: "starter",
@@ -36,7 +44,7 @@ const PLAN_METADATA: Record<string, PlanMetadata> = {
       { key: "execution.sync_mode", enabled: true },
       { key: "content.language.refinement", enabled: false }
     ],
-    allowedModels: ["gpt-4o-mini"]
+    allowedModels: ROUTED_MODELS
   },
   criador: {
     tier: "pro",
@@ -44,7 +52,7 @@ const PLAN_METADATA: Record<string, PlanMetadata> = {
       { key: "execution.sync_mode", enabled: true },
       { key: "content.language.refinement", enabled: true }
     ],
-    allowedModels: ["gpt-4o-mini", "gpt-4.1"]
+    allowedModels: ROUTED_MODELS
   },
   profissional: {
     tier: "pro",
@@ -53,7 +61,7 @@ const PLAN_METADATA: Record<string, PlanMetadata> = {
       { key: "content.language.refinement", enabled: true },
       { key: "rollout.beta.access", enabled: true }
     ],
-    allowedModels: ["gpt-4o-mini", "gpt-4.1", "claude-3-5-sonnet"]
+    allowedModels: ROUTED_MODELS
   }
 };
 

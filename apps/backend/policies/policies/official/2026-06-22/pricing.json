@@ -1,6 +1,6 @@
 {
   "policyVersion": "2026-06-22",
-  "lifecycle": "active",
+  "lifecycle": "legacy-supported",
   "canonicalCreditCost": 2.5,
   "pricesByPlan": {
     "short-piece": {

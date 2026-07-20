@@ -27,10 +27,13 @@ export interface BuildCalibrationReportOptions {
   readonly planGrants?: CalibrationPlanGrants;
 }
 
+// Espelha catalog-pricing.json (monthlyCredits = ceil(monthlyGenerations × 2.5); receita =
+// priceCents.USD). O plano free saiu na ADR 0006 — entram trial e a escada real.
 const DEFAULT_PLAN_GRANTS: CalibrationPlanGrants = {
-  free: { monthlyCredits: 20, revenueUsdMonthly: 0 },
-  criador: { monthlyCredits: 63, revenueUsdMonthly: 24 },
-  pro: { monthlyCredits: 150, revenueUsdMonthly: 59 }
+  trial: { monthlyCredits: 20, revenueUsdMonthly: 0 },
+  explorador: { monthlyCredits: 100, revenueUsdMonthly: 9 },
+  criador: { monthlyCredits: 300, revenueUsdMonthly: 19 },
+  profissional: { monthlyCredits: 1000, revenueUsdMonthly: 49 }
 };
 
 export function buildCalibrationReport(options: BuildCalibrationReportOptions): CalibrationReport {

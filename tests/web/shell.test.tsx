@@ -116,7 +116,7 @@ describe("ambient toast (S10b — system kit)", () => {
     queryClient.setQueryData(queryKeys.execution("exec-9"), executionFixture({ jobId: "exec-9", briefingTopic: "tema do toast" }));
 
     await mountShell(queryClient, runtime);
-    useToastStore.getState().push({ id: "exec-9", kind: "success", topic: "tema do toast" });
+    useToastStore.getState().push({ id: "exec-9", executionId: "exec-9", kind: "success", topic: "tema do toast" });
 
     const toast = await screen.findByText('"tema do toast" ficou pronto');
     fireEvent.click(toast);
@@ -137,6 +137,32 @@ describe("ambient toast (S10b — system kit)", () => {
     useToastStore.getState().push({ id: "exec-8", kind: "error", topic: "tema que falhou" });
 
     expect(await screen.findByText('"tema que falhou" não deu certo')).toBeInTheDocument();
+  });
+
+  // Regression: toast ids that are not execution ids (dispatch-error, export-*, calibrate-*) used
+  // to be routed to /g/<id> anyway, landing the user on a resource_not_found screen.
+  it("a toast without an execution is inert — no navigation, no open affordance", async () => {
+    const { queryClient, runtime } = renderShell("/app/generate");
+    queryClient.setQueryData(queryKeys.onboarding(), onboardingCompleted);
+    queryClient.setQueryData(queryKeys.voiceConsent(), consentGranted);
+    queryClient.setQueryData(queryKeys.voiceProfile(), voiceProfileFixture);
+    queryClient.setQueryData(queryKeys.executionsList({ q: undefined, status: "all", period: "all" }), emptyExecutionsPage);
+    queryClient.setQueryData(queryKeys.entitlement(), entitlementFixture);
+
+    await mountShell(queryClient, runtime);
+    useToastStore.getState().push({
+      id: "dispatch-error",
+      kind: "error",
+      topic: "tema do dispatch",
+      message: "créditos não cobrados — tente de novo"
+    });
+
+    const toast = await screen.findByText(/"tema do dispatch" não deu certo/);
+    expect(screen.queryByText("abrir →")).not.toBeInTheDocument();
+
+    fireEvent.click(toast);
+
+    expect(screen.queryByRole("heading", { level: 1, name: "tema do dispatch" })).not.toBeInTheDocument();
   });
 });
 

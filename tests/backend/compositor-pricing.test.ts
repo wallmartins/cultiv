@@ -38,8 +38,9 @@ describe("compositor pricing", () => {
       })
     );
 
-    expect(medium.creditPrice).toBe(3.8);
-    expect(long.creditPrice).toBe(4.8);
+    // policy 2026-07-20: preço por tamanho — edition-piece medium = 2 textos, long = 3
+    expect(medium.creditPrice).toBe(5);
+    expect(long.creditPrice).toBe(7.5);
     expect(medium.planSignature).toBe("edition-piece");
     expect(medium.lengthTier).toBe("medium");
   });

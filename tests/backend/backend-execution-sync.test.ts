@@ -48,7 +48,7 @@ describe("backend execution service sync", () => {
             keyPoints: ["packages first", "backend second"]
           }
         },
-        model: "gpt-4.1",
+        model: "gemini-3.1-flash-lite",
         adapter: "openai",
         idempotencyKey: "idem-billing-run",
         includeTrace: false
@@ -61,7 +61,7 @@ describe("backend execution service sync", () => {
 
     const ledger = services.billing.listLedger("backend", "criador");
     expect(ledger.map((entry) => entry.entryType)).toEqual(["grant_cycle", "reserve", "capture"]);
-    expect(services.billing.getWallet("backend", "criador")?.availableCredits).toBe(72.5);
+    expect(services.billing.getWallet("backend", "criador")?.availableCredits).toBe(297.5);
   });
 
   it("fails trusted execution with integrity errors instead of recomputing policy", async () => {
@@ -172,7 +172,7 @@ describe("backend execution service sync", () => {
               keyPoints: ["packages first", "backend second"]
             }
           },
-          model: "gpt-4.1",
+          model: "gemini-3.1-flash-lite",
           adapter: "openai",
           idempotencyKey: "idem-provider-failure",
           includeTrace: false

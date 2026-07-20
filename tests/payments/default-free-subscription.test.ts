@@ -14,7 +14,7 @@ describe("default free subscription", () => {
     expect(criador).toMatchObject({
       tier: "pro",
       name: "Criador",
-      monthlyCredits: 75
+      monthlyCredits: 300
     });
     expect(criador?.dailyCredits).toBeUndefined();
   });
@@ -36,7 +36,7 @@ describe("default free subscription", () => {
     expect(entitlement.planId).toBe("trial");
     expect(entitlement.tier).toBe("pro");
     expect(entitlement.status).toBe("trialing");
-    expect(entitlement.wallet.availableCredits).toBe(13);
+    expect(entitlement.wallet.availableCredits).toBe(20);
   });
 
   it("does not provision free tier when the user already has an unresolved subscription plan", () => {
@@ -85,7 +85,7 @@ describe("default free subscription", () => {
     );
 
     expect(entitlement?.planId).toBe("profissional");
-    expect(entitlement?.wallet.availableCredits).toBe(200);
+    expect(entitlement?.wallet.availableCredits).toBe(1000);
     expect(entitlement?.activeCycleId).toBe("user_orphan_pro:profissional:cycle:default");
     expect(billing.listLedger("user_orphan_pro", "profissional")).toHaveLength(1);
     expect(billing.listLedger("user_orphan_pro", "profissional")[0]?.entryType).toBe("grant_cycle");
@@ -114,7 +114,7 @@ describe("default free subscription", () => {
     );
 
     expect(second.planId).toBe(first.planId);
-    expect(second.wallet.availableCredits).toBe(3);
+    expect(second.wallet.availableCredits).toBe(10);
   });
 
   it("activates a paid plan with subscription and cycle in one step", () => {
@@ -132,7 +132,7 @@ describe("default free subscription", () => {
     );
 
     expect(entitlement.planId).toBe("profissional");
-    expect(entitlement.wallet.availableCredits).toBe(200);
+    expect(entitlement.wallet.availableCredits).toBe(1000);
     expect(billing.getPrimarySubscriptionPlanId("user_upgrade")).toBe("profissional");
   });
 
@@ -152,6 +152,6 @@ describe("default free subscription", () => {
 
     expect(entitlement.planId).toBe("criador");
     expect(entitlement.tier).toBe("pro");
-    expect(entitlement.wallet.availableCredits).toBe(75);
+    expect(entitlement.wallet.availableCredits).toBe(300);
   });
 });

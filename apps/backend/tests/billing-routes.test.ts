@@ -64,7 +64,7 @@ describe("billing routes", () => {
     expect(body.planId).toBe("trial");
     expect(body.tier).toBe("pro");
     expect(body.status).toBe("trialing");
-    expect(body.availableCredits).toBe(13);
+    expect(body.availableCredits).toBe(20);
     expect(body.trialEndsAt).toBeTypeOf("string");
     expect(body.management).toEqual({
       canManageViaPortal: false,

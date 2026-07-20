@@ -6,6 +6,7 @@ import { normalizeText, stripTemplateHeaders } from "../quality/quality.js";
 import { buildAdapterStepContext } from "./step-context.js";
 import type { BackendAdapterMetrics, BackendProviderAttempt } from "./pipeline-attempt-types.js";
 import type { BackendProviderTransport } from "./provider-transport.js";
+import { estimateUsdCost } from "../cost/model-rates.js";
 
 interface BackendExecutionAdapter extends ExecutionAdapter {
   readonly inspect: () => {
@@ -97,7 +98,12 @@ export function createBackendExecutionAdapter(args: {
             const inputTokens = completion.right.response.usage?.inputTokens ?? estimateTokens(instruction);
             const outputTokens = completion.right.response.usage?.outputTokens ?? estimateTokens(completion.right.response.text);
             const debitedCredits = Math.max(1, Math.ceil((inputTokens + outputTokens) / 300));
-            const estimatedUsdCost = estimateCost(inputTokens, outputTokens);
+            const estimatedUsdCost = estimateUsdCost({
+              provider: attempt.provider,
+              model: attempt.model,
+              inputTokens,
+              outputTokens
+            });
             metrics.inputTokensTotal += inputTokens;
             metrics.outputTokensTotal += outputTokens;
             metrics.debitedCredits += debitedCredits;
@@ -157,6 +163,3 @@ function estimateTokens(value: string | StructuredPrompt): number {
   return Math.max(1, Math.ceil(normalizeText(text).length / 4));
 }
 
-function estimateCost(inputTokens: number, outputTokens: number): number {
-  return Math.round((inputTokens * 0.000004 + outputTokens * 0.000015) * 10000) / 10000;
-}

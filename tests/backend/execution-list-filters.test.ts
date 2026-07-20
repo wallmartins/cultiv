@@ -117,6 +117,11 @@ describe("execution list filters", () => {
   });
 
   it("filters in-memory jobs by resolved presentation metadata", () => {
+    // As datas dos fixtures são absolutas e a janela "30d" corre contra o relógio real
+    // (resolveExecutionsPeriodCutoff usa Date.now()), então sem relógio fixo este teste
+    // passa a falhar sozinho no dia em que 2026-06-20 sai dos últimos 30 dias.
+    vi.setSystemTime(Date.parse("2026-06-24T12:00:00.000Z"));
+
     const jobsRef = Effect.runSync(Ref.make(new Map()));
     const repository = createInMemoryJobRepository(jobsRef);
     const old = Effect.runSync(
@@ -146,6 +151,8 @@ describe("execution list filters", () => {
     expect(page.items[0]?.jobId).toBe(recent.jobId);
     expect(snapshotStoredJob(page.items[0]!).briefingTopic).toBe("Tema da expedição");
     expect(page.items.some((item) => item.jobId === old.jobId)).toBe(false);
+
+    vi.useRealTimers();
   });
 
   it("#1 filters in-memory jobs by q against the resolved briefingTopic", () => {

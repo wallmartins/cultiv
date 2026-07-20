@@ -1,9 +1,15 @@
 {
-  "activeVersion": "2026-06-22",
+  "activeVersion": "2026-07-20",
   "versions": [
     {
-      "version": "2026-06-22",
+      "version": "2026-07-20",
       "lifecycle": "active",
+      "catalogPath": "./2026-07-20/catalog.json",
+      "pricingPath": "./2026-07-20/pricing.json"
+    },
+    {
+      "version": "2026-06-22",
+      "lifecycle": "legacy-supported",
       "catalogPath": "./2026-06-22/catalog.json",
       "pricingPath": "./2026-06-22/pricing.json"
     },

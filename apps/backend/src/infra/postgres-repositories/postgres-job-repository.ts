@@ -31,12 +31,15 @@ function extractRuntimeRequest(record: JobRecord): PipelineRequest | undefined {
 }
 
 function serializeJob(record: JobRecord) {
-  const briefingTopic = resolveExecutionPresentation(extractRuntimeRequest(record), record.contentType).briefingTopic;
+  // Toda a presentation vai desnormalizada para o JSON, não só briefingTopic: applyJobListFilters
+  // filtra por `data->>'...'`, então um campo não persistido é um filtro que silenciosamente não
+  // faz nada. Espelha o `...presentation` de snapshotStoredJob no repositório in-memory.
+  const presentation = resolveExecutionPresentation(extractRuntimeRequest(record), record.contentType);
 
   return {
     id: record.id,
     user_id: record.userId,
-    data: JSON.stringify({ ...record, briefingTopic }),
+    data: JSON.stringify({ ...record, ...presentation }),
     version: record.version,
     created_at: record.createdAt,
     updated_at: record.updatedAt
@@ -334,7 +337,10 @@ export function createPostgresJobRepository(
   };
 }
 
-function applyJobListFilters<QB extends SelectQueryBuilder<DatabaseTables, "jobs", object>>(
+// Exportado para teste: o SQL gerado é verificável sem banco (query.compile()), e a suíte
+// Postgres é gated por BACKEND_TEST_DATABASE_URL — foi assim que `intent`/`lengthTier` ficaram
+// sem filtro em produção sem nenhum teste reclamar.
+export function applyJobListFilters<QB extends SelectQueryBuilder<DatabaseTables, "jobs", object>>(
   query: QB,
   filters?: ExecutionsListFilters
 ): QB {
@@ -354,6 +360,14 @@ function applyJobListFilters<QB extends SelectQueryBuilder<DatabaseTables, "jobs
 
   if (filters.contentType) {
     next = next.where(sql`data->>'contentType'`, "=", filters.contentType) as QB;
+  }
+
+  if (filters.intent) {
+    next = next.where(sql`data->>'generationIntent'`, "=", filters.intent) as QB;
+  }
+
+  if (filters.lengthTier) {
+    next = next.where(sql`data->>'lengthTier'`, "=", filters.lengthTier) as QB;
   }
 
   if (filters.q) {

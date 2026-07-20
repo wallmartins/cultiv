@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { Effect } from "effect";
 import {
   createDatabase,
@@ -165,6 +165,10 @@ describe("database jobs", () => {
   });
 
   it("applies list filters before pagination and count", () => {
+    // Fixtures com data absoluta + janela "30d" medida contra Date.now(): sem relógio fixo
+    // o teste caduca sozinho quando 2026-06-20 sai dos últimos 30 dias.
+    vi.setSystemTime(Date.parse("2026-06-24T12:00:00.000Z"));
+
     const database = createDatabase();
     const createJob = (id: string, status: "queued" | "done", createdAt: string, contentType: string) =>
       Effect.runSync(
@@ -209,6 +213,8 @@ describe("database jobs", () => {
     expect(Effect.runSync(database.jobs.listByUser("user-a", 10, 0, filters)).map((job) => job.id)).toEqual([
       "recent-failed"
     ]);
+
+    vi.useRealTimers();
   });
 
   it("throws typed errors for duplicate and missing jobs", () => {
