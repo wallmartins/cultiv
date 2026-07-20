@@ -135,7 +135,7 @@ describe("backend free tier quality modes", () => {
     const entitlement = services.billing.getEntitlement(provisioned!.id);
     expect(entitlement?.planId).toBe("trial");
     expect(entitlement?.status).toBe("trialing");
-    expect(entitlement?.wallet.availableCredits).toBe(13);
+    expect(entitlement?.wallet.availableCredits).toBe(20);
   });
 
   it("allows fast generation on free plan when server default quality mode is balanced", async () => {

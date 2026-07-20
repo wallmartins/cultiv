@@ -121,10 +121,13 @@ export function WorkspaceShellContainer({ children }: WorkspaceShellContainerPro
     if (!activeToast || notifiedIdsRef.current.has(activeToast.id)) return;
     notifiedIdsRef.current.add(activeToast.id);
     if (!completionNotifications.enabled || typeof Notification === "undefined" || !document.hidden) return;
+    const executionId = activeToast.executionId;
     const notification = new Notification(buildToastText(activeToast));
     notification.onclick = () => {
       window.focus();
-      void navigate({ to: "/g/$executionId", params: { executionId: activeToast.id } });
+      if (executionId) {
+        void navigate({ to: "/g/$executionId", params: { executionId } });
+      }
       notification.close();
     };
   });
@@ -132,7 +135,8 @@ export function WorkspaceShellContainer({ children }: WorkspaceShellContainerPro
   function openToast(toast: (typeof toasts)[number]) {
     markRead(toast.id);
     dismissToast(toast.id);
-    void navigate({ to: "/g/$executionId", params: { executionId: toast.id } });
+    if (!toast.executionId) return;
+    void navigate({ to: "/g/$executionId", params: { executionId: toast.executionId } });
   }
 
   // 2a ReconnectionReconcile (states/ReconnectionReconcile.tsx) has no host yet: the SDK's
@@ -228,7 +232,14 @@ export function WorkspaceShellContainer({ children }: WorkspaceShellContainerPro
           onClose: closeCompanion,
           content: buildCompanionContent(locked, voiceProfile.data, goVoice)
         }}
-        toast={activeToast ? { text: buildToastText(activeToast), onClick: () => openToast(activeToast) } : undefined}
+        toast={
+          activeToast
+            ? {
+                text: buildToastText(activeToast),
+                ...(activeToast.executionId ? { onClick: () => openToast(activeToast) } : {})
+              }
+            : undefined
+        }
       >
         {locked && pathname !== "/voice" ? <LockedCenter onCalibrate={() => navigate({ to: "/calibrate" })} /> : children}
       </WorkspaceShell>

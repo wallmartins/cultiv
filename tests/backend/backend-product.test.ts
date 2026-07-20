@@ -38,7 +38,7 @@ describe("backend product bundle", () => {
           topic: "Product integration",
           keyPoints: ["database", "adapters", "feature flags"]
         },
-        model: "gpt-4.1",
+        model: "gemini-3.1-flash-lite",
         includeTrace: true,
         idempotencyKey: "product-m2d"
       })

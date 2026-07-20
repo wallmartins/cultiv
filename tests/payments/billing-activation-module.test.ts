@@ -24,6 +24,6 @@ describe("billing activation module", () => {
     expect(entitlement?.tier).toBe("pro");
     expect(entitlement?.status).toBe("trialing");
     expect(entitlement?.trialEndsAt).toBe("2026-06-19T00:00:00.000Z");
-    expect(entitlement?.wallet.availableCredits).toBe(13);
+    expect(entitlement?.wallet.availableCredits).toBe(20);
   });
 });

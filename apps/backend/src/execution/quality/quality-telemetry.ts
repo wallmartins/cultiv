@@ -5,6 +5,7 @@ import type { BackendStepProviderAttempt } from "../pipeline/pipeline-attempt-ty
 import type { ExecutionSelection } from "./quality-selection.js";
 import { resolveExecutionPreviewCorrelation } from "../pipeline/preview-correlation.js";
 import { readCompositorMetadata, readStepPlannerTelemetry } from "../pipeline-metadata.js";
+import { estimateUsdCost } from "../cost/model-rates.js";
 
 export type { ExecutionTelemetry };
 
@@ -29,11 +30,17 @@ export function createExecutionTelemetry(options: {
   const boundedExecutedCount = Math.max(0, options.executedCount);
   const boundedBudget = Math.max(0, options.maxLLMCalls);
   const bypassedCount = Math.max(0, boundedBudget - boundedExecutedCount);
+  // Caminho normal: soma dos custos por passo, já resolvidos pelo modelo que atendeu cada
+  // chamada. O fallback abaixo só vale quando não houve métrica por passo — aí usa o modelo
+  // selecionado, e sem seleção cai no teto conservador de model-rates.
   const estimatedUsdCost =
     options.estimatedUsdCost ??
-    roundEstimatedCost(
-      (options.inputTokensTotal ?? 0) * 0.000004 + (options.outputTokensTotal ?? 0) * 0.000015
-    );
+    estimateUsdCost({
+      provider: options.selection?.adapter ?? "unknown",
+      model: options.selection?.model ?? "unknown",
+      inputTokens: options.inputTokensTotal ?? 0,
+      outputTokens: options.outputTokensTotal ?? 0
+    });
   const preview = options.request && options.finalQualityMode
     ? resolveExecutionPreviewCorrelation({
         request: options.request,
@@ -99,10 +106,6 @@ export function createExecutionTelemetry(options: {
       : undefined,
     billing: options.billing
   };
-}
-
-function roundEstimatedCost(value: number): number {
-  return Math.round(value * 10000) / 10000;
 }
 
 function resolveCompositorTelemetryContext(

@@ -112,7 +112,9 @@ export function createBackendGenerationPreviewService(options: {
             ...(blockedReason ? { blockedReason } : {})
           };
         });
-        const selectedQualityMode = selectQualityMode(sanitizedArgs.qualityMode, qualityModes);
+        // ADR 0009 — não há picker: a recomendação é a decisão, não uma sugestão. Ela vem
+        // antes da seleção porque é o candidato preferencial; `qualityModes` já carrega o
+        // teto do plano (allowed), então um modo fora do plano nunca é escolhido.
         const includeRecommendation = sanitizedArgs.includeRecommendation !== false;
         const recommendation = includeRecommendation
           ? recommendGenerationPreviewQualityMode({
@@ -122,6 +124,12 @@ export function createBackendGenerationPreviewService(options: {
               qualityModes
             })
           : null;
+        const selectedQualityMode = selectQualityMode(
+          sanitizedArgs.qualityMode,
+          qualityModes,
+          options.config.qualityMode,
+          recommendation?.qualityMode
+        );
         const pricingSnapshot = yield* options.aiPolicy.resolvePricingEnvelope({
           planTier,
           contentType: pricingContentType,
@@ -227,24 +235,30 @@ function selectContentType(
   );
 }
 
+// Ordem de precedência: pedido explícito (só chega por API, a UI não tem picker) > modo
+// inferido pelo briefing > default de config > primeiro permitido. Todo candidato passa
+// pelo filtro `allowed`, que é onde o teto do plano entra.
 function selectQualityMode(
   requestedQualityMode: QualityMode | undefined,
   qualityModes: ReadonlyArray<{
     readonly id: QualityMode;
     readonly allowed: boolean;
-  }>
+  }>,
+  defaultQualityMode: QualityMode,
+  recommendedQualityMode?: QualityMode
 ): QualityMode {
-  if (requestedQualityMode) {
-    const requested = qualityModes.find((mode) => mode.id === requestedQualityMode);
-    if (requested?.allowed) {
-      return requested.id;
+  for (const candidate of [requestedQualityMode, recommendedQualityMode, defaultQualityMode]) {
+    if (!candidate) continue;
+    const match = qualityModes.find((mode) => mode.id === candidate);
+    if (match?.allowed) {
+      return match.id;
     }
   }
 
   return (
     qualityModes.find((mode) => mode.allowed)?.id ??
     qualityModes[0]?.id ??
-    "balanced"
+    defaultQualityMode
   );
 }
 

@@ -226,6 +226,7 @@ export function useRunningExecutionsWatch() {
           markUnread(id);
           pushToast({
             id,
+            executionId: id,
             kind: transition.type === "completed" ? "success" : "error",
             topic: transition.snapshot?.briefingTopic
           });

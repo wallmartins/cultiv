@@ -44,6 +44,7 @@ describe("pricing calibration", () => {
     const report = buildCalibrationReport({ jobs: fixture });
     expect(report.canonicalCreditCost).toBeGreaterThan(0);
     expect(report.pricing.length).toBeGreaterThan(0);
-    expect(report.planSimulation.length).toBe(3);
+    // trial + os 3 planos pagos (DEFAULT_PLAN_GRANTS espelha catalog-pricing.json)
+    expect(report.planSimulation.length).toBe(4);
   });
 });

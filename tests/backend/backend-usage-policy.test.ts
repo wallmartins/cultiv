@@ -39,7 +39,7 @@ function buildPlanRequest(overrides: Record<string, unknown> = {}) {
         keyPoints: ["billing", "feature flags", "limits"]
       }
     },
-    model: "gpt-4o-mini",
+    model: "gemini-3.1-flash-lite",
     adapter: "openai",
     idempotencyKey: "usage-policy-check",
     ...overrides
@@ -89,7 +89,7 @@ describe("backend usage policy", () => {
         qualityMode: "balanced",
         userId: "backend",
         planId: "criador",
-        model: "gpt-4.1",
+        model: "gemini-3.1-flash-lite",
         adapter: "openai"
       })
     );
@@ -101,7 +101,7 @@ describe("backend usage policy", () => {
         qualityMode: "balanced",
         userId: "backend",
         planId: "criador",
-        model: "gpt-4.1",
+        model: "gemini-3.1-flash-lite",
         adapter: "openai"
       })
     );
@@ -161,7 +161,7 @@ describe("backend usage policy", () => {
           qualityMode: "balanced",
           userId: "backend",
           planId: "free",
-          model: "gpt-4o-mini",
+          model: "gemini-3.1-flash-lite",
           adapter: "openai"
         })
       );
@@ -181,7 +181,7 @@ describe("backend usage policy", () => {
           qualityMode: "balanced",
           userId: "backend",
           planId: "free",
-          model: "gpt-4o-mini",
+          model: "gemini-3.1-flash-lite",
           adapter: "openai"
         })
       )
@@ -225,7 +225,7 @@ describe("backend usage policy", () => {
         qualityMode: "balanced",
         userId: "backend",
         planId: "free",
-        model: "gpt-4o-mini",
+        model: "gemini-3.1-flash-lite",
         adapter: "openai"
       })
     );
@@ -240,7 +240,7 @@ describe("backend usage policy", () => {
         qualityMode: "balanced",
         userId: "backend",
         planId: "criador",
-        model: "gpt-4.1",
+        model: "gemini-3.1-flash-lite",
         adapter: "openai"
       })
     );

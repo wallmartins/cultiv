@@ -2,7 +2,7 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-- **Comentários**: Mantenha os comentários no código estritamente mínimos. Adicione apenas se for estritamente necessário para explicar padrões complexos e incomuns. Não comente o óbvio ou o que a própria função já descreve.
+- **Comments**: Keep code comments to a minimum; only explain unusual patterns.
 
 ## What this is
 

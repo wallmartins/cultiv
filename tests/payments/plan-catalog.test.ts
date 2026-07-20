@@ -9,7 +9,7 @@ describe("listPlanCatalog", () => {
     expect(typeof view.generationsDisclaimer).toBe("string");
 
     const explorador = view.plans.find((plan) => plan.id === "explorador")!;
-    expect(explorador.monthlyGenerations).toBe(15);
+    expect(explorador.monthlyGenerations).toBe(40);
     expect(explorador.featured).toBe(false);
     expect(explorador.prices.BRL.monthly.amountCents).toBe(4900);
     expect(explorador.prices.BRL.annual.amountCents).toBe(3920);
@@ -25,13 +25,13 @@ describe("listPlanCatalog", () => {
     expect(explorador.prices.USD.monthly.internalRef).toBe("explorador");
 
     const criador = view.plans.find((plan) => plan.id === "criador")!;
-    expect(criador.monthlyGenerations).toBe(30);
+    expect(criador.monthlyGenerations).toBe(120);
     expect(criador.featured).toBe(true);
     expect(criador.tag).toBe("mais escolhido");
     expect(criador.prices.BRL.annual.amountCents).toBe(7920);
 
     const profissional = view.plans.find((plan) => plan.id === "profissional")!;
-    expect(profissional.monthlyGenerations).toBe(80);
+    expect(profissional.monthlyGenerations).toBe(400);
     expect(profissional.featured).toBe(false);
     expect(profissional.prices.USD.annual.amountCents).toBe(3920);
   });

@@ -80,6 +80,35 @@ describe("backend app execution quotes and telemetry", () => {
     expect(error.details?.reason).toBe("quality_mode_plan_restriction");
   });
 
+  // Regression: the web client sends neither preview nor run a qualityMode. Preview used to fall
+  // back to first-allowed while the run path defaulted to config QUALITY_MODE, so every quote came
+  // back stale (409) even though the client echoed the quoteId verbatim.
+  it("accepts a quote round-tripped without an explicit quality mode", async () => {
+    const { app } = createExecutionApp("sync");
+    const briefing = { topic: "Policy snapshots", audience: "platform engineers" };
+
+    const previewResponse = await app.request("/api/generation-preview", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ contentType: "newsletter", briefing })
+    });
+
+    expect(previewResponse.status).toBe(200);
+    const preview = await Effect.runPromise(decodeGenerationPreviewResponse(await previewResponse.json()));
+
+    const runResponse = await app.request("/me/executions/run", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        contentType: "newsletter",
+        briefing,
+        quoteId: preview.pricingSnapshot.quoteId
+      })
+    });
+
+    expect(runResponse.status).toBe(200);
+  });
+
   it("accepts a matching quote and rejects a stale quote on the /me execution surface", async () => {
     const { app } = createExecutionApp("sync");
     const previewPayload = {
@@ -115,13 +144,29 @@ describe("backend app execution quotes and telemetry", () => {
     const decodedSuccess = await Effect.runPromise(decodeSyncExecutionView(await successResponse.json()));
     expect(decodedSuccess.contentType).toBe("newsletter");
 
-    const staleResponse = await app.request("/me/executions/run", {
+    // Desde a policy 2026-07-20 o preço é por tamanho: trocar o modo não muda a fatura,
+    // então não invalida o quote. O que invalida é mexer em algo que move preço — aqui,
+    // o tipo de conteúdo (newsletter = edition-piece, blog = long-piece).
+    const sameQuoteOtherMode = await app.request("/me/executions/run", {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
         contentType: "newsletter",
         briefing: previewPayload.briefing,
         qualityMode: "strict",
+        quoteId: preview.pricingSnapshot.quoteId
+      })
+    });
+
+    expect(sameQuoteOtherMode.status).toBe(200);
+
+    const staleResponse = await app.request("/me/executions/run", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        contentType: "long-form-blog",
+        briefing: previewPayload.briefing,
+        qualityMode: "balanced",
         quoteId: preview.pricingSnapshot.quoteId
       })
     });
@@ -172,14 +217,16 @@ describe("backend app execution quotes and telemetry", () => {
     const decodedSuccess = await Effect.runPromise(decodeSyncExecutionView(await successResponse.json()));
     expect(decodedSuccess.contentType).toBe("linkedin-post");
 
+    // lengthTier move o preço (short-piece 2.5 vs long-piece 10), então invalida o quote —
+    // ao contrário do qualityMode, que é decisão do sistema e não entra na fatura.
     const staleResponse = await app.request("/me/executions/run", {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
         intent: "share-idea",
-        scope: { lengthTier: "short" },
+        scope: { lengthTier: "long" },
         briefing: previewPayload.briefing,
-        qualityMode: "strict",
+        qualityMode: "balanced",
         quoteId: preview.pricingSnapshot.quoteId
       })
     });

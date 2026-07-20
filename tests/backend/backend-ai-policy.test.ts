@@ -26,7 +26,7 @@ describe("backend ai policy", () => {
     const services = Effect.runSync(createBackendProductServices(baseConfig));
     const policy = Effect.runSync(services.aiPolicy.getActivePolicy());
 
-    expect(policy.version).toBe("2026-06-22");
+    expect(policy.version).toBe("2026-07-20");
     expect(policy.orchestrationCatalog.pipelines["validation-post"]?.steps[0]?.config).toMatchObject({
       executionType: "local"
     });
@@ -164,7 +164,7 @@ describe("backend ai policy", () => {
     const officialPolicy = Effect.runSync(services.aiPolicy.getActivePolicy());
     const experimentalResolved = Effect.runSync(experimentalPolicy!.getActivePolicy());
 
-    expect(officialPolicy.version).toBe("2026-06-22");
+    expect(officialPolicy.version).toBe("2026-07-20");
     expect(experimentalResolved.version).toBe("2026-05-24-exp");
     expect(
       experimentalResolved.routingProfiles["experimental-llm"]?.preferredAttempts[0]

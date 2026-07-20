@@ -133,8 +133,16 @@ export function registerLegacyFreeTierPlan(services: ReturnType<typeof createBac
       name: "Free (fixture)",
       monthlyCredits: 20,
       features: [{ key: "execution.sync_mode", enabled: true }],
-      // matches the backend-fast/balanced/strict union registerBackendBillingPlans() applies to catalog plans
-      allowedModels: ["backend-fast", "backend-balanced", "backend-strict", "gpt-4.1", "gpt-4o-mini"]
+      // espelha o que registerBackendBillingPlans() aplica: pseudo-modelos backend-* + os modelos
+      // realmente roteados pela policy ativa (ADR 0009)
+      allowedModels: [
+        "backend-fast",
+        "backend-balanced",
+        "backend-strict",
+        "gemini-3.1-flash-lite",
+        "gemini-2.5-flash",
+        "llama-3.3-70b-versatile"
+      ]
     })
   );
 }
