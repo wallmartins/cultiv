@@ -6,7 +6,8 @@ import {
   ClientSdkContractFailure,
   ClientSdkHttpStatusError,
   ClientSdkResponseDecodeError,
-  ClientSdkTransportError
+  ClientSdkTransportError,
+  httpStatusErrorMessage
 } from "./errors.js";
 
 export interface HttpResponse {
@@ -43,6 +44,12 @@ export function assertOkResponseEffect(
     const apiError = yield* decodeApiErrorResponseEffect(response.body);
     return yield* Effect.fail(
       new ClientSdkHttpStatusError({
+        message: httpStatusErrorMessage({
+          label,
+          status: response.status,
+          code: apiError?.code,
+          responseMessage: apiError?.message
+        }),
         label,
         status: response.status,
         code: apiError?.code,

@@ -22,7 +22,20 @@ export function useExecutionsList(filters: ExecutionsListFilters = {}, options?:
   return useQuery({
     queryKey: queryKeys.executionsList(filters),
     queryFn: () => run(withSdk((sdk) => sdk.executions.list(filters))),
-    enabled: options?.enabled
+    enabled: options?.enabled,
+    // Só a busca por texto reaproveita a página anterior: digitar monta uma queryKey nova a cada
+    // tecla e, sem isso, `data` volta a undefined e a lista pisca "nenhuma geração encontrada" no
+    // meio da digitação. Trocar status/período é troca de categoria — manter a página anterior
+    // mostraria itens que não pertencem ao filtro escolhido, então ali a lista espera a resposta.
+    placeholderData: (previous, previousQuery) => {
+      const previousFilters = previousQuery?.queryKey[2] as ExecutionsListFilters | undefined;
+      if (!previousFilters) return undefined;
+      const sameBucket =
+        previousFilters.status === filters.status &&
+        previousFilters.period === filters.period &&
+        previousFilters.limit === filters.limit;
+      return sameBucket ? previous : undefined;
+    }
   });
 }
 

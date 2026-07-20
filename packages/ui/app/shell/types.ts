@@ -2,7 +2,11 @@ import type { StatusDotTone } from "../primitives/index.js";
 
 export type ShellTheme = "light" | "dark";
 
-export type HistoryStatusFilterUI = "all" | "done" | "running" | "failed";
+// Espelha JobStatusSchema (queued|running|done|failed|cancelled) + "all". Sem "queued" e
+// "cancelled" esses itens só existiam dentro de TODOS, sem forma de isolar.
+export type HistoryStatusFilterUI = "all" | "queued" | "running" | "done" | "failed" | "cancelled";
+
+export type HistoryPeriodFilterUI = "7d" | "30d" | "90d" | "all";
 
 export type HistoryItemVisual =
   | { readonly kind: "ring"; readonly value: number }

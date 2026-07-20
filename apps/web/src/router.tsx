@@ -14,7 +14,14 @@ import type { ClientSdk, ClientSdkError } from "@my-ai-orchestrator/client-sdk";
 import type { LogoutOptions, RedirectLoginOptions, User as Auth0User } from "@auth0/auth0-react";
 // "/light" e não o barrel: o barrel reexporta makeAppRuntime (ManagedRuntime) e traria
 // Effect + client-sdk pro chunk inicial. Ver packages/shared/src/light.ts.
-import { deriveAppMode, queryKeys, useUnreadStore, type AppMode, type AppRuntime } from "@my-ai-orchestrator/shared/light";
+import {
+  deriveAppMode,
+  hasVoiceProfile,
+  queryKeys,
+  useUnreadStore,
+  type AppMode,
+  type AppRuntime
+} from "@my-ai-orchestrator/shared/light";
 import { queryClient } from "./query-client.js";
 import { readPendingCheckout } from "./routes/pending-checkout-storage.js";
 
@@ -89,6 +96,16 @@ async function resolveAppMode(qc: QueryClient, runtime: AppRuntime): Promise<App
   return deriveAppMode(onboarding, consent, voiceProfile.diagnostics);
 }
 
+// Mesma queryKey do resolveAppMode/useVoiceProfile: o gate de /calibrate reaproveita o fetch
+// que o shell já faria em vez de pedir o perfil de novo.
+async function resolveHasVoiceProfile(qc: QueryClient, runtime: AppRuntime): Promise<boolean> {
+  const voiceProfile = await qc.ensureQueryData({
+    queryKey: queryKeys.voiceProfile(),
+    queryFn: () => runSdk(runtime, (sdk) => sdk.voice.getProfile())
+  });
+  return hasVoiceProfile(voiceProfile);
+}
+
 const rootRoute = createRootRouteWithContext<RouterContext>()({
   component: RootLayout
 });
@@ -136,7 +153,10 @@ function CallbackRoute() {
     if (auth.isLoading) return;
     const returnTo = pendingReturnTo;
     pendingReturnTo = undefined;
-    if (!returnTo) {
+    // Todo CTA da landing aponta pra /calibrate (apps/landing/src/config.ts: trialUrl), então
+    // esse returnTo não é um destino escolhido — é só "entrar no app". Manda pro /generate e
+    // deixa o gate do shell devolver pra /calibrate quem de fato ainda não calibrou.
+    if (!returnTo || new URL(returnTo, window.location.origin).pathname.endsWith("/calibrate")) {
       void navigate({ to: "/generate" });
       return;
     }
@@ -156,6 +176,20 @@ const calibrateRoute = createRoute({
   beforeLoad: async ({ context, location }) => {
     if (!context.auth.isAuthenticated) {
       await context.auth.loginWithRedirect({ appState: { returnTo: location.href } });
+      return;
+    }
+    const runtime = await context.loadRuntime();
+    // O gate do shell manda pra cá enquanto appMode === "calibrate"; sair daqui nesse modo
+    // devolveria o usuário pro shell, que redirecionaria de volta — ping-pong infinito. Só quem
+    // já saiu do modo calibrate pode ser desviado.
+    if ((await resolveAppMode(context.queryClient, runtime)) === "calibrate") {
+      return;
+    }
+    // Quem já tem voz não recalibra pela URL: o único caminho de recalibração é o "Recalibrar"
+    // de /voice (overlay leve). Entrar aqui abriria o wizard cheio e queimaria uma das
+    // tentativas limitadas do plano (voice-calibration-service.ts: maxWizards).
+    if (await resolveHasVoiceProfile(context.queryClient, runtime)) {
+      throw redirect({ to: "/voice" });
     }
   },
   component: CalibrateContainer
@@ -274,7 +308,19 @@ export const router = createRouter({
   defaultPreload: "intent",
   // Com as superfícies em chunks separados, uma navegação pode esperar um download. O padrão de
   // defaultPendingMs (1s) segura este aviso: carregamento rápido não pisca nada na tela.
-  defaultPendingComponent: () => <p className="route-pending">Carregando…</p>
+  defaultPendingComponent: () => <p className="route-pending">Carregando…</p>,
+  // Sem isto, um loader que rejeita (ex.: o GET da execução em /g/$id) não renderiza nada: a URL
+  // já mudou e a tela fica em branco, com o erro só no console. Markup inline de propósito —
+  // importar um componente de packages/ui aqui puxaria o chunk dele pro carregamento inicial.
+  defaultErrorComponent: ({ error, reset }) => (
+    <div className="route-error">
+      <p>Não deu para carregar esta tela.</p>
+      <p className="route-error-detail">{error instanceof Error ? error.message : String(error)}</p>
+      <button type="button" onClick={reset}>
+        Tentar de novo
+      </button>
+    </div>
+  )
 });
 
 declare module "@tanstack/react-router" {

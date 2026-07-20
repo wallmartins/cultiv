@@ -1,4 +1,7 @@
-:root {
+/* Light is declared for [data-theme="light"] too, not just :root — a nested element
+   opting into light must win over a dark ancestor, and inheritance alone can't do that. */
+:root,
+[data-theme="light"] {
   --bg: oklch(0.99 0 0);
   --surface: oklch(0.965 0 0);
   --ink: oklch(0.19 0 0);

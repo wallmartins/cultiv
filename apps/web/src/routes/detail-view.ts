@@ -76,3 +76,12 @@ export function buildAlignment(voice: ExecutionVoiceMetadataView | undefined): E
     antiPatterns: voice.appliedSignals.antiPatterns
   };
 }
+
+// O SDK falha com ClientSdkHttpStatusError, que carrega `status`. Traduz os casos que o autor
+// pode resolver sozinho; o resto cai no genérico.
+export function detailErrorReason(error: unknown): string {
+  const status = typeof error === "object" && error !== null ? (error as { status?: unknown }).status : undefined;
+  if (status === 404) return "essa geração não existe mais";
+  if (status === 401 || status === 403) return "sua sessão expirou — entre de novo";
+  return "não deu para carregar essa geração";
+}

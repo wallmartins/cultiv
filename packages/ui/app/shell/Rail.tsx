@@ -4,7 +4,12 @@ import { RailFilterChips } from "./RailFilterChips.js";
 import { RailFooter } from "./RailFooter.js";
 import { RailHistoryList } from "./RailHistoryList.js";
 import { RailSearch } from "./RailSearch.js";
-import type { HistoryGroupData, HistoryStatusFilterUI, RailEmptyReason } from "./types.js";
+import type {
+  HistoryGroupData,
+  HistoryPeriodFilterUI,
+  HistoryStatusFilterUI,
+  RailEmptyReason
+} from "./types.js";
 
 export interface RailProps {
   readonly open: boolean;
@@ -14,6 +19,8 @@ export interface RailProps {
   readonly onSearchChange: (value: string) => void;
   readonly activeFilter: HistoryStatusFilterUI;
   readonly onFilterChange: (filter: HistoryStatusFilterUI) => void;
+  readonly activePeriod: HistoryPeriodFilterUI;
+  readonly onPeriodChange: (period: HistoryPeriodFilterUI) => void;
   readonly groups: readonly HistoryGroupData[];
   readonly emptyReason?: RailEmptyReason;
   readonly onOpenItem: (id: string) => void;
@@ -38,6 +45,8 @@ export function Rail({
   onSearchChange,
   activeFilter,
   onFilterChange,
+  activePeriod,
+  onPeriodChange,
   groups,
   emptyReason,
   onOpenItem,
@@ -62,7 +71,12 @@ export function Rail({
       <div className={inertClass}>
         <NewGenerationButton onClick={onNewGeneration} disabled={locked} />
         <RailSearch value={search} onChange={onSearchChange} />
-        <RailFilterChips active={activeFilter} onChange={onFilterChange} />
+        <RailFilterChips
+          active={activeFilter}
+          onChange={onFilterChange}
+          activePeriod={activePeriod}
+          onPeriodChange={onPeriodChange}
+        />
         <RailHistoryList
           groups={groups}
           emptyReason={emptyReason}

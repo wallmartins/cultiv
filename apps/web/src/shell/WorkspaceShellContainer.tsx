@@ -1,9 +1,10 @@
-import { useDeferredValue, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useNavigate, useRouteContext, useRouterState } from "@tanstack/react-router";
 import {
   confidenceRingValue,
   creditsAsTexts,
   useCompletionNotifications,
+  useDebouncedValue,
   useEntitlement,
   useExecutionsList,
   useHistoryFilterStore,
@@ -72,8 +73,10 @@ export function WorkspaceShellContainer({ children }: WorkspaceShellContainerPro
   const filterPeriod = useHistoryFilterStore((state) => state.period);
   const setQuery = useHistoryFilterStore((state) => state.setQuery);
   const setStatus = useHistoryFilterStore((state) => state.setStatus);
-  // React defers the query-driving value so fast typing doesn't fire a network request per keystroke.
-  const deferredQuery = useDeferredValue(filterQuery);
+  const setPeriod = useHistoryFilterStore((state) => state.setPeriod);
+  // Segura a digitação antes de virar queryKey — useDeferredValue desprioriza o render, mas
+  // deixa passar um request por tecla.
+  const deferredQuery = useDebouncedValue(filterQuery);
 
   // undefined until "mostrar mais antigos" is used — the server echoes back the effective limit
   // it applied (ExecutionsPageView.limit), so bumping from that instead of a guessed constant
@@ -148,8 +151,14 @@ export function WorkspaceShellContainer({ children }: WorkspaceShellContainerPro
     () => buildHistoryGroups(executions.data, unread, activeExecutionId, now),
     [executions.data, unread, activeExecutionId, now]
   );
+  // Período entra na conta junto com busca/status: filtrar por "7D" e não achar nada é rail
+  // filtrado vazio ("limpe a busca ou os filtros"), não "você nunca gerou nada".
   const emptyReason =
-    groups.length > 0 ? undefined : filterQuery || filterStatus !== "all" ? "filtered" : "never-generated";
+    groups.length > 0
+      ? undefined
+      : filterQuery || filterStatus !== "all" || filterPeriod !== "all"
+        ? "filtered"
+        : "never-generated";
 
   const olderCount = executions.data ? Math.max(0, executions.data.total - executions.data.items.length) : 0;
   const onShowOlder = () => {
@@ -188,6 +197,8 @@ export function WorkspaceShellContainer({ children }: WorkspaceShellContainerPro
           onSearchChange: setQuery,
           activeFilter: filterStatus as HistoryStatusFilterUI,
           onFilterChange: setStatus,
+          activePeriod: filterPeriod,
+          onPeriodChange: setPeriod,
           groups,
           emptyReason,
           olderCount,
