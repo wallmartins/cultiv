@@ -14,6 +14,7 @@ import {
   emptyExecutionsPage,
   entitlementFixture,
   mockAuth,
+  noVoiceProfileFixture,
   onboardingCompleted,
   voiceProfileFixture
 } from "./fixtures.js";
@@ -161,5 +162,50 @@ describe("landing entry flow", () => {
     mountAt("/app/generate", false);
     await router.load();
     expect(router.state.location.pathname).toBe("/calibrate");
+  });
+});
+
+// Recalibrar é só pelo botão de /voice (overlay leve). A URL /calibrate não pode reabrir o wizard
+// cheio pra quem já tem voz — além de confundir, isso queima uma das tentativas do plano.
+describe("gate de /calibrate", () => {
+  it("desvia pra /voice quem já tem voz calibrada", async () => {
+    mountAt("/app/calibrate", true);
+    await router.load();
+
+    expect(router.state.location.pathname).toBe("/voice");
+  });
+
+  it("deixa calibrar quem concluiu o onboarding mas ainda não tem voz", async () => {
+    const { queryClient } = mountAt("/app/calibrate", true);
+    queryClient.setQueryData(queryKeys.voiceProfile(), noVoiceProfileFixture);
+    await router.load();
+
+    expect(router.state.location.pathname).toBe("/calibrate");
+  });
+
+  // O gate do shell manda pra /calibrate enquanto appMode === "calibrate". Se o gate de /calibrate
+  // desviasse por perfil existente sem olhar o appMode, os dois se redirecionariam pra sempre —
+  // foi exatamente o que travou esta suíte durante a implementação.
+  it("não faz ping-pong com o gate do shell quando o onboarding ainda está aberto", async () => {
+    mountAt("/app/calibrate", false);
+    await router.load();
+
+    expect(router.state.location.pathname).toBe("/calibrate");
+  });
+
+  it("manda pro /generate quem volta do login com returnTo de /calibrate (CTA da landing)", async () => {
+    const { queryClient, runtime } = mountAt("/app/callback", true);
+    captureReturnTo("/calibrate");
+    await router.load();
+
+    await renderAndSettle(
+      <QueryClientProvider client={queryClient}>
+        <RuntimeProvider runtime={runtime}>
+          <RouterProvider router={router} />
+        </RuntimeProvider>
+      </QueryClientProvider>
+    );
+
+    await waitFor(() => expect(router.state.location.pathname).toBe("/generate"));
   });
 });

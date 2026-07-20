@@ -6,7 +6,11 @@ export class ClientSdkInvalidRequestError extends Data.TaggedError("ClientSdkInv
   readonly request: unknown;
 }> {}
 
+// `message` é obrigatório de propósito: Data.TaggedError estende Error, e sem esse campo
+// `.message` fica "" e o Effect troca por "An error has occurred" na hora de imprimir —
+// perdendo status/code/responseMessage, que são justamente o que diz o que aconteceu.
 export class ClientSdkHttpStatusError extends Data.TaggedError("ClientSdkHttpStatusError")<{
+  readonly message: string;
   readonly label: string;
   readonly status: number;
   readonly code?: ApiErrorCode;
@@ -15,6 +19,17 @@ export class ClientSdkHttpStatusError extends Data.TaggedError("ClientSdkHttpSta
   readonly details?: Readonly<Record<string, unknown>>;
   readonly responseMessage?: string;
 }> {}
+
+export function httpStatusErrorMessage(input: {
+  readonly label: string;
+  readonly status: number;
+  readonly code?: ApiErrorCode;
+  readonly responseMessage?: string;
+}): string {
+  const code = input.code ? ` (${input.code})` : "";
+  const detail = input.responseMessage ? `: ${input.responseMessage}` : "";
+  return `${input.label} failed with HTTP ${input.status}${code}${detail}`;
+}
 
 export class ClientSdkResponseDecodeError extends Data.TaggedError("ClientSdkResponseDecodeError")<{
   readonly label: string;

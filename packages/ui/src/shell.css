@@ -84,6 +84,12 @@
   flex-wrap: wrap;
 }
 
+/* Segunda linha (período) encostada na de status: são dois eixos do mesmo filtro. */
+.rail-filters-period {
+  margin-top: 0;
+  opacity: 0.85;
+}
+
 .rail-history {
   flex: 1;
   overflow-y: auto;

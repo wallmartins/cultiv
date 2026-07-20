@@ -10,7 +10,14 @@ import {
 } from "@my-ai-orchestrator/shared";
 import { DetailFailed, ExecutionDetail, WritingCenter } from "@my-ai-orchestrator/ui/app/detail";
 import { LongTimeoutWatch } from "@my-ai-orchestrator/ui/app/states";
-import { buildAlignment, buildDetailMeta, formatElapsed, isLongRunning, splitParagraphs } from "./detail-view.js";
+import {
+  buildAlignment,
+  buildDetailMeta,
+  detailErrorReason,
+  formatElapsed,
+  isLongRunning,
+  splitParagraphs
+} from "./detail-view.js";
 
 const routeApi = getRouteApi("/_shell/g/$executionId");
 
@@ -23,11 +30,17 @@ export function ExecutionDetailContainer() {
   const [alignmentOpen, setAlignmentOpen] = useState(false);
   const [timeoutAcknowledged, setTimeoutAcknowledged] = useState(false);
 
-  const { data: execution } = useExecution(executionId);
+  const { data: execution, isError, error } = useExecution(executionId);
   useExecutionWatch(executionId);
   const reactionMutation = useReaction(executionId);
   const clearReactionMutation = useClearReaction(executionId);
   const cancelMutation = useCancelExecution(executionId);
+
+  // Buscar falhou é diferente de ainda não ter chegado: sem este ramo os dois caem no `null`
+  // abaixo e a rota fica permanentemente em branco.
+  if (isError) {
+    return <DetailFailed reason={detailErrorReason(error)} onRedo={() => navigate({ to: "/generate" })} />;
+  }
 
   if (!execution) return null;
 
