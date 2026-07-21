@@ -3,6 +3,7 @@ import { useNavigate, useRouteContext, useRouterState } from "@tanstack/react-ro
 import { useQueryClient } from "@tanstack/react-query";
 import type { BillingPlanView } from "@my-ai-orchestrator/contracts";
 import { creditsAsTexts, queryKeys, useCheckout, useCheckoutStatus, useEntitlement, usePlans, useTopUps } from "@my-ai-orchestrator/shared";
+import { useFormat, useMessages } from "@my-ai-orchestrator/ui/app/i18n";
 import { CheckoutOverlay, PlansScreen, type CheckoutPhase, type CheckoutProductKind } from "@my-ai-orchestrator/ui/app/plans";
 import { DowngradeSurplus } from "@my-ai-orchestrator/ui/app/states";
 import { resolvePlanName } from "./billing-view.js";
@@ -32,6 +33,8 @@ interface DowngradeConfirm {
 // S7 — container for /app/plans (catalog · contextual paywall · checkout redirect + return).
 // packages/ui/app/plans stays props-in; this is the only file that touches hooks/router/search.
 export function PlansRoute() {
+  const t = useMessages();
+  const format = useFormat();
   const navigate = useNavigate();
   const search = useRouterState({ select: (state) => state.location.search as Record<string, string | undefined> });
   const queryClient = useQueryClient();
@@ -121,7 +124,7 @@ export function PlansRoute() {
       productKind: "topup",
       internalRef: pkg.id,
       billingPeriod: "one_time",
-      itemLabel: pkg.description ?? `pacote de ${pkg.credits} créditos`
+      itemLabel: pkg.description ?? t.plans.topUpPackage(t.common.credits(pkg.credits))
     });
   }
 
@@ -138,23 +141,24 @@ export function PlansRoute() {
 
   const returnedPlan = plansQuery.data?.plans.find((plan) => plan.id === checkoutStatusQuery.data?.planId);
   const returnedProduct: CheckoutProductKind = checkoutStatusQuery.data?.planId ? "subscription" : "topup";
-  const returnedItemLabel = returnedProduct === "subscription" ? (returnedPlan?.name ?? "seu plano") : "pacote de créditos";
+  const returnedItemLabel =
+    returnedProduct === "subscription" ? (returnedPlan?.name ?? t.plans.yourPlanFallback) : t.plans.creditsPackageFallback;
 
   const checkoutPhase: CheckoutPhase | undefined =
     kind === "redirecting"
       ? {
           kind: "redirecting",
-          label: "indo pro pagamento seguro…",
+          label: t.plans.redirecting,
           meta: pending
             ? pending.product === "subscription"
-              ? `plano ${pending.itemLabel}`
+              ? t.plans.planMeta(pending.itemLabel)
               : pending.itemLabel
             : checkout.data
-              ? `${gatewayLabel(checkout.data.gateway)}`
+              ? `${gatewayLabel(t, checkout.data.gateway)}`
               : undefined
         }
       : kind === "checking"
-        ? { kind: "redirecting", label: "confirmando pagamento…" }
+        ? { kind: "redirecting", label: t.plans.confirming }
         : kind === "success"
           ? { kind: "success", product: returnedProduct, itemLabel: returnedItemLabel, onDone: () => navigate({ to: "/generate" }) }
           : kind === "pending"
@@ -173,7 +177,7 @@ export function PlansRoute() {
 
   const plansState = plansQuery.isPending ? "loading" : plansQuery.isError ? "error" : "ready";
   const plans = plansQuery.data
-    ? mapCatalogToCards(plansQuery.data, period, currency, checkoutInFlight, selectPlan, search.plan)
+    ? mapCatalogToCards(t, format, plansQuery.data, period, currency, checkoutInFlight, selectPlan, search.plan)
     : [];
 
   return (
@@ -207,7 +211,7 @@ export function PlansRoute() {
             balance={entitlement.data.availableCredits}
             keptCredits={downgradeConfirm.check.keptCredits}
             surplusCredits={downgradeConfirm.check.surplusCredits}
-            fromPlan={resolvePlanName(entitlement.data, plansQuery.data?.plans)}
+            fromPlan={resolvePlanName(t, entitlement.data, plansQuery.data?.plans)}
             toPlan={downgradeConfirm.plan.name}
             onConfirm={confirmDowngrade}
             onKeep={() => setDowngradeConfirm(undefined)}

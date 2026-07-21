@@ -5,7 +5,7 @@ import { createMemoryHistory } from "@tanstack/react-router";
 import { act, render, waitFor } from "@testing-library/react";
 import React from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { makeAppRuntime, queryKeys, type AppRuntime } from "@my-ai-orchestrator/shared";
+import { makeAppRuntime, queryKeys, useUiLanguage, type AppRuntime } from "@my-ai-orchestrator/shared";
 import { router, type RouterContext } from "~/router.js";
 import { queryClient } from "~/query-client.js";
 import { App } from "~/app.js";
@@ -45,6 +45,10 @@ function seedGate(): void {
 
 beforeEach(() => {
   auth0State = { ...auth0State, isLoading: true, isAuthenticated: false, user: undefined };
+  // These assertions use the loading copy as a proxy for "still in the loading state", so the
+  // locale has to be pinned — otherwise the app follows the runner's navigator.language (jsdom
+  // reports en-US) and the pt-BR strings below stop matching.
+  useUiLanguage.setState({ language: "pt-BR" });
 });
 
 afterEach(() => {

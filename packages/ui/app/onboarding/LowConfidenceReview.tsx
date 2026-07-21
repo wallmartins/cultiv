@@ -1,4 +1,5 @@
 import { Banner, Pill } from "../primitives/index.js";
+import { useMessages } from "../i18n/index.js";
 import { VoicePreview } from "./VoicePreview.js";
 import type { VoicePreviewVM } from "./types.js";
 
@@ -13,18 +14,19 @@ export interface LowConfidenceReviewProps {
 // mostrar um número baixo sem saída. Editar em v1 não reabre o passo (GAP #12: sem transição de
 // reabertura no backend), então a amostra é só revista; recalibrar é o caminho de reforço.
 export function LowConfidenceReview({ preview, weakStepLabel, onViewSample, onContinueAnyway }: LowConfidenceReviewProps) {
+  const t = useMessages();
   return (
     <div className="wizard-low-confidence">
       <VoicePreview preview={preview} />
       <Banner tone="warning" className="wizard-low-confidence-banner">
-        a amostra "{weakStepLabel}" ficou curta pra sua voz — dá pra revê-la, ou seguir assim mesmo.
+        {t.onboarding.lowConfidence.banner(weakStepLabel)}
       </Banner>
       <div className="wizard-step-footer">
         <Pill variant="secondary" onClick={onContinueAnyway}>
-          Continuar assim mesmo
+          {t.onboarding.lowConfidence.continueAnyway}
         </Pill>
         <Pill variant="primary" onClick={onViewSample}>
-          Ver esta amostra
+          {t.onboarding.lowConfidence.viewSample}
         </Pill>
       </div>
     </div>

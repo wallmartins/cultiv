@@ -154,7 +154,7 @@ describe("voice route (S5)", () => {
 
     expect(await screen.findByText("Voz sólida")).toBeInTheDocument();
     expect(screen.getByText("Você parte quase sempre de uma tensão concreta antes de generalizar.")).toBeInTheDocument();
-    expect(screen.getByText("fala de igual pra igual")).toBeInTheDocument();
+    expect(screen.getByText("Fala de igual pra igual")).toBeInTheDocument();
     expect(screen.getByText("Consentimento de treino concedido")).toBeInTheDocument();
 
     const text = container.textContent ?? "";
@@ -287,8 +287,8 @@ describe("voice companion — one source, two surfaces (S5)", () => {
     expect(screen.getByText("Voz sólida")).toBeInTheDocument();
     expect(screen.getByText("Você parte quase sempre de uma tensão concreta antes de generalizar.")).toBeInTheDocument();
     // Companion slices to 3 chips — the 4th from the fixture stays route-only.
-    expect(screen.getByText("fala de igual pra igual")).toBeInTheDocument();
-    expect(screen.queryByText("abre com cena concreta")).not.toBeInTheDocument();
+    expect(screen.getByText("Fala de igual pra igual")).toBeInTheDocument();
+    expect(screen.queryByText("Abre com cena concreta")).not.toBeInTheDocument();
   });
 
   it("falls back to the shared empty state when there's no profile", async () => {

@@ -99,5 +99,16 @@ export function homeGraph(site: URL): object[] {
       acceptedAnswer: { "@type": "Answer", text: f.a },
     })),
   };
-  return [org, website, software, faq];
+  const webpage = {
+    "@type": "WebPage",
+    "@id": id(site, "/#webpage"),
+    url: site.href,
+    name: SITE.pt.title,
+    description: SITE.pt.description,
+    inLanguage: "pt-BR",
+    isPartOf: { "@id": website["@id"] },
+    about: { "@id": software["@id"] },
+    primaryImageOfPage: id(site, "/og-image.png"),
+  };
+  return [org, website, webpage, software, faq];
 }

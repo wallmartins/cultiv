@@ -1,4 +1,5 @@
 import { Mono, Pill, Ring, Serif, StatusDot } from "../primitives/index.js";
+import { useMessages } from "../i18n/index.js";
 
 export interface QueueAndTrialGateProps {
   readonly runningCount: number;
@@ -10,6 +11,7 @@ export interface QueueAndTrialGateProps {
 
 // 2b — last trial generation + ≥2 already running: single card, never a modal.
 export function QueueAndTrialGate({ runningCount, queueEta, onUseLast, onSaveForLater, onViewPlans }: QueueAndTrialGateProps) {
+  const t = useMessages();
   return (
     <div style={{ maxWidth: 560, width: "100%", display: "flex", flexDirection: "column", gap: 14 }}>
       <div
@@ -28,13 +30,12 @@ export function QueueAndTrialGate({ runningCount, queueEta, onUseLast, onSaveFor
             <span style={{ fontFamily: "var(--font-ui)", fontSize: "0.8rem" }}>1</span>
           </Ring>
           <Serif size="1.25rem" lineHeight={1.3}>
-            Esta é a sua última geração do teste.
+            {t.states.queueAndTrialGate.lastGeneration}
           </Serif>
         </div>
 
         <div style={{ fontSize: "0.84rem", color: "var(--muted)", lineHeight: 1.6 }}>
-          Depois dela, escrever de novo pede um plano. Sua voz e seu histórico ficam — o limite do
-          teste é só volume.
+          {t.states.queueAndTrialGate.explanation}
         </div>
 
         <div
@@ -47,12 +48,12 @@ export function QueueAndTrialGate({ runningCount, queueEta, onUseLast, onSaveFor
           }}
         >
           <StatusDot tone="accent" size={6} pulse />
-          <Mono>{runningCount} gerações rodando agora — esta entra na fila e começa em {queueEta}</Mono>
+          <Mono>{t.states.queueAndTrialGate.queueStatus(t.common.generations(runningCount), queueEta)}</Mono>
         </div>
 
         <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", flexWrap: "wrap" }}>
-          <Pill variant="secondary" onClick={onSaveForLater}>Guardar pra depois</Pill>
-          <Pill variant="primary" onClick={onUseLast}>Usar a última e entrar na fila →</Pill>
+          <Pill variant="secondary" onClick={onSaveForLater}>{t.states.queueAndTrialGate.saveForLater}</Pill>
+          <Pill variant="primary" onClick={onUseLast}>{t.states.queueAndTrialGate.useLast}</Pill>
         </div>
       </div>
 
@@ -62,7 +63,7 @@ export function QueueAndTrialGate({ runningCount, queueEta, onUseLast, onSaveFor
           onClick={onViewPlans}
           style={{ background: "none", border: "none", padding: 0, cursor: "pointer" }}
         >
-          <Mono style={{ color: "var(--accent)" }}>ver planos antes de decidir →</Mono>
+          <Mono style={{ color: "var(--accent)" }}>{t.states.queueAndTrialGate.viewPlans}</Mono>
         </button>
       </div>
     </div>

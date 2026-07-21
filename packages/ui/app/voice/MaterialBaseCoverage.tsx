@@ -1,3 +1,4 @@
+import { useMessages } from "../i18n/index.js";
 import { Mono, Panel } from "../primitives/index.js";
 import type { CoverageItemVM } from "./types.js";
 
@@ -7,13 +8,15 @@ export interface MaterialBaseCoverageProps {
 }
 
 export function MaterialBaseCoverage({ coverage, nextStep }: MaterialBaseCoverageProps) {
+  const t = useMessages();
+
   return (
     <Panel className="voice-material-card voice-coverage-card">
       <Mono as="div" className="voice-material-card-heading">
-        Cobertura por formato
+        {t.voice.coverage.heading}
       </Mono>
       {coverage.length === 0 ? (
-        <div className="voice-coverage-empty">cobertura ainda não calculada</div>
+        <div className="voice-coverage-empty">{t.voice.coverage.empty}</div>
       ) : (
         coverage.map((item) => (
           <div key={item.label} className="voice-coverage-row">
@@ -28,7 +31,7 @@ export function MaterialBaseCoverage({ coverage, nextStep }: MaterialBaseCoverag
         ))
       )}
       <div className="voice-coverage-next">
-        <span className="voice-coverage-next-eyebrow">Próximo passo:</span> {nextStep}
+        <span className="voice-coverage-next-eyebrow">{t.voice.coverage.nextStepEyebrow}</span> {nextStep}
       </div>
     </Panel>
   );

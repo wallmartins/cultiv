@@ -10,14 +10,8 @@ import {
 } from "@my-ai-orchestrator/shared";
 import { DetailFailed, ExecutionDetail, WritingCenter } from "@my-ai-orchestrator/ui/app/detail";
 import { LongTimeoutWatch } from "@my-ai-orchestrator/ui/app/states";
-import {
-  buildAlignment,
-  buildDetailMeta,
-  detailErrorReason,
-  formatElapsed,
-  isLongRunning,
-  splitParagraphs
-} from "./detail-view.js";
+import { useFormat, useMessages } from "@my-ai-orchestrator/ui/app/i18n";
+import { buildAlignment, buildDetailMeta, detailErrorReason, isLongRunning, splitParagraphs } from "./detail-view.js";
 
 const routeApi = getRouteApi("/_shell/g/$executionId");
 
@@ -29,6 +23,8 @@ export function ExecutionDetailContainer() {
   const navigate = routeApi.useNavigate();
   const [alignmentOpen, setAlignmentOpen] = useState(false);
   const [timeoutAcknowledged, setTimeoutAcknowledged] = useState(false);
+  const t = useMessages();
+  const format = useFormat();
 
   const { data: execution, isError, error } = useExecution(executionId);
   useExecutionWatch(executionId);
@@ -39,7 +35,7 @@ export function ExecutionDetailContainer() {
   // Buscar falhou é diferente de ainda não ter chegado: sem este ramo os dois caem no `null`
   // abaixo e a rota fica permanentemente em branco.
   if (isError) {
-    return <DetailFailed reason={detailErrorReason(error)} onRedo={() => navigate({ to: "/generate" })} />;
+    return <DetailFailed reason={detailErrorReason(t, error)} onRedo={() => navigate({ to: "/generate" })} />;
   }
 
   if (!execution) return null;
@@ -51,7 +47,7 @@ export function ExecutionDetailContainer() {
         <LongTimeoutWatch
           theme={execution.briefingTopic ?? ""}
           progress={(execution.progress?.percent ?? 0) / 100}
-          elapsed={formatElapsed(execution.createdAt, now)}
+          elapsed={format.relativeTime(execution.createdAt, now)}
           refundCredits={execution.reservedCredits}
           onCancel={() => cancelMutation.mutate(undefined)}
           onWait={() => setTimeoutAcknowledged(true)}
@@ -63,7 +59,8 @@ export function ExecutionDetailContainer() {
 
   if (execution.status === "failed" || execution.status === "cancelled") {
     const reason =
-      execution.error?.message ?? (execution.status === "cancelled" ? "geração cancelada" : "motivo desconhecido");
+      execution.error?.message ??
+      (execution.status === "cancelled" ? t.detail.cancelledReason : t.detail.unknownReason);
     return <DetailFailed reason={reason} onRedo={() => navigate({ to: "/generate" })} />;
   }
 
@@ -77,11 +74,11 @@ export function ExecutionDetailContainer() {
 
   return (
     <ExecutionDetail
-      meta={buildDetailMeta(execution, new Date())}
+      meta={buildDetailMeta(t, format, execution, new Date())}
       usedFallbackVoiceProfile={execution.voice?.usedFallbackVoiceProfile ?? false}
-      topic={execution.briefingTopic ?? "sem tema"}
+      topic={execution.briefingTopic ?? t.common.noTopic}
       paragraphs={splitParagraphs(execution.result?.content ?? "")}
-      alignment={buildAlignment(execution.voice)}
+      alignment={buildAlignment(t, execution.voice)}
       alignmentOpen={alignmentOpen}
       onToggleAlignment={() => setAlignmentOpen((open) => !open)}
       onSeeVoiceProfile={() => navigate({ to: "/voice" })}

@@ -1,4 +1,5 @@
 import { Mono, Pill, Serif } from "../primitives/index.js";
+import { useMessages } from "../i18n/index.js";
 import { LowConfidenceReview } from "./LowConfidenceReview.js";
 import { VoicePreview } from "./VoicePreview.js";
 import type { VoicePreviewVM } from "./types.js";
@@ -18,18 +19,20 @@ export interface ResultStepProps {
 }
 
 export function ResultStep({ state }: ResultStepProps) {
+  const t = useMessages();
+
   if (state.kind === "error") {
     return (
       <div className="wizard-result-step is-error">
         <Mono eyebrow className="wizard-step-eyebrow">
-          algo deu errado
+          {t.onboarding.result.errorEyebrow}
         </Mono>
         <Serif as="h2" size="1.3rem" lineHeight={1.35}>
-          não deu pra construir sua voz agora
+          {t.onboarding.result.errorHeading}
         </Serif>
         <p className="wizard-result-error-message">{state.message}</p>
         <Pill variant="primary" onClick={state.onRetry}>
-          Refazer
+          {t.onboarding.result.retry}
         </Pill>
       </div>
     );
@@ -38,7 +41,7 @@ export function ResultStep({ state }: ResultStepProps) {
   return (
     <div className="wizard-result-step is-success">
       <Mono eyebrow className="wizard-step-eyebrow">
-        sua voz está pronta
+        {t.onboarding.voiceReady}
       </Mono>
       {state.lowConfidence ? (
         <LowConfidenceReview
@@ -56,7 +59,7 @@ export function ResultStep({ state }: ResultStepProps) {
             </Mono>
           ) : null}
           <Pill variant="primary" className="wide" onClick={state.onContinue}>
-            Continuar
+            {t.common.continue}
           </Pill>
         </>
       )}

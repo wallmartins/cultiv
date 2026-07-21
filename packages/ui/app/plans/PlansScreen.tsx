@@ -1,5 +1,6 @@
 import "./plans.css";
 import { Mono, Pill, Serif } from "../primitives/index.js";
+import { useMessages } from "../i18n/index.js";
 import { BillingToggles } from "./BillingToggles.js";
 import { PaywallHeader } from "./PaywallHeader.js";
 import { PlanCard } from "./PlanCard.js";
@@ -40,6 +41,7 @@ export function PlansScreen({
   disclaimer,
   topUp
 }: PlansScreenProps) {
+  const t = useMessages();
   return (
     <div className="plans-screen">
       <div className="plans-screen-inner">
@@ -54,7 +56,9 @@ export function PlansScreen({
         ) : null}
         <div className="plans-heading">
           <Serif as="h1" className="plans-heading-title">
-            Escolha o ritmo da sua <em>voz</em>.
+            {t.plans.heading.prefix}
+            <em>{t.plans.heading.emphasis}</em>
+            {t.plans.heading.suffix}
           </Serif>
           <BillingToggles
             period={period}
@@ -82,6 +86,7 @@ function PlanGrid({
   readonly plans: readonly PlanCardData[];
   readonly onRetry?: () => void;
 }) {
+  const t = useMessages();
   if (state === "loading") {
     return (
       <div className="plan-grid is-loading">
@@ -95,10 +100,10 @@ function PlanGrid({
   if (state === "error") {
     return (
       <div className="plans-catalog-error">
-        <Mono>não foi possível carregar os planos agora</Mono>
+        <Mono>{t.plans.catalogError}</Mono>
         {onRetry ? (
           <Pill variant="outline" onClick={onRetry}>
-            Tentar de novo
+            {t.common.retry}
           </Pill>
         ) : null}
       </div>

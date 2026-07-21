@@ -1,4 +1,5 @@
 import { Mono, Panel, Serif } from "../primitives/index.js";
+import { useMessages } from "../i18n/index.js";
 import { EmptyLedger } from "./EmptyLedger.js";
 import { LedgerRow, type LedgerRowData } from "./LedgerRow.js";
 
@@ -12,14 +13,15 @@ export interface LedgerStatementProps {
 // Rows arrive already curated by the backend (LedgerStatementView) — this only lays them out,
 // it never collapses reserve/capture/release itself.
 export function LedgerStatement({ rows, loading = false }: LedgerStatementProps) {
+  const t = useMessages();
   return (
     <div>
       <Serif as="h2" size="1.5rem" style={{ marginBottom: "var(--sp-md)" }}>
-        Extrato
+        {t.billing.extrato}
       </Serif>
       {loading ? (
         <Panel style={{ padding: "var(--sp-lg)", textAlign: "center" }}>
-          <Mono style={{ color: "var(--dim)" }}>carregando extrato…</Mono>
+          <Mono style={{ color: "var(--dim)" }}>{t.billing.ledgerLoading}</Mono>
         </Panel>
       ) : rows.length === 0 ? (
         <EmptyLedger />

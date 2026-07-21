@@ -1,5 +1,6 @@
 import "./onboarding.css";
 import { Mono } from "../primitives/index.js";
+import { useMessages } from "../i18n/index.js";
 import { ReviewStep, type ReviewStepProps } from "./ReviewStep.js";
 import { ResultStep, type ResultStepProps } from "./ResultStep.js";
 import { Step1Context, type Step1ContextProps } from "./Step1Context.js";
@@ -41,6 +42,7 @@ function renderContent(content: WizardStepContent) {
 // Um só motor de passos, dois chromes (breakdown-11 §0/§1.2) — mesmos componentes de conteúdo,
 // só a casca muda entre tela cheia (full, primeira calibração) e overlay (light, recalibrar).
 export function CalibrationWizard({ variant, progress, content, onClose }: CalibrationWizardProps) {
+  const t = useMessages();
   const showProgress = content.kind !== "bridge";
 
   if (variant === "light") {
@@ -48,8 +50,8 @@ export function CalibrationWizard({ variant, progress, content, onClose }: Calib
       <div className="wizard-overlay-backdrop">
         <div className="wizard-overlay-panel">
           <div className="wizard-overlay-header">
-            <Mono eyebrow>recalibrar sua voz</Mono>
-            <button type="button" className="wizard-overlay-close close" onClick={onClose} aria-label="fechar">
+            <Mono eyebrow>{t.onboarding.overlay.recalibrateEyebrow}</Mono>
+            <button type="button" className="wizard-overlay-close close" onClick={onClose} aria-label={t.onboarding.overlay.close}>
               ×
             </button>
           </div>

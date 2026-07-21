@@ -1,4 +1,5 @@
 import { Mono, Pill, Ring } from "../primitives/index.js";
+import { useMessages } from "../i18n/index.js";
 
 export interface PaymentPendingZeroCreditsProps {
   readonly planName: string;
@@ -8,6 +9,7 @@ export interface PaymentPendingZeroCreditsProps {
 
 // 1d — billing card + generation paywall when payment is pending and credits hit zero.
 export function PaymentPendingZeroCredits({ planName, cycleCredits, onRegularize }: PaymentPendingZeroCreditsProps) {
+  const t = useMessages();
   return (
     <div
       style={{
@@ -26,7 +28,7 @@ export function PaymentPendingZeroCredits({ planName, cycleCredits, onRegularize
     >
       <Ring value={0} size={84} width={4} tone="danger">
         <span style={{ fontFamily: "var(--font-ui)", fontSize: "1.5rem", lineHeight: 1 }}>0</span>
-        <Mono style={{ color: "var(--muted)", marginTop: 2 }}>CRÉDITOS</Mono>
+        <Mono style={{ color: "var(--muted)", marginTop: 2 }}>{t.states.paymentPendingZeroCredits.creditsLabel}</Mono>
       </Ring>
 
       <h1
@@ -39,23 +41,22 @@ export function PaymentPendingZeroCredits({ planName, cycleCredits, onRegularize
           maxWidth: 420
         }}
       >
-        Seus créditos acabaram — e a renovação não passou.
+        {t.states.paymentPendingZeroCredits.title}
       </h1>
 
       <div style={{ fontSize: "0.88rem", color: "var(--muted)", lineHeight: 1.6, maxWidth: 420 }}>
-        Não conseguimos cobrar o {planName} este mês. Regularizando, os {cycleCredits} créditos do ciclo
-        entram na hora. Sua voz e seu histórico estão intactos.
+        {t.states.paymentPendingZeroCredits.body(planName, t.common.credits(cycleCredits))}
       </div>
 
       <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap", justifyContent: "center" }}>
-        <Pill variant="danger" onClick={onRegularize}>Regularizar pagamento →</Pill>
+        <Pill variant="danger" onClick={onRegularize}>{t.states.paymentPendingZeroCredits.regularize}</Pill>
         <Pill variant="secondary" disabled style={{ padding: "10px 20px", fontSize: "0.86rem" }}>
-          Comprar créditos avulsos
+          {t.states.paymentPendingZeroCredits.buyExtra}
         </Pill>
       </div>
 
       <Mono style={{ color: "var(--dim)" }}>
-        compra avulsa reabre depois de regularizar · dúvidas? suporte@cultiv.app
+        {t.states.paymentPendingZeroCredits.footnote}
       </Mono>
     </div>
   );

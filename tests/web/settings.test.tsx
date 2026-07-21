@@ -8,12 +8,19 @@ import React from "react";
 import { describe, expect, it, vi } from "vitest";
 import type { VoiceTrainingConsentStatusView } from "@my-ai-orchestrator/contracts";
 import { makeAppRuntime, queryKeys, RuntimeProvider } from "@my-ai-orchestrator/shared";
+import { DEFAULT_LOCALE, makeFormatters, messagesFor } from "@my-ai-orchestrator/ui/app/i18n";
 import { DeleteDialog, ResetDialog, SettingsScreen, type SettingsScreenProps } from "@my-ai-orchestrator/ui/app/settings";
 import type { AppAuth } from "~/router.js";
 import { SettingsContainer } from "~/routes/settings.js";
 import { storePostResetContext } from "~/routes/calibrate-view.js";
 import { audienceFromChannel, consentMirrorSinceLabel, initialsFrom } from "~/routes/settings-view.js";
 import { entitlementFixture, executionFixture, executionsPageWith, mockAuth } from "./fixtures.js";
+
+// Components render outside I18nProvider in this file (falls back to pt-BR, per CONVENTIONS.md);
+// pure view functions take the dictionary as a parameter, so tests construct the same pt-BR
+// instance to keep both sides consistent.
+const t = messagesFor(DEFAULT_LOCALE);
+const format = makeFormatters(DEFAULT_LOCALE);
 
 // jsdom's localStorage is undefined in this suite's Node/vitest combo (confirmed empirically) —
 // storePostResetContext is mocked so the reset-confirm wiring is testable without depending on
@@ -54,16 +61,17 @@ describe("settings-view (pure)", () => {
   });
 
   it("consentMirrorSinceLabel reads grantedAt when granted, revokedAt when not", () => {
-    const granted: VoiceTrainingConsentStatusView = { granted: true, grantedAt: "2026-07-02T00:00:00Z" };
-    const revoked: VoiceTrainingConsentStatusView = { granted: false, revokedAt: "2026-07-10T00:00:00Z" };
-    expect(consentMirrorSinceLabel(granted)).toBe("em 02/07/2026");
-    expect(consentMirrorSinceLabel(revoked)).toBe("em 10/07/2026");
+    const granted: VoiceTrainingConsentStatusView = { granted: true, grantedAt: "2026-07-02T12:00:00Z" };
+    const revoked: VoiceTrainingConsentStatusView = { granted: false, revokedAt: "2026-07-10T12:00:00Z" };
+    // Noon UTC keeps the calendar day stable regardless of the runner's local timezone.
+    expect(consentMirrorSinceLabel(t, format, granted)).toBe("em 02 de jul. de 2026");
+    expect(consentMirrorSinceLabel(t, format, revoked)).toBe("em 10 de jul. de 2026");
   });
 
   it("audienceFromChannel (1e, GAP #7) maps the real channel field, falls back generically", () => {
-    expect(audienceFromChannel("professional-network")).toBe("quem te lê no LinkedIn");
-    expect(audienceFromChannel(null)).toBe("quem te acompanha");
-    expect(audienceFromChannel(undefined)).toBe("quem te acompanha");
+    expect(audienceFromChannel(t, "professional-network")).toBe("quem te lê no LinkedIn");
+    expect(audienceFromChannel(t, null)).toBe("quem te acompanha");
+    expect(audienceFromChannel(t, undefined)).toBe("quem te acompanha");
   });
 });
 
@@ -185,14 +193,14 @@ describe("settings route (S9) — real hooks, no mutation submitted", () => {
   it("binds real auth identity, entitlement plan, and granted consent", async () => {
     const queryClient = newQueryClient();
     queryClient.setQueryData(queryKeys.entitlement(), entitlementFixture);
-    queryClient.setQueryData(queryKeys.voiceConsent(), { granted: true, grantedAt: "2026-07-02T00:00:00Z" });
+    queryClient.setQueryData(queryKeys.voiceConsent(), { granted: true, grantedAt: "2026-07-02T12:00:00Z" });
     queryClient.setQueryData(queryKeys.billingPlans(), { plans: [], generationsDisclaimer: "" });
 
     renderSettings(queryClient);
 
     expect(await screen.findByText(mockAuth.user!.name!)).toBeInTheDocument();
     expect(screen.getByText(`${mockAuth.user!.email} · via Auth0`)).toBeInTheDocument();
-    expect(screen.getByText(/concedido em 02\/07\/2026/)).toBeInTheDocument();
+    expect(screen.getByText(/concedido em 02 de jul\. de 2026/)).toBeInTheDocument();
     // tier "creator" has no catalog match in the seeded (empty) plans list, so resolvePlanName
     // falls back to the capitalized tier — same real function billing.tsx uses.
     const expectedPlanText = `Creator · ${entitlementFixture.availableCredits} créditos`;
@@ -202,7 +210,7 @@ describe("settings route (S9) — real hooks, no mutation submitted", () => {
   it("opens the reset dialog and cancels without invoking the mutation", async () => {
     const queryClient = newQueryClient();
     queryClient.setQueryData(queryKeys.entitlement(), entitlementFixture);
-    queryClient.setQueryData(queryKeys.voiceConsent(), { granted: true, grantedAt: "2026-07-02T00:00:00Z" });
+    queryClient.setQueryData(queryKeys.voiceConsent(), { granted: true, grantedAt: "2026-07-02T12:00:00Z" });
     queryClient.setQueryData(queryKeys.billingPlans(), { plans: [], generationsDisclaimer: "" });
 
     renderSettings(queryClient);
@@ -219,7 +227,7 @@ describe("settings route (S9) — real hooks, no mutation submitted", () => {
   it("opens the delete dialog and keeps the terminal action disabled until EXCLUIR is typed", async () => {
     const queryClient = newQueryClient();
     queryClient.setQueryData(queryKeys.entitlement(), entitlementFixture);
-    queryClient.setQueryData(queryKeys.voiceConsent(), { granted: true, grantedAt: "2026-07-02T00:00:00Z" });
+    queryClient.setQueryData(queryKeys.voiceConsent(), { granted: true, grantedAt: "2026-07-02T12:00:00Z" });
     queryClient.setQueryData(queryKeys.billingPlans(), { plans: [], generationsDisclaimer: "" });
 
     renderSettings(queryClient);
@@ -239,7 +247,7 @@ describe("settings route (S9) — real hooks, no mutation submitted", () => {
   it("1e — confirming reset snapshots the last execution's topic/channel before the mutation wipes it", async () => {
     const queryClient = newQueryClient();
     queryClient.setQueryData(queryKeys.entitlement(), entitlementFixture);
-    queryClient.setQueryData(queryKeys.voiceConsent(), { granted: true, grantedAt: "2026-07-02T00:00:00Z" });
+    queryClient.setQueryData(queryKeys.voiceConsent(), { granted: true, grantedAt: "2026-07-02T12:00:00Z" });
     queryClient.setQueryData(queryKeys.billingPlans(), { plans: [], generationsDisclaimer: "" });
     queryClient.setQueryData(
       queryKeys.executionsList({ status: "all", limit: 1 }),

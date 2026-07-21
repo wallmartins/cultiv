@@ -1,4 +1,5 @@
 import { Chip, Mono } from "../primitives/index.js";
+import { useMessages } from "../i18n/index.js";
 import type { ExecutionReactionValue } from "./types.js";
 
 export interface ReactionRowProps {
@@ -9,16 +10,17 @@ export interface ReactionRowProps {
 
 // "soou como você?" — clicking the already-selected pill clears it (toggle), the other submits.
 export function ReactionRow({ value, onReact, pending = false }: ReactionRowProps) {
+  const t = useMessages();
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-      <Mono style={{ color: "var(--dim)" }}>soou como você?</Mono>
+      <Mono style={{ color: "var(--dim)" }}>{t.detail.reaction.prompt}</Mono>
       <Chip
         tone={value === "up" ? "accent" : undefined}
         aria-pressed={value === "up"}
         disabled={pending}
         onClick={() => onReact("up")}
       >
-        Confere
+        {t.detail.reaction.up}
       </Chip>
       <Chip
         tone={value === "down" ? "danger" : undefined}
@@ -26,10 +28,10 @@ export function ReactionRow({ value, onReact, pending = false }: ReactionRowProp
         disabled={pending}
         onClick={() => onReact("down")}
       >
-        Nem tanto
+        {t.detail.reaction.down}
       </Chip>
       {value ? (
-        <span style={{ fontSize: "0.8rem", color: "var(--muted)", fontStyle: "italic" }}>obrigado — isso afina a sua voz</span>
+        <span style={{ fontSize: "0.8rem", color: "var(--muted)", fontStyle: "italic" }}>{t.detail.reaction.thanks}</span>
       ) : null}
     </div>
   );

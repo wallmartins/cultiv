@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { TRAIT_KEYS, type TraitKey } from "@my-ai-orchestrator/contracts";
 import {
-  confidenceHeadline,
   hasVoiceProfile,
   useConsentStatus,
   useExecutionsList,
@@ -12,6 +11,7 @@ import {
   useShellStore,
   useVoiceProfile
 } from "@my-ai-orchestrator/shared";
+import { useFormat, useMessages } from "@my-ai-orchestrator/ui/app/i18n";
 import { VoiceProfileScreen, type VoiceProfileScreenState } from "@my-ai-orchestrator/ui/app/voice";
 import { RecalibrateWithRunning } from "@my-ai-orchestrator/ui/app/states";
 import {
@@ -42,6 +42,8 @@ function isTraitKey(value: string): value is TraitKey {
 // VoiceProseCard/ConfidenceRing implementation (breakdown-10 §0).
 export function VoiceContainer() {
   const navigate = useNavigate();
+  const t = useMessages();
+  const format = useFormat();
   const toggleRecal = useShellStore((state) => state.toggleRecal);
   const [revokeDialogOpen, setRevokeDialogOpen] = useState(false);
   const [recalConfirmOpen, setRecalConfirmOpen] = useState(false);
@@ -84,14 +86,14 @@ export function VoiceContainer() {
 
     state = {
       kind: "ready",
-      ring: buildRing(profile),
-      headline: confidenceHeadline(profile.profile.confidence),
-      versionLabel: buildVersionLabel(profile),
+      ring: buildRing(profile, t),
+      headline: t.common.confidence.headline[profile.profile.confidence],
+      versionLabel: buildVersionLabel(profile, t),
       onRecalibrate: requestRecalibrate,
       proseCore: prose.core,
       proseDevelopment: prose.development,
-      descriptorChips: buildDescriptorChips(profile),
-      traits: buildTraits(profile),
+      descriptorChips: buildDescriptorChips(profile, t),
+      traits: buildTraits(profile, t),
       onConfirmTrait: (traitKey) => {
         if (isTraitKey(traitKey)) recordTrait.mutate({ traitKey, response: "confirmed" });
       },
@@ -100,18 +102,18 @@ export function VoiceContainer() {
       },
       pendingTraitKey: recordTrait.isPending ? recordTrait.variables?.traitKey : undefined,
       materialBase: {
-        heading: `${profile.materialBase.totalExamples} amostras da calibração · leitura`,
+        heading: t.voice.materialBase.heading(t.common.samples(profile.materialBase.totalExamples)),
         totalExamples: profile.materialBase.totalExamples,
         activeExamples: profile.materialBase.activeExamples,
         excludedExamples: profile.materialBase.excludedExamples,
         pinnedExamples: profile.materialBase.pinnedExamples,
-        footnote: "novos exemplos só entram recalibrando",
+        footnote: t.voice.materialBase.footnote,
         samples: buildMaterialBaseSamples(profile)
       },
-      coverage: buildCoverage(profile.diagnostics),
+      coverage: buildCoverage(profile.diagnostics, t),
       consent: {
         state: consent.granted ? "granted" : "revoked",
-        sinceLabel: buildConsentSinceLabel(consent),
+        sinceLabel: buildConsentSinceLabel(consent, t, format),
         onRevoke: () => setRevokeDialogOpen(true),
         onGrant: () => grantConsent.mutate()
       },
@@ -133,7 +135,7 @@ export function VoiceContainer() {
           <div onClick={(event) => event.stopPropagation()}>
             <RecalibrateWithRunning
               running={runningItems.map((item) => ({
-                topic: item.briefingTopic ?? "sem tema",
+                topic: item.briefingTopic ?? t.common.noTopic,
                 progress: (item.progress?.percent ?? 0) / 100
               }))}
               fromVersion={currentVersion}

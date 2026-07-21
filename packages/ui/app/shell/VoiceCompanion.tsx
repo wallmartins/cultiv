@@ -8,6 +8,7 @@ import { VoiceEmptyState } from "../voice/VoiceEmptyState.js";
 import { VoiceProseCard } from "../voice/VoiceProseCard.js";
 import { LockedCompanionEmpty } from "../locked/index.js";
 import type { VoiceCompanionContent } from "./types.js";
+import { useMessages } from "../i18n/index.js";
 
 export interface VoiceCompanionProps {
   readonly open: boolean;
@@ -16,15 +17,16 @@ export interface VoiceCompanionProps {
 }
 
 export function VoiceCompanion({ open, onClose, content }: VoiceCompanionProps) {
+  const t = useMessages();
   if (!open) return null;
 
   return (
     <div className="voice-companion">
       <div className="voice-companion-header">
         <Mono as="span" className="voice-companion-title">
-          Sua voz
+          {t.shell.companion.title}
         </Mono>
-        <button type="button" className="icon-button" onClick={onClose} aria-label="fechar">
+        <button type="button" className="icon-button" onClick={onClose} aria-label={t.shell.companion.close}>
           ×
         </button>
       </div>
@@ -42,12 +44,13 @@ export function VoiceCompanion({ open, onClose, content }: VoiceCompanionProps) 
 // Same component the route's empty branch uses (VoiceProfileScreen.tsx) — "uma fonte, duas
 // superfícies" applies to empty state too, not just ready.
 function CompanionEmpty({ onCalibrate }: { onCalibrate: () => void }) {
+  const t = useMessages();
   return (
     <VoiceEmptyState
       onCalibrate={onCalibrate}
       size={56}
-      description="sua voz aparece aqui depois da calibração"
-      ctaLabel="calibrar agora →"
+      description={t.shell.companion.emptyDescription}
+      ctaLabel={t.shell.companion.emptyCta}
     />
   );
 }
@@ -63,6 +66,7 @@ function CompanionReady({
   descriptorChips,
   onSeeProfile
 }: Extract<VoiceCompanionContent, { kind: "ready" }>) {
+  const t = useMessages();
   return (
     <div className="companion-ready">
       <ProfileCard dialog className="companion-ready-summary">
@@ -76,10 +80,10 @@ function CompanionReady({
           </Mono>
         </div>
       </ProfileCard>
-      <VoiceProseCard heading="Como eu penso" body={proseCore} />
+      <VoiceProseCard heading={t.shell.companion.howIThink} body={proseCore} />
       <VoiceDescriptorChips chips={descriptorChips.slice(0, 3)} />
       <button type="button" className="companion-ready-link" onClick={onSeeProfile}>
-        <Mono as="span">ver perfil completo →</Mono>
+        <Mono as="span">{t.shell.companion.seeFullProfile}</Mono>
       </button>
     </div>
   );

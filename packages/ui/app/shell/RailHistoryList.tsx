@@ -1,4 +1,5 @@
 import { Mono, Pill, Ring, Serif, StatusDot } from "../primitives/index.js";
+import { useMessages } from "../i18n/index.js";
 import type { HistoryGroupData, HistoryItemData, RailEmptyReason } from "./types.js";
 
 export interface RailHistoryListProps {
@@ -20,6 +21,7 @@ export function RailHistoryList({
   otherStatusMatches,
   onClearFilter
 }: RailHistoryListProps) {
+  const t = useMessages();
   if (emptyReason) {
     return (
       <div className="rail-history">
@@ -35,7 +37,7 @@ export function RailHistoryList({
       ))}
       {olderCount ? (
         <Pill variant="outline" onClick={onShowOlder} className="rail-show-older">
-          mostrar mais antigos · {olderCount}
+          {t.shell.showOlder(olderCount)}
         </Pill>
       ) : null}
     </div>
@@ -92,21 +94,19 @@ function EmptyRail({
   otherStatusMatches?: number;
   onClearFilter?: () => void;
 }) {
+  const t = useMessages();
   if (reason === "filtered" && otherStatusMatches) {
     return (
       <div className="rail-empty">
-        <Mono as="div">nada aqui com esse filtro — mas há {otherStatusMatches} resultados em outros status</Mono>
+        <Mono as="div">{t.shell.emptyOtherStatus(otherStatusMatches)}</Mono>
         <Pill variant="outline" tone="accent" onClick={onClearFilter} className="rail-show-older">
-          Limpar filtro e mostrar os {otherStatusMatches} →
+          {t.shell.clearFilterCta(otherStatusMatches)}
         </Pill>
       </div>
     );
   }
 
-  const text =
-    reason === "filtered"
-      ? "nenhuma geração encontrada · limpe a busca ou os filtros"
-      : "nenhuma geração ainda · toque em ＋ Nova geração para começar";
+  const text = reason === "filtered" ? t.shell.emptyFiltered : t.shell.emptyNone;
   return (
     <Mono as="div" className="rail-empty">
       {text}

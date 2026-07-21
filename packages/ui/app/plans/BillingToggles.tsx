@@ -1,3 +1,4 @@
+import { useMessages } from "../i18n/index.js";
 import type { BillingCurrencyUI, BillingPeriodUI } from "./types.js";
 
 export interface BillingTogglesProps {
@@ -12,14 +13,15 @@ function toggleClass(active: boolean): string {
 }
 
 export function BillingToggles({ period, currency, onPeriodChange, onCurrencyChange }: BillingTogglesProps) {
+  const t = useMessages();
   return (
     <div className="billing-toggles">
       <div className="billing-toggle-group">
         <button type="button" className={toggleClass(period === "monthly")} onClick={() => onPeriodChange("monthly")}>
-          mensal
+          {t.plans.period.monthly}
         </button>
         <button type="button" className={toggleClass(period === "annual")} onClick={() => onPeriodChange("annual")}>
-          anual −20%
+          {t.plans.period.annual}
         </button>
       </div>
       <div className="billing-toggle-group">

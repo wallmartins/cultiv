@@ -5,6 +5,7 @@ import {
   type PastedThemeFormattedProps,
   type QueueAndTrialGateProps
 } from "../states/index.js";
+import { useMessages } from "../i18n/index.js";
 import { AnalyzingIndicator } from "./AnalyzingIndicator.js";
 import { ChannelPicker, type ChannelPickerProps } from "./ChannelPicker.js";
 import { CostPreviewBand, type CostPreviewBandProps } from "./CostPreviewBand.js";
@@ -35,6 +36,7 @@ export interface GenerateSurfaceProps {
 
 // Orchestrates by phase — no state of its own, just picks which block renders (breakdown 08 §1a).
 export function GenerateSurface({ phase, hero, pastedPreview, messages, composerRegion, costBand }: GenerateSurfaceProps) {
+  const t = useMessages();
   if (phase === "hero") {
     if (pastedPreview) {
       return (
@@ -57,7 +59,7 @@ export function GenerateSurface({ phase, hero, pastedPreview, messages, composer
             phase === "analyzing" ? (
               <AnalyzingIndicator />
             ) : phase === "firing" ? (
-              <AnalyzingIndicator label="iniciando a geração…" />
+              <AnalyzingIndicator label={t.generate.startingGeneration} />
             ) : undefined
           }
         />

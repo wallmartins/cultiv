@@ -16,6 +16,7 @@ import {
 } from "@my-ai-orchestrator/shared";
 import { GenerateSurface, type ComposerRegion } from "@my-ai-orchestrator/ui/app/generate";
 import { PaymentPendingZeroCredits } from "@my-ai-orchestrator/ui/app/states";
+import { useMessages } from "@my-ai-orchestrator/ui/app/i18n";
 import {
   buildBriefing,
   buildGuidedSteps,
@@ -30,7 +31,7 @@ import {
   isLastTrialGeneration,
   looksLikeMarkdown,
   parsePastedTheme,
-  PLATFORM_OPTIONS,
+  platformOptions,
   questionEyebrow,
   questionStepCount,
   type PastedThemeParse
@@ -40,6 +41,7 @@ import {
 // props. packages/ui/app/generate stays props-in; this is the only file that touches hooks/router.
 export function GenerateContainer() {
   const navigate = useNavigate();
+  const t = useMessages();
 
   const {
     phase,
@@ -73,9 +75,10 @@ export function GenerateContainer() {
   // — same queryKey, so this is a cache hit rather than a second network round-trip.
   const runningExecutions = useExecutionsList({ status: "all", limit: 20 });
 
-  const steps = buildGuidedSteps(questionPlan, intentAmbiguity, prefill?.intent);
+  const steps = buildGuidedSteps(t, questionPlan, intentAmbiguity, prefill?.intent);
   const currentStep = steps[qIndex];
   const briefing = buildBriefing(theme, steps, answers);
+  const options = platformOptions(t);
 
   // intent stays the original inference here (and in handleGenerate below) — the ambiguity answer
   // is drafting context, not an intent correction. Accepted risk for v1 (GAP #14, closed).
@@ -87,9 +90,9 @@ export function GenerateContainer() {
   };
   const previewQuery = usePreview(previewInput, phase === "thread");
 
-  const blockedReason = generateBlockedReason(entitlement.data);
-  const costLabel = formatCostLabel(previewQuery.data, entitlement.data?.canonicalCreditCost);
-  const trialLine = formatTrialLine(entitlement.data, new Date());
+  const blockedReason = generateBlockedReason(t, entitlement.data);
+  const costLabel = formatCostLabel(t, previewQuery.data, entitlement.data?.canonicalCreditCost);
+  const trialLine = formatTrialLine(t, entitlement.data, new Date());
   const runningCount = countRunning(runningExecutions.data);
   const showQueueGate = isLastTrialGeneration(entitlement.data) && runningCount >= 2;
 
@@ -112,7 +115,7 @@ export function GenerateContainer() {
         onError: () => {
           setPrefillResult({
             prefill: { intent: "share-idea", scope: defaultScope("share-idea") },
-            questionPlan: fallbackQuestionPlan(submittedTheme),
+            questionPlan: fallbackQuestionPlan(t, submittedTheme),
             intentAmbiguity: null
           });
         }
@@ -129,7 +132,7 @@ export function GenerateContainer() {
   function handleThemePaste(pastedText: string) {
     if (!looksLikeMarkdown(pastedText)) return;
     setDraft(pastedText);
-    setPastedPreview(parsePastedTheme(pastedText));
+    setPastedPreview(parsePastedTheme(t, pastedText));
   }
 
   function submitCurrentAnswer() {
@@ -145,7 +148,7 @@ export function GenerateContainer() {
   }
 
   function selectPlatform(optionId: string) {
-    const option = PLATFORM_OPTIONS.find((candidate) => candidate.id === optionId);
+    const option = options.find((candidate) => candidate.id === optionId);
     if (!option) return;
     setSelectedPlatformId(optionId);
     setChannel(option.channel);
@@ -179,7 +182,7 @@ export function GenerateContainer() {
             id: "dispatch-error",
             kind: "error",
             topic: theme,
-            message: "créditos não cobrados — tente de novo"
+            message: t.generate.dispatchError
           });
         }
       }
@@ -195,7 +198,7 @@ export function GenerateContainer() {
               kind: "queue-gate",
               props: {
                 runningCount,
-                queueEta: formatQueueEta(runningCount),
+                queueEta: formatQueueEta(t, runningCount),
                 onUseLast: handleGenerate,
                 // No drafts contract exists — the session itself already survives navigation
                 // (wizard-session is a store, not route state), so "for later" is just leaving.
@@ -208,9 +211,9 @@ export function GenerateContainer() {
           ? {
               kind: "channel",
               props: {
-                eyebrow: "canal · opcional",
+                eyebrow: t.generate.channelEyebrow,
                 prompt: currentStep.prompt,
-                options: PLATFORM_OPTIONS.map((option) => ({
+                options: options.map((option) => ({
                   id: option.id,
                   label: option.label,
                   active: option.id === selectedPlatformId
@@ -222,7 +225,7 @@ export function GenerateContainer() {
           : {
               kind: "question",
               props: {
-                eyebrow: questionEyebrow(qIndex, questionStepCount(steps)),
+                eyebrow: questionEyebrow(t, qIndex, questionStepCount(steps)),
                 prompt: currentStep.prompt,
                 note: currentStep.note,
                 value: answerDraft,

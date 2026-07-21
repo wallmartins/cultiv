@@ -2,12 +2,25 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { RouterProvider } from "@tanstack/react-router";
-import { RuntimeProvider, type AppRuntime } from "@my-ai-orchestrator/shared/light";
+import { RuntimeProvider, useUiLanguage, type AppRuntime } from "@my-ai-orchestrator/shared/light";
+import { I18nProvider, useMessages } from "@my-ai-orchestrator/ui/app/i18n";
 import { router, type AppAuth } from "./router.js";
 import { loadRuntime } from "./runtime-loader.js";
 import { queryClient } from "./query-client.js";
 
+// The provider wraps AppContent rather than living inside it: the loading and load-failed states
+// below return before the router mounts, and they need copy too.
 export function App() {
+  const language = useUiLanguage((state) => state.language);
+  return (
+    <I18nProvider locale={language}>
+      <AppContent />
+    </I18nProvider>
+  );
+}
+
+function AppContent() {
+  const t = useMessages();
   const auth0 = useAuth0();
   const [runtime, setRuntime] = useState<AppRuntime>();
   const [runtimeFailed, setRuntimeFailed] = useState(false);
@@ -66,16 +79,16 @@ export function App() {
   if (runtimeFailed) {
     return (
       <p role="alert">
-        Não foi possível carregar o app.{" "}
+        {t.app.loadFailed}{" "}
         <button type="button" onClick={() => window.location.reload()}>
-          Recarregar
+          {t.app.reload}
         </button>
       </p>
     );
   }
 
   if (!routerMounted) {
-    return <p>Carregando…</p>;
+    return <p>{t.app.loading}</p>;
   }
 
   const routerTree = (

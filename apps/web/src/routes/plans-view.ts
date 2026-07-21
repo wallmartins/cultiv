@@ -1,11 +1,11 @@
 import type {
-  BillingCurrency,
   BillingEntitlementView,
   BillingPlanView,
   BillingTopUpPackage,
   CheckoutStatusView,
   PlanCatalogView
 } from "@my-ai-orchestrator/contracts";
+import type { AppFormatters, AppMessages } from "@my-ai-orchestrator/ui/app/i18n";
 import type { BillingCurrencyUI, BillingPeriodUI, PaywallTrigger, PlanCardData } from "@my-ai-orchestrator/ui/app/plans";
 
 const KNOWN_TRIGGERS: ReadonlySet<string> = new Set([
@@ -27,18 +27,9 @@ export function parsePeriod(raw: unknown): BillingPeriodUI | undefined {
   return typeof raw === "string" && KNOWN_PERIODS.has(raw) ? (raw as BillingPeriodUI) : undefined;
 }
 
-// Mirrors apps/landing/scripts/sync-plans.mjs's formatBRL/formatUSD — same rounding/decimal
-// convention across both surfaces, now applied to the real per-request `amountCents` (backend
-// already baked the annual −20% in; this never recomputes a discount).
-export function formatCents(cents: number, currency: BillingCurrency): string {
-  const value = cents / 100;
-  if (currency === "BRL") {
-    return Number.isInteger(value) ? `R$ ${value}` : `R$ ${value.toFixed(2).replace(".", ",")}`;
-  }
-  return Number.isInteger(value) ? `$${value}` : `$${value.toFixed(2)}`;
-}
-
 export function mapPlanToCard(
+  t: AppMessages,
+  format: AppFormatters,
   plan: BillingPlanView,
   period: BillingPeriodUI,
   currency: BillingCurrencyUI,
@@ -49,7 +40,7 @@ export function mapPlanToCard(
   const priceEntry = plan.prices[currency][period];
   const billNote =
     period === "annual" && priceEntry.annualTotalCents !== undefined
-      ? ` · ${formatCents(priceEntry.annualTotalCents, currency)} cobrado no ano`
+      ? t.plans.billNote.annualTotal(format.currency(priceEntry.annualTotalCents / 100, currency))
       : "";
   const current = plan.current === true;
 
@@ -60,17 +51,19 @@ export function mapPlanToCard(
     // O plano que o autor escolheu na landing rouba o destaque do catálogo — ele chegou por ele.
     featured: highlightPlanId ? plan.id === highlightPlanId : plan.featured,
     current,
-    priceLabel: formatCents(priceEntry.amountCents, currency),
+    priceLabel: format.currency(priceEntry.amountCents / 100, currency),
     billNote,
     generations: plan.monthlyGenerations,
     features: plan.features,
-    ctaLabel: current ? "Plano atual" : `Assinar ${plan.name} →`,
+    ctaLabel: current ? t.plans.currentPlanCta : t.plans.subscribeCta(plan.name),
     ctaDisabled: current || checkoutInFlight,
     onSelect
   };
 }
 
 export function mapCatalogToCards(
+  t: AppMessages,
+  format: AppFormatters,
   catalog: PlanCatalogView,
   period: BillingPeriodUI,
   currency: BillingCurrencyUI,
@@ -81,7 +74,7 @@ export function mapCatalogToCards(
   // Um ?plan= desconhecido não pode apagar o destaque que o catálogo já traz.
   const highlight = catalog.plans.some((plan) => plan.id === highlightPlanId) ? highlightPlanId : undefined;
   return catalog.plans.map((plan) =>
-    mapPlanToCard(plan, period, currency, checkoutInFlight, () => onSelectPlan(plan), highlight)
+    mapPlanToCard(t, format, plan, period, currency, checkoutInFlight, () => onSelectPlan(plan), highlight)
   );
 }
 
@@ -120,8 +113,8 @@ export function daysRemaining(deadlineIso: string, now: Date): number {
   return Math.max(0, Math.ceil(ms / (24 * 60 * 60 * 1000)));
 }
 
-export function gatewayLabel(gateway: "stripe" | "asaas"): string {
-  return gateway === "stripe" ? "Stripe" : "ASAAS";
+export function gatewayLabel(t: AppMessages, gateway: "stripe" | "asaas"): string {
+  return gateway === "stripe" ? t.plans.gateway.stripe : t.plans.gateway.asaas;
 }
 
 // 2e — DowngradeSurplus (breakdown-15 §1). BillingPlanView ships no rolloverCap field (GAP #6:

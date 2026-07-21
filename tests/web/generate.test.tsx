@@ -8,6 +8,7 @@ import React from "react";
 import { beforeEach, describe, expect, it } from "vitest";
 import type { GenerationPreviewResponse } from "@my-ai-orchestrator/contracts";
 import { makeAppRuntime, queryKeys, RuntimeProvider, useWizardSessionStore } from "@my-ai-orchestrator/shared";
+import { messagesFor } from "@my-ai-orchestrator/ui/app/i18n";
 import { GenerateContainer } from "~/routes/generate.js";
 import {
   buildBriefing,
@@ -44,6 +45,11 @@ function newQueryClient() {
   return new QueryClient({ defaultOptions: { queries: { staleTime: Infinity, retry: false } } });
 }
 
+// GenerateContainer falls back to pt-BR (DEFAULT_LOCALE) when rendered outside <I18nProvider>
+// (see renderGenerate above) — this mirrors that fallback for the pure generate-view.ts helpers
+// called directly in these tests.
+const t = messagesFor("pt-BR");
+
 const previewFixture: GenerationPreviewResponse = {
   pricingSnapshot: { quoteId: "quote-1", policyVersion: "v1", contentType: "linkedin-post", qualityMode: "balanced", creditPrice: 2 },
   currentBalance: 12,
@@ -79,7 +85,7 @@ describe("generate surface (S3)", () => {
 
   it("thread — echoes the theme, asks the first backbone question numbered, shows the cost band", async () => {
     const theme = "aprender mais rápido com IA";
-    const steps = buildGuidedSteps(fallbackQuestionPlan(theme), null, "share-idea");
+    const steps = buildGuidedSteps(t, fallbackQuestionPlan(t, theme), null, "share-idea");
     const briefing = buildBriefing(theme, steps, []);
 
     const queryClient = newQueryClient();
@@ -93,7 +99,7 @@ describe("generate surface (S3)", () => {
       phase: "thread",
       theme,
       prefill: { intent: "share-idea", scope: SCOPE },
-      questionPlan: fallbackQuestionPlan(theme),
+      questionPlan: fallbackQuestionPlan(t, theme),
       intentAmbiguity: null,
       answers: [],
       qIndex: 0
@@ -109,7 +115,7 @@ describe("generate surface (S3)", () => {
 
   it("answering a question echoes a user bubble and advances the composer to the next question", async () => {
     const theme = "hábitos de escrita";
-    const steps = buildGuidedSteps(fallbackQuestionPlan(theme), null, "share-idea");
+    const steps = buildGuidedSteps(t, fallbackQuestionPlan(t, theme), null, "share-idea");
     const answeredBriefing = buildBriefing(theme, steps, [{ questionId: "thesis", text: "escrever todo dia", skipped: false }]);
 
     const queryClient = newQueryClient();
@@ -127,7 +133,7 @@ describe("generate surface (S3)", () => {
       phase: "thread",
       theme,
       prefill: { intent: "share-idea", scope: SCOPE },
-      questionPlan: fallbackQuestionPlan(theme),
+      questionPlan: fallbackQuestionPlan(t, theme),
       intentAmbiguity: null,
       answers: [],
       qIndex: 0
@@ -146,7 +152,7 @@ describe("generate surface (S3)", () => {
 
   it("session done — shows the session-done card once every step is answered/skipped", async () => {
     const theme = "voz autêntica";
-    const steps = buildGuidedSteps(fallbackQuestionPlan(theme), null, "share-idea");
+    const steps = buildGuidedSteps(t, fallbackQuestionPlan(t, theme), null, "share-idea");
     const answers = steps
       .filter((step) => step.kind !== "channel")
       .map((step) => ({ questionId: step.id, text: "", skipped: true }));
@@ -163,7 +169,7 @@ describe("generate surface (S3)", () => {
       phase: "thread",
       theme,
       prefill: { intent: "share-idea", scope: SCOPE },
-      questionPlan: fallbackQuestionPlan(theme),
+      questionPlan: fallbackQuestionPlan(t, theme),
       intentAmbiguity: null,
       answers,
       qIndex: steps.length // past the channel step too — session done
@@ -176,7 +182,7 @@ describe("generate surface (S3)", () => {
 
   it("session done — last trial generation with 2+ already running shows the queue gate instead", async () => {
     const theme = "voz autêntica";
-    const steps = buildGuidedSteps(fallbackQuestionPlan(theme), null, "share-idea");
+    const steps = buildGuidedSteps(t, fallbackQuestionPlan(t, theme), null, "share-idea");
     const answers = steps
       .filter((step) => step.kind !== "channel")
       .map((step) => ({ questionId: step.id, text: "", skipped: true }));
@@ -200,7 +206,7 @@ describe("generate surface (S3)", () => {
       phase: "thread",
       theme,
       prefill: { intent: "share-idea", scope: SCOPE },
-      questionPlan: fallbackQuestionPlan(theme),
+      questionPlan: fallbackQuestionPlan(t, theme),
       intentAmbiguity: null,
       answers,
       qIndex: steps.length
@@ -216,7 +222,11 @@ describe("generate surface (S3)", () => {
   it("hero — pasting markdown detours into the confirm card; confirming submits the cleaned title", async () => {
     const queryClient = newQueryClient();
     queryClient.setQueryData(queryKeys.entitlement(), entitlementFixture);
-    const briefing = buildBriefing("Por que abandonei o roadmap trimestral", buildGuidedSteps(fallbackQuestionPlan(""), null, "share-idea"), []);
+    const briefing = buildBriefing(
+      "Por que abandonei o roadmap trimestral",
+      buildGuidedSteps(t, fallbackQuestionPlan(t, ""), null, "share-idea"),
+      []
+    );
     queryClient.setQueryData(
       queryKeys.preview({ intent: "share-idea", scope: SCOPE, briefing, includeRecommendation: true }),
       previewFixture
@@ -270,8 +280,8 @@ describe("generate-view: trial/queue/paste pure helpers", () => {
   });
 
   it("formatQueueEta floors at ~1 min, scales with running count", () => {
-    expect(formatQueueEta(0)).toBe("~1 min");
-    expect(formatQueueEta(2)).toBe("~4 min");
+    expect(formatQueueEta(t, 0)).toBe("~1 min");
+    expect(formatQueueEta(t, 2)).toBe("~4 min");
   });
 
   it("looksLikeMarkdown flags headings/bullets/links/bold, not plain prose", () => {
@@ -292,7 +302,7 @@ describe("generate-view: trial/queue/paste pure helpers", () => {
       "fonte: https://example.com/post"
     ].join("\n");
 
-    const parsed = parsePastedTheme(pasted);
+    const parsed = parsePastedTheme(t, pasted);
     expect(parsed.title).toBe("Por que abandonei o roadmap trimestral");
     expect(parsed.angles).toEqual(["times pequenos decidem mais rápido", "métricas de vaidade escondem o que importa"]);
     expect(parsed.linkCount).toBe(1);

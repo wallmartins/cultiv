@@ -1,5 +1,6 @@
 import "./settings.css";
 import { Mono } from "../primitives/index.js";
+import { useMessages } from "../i18n/index.js";
 import { AccountSection, type AccountSectionProps } from "./AccountSection.js";
 import { DeleteDialog, type DeleteDialogProps } from "./DeleteDialog.js";
 import { PlanSummarySection, type PlanSummarySectionProps } from "./PlanSummarySection.js";
@@ -20,11 +21,12 @@ export interface SettingsScreenProps {
 // Column layout, max-width 620px (design linha 358) — narrower than voice/billing (680px) since
 // settings rows are single-line, not prose/cards.
 export function SettingsScreen({ account, preferences, privacy, plan, resetDialog, deleteDialog }: SettingsScreenProps) {
+  const t = useMessages();
   return (
     <div className="settings-screen">
       <div className="settings-screen-inner">
         <Mono as="div" className="settings-page-eyebrow">
-          Configurações
+          {t.settings.pageEyebrow}
         </Mono>
         <AccountSection {...account} />
         <PreferencesSection {...preferences} />

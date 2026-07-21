@@ -1,8 +1,5 @@
 import { Mono, Panel, Pill, Serif } from "../primitives/index.js";
-
-// Único ponto de verdade da palavra de confirmação — o container reusa esta constante em vez
-// de duplicar o literal.
-export const DELETE_CONFIRM_WORD = "EXCLUIR";
+import { useMessages } from "../i18n/index.js";
 
 export interface DeleteDialogProps {
   readonly open: boolean;
@@ -13,42 +10,44 @@ export interface DeleteDialogProps {
   readonly onConfirm: () => void;
 }
 
-// Degrau terminal — type-to-confirm é a fricção que separa este diálogo do ResetDialog.
+// Degrau terminal — type-to-confirm é a fricção que separa este diálogo do ResetDialog. The
+// confirm word is sourced from t.settings.deleteConfirmWord (not a static export) so it stays
+// locale-correct — the backend (account-service.ts) accepts both "EXCLUIR" and "DELETE".
 export function DeleteDialog({ open, confirmText, onConfirmTextChange, pending, onCancel, onConfirm }: DeleteDialogProps) {
+  const t = useMessages();
   if (!open) return null;
-  const canConfirm = confirmText === DELETE_CONFIRM_WORD;
+  const confirmWord = t.settings.deleteConfirmWord;
+  const canConfirm = confirmText === confirmWord;
+  const confirmLabel = t.settings.deleteDialogConfirmLabel(confirmWord);
 
   return (
     <div className="settings-dialog-backdrop" onClick={onCancel}>
       <Panel dialog className="settings-dialog is-delete" onClick={(event) => event.stopPropagation()}>
         <Mono as="div" className="settings-dialog-eyebrow">
-          ação terminal · sem volta
+          {t.settings.deleteDialogEyebrow}
         </Mono>
         <Serif as="div" size="1.5rem" lineHeight="1.25" className="settings-dialog-title">
-          Excluir a conta remove tudo — inclusive o login
+          {t.settings.deleteDialogTitle}
         </Serif>
-        <div className="settings-dialog-body">
-          Voz, exemplos, histórico, dados de pagamento e o acesso. Não há recuperação. Se quiser só recomeçar, use
-          "Resetar conta".
-        </div>
+        <div className="settings-dialog-body">{t.settings.deleteDialogBody}</div>
         <div className="settings-dialog-confirm-field">
           <Mono as="div" className="settings-dialog-confirm-label">
-            digite EXCLUIR pra confirmar
+            {confirmLabel}
           </Mono>
           <input
             className="settings-dialog-confirm-input"
             value={confirmText}
             onChange={(event) => onConfirmTextChange(event.target.value)}
-            placeholder={DELETE_CONFIRM_WORD}
-            aria-label="digite EXCLUIR pra confirmar"
+            placeholder={confirmWord}
+            aria-label={confirmLabel}
           />
         </div>
         <div className="settings-dialog-actions">
           <Pill variant="secondary" onClick={onCancel} disabled={pending}>
-            Manter minha conta
+            {t.settings.keepAccount}
           </Pill>
           <Pill variant="danger" onClick={onConfirm} disabled={!canConfirm || pending}>
-            {pending ? "Excluindo…" : "Excluir pra sempre"}
+            {pending ? t.settings.deletingInProgress : t.settings.deleteForever}
           </Pill>
         </div>
       </Panel>

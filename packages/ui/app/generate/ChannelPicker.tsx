@@ -1,4 +1,5 @@
 import { Chip, Mono, Panel, Serif } from "../primitives/index.js";
+import { useMessages } from "../i18n/index.js";
 import type { ChannelOptionData } from "./types.js";
 
 export interface ChannelPickerProps {
@@ -12,6 +13,7 @@ export interface ChannelPickerProps {
 // showChannels (design L208–219) — rich platform vocabulary, mapped to the 4 GenerationChannel
 // buckets upstream (container); this only renders the chips + skip. Only explicit input in ADR 0004 §2.
 export function ChannelPicker({ eyebrow, prompt, options, onSelect, onSkip }: ChannelPickerProps) {
+  const t = useMessages();
   return (
     <Panel className="generate-channel-panel">
       <Mono eyebrow style={{ color: "var(--dim)", marginBottom: 5 }}>
@@ -29,7 +31,7 @@ export function ChannelPicker({ eyebrow, prompt, options, onSelect, onSkip }: Ch
       </div>
       <div style={{ marginTop: 10 }}>
         <button type="button" onClick={onSkip} className="mono generate-skip-link">
-          pular · fica como texto livre →
+          {t.generate.channelSkipLink}
         </button>
       </div>
     </Panel>

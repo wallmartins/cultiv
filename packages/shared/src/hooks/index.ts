@@ -9,6 +9,7 @@ export {
   useClearReaction,
   useExecutionWatch,
   useRunningExecutionsWatch,
+  foldTransition,
   type SubmitReactionInput
 } from "./executions.js";
 

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Mono, Panel, Pill, Serif } from "../primitives/index.js";
+import { useMessages } from "../i18n/index.js";
 
 export interface PlanCardAction {
   readonly label: string;
@@ -19,6 +20,7 @@ export interface PlanCardProps {
 
 // Zero enum de estado aqui — o container já resolveu label/handler; o card só desenha.
 export function PlanCard({ planName, payMethod, onSwitchPlan, secondaryAction }: PlanCardProps) {
+  const t = useMessages();
   const [confirming, setConfirming] = useState(false);
   const isDanger = secondaryAction?.tone === "danger";
 
@@ -33,24 +35,24 @@ export function PlanCard({ planName, payMethod, onSwitchPlan, secondaryAction }:
 
   return (
     <Panel style={{ padding: "var(--sp-lg)", display: "flex", flexDirection: "column", gap: "var(--sp-sm)" }}>
-      <Mono eyebrow>Plano</Mono>
+      <Mono eyebrow>{t.billing.planEyebrow}</Mono>
       <Serif as="div" size="1.3rem">
         {planName}
       </Serif>
       <Mono style={{ color: "var(--muted)" }}>{payMethod}</Mono>
       <div style={{ display: "flex", gap: "var(--sp-sm)", marginTop: "var(--sp-sm)", flexWrap: "wrap" }}>
         <Pill variant="primary" onClick={onSwitchPlan}>
-          Trocar plano →
+          {t.billing.switchPlan}
         </Pill>
         {secondaryAction ? (
           confirming ? (
             <>
-              <Mono style={{ color: "var(--muted)", alignSelf: "center" }}>tem certeza?</Mono>
+              <Mono style={{ color: "var(--muted)", alignSelf: "center" }}>{t.billing.confirmCancel.prompt}</Mono>
               <Pill variant="danger" onClick={handleSecondaryClick} disabled={secondaryAction.pending}>
-                Sim, cancelar
+                {t.billing.confirmCancel.confirm}
               </Pill>
               <Pill variant="secondary" onClick={() => setConfirming(false)}>
-                Manter assinatura
+                {t.billing.confirmCancel.keep}
               </Pill>
             </>
           ) : (
