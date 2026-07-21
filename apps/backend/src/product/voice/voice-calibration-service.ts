@@ -310,7 +310,7 @@ export function createBackendVoiceCalibrationService(
         const session = yield* requireSession(sessionId, userId);
         yield* assertSessionInProgress(session);
 
-        const built = buildStepPrompt(stepId, session.context, session.themeRotationIndex);
+        const built = buildStepPrompt(stepId, session.context);
         return {
           stepId,
           prompt: built.prompt,

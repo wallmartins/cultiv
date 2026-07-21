@@ -1,7 +1,6 @@
 import { create } from "zustand";
 import type {
   GenerationChannel,
-  GenerationIntentAmbiguity,
   GeneratePrefill,
   GenerationPrefillQuestion
 } from "@my-ai-orchestrator/contracts";
@@ -22,14 +21,12 @@ interface WizardSessionState {
   readonly channel?: GenerationChannel;
   readonly prefill?: GeneratePrefill;
   readonly questionPlan: readonly GenerationPrefillQuestion[];
-  readonly intentAmbiguity: GenerationIntentAmbiguity | null;
   readonly answers: readonly WizardAnswer[];
   readonly qIndex: number;
   readonly setTheme: (theme: string) => void;
   readonly setPrefillResult: (input: {
     prefill: GeneratePrefill;
     questionPlan: readonly GenerationPrefillQuestion[];
-    intentAmbiguity: GenerationIntentAmbiguity | null;
   }) => void;
   readonly setChannel: (channel: GenerationChannel) => void;
   readonly submitAnswer: (questionId: string, text: string) => void;
@@ -45,7 +42,6 @@ const INITIAL = {
   channel: undefined,
   prefill: undefined,
   questionPlan: [] as readonly GenerationPrefillQuestion[],
-  intentAmbiguity: null,
   answers: [] as readonly WizardAnswer[],
   qIndex: 0
 };
@@ -53,17 +49,16 @@ const INITIAL = {
 export const useWizardSessionStore = create<WizardSessionState>((set, get) => ({
   ...INITIAL,
   setTheme: (theme) => set({ theme, phase: "analyzing" }),
-  setPrefillResult: ({ prefill, questionPlan, intentAmbiguity }) =>
-    set({ prefill, questionPlan, intentAmbiguity, phase: "thread", qIndex: 0 }),
+  setPrefillResult: ({ prefill, questionPlan }) => set({ prefill, questionPlan, phase: "thread", qIndex: 0 }),
   setChannel: (channel) => set({ channel }),
   submitAnswer: (questionId, text) =>
     set((state) => ({
       answers: [...state.answers, { questionId, text, skipped: false }],
       qIndex: state.qIndex + 1
     })),
-  // questionId is explicit for steps outside questionPlan (the ambiguity/channel synthetic
-  // steps the container prepends/appends — see apps/web/src/routes/generate-view.ts); falls
-  // back to the plan lookup for a plain backbone/extra question.
+  // questionId is explicit for steps outside questionPlan (the channel synthetic step the
+  // container appends — see apps/web/src/routes/generate-view.ts); falls back to the plan
+  // lookup for a plain backbone/extra question.
   skip: (questionId) => {
     const id = questionId ?? get().questionPlan[get().qIndex]?.id;
     set((state) => ({

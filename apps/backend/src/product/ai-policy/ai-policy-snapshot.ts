@@ -75,7 +75,7 @@ export function resolveExecutionSnapshot(args: {
       qualityMode: args.qualityMode,
       defaultLanguage: args.defaultLanguage
     });
-    const pipelinePolicy = args.policy.catalog[plan.pipelineType ?? inferPipelineType(plan.pipeline.name)];
+    const pipelinePolicy = args.policy.catalog[plan.pipelineType ?? inferPlanSignature(plan.pipeline.name)];
 
     if (!pipelinePolicy) {
       return yield* Effect.fail(
@@ -169,10 +169,10 @@ function cloneAttempt(attempt: AIPolicyProviderModelAttempt): AIPolicyProviderMo
   };
 }
 
-function inferPipelineType(
+function inferPlanSignature(
   pipelineName: string
-): import("@my-ai-orchestrator/contracts").PipelineType {
-  return pipelineName as import("@my-ai-orchestrator/contracts").PipelineType;
+): import("@my-ai-orchestrator/contracts").PlanSignature {
+  return pipelineName as import("@my-ai-orchestrator/contracts").PlanSignature;
 }
 
 function freezeResolvedExecutionSnapshot(snapshot: ResolvedExecutionSnapshot): ResolvedExecutionSnapshot {

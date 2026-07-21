@@ -287,7 +287,8 @@ describe("backend usage policy", () => {
         authorization: createBackendTestAuthorizationHeader({ userId: "backend" })
       },
       body: JSON.stringify({
-        contentType: "linkedin-post",
+        rhetoricalMode: "expound",
+        scope: { lengthTier: "short", channel: "professional-network" },
         qualityMode: "fast",
         briefing: {
           topic: "Authorization checks",

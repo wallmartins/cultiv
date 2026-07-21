@@ -11,13 +11,9 @@ export interface CompositorPricingArgs {
 
 export function resolveCompositorPricingArgs(
   resolvedTarget: ResolvedGenerationTarget
-): CompositorPricingArgs | undefined {
-  if (!resolvedTarget.compositor || !resolvedTarget.resolvedIntent) {
-    return undefined;
-  }
-
+): CompositorPricingArgs {
   return {
     planSignature: resolvedTarget.compositor.plan.planSignature,
-    lengthTier: resolvedTarget.resolvedIntent.scope.lengthTier
+    lengthTier: resolvedTarget.compositor.plan.parameters.lengthTier
   };
 }

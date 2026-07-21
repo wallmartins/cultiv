@@ -4,8 +4,6 @@ export const Routes = {
   Ready: "GET /ready",
   ApiReady: "GET /api/ready",
 
-  GetMeGenerationIntents: "GET /me/generation-intents",
-
   PostMeExecutionsRun: "POST /me/executions/run",
   GetMeExecutions: "GET /me/executions",
   GetMeExecution: "GET /me/executions/:executionId",

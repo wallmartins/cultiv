@@ -1,10 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import {
-  PHASE1_DEFAULT_LENGTH_BY_INTENT,
-  type GenerationIntent,
-  type GenerationPreviewRequest
-} from "@my-ai-orchestrator/contracts";
+import type { GenerationPreviewRequest } from "@my-ai-orchestrator/contracts";
 import {
   useEntitlement,
   useExecutionsList,
@@ -49,7 +45,6 @@ export function GenerateContainer() {
     channel,
     prefill,
     questionPlan,
-    intentAmbiguity,
     answers,
     qIndex,
     setTheme,
@@ -75,16 +70,17 @@ export function GenerateContainer() {
   // — same queryKey, so this is a cache hit rather than a second network round-trip.
   const runningExecutions = useExecutionsList({ status: "all", limit: 20 });
 
-  const steps = buildGuidedSteps(t, questionPlan, intentAmbiguity, prefill?.intent);
+  const steps = buildGuidedSteps(t, questionPlan);
   const currentStep = steps[qIndex];
   const briefing = buildBriefing(theme, steps, answers);
   const options = platformOptions(t);
 
-  // intent stays the original inference here (and in handleGenerate below) — the ambiguity answer
-  // is drafting context, not an intent correction. Accepted risk for v1 (GAP #14, closed).
+  // ponytail: F4 — genre is inferred by the theme-first producer (Phase 4); until then every
+  // request carries the same default rhetoricalMode.
+  const rhetoricalMode = prefill?.rhetoricalMode ?? "expound";
   const previewInput: GenerationPreviewRequest = {
-    intent: prefill?.intent,
-    scope: channel ? { ...(prefill?.scope ?? defaultScope(prefill?.intent)), channel } : prefill?.scope,
+    rhetoricalMode,
+    scope: channel ? { ...(prefill?.scope ?? defaultScope()), channel } : prefill?.scope,
     briefing,
     includeRecommendation: true
   };
@@ -107,16 +103,14 @@ export function GenerateContainer() {
           setSelectedPlatformId(response.detectedPlatform);
           setPrefillResult({
             prefill: response.prefill,
-            questionPlan: response.questionPlan,
-            intentAmbiguity: response.intentAmbiguity
+            questionPlan: response.questionPlan
           });
         },
         // Silent fallback (ADR 0004 §3) — inference failure never blocks the flow.
         onError: () => {
           setPrefillResult({
-            prefill: { intent: "share-idea", scope: defaultScope("share-idea") },
-            questionPlan: fallbackQuestionPlan(t, submittedTheme),
-            intentAmbiguity: null
+            prefill: { rhetoricalMode: "expound", scope: defaultScope() },
+            questionPlan: fallbackQuestionPlan(t, submittedTheme)
           });
         }
       }
@@ -160,8 +154,8 @@ export function GenerateContainer() {
     startFiring();
     generateMutation.mutate(
       {
-        intent: prefill.intent,
-        scope: channel ? { ...(prefill.scope ?? defaultScope(prefill.intent)), channel } : prefill.scope,
+        rhetoricalMode: prefill.rhetoricalMode ?? "expound",
+        scope: channel ? { ...(prefill.scope ?? defaultScope()), channel } : prefill.scope,
         briefing,
         // quoteId hashes the quality mode it was priced under, so the mode has to travel with
         // it — otherwise the backend re-defaults (config QUALITY_MODE) and rejects as quote_stale.
@@ -277,6 +271,7 @@ export function GenerateContainer() {
   );
 }
 
-function defaultScope(intent: GenerationIntent | undefined) {
-  return { lengthTier: PHASE1_DEFAULT_LENGTH_BY_INTENT[intent ?? "share-idea"] };
+// pre-genre-producer default (ponytail: F4 — the theme-first producer picks lengthTier once it lands).
+function defaultScope() {
+  return { lengthTier: "short" as const };
 }

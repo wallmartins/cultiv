@@ -41,7 +41,8 @@ describe("backend app execution quotes and telemetry", () => {
     seedExecutionVoiceState(services, "user_1");
     const app = createBackendAppTestApp(config, services);
     const previewPayload = {
-      contentType: "architecture-post",
+      rhetoricalMode: "expound",
+      scope: { lengthTier: "long" },
       qualityMode: "balanced",
       briefing: {
         topic: "Policy snapshots",
@@ -57,7 +58,7 @@ describe("backend app execution quotes and telemetry", () => {
 
     expect(previewResponse.status).toBe(200);
     const preview = await Effect.runPromise(decodeGenerationPreviewResponse(await previewResponse.json()));
-    expect(preview.options.contentTypes.find((contentType) => contentType.id === "architecture-post")?.allowed).toBe(true);
+    expect(preview.pricingSnapshot.contentType).toBe("long-piece");
     expect(preview.options.qualityModes.find((mode) => mode.id === "balanced")?.blockedReason).toBe(
       "quality_mode_plan_restriction"
     );
@@ -66,7 +67,8 @@ describe("backend app execution quotes and telemetry", () => {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
-        contentType: "architecture-post",
+        rhetoricalMode: "expound",
+        scope: { lengthTier: "long" },
         briefing: previewPayload.briefing,
         qualityMode: "balanced",
         quoteId: preview.pricingSnapshot.quoteId
@@ -90,7 +92,7 @@ describe("backend app execution quotes and telemetry", () => {
     const previewResponse = await app.request("/api/generation-preview", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ contentType: "newsletter", briefing })
+      body: JSON.stringify({ rhetoricalMode: "promote", scope: { lengthTier: "medium", channel: "email" }, briefing })
     });
 
     expect(previewResponse.status).toBe(200);
@@ -100,7 +102,8 @@ describe("backend app execution quotes and telemetry", () => {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
-        contentType: "newsletter",
+        rhetoricalMode: "promote",
+        scope: { lengthTier: "medium", channel: "email" },
         briefing,
         quoteId: preview.pricingSnapshot.quoteId
       })
@@ -112,7 +115,8 @@ describe("backend app execution quotes and telemetry", () => {
   it("accepts a matching quote and rejects a stale quote on the /me execution surface", async () => {
     const { app } = createExecutionApp("sync");
     const previewPayload = {
-      contentType: "newsletter",
+      rhetoricalMode: "promote",
+      scope: { lengthTier: "medium", channel: "email" },
       qualityMode: "balanced",
       briefing: {
         topic: "Policy snapshots",
@@ -128,12 +132,14 @@ describe("backend app execution quotes and telemetry", () => {
 
     expect(previewResponse.status).toBe(200);
     const preview = await Effect.runPromise(decodeGenerationPreviewResponse(await previewResponse.json()));
+    expect(preview.pricingSnapshot.contentType).toBe("edition-piece");
 
     const successResponse = await app.request("/me/executions/run", {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
-        contentType: "newsletter",
+        rhetoricalMode: previewPayload.rhetoricalMode,
+        scope: previewPayload.scope,
         briefing: previewPayload.briefing,
         qualityMode: "balanced",
         quoteId: preview.pricingSnapshot.quoteId
@@ -142,16 +148,17 @@ describe("backend app execution quotes and telemetry", () => {
 
     expect(successResponse.status).toBe(200);
     const decodedSuccess = await Effect.runPromise(decodeSyncExecutionView(await successResponse.json()));
-    expect(decodedSuccess.contentType).toBe("newsletter");
+    expect(decodedSuccess.contentType).toBe("edition-piece");
 
     // Desde a policy 2026-07-20 o preço é por tamanho: trocar o modo não muda a fatura,
     // então não invalida o quote. O que invalida é mexer em algo que move preço — aqui,
-    // o tipo de conteúdo (newsletter = edition-piece, blog = long-piece).
+    // o tamanho/canal do plano (medium/email = edition-piece, long/blog = long-piece).
     const sameQuoteOtherMode = await app.request("/me/executions/run", {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
-        contentType: "newsletter",
+        rhetoricalMode: previewPayload.rhetoricalMode,
+        scope: previewPayload.scope,
         briefing: previewPayload.briefing,
         qualityMode: "strict",
         quoteId: preview.pricingSnapshot.quoteId
@@ -164,7 +171,8 @@ describe("backend app execution quotes and telemetry", () => {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
-        contentType: "long-form-blog",
+        rhetoricalMode: previewPayload.rhetoricalMode,
+        scope: { lengthTier: "long", channel: "blog" },
         briefing: previewPayload.briefing,
         qualityMode: "balanced",
         quoteId: preview.pricingSnapshot.quoteId
@@ -179,10 +187,10 @@ describe("backend app execution quotes and telemetry", () => {
     expect(staleError.details?.recovery).toBe("refresh_preview");
   });
 
-  it("accepts intent-based preview and execution with matching quote; rejects stale quote", async () => {
+  it("accepts rhetoricalMode-based preview and execution with matching quote; rejects stale quote", async () => {
     const { app } = createExecutionApp("sync");
     const previewPayload = {
-      intent: "share-idea",
+      rhetoricalMode: "expound",
       scope: { lengthTier: "short" },
       qualityMode: "balanced",
       briefing: {
@@ -199,13 +207,13 @@ describe("backend app execution quotes and telemetry", () => {
 
     expect(previewResponse.status).toBe(200);
     const preview = await Effect.runPromise(decodeGenerationPreviewResponse(await previewResponse.json()));
-    expect(preview.pricingSnapshot.contentType).toBe("linkedin-post");
+    expect(preview.pricingSnapshot.contentType).toBe("short-piece");
 
     const successResponse = await app.request("/me/executions/run", {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
-        intent: "share-idea",
+        rhetoricalMode: "expound",
         scope: { lengthTier: "short" },
         briefing: previewPayload.briefing,
         qualityMode: "balanced",
@@ -215,15 +223,15 @@ describe("backend app execution quotes and telemetry", () => {
 
     expect(successResponse.status).toBe(200);
     const decodedSuccess = await Effect.runPromise(decodeSyncExecutionView(await successResponse.json()));
-    expect(decodedSuccess.contentType).toBe("linkedin-post");
+    expect(decodedSuccess.contentType).toBe("short-piece");
 
-    // lengthTier move o preço (short-piece 2.5 vs long-piece 10), então invalida o quote —
+    // lengthTier move o preço (short-piece vs long-piece), então invalida o quote —
     // ao contrário do qualityMode, que é decisão do sistema e não entra na fatura.
     const staleResponse = await app.request("/me/executions/run", {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
-        intent: "share-idea",
+        rhetoricalMode: "expound",
         scope: { lengthTier: "long" },
         briefing: previewPayload.briefing,
         qualityMode: "balanced",
@@ -255,7 +263,8 @@ describe("backend app execution quotes and telemetry", () => {
     seedExecutionVoiceState(services, "user_1");
     const app = createBackendAppTestApp(config, services);
     const previewPayload = {
-      contentType: "architecture-post",
+      rhetoricalMode: "argue",
+      scope: { lengthTier: "medium" },
       qualityMode: "fast",
       briefing: {
         systemContext: "We need immutable policy snapshots, provider fallbacks and auditable preview-to-execution correlation.",
@@ -290,7 +299,8 @@ describe("backend app execution quotes and telemetry", () => {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
-        contentType: "architecture-post",
+        rhetoricalMode: previewPayload.rhetoricalMode,
+        scope: previewPayload.scope,
         briefing: previewPayload.briefing,
         qualityMode: "fast",
         quoteId: preview.pricingSnapshot.quoteId,
@@ -320,7 +330,8 @@ describe("backend app execution quotes and telemetry", () => {
   it("keeps preview-confirmed execution aligned with direct execution for minimized runtime input", async () => {
     const { app } = createExecutionApp("sync");
     const sharedPayload = {
-      contentType: "newsletter",
+      rhetoricalMode: "promote",
+      scope: { lengthTier: "medium", channel: "email" },
       qualityMode: "balanced" as const,
       briefing: {
         topic: "Runtime minimization",
@@ -350,7 +361,7 @@ describe("backend app execution quotes and telemetry", () => {
     expect(confirmedResponse.status).toBe(200);
     const confirmed = await Effect.runPromise(decodeSyncExecutionView(await confirmedResponse.json()));
     expect(confirmed.content).toContain("provider:gemini:");
-    expect(confirmed.pipelineName).toBe("newsletter");
-    expect(confirmed.contentType).toBe("newsletter");
+    expect(confirmed.pipelineName).toBe("edition-piece");
+    expect(confirmed.contentType).toBe("edition-piece");
   });
 });

@@ -14,7 +14,6 @@ export const queryKeys = {
   calibrationEntitlement: () => ["voice", "calibration", "entitlement"] as const,
   onboarding: () => ["onboarding"] as const,
   entitlement: () => ["entitlement"] as const,
-  generationIntents: () => ["generation-intents"] as const,
   billingPlans: () => ["billing", "plans"] as const,
   billingTopups: () => ["billing", "topups"] as const,
   billingLedger: (page?: { limit?: number; offset?: number }) => ["billing", "ledger", page ?? {}] as const,

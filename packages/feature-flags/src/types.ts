@@ -1,12 +1,12 @@
 import { Context, Effect } from "effect";
-import type { ExecutionMode, PipelineType, QualityMode } from "@my-ai-orchestrator/contracts";
+import type { ExecutionMode, PlanSignature, QualityMode } from "@my-ai-orchestrator/contracts";
 import type { FeatureFlagDefinitionError, FeatureFlagRolloutError, FeatureFlagVariantError } from "./errors.js";
 
 export type FeatureFlagScope = "execution" | "content" | "generation" | "rollout";
 
 export interface FeatureFlagTarget {
   readonly userId?: string;
-  readonly pipelineType?: PipelineType;
+  readonly pipelineType?: PlanSignature;
   readonly contentType?: string;
   readonly environment?: "development" | "test" | "staging" | "production";
   readonly locale?: string;

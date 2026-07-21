@@ -1,6 +1,6 @@
 import { Context, Effect, Layer } from "effect";
 import type { DatabaseError } from "@my-ai-orchestrator/database";
-import type { PipelineDefinition, PipelineRequest, PipelineType, QualityMode } from "@my-ai-orchestrator/contracts";
+import type { PipelineDefinition, PipelineRequest, PlanSignature, QualityMode } from "@my-ai-orchestrator/contracts";
 import type { OrchestrationCatalog } from "@my-ai-orchestrator/orchestrator";
 import type { OrchestrationPlan } from "@my-ai-orchestrator/orchestrator";
 import type { ExecutionMode } from "@my-ai-orchestrator/contracts";
@@ -29,7 +29,7 @@ export interface AIPolicyStepDefinition {
 }
 
 export interface AIPolicyPipelineDefinition {
-  readonly pipelineType: PipelineType;
+  readonly pipelineType: PlanSignature;
   readonly contentType: string;
   readonly defaultLanguage: string;
   readonly defaultQualityMode: QualityMode;
@@ -40,7 +40,7 @@ export interface AIPolicyContentTypeDefinition {
   readonly id: string;
   readonly label: string;
   readonly defaultLanguage: string;
-  readonly pipelineType: PipelineType;
+  readonly pipelineType: PlanSignature;
   readonly internal?: boolean;
 }
 
@@ -104,7 +104,7 @@ export interface ResolvedExecutionSnapshot {
 export interface ResolvedAIPolicyVersion {
   readonly version: string;
   readonly lifecycle: AIPolicyLifecycle;
-  readonly catalog: Readonly<Record<PipelineType, AIPolicyPipelineDefinition>>;
+  readonly catalog: Readonly<Record<PlanSignature, AIPolicyPipelineDefinition>>;
   readonly contentTypes: Readonly<Record<string, AIPolicyContentTypeDefinition>>;
   readonly routingProfiles: Readonly<Record<string, AIPolicyRoutingProfileDefinition>>;
   readonly orchestrationCatalog: OrchestrationCatalog;

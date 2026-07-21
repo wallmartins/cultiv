@@ -1,6 +1,5 @@
 import {
   CALIBRATION_WIZARD_STEPS,
-  type CalibrationWizardStep,
   type WizardStepId
 } from "@my-ai-orchestrator/domain";
 import {
@@ -17,28 +16,13 @@ export interface WizardStepPrompt {
   readonly minWords?: number;
 }
 
-export function pickThemeFromPool(step: CalibrationWizardStep, rotationIndex = 0): string {
-  if (step.themePool.length === 0) {
-    return step.defaultTheme;
-  }
-
-  return step.themePool[rotationIndex % step.themePool.length] ?? step.defaultTheme;
-}
-
-export function buildStepPrompt(
-  stepId: WizardStepId,
-  context?: WizardContext,
-  rotationIndex = 0
-): WizardStepPrompt {
+export function buildStepPrompt(stepId: WizardStepId, context?: WizardContext): WizardStepPrompt {
   const step = getCalibrationWizardStep(stepId);
   if (!step) {
     throw new Error(`Unknown calibration wizard step: ${stepId}`);
   }
 
-  const theme =
-    step.id === "micro_opinion" && !context?.subject && step.themePool.length > 0
-      ? pickThemeFromPool(step, rotationIndex)
-      : resolveTheme(step, context);
+  const theme = resolveTheme(step, context);
 
   const prompt = step.prompt.includes("{theme}")
     ? step.prompt.replace("{theme}", theme)

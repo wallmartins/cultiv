@@ -57,7 +57,7 @@ const previewFixture: GenerationPreviewResponse = {
   quotaRemaining: 12,
   quotaLimit: 20,
   quotaCost: 2,
-  options: { contentTypes: [], qualityModes: [] }
+  options: { qualityModes: [] }
 };
 
 const SCOPE = { lengthTier: "short" as const };
@@ -85,22 +85,21 @@ describe("generate surface (S3)", () => {
 
   it("thread — echoes the theme, asks the first backbone question numbered, shows the cost band", async () => {
     const theme = "aprender mais rápido com IA";
-    const steps = buildGuidedSteps(t, fallbackQuestionPlan(t, theme), null, "share-idea");
+    const steps = buildGuidedSteps(t, fallbackQuestionPlan(t, theme));
     const briefing = buildBriefing(theme, steps, []);
 
     const queryClient = newQueryClient();
     queryClient.setQueryData(queryKeys.entitlement(), entitlementFixture);
     queryClient.setQueryData(
-      queryKeys.preview({ intent: "share-idea", scope: SCOPE, briefing, includeRecommendation: true }),
+      queryKeys.preview({ rhetoricalMode: "expound", scope: SCOPE, briefing, includeRecommendation: true }),
       previewFixture
     );
 
     useWizardSessionStore.setState({
       phase: "thread",
       theme,
-      prefill: { intent: "share-idea", scope: SCOPE },
+      prefill: { rhetoricalMode: "expound", scope: SCOPE },
       questionPlan: fallbackQuestionPlan(t, theme),
-      intentAmbiguity: null,
       answers: [],
       qIndex: 0
     });
@@ -115,26 +114,25 @@ describe("generate surface (S3)", () => {
 
   it("answering a question echoes a user bubble and advances the composer to the next question", async () => {
     const theme = "hábitos de escrita";
-    const steps = buildGuidedSteps(t, fallbackQuestionPlan(t, theme), null, "share-idea");
+    const steps = buildGuidedSteps(t, fallbackQuestionPlan(t, theme));
     const answeredBriefing = buildBriefing(theme, steps, [{ questionId: "thesis", text: "escrever todo dia", skipped: false }]);
 
     const queryClient = newQueryClient();
     queryClient.setQueryData(queryKeys.entitlement(), entitlementFixture);
     queryClient.setQueryData(
-      queryKeys.preview({ intent: "share-idea", scope: SCOPE, briefing: buildBriefing(theme, steps, []), includeRecommendation: true }),
+      queryKeys.preview({ rhetoricalMode: "expound", scope: SCOPE, briefing: buildBriefing(theme, steps, []), includeRecommendation: true }),
       previewFixture
     );
     queryClient.setQueryData(
-      queryKeys.preview({ intent: "share-idea", scope: SCOPE, briefing: answeredBriefing, includeRecommendation: true }),
+      queryKeys.preview({ rhetoricalMode: "expound", scope: SCOPE, briefing: answeredBriefing, includeRecommendation: true }),
       previewFixture
     );
 
     useWizardSessionStore.setState({
       phase: "thread",
       theme,
-      prefill: { intent: "share-idea", scope: SCOPE },
+      prefill: { rhetoricalMode: "expound", scope: SCOPE },
       questionPlan: fallbackQuestionPlan(t, theme),
-      intentAmbiguity: null,
       answers: [],
       qIndex: 0
     });
@@ -152,7 +150,7 @@ describe("generate surface (S3)", () => {
 
   it("session done — shows the session-done card once every step is answered/skipped", async () => {
     const theme = "voz autêntica";
-    const steps = buildGuidedSteps(t, fallbackQuestionPlan(t, theme), null, "share-idea");
+    const steps = buildGuidedSteps(t, fallbackQuestionPlan(t, theme));
     const answers = steps
       .filter((step) => step.kind !== "channel")
       .map((step) => ({ questionId: step.id, text: "", skipped: true }));
@@ -161,16 +159,15 @@ describe("generate surface (S3)", () => {
     const queryClient = newQueryClient();
     queryClient.setQueryData(queryKeys.entitlement(), entitlementFixture);
     queryClient.setQueryData(
-      queryKeys.preview({ intent: "share-idea", scope: SCOPE, briefing, includeRecommendation: true }),
+      queryKeys.preview({ rhetoricalMode: "expound", scope: SCOPE, briefing, includeRecommendation: true }),
       previewFixture
     );
 
     useWizardSessionStore.setState({
       phase: "thread",
       theme,
-      prefill: { intent: "share-idea", scope: SCOPE },
+      prefill: { rhetoricalMode: "expound", scope: SCOPE },
       questionPlan: fallbackQuestionPlan(t, theme),
-      intentAmbiguity: null,
       answers,
       qIndex: steps.length // past the channel step too — session done
     });
@@ -182,7 +179,7 @@ describe("generate surface (S3)", () => {
 
   it("session done — last trial generation with 2+ already running shows the queue gate instead", async () => {
     const theme = "voz autêntica";
-    const steps = buildGuidedSteps(t, fallbackQuestionPlan(t, theme), null, "share-idea");
+    const steps = buildGuidedSteps(t, fallbackQuestionPlan(t, theme));
     const answers = steps
       .filter((step) => step.kind !== "channel")
       .map((step) => ({ questionId: step.id, text: "", skipped: true }));
@@ -191,7 +188,7 @@ describe("generate surface (S3)", () => {
     const queryClient = newQueryClient();
     queryClient.setQueryData(queryKeys.entitlement(), { ...entitlementFixture, status: "trialing", quotaRemaining: 1 });
     queryClient.setQueryData(
-      queryKeys.preview({ intent: "share-idea", scope: SCOPE, briefing, includeRecommendation: true }),
+      queryKeys.preview({ rhetoricalMode: "expound", scope: SCOPE, briefing, includeRecommendation: true }),
       previewFixture
     );
     queryClient.setQueryData(
@@ -205,9 +202,8 @@ describe("generate surface (S3)", () => {
     useWizardSessionStore.setState({
       phase: "thread",
       theme,
-      prefill: { intent: "share-idea", scope: SCOPE },
+      prefill: { rhetoricalMode: "expound", scope: SCOPE },
       questionPlan: fallbackQuestionPlan(t, theme),
-      intentAmbiguity: null,
       answers,
       qIndex: steps.length
     });
@@ -224,11 +220,11 @@ describe("generate surface (S3)", () => {
     queryClient.setQueryData(queryKeys.entitlement(), entitlementFixture);
     const briefing = buildBriefing(
       "Por que abandonei o roadmap trimestral",
-      buildGuidedSteps(t, fallbackQuestionPlan(t, ""), null, "share-idea"),
+      buildGuidedSteps(t, fallbackQuestionPlan(t, "")),
       []
     );
     queryClient.setQueryData(
-      queryKeys.preview({ intent: "share-idea", scope: SCOPE, briefing, includeRecommendation: true }),
+      queryKeys.preview({ rhetoricalMode: "expound", scope: SCOPE, briefing, includeRecommendation: true }),
       previewFixture
     );
 

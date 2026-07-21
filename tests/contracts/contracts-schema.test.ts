@@ -10,7 +10,7 @@ import {
   JobCreatedResponseSchema,
   ExecutionTelemetrySchema,
   PipelineRequestSchema,
-  PipelineTypeSchema,
+  PlanSignatureSchema,
   PracticeProfileDiagnosticsSchema,
   PracticeProfileSchema,
   QualityModeSchema,
@@ -22,14 +22,14 @@ describe('contracts package', () => {
     const decode = Schema.decodeUnknownSync(SimplifiedPipelineRequestSchema);
     const value = decode({
       userId: 'user_1',
-      pipelineType: 'validation-post',
+      pipelineType: 'edition-piece',
       briefing: 'Write a validation post',
       importedContext: 'External reference text',
       qualityMode: 'balanced'
     });
 
     expect(value.userId).toBe('user_1');
-    expect(value.pipelineType).toBe('validation-post');
+    expect(value.pipelineType).toBe('edition-piece');
     expect(value.qualityMode).toBe('balanced');
     expect(value.importedContext).toBe('External reference text');
   });
@@ -40,7 +40,7 @@ describe('contracts package', () => {
     expect(() =>
       decode({
         userId: 'user_1',
-        pipelineType: 'validation-post',
+        pipelineType: 'edition-piece',
         briefing: 'Write a validation post',
         importedContext: { html: '<p>unsupported</p>' }
       })
@@ -49,7 +49,7 @@ describe('contracts package', () => {
 
   it('keeps the exported enum schemas aligned', () => {
     expect(Schema.decodeUnknownSync(ExecutionModeSchema)('sync')).toBe('sync');
-    expect(Schema.decodeUnknownSync(PipelineTypeSchema)('newsletter')).toBe('newsletter');
+    expect(Schema.decodeUnknownSync(PlanSignatureSchema)('short-piece')).toBe('short-piece');
     expect(Schema.decodeUnknownSync(QualityModeSchema)('strict')).toBe('strict');
   });
 
@@ -70,7 +70,7 @@ describe('contracts package', () => {
   it('decodes a pipeline request union for explicit and simplified forms', () => {
     const simplified = Schema.decodeUnknownSync(PipelineRequestSchema)({
       userId: 'user_2',
-      pipelineType: 'architecture-post',
+      pipelineType: 'short-piece',
       briefing: { topic: 'Monorepo' }
     });
 

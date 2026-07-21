@@ -35,7 +35,6 @@ describe("client-sdk package", () => {
     expect(typeof sdk.executions.watch).toBe("function");
     expect(typeof sdk.voice.getProfile).toBe("function");
     expect(typeof sdk.onboarding.getStatus).toBe("function");
-    expect(typeof sdk.generationIntents.list).toBe("function");
     expect(typeof sdk.toPromise).toBe("function");
   });
 

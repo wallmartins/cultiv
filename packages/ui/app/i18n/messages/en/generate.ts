@@ -26,16 +26,6 @@ export const generate: AppMessages["generate"] = {
   sessionDoneEyebrow: "session complete",
   sessionDoneMessage: "All set. Just hit generate.",
   dispatchError: "credits weren't charged — try again",
-  ambiguityPrompt: (intentA, intentB) => `Is this more about ${intentA} or about ${intentB}?`,
-  ambiguityNote: "tell me in one sentence — it changes the angle of the text",
-  intentLabel: {
-    "share-idea": "sharing an idea",
-    "explain-deeply": "explaining something deeply",
-    "engage-audience": "engaging your audience",
-    "tell-story": "telling a story",
-    "update-subscribers": "updating the people who follow you",
-    "document-decision": "documenting a decision"
-  },
   fallbackQuestion: {
     thesis: (theme) => `What's the central thesis or claim you want to make about "${theme}"?`,
     experience: "What concrete experience of yours would be the best example here?",

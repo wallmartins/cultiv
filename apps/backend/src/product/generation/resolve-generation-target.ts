@@ -1,17 +1,20 @@
 import { Effect } from "effect";
 import type {
   ExecutionPlan,
-  GenerationIntent,
   GenerationScope,
   PipelineDefinition,
-  QualityMode
+  QualityMode,
+  RhetoricalMode
 } from "@my-ai-orchestrator/contracts";
 import { BackendValidationError } from "../../http/errors.js";
 import { planGeneration } from "./compositor/compositor-planner.js";
 import { materializeCompositorPipeline } from "./compositor/plan-materializer.js";
-import { resolveGenerationIntent, type ResolvedGenerationIntent } from "./intent-resolver.js";
 import { formatPatchOp } from "./step-planner/format-patch-op.js";
 import { patchExecutionPlan } from "./step-planner/step-planner.js";
+
+// ponytail: F4 — the genre producer (theme-first inference at the end of the generation questions)
+// lands in Phase 4; until then a request without a mode plans as expository prose.
+const DEFAULT_RHETORICAL_MODE: RhetoricalMode = "expound";
 
 export interface StepPlannerTelemetry {
   readonly patchCount: number;
@@ -22,9 +25,7 @@ export interface StepPlannerTelemetry {
 
 export interface ResolvedGenerationTarget {
   readonly contentTypeId: string;
-  readonly resolvedIntent?: ResolvedGenerationIntent;
-  readonly ignoredLegacyContentType?: string;
-  readonly compositor?: {
+  readonly compositor: {
     readonly plan: ExecutionPlan;
     readonly pipeline: PipelineDefinition;
   };
@@ -62,83 +63,34 @@ function resolveCompositorPlan(args: {
 }
 
 export function resolveGenerationTarget(request: {
-  readonly intent?: GenerationIntent;
+  readonly rhetoricalMode?: RhetoricalMode;
   readonly scope?: GenerationScope;
-  readonly contentType?: string;
-  readonly compositorEnabled?: boolean;
   readonly stepPlannerEnabled?: boolean;
   readonly briefing?: string | Record<string, unknown>;
   readonly qualityMode?: QualityMode;
 }): Effect.Effect<ResolvedGenerationTarget, BackendValidationError> {
-  if (request.intent && request.scope) {
-    const resolved = resolveGenerationIntent({ intent: request.intent, scope: request.scope });
-
-    if (request.compositorEnabled) {
-      const basePlan = planGeneration({
-        intent: request.intent,
-        scope: request.scope,
-        qualityMode: request.qualityMode ?? "balanced"
-      });
-      const { plan, pipeline, stepPlanner } = resolveCompositorPlan({
-        basePlan,
-        stepPlannerEnabled: request.stepPlannerEnabled,
-        briefing: request.briefing
-      });
-      const compositorResult: ResolvedGenerationTarget = {
-        contentTypeId: plan.planSignature,
-        resolvedIntent: resolved,
-        compositor: { plan, pipeline },
-        ...(stepPlanner ? { stepPlanner } : {})
-      };
-
-      if (request.contentType && request.contentType !== resolved.legacyContentTypeId) {
-        return Effect.zipRight(
-          Effect.logWarning("Ignoring legacy contentType in favor of compositor planning", {
-            intent: request.intent,
-            scope: request.scope,
-            contentType: request.contentType,
-            planSignature: plan.planSignature,
-            resolvedContentType: resolved.legacyContentTypeId
-          }),
-          Effect.succeed({
-            ...compositorResult,
-            ignoredLegacyContentType: request.contentType
-          })
-        );
-      }
-
-      return Effect.succeed(compositorResult);
-    }
-
-    if (request.contentType && request.contentType !== resolved.legacyContentTypeId) {
-      return Effect.zipRight(
-        Effect.logWarning("Ignoring legacy contentType in favor of intent resolution", {
-          intent: request.intent,
-          scope: request.scope,
-          contentType: request.contentType,
-          resolvedContentType: resolved.legacyContentTypeId
-        }),
-        Effect.succeed({
-          contentTypeId: resolved.legacyContentTypeId,
-          resolvedIntent: resolved,
-          ignoredLegacyContentType: request.contentType
-        })
-      );
-    }
-
-    return Effect.succeed({
-      contentTypeId: resolved.legacyContentTypeId,
-      resolvedIntent: resolved
-    });
+  if (!request.scope) {
+    return Effect.fail(
+      new BackendValidationError({
+        message: "A generation scope (length tier and channel) is required"
+      })
+    );
   }
 
-  if (request.contentType) {
-    return Effect.succeed({ contentTypeId: request.contentType });
-  }
+  const basePlan = planGeneration({
+    rhetoricalMode: request.rhetoricalMode ?? DEFAULT_RHETORICAL_MODE,
+    scope: request.scope,
+    qualityMode: request.qualityMode ?? "balanced"
+  });
+  const { plan, pipeline, stepPlanner } = resolveCompositorPlan({
+    basePlan,
+    stepPlannerEnabled: request.stepPlannerEnabled,
+    briefing: request.briefing
+  });
 
-  return Effect.fail(
-    new BackendValidationError({
-      message: "Either intent and scope or contentType must be provided"
-    })
-  );
+  return Effect.succeed({
+    contentTypeId: plan.planSignature,
+    compositor: { plan, pipeline },
+    ...(stepPlanner ? { stepPlanner } : {})
+  });
 }

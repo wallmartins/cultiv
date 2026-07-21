@@ -3,7 +3,6 @@ import type { GuidedStep } from "~/routes/generate-view.js";
 import { buildBriefing } from "~/routes/generate-view.js";
 
 const STEPS: readonly GuidedStep[] = [
-  { kind: "ambiguity", id: "ambiguity", prompt: "tese ou hipótese?" },
   { kind: "question", id: "thesis", angle: "thesis", prompt: "qual a tese?" },
   { kind: "question", id: "experience", angle: "experience", prompt: "qual experiência?" },
   { kind: "question", id: "tension", angle: "tension", prompt: "qual tensão?" },
@@ -48,16 +47,13 @@ describe("buildBriefing", () => {
     expect(withoutAudience).toEqual({ topic: "voz autêntica" });
   });
 
-  it("folds ambiguity, thesis, and extra answers into payload without dropping content", () => {
+  it("folds thesis and extra answers into payload without dropping content", () => {
     const briefing = buildBriefing("migração pro Postgres", STEPS, [
-      { questionId: "ambiguity", text: "é sobre a decisão, não o tutorial", skipped: false },
       { questionId: "thesis", text: "big-bang perde pra incremental", skipped: false },
       { questionId: "extra-1", text: "rolou em produção sem downtime visível", skipped: false }
     ]);
 
-    expect(briefing.payload).toBe(
-      "é sobre a decisão, não o tutorial big-bang perde pra incremental rolou em produção sem downtime visível"
-    );
+    expect(briefing.payload).toBe("big-bang perde pra incremental rolou em produção sem downtime visível");
     expect(briefing).not.toHaveProperty("keyPoints");
     expect(briefing).not.toHaveProperty("goal");
   });

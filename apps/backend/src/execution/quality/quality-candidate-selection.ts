@@ -1,5 +1,5 @@
 import { Effect } from "effect";
-import type { PipelineType } from "@my-ai-orchestrator/contracts";
+import type { PlanSignature } from "@my-ai-orchestrator/contracts";
 import {
   CandidateGenerationError,
   CandidateSelectionError,
@@ -46,14 +46,14 @@ export function executeQualitySelectionAttempt(
   });
   const lexicalQualityV2 = options.services.featureFlags.isEnabled("generation.lexicalQualityV2", {
     contentType: options.plan.contentType.id,
-    pipelineType: options.plan.contentType.id as PipelineType,
+    pipelineType: options.plan.contentType.id as PlanSignature,
     qualityMode: options.qualityMode,
     userId: options.billingIdentity.userId,
     environment: options.config.environment
   });
   const reasoningSignatureEnabled = options.services.featureFlags.isEnabled("voice.reasoningSignatureV1", {
     contentType: options.plan.contentType.id,
-    pipelineType: options.plan.contentType.id as PipelineType,
+    pipelineType: options.plan.contentType.id as PlanSignature,
     qualityMode: options.qualityMode,
     userId: options.billingIdentity.userId,
     environment: options.config.environment

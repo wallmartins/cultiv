@@ -2,7 +2,7 @@ import type {
   ExecutionMode,
   JobStatus,
   PipelineDefinition,
-  PipelineType,
+  PlanSignature,
   QualityMode,
   LanguageProfileSummary
 } from "@my-ai-orchestrator/contracts";
@@ -28,7 +28,7 @@ export interface PipelineStep extends Entity {
 
 export interface Pipeline extends Entity {
   name: string;
-  type: PipelineType;
+  type: PlanSignature;
   steps: readonly PipelineStep[];
   qualityMode: QualityMode;
 }

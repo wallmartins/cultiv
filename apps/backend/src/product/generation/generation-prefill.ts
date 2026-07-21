@@ -1,10 +1,7 @@
 import { Effect, Schema } from "effect";
 import type { AIAdapterServiceContract } from "@my-ai-orchestrator/ai-adapters";
 import {
-  GenerationIntentSchema,
   GenerationLengthTierSchema,
-  PHASE1_DEFAULT_LENGTH_BY_INTENT,
-  type GenerationIntent,
   type GenerationPrefillQuestion,
   type GenerationPrefillResponse
 } from "@my-ai-orchestrator/contracts";
@@ -15,7 +12,6 @@ import type {
 } from "../ai-policy/ai-policy-types.js";
 import { PrefillInferenceInfraError } from "../../http/errors.js";
 import { parseJsonFromLlmResponse } from "../voice/voice-extraction-json.js";
-import { INTENT_CATALOG_COPY, resolveLocaleCopy } from "../catalog/generation-intent-catalog.js";
 import { detectPlatformInTheme } from "./generation-prefill-platform.js";
 import type {
   BackendGenerationPrefillRequest,
@@ -27,10 +23,9 @@ import type {
 // split it out once eval shows the shared profile's latency/cost doesn't fit prefill.
 const ROUTING_PROFILE_ID = "default-llm";
 
+// F1-2: the prefill no longer classifies a rhetorical genre — genre is inferred at the end of the
+// generation questions (Phase 4 producer). It only seeds size, a briefing amplification, and extras.
 const LlmPrefillResultSchema = Schema.Struct({
-  intent: GenerationIntentSchema,
-  ambiguous: Schema.Boolean,
-  alternativeIntent: Schema.optional(GenerationIntentSchema),
   lengthTier: GenerationLengthTierSchema,
   briefingSeed: Schema.optional(Schema.String),
   extraQuestions: Schema.optional(Schema.Array(Schema.Struct({ prompt: Schema.String })))
@@ -39,6 +34,10 @@ type LlmPrefillResult = typeof LlmPrefillResultSchema.Type;
 const decodeLlmPrefillResult = Schema.decodeUnknown(LlmPrefillResultSchema);
 
 type Locale = "pt-BR" | "en-US";
+
+function resolveLocale(language: string | undefined): Locale {
+  return language?.toLowerCase().startsWith("en") ? "en-US" : "pt-BR";
+}
 
 const BACKBONE_QUESTION_COPY: Readonly<
   Record<Locale, ReadonlyArray<{ readonly angle: "thesis" | "experience" | "tension" | "motivation"; readonly prompt: (theme: string) => string }>>
@@ -65,7 +64,7 @@ export function createBackendGenerationPrefillService(options: {
   return {
     infer(args: BackendGenerationPrefillRequest) {
       return Effect.gen(function* () {
-        const locale = resolveLocaleCopy(args.language ?? "pt-BR");
+        const locale = resolveLocale(args.language);
         const detectedPlatform = detectPlatformInTheme(args.theme);
 
         const policy = yield* options.aiPolicy.getActivePolicy().pipe(
@@ -158,25 +157,15 @@ function runLlmInference(args: {
 }
 
 function buildSystemPrompt(): string {
-  const intentLines = (Object.keys(INTENT_CATALOG_COPY) as GenerationIntent[]).map(
-    (intent) => `- ${intent}: ${INTENT_CATALOG_COPY[intent]["en-US"].description}`
-  );
-
   return [
     "You infer a lightweight generation setup from a short free-text theme for Cultiv, a writing tool.",
     "Respond with JSON only — no markdown fences or commentary.",
-    "Classify the theme into exactly one intent (the rhetorical angle the author most likely wants):",
-    ...intentLines,
-    "Only set \"ambiguous\": true when two intents are similarly likely; when true, set \"alternativeIntent\" to the second-best intent.",
-    "\"lengthTier\" is short|medium|long — infer from explicit cues (e.g. \"quick post\" -> short, \"deep dive\" -> long); default to the intent's typical length when unclear.",
+    "\"lengthTier\" is short|medium|long — infer from explicit cues (e.g. \"quick post\" -> short, \"deep dive\" -> long); default to short when unclear.",
     "\"briefingSeed\" is an optional one-sentence amplification of the theme in the author's own words — never invent facts, experiences, or opinions the theme doesn't state.",
     "\"extraQuestions\" holds 0 to 2 follow-up questions ONLY when the theme suggests a genuinely useful angle beyond thesis, personal experience, counter-tension, and motivation — otherwise return an empty array.",
     "Write briefingSeed and extraQuestions prompts in the same language as the theme.",
     "Schema:",
     "{",
-    '  "intent": "share-idea|explain-deeply|engage-audience|tell-story|update-subscribers|document-decision",',
-    '  "ambiguous": boolean,',
-    '  "alternativeIntent": "<same literals, only when ambiguous>",',
     '  "lengthTier": "short|medium|long",',
     '  "briefingSeed": "string (optional)",',
     '  "extraQuestions": [{ "prompt": "string" }]',
@@ -197,24 +186,16 @@ function buildResponse(args: {
   readonly detectedPlatform: string | undefined;
   readonly inference: LlmPrefillResult | undefined;
 }): GenerationPrefillResponse {
-  const intent: GenerationIntent = args.inference?.intent ?? "share-idea";
-  const lengthTier = args.inference?.lengthTier ?? PHASE1_DEFAULT_LENGTH_BY_INTENT[intent];
-  const ambiguous = args.inference?.ambiguous ?? false;
+  // rhetoricalMode is deliberately left unset — the genre producer lands in Phase 4 (ponytail: F4).
+  const lengthTier = args.inference?.lengthTier ?? "short";
   const briefingSeed = args.inference?.briefingSeed;
 
   return {
     prefill: {
-      intent,
       scope: { lengthTier },
       ...(briefingSeed ? { briefing: { topic: briefingSeed } } : {}),
       ...(args.language ? { language: args.language } : {})
     },
-    intentAmbiguity: ambiguous
-      ? {
-          ambiguous: true,
-          ...(args.inference?.alternativeIntent ? { alternative: args.inference.alternativeIntent } : {})
-        }
-      : null,
     ...(args.detectedPlatform ? { detectedPlatform: args.detectedPlatform } : {}),
     questionPlan: buildQuestionPlan(args.locale, args.theme, args.inference?.extraQuestions ?? [])
   };

@@ -80,7 +80,8 @@ describe("me surface contracts", () => {
 
   it("decodes the authenticated execution request", () => {
     const value = Schema.decodeUnknownSync(MeExecutionRequestSchema)({
-      contentType: "newsletter",
+      rhetoricalMode: "promote",
+      scope: { lengthTier: "long", channel: "email" },
       briefing: {
         topic: "Migração para Hono + Effect",
         audience: "engenheiros"
@@ -91,7 +92,8 @@ describe("me surface contracts", () => {
       idempotencyKey: "exec_1"
     });
 
-    expect(value.contentType).toBe("newsletter");
+    expect(value.rhetoricalMode).toBe("promote");
+    expect(value.scope?.lengthTier).toBe("long");
     expect(value.qualityMode).toBe("strict");
     expect(value.quoteId).toBe("quote_1");
     expect(value.idempotencyKey).toBe("exec_1");

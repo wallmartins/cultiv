@@ -19,16 +19,16 @@
   ],
   "contentTypes": [
     {
-      "id": "validation-post",
-      "label": "Validation Post Experimental",
+      "id": "short-piece",
+      "label": "Short Piece Experimental",
       "defaultLanguage": "pt-BR",
-      "pipelineType": "validation-post"
+      "pipelineType": "short-piece"
     }
   ],
   "pipelines": [
     {
-      "pipelineType": "validation-post",
-      "contentType": "validation-post",
+      "pipelineType": "short-piece",
+      "contentType": "short-piece",
       "defaultLanguage": "pt-BR",
       "defaultQualityMode": "balanced",
       "steps": [

@@ -8,8 +8,8 @@ import { resolveStructuredStepTemplate } from "../../apps/backend/src/execution/
 import { resolveTemplate } from "@my-ai-orchestrator/skills";
 
 describe("compositor expression instructions", () => {
-  it("maps email-share-idea to subject line and CTA guidance", () => {
-    const instructions = resolveExpressionFormatInstructions("email-share-idea", "draft", {
+  it("maps email-expound to subject line and CTA guidance", () => {
+    const instructions = resolveExpressionFormatInstructions("email-expound", "draft", {
       min: 400,
       max: 1200
     });
@@ -19,13 +19,13 @@ describe("compositor expression instructions", () => {
     expect(instructions).toContain("Target length: between 400 and 1200 words.");
   });
 
-  it("covers channel and intent expression profiles", () => {
+  it("covers channel and rhetorical mode expression profiles", () => {
     const profiles = listExpressionInstructionProfiles();
 
-    expect(profiles).toContain("email-share-idea");
-    expect(profiles).toContain("professional-share-idea");
-    expect(profiles).toContain("blog-explain-deeply");
-    expect(profiles).toContain("share-idea-default");
+    expect(profiles).toContain("email-expound");
+    expect(profiles).toContain("professional-expound");
+    expect(profiles).toContain("blog-expound");
+    expect(profiles).toContain("expound-default");
   });
 
   it("includes email subject instruction in draft skill template locals", async () => {
@@ -34,13 +34,13 @@ describe("compositor expression instructions", () => {
       resolveTemplate(structured.system, {
       state: {},
       inputs: {
-        expressionProfile: "email-share-idea",
+        expressionProfile: "email-expound",
         wordTarget: { min: 400, max: 1200 }
       },
       config: {},
       memory: {},
       locals: {
-        formatInstructions: resolveExpressionFormatInstructions("email-share-idea", "draft", {
+        formatInstructions: resolveExpressionFormatInstructions("email-expound", "draft", {
           min: 400,
           max: 1200
         }),

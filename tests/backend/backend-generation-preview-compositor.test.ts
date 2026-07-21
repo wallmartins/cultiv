@@ -1,7 +1,6 @@
 import { Effect } from "effect";
 import { describe, expect, it } from "vitest";
-import { decodeGenerationPreviewResponse, resolvePhase1LegacyContentTypeId } from "@my-ai-orchestrator/contracts";
-import { resolveEffectiveWordTarget, toIntentWordTarget } from "@my-ai-orchestrator/text-quality";
+import { decodeGenerationPreviewResponse } from "@my-ai-orchestrator/contracts";
 import {
   backendAppTestStartedAt,
   createBackendAppTestApp,
@@ -9,8 +8,11 @@ import {
   createBackendAppTestServices
 } from "./backend-app.fixtures.js";
 
+// generation-preview always resolves through the compositor now (Practice Profile Phase 1
+// clean cut removed the legacy/compositorV1Enabled branch); `compositorV1Enabled` on BackendConfig
+// is a vestigial feature-flag registration that nothing in the generation path reads anymore.
 describe("backend generation preview compositor", () => {
-  it("returns compositor planSignature when compositor flag is enabled", async () => {
+  it("returns compositor planSignature and expression profile when compositorV1Enabled is true", async () => {
     const config = createBackendAppTestConfig({
       billingUserId: "user_compositor_preview",
       compositorV1Enabled: true
@@ -20,7 +22,7 @@ describe("backend generation preview compositor", () => {
     services.billing.upsertSubscription({
       id: "sub_user_compositor_preview_pro",
       userId: "user_compositor_preview",
-      planId: "pro",
+      planId: "criador",
       status: "active",
       startedAt: backendAppTestStartedAt.toISOString()
     });
@@ -30,7 +32,7 @@ describe("backend generation preview compositor", () => {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
-        intent: "share-idea",
+        rhetoricalMode: "expound",
         scope: { lengthTier: "medium", channel: "email" },
         briefing: {
           topic: "Why compositor planning matters"
@@ -43,32 +45,21 @@ describe("backend generation preview compositor", () => {
     const decoded = await Effect.runPromise(decodeGenerationPreviewResponse(await response.json()));
 
     expect(decoded.compositor?.planSignature).toBe("edition-piece");
-    expect(decoded.compositor?.expressionProfile).toBe("email-share-idea");
+    expect(decoded.compositor?.expressionProfile).toBe("email-expound");
     expect(decoded.pricingSnapshot.contentType).toBe("edition-piece");
-    const wordTarget = toIntentWordTarget(
-      resolveEffectiveWordTarget({
-        contentType: resolvePhase1LegacyContentTypeId("share-idea", "medium"),
-        lengthTier: "medium",
-        channel: "email"
-      })
-    );
-
-    expect(decoded.resolvedIntent).toMatchObject({
-      intent: "share-idea",
-      scope: { lengthTier: "medium", channel: "email" },
-      wordTargetMin: wordTarget.min,
-      wordTargetMax: wordTarget.max
-    });
   });
 
-  it("keeps legacy preview behavior when compositor flag is disabled", async () => {
-    const config = createBackendAppTestConfig({ billingUserId: "user_legacy_preview" });
+  it("still resolves through the compositor when compositorV1Enabled is false (flag is inert)", async () => {
+    const config = createBackendAppTestConfig({
+      billingUserId: "user_legacy_preview",
+      compositorV1Enabled: false
+    });
     const services = createBackendAppTestServices(config);
 
     services.billing.upsertSubscription({
       id: "sub_user_legacy_preview_pro",
       userId: "user_legacy_preview",
-      planId: "pro",
+      planId: "criador",
       status: "active",
       startedAt: backendAppTestStartedAt.toISOString()
     });
@@ -78,7 +69,7 @@ describe("backend generation preview compositor", () => {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
-        intent: "share-idea",
+        rhetoricalMode: "expound",
         scope: { lengthTier: "medium", channel: "email" },
         briefing: {
           topic: "Legacy resolver path"
@@ -90,7 +81,7 @@ describe("backend generation preview compositor", () => {
 
     const decoded = await Effect.runPromise(decodeGenerationPreviewResponse(await response.json()));
 
-    expect(decoded.compositor).toBeUndefined();
-    expect(decoded.pricingSnapshot.contentType).toBe("linkedin-post");
+    expect(decoded.compositor?.planSignature).toBe("edition-piece");
+    expect(decoded.pricingSnapshot.contentType).toBe("edition-piece");
   });
 });

@@ -7,7 +7,7 @@ import type {
   JobStatus,
   PipelineDefinition,
   PipelineStepDefinition,
-  PipelineType,
+  PlanSignature,
   QualityMode,
   ContentTypeDefinition,
   LanguageProfileSummary
@@ -50,7 +50,7 @@ export interface PipelineConfig {
 }
 
 export interface Pipeline extends PipelineDefinition {
-  type?: PipelineType;
+  type?: PlanSignature;
   inputs?: Record<string, unknown>;
   config?: PipelineConfig;
   steps: PipelineStep[];

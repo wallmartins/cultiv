@@ -14,13 +14,13 @@ import {
   resolveSelection,
   estimateStepProgressScore
 } from "../src/execution/quality/quality.js";
-import type { PipelineRequest, QualityMode } from "@my-ai-orchestrator/contracts";
+import type { PipelineRequest, PlanSignature, QualityMode } from "@my-ai-orchestrator/contracts";
 
 describe("M2-26: Paridade Funcional - Job Store", () => {
   describe("createQueuedJob", () => {
     it("cria job com status initial 'queued'", () => {
       const store = createJobStoreHarness();
-      const request = createSimplifiedRequest("twitter-thread", "Crie um tweet viral");
+      const request = createSimplifiedRequest("serial-piece", "Crie um tweet viral");
       const created = store.createQueuedJob(request);
 
       expect(created.status).toBe("queued");
@@ -30,16 +30,16 @@ describe("M2-26: Paridade Funcional - Job Store", () => {
 
     it("resolves contentType from pipelineType", () => {
       const store = createJobStoreHarness();
-      const request = createSimplifiedRequest("twitter-thread", "Test");
+      const request = createSimplifiedRequest("serial-piece", "Test");
       const created = store.createQueuedJob(request);
 
-      expect(created.contentType).toBe("twitter-thread");
+      expect(created.contentType).toBe("serial-piece");
     });
 
     it("resolves estimatedSteps from request structure", () => {
       const store = createJobStoreHarness();
 
-      const simplified = createSimplifiedRequest("twitter-thread", "Test");
+      const simplified = createSimplifiedRequest("serial-piece", "Test");
       const simplifiedJob = store.createQueuedJob(simplified);
       expect(simplifiedJob.estimatedSteps).toBe(1);
 
@@ -61,7 +61,7 @@ describe("M2-26: Paridade Funcional - Job Store", () => {
     it("permite idempotency via idempotencyKey no request", () => {
       const store = createJobStoreHarness();
       const requestWithKey = {
-        pipelineType: "twitter-thread" as const,
+        pipelineType: "serial-piece" as const,
         briefing: "Test",
         idempotencyKey: "unique-key-123"
       };
@@ -71,7 +71,7 @@ describe("M2-26: Paridade Funcional - Job Store", () => {
 
     it("cria evento initial de progress", () => {
       const store = createJobStoreHarness();
-      const request = createSimplifiedRequest("twitter-thread", "Test");
+      const request = createSimplifiedRequest("serial-piece", "Test");
       const created = store.createQueuedJob(request);
       const events = store.listJobEvents(created.jobId);
 
@@ -90,7 +90,7 @@ describe("M2-26: Paridade Funcional - Job Store", () => {
 
     it("retorna status correto após criação", () => {
       const store = createJobStoreHarness();
-      const request = createSimplifiedRequest("twitter-thread", "Test");
+      const request = createSimplifiedRequest("serial-piece", "Test");
       const created = store.createQueuedJob(request);
       const status = store.getJobStatus(created.jobId);
 
@@ -103,7 +103,7 @@ describe("M2-26: Paridade Funcional - Job Store", () => {
   describe("updateJobProgress", () => {
     it("atualiza status para 'running' após progress", () => {
       const store = createJobStoreHarness();
-      const request = createSimplifiedRequest("twitter-thread", "Test");
+      const request = createSimplifiedRequest("serial-piece", "Test");
       const created = store.createQueuedJob(request);
 
       const updated = store.updateJobProgress(created.jobId, {
@@ -121,7 +121,7 @@ describe("M2-26: Paridade Funcional - Job Store", () => {
 
     it("adiciona evento de progress", () => {
       const store = createJobStoreHarness();
-      const request = createSimplifiedRequest("twitter-thread", "Test");
+      const request = createSimplifiedRequest("serial-piece", "Test");
       const created = store.createQueuedJob(request);
 
       store.updateJobProgress(created.jobId, {
@@ -140,7 +140,7 @@ describe("M2-26: Paridade Funcional - Job Store", () => {
   describe("completeJob", () => {
     it("finaliza job com resultado", () => {
       const store = createJobStoreHarness();
-      const request = createSimplifiedRequest("twitter-thread", "Test");
+      const request = createSimplifiedRequest("serial-piece", "Test");
       const created = store.createQueuedJob(request);
 
       const completed = store.completeJob(created.jobId, {
@@ -169,7 +169,7 @@ describe("M2-26: Paridade Funcional - Job Store", () => {
 
     it("emite evento 'done'", () => {
       const store = createJobStoreHarness();
-      const request = createSimplifiedRequest("twitter-thread", "Test");
+      const request = createSimplifiedRequest("serial-piece", "Test");
       const created = store.createQueuedJob(request);
 
       store.completeJob(created.jobId, { content: "Done", metadata: {} });
@@ -183,7 +183,7 @@ describe("M2-26: Paridade Funcional - Job Store", () => {
   describe("failJob", () => {
     it("marca job como failed com erro", () => {
       const store = createJobStoreHarness();
-      const request = createSimplifiedRequest("twitter-thread", "Test");
+      const request = createSimplifiedRequest("serial-piece", "Test");
       const created = store.createQueuedJob(request);
 
       const failed = store.failJob(created.jobId, {
@@ -199,7 +199,7 @@ describe("M2-26: Paridade Funcional - Job Store", () => {
 
     it("emite evento 'error'", () => {
       const store = createJobStoreHarness();
-      const request = createSimplifiedRequest("twitter-thread", "Test");
+      const request = createSimplifiedRequest("serial-piece", "Test");
       const created = store.createQueuedJob(request);
 
       store.failJob(created.jobId, { message: "Error", step: null });
@@ -213,7 +213,7 @@ describe("M2-26: Paridade Funcional - Job Store", () => {
   describe("subscribe", () => {
     it("notifica listener de novos eventos", async () => {
       const store = createJobStoreHarness();
-      const request = createSimplifiedRequest("twitter-thread", "Test");
+      const request = createSimplifiedRequest("serial-piece", "Test");
       const created = store.createQueuedJob(request);
 
       const receivedEvents: Array<{ type: string }> = [];
@@ -239,7 +239,7 @@ describe("M2-26: Paridade Funcional - Job Store", () => {
 
     it("retorna função para cancelar subscription", async () => {
       const store = createJobStoreHarness();
-      const request = createSimplifiedRequest("twitter-thread", "Test");
+      const request = createSimplifiedRequest("serial-piece", "Test");
       const created = store.createQueuedJob(request);
 
       const receivedBefore: Array<{ type: string }> = [];
@@ -265,7 +265,7 @@ describe("M2-26: Paridade Funcional - Job Store", () => {
 describe("M2-26: Paridade Funcional - Quality Execution", () => {
   describe("resolveSelection", () => {
     it("usa qualidade do request quando fornecida", () => {
-      const request = createSimplifiedRequest("twitter-thread", "Test");
+      const request = createSimplifiedRequest("serial-piece", "Test");
       (request as { qualityMode?: QualityMode }).qualityMode = "strict";
 
       const selection = resolveSelection(request, {
@@ -280,7 +280,7 @@ describe("M2-26: Paridade Funcional - Quality Execution", () => {
     });
 
     it("usa fallback quando qualidade não fornecida", () => {
-      const request = createSimplifiedRequest("twitter-thread", "Test");
+      const request = createSimplifiedRequest("serial-piece", "Test");
 
       const selection = resolveSelection(request, {
         executionMode: "sync",
@@ -294,7 +294,7 @@ describe("M2-26: Paridade Funcional - Quality Execution", () => {
     });
 
     it("usa adapter do request quando fornecido", () => {
-      const request = createSimplifiedRequest("twitter-thread", "Test");
+      const request = createSimplifiedRequest("serial-piece", "Test");
       (request as { adapter?: string }).adapter = "anthropic";
 
       const selection = resolveSelection(request, {
@@ -308,7 +308,7 @@ describe("M2-26: Paridade Funcional - Quality Execution", () => {
     });
 
     it("constrói model a partir de adapter-qualityMode", () => {
-      const request = createSimplifiedRequest("twitter-thread", "Test");
+      const request = createSimplifiedRequest("serial-piece", "Test");
 
       const selection = resolveSelection(request, {
         executionMode: "sync",
@@ -446,7 +446,7 @@ describe("M2-26: Paridade Funcional - Contract Decoding", () => {
     it("decodifica simplified request valido", async () => {
       const raw = {
         userId: "user-123",
-        pipelineType: "twitter-thread",
+        pipelineType: "serial-piece",
         briefing: "Crie um tweet sobre IA"
       };
 
@@ -503,7 +503,7 @@ describe("M2-26: Paridade Funcional - Contract Decoding", () => {
       const validStatus = {
         jobId: "job-123",
         status: "done",
-        contentType: "twitter-thread",
+        contentType: "serial-piece",
         progress: {
           currentStep: "completed",
           stepIndex: 4,
@@ -578,7 +578,7 @@ describe("M2-27: Audit - No Legacy Dependencies", () => {
 });
 
 function createSimplifiedRequest(
-  pipelineType: "twitter-thread" | "linkedin-post" | "validation-post" | "long-form-blog" | "newsletter",
+  pipelineType: PlanSignature,
   briefing: string
 ): PipelineRequest {
   return {

@@ -5,7 +5,6 @@ import { buildRefinementSkillContext } from "@my-ai-orchestrator/skills";
 import type { GenerationContext, VoiceProfile } from "@my-ai-orchestrator/text-quality";
 import { replaceEmDashesWithCommas } from "@my-ai-orchestrator/text-quality";
 import { normalizeText, stripTemplateHeaders } from "./quality/quality.js";
-import { readGenerationIntent } from "./pipeline-metadata.js";
 import type { BackendSkillOptions } from "./skill-types.js";
 import {
   resolveGenerationDomainLabel,
@@ -86,7 +85,6 @@ export function createBackendSkillDefinition(
       Effect.gen(function* () {
         const voiceProfile = context.state.voiceProfile as Partial<VoiceProfile> | undefined;
         const generationContext = context.state.generationContext as GenerationContext | undefined;
-        const generationIntent = pickGenerationIntent(context.inputs, context.state);
         const voiceExampleTexts = collectVoiceExampleTexts(voiceProfile);
         const stepExamples = step.name === "hook"
           ? voiceExampleTexts.slice(0, 1)
@@ -113,7 +111,6 @@ export function createBackendSkillDefinition(
         const previousContent = previousStep ? context.state[previousStep.name] : undefined;
         const briefingText = getBriefingText(context.inputs);
         const stepVoice = buildStepVoiceContext(step.name, voiceProfile, {
-          intent: generationIntent,
           briefing: briefingText
         });
         const topic = getTopic(context.inputs, context.state, context.pipeline.name);
@@ -183,24 +180,3 @@ export function createBackendSkillDefinition(
   };
 }
 
-function pickGenerationIntent(
-  inputs: Readonly<Record<string, unknown>>,
-  state: Readonly<Record<string, unknown>>
-): string | undefined {
-  const fromInputs = inputs.generationIntent;
-  if (typeof fromInputs === "string" && fromInputs.trim().length > 0) {
-    return fromInputs;
-  }
-
-  const nestedIntent = readGenerationIntent(inputs.context);
-  if (nestedIntent) {
-    return nestedIntent;
-  }
-
-  const fromState = state.generationIntent;
-  if (typeof fromState === "string" && fromState.trim().length > 0) {
-    return fromState;
-  }
-
-  return undefined;
-}

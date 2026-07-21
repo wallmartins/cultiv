@@ -8,7 +8,7 @@ describe("step planner smoke scenarios", () => {
   it("dry-run expectations match planner output for all curated scenarios", () => {
     for (const scenario of STEP_PLANNER_SMOKE_SCENARIOS) {
       const basePlan = planGeneration({
-        intent: scenario.fixture.intent,
+        rhetoricalMode: scenario.fixture.rhetoricalMode,
         scope: scenario.fixture.scope,
         qualityMode: scenario.fixture.qualityMode
       });

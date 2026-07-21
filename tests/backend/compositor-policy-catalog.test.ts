@@ -38,13 +38,15 @@ describe("compositor policy catalog", () => {
     expect(userFacingIds).not.toContain("long-piece");
     expect(userFacingIds).not.toContain("serial-piece");
     expect(userFacingIds).not.toContain("edition-piece");
-    expect(userFacingIds).toHaveLength(6);
+    // legacy named content types were purged in the intent->genre re-key; only the
+    // 4 internal compositor buckets remain, so nothing is user-facing anymore.
+    expect(userFacingIds).toHaveLength(0);
   });
 
   it("resolves execution snapshot for ExplicitPipelineRequest with edition-piece", () => {
     const services = Effect.runSync(createBackendProductServices(baseConfig));
     const plan = planGeneration({
-      intent: "share-idea",
+      rhetoricalMode: "expound",
       scope: { lengthTier: "medium", channel: "email" },
       qualityMode: "balanced"
     });
@@ -86,10 +88,10 @@ describe("compositor policy catalog", () => {
     expect(snapshot.pricingEnvelope.lengthTier).toBe("medium");
   });
 
-  it("resolves compositor structure step routing for document-decision plans", () => {
+  it("resolves compositor structure step routing for argue plans", () => {
     const services = Effect.runSync(createBackendProductServices(baseConfig));
     const plan = planGeneration({
-      intent: "document-decision",
+      rhetoricalMode: "argue",
       scope: { lengthTier: "medium" },
       qualityMode: "balanced"
     });

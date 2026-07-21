@@ -1,6 +1,6 @@
 import { Schema } from "effect";
 import { createSchemaDecoder } from "../shared.js";
-import { GenerationLengthTierSchema, type GenerationLengthTier } from "../generation-intent.js";
+import { GenerationLengthTierSchema, type GenerationLengthTier } from "../generation-scope.js";
 import { JobStatusSchema } from "./job.js";
 
 export const ExecutionsListPeriodSchema = Schema.Literal("7d", "30d", "90d", "all");

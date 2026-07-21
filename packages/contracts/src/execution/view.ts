@@ -10,9 +10,9 @@ import {
 } from "../voice.js";
 import {
   GenerationChannelSchema,
-  GenerationIntentSchema,
   GenerationLengthTierSchema
-} from "../generation-intent.js";
+} from "../generation-scope.js";
+import { RhetoricalModeSchema } from "../reasoning.js";
 import {
   AsyncRunResponseSchema,
   ExecutionControlsSchema,
@@ -57,7 +57,7 @@ export const JobStatusResponseSchema = Schema.Struct({
   completedAt: Schema.NullOr(Schema.String),
   voice: Schema.optional(ExecutionVoiceMetadataViewSchema),
   userId: Schema.optional(Schema.String),
-  generationIntent: Schema.optional(GenerationIntentSchema),
+  rhetoricalMode: Schema.optional(RhetoricalModeSchema),
   briefingTopic: Schema.optional(Schema.String),
   lengthTier: Schema.optional(GenerationLengthTierSchema),
   channel: Schema.optional(GenerationChannelSchema),
@@ -121,7 +121,7 @@ export const ExecutionStatusViewSchema = Schema.Struct({
   createdAt: Schema.String,
   completedAt: Schema.NullOr(Schema.String),
   voice: Schema.optional(ExecutionVoiceMetadataViewSchema),
-  generationIntent: Schema.optional(GenerationIntentSchema),
+  rhetoricalMode: Schema.optional(RhetoricalModeSchema),
   briefingTopic: Schema.optional(Schema.String),
   lengthTier: Schema.optional(GenerationLengthTierSchema),
   channel: Schema.optional(GenerationChannelSchema),

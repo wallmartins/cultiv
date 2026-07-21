@@ -8,8 +8,6 @@ export const CALIBRATION_WIZARD_STEPS = [
     targetWords: 0,
     maxWords: 0,
     targetSentences: 0,
-    capturesFeatures: [] as const,
-    themePool: [] as const,
     defaultTheme: ""
   },
   {
@@ -19,13 +17,6 @@ export const CALIBRATION_WIZARD_STEPS = [
     targetWords: 60,
     maxWords: 100,
     targetSentences: 3,
-    capturesFeatures: ["lexical", "punctuation", "tone"] as const,
-    themePool: [
-      "trabalho remoto",
-      "um bom café",
-      "acordar cedo",
-      "melhor formato de conteúdo online"
-    ] as const,
     defaultTheme: "trabalho remoto"
   },
   {
@@ -37,8 +28,6 @@ export const CALIBRATION_WIZARD_STEPS = [
     targetWords: 150,
     maxWords: 250,
     targetSentences: 10,
-    capturesFeatures: ["reasoning", "authority", "certainty"] as const,
-    themePool: [] as const,
     defaultTheme: ""
   },
   {
@@ -48,8 +37,6 @@ export const CALIBRATION_WIZARD_STEPS = [
     targetWords: 250,
     maxWords: 400,
     targetSentences: 15,
-    capturesFeatures: ["development", "transitions", "epistemic"] as const,
-    themePool: [] as const,
     defaultTheme: "Defenda uma posição sobre algo que importa para você."
   },
   {
@@ -60,16 +47,12 @@ export const CALIBRATION_WIZARD_STEPS = [
     targetWords: 180,
     maxWords: 300,
     targetSentences: 10,
-    capturesFeatures: ["register", "complexity", "adaptation"] as const,
-    themePool: [] as const,
     defaultTheme: ""
   },
   {
     id: "review_confirm",
     label: "Revisão",
     prompt: "",
-    capturesFeatures: ["affirmation"] as const,
-    themePool: [] as const,
     defaultTheme: ""
   }
 ] as const;

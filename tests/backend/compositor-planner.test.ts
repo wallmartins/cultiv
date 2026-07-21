@@ -18,15 +18,15 @@ function expectedWordTarget(args: {
 }
 
 describe("CompositorPlanner", () => {
-  it("share-idea short professional-network → short-piece with hook", () => {
+  it("expound short professional-network → short-piece with hook", () => {
     const plan = planGeneration({
-      intent: "share-idea",
+      rhetoricalMode: "expound",
       scope: { lengthTier: "short", channel: "professional-network" },
       qualityMode: "balanced"
     });
     expect(plan.planSignature).toBe("short-piece");
     expect(plan.steps.map((s) => s.name)).toContain("hook");
-    expect(plan.parameters.expressionProfile).toBe("professional-share-idea");
+    expect(plan.parameters.expressionProfile).toBe("professional-expound");
     expect(plan.parameters.wordTarget).toEqual(
       expectedWordTarget({
         contentType: "linkedin-post",
@@ -36,61 +36,61 @@ describe("CompositorPlanner", () => {
     );
   });
 
-  it("share-idea medium email → edition-piece without hook", () => {
+  it("expound medium email → edition-piece without hook", () => {
     const plan = planGeneration({
-      intent: "share-idea",
+      rhetoricalMode: "expound",
       scope: { lengthTier: "medium", channel: "email" },
       qualityMode: "balanced"
     });
     expect(plan.planSignature).toBe("edition-piece");
     expect(plan.steps.map((s) => s.name)).not.toContain("hook");
-    expect(plan.parameters.expressionProfile).toBe("email-share-idea");
+    expect(plan.parameters.expressionProfile).toBe("email-expound");
   });
 
-  it("explain-deeply long blog → long-piece with research", () => {
+  it("expound long blog → long-piece with research", () => {
     const plan = planGeneration({
-      intent: "explain-deeply",
+      rhetoricalMode: "expound",
       scope: { lengthTier: "long", channel: "blog" },
       qualityMode: "balanced"
     });
     expect(plan.planSignature).toBe("long-piece");
     expect(plan.steps.map((s) => s.name)).toContain("research");
-    expect(plan.parameters.expressionProfile).toBe("blog-explain-deeply");
+    expect(plan.parameters.expressionProfile).toBe("blog-expound");
   });
 
-  it("document-decision medium → structure step when applicable", () => {
+  it("argue medium unspecified channel → structure step when applicable", () => {
     const plan = planGeneration({
-      intent: "document-decision",
+      rhetoricalMode: "argue",
       scope: { lengthTier: "medium" },
       qualityMode: "balanced"
     });
     expect(plan.steps.map((s) => s.name)).toContain("structure");
-    expect(plan.parameters.expressionProfile).toBe("document-decision-default");
+    expect(plan.parameters.expressionProfile).toBe("argue-default");
   });
 
-  it("engage-audience short social → short-piece", () => {
+  it("argue short social → short-piece", () => {
     const plan = planGeneration({
-      intent: "engage-audience",
+      rhetoricalMode: "argue",
       scope: { lengthTier: "short", channel: "social" },
       qualityMode: "balanced"
     });
     expect(plan.planSignature).toBe("short-piece");
-    expect(plan.parameters.expressionProfile).toBe("social-engage-audience");
+    expect(plan.parameters.expressionProfile).toBe("social-argue");
   });
 
-  it("tell-story medium → serial-piece", () => {
+  it("narrate medium unspecified channel → serial-piece", () => {
     const plan = planGeneration({
-      intent: "tell-story",
+      rhetoricalMode: "narrate",
       scope: { lengthTier: "medium" },
       qualityMode: "balanced"
     });
     expect(plan.planSignature).toBe("serial-piece");
-    expect(plan.parameters.expressionProfile).toBe("tell-story-default");
+    expect(plan.parameters.expressionProfile).toBe("narrate-default");
   });
 
   it("materializeCompositorPipeline maps plan to pipeline definition", () => {
     const plan = planGeneration({
-      intent: "share-idea",
+      rhetoricalMode: "expound",
       scope: { lengthTier: "medium", channel: "email" },
       qualityMode: "balanced"
     });

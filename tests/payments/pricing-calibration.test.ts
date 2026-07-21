@@ -8,16 +8,16 @@ import {
 import fixture from "../fixtures/billing/calibration-jobs.json";
 
 describe("pricing calibration", () => {
-  it("estimates higher cost for long-form-blog strict than twitter-thread fast", () => {
-    const blog = estimateTheoreticalCostUsd({
-      contentType: "long-form-blog",
+  it("estimates higher cost for long-piece strict than short-piece fast", () => {
+    const longPiece = estimateTheoreticalCostUsd({
+      contentType: "long-piece",
       qualityMode: "strict"
     });
-    const tweet = estimateTheoreticalCostUsd({
-      contentType: "twitter-thread",
+    const shortPiece = estimateTheoreticalCostUsd({
+      contentType: "short-piece",
       qualityMode: "fast"
     });
-    expect(blog).toBeGreaterThan(tweet);
+    expect(longPiece).toBeGreaterThan(shortPiece);
   });
 
   it("derives credit price with target margin and canonical anchor", () => {

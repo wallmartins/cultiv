@@ -15,8 +15,8 @@ describe("generation compositor contracts", () => {
       ],
       parameters: {
         wordTarget: { min: 400, max: 1200 },
-        expressionProfile: "email-share-idea",
-        intent: "share-idea",
+        expressionProfile: "email-expound",
+        rhetoricalMode: "expound",
         lengthTier: "medium"
       }
     });

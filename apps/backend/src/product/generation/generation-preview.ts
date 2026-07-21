@@ -14,8 +14,6 @@ import {
 } from "@my-ai-orchestrator/payments";
 import { isQualityModeAllowed, resolveQualityModeBlockedReason } from "../billing/commercial-access.js";
 import { resolveStoredUserEntitlement, resolveStoredUserPlanId } from "../billing/resolve-user-billing.js";
-import { buildContentTypeCatalogView } from "../catalog/content-type-catalog.js";
-import { resolveCatalogContentTypeDefinitions } from "../catalog/resolve-catalog-content-types.js";
 import type { BackendAIPolicyServiceContract } from "../ai-policy/ai-policy-types.js";
 import type {
   BackendApprovedGenerationPreviewRequest,
@@ -26,7 +24,6 @@ import { toGenerationPricingSnapshot } from "../billing/generation-pricing-snaps
 import { resolveCompositorPricingArgs } from "../billing/compositor-pricing-args.js";
 import { recommendGenerationPreviewQualityMode } from "./generation-preview-recommendation.js";
 import { resolveGenerationTarget } from "./resolve-generation-target.js";
-import { isGenerationCompositorEnabled } from "./is-compositor-enabled.js";
 import { isGenerationStepPlannerEnabled } from "./is-step-planner-enabled.js";
 import type { BackendPublicInputSafetyGatewayService } from "../../safety/public-input-safety-types.js";
 import type { FeatureFlagServiceContract } from "@my-ai-orchestrator/feature-flags";
@@ -50,31 +47,18 @@ export function createBackendGenerationPreviewService(options: {
         const entitlement = resolveStoredUserEntitlement(options.billing, sanitizedArgs.userId) ?? null;
         const currentBalance = entitlement?.wallet.availableCredits ?? 0;
         const primaryLanguage = sanitizedArgs.language ?? voiceProfile?.primaryLanguage ?? options.config.defaultLanguage;
-        const orchestrationCatalog = options.aiPolicy.getActiveOrchestrationCatalog();
-        const contentTypes = buildContentTypeCatalogView(
-          resolveCatalogContentTypeDefinitions(orchestrationCatalog),
-          {
-            userLanguage: primaryLanguage,
-            subscriptionActive: entitlement?.status === "active"
-          }
-        );
         const planTier = (entitlement?.tier ?? "free") as BillingPlanTier;
-        const compositorEnabled = isGenerationCompositorEnabled(options.featureFlags, options.config);
         const stepPlannerEnabled = isGenerationStepPlannerEnabled(options.featureFlags, options.config);
         const resolvedTarget = yield* resolveGenerationTarget({
-          intent: sanitizedArgs.intent,
+          rhetoricalMode: sanitizedArgs.rhetoricalMode,
           scope: sanitizedArgs.scope,
-          contentType: sanitizedArgs.contentType,
-          compositorEnabled,
           stepPlannerEnabled,
           briefing: sanitizedArgs.briefing,
           qualityMode: sanitizedArgs.qualityMode
         });
         const compositorPricing = resolveCompositorPricingArgs(resolvedTarget);
-        const pricingContentType = compositorPricing?.planSignature ?? resolvedTarget.contentTypeId;
-        const selectedContentType = resolvedTarget.compositor
-          ? buildCompositorContentTypeView(resolvedTarget, primaryLanguage)
-          : selectContentType(resolvedTarget.contentTypeId, contentTypes);
+        const pricingContentType = compositorPricing.planSignature;
+        const selectedContentType = buildCompositorContentTypeView(resolvedTarget, primaryLanguage);
         const qualityModePricing = yield* Effect.all(
           QUALITY_MODES.map((mode) =>
             options.aiPolicy.resolvePricingEnvelope({
@@ -82,8 +66,8 @@ export function createBackendGenerationPreviewService(options: {
               contentType: pricingContentType,
               qualityMode: mode,
               attachedPolicyVersion: options.config.aiPolicyAttachedVersion,
-              planSignature: compositorPricing?.planSignature,
-              lengthTier: compositorPricing?.lengthTier
+              planSignature: compositorPricing.planSignature,
+              lengthTier: compositorPricing.lengthTier
             })
           )
         );
@@ -159,38 +143,14 @@ export function createBackendGenerationPreviewService(options: {
                 explanation: recommendation.explanation
               }
             : undefined,
-          ...(resolvedTarget.resolvedIntent
-            ? {
-                resolvedIntent: {
-                  intent: resolvedTarget.resolvedIntent.intent,
-                  scope: resolvedTarget.resolvedIntent.scope,
-                  wordTargetMin: resolvedTarget.resolvedIntent.wordTarget.min,
-                  wordTargetMax: resolvedTarget.resolvedIntent.wordTarget.max
-                }
-              }
-            : {}),
-          ...(resolvedTarget.compositor
-            ? {
-                compositor: {
-                  planId: resolvedTarget.compositor.plan.planId,
-                  planSignature: resolvedTarget.compositor.plan.planSignature,
-                  expressionProfile: resolvedTarget.compositor.plan.parameters.expressionProfile,
-                  lengthTier: resolvedTarget.compositor.plan.parameters.lengthTier,
-                  wordTarget: resolvedTarget.compositor.plan.parameters.wordTarget
-                }
-              }
-            : {}),
+          compositor: {
+            planId: resolvedTarget.compositor.plan.planId,
+            planSignature: resolvedTarget.compositor.plan.planSignature,
+            expressionProfile: resolvedTarget.compositor.plan.parameters.expressionProfile,
+            lengthTier: resolvedTarget.compositor.plan.parameters.lengthTier,
+            wordTarget: resolvedTarget.compositor.plan.parameters.wordTarget
+          },
           options: {
-            contentTypes: contentTypes.map((contentType) => ({
-              id: contentType.id,
-              label: contentType.label,
-              allowed: contentType.available,
-              ...(contentType.reasonCode
-                ? {
-                    blockedReason: !entitlement ? "plan_restriction" : contentType.reasonCode
-                  }
-                : {})
-            })),
             qualityModes: qualityModes.map((mode) => ({
               ...mode,
               ...(recommendation && recommendation.qualityMode === mode.id
@@ -208,31 +168,6 @@ export function createBackendGenerationPreviewService(options: {
       });
     }
   };
-}
-
-function selectContentType(
-  requestedContentType: string | undefined,
-  contentTypes: ReadonlyArray<ContentTypeCatalogItemView>
-): ContentTypeCatalogItemView {
-  return (
-    (requestedContentType ? contentTypes.find((contentType) => contentType.id === requestedContentType) : undefined) ??
-    contentTypes.find((contentType) => contentType.available) ??
-    contentTypes[0] ?? {
-      id: "unknown",
-      label: "Unknown",
-      available: false,
-      defaultLanguage: "pt-BR",
-      supportedLanguages: ["pt-BR"],
-      steps: [],
-      inputSchema: [],
-      briefingGuidance: {
-        objective: "No content type available.",
-        tips: [],
-        exampleBriefing: "",
-        commonMistakes: []
-      }
-    }
-  );
 }
 
 // Ordem de precedência: pedido explícito (só chega por API, a UI não tem picker) > modo
@@ -276,7 +211,7 @@ function buildCompositorContentTypeView(
   resolvedTarget: import("./resolve-generation-target.js").ResolvedGenerationTarget,
   primaryLanguage: string
 ): ContentTypeCatalogItemView {
-  const plan = resolvedTarget.compositor!.plan;
+  const plan = resolvedTarget.compositor.plan;
 
   return {
     id: resolvedTarget.contentTypeId,

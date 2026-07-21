@@ -1,13 +1,13 @@
-import type { GenerationIntent, GenerationLengthTier, QualityMode } from "@my-ai-orchestrator/contracts";
-import { resolvePhase1LegacyContentTypeId } from "@my-ai-orchestrator/contracts";
+import type { GenerationLengthTier, PlanSignature, QualityMode, RhetoricalMode } from "@my-ai-orchestrator/contracts";
+import { pickBasePreset } from "../../src/product/generation/compositor/expression.js";
 
 export interface CalibrationSweepCell {
   readonly id: string;
-  readonly intent: GenerationIntent;
+  readonly rhetoricalMode: RhetoricalMode;
   readonly lengthTier: GenerationLengthTier;
   readonly qualityMode: QualityMode;
   readonly repeats: number;
-  readonly expectedLegacyContentType: string;
+  readonly expectedPlanSignature: PlanSignature;
 }
 
 export interface CalibrationSweepProfile {
@@ -16,31 +16,28 @@ export interface CalibrationSweepProfile {
   readonly cells: readonly CalibrationSweepCell[];
 }
 
-const INTENTS: readonly GenerationIntent[] = [
-  "share-idea",
-  "explain-deeply",
-  "engage-audience",
-  "tell-story",
-  "update-subscribers",
-  "document-decision"
-];
+const RHETORICAL_MODES: readonly RhetoricalMode[] = ["expound", "narrate", "argue", "instruct", "promote"];
 
 const TIERS: readonly GenerationLengthTier[] = ["short", "medium", "long"];
 const MODES: readonly QualityMode[] = ["fast", "balanced", "strict"];
 
-export function buildFullIntentTierModeGrid(repeats: number): readonly CalibrationSweepCell[] {
+function resolvePlanSignature(rhetoricalMode: RhetoricalMode, lengthTier: GenerationLengthTier): PlanSignature {
+  return pickBasePreset({ rhetoricalMode, lengthTier });
+}
+
+export function buildFullRhetoricalModeTierModeGrid(repeats: number): readonly CalibrationSweepCell[] {
   const cells: CalibrationSweepCell[] = [];
 
-  for (const intent of INTENTS) {
+  for (const rhetoricalMode of RHETORICAL_MODES) {
     for (const lengthTier of TIERS) {
       for (const qualityMode of MODES) {
         cells.push({
-          id: `${intent}:${lengthTier}:${qualityMode}`,
-          intent,
+          id: `${rhetoricalMode}:${lengthTier}:${qualityMode}`,
+          rhetoricalMode,
           lengthTier,
           qualityMode,
           repeats,
-          expectedLegacyContentType: resolvePhase1LegacyContentTypeId(intent, lengthTier)
+          expectedPlanSignature: resolvePlanSignature(rhetoricalMode, lengthTier)
         });
       }
     }
@@ -49,30 +46,27 @@ export function buildFullIntentTierModeGrid(repeats: number): readonly Calibrati
   return cells;
 }
 
-/** Cells where length tier changes the resolved legacy pipeline (proxy for tier-driven execution). */
+/** Cells where length tier changes the resolved compositor plan signature (proxy for tier-driven execution). */
 export function buildTierPipelineVarianceGrid(repeats: number): readonly CalibrationSweepCell[] {
-  const byIntent = new Map<GenerationIntent, Set<string>>();
-  for (const intent of INTENTS) {
-    byIntent.set(
-      intent,
-      new Set(TIERS.map((tier) => resolvePhase1LegacyContentTypeId(intent, tier)))
-    );
+  const byMode = new Map<RhetoricalMode, Set<PlanSignature>>();
+  for (const rhetoricalMode of RHETORICAL_MODES) {
+    byMode.set(rhetoricalMode, new Set(TIERS.map((tier) => resolvePlanSignature(rhetoricalMode, tier))));
   }
 
   const cells: CalibrationSweepCell[] = [];
-  for (const intent of INTENTS) {
-    if ((byIntent.get(intent)?.size ?? 0) <= 1) {
+  for (const rhetoricalMode of RHETORICAL_MODES) {
+    if ((byMode.get(rhetoricalMode)?.size ?? 0) <= 1) {
       continue;
     }
 
     for (const lengthTier of TIERS) {
       cells.push({
-        id: `${intent}:${lengthTier}:balanced`,
-        intent,
+        id: `${rhetoricalMode}:${lengthTier}:balanced`,
+        rhetoricalMode,
         lengthTier,
         qualityMode: "balanced",
         repeats,
-        expectedLegacyContentType: resolvePhase1LegacyContentTypeId(intent, lengthTier)
+        expectedPlanSignature: resolvePlanSignature(rhetoricalMode, lengthTier)
       });
     }
   }
@@ -85,15 +79,15 @@ export function resolveSweepProfile(profileId: string, repeats: number): Calibra
     case "tier-variance":
       return {
         id: profileId,
-        description: "Intent × tier (balanced) where tier changes legacy pipeline — Option B viability proxy",
+        description: "Rhetorical mode × tier (balanced) where tier changes plan signature — Option B viability proxy",
         cells: buildTierPipelineVarianceGrid(repeats)
       };
     case "full":
     default:
       return {
         id: profileId,
-        description: "All intent × tier × qualityMode combinations",
-        cells: buildFullIntentTierModeGrid(repeats)
+        description: "All rhetorical mode × tier × qualityMode combinations",
+        cells: buildFullRhetoricalModeTierModeGrid(repeats)
       };
   }
 }

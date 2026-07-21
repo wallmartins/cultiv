@@ -80,9 +80,7 @@ describe("job status mappers", () => {
       completedAt: null,
       voice: undefined,
       userId: "user-1",
-      reservedCredits: undefined,
-      generationIntent: "tell-story",
-      lengthTier: "medium"
+      reservedCredits: undefined
     });
   });
 

@@ -1,32 +1,17 @@
-import type { GenerationIntent } from "@my-ai-orchestrator/contracts";
+import type { RhetoricalMode } from "@my-ai-orchestrator/contracts";
 
-export type RhetoricalGoalClass =
-  | "share"
-  | "explain"
-  | "engage"
-  | "story"
-  | "update"
-  | "document";
-
-export interface RhetoricalProfile {
-  readonly goalClass: RhetoricalGoalClass;
-  readonly promptPackId: string;
-  readonly structureStep?: "structure";
-}
-
-const RHETORICAL_PROFILES: Record<GenerationIntent, RhetoricalProfile> = {
-  "share-idea": { goalClass: "share", promptPackId: "share-idea" },
-  "explain-deeply": { goalClass: "explain", promptPackId: "explain-deeply" },
-  "engage-audience": { goalClass: "engage", promptPackId: "engage-audience" },
-  "tell-story": { goalClass: "story", promptPackId: "tell-story" },
-  "update-subscribers": { goalClass: "update", promptPackId: "update-subscribers" },
-  "document-decision": {
-    goalClass: "document",
-    promptPackId: "document-decision",
-    structureStep: "structure"
-  }
+// Which rhetorical modes insert an explicit structure step before the draft (medium/long only).
+// `argue` inherits the old document-decision behavior — a claim-and-trade-offs piece earns an
+// explicit structure pass; the others draft directly. Keyed-by-value with every mode present, so
+// adding a mode is one line and there is no unprotected fall-through.
+const MODE_STRUCTURE_STEP: Record<RhetoricalMode, boolean> = {
+  expound: false,
+  narrate: false,
+  argue: true,
+  instruct: false,
+  promote: false
 };
 
-export function getRhetoricalProfile(intent: GenerationIntent): RhetoricalProfile {
-  return RHETORICAL_PROFILES[intent];
+export function modeUsesStructureStep(mode: RhetoricalMode): boolean {
+  return MODE_STRUCTURE_STEP[mode];
 }

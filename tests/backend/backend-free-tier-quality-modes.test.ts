@@ -47,7 +47,8 @@ describe("backend free tier quality modes", () => {
         "content-type": "application/json"
       },
       body: JSON.stringify({
-        contentType: "linkedin-post",
+        rhetoricalMode: "expound",
+        scope: { lengthTier: "short", channel: "professional-network" },
         qualityMode: "strict",
         briefing: {
           topic: "Monorepo trade-offs",
@@ -97,7 +98,8 @@ describe("backend free tier quality modes", () => {
         "content-type": "application/json"
       },
       body: JSON.stringify({
-        contentType: "linkedin-post",
+        rhetoricalMode: "expound",
+        scope: { lengthTier: "short", channel: "professional-network" },
         qualityMode: "strict",
         briefing: {
           topic: "Billing from database",
@@ -176,7 +178,8 @@ describe("backend free tier quality modes", () => {
         authorization: createBackendTestAuthorizationHeader({ userId })
       },
       body: JSON.stringify({
-        contentType: "linkedin-post",
+        rhetoricalMode: "expound",
+        scope: { lengthTier: "short", channel: "professional-network" },
         qualityMode: "fast",
         briefing: {
           topic: "Monorepo trade-offs",

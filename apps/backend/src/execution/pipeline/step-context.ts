@@ -30,7 +30,6 @@ export interface StepVoiceContext {
 }
 
 export interface StepGenerationHints {
-  readonly intent?: string;
   readonly briefing?: string;
 }
 
@@ -65,7 +64,6 @@ export function buildStepVoiceContext(
   const argumentLensesSection = buildArgumentLensesSection({
     stepName,
     voiceProfile,
-    intent: generationHints?.intent,
     briefing: generationHints?.briefing
   });
 

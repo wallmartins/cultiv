@@ -62,7 +62,7 @@ describe("backend audit trail", () => {
 
     Effect.runSync(
       services.aiPolicy.activatePolicyVersion({
-        policyVersion: "2026-04-01",
+        policyVersion: "2026-06-22",
         actor: "operator_1",
         approvedAt: backendAppTestStartedAt.toISOString()
       })

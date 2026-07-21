@@ -3,10 +3,10 @@ import { createSchemaDecoder } from "./shared.js";
 import { QualityModeSchema } from "./execution.js";
 import { CompositorMetadataSchema, PlanSignatureSchema } from "./generation-compositor.js";
 import {
-  GenerationIntentSchema,
   GenerationLengthTierSchema,
   GenerationScopeSchema
-} from "./generation-intent.js";
+} from "./generation-scope.js";
+import { RhetoricalModeSchema } from "./reasoning.js";
 
 const PreviewBriefingSchema = Schema.Union(
   Schema.String,
@@ -14,8 +14,7 @@ const PreviewBriefingSchema = Schema.Union(
 );
 
 export const GenerationPreviewRequestSchema = Schema.Struct({
-  contentType: Schema.optional(Schema.String),
-  intent: Schema.optional(GenerationIntentSchema),
+  rhetoricalMode: Schema.optional(RhetoricalModeSchema),
   scope: Schema.optional(GenerationScopeSchema),
   briefing: Schema.optional(PreviewBriefingSchema),
   importedContext: Schema.optional(Schema.String),
@@ -24,14 +23,6 @@ export const GenerationPreviewRequestSchema = Schema.Struct({
   includeRecommendation: Schema.optional(Schema.Boolean)
 });
 export type GenerationPreviewRequest = typeof GenerationPreviewRequestSchema.Type;
-
-export const GenerationPreviewContentTypeOptionSchema = Schema.Struct({
-  id: Schema.String,
-  label: Schema.String,
-  allowed: Schema.Boolean,
-  blockedReason: Schema.optional(Schema.String)
-});
-export type GenerationPreviewContentTypeOption = typeof GenerationPreviewContentTypeOptionSchema.Type;
 
 export const GenerationPreviewQualityModeOptionSchema = Schema.Struct({
   id: QualityModeSchema,
@@ -66,14 +57,6 @@ export const GenerationPricingSnapshotSchema = Schema.Struct({
 });
 export type GenerationPricingSnapshot = typeof GenerationPricingSnapshotSchema.Type;
 
-export const GenerationPreviewResolvedIntentSchema = Schema.Struct({
-  intent: GenerationIntentSchema,
-  scope: GenerationScopeSchema,
-  wordTargetMin: Schema.Number,
-  wordTargetMax: Schema.Number
-});
-export type GenerationPreviewResolvedIntent = typeof GenerationPreviewResolvedIntentSchema.Type;
-
 export const GenerationPreviewResponseSchema = Schema.Struct({
   pricingSnapshot: GenerationPricingSnapshotSchema,
   currentBalance: Schema.Number,
@@ -83,10 +66,8 @@ export const GenerationPreviewResponseSchema = Schema.Struct({
   quotaCost: Schema.Number,
   canonicalCreditCost: Schema.optional(Schema.Number),
   recommendation: Schema.optional(GenerationPreviewRecommendationSchema),
-  resolvedIntent: Schema.optional(GenerationPreviewResolvedIntentSchema),
   compositor: Schema.optional(CompositorMetadataSchema),
   options: Schema.Struct({
-    contentTypes: Schema.Array(GenerationPreviewContentTypeOptionSchema),
     qualityModes: Schema.Array(GenerationPreviewQualityModeOptionSchema)
   })
 });

@@ -12,8 +12,7 @@ export interface QuestionComposerProps {
   readonly onSkip: () => void;
 }
 
-// showComposer (design L197–207) — one question at a time; also serves the ambiguity question
-// (same chrome, note carries the impact line).
+// showComposer (design L197–207) — one question at a time; note carries the impact line.
 export function QuestionComposer({ eyebrow, prompt, note, value, onChange, onSubmit, onSkip }: QuestionComposerProps) {
   const t = useMessages();
   function handleKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {

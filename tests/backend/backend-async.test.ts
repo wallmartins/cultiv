@@ -10,6 +10,8 @@ import { processQueuedJob } from "../../apps/backend";
 import { AIAdapterTransportError } from "../../packages/ai-adapters";
 import { createBackendTestAuthorizationHeader } from "../../apps/backend/src/auth/index.js";
 import { createBackendAppTestApp, seedExecutionVoiceState } from "./backend-app.fixtures.js";
+import { planGeneration } from "../../apps/backend/src/product/generation/compositor/compositor-planner.js";
+import { mergeCompositorPipelineContext } from "../../apps/backend/src/product/generation/merge-compositor-pipeline-context.js";
 
 describe("backend async flow", () => {
   const config: BackendConfig = {
@@ -44,7 +46,8 @@ describe("backend async flow", () => {
         "content-type": "application/json"
       },
       body: JSON.stringify({
-        contentType: "validation-post",
+        rhetoricalMode: "expound",
+        scope: { lengthTier: "short" },
         briefing: {
           topic: "SSE replay",
           keyPoints: ["queued", "progress", "done"]
@@ -106,11 +109,22 @@ describe("backend async flow", () => {
       }
     });
 
+    // A raw SimplifiedPipelineRequest bypasses resolveGenerationTarget (and the context it
+    // populates), so pricing (now size-keyed via pricesByPlan) needs the same compositor
+    // metadata a real /me/executions/run request would carry — build it the same way.
+    const plan = planGeneration({
+      rhetoricalMode: "expound",
+      scope: { lengthTier: "short" },
+      qualityMode: "balanced"
+    });
+    const context = mergeCompositorPipelineContext(undefined, plan, "unspecified");
+
     const queued = await Effect.runPromise(
       execution.execute({
         userId: "backend",
-        pipelineType: "validation-post",
-        contentType: "validation-post",
+        pipelineType: plan.planSignature,
+        contentType: plan.planSignature,
+        context,
         briefing: {
           topic: "Worker failure path"
         }
@@ -133,7 +147,7 @@ describe("backend async flow", () => {
     const events = await Effect.runPromise(jobStore.listJobEvents(queued.jobId));
 
     expect(failed?.status).toBe("failed");
-    expect(failed?.error?.message).toContain('Pipeline "validation-post" failed at step "draft"');
+    expect(failed?.error?.message).toContain('Pipeline "short-piece" failed at step "hook"');
     expect(failed?.error?.message).toContain("simulated transport failure");
     expect(events.at(-1)?.type).toBe("error");
   });

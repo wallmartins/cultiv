@@ -20,14 +20,13 @@ export interface VoiceCalibrationSessionRecord {
   currentStepId: WizardStepId;
   steps: VoiceCalibrationStepState[];
   exampleIdsByStepId: Record<string, string>;
-  themeRotationIndex: number;
   readonly createdAt: string;
   updatedAt: string;
 }
 
-function buildInitialSteps(context?: WizardContext, rotationIndex = 0): VoiceCalibrationStepState[] {
+function buildInitialSteps(context?: WizardContext): VoiceCalibrationStepState[] {
   return CALIBRATION_WIZARD_STEPS.map((step) => {
-    const built = buildStepPrompt(step.id, context, rotationIndex);
+    const built = buildStepPrompt(step.id, context);
     return {
       stepId: step.id,
       theme: built.theme,
@@ -45,7 +44,6 @@ export function createVoiceCalibrationSession(userId: string, now: () => Date): 
     currentStepId: CALIBRATION_WIZARD_STEPS[0]!.id,
     steps: buildInitialSteps(),
     exampleIdsByStepId: {},
-    themeRotationIndex: 0,
     createdAt: timestamp,
     updatedAt: timestamp
   };
@@ -81,11 +79,7 @@ export function refreshSessionStepPrompts(
       return stepState;
     }
 
-    const built = buildStepPrompt(
-      stepState.stepId as WizardStepId,
-      session.context,
-      session.themeRotationIndex
-    );
+    const built = buildStepPrompt(stepState.stepId as WizardStepId, session.context);
     return {
       ...stepState,
       theme: built.theme,

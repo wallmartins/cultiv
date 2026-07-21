@@ -1,17 +1,8 @@
-import type { GenerationIntent } from "@my-ai-orchestrator/contracts";
+import { RHETORICAL_MODES, type RhetoricalMode } from "@my-ai-orchestrator/contracts";
 import {
   formatIntentWordTargetLine,
   type IntentWordTarget
 } from "../../../execution/skill-templates.js";
-
-const GENERATION_INTENTS: readonly GenerationIntent[] = [
-  "share-idea",
-  "explain-deeply",
-  "engage-audience",
-  "tell-story",
-  "update-subscribers",
-  "document-decision"
-];
 
 const CHANNEL_FORMAT_BASE: Record<string, string> = {
   email:
@@ -24,13 +15,12 @@ const CHANNEL_FORMAT_BASE: Record<string, string> = {
     "Write for a social feed: punchy opening, tight paragraphs, conversational rhythm, and one core idea."
 };
 
-const INTENT_ANGLE: Record<GenerationIntent, string> = {
-  "share-idea": "Lead with the core insight and why it matters now.",
-  "explain-deeply": "Teach the idea in layers; move from context to mechanism to implication.",
-  "engage-audience": "Invite reaction with a concrete tension, question, or lived moment.",
-  "tell-story": "Use narrative progression with scene, tension, and resolution.",
-  "update-subscribers": "Frame what changed, why it matters to the reader, and what to do next.",
-  "document-decision": "State the decision, trade-offs considered, and the reasoning behind the choice."
+const MODE_ANGLE: Record<RhetoricalMode, string> = {
+  expound: "Lead with the core insight and unfold it in layers: context, mechanism, implication.",
+  narrate: "Use narrative progression with scene, tension, and resolution.",
+  argue: "State the claim, weigh the trade-offs, and make the reasoning behind the position explicit.",
+  instruct: "Guide the reader step by step; move from what, to why, to how.",
+  promote: "Frame what changed, why it matters to the reader, and what to do next."
 };
 
 const EXPRESSION_INSTRUCTIONS = buildExpressionInstructionCatalog();
@@ -38,13 +28,13 @@ const EXPRESSION_INSTRUCTIONS = buildExpressionInstructionCatalog();
 function buildExpressionInstructionCatalog(): Readonly<Record<string, string>> {
   const catalog: Record<string, string> = {};
 
-  for (const intent of GENERATION_INTENTS) {
-    catalog[`${intent}-default`] = `${INTENT_ANGLE[intent]} Write as final publishable content for the requested audience.`;
+  for (const mode of RHETORICAL_MODES) {
+    catalog[`${mode}-default`] = `${MODE_ANGLE[mode]} Write as final publishable content for the requested audience.`;
   }
 
   for (const [channel, format] of Object.entries(CHANNEL_FORMAT_BASE)) {
-    for (const intent of GENERATION_INTENTS) {
-      catalog[`${channel}-${intent}`] = `${format} ${INTENT_ANGLE[intent]}`;
+    for (const mode of RHETORICAL_MODES) {
+      catalog[`${channel}-${mode}`] = `${format} ${MODE_ANGLE[mode]}`;
     }
   }
 

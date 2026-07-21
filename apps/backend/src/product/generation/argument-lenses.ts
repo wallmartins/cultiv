@@ -1,4 +1,4 @@
-import type { GenerationIntent, PerspectiveShiftDensity } from "@my-ai-orchestrator/contracts";
+import type { PerspectiveShiftDensity } from "@my-ai-orchestrator/contracts";
 import type { VoiceProfile } from "@my-ai-orchestrator/text-quality";
 
 export type ArgumentLens =
@@ -58,12 +58,6 @@ const LENS_BY_ID = Object.fromEntries(
   ARGUMENT_LENS_POOL.map((lens) => [lens.id, lens] as const)
 ) as Record<ArgumentLens, ArgumentLensDefinition>;
 
-const INTENT_LENS_PRIORITY: Partial<Record<GenerationIntent, readonly ArgumentLens[]>> = {
-  "document-decision": ["operational", "organizational"],
-  "engage-audience": ["psychological", "team"],
-  "explain-deeply": ["operational", "temporal"]
-};
-
 const BRIEFING_KEYWORD_LENS: ReadonlyArray<{ readonly pattern: RegExp; readonly lens: ArgumentLens }> = [
   { pattern: /\b(psycholog|emotion|feeling|mental|behavior|motivat)\w*/i, lens: "psychological" },
   { pattern: /\b(cost|budget|revenue|money|invest|roi|profit|financial)\w*/i, lens: "financial" },
@@ -93,7 +87,6 @@ const PERSPECTIVE_SHIFT_MAX_LENSES: Record<PerspectiveShiftDensity, number> = {
 const ARGUMENT_LENS_STEPS = new Set(["draft", "expand", "structure"]);
 
 export interface SelectArgumentLensesInput {
-  readonly intent?: string;
   readonly briefing?: string;
   readonly perspectiveShiftDensity?: PerspectiveShiftDensity;
   readonly maxLenses?: number;
@@ -138,7 +131,6 @@ export function resolveMaxLensesFromDensity(
 export function selectArgumentLenses(input: SelectArgumentLensesInput): readonly ArgumentLens[] {
   const maxLenses = resolveMaxLensesFromDensity(input.perspectiveShiftDensity, input.maxLenses);
   const briefing = normalizeBriefing(input.briefing);
-  const intent = asGenerationIntent(input.intent);
   const ordered: ArgumentLens[] = [];
 
   const pushUnique = (lens: ArgumentLens) => {
@@ -146,10 +138,6 @@ export function selectArgumentLenses(input: SelectArgumentLensesInput): readonly
       ordered.push(lens);
     }
   };
-
-  for (const lens of intent ? INTENT_LENS_PRIORITY[intent] ?? [] : []) {
-    pushUnique(lens);
-  }
 
   if (briefing) {
     for (const entry of BRIEFING_KEYWORD_LENS) {
@@ -189,7 +177,6 @@ export function formatArgumentLensesPromptBlock(lenses: readonly ArgumentLens[])
 export function buildArgumentLensesSection(input: {
   readonly stepName: string;
   readonly voiceProfile?: Partial<VoiceProfile>;
-  readonly intent?: string;
   readonly briefing?: string;
 }): string {
   if (!ARGUMENT_LENS_STEPS.has(input.stepName)) {
@@ -198,7 +185,6 @@ export function buildArgumentLensesSection(input: {
 
   const density = resolvePerspectiveShiftDensity(input.voiceProfile);
   const lenses = selectArgumentLenses({
-    intent: input.intent,
     briefing: input.briefing,
     perspectiveShiftDensity: density
   });
@@ -212,21 +198,6 @@ function normalizeBriefing(briefing: string | undefined): string {
   }
 
   return briefing.trim();
-}
-
-function asGenerationIntent(intent: string | undefined): GenerationIntent | undefined {
-  if (
-    intent === "share-idea"
-    || intent === "explain-deeply"
-    || intent === "engage-audience"
-    || intent === "tell-story"
-    || intent === "update-subscribers"
-    || intent === "document-decision"
-  ) {
-    return intent;
-  }
-
-  return undefined;
 }
 
 export function isArgumentLensStep(stepName: string): boolean {

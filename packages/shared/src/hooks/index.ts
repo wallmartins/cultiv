@@ -38,8 +38,6 @@ export {
 
 export { useOnboarding, useCompleteOnboarding } from "./onboarding.js";
 
-export { useGenerationIntents } from "./generation-intents.js";
-
 export { useGeneratePrefill } from "./generation-prefill.js";
 
 export {

@@ -27,7 +27,7 @@ describe("backend ai policy", () => {
     const policy = Effect.runSync(services.aiPolicy.getActivePolicy());
 
     expect(policy.version).toBe("2026-07-20");
-    expect(policy.orchestrationCatalog.pipelines["validation-post"]?.steps[0]?.config).toMatchObject({
+    expect(policy.orchestrationCatalog.pipelines["long-piece"]?.steps[0]?.config).toMatchObject({
       executionType: "local"
     });
   });
@@ -87,36 +87,40 @@ describe("backend ai policy", () => {
     const services = Effect.runSync(
       createBackendProductServices({
         ...baseConfig,
-        aiPolicyAttachedVersion: "2026-04-01"
+        aiPolicyAttachedVersion: "2026-06-22"
       })
     );
 
     const activePricing = Effect.runSync(
       services.aiPolicy.resolvePricingEnvelope({
         planTier: "pro",
-        contentType: "newsletter",
-        qualityMode: "balanced"
+        contentType: "edition-piece",
+        qualityMode: "balanced",
+        planSignature: "edition-piece",
+        lengthTier: "medium"
       })
     );
     const legacyPricing = Effect.runSync(
       services.aiPolicy.resolvePricingEnvelope({
         planTier: "pro",
-        contentType: "newsletter",
+        contentType: "edition-piece",
         qualityMode: "balanced",
-        attachedPolicyVersion: "2026-04-01"
+        planSignature: "edition-piece",
+        lengthTier: "medium",
+        attachedPolicyVersion: "2026-06-22"
       })
     );
 
-    expect(activePricing.policyVersion).toBe("2026-04-01");
+    expect(activePricing.policyVersion).toBe("2026-06-22");
     expect(activePricing.lifecycle).toBe("legacy-supported");
-    expect(legacyPricing.creditPrice).toBe(2.2);
+    expect(legacyPricing.creditPrice).toBe(3.8);
   });
 
   it("resolves an immutable execution snapshot from the attached policy version", () => {
     const services = Effect.runSync(
       createBackendProductServices({
         ...baseConfig,
-        aiPolicyAttachedVersion: "2026-04-01"
+        aiPolicyAttachedVersion: "2026-06-22"
       })
     );
 
@@ -124,24 +128,30 @@ describe("backend ai policy", () => {
       services.aiPolicy.resolveExecutionSnapshot({
         request: {
           userId: "user_1",
-          pipelineType: "newsletter",
-          contentType: "newsletter",
+          pipelineType: "edition-piece",
+          contentType: "edition-piece",
           briefing: {
             topic: "Execution snapshot"
           },
-          qualityMode: "balanced"
+          qualityMode: "balanced",
+          context: {
+            compositor: {
+              planSignature: "edition-piece",
+              lengthTier: "medium"
+            }
+          }
         },
         planTier: "pro",
         executionMode: "sync",
         qualityMode: "balanced",
         defaultLanguage: "pt-BR",
-        attachedPolicyVersion: "2026-04-01"
+        attachedPolicyVersion: "2026-06-22"
       })
     );
 
-    expect(snapshot.policyVersion).toBe("2026-04-01");
-    expect(snapshot.pricingEnvelope.policyVersion).toBe("2026-04-01");
-    expect(snapshot.plan.contentType.id).toBe("newsletter");
+    expect(snapshot.policyVersion).toBe("2026-06-22");
+    expect(snapshot.pricingEnvelope.policyVersion).toBe("2026-06-22");
+    expect(snapshot.plan.contentType.id).toBe("edition-piece");
     expect(snapshot.steps.length).toBe(snapshot.plan.pipeline.steps.length);
     expect(snapshot.steps.find((step) => step.execution === "llm")?.attempts.length).toBeGreaterThan(0);
     expect(snapshot.steps.find((step) => step.execution === "local")?.attempts).toEqual([]);

@@ -2,15 +2,16 @@ import { Schema } from "effect";
 import { createSchemaDecoder } from "../shared.js";
 import {
   PipelineDefinitionSchema,
-  PipelineTypeSchema,
   PreviewRecommendationSchema,
   QualityModeSchema
 } from "./job.js";
-import { GenerationIntentSchema, GenerationScopeSchema } from "../generation-intent.js";
+import { PlanSignatureSchema } from "../plan-signature.js";
+import { GenerationScopeSchema } from "../generation-scope.js";
+import { RhetoricalModeSchema } from "../reasoning.js";
 
 export const SimplifiedPipelineRequestSchema = Schema.Struct({
   userId: Schema.String,
-  pipelineType: PipelineTypeSchema,
+  pipelineType: PlanSignatureSchema,
   briefing: Schema.Union(Schema.String, Schema.Record({ key: Schema.String, value: Schema.Unknown })),
   importedContext: Schema.optional(Schema.String),
   context: Schema.optional(Schema.Record({ key: Schema.String, value: Schema.Unknown })),
@@ -50,8 +51,7 @@ export const PipelineRequestSchema = Schema.Union(
 export type PipelineRequest = typeof PipelineRequestSchema.Type;
 
 export const MeExecutionRequestSchema = Schema.Struct({
-  contentType: Schema.optional(Schema.String),
-  intent: Schema.optional(GenerationIntentSchema),
+  rhetoricalMode: Schema.optional(RhetoricalModeSchema),
   scope: Schema.optional(GenerationScopeSchema),
   briefing: Schema.Union(Schema.String, Schema.Record({ key: Schema.String, value: Schema.Unknown })),
   importedContext: Schema.optional(Schema.String),

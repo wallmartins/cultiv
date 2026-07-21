@@ -2,8 +2,6 @@ import type {
   BillingEntitlementView,
   ExecutionsPageView,
   GenerationChannel,
-  GenerationIntent,
-  GenerationIntentAmbiguity,
   GenerationPreviewResponse,
   GenerationPrefillQuestion
 } from "@my-ai-orchestrator/contracts";
@@ -13,7 +11,7 @@ import type { ThreadMessageData } from "@my-ai-orchestrator/ui/app/generate";
 
 export const CHANNEL_STEP_ID = "channel";
 
-export type GuidedStepKind = "ambiguity" | "question" | "channel";
+export type GuidedStepKind = "question" | "channel";
 
 export interface GuidedStep {
   readonly kind: GuidedStepKind;
@@ -36,27 +34,10 @@ export function fallbackQuestionPlan(t: AppMessages, theme: string): readonly Ge
   ];
 }
 
-// The ambiguity question (when present) is always first, then the backbone/extra plan, then
-// channel — one flat sequence so wizard-session's qIndex can walk it uniformly.
-export function buildGuidedSteps(
-  t: AppMessages,
-  questionPlan: readonly GenerationPrefillQuestion[],
-  intentAmbiguity: GenerationIntentAmbiguity | null,
-  intent: GenerationIntent | undefined
-): readonly GuidedStep[] {
+// The backbone/extra question plan, then channel — one flat sequence so wizard-session's qIndex
+// can walk it uniformly.
+export function buildGuidedSteps(t: AppMessages, questionPlan: readonly GenerationPrefillQuestion[]): readonly GuidedStep[] {
   const steps: GuidedStep[] = [];
-
-  if (intentAmbiguity?.ambiguous && intentAmbiguity.alternative && intent) {
-    // The answer to this step feeds the payload slot (context for drafting) but does not correct
-    // `intent`: ADR 0004 rejects a chip/choice UI here and no contract reclassifies a free-text
-    // answer. This is an accepted-risk decision for v1 (GAP #14, closed in docs/live/plan/fase-b-gaps.md).
-    steps.push({
-      kind: "ambiguity",
-      id: "ambiguity",
-      prompt: t.generate.ambiguityPrompt(t.generate.intentLabel[intent], t.generate.intentLabel[intentAmbiguity.alternative]),
-      note: t.generate.ambiguityNote
-    });
-  }
 
   for (const question of questionPlan) {
     steps.push({ kind: "question", id: question.id, angle: question.angle, prompt: question.prompt });
@@ -72,7 +53,7 @@ export function buildGuidedSteps(
   return steps;
 }
 
-// Only ambiguity/question steps get numbered ("pergunta N de M") — channel has its own prompt.
+// Only question steps get numbered ("pergunta N de M") — channel has its own prompt.
 export function questionStepCount(steps: readonly GuidedStep[]): number {
   return steps.filter((step) => step.kind !== "channel").length;
 }
@@ -126,13 +107,6 @@ export function buildBriefing(
     if (!text) continue;
     const step = steps.find((candidate) => candidate.id === answer.questionId);
     if (!step || step.kind === "channel") continue;
-
-    if (step.kind === "ambiguity") {
-      // ponytail: F4 — no dedicated slot for intent-disambiguation context; folds into payload,
-      // the same catch-all role the old keyPoints[] played.
-      foldIntoPayload(text);
-      continue;
-    }
 
     switch (step.angle) {
       case "thesis":

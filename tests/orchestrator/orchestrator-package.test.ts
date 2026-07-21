@@ -21,12 +21,12 @@ describe("orchestrator package", () => {
   it("builds a normalized plan for simplified requests", () => {
     const plan = buildOrchestrationPlan({
       userId: "user_1",
-      pipelineType: "validation-post",
+      pipelineType: "serial-piece",
       briefing: "Write a validation post"
     });
 
-    expect(plan.pipeline.name).toBe("validation-post");
-    expect(plan.contentType.label).toBe("Validation Post");
+    expect(plan.pipeline.name).toBe("serial-piece");
+    expect(plan.contentType.label).toBe("Serial Piece");
     expect(plan.estimatedSteps).toBe(4);
     expect(plan.progress.currentStep).toBe("analyze");
     expect(plan.stepProgress[0]?.status).toBe("running");
@@ -65,13 +65,13 @@ describe("orchestrator package", () => {
 
       const plan = planner.buildPlan({
         userId: "user_3",
-        pipelineType: "newsletter",
+        pipelineType: "edition-piece",
         briefing: "Monthly newsletter"
       });
 
       return {
-        defaultLanguage: catalog.defaultLanguageByPipeline["newsletter"],
-        stepCount: planner.estimateStepCount(catalog.pipelines["newsletter"]),
+        defaultLanguage: catalog.defaultLanguageByPipeline["edition-piece"],
+        stepCount: planner.estimateStepCount(catalog.pipelines["edition-piece"]),
         retry: policy.shouldRetry(1, { status: "failed" }),
         shouldContinue: policy.shouldContinue({ status: "done" }),
         strategy: strategy.selectStrategy(plan),
@@ -85,7 +85,7 @@ describe("orchestrator package", () => {
     const result = Effect.runSync(program.pipe(Effect.provide(createOrchestratorLayer())));
 
     expect(result.defaultLanguage).toBe("pt-BR");
-    expect(result.stepCount).toBe(5);
+    expect(result.stepCount).toBe(4);
     expect(result.retry).toBe(true);
     expect(result.shouldContinue).toBe(true);
     expect(result.strategy.mode).toBe("sync");

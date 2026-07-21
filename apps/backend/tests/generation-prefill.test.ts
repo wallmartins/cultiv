@@ -61,9 +61,8 @@ describe("generation prefill service", () => {
       service.infer({ userId: "user-1", theme: "Por que times pequenos entregam mais rápido" })
     );
 
-    expect(response.prefill.intent).toBe("share-idea");
     expect(response.prefill.scope).toEqual({ lengthTier: "short" });
-    expect(response.intentAmbiguity).toBeNull();
+    expect(response.prefill.rhetoricalMode).toBeUndefined();
     expect(response.questionPlan).toHaveLength(4);
     expect(response.questionPlan.map((question) => question.angle)).toEqual([
       "thesis",
@@ -73,11 +72,8 @@ describe("generation prefill service", () => {
     ]);
   });
 
-  it("decodes a well-formed LLM response into the full response, including ambiguity and extra questions", async () => {
+  it("decodes a well-formed LLM response into the full response, including extra questions", async () => {
     const llmPayload = {
-      intent: "explain-deeply",
-      ambiguous: true,
-      alternativeIntent: "share-idea",
       lengthTier: "long",
       briefingSeed: "Como microsserviços afetam a velocidade de entrega.",
       extraQuestions: [{ prompt: "Que métrica você usaria para provar isso?" }]
@@ -108,10 +104,9 @@ describe("generation prefill service", () => {
       })
     );
 
-    expect(response.prefill.intent).toBe("explain-deeply");
     expect(response.prefill.scope).toEqual({ lengthTier: "long" });
     expect(response.prefill.briefing).toEqual({ topic: llmPayload.briefingSeed });
-    expect(response.intentAmbiguity).toEqual({ ambiguous: true, alternative: "share-idea" });
+    expect(response.prefill.rhetoricalMode).toBeUndefined();
     expect(response.detectedPlatform).toBe("linkedin");
     expect(response.questionPlan).toHaveLength(5);
     expect(response.questionPlan.at(-1)).toMatchObject({ id: "extra-1", angle: "extra" });
@@ -139,8 +134,8 @@ describe("generation prefill service", () => {
 
     const response = await Effect.runPromise(service.infer({ userId: "user-1", theme: "Um tema qualquer" }));
 
-    expect(response.prefill.intent).toBe("share-idea");
-    expect(response.intentAmbiguity).toBeNull();
+    expect(response.prefill.scope).toEqual({ lengthTier: "short" });
+    expect(response.prefill.rhetoricalMode).toBeUndefined();
   });
 
   it("fails the flow (does not fall back) when reading the active AI policy hits a genuine infra error", async () => {

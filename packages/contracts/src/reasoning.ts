@@ -66,10 +66,14 @@ export const EpistemicPostureSchema = Schema.Literal(
 );
 export type EpistemicPosture = typeof EpistemicPostureSchema.Type;
 
-// ponytail: F1/F2 — groundwork only, no producer/consumer yet (genre is inferred at the end of generation questions).
+// The rhetorical genre axis. Consumed by the compositor (Phase 1 F1-2 re-key); its producer —
+// genre inference at the end of the generation questions — lands in Phase 4 (F4-3), so the request
+// carries it optionally and the resolver defaults it until then (ponytail: F4).
 // English wire values matching every other contracts enum; norte pt names in comments (genero-dimensoes.md §A):
 // expound=expor · narrate=narrar · argue=argumentar · instruct=instruir · promote=promover.
-export const RhetoricalModeSchema = Schema.Literal("expound", "narrate", "argue", "instruct", "promote");
+// Single source for the value list so consumers (compositor, presentation guard) don't re-hand-list it.
+export const RHETORICAL_MODES = ["expound", "narrate", "argue", "instruct", "promote"] as const;
+export const RhetoricalModeSchema = Schema.Literal(...RHETORICAL_MODES);
 export type RhetoricalMode = typeof RhetoricalModeSchema.Type;
 
 export const RhetoricalModeProfileSchema = Schema.Struct({

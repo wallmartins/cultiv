@@ -2,9 +2,7 @@ export { ContractDecodeError } from "./errors.js";
 
 export * from "./content-types.js";
 export * from "./execution.js";
-export * from "./generation-intent.js";
-export * from "./generation-intents-catalog.js";
-export * from "./generation-intent-legacy-map.js";
+export * from "./generation-scope.js";
 export * from "./generation-compositor.js";
 export * from "./plan-signature.js";
 export * from "./generate-prefill.js";

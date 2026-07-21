@@ -1,8 +1,6 @@
-// Intent labels mirror apps/backend/.../catalog/generation-intent-catalog.ts INTENT_CATALOG_COPY
-// pt-BR — duplicated locally (apps/web generate-view.ts) rather than pulling backend code across
-// the boundary. Platform/quality-mode/gate keys line up with the contracts' own literal unions
-// (GenerationChannel ids, QualityMode, BillingGenerationGate) so generate-view.ts can index this
-// object directly with those types without this package importing them.
+// Platform/quality-mode/gate keys line up with the contracts' own literal unions (GenerationChannel
+// ids, QualityMode, BillingGenerationGate) so generate-view.ts can index this object directly with
+// those types without this package importing them.
 export const generate = {
   hero: {
     eyebrow: "escreve como você pensa",
@@ -30,16 +28,6 @@ export const generate = {
   sessionDoneEyebrow: "sessão concluída",
   sessionDoneMessage: "Tudo pronto. É só gerar.",
   dispatchError: "créditos não cobrados — tente de novo",
-  ambiguityPrompt: (intentA: string, intentB: string) => `Isso é mais sobre ${intentA} ou sobre ${intentB}?`,
-  ambiguityNote: "me diga em uma frase — isso muda o ângulo do texto",
-  intentLabel: {
-    "share-idea": "compartilhar uma ideia",
-    "explain-deeply": "explicar a fundo",
-    "engage-audience": "engajar sua audiência",
-    "tell-story": "contar uma história",
-    "update-subscribers": "atualizar quem te acompanha",
-    "document-decision": "registrar uma decisão"
-  },
   fallbackQuestion: {
     thesis: (theme: string) => `Qual é a tese ou hipótese central que você quer defender sobre "${theme}"?`,
     experience: "Que experiência concreta sua seria o melhor exemplo aqui?",

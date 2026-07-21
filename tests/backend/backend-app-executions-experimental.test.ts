@@ -23,7 +23,7 @@ describe("backend app experimental executions", () => {
     const app = createBackendAppTestApp(config, services);
     const requestBody = {
       pipeline: {
-        name: "validation-post",
+        name: "short-piece",
         steps: [
           { name: "analyze", skill: "analyze" },
           { name: "draft", skill: "draft" },
@@ -90,7 +90,7 @@ describe("backend app experimental executions", () => {
       },
       body: JSON.stringify({
         pipeline: {
-          name: "validation-post",
+          name: "short-piece",
           steps: [
             { name: "analyze", skill: "analyze" },
             { name: "draft", skill: "draft" },
@@ -113,10 +113,10 @@ describe("backend app experimental executions", () => {
     expect(response.status).toBe(200);
     const execution = await Effect.runPromise(decodeSyncExecutionView(await response.json()));
 
-    expect(execution.pipelineName).toBe("validation-post");
+    expect(execution.pipelineName).toBe("short-piece");
     expect(execution.telemetry?.pricing).toMatchObject({
       policyVersion: "2026-05-24-exp",
-      contentType: "validation-post",
+      contentType: "short-piece",
       plannedCreditPrice: 2.8
     });
     expect(execution.telemetry?.billing).toBeUndefined();

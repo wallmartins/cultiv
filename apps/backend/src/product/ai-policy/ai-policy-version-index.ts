@@ -1,5 +1,4 @@
 import { Effect } from "effect";
-import type { PipelineType } from "@my-ai-orchestrator/contracts";
 import { BackendAIPolicyCatalogError, BackendAIPolicyPricingError } from "../../http/errors.js";
 import type { ResolvedVersionDocument } from "./ai-policy-loader.js";
 import { toResolvedAIPolicyVersion } from "./ai-policy-mappers.js";
@@ -81,7 +80,7 @@ export function resolvePolicyPipeline(
     );
   }
 
-  return Effect.succeed(policy.catalog[contentTypeDefinition.pipelineType as PipelineType]);
+  return Effect.succeed(policy.catalog[contentTypeDefinition.pipelineType]);
 }
 
 export function resolvePolicyPricingEnvelope(

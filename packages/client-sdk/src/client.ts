@@ -2,7 +2,6 @@ import { Cause, Context, Effect, Exit, Layer } from "effect";
 import { createAccountClient, type AccountClient } from "./account.js";
 import { createBillingClient, type BillingClient } from "./billing.js";
 import type { ClientSdkConfig } from "./config.js";
-import { createGenerationIntentsClient, type GenerationIntentsClient } from "./generation-intents.js";
 import { createGenerationPrefillClient, type GenerationPrefillClient } from "./generation-prefill.js";
 import type { ClientSdkError } from "./errors.js";
 import { createExecutionsClient, type ExecutionsClient } from "./executions.js";
@@ -21,7 +20,6 @@ export interface ClientSdk {
   readonly voice: VoiceClient;
   readonly voiceCalibration: VoiceCalibrationClient;
   readonly onboarding: OnboardingClient;
-  readonly generationIntents: GenerationIntentsClient;
   readonly generationPrefill: GenerationPrefillClient;
   readonly billing: BillingClient;
   readonly account: AccountClient;
@@ -42,7 +40,6 @@ export function createClientSdk(config: ClientSdkConfig): ClientSdk {
     voice: createVoiceClient(transport),
     voiceCalibration: createVoiceCalibrationClient(transport),
     onboarding: createOnboardingClient(transport),
-    generationIntents: createGenerationIntentsClient(transport),
     generationPrefill: createGenerationPrefillClient(transport),
     billing: createBillingClient(transport),
     account: createAccountClient(transport),
