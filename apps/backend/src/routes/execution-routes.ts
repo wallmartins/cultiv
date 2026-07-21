@@ -261,8 +261,6 @@ function parseExecutionsListQuery(
     decodeExecutionsListQuery({
       ...(query.period ? { period: query.period } : {}),
       ...(query.status ? { status: query.status } : {}),
-      ...(query.contentType ? { contentType: query.contentType } : {}),
-      ...(query.intent ? { intent: query.intent } : {}),
       ...(query.lengthTier ? { lengthTier: query.lengthTier } : {}),
       ...(query.q ? { q: query.q } : {})
     })

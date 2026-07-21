@@ -3,9 +3,9 @@ import { createSchemaDecoder } from "./shared.js";
 import { VoiceProfileConfidenceSchema } from "./voice.js";
 
 export const WizardContextSchema = Schema.Struct({
-  domain: Schema.optional(Schema.String),
-  audience: Schema.optional(Schema.String),
-  selfDeclaredStrength: Schema.optional(Schema.String)
+  subject: Schema.optional(Schema.String),
+  vantagePoint: Schema.optional(Schema.String),
+  audiences: Schema.optional(Schema.Array(Schema.String))
 });
 export type WizardContext = typeof WizardContextSchema.Type;
 

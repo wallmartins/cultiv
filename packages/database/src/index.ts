@@ -21,6 +21,10 @@ export {
   toMemoryEntryRecord,
   toPipelineDomain,
   toPipelineRecord,
+  toPracticeProfileDiagnosticsDomain,
+  toPracticeProfileDiagnosticsRecord,
+  toPracticeProfileDomain,
+  toPracticeProfileRecord,
   toVoiceExampleDomain,
   toVoiceExampleRecord,
   toVoiceProfileDiagnosticsDomain,
@@ -51,7 +55,9 @@ export {
   createVoiceProfileDiagnosticsRepositoryFromClient,
   createVoiceProfileRepositoryFromClient,
   createVoiceProfileSnapshotRepositoryFromClient,
-  createVoiceTrainingConsentRepositoryFromClient
+  createVoiceTrainingConsentRepositoryFromClient,
+  createPracticeProfileRepositoryFromClient,
+  createPracticeProfileDiagnosticsRepositoryFromClient
 } from "./repositories.js";
 
 export {
@@ -99,6 +105,10 @@ export type {
   MemoryRepository,
   PipelineRecord,
   PipelineRepository,
+  PracticeProfileDiagnosticsRecord,
+  PracticeProfileDiagnosticsRepository,
+  PracticeProfileRecord,
+  PracticeProfileRepository,
   VoiceExampleRecord,
   VoiceExampleRepository,
   VoiceExampleBatchRecord,

@@ -46,7 +46,7 @@
             "frequency": "common"
           }
         ],
-        "epistemicPosture": "advocacy_mixed",
+        "epistemicPosture": "advocacy",
         "structuralAntiPatterns": [
           "slow_warmup",
           "excessive_hedging"

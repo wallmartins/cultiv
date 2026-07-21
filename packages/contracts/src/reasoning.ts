@@ -57,9 +57,33 @@ export type TransitionTendency = typeof TransitionTendencySchema.Type;
 export const EpistemicPostureSchema = Schema.Literal(
   "exploratory",
   "investigative",
-  "advocacy_mixed"
+  "advocacy",
+  "expository",
+  "instructive",
+  "experiential",
+  "promotional",
+  "not_applicable"
 );
 export type EpistemicPosture = typeof EpistemicPostureSchema.Type;
+
+// ponytail: F1/F2 — groundwork only, no producer/consumer yet (genre is inferred at the end of generation questions).
+// English wire values matching every other contracts enum; norte pt names in comments (genero-dimensoes.md §A):
+// expound=expor · narrate=narrar · argue=argumentar · instruct=instruir · promote=promover.
+export const RhetoricalModeSchema = Schema.Literal("expound", "narrate", "argue", "instruct", "promote");
+export type RhetoricalMode = typeof RhetoricalModeSchema.Type;
+
+export const RhetoricalModeProfileSchema = Schema.Struct({
+  dominant: RhetoricalModeSchema,
+  secondary: Schema.optional(RhetoricalModeSchema)
+});
+export type RhetoricalModeProfile = typeof RhetoricalModeProfileSchema.Type;
+
+export const GenreSignatureSchema = Schema.Struct({
+  rhetoricalMode: RhetoricalModeProfileSchema,
+  epistemicPosture: EpistemicPostureSchema,
+  prose: Schema.String
+});
+export type GenreSignature = typeof GenreSignatureSchema.Type;
 
 export const TraitFrequencySchema = Schema.Literal("rare", "occasional", "common", "dominant");
 export type TraitFrequency = typeof TraitFrequencySchema.Type;

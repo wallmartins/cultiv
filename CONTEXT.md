@@ -12,13 +12,29 @@ _Avoid_: Flow, process
 The client-visible request to generate a text, carrying briefing, voice-related inputs, quality mode, and other product parameters without exposing internal pipeline structure.
 _Avoid_: Client pipeline, user-defined flow
 
-**Content Type**:
-The kind of text being generated, such as blog post, LinkedIn post, thread, or newsletter.
-_Avoid_: Format, template
+**Content Type** _(deprecated — ADR 0010)_:
+Formerly the named kind of text generated (blog post, LinkedIn post, thread). Superseded by composition over **Rhetorical Mode** × size × channel into a plan signature; the named catalog and `PipelineTypeSchema` are dead scaffolding (the compositor is the live path). Retained here only to mark the deprecation; do not add named types.
+_Avoid_: Format, template, vertical type
 
 **Content Type Format Preset**:
 Platform and structure constraints applied per **Content Type** during voice resolution, such as word targets, paragraph shape, and channel conventions.
 _Avoid_: Style preset, voice preset, cognitive baseline
+
+**Practice Profile** _(ADR 0010)_:
+The author's declared writing practice: the **Subject** they write about, the **Vantage Point** they write from, and the set of audiences they address. Declared during calibration — never inferred from **Voice Examples** — and derived once (seed) before the calibration writing prompts are generated, then enriched (append-only) post-consent. Sibling of the **Voice Profile** with its own lifecycle: the voice captures *how* the author thinks; the Practice Profile captures *what about* and *for whom*. One per account in v1. The **Voice Profile is never overwritten** by it — audience adjusts accessibility, not voice.
+_Avoid_: Domain profile, niche, vertical, job title, persona
+
+**Vantage Point** _(ADR 0010)_:
+The position an author writes from — the premises their claims rest on, their scope of action, and what they are accountable for. Distinct from job title: two authors with identical titles and different scope argue from incompatible premises. Subject takes priority over Vantage Point when they diverge.
+_Avoid_: Role, job title, seniority, cargo
+
+**Practice Dimensions** _(ADR 0010)_:
+The fixed set of fields every **Practice Profile** answers about any subject — **Point, Evidence, Presupposition, Resistance, Stake, Cliché, Lexicon** — invisible to the author, filled by the LLM, never chosen by it. The subject itself is open: there is no closed list of domains, and reference samples are tests of the generator, not supported verticals. Curated in the norte (`.scratch/adaptacao-por-dominio/norte/backbone-curado.md`).
+_Avoid_: Vertical taxonomy, domain list, niche catalog
+
+**Rhetorical Mode** _(ADR 0010)_:
+The text-level genre dimension inferred at the end of the generation questions — a **dominant mode plus an optional secondary**, from expose / narrate / argue / instruct / promote. Classified **by substance** (what the payload does), never by keyword. Hybrid representation: a reduced enum for control plus open prose for the prompt. Curated in the norte (`genero-dimensoes.md`). Genre is a property of the text, not of the author.
+_Avoid_: Content type, format name, closed genre taxonomy, intent
 
 **Voice Profile**:
 The user's durable writing voice at the surface layer: tone, cadence, vocabulary, and lexical constraints.
@@ -53,8 +69,8 @@ The offline harmonization step after parallel **Reasoning Extraction** and **Arg
 _Avoid_: User-visible conflict card, dual profile, generation gate, unconditional third extraction call
 
 **Format Expression Profile**:
-Per-**Content Type** register and expression traits — such as formality, technical density, and channel conventions — derived only when the author has enough active examples for that **Content Type**; optional in cold start and not tied to legacy channel fields when channel is omitted.
-_Avoid_: Format voice preset, channel persona, per-format cognitive profile
+Per-format register and expression traits — such as formality, technical density, and channel conventions — derived only when the author has enough active examples; optional in cold start. A **voice** artifact (how the author sounds on a channel). Still keyed by **Content Type** in the live code today; ADR 0010 (F6-4) re-keys it to **channel** once **Content Type** is fully retired — not yet done. Audience does **not** enter here — it is a parallel accessibility axis, not a voice one.
+_Avoid_: Format voice preset, channel persona, per-format cognitive profile, audience register
 
 **Derived Anti-Patterns**:
 Voice-related patterns the author consistently avoids, inferred automatically from **Voice Examples** during **Core Reasoning Signature** extraction.

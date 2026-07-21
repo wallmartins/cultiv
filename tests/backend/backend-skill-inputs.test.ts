@@ -16,6 +16,37 @@ describe("backend skill inputs", () => {
     expect(briefingText).toContain("Imported context: Notas externas em texto puro");
   });
 
+  it("serializes the labeled Practice Profile slots (ADR 0010 §6)", () => {
+    const briefingText = getBriefingText({
+      briefing: {
+        topic: "Migração pro Postgres",
+        payload: "a migração incremental venceu o big-bang",
+        anchor: "cortamos o downtime de 4h pra 12min em produção",
+        resistance: "o time achava que dual-write era arriscado demais",
+        stake: "o próximo deploy trava se a régua de rollback não existir"
+      }
+    });
+
+    expect(briefingText).toBe(
+      "Topic: Migração pro Postgres | Payload: a migração incremental venceu o big-bang | " +
+        "Anchor: cortamos o downtime de 4h pra 12min em produção | " +
+        "Resistance: o time achava que dual-write era arriscado demais | " +
+        "Stake: o próximo deploy trava se a régua de rollback não existir"
+    );
+  });
+
+  it("drops the retired goal/keyPoints fields — clean cut, no back-compat", () => {
+    const briefingText = getBriefingText({
+      briefing: {
+        topic: "Voz autêntica",
+        goal: "should not appear",
+        keyPoints: ["should not appear either"]
+      }
+    });
+
+    expect(briefingText).toBe("Topic: Voz autêntica");
+  });
+
   it("keeps runtime metadata out of fallback briefing assembly for explicit inputs", () => {
     const briefingText = getBriefingText({
       topic: "Runtime minimization",

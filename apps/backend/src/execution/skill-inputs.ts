@@ -32,17 +32,19 @@ export function getBriefingText(inputs: Readonly<Record<string, unknown>>): stri
   if (briefing && typeof briefing === "object") {
     const summary = briefing as Record<string, unknown>;
     const topic = typeof summary.topic === "string" ? summary.topic : undefined;
-    const goal = typeof summary.goal === "string" ? summary.goal : undefined;
     const audience = typeof summary.audience === "string" ? summary.audience : undefined;
-    const keyPoints = Array.isArray(summary.keyPoints)
-      ? summary.keyPoints.filter((item): item is string => typeof item === "string")
-      : [];
+    const payload = typeof summary.payload === "string" ? summary.payload : undefined;
+    const anchor = typeof summary.anchor === "string" ? summary.anchor : undefined;
+    const resistance = typeof summary.resistance === "string" ? summary.resistance : undefined;
+    const stake = typeof summary.stake === "string" ? summary.stake : undefined;
 
     return appendImportedContext([
       topic ? `Topic: ${topic}` : undefined,
-      goal ? `Goal: ${goal}` : undefined,
       audience ? `Audience: ${audience}` : undefined,
-      keyPoints.length > 0 ? `Key points: ${keyPoints.join("; ")}` : undefined
+      payload ? `Payload: ${payload}` : undefined,
+      anchor ? `Anchor: ${anchor}` : undefined,
+      resistance ? `Resistance: ${resistance}` : undefined,
+      stake ? `Stake: ${stake}` : undefined
     ]
       .filter((part): part is string => typeof part === "string")
       .join(" | "), importedContext);

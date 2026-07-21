@@ -10,6 +10,7 @@ import type { VoiceCalibrationSessionView } from "@my-ai-orchestrator/contracts"
 import { makeAppRuntime, queryKeys, RuntimeProvider, useShellStore } from "@my-ai-orchestrator/shared";
 import { CalibrationWizard, type Step1ContextProps, type WizardStepContent } from "@my-ai-orchestrator/ui/app/onboarding";
 import { LockedCenter, LockedCompanionEmpty } from "@my-ai-orchestrator/ui/app/locked";
+import { DEFAULT_LOCALE, messagesFor } from "@my-ai-orchestrator/ui/app/i18n";
 import { CalibrateContainer } from "~/routes/calibrate.js";
 import {
   buildProgress,
@@ -46,7 +47,7 @@ function sessionAt(currentStepId: string, overrides: Partial<VoiceCalibrationSes
     sessionId: "voice-calibration:test-1",
     userId: "test-user",
     status: "in_progress",
-    context: { domain: "produto", audience: "fundadores" },
+    context: { subject: "produto", vantagePoint: "fundador técnico", audiences: ["fundadores"] },
     currentStepId,
     steps: [
       { stepId: "context_setup", prompt: "" },
@@ -86,8 +87,10 @@ function newQueryClient() {
 }
 
 describe("calibrate-view (pure)", () => {
+  const t = messagesFor(DEFAULT_LOCALE);
+
   it("buildProgress marks steps before currentStepId done, the displayed one active, the rest upcoming", () => {
-    const progress = buildProgress(sessionAt("review_confirm"), "format_adaptation");
+    const progress = buildProgress(t, sessionAt("review_confirm"), "format_adaptation");
     expect(progress.map((step) => step.status)).toEqual(["done", "done", "done", "done", "active", "upcoming"]);
   });
 
@@ -98,22 +101,22 @@ describe("calibrate-view (pure)", () => {
   });
 
   it("weakestWritingStep points at the writing step with the fewest words", () => {
-    const weakest = weakestWritingStep(sessionAt("review_confirm"));
+    const weakest = weakestWritingStep(t, sessionAt("review_confirm"));
     expect(weakest).toEqual({ stepId: "format_adaptation", label: "Versatilidade" });
   });
 
   it("formatCalibrationTrialLine is only informative while trialing, degrades without trialEndsAt", () => {
     const now = new Date("2026-07-17T00:00:00Z");
-    expect(formatCalibrationTrialLine({ ...entitlementFixture, status: "active" }, now)).toBeUndefined();
+    expect(formatCalibrationTrialLine(t, { ...entitlementFixture, status: "active" }, now)).toBeUndefined();
     expect(
-      formatCalibrationTrialLine({ ...entitlementFixture, status: "trialing", trialEndsAt: "2026-07-20T00:00:00Z" }, now)
+      formatCalibrationTrialLine(t, { ...entitlementFixture, status: "trialing", trialEndsAt: "2026-07-20T00:00:00Z" }, now)
     ).toBe("seu teste · ~6 textos · 3 dias restantes");
   });
 
   it("describeCalibrationError prefers responseMessage, then message, then a generic fallback", () => {
-    expect(describeCalibrationError({ responseMessage: "quota excedida" })).toBe("quota excedida");
-    expect(describeCalibrationError({ message: "network down" })).toBe("network down");
-    expect(describeCalibrationError({})).toMatch(/não conseguimos confirmar/);
+    expect(describeCalibrationError(t, { responseMessage: "quota excedida" })).toBe("quota excedida");
+    expect(describeCalibrationError(t, { message: "network down" })).toBe("network down");
+    expect(describeCalibrationError(t, {})).toMatch(/não conseguimos confirmar/);
   });
 });
 
@@ -122,26 +125,33 @@ describe("CalibrationWizard (presentational)", () => {
     return {
       kind: "context",
       props: {
-        domain: "",
-        onDomainChange: () => {},
-        audience: "",
-        onAudienceChange: () => {},
-        strength: "",
-        onStrengthChange: () => {},
+        subject: "",
+        onSubjectChange: () => {},
+        vantagePoint: "",
+        onVantagePointChange: () => {},
+        audiences: [],
+        audienceDraft: "",
+        onAudienceDraftChange: () => {},
+        onAudienceAdd: () => {},
+        onAudienceRemove: () => {},
         onContinue: () => {},
         ...overrides
       }
     };
   }
 
-  it("Step1Context — Continuar disabled while domain/audience are empty", async () => {
+  it("Step1Context — Continuar disabled while subject/vantagePoint/audiences are empty", async () => {
     await renderWithRouter(<CalibrationWizard variant="full" progress={[]} content={step1Content()} />);
     expect(screen.getByText("Continuar").closest("button")).toBeDisabled();
   });
 
-  it("Step1Context — Continuar enables once both domain and audience are filled", async () => {
+  it("Step1Context — Continuar enables once subject, vantagePoint and at least one audience are filled", async () => {
     await renderWithRouter(
-      <CalibrationWizard variant="full" progress={[]} content={step1Content({ domain: "produto", audience: "fundadores" })} />
+      <CalibrationWizard
+        variant="full"
+        progress={[]}
+        content={step1Content({ subject: "produto", vantagePoint: "fundador técnico", audiences: ["fundadores"] })}
+      />
     );
     expect(screen.getByText("Continuar").closest("button")).not.toBeDisabled();
   });
@@ -410,7 +420,9 @@ describe("CalibrateContainer (S6 — full wizard, container-level)", () => {
       fireEvent.click(screen.getByText("Recalibrar com esse contexto →"));
 
       expect(await screen.findByText("vamos te conhecer")).toBeInTheDocument();
-      expect(screen.getByLabelText("pra quem você escreve?")).toHaveValue("quem te lê no LinkedIn");
+      // onResume seeds audiences[] (not the single audience field it used to) — the prior context
+      // renders as a removable chip, not a prefilled input value.
+      expect(screen.getByText("quem te lê no LinkedIn ×")).toBeInTheDocument();
       expect(clearPostResetContext).toHaveBeenCalledTimes(1);
     } finally {
       restore();

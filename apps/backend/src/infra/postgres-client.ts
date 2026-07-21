@@ -13,6 +13,8 @@ import { createPostgresContentTypeRepository } from "./postgres-repositories/pos
 import { createPostgresPipelineRepository } from "./postgres-repositories/postgres-pipeline-repository.js";
 import { createPostgresVoiceExampleRepository } from "./postgres-repositories/postgres-voice-example-repository.js";
 import { createPostgresVoiceExampleBatchRepository } from "./postgres-repositories/postgres-voice-example-batch-repository.js";
+import { createPostgresPracticeProfileRepository } from "./postgres-repositories/postgres-practice-profile-repository.js";
+import { createPostgresPracticeProfileDiagnosticsRepository } from "./postgres-repositories/postgres-practice-profile-diagnostics-repository.js";
 import { createPostgresVoiceProfileRepository } from "./postgres-repositories/postgres-voice-profile-repository.js";
 import { createPostgresVoiceProfileDiagnosticsRepository } from "./postgres-repositories/postgres-voice-profile-diagnostics-repository.js";
 import { createPostgresVoiceProfileSnapshotRepository } from "./postgres-repositories/postgres-voice-profile-snapshot-repository.js";
@@ -47,6 +49,8 @@ export function createPostgresDatabaseClient(db: Kysely<DatabaseTables>): Databa
     voiceTrainingConsents: createPostgresVoiceTrainingConsentRepository(db),
     executionReactions: createPostgresExecutionReactionRepository(db),
     voiceExampleBatches: createPostgresVoiceExampleBatchRepository(db),
+    practiceProfiles: createPostgresPracticeProfileRepository(db),
+    practiceProfileDiagnostics: createPostgresPracticeProfileDiagnosticsRepository(db),
     audit: createPostgresAuditRepository(db),
 
     transaction<T, E>(

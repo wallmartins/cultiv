@@ -58,14 +58,16 @@ describe("voice calibration service", () => {
     const started = Effect.runSync(services.voiceCalibration.startSession("user_cal_2"));
     const updated = Effect.runSync(
       services.voiceCalibration.setContext(started.sessionId, "user_cal_2", {
-        domain: "tecnologia",
-        audience: "colegas de produto"
+        subject: "tecnologia",
+        vantagePoint: "praticante autônomo",
+        audiences: ["colegas de produto"]
       })
     );
 
     expect(updated.context).toEqual({
-      domain: "tecnologia",
-      audience: "colegas de produto"
+      subject: "tecnologia",
+      vantagePoint: "praticante autônomo",
+      audiences: ["colegas de produto"]
     });
   });
 
@@ -76,7 +78,7 @@ describe("voice calibration service", () => {
     const started = Effect.runSync(services.voiceCalibration.startSession("user_cal_3"));
     Effect.runSync(
       services.voiceCalibration.setContext(started.sessionId, "user_cal_3", {
-        domain: "tecnologia"
+        subject: "tecnologia"
       })
     );
     const submitted = Effect.runSync(
@@ -104,7 +106,7 @@ describe("voice calibration service", () => {
     const started = Effect.runSync(services.voiceCalibration.startSession("user_cal_4"));
     Effect.runSync(
       services.voiceCalibration.setContext(started.sessionId, "user_cal_4", {
-        domain: "tecnologia"
+        subject: "tecnologia"
       })
     );
     const skipped = Effect.runSync(
@@ -128,7 +130,7 @@ describe("voice calibration service", () => {
     const started = Effect.runSync(services.voiceCalibration.startSession("user_cal_5"));
     Effect.runSync(
       services.voiceCalibration.setContext(started.sessionId, "user_cal_5", {
-        domain: "tecnologia"
+        subject: "tecnologia"
       })
     );
 

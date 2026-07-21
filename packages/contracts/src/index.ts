@@ -16,5 +16,6 @@ export * from "./voice.js";
 export * from "./metaphor-signature.js";
 export * from "./voice-calibration.js";
 export * from "./reasoning.js";
+export * from "./practice-profile.js";
 export * from "./onboarding.js";
 export * from "./account-ops.js";

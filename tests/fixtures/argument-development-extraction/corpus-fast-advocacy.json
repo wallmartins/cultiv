@@ -38,7 +38,7 @@
         { "from": "tese", "to": "evidencia", "frequency": "dominant" },
         { "from": "evidencia", "to": "fechamento", "frequency": "common" }
       ],
-      "epistemicPosture": "advocacy_mixed",
+      "epistemicPosture": "advocacy",
       "structuralAntiPatterns": ["aquecimento_lento", "hedging_excessivo"]
     }
   }

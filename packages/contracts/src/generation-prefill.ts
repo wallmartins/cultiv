@@ -6,7 +6,9 @@ import { GenerationIntentSchema } from "./generation-intent.js";
 // --- Request -----------------------------------------------------------------
 export const GenerationPrefillRequestSchema = Schema.Struct({
   theme: Schema.String,
-  language: Schema.optional(Schema.String)
+  language: Schema.optional(Schema.String),
+  // F0-6 — narrowed-audience socket (audience-narrowing step lands in F4-2; slot instantiation F4-3).
+  audience: Schema.optional(Schema.String)
 });
 export type GenerationPrefillRequest = typeof GenerationPrefillRequestSchema.Type;
 

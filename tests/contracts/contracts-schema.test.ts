@@ -11,6 +11,8 @@ import {
   ExecutionTelemetrySchema,
   PipelineRequestSchema,
   PipelineTypeSchema,
+  PracticeProfileDiagnosticsSchema,
+  PracticeProfileSchema,
   QualityModeSchema,
   SimplifiedPipelineRequestSchema
 } from "../../packages/contracts/src/index.js";
@@ -210,5 +212,50 @@ describe('contracts package', () => {
     expect(value.canonicalCreditCost).toBe(2.5);
     expect(value.options.qualityModes[1]?.creditPrice).toBe(2.5);
     expect(value.options.qualityModes[1]?.recommendation?.reasonCodes).toEqual(['balanced_default']);
+  });
+
+  it('decodes a practice profile with its seven dimensions', () => {
+    const decode = Schema.decodeUnknownSync(PracticeProfileSchema);
+    const value = decode({
+      userId: 'user_1',
+      version: 1,
+      depth: 'seed',
+      subject: 'Infraestrutura de dados para climate-tech',
+      vantagePoint: 'Engenheira founding em startup early-stage, respondendo a investidores e reguladores',
+      audiences: ['liderança técnica', 'investidores'],
+      dimensions: {
+        point: 'Achado',
+        evidence: 'Dado de cliente de amostra pequena',
+        readerAssumption: 'Conhece a pressão regulatória mas não o dado técnico',
+        resistance: 'Pushback do chefe sobre custo',
+        stake: 'Decisão de orçamento a tomar agora',
+        fieldCliche: 'Levamos sustentabilidade a sério',
+        lexicon: ['MRV', 'offset', 'escopo 3']
+      }
+    });
+
+    expect(value.depth).toBe('seed');
+    expect(value.audiences).toEqual(['liderança técnica', 'investidores']);
+    expect(value.dimensions.fieldCliche).toBe('Levamos sustentabilidade a sério');
+    expect(value.dimensions.lexicon).toEqual(['MRV', 'offset', 'escopo 3']);
+  });
+
+  it('decodes practice profile diagnostics with enrichment suggestions keyed by dimension', () => {
+    const decode = Schema.decodeUnknownSync(PracticeProfileDiagnosticsSchema);
+    const value = decode({
+      userId: 'user_1',
+      activeVersion: 1,
+      pendingVersion: 2,
+      updating: true,
+      summary: 'Enriquecimento em progresso.',
+      enrichmentSuggestions: {
+        lexicon: { response: 'accepted', recordedAt: '2026-07-21T00:00:00.000Z' },
+        fieldCliche: { response: 'rejected', recordedAt: '2026-07-21T00:00:00.000Z' }
+      }
+    });
+
+    expect(value.pendingVersion).toBe(2);
+    expect(value.enrichmentSuggestions?.lexicon?.response).toBe('accepted');
+    expect(value.enrichmentSuggestions?.fieldCliche?.response).toBe('rejected');
   });
 });

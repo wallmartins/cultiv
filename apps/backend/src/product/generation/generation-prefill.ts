@@ -89,6 +89,8 @@ export function createBackendGenerationPrefillService(options: {
           }).pipe(Effect.catchAll(() => Effect.succeed(undefined)));
         }
 
+        // F4-3: args.audience (narrowed public) will drive audience-aware slot instantiation here,
+        // replacing the up-front intent classification below. Groundwork socket only — not consumed yet.
         return buildResponse({
           theme: args.theme,
           language: args.language,

@@ -20,19 +20,19 @@ describe("voice calibration context", () => {
     ]);
   });
 
-  it("resolves domain-specific opinion themes for micro_opinion", () => {
+  it("resolves subject-specific opinion themes for micro_opinion", () => {
     const step = getCalibrationWizardStep("micro_opinion");
     expect(step).toBeDefined();
 
-    const context: WizardContext = { domain: "tecnologia", audience: "colegas" };
+    const context: WizardContext = { subject: "tecnologia", vantagePoint: "praticante", audiences: ["colegas"] };
     expect(resolveTheme(step!, context)).toBe(THEMES_BY_DOMAIN.tecnologia.opinion);
   });
 
-  it("resolves domain-specific argument themes for argument_development", () => {
+  it("resolves subject-specific argument themes for argument_development", () => {
     const step = getCalibrationWizardStep("argument_development");
     expect(step).toBeDefined();
 
-    const context: WizardContext = { domain: "negocios" };
+    const context: WizardContext = { subject: "negocios" };
     expect(resolveTheme(step!, context)).toBe(THEMES_BY_DOMAIN.negocios.argument);
   });
 
@@ -40,18 +40,18 @@ describe("voice calibration context", () => {
     const reasoning = getCalibrationWizardStep("reasoning_reflection");
     const adaptation = getCalibrationWizardStep("format_adaptation");
 
-    expect(resolveTheme(reasoning!, { domain: "tecnologia" })).toBe(reasoning!.fixedPrompt);
-    expect(resolveTheme(adaptation!, { domain: "educacao" })).toBe(adaptation!.fixedPrompt);
+    expect(resolveTheme(reasoning!, { subject: "tecnologia" })).toBe(reasoning!.fixedPrompt);
+    expect(resolveTheme(adaptation!, { subject: "educacao" })).toBe(adaptation!.fixedPrompt);
   });
 
-  it("falls back to default theme when domain is missing", () => {
+  it("falls back to default theme when subject is missing", () => {
     const step = getCalibrationWizardStep("micro_opinion");
     expect(resolveTheme(step!)).toBe(step!.defaultTheme);
   });
 
-  it("falls back to default theme for unknown domains", () => {
+  it("falls back to default theme for unknown subjects", () => {
     const step = getCalibrationWizardStep("micro_opinion");
-    expect(resolveTheme(step!, { domain: "desconhecido" })).toBe(step!.defaultTheme);
+    expect(resolveTheme(step!, { subject: "desconhecido" })).toBe(step!.defaultTheme);
   });
 
   it("defines themes for all supported domains", () => {

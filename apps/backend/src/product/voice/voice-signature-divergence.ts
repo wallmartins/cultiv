@@ -29,11 +29,11 @@ export function evaluateVoiceSignatureDivergence(args: {
   }
 
   if (
-    development.epistemicPosture === "advocacy_mixed"
+    development.epistemicPosture === "advocacy"
     && core.judgmentFrequency === "low"
     && (core.readerRelationship === "observer" || core.conclusionPace === "slow")
   ) {
-    reasons.push("advocacy_mixed_conflicts_with_observational_core");
+    reasons.push("advocacy_conflicts_with_observational_core");
   }
 
   if (

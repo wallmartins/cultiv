@@ -101,22 +101,22 @@ export function evaluateArgumentDevelopmentDrift(
   }
 
   if (
-    development.epistemicPosture === "advocacy_mixed"
+    development.epistemicPosture === "advocacy"
     && structuralStep
     && HEDGING_MARKERS.some((pattern) => pattern.test(normalized))
   ) {
     score -= 25;
-    notes.push("Candidate hedges excessively for advocacy-mixed development posture");
+    notes.push("Candidate hedges excessively for advocacy development posture");
   }
 
   if (
-    development.epistemicPosture === "advocacy_mixed"
+    development.epistemicPosture === "advocacy"
     && structuralStep
     && development.structuralAntiPatterns.some((pattern) => /slow|warmup|digression/.test(pattern))
     && /antes de|vamos percorrer|sem fechar|sem chegar/.test(normalized)
   ) {
     score -= 30;
-    notes.push("Candidate delays the thesis for advocacy-mixed development posture");
+    notes.push("Candidate delays the thesis for advocacy development posture");
   }
 
   if (

@@ -5,9 +5,9 @@ import {
 } from "@my-ai-orchestrator/domain";
 
 export interface WizardContext {
-  readonly domain?: string;
-  readonly audience?: string;
-  readonly selfDeclaredStrength?: string;
+  readonly subject?: string;
+  readonly vantagePoint?: string;
+  readonly audiences?: readonly string[];
 }
 
 export const THEMES_BY_DOMAIN: Readonly<
@@ -48,13 +48,15 @@ export function resolveTheme(step: CalibrationWizardStep, context?: WizardContex
       return step.fixedPrompt;
     case "review_confirm":
       return step.defaultTheme;
+    // ponytail: F1-3/F3-4 — THEMES_BY_DOMAIN is dead scaffolding (real anchor is the generated
+    // one, F3-4); subject is free text now, so this key match rarely hits and falls through.
     case "micro_opinion":
-      return context?.domain
-        ? (THEMES_BY_DOMAIN[context.domain]?.opinion ?? step.defaultTheme)
+      return context?.subject
+        ? (THEMES_BY_DOMAIN[context.subject]?.opinion ?? step.defaultTheme)
         : step.defaultTheme;
     case "argument_development":
-      return context?.domain
-        ? (THEMES_BY_DOMAIN[context.domain]?.argument ?? step.defaultTheme)
+      return context?.subject
+        ? (THEMES_BY_DOMAIN[context.subject]?.argument ?? step.defaultTheme)
         : step.defaultTheme;
   }
 }

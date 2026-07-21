@@ -21,7 +21,7 @@ describe("voice signature divergence", () => {
     expect(result.reasons).toContain("exploratory_posture_conflicts_with_core_certainty_or_pace");
   });
 
-  it("detects advocacy_mixed conflicting with observational core", () => {
+  it("detects advocacy conflicting with observational core", () => {
     const result = evaluateVoiceSignatureDivergence({
       reasoning: {
         ...TEST_REASONING_EXTRACTION_FIXTURE,
@@ -34,12 +34,12 @@ describe("voice signature divergence", () => {
       },
       development: {
         ...TEST_ARGUMENT_DEVELOPMENT_EXTRACTION_FIXTURE.development,
-        epistemicPosture: "advocacy_mixed"
+        epistemicPosture: "advocacy"
       }
     });
 
     expect(result.hasConflict).toBe(true);
-    expect(result.reasons).toContain("advocacy_mixed_conflicts_with_observational_core");
+    expect(result.reasons).toContain("advocacy_conflicts_with_observational_core");
   });
 
   it("detects investigative moves conflicting with high judgment", () => {

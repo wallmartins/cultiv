@@ -36,7 +36,7 @@ export function buildStepPrompt(
   }
 
   const theme =
-    step.id === "micro_opinion" && !context?.domain && step.themePool.length > 0
+    step.id === "micro_opinion" && !context?.subject && step.themePool.length > 0
       ? pickThemeFromPool(step, rotationIndex)
       : resolveTheme(step, context);
 
