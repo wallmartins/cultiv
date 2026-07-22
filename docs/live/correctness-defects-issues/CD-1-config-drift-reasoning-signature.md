@@ -8,7 +8,7 @@
 O survey mapeou este item presumindo a flag **desligada**. Está **ligada em produção**
 (`VOICE_REASONING_SIGNATURE_V1=true` na VPS; a fiação foi verificada em código:
 `config-env.ts:32` → `config.reasoningSignatureV1Enabled` → `resolveBackendFeatureFlags`
-sobrescreve o default do registry (`packages/feature-flags/src/defaults.ts:49`) →
+sobrescreve o default do registry (`packages/feature-flags/src/defaults.ts:49-51`) →
 `createFeatureFlagRegistry` no bootstrap → os 5 call sites de `isEnabled("voice.reasoningSignatureV1")`
 retornam `true`). **Em produção o `CONTEXT.md` está correto** — extração roda, hints são injetados, Voice
 Judge roda, `traitProfile` é produzido.

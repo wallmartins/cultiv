@@ -5,14 +5,23 @@
 **Origem:** wayfinder 03 · survey §6
 
 ## Contexto
-O mesmo achado desconta duas vezes do mesmo score:
-1. `evaluateLexicalQuality` (`lexical-quality.ts:124-127`) devolve `penalty` (até 40).
-2. `criticizeText` (`critic.ts:65-73`) vira o achado em `CriticFinding severity:"high"` → **−40** via
-   `severityPenalty` (`critic.ts:253-257`).
-3. `lane-runner.ts:63-65` calcula `lexicalPenalty` **da mesma chamada** e guarda no candidato.
-4. `scorer.ts:15` faz `criticScore = clamp(input.criticScore - lexicalPenalty)` — **subtrai de novo**.
+O mesmo achado lexical desconta duas vezes do mesmo score (arquitetura re-verificada 2026-07-22 no código
+atual — os números do survey original eram pré-Fase-6, ver ⚠️ abaixo):
+1. `evaluateLexicalQuality` (`packages/text-quality/src/quality/lexical-quality.ts:98-136`) devolve um
+   `penalty` **composto** (soma de concentração de termo, TTR, bigramas repetidos, lemas espaçados, etc.).
+2. `criticizeText` (`critic.ts:63-68`, atrás de `lexicalQualityV2`) vira **cada** finding lexical num
+   `CriticFinding severity:"medium"` → **−20** cada via `severityPenalty` (`critic.ts:252-253`); isso entra
+   no `criticScore` (`critic.ts:170`).
+3. `lane-runner.ts:62` guarda o `penalty` composto **da mesma chamada** como `lexicalPenalty` no candidato.
+4. `scorer.ts:15` faz `criticScore = clamp(input.criticScore - (input.lexicalPenalty ?? 0))` — **subtrai o
+   mesmo achado de novo**.
 
-Medido: 3 termos → 100 → 60 → **24**. 76 pontos numa escala de 100, pelo mesmo achado, contado 2×.
+⚠️ **Re-verificação (2026-07-22):** o survey mediu "3 termos → 100 → 60 → **24**" com o achado de jargão em
+`severity:"high"` (−40). Esse caminho tech-first (`techTermHits` / "Technical jargon detected") foi
+**deletado na Fase 6** (`ed736e1`, F6-1). No código atual o finding lexical é `medium` (−20), não `high`, e
+está gateado por `lexicalQualityV2` (default `on` na VPS). A **dupla contagem em si permanece real** (o
+mesmo achado reduz o `criticScore` como `CriticFinding` **e** como `lexicalPenalty` no `scorer`) — só a
+magnitude e o exemplo mudaram. A medição do antes/depois deve ser refeita contra o código atual.
 
 ## DECISÃO (confirmar na implementação)
 1. **Bug ou calibração deliberada?** *Recomendação:* **bug** (dupla subtração do mesmo achado não é

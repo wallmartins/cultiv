@@ -25,6 +25,18 @@ third (tech) to recruit; none has used it yet.
 "Fix everything" is not a plan. What is acceptable-broken before two known users is named explicitly in the
 cut below — deletion is delivery, not omission.
 
+**Two triage sub-questions carried from wayfinder ticket 01 (not yet resolved — flagged, not dropped):**
+- **(a) The 6 operational-launch blockers — one map or two?** The 2026-07-19 audit found: durable suite red
+  (stale `free` fixtures), ~30 commits unpushed (CI never ran), README says Railway but deploy is VPS/PM2,
+  `AUTH0_MANAGEMENT_*` missing (LGPD), dead `requiredEnvVars`, no Sentry. *Recommendation:* keep them a
+  **separate operational track** — they are launch/ops, not product-correctness — but note they compete for
+  the **same beta clock**, so sequence the two tracks together. FU-1 (push + CI) already addresses the first
+  blocker. Confirm this split when the first implementation session runs.
+- **(b) `.worktrees/architecture-deepening/` — already-fixed-but-unintegrated?** Before scoping each CD-*,
+  check whether that worktree already fixed it. *Status:* the FU-6 audit diffed it and found it still carries
+  **pre-Phase-6** code (e.g. the deleted `domain`/`techTermHits` in `lexical-quality.ts`) — so it is **behind**
+  `main`, not ahead; no unintegrated fix to salvage. Re-check per issue before implementing anyway.
+
 ## The defects (promoted to atomic issues)
 
 | Issue | Was | Defect | Kind | Changes product output? | Irreversible? |
