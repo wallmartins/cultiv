@@ -2,7 +2,7 @@
 
 Decomposição atômica do **`docs/live/plan/practice-profile-plan.md`** (companheiro da **ADR 0010**). Uma issue = uma mudança independente e testável. Cada arquivo `FN-Nx-*.md` tem metadados → contexto → mudança (`file:line`) → aceite → verify → deps.
 
-> **Status:** ✅ completo — **50 issues** nas 6 fases. Cada issue nasce independente; as **deps** dizem a ordem, a **espinha** diz o que atacar primeiro.
+> **Status:** ✅ **6 fases (0→6) implementadas + gated** (2026-07-22, último commit `ed736e1`). 50 issues nas fases + **6 follow-ups pós-fase** (`FU-1..FU-6`, seção no fim) fechando as 4 ressalvas do fechamento. Cada issue nasce independente; as **deps** dizem a ordem, a **espinha** diz o que atacar primeiro.
 
 ## 🩸 Espinha do caminho crítico
 
@@ -106,6 +106,19 @@ graph LR
 | **F6-2** · Conjunto de avaliação multi-domínio (span de estilo) | F2-1 | |
 | **F6-3** · Guardas de drift/critic → tabela declarativa | F0-4a | |
 | **F6-4** · Re-chavear FEP content-type → canal | F1-1b | |
+
+## Follow-ups pós-Fase 6 (pontas abertas do fechamento, 2026-07-22)
+
+As 6 fases (0→6) estão **implementadas e passaram o portão de revisão**. Estes tickets fecham as 4 ressalvas do fechamento — não são fases novas, são pontas para "mapa completo" de verdade.
+
+| Issue | Ressalva | Tipo | Bloqueia |
+|---|---|---|---|
+| **FU-1** · Push da branch + CI verde | 1 | processo | merge a `main` |
+| **FU-2** · G2 grounding web nativo | 2 | plataforma (dep. `ai-adapters`) | — |
+| **FU-3** · Seed órfão do `briefings.ts` (fiar ou deletar) | 3a | qualidade (F6-2) | — |
+| **FU-4** · Dedup do mapa de canal (fonte única + round-trip) | 3b | seam-drift (F6-4) | — |
+| **FU-5** · Dupla resolução de voz síncrona | 3c/4 | defeito → mapa de defeitos | — |
+| **FU-6** · Rodar o mapa de defeitos de corretude até o fim | 4 | meta (mapa irmão) | "mapa completo" |
 
 ---
 
