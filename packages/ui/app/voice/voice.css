@@ -433,3 +433,119 @@
 .voice-error-text {
   font-size: 0.9rem;
 }
+
+/* F5 — practice section ("sua identidade de escrita": voz + prática). Reuses the trait/panel visual
+   language and the wizard field inputs, colocated here so /voice never reaches into onboarding.css. */
+.voice-practice-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.voice-practice-eyebrow {
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+}
+.voice-practice-heading {
+  margin: 0 0 4px;
+}
+.voice-practice-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.voice-practice-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.voice-practice-depth-badge {
+  padding: 4px 10px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--line);
+  color: var(--muted);
+  text-transform: uppercase;
+}
+.voice-practice-depth-badge.is-enriched {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.voice-practice-axis {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.voice-practice-axis-label {
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.72rem;
+}
+.voice-practice-axis-value {
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+.voice-practice-audience-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+.voice-practice-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.voice-practice-field-label {
+  font-size: 0.86rem;
+  font-weight: 500;
+}
+.voice-practice-field-input,
+.voice-practice-field-textarea {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-input);
+  padding: 11px 14px;
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 0.92rem;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+.voice-practice-field-input:focus,
+.voice-practice-field-textarea:focus {
+  border-color: var(--accent);
+  box-shadow: var(--glow-ring);
+}
+.voice-practice-field-textarea {
+  resize: vertical;
+}
+.voice-practice-edit-error {
+  color: var(--danger);
+  font-size: 0.84rem;
+}
+.voice-practice-edit-actions,
+.voice-practice-niche-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+.voice-practice-niche-heading {
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+.voice-practice-niche-question {
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.6;
+  white-space: pre-line;
+}
+.voice-practice-niche-answer {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}

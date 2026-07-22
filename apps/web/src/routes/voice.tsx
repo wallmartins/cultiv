@@ -6,19 +6,25 @@ import {
   useConsentStatus,
   useExecutionsList,
   useGrantConsent,
+  usePracticeIdentity,
   useRecordTraitConfirmation,
+  useRespondToNicheAsk,
   useRevokeConsent,
   useShellStore,
+  useUiLanguage,
+  useUpdateDeclaredAxes,
   useVoiceProfile
 } from "@my-ai-orchestrator/shared";
 import { useFormat, useMessages } from "@my-ai-orchestrator/ui/app/i18n";
-import { VoiceProfileScreen, type VoiceProfileScreenState } from "@my-ai-orchestrator/ui/app/voice";
+import { VoiceProfileScreen, type PracticeSectionVM, type VoiceProfileScreenState } from "@my-ai-orchestrator/ui/app/voice";
 import { RecalibrateWithRunning } from "@my-ai-orchestrator/ui/app/states";
 import {
   buildConsentSinceLabel,
   buildCoverage,
   buildDescriptorChips,
   buildMaterialBaseSamples,
+  buildPracticeAxes,
+  buildPracticeNicheAsk,
   buildProse,
   buildRing,
   buildTraits,
@@ -59,6 +65,80 @@ export function VoiceContainer() {
     (item) => item.status === "queued" || item.status === "running"
   );
 
+  const uiLanguage = useUiLanguage((state) => state.language);
+  const identityQuery = usePracticeIdentity(uiLanguage);
+  const updateAxes = useUpdateDeclaredAxes(uiLanguage);
+  const respondNiche = useRespondToNicheAsk(uiLanguage);
+
+  const [practiceEditOpen, setPracticeEditOpen] = useState(false);
+  const [practiceSubject, setPracticeSubject] = useState("");
+  const [practiceVantagePoint, setPracticeVantagePoint] = useState("");
+  const [practiceAudiences, setPracticeAudiences] = useState<readonly string[]>([]);
+  const [practiceAudienceDraft, setPracticeAudienceDraft] = useState("");
+  const [practiceEditError, setPracticeEditError] = useState<string | undefined>(undefined);
+
+  const [nicheAnswerOpen, setNicheAnswerOpen] = useState(false);
+  const [nicheAnswer, setNicheAnswer] = useState("");
+
+  const identity = identityQuery.data?.profile;
+
+  function openPracticeEdit() {
+    if (!identity) return;
+    setPracticeSubject(identity.subject);
+    setPracticeVantagePoint(identity.vantagePoint);
+    setPracticeAudiences(identity.audiences);
+    setPracticeAudienceDraft("");
+    setPracticeEditError(undefined);
+    setPracticeEditOpen(true);
+  }
+
+  function cancelPracticeEdit() {
+    setPracticeEditOpen(false);
+    setPracticeEditError(undefined);
+  }
+
+  function addPracticeAudience() {
+    const value = practiceAudienceDraft.trim();
+    if (!value || practiceAudiences.includes(value)) return;
+    setPracticeAudiences((current) => [...current, value]);
+    setPracticeAudienceDraft("");
+  }
+
+  function removePracticeAudience(value: string) {
+    setPracticeAudiences((current) => current.filter((candidate) => candidate !== value));
+  }
+
+  function savePracticeEdit() {
+    const subject = practiceSubject.trim();
+    const vantagePoint = practiceVantagePoint.trim();
+    if (!subject || !vantagePoint || practiceAudiences.length === 0) {
+      setPracticeEditError(t.voice.practice.editValidationError);
+      return;
+    }
+    setPracticeEditError(undefined);
+    updateAxes.mutate(
+      { subject, vantagePoint, audiences: practiceAudiences },
+      {
+        onSuccess: () => setPracticeEditOpen(false),
+        onError: () => setPracticeEditError(t.voice.practice.saveError)
+      }
+    );
+  }
+
+  function submitNicheAnswer() {
+    const answer = nicheAnswer.trim();
+    if (!answer) return;
+    respondNiche.mutate(
+      { action: "answer", answer },
+      {
+        onSuccess: () => {
+          setNicheAnswer("");
+          setNicheAnswerOpen(false);
+        }
+      }
+    );
+  }
+
   const goCalibrate = () => navigate({ to: "/calibrate" });
 
   // 2d — recalibrating mid-generation doesn't interrupt anything server-side (running jobs finish
@@ -83,6 +163,39 @@ export function VoiceContainer() {
     const profile = profileQuery.data;
     const consent = consentQuery.data;
     const prose = buildProse(profile);
+
+    const practice: PracticeSectionVM | null = identity
+      ? {
+          axes: buildPracticeAxes(identity),
+          nicheAsk: buildPracticeNicheAsk(identity),
+          edit: {
+            open: practiceEditOpen,
+            subject: practiceSubject,
+            vantagePoint: practiceVantagePoint,
+            audiences: practiceAudiences,
+            audienceDraft: practiceAudienceDraft,
+            pending: updateAxes.isPending,
+            error: practiceEditError,
+            onOpen: openPracticeEdit,
+            onCancel: cancelPracticeEdit,
+            onSubjectChange: setPracticeSubject,
+            onVantagePointChange: setPracticeVantagePoint,
+            onAudienceDraftChange: setPracticeAudienceDraft,
+            onAudienceAdd: addPracticeAudience,
+            onAudienceRemove: removePracticeAudience,
+            onSave: savePracticeEdit
+          },
+          nicheAskState: {
+            answerOpen: nicheAnswerOpen,
+            answer: nicheAnswer,
+            pending: respondNiche.isPending,
+            onRespondOpen: () => setNicheAnswerOpen(true),
+            onAnswerChange: setNicheAnswer,
+            onAnswerSubmit: submitNicheAnswer,
+            onDismiss: () => respondNiche.mutate({ action: "dismiss" })
+          }
+        }
+      : null;
 
     state = {
       kind: "ready",
@@ -121,7 +234,8 @@ export function VoiceContainer() {
         open: revokeDialogOpen,
         onCancel: () => setRevokeDialogOpen(false),
         onConfirm: () => revokeConsent.mutate(undefined, { onSuccess: () => setRevokeDialogOpen(false) })
-      }
+      },
+      practice
     };
   }
 

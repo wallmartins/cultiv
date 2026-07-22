@@ -8,10 +8,12 @@ import {
   useEntitlement,
   useExecutionsList,
   useHistoryFilterStore,
+  usePracticeIdentity,
   useRunningExecutionsWatch,
   useShellStore,
   useThemeStore,
   useToastStore,
+  useUiLanguage,
   useUnreadStore,
   useVoiceProfile
 } from "@my-ai-orchestrator/shared";
@@ -98,6 +100,10 @@ export function WorkspaceShellContainer({ children }: WorkspaceShellContainerPro
   });
   const entitlement = useEntitlement();
   const voiceProfile = useVoiceProfile();
+  const uiLanguage = useUiLanguage((state) => state.language);
+  // Same "cache hit, no second fetch" reasoning as voiceProfile above — the companion can mount
+  // on /generate before the author ever visits /voice.
+  const practiceIdentity = usePracticeIdentity(uiLanguage);
   const unread = useUnreadStore((state) => state.unread);
 
   // Keeps the rail's live items + unread dots + the toast/notifications signal below current
@@ -238,7 +244,7 @@ export function WorkspaceShellContainer({ children }: WorkspaceShellContainerPro
         companion={{
           open: companionOpen,
           onClose: closeCompanion,
-          content: buildCompanionContent(t, locked, voiceProfile.data, goVoice)
+          content: buildCompanionContent(t, locked, voiceProfile.data, practiceIdentity.data, goVoice)
         }}
         toast={
           activeToast

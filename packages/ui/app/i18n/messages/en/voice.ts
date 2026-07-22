@@ -55,6 +55,32 @@ export const voice: AppMessages["voice"] = {
     }
   },
 
+  practice: {
+    sectionEyebrow: "practice · what you write about and who for",
+    sectionHeading: "Your practice",
+    subjectLabel: "Subject",
+    vantagePointLabel: "Vantage point",
+    audiencesLabel: "Audiences",
+    depth: {
+      seed: "Seed",
+      enriched: "Enriched"
+    },
+    edit: "Edit",
+    save: "Save",
+    cancel: "Cancel",
+    addAudience: "type an audience and press Enter",
+    audienceRemoveAria: (value) => `remove ${value}`,
+    editValidationError: "fill in subject, vantage point, and at least one audience.",
+    saveError: "couldn't save right now — try again in a moment.",
+    nicheAsk: {
+      heading: "Make your profile more specific",
+      respond: "Respond",
+      dismiss: "Dismiss",
+      answerPlaceholder: "tell us more — names, cases, debates from your day-to-day…",
+      submit: "Send"
+    }
+  },
+
   contentType: {
     "linkedin-post": "LinkedIn",
     newsletter: "Newsletter",

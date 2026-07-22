@@ -19,3 +19,47 @@ export interface CoverageItemVM {
   readonly caption: string;
   readonly value: number;
 }
+
+export type PracticeDepth = "seed" | "enriched";
+
+export interface PracticeAxesVM {
+  readonly subject: string;
+  readonly vantagePoint: string;
+  readonly audiences: readonly string[];
+  readonly depth: PracticeDepth;
+}
+
+export interface PracticeNicheAskVM {
+  readonly question: string;
+}
+
+export interface PracticeSectionVM {
+  readonly axes: PracticeAxesVM;
+  readonly nicheAsk: PracticeNicheAskVM | null;
+  readonly edit: {
+    readonly open: boolean;
+    readonly subject: string;
+    readonly vantagePoint: string;
+    readonly audiences: readonly string[];
+    readonly audienceDraft: string;
+    readonly pending: boolean;
+    readonly error?: string;
+    readonly onOpen: () => void;
+    readonly onCancel: () => void;
+    readonly onSubjectChange: (value: string) => void;
+    readonly onVantagePointChange: (value: string) => void;
+    readonly onAudienceDraftChange: (value: string) => void;
+    readonly onAudienceAdd: () => void;
+    readonly onAudienceRemove: (value: string) => void;
+    readonly onSave: () => void;
+  };
+  readonly nicheAskState: {
+    readonly answerOpen: boolean;
+    readonly answer: string;
+    readonly pending: boolean;
+    readonly onRespondOpen: () => void;
+    readonly onAnswerChange: (value: string) => void;
+    readonly onAnswerSubmit: () => void;
+    readonly onDismiss: () => void;
+  };
+}

@@ -131,6 +131,30 @@ Achados e destino:
 - **F5-2 · Duas naturezas de edição:** (a) editar declaração in-place (não é exemplo, ADR 0001 não trava); (b) aceitar/rejeitar sugestões de enriquecimento (store separada, só-acrescenta).
 - **F5-3 · Afordância da pergunta HITL de nicho** (G5).
 
+### Resolução da Fase 5 (2026-07-22)
+
+Implementada em Opus (eu = espinha + integração; 2 agentes de fan-out em Opus, arquivos disjuntos: backend e ui). Fatia UI fechada por mim após interrupção por limite de sessão da conta (o agente ui parou no meio; render/campo/CSS/barrel completados à mão). **Duas decisões do usuário (grilling antes de codar):**
+
+- **Decisão 1 — F5-2(b) = F5-3 (nicho unificado).** As 7 dimensões são invisíveis ao autor (ADR §2) e não há auto-propor deriva no v1, então o único estado de enriquecimento pendente é `pendingNicheAskDimensions`. "Aceitar/rejeitar sugestão de enriquecimento" **colapsa no card de nicho**: **Responder** (digita especificidades → re-dispara G2 com a resposta como `authorSpecifics` → dimensões `accepted`, saem do pending) / **Dispensar** (marca `rejected`, limpa pending). Sem lista separada de accept/reject, sem estágio pending-version (contradiria o G2 auto-aplicado do F3-5). *(Emenda ao texto do F5-2 acima, que descrevia a lista separada — registrada aqui como no padrão da Fase 3.5.)*
+- **Decisão 2 — F5-2(a) re-seed só em mudança MATERIAL.** Editar a declaração reusa a guarda C-1 `sameDeclaredAxes`: cosmético (caixa/ordem/dup) só grava a forma de superfície; material re-seeda o G1 síncrono (version+1, depth "seed", pending limpo) sob teto de 60s (classe C-7), degradando a erro visível com o perfil intocado.
+
+- **F5-1 ✅** `/voice` ganha a seção Prática (`PracticeSection` no `ReadyScreen`), read `GET /me/practice-identity` NOVA (superset do F4-2 declared-view + `nicheAsk` derivado server-side, **nunca as 7 dimensões**). Companion = subconjunto read-only (`VoiceCompanionPractice`: subject + depth, sem handlers). `settings` intocado (só espelha).
+- **F5-2(a) ✅** `POST /me/practice-profile/declaration` → `updateDeclaredAxes` (cosmético/material via C-1, timeout 60s + degradação). Edição in-place na web espelha a UX de públicos do `calibrate.tsx` (trim+dedupe, Enter adiciona), validação local + erros amigáveis (nunca mensagem crua do backend).
+- **F5-2(b)/F5-3 ✅** `POST /me/practice-profile/niche-ask` → `respondToNicheAsk` (answer→re-enriquece G2 best-effort / dismiss→registra rejeitado). Falha/timeout de re-enriquecimento **não escreve nada e mantém o ask pendente** (retentável), sem gravar "accepted" falso.
+- **F5-4 ✅** Companion voz+prática read-only (mesma cache `usePracticeIdentity`, sem 2º fetch); `settings` sem edição de prática (verificado, zero diff).
+
+### Portão de revisão da Fase 5 (2026-07-22, revisores em Fable, implementação em Opus)
+
+3 revisores (backend · ui+web · transversal), read-only, contra o diff não-commitado (base `8d84012`). **Vereditos: F5-1/F5-4 FAITHFUL; F5-2/F5-3 PARTIAL → consertados → FAITHFUL.** Gates re-rodados independentemente pelo transversal: smoke 3/3 · guardrails 2/2 · typecheck 8/8 pacotes · vitest direcionado 26/26 · voice-profile-centralization 7/7 · frontend-client-boundary 2/2.
+
+Achados confirmados no fonte e destino:
+- **CRÍTICO/MAJOR (2 revisores) — locale não threadado nas rotas de escrita.** O read levava locale, as mutations não; `resolvePracticeProfileLocale(undefined)`→pt-BR sempre, então re-seed/re-enriquecimento gravavam dimensões em português pra autor em inglês. **Consertado:** `locale?` nos inputs do client-sdk (enviado como `?locale=`, consistente com o GET), repassado pelos hooks (`useUpdateDeclaredAxes(locale)`/`useRespondToNicheAsk(locale)`) e por `voice.tsx` (`uiLanguage`).
+- **MAJOR (transversal) — `dimensions` do niche-ask vazava as chaves da taxonomia no fio, sem uso.** `PracticeNicheAskViewSchema` mandava `PracticeDimensionKey[]` que ninguém consumia (ADR §2: dimensões invisíveis; chaves visíveis no devtools). **Consertado:** dropado do schema; `buildIdentityView` projeta só `{ question }`; teste atualizado.
+- **MAJOR (transversal) — empty-state documentado nunca implementado** (`voice.practice.emptyDescription` morto). **Resolvido removendo a i18n morta (pt+en) + corrigindo o comentário do contrato** (justificativa YAGNI: pré-launch sem contas legadas; perfil de voz pronto implica prática via F3-1; null = janela transitória de loading → renderiza nada, sem flash).
+- **MINOR (backend) — degradação gravava "accepted" na falha + perdia a resposta.** **Consertado** junto (comportamento acima: falha = sem escrita, ask pendente).
+- **MINOR (frontend) — CSS `var(--border)` (token inexistente).** **Consertado** → `var(--line)`.
+- **INFO registrados, não-bloqueantes:** `normalizeAxes` duplica `toDeclaredAxes` (input shape distinto, 7 linhas, disclosed — aceito); `enrichmentSuggestions` sobrevive ao re-seed material (log de auditoria retido de propósito, dormente — aceito); `PracticeProfileGenerationError` sem entrada no error-map mas inalcançável hoje (todo call site mapeia/engole antes do HTTP — aceito, YAGNI); `invalidatePracticeAfterChange` usa literal `["practice-identity"]` (prefixo react-query correto; derivar de um builder locale-keyed é awkward — aceito); `PracticeDepth` widened-string na UI segue a convenção pré-existente do pacote (aceito). **Follow-up (test-gap, MINOR):** não há teste de nível de rota (`practice-profile-routes.test.ts`) que exercite o threading de `?locale=` pela camada Hono — o bug do locale passou pelos testes de serviço (que chamam com locale literal); registrado pra suíte de integração da Fase 6.
+
 ## Fase 6 — Qualidade & eval
 
 - **F6-1 · A régua fica neutra** — nenhuma mudança de scoring por domínio (confirmar, não construir).

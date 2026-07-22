@@ -22,6 +22,7 @@ import { createBackendProviderTransport } from "../../execution/pipeline/provide
 import type { BackendProviderTransport } from "../../execution/pipeline/provider-transport.js";
 import { createBackendVoiceService } from "../voice/voice-service.js";
 import { createBackendVoiceCalibrationService } from "../voice/voice-calibration-service.js";
+import { createBackendPracticeProfileService } from "../practice-profile/practice-profile-service.js";
 import { createBackendObservabilityService } from "./observability.js";
 import { createBackendApplicationUserMemoryRepository } from "../../auth/application-user-memory.js";
 import { createBackendOperatorMemoryRepository } from "../../auth/operator-memory.js";
@@ -227,6 +228,14 @@ export function createBackendProductServices(
           aiPolicy: dependencies.aiPolicy
         }
       ),
+      practiceProfile: createBackendPracticeProfileService({
+        database: dependencies.database,
+        now,
+        aiAdapters: dependencies.aiAdapters,
+        providerTransport,
+        aiPolicy: dependencies.aiPolicy,
+        logger: safeLogger
+      }),
       policyEvidence,
       operationalOverride,
       redaction,

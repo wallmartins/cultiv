@@ -5,6 +5,7 @@ import { ConfidenceRing } from "./ConfidenceRing.js";
 import { ConsentPanel } from "./ConsentPanel.js";
 import { MaterialBaseCoverage } from "./MaterialBaseCoverage.js";
 import { MaterialBaseSamples, type MaterialBaseSampleVM } from "./MaterialBaseSamples.js";
+import { PracticeSection } from "./PracticeSection.js";
 import { RevokeConfirmDialog } from "./RevokeConfirmDialog.js";
 import { TraitReviewList } from "./TraitReviewList.js";
 import { VoiceDescriptorChips } from "./VoiceDescriptorChips.js";
@@ -12,7 +13,7 @@ import { VoiceEmptyState } from "./VoiceEmptyState.js";
 import { VoiceHeader } from "./VoiceHeader.js";
 import { VoiceLoadingSkeleton } from "./VoiceLoadingSkeleton.js";
 import { VoiceProseCard } from "./VoiceProseCard.js";
-import type { CoverageItemVM, TraitVM } from "./types.js";
+import type { CoverageItemVM, PracticeSectionVM, TraitVM } from "./types.js";
 
 export interface VoiceProfileReadyState {
   readonly kind: "ready";
@@ -44,6 +45,9 @@ export interface VoiceProfileReadyState {
     readonly onGrant: () => void;
   };
   readonly revokeDialog: { readonly open: boolean; readonly onCancel: () => void; readonly onConfirm: () => void };
+  // F5 · the practice half of "sua identidade de escrita". null/absent → not derived yet (render nothing);
+  // the container (voice-mappers.ts) builds it from the practice-identity read.
+  readonly practice?: PracticeSectionVM | null;
 }
 
 export type VoiceProfileScreenState =
@@ -127,6 +131,8 @@ function ReadyScreen({ state }: { state: VoiceProfileReadyState }) {
         onContest={state.onContestTrait}
         pendingTraitKey={state.pendingTraitKey}
       />
+
+      {state.practice ? <PracticeSection vm={state.practice} /> : null}
 
       <div className="voice-material-section">
         <h2 className="voice-material-heading">{t.voice.materialBase.sectionHeading}</h2>

@@ -59,6 +59,10 @@ export class BackendVoiceProfileNotFoundError extends Data.TaggedError("BackendV
   readonly userId: string;
 }> {}
 
+export class BackendPracticeProfileNotFoundError extends Data.TaggedError("BackendPracticeProfileNotFoundError")<{
+  readonly userId: string;
+}> {}
+
 export class BackendVoiceExampleNotFoundError extends Data.TaggedError("BackendVoiceExampleNotFoundError")<{
   readonly exampleId: string;
   readonly userId: string;

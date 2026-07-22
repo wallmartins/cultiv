@@ -14,6 +14,7 @@ export const queryKeys = {
   calibrationEntitlement: () => ["voice", "calibration", "entitlement"] as const,
   onboarding: () => ["onboarding"] as const,
   practiceProfile: () => ["practice-profile"] as const,
+  practiceIdentity: (locale?: string) => ["practice-identity", locale ?? null] as const,
   entitlement: () => ["entitlement"] as const,
   billingPlans: () => ["billing", "plans"] as const,
   billingTopups: () => ["billing", "topups"] as const,

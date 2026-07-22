@@ -16,7 +16,11 @@ export {
   contractsProfileToDomain,
   domainProfileToContracts
 } from "./practice-profile-domain-bridge.js";
-export { PracticeProfileGenerationError } from "./practice-profile-errors.js";
+export {
+  PracticeProfileGenerationError,
+  PracticeProfileValidationError,
+  PracticeProfileDerivationError
+} from "./practice-profile-errors.js";
 export {
   GENERATOR_ANTI_PATTERN_RULES,
   assessClicheLeak,
@@ -47,3 +51,8 @@ export {
   enrichPracticeProfileForUser,
   type PracticeProfileEnrichmentDeps
 } from "./practice-profile-enrichment.js";
+export {
+  createBackendPracticeProfileService,
+  type BackendPracticeProfileService,
+  type BackendPracticeProfileServiceDeps
+} from "./practice-profile-service.js";

@@ -42,7 +42,12 @@ export { useGeneratePrefill } from "./generation-prefill.js";
 
 export { useGenreInference } from "./genre-inference.js";
 
-export { usePracticeProfile } from "./practice-profile.js";
+export {
+  usePracticeProfile,
+  usePracticeIdentity,
+  useUpdateDeclaredAxes,
+  useRespondToNicheAsk
+} from "./practice-profile.js";
 
 export {
   useEntitlement,

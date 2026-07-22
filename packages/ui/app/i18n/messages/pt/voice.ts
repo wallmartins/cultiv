@@ -53,6 +53,32 @@ export const voice = {
     }
   },
 
+  practice: {
+    sectionEyebrow: "prática · sobre o quê e pra quem você escreve",
+    sectionHeading: "Sua prática",
+    subjectLabel: "Assunto",
+    vantagePointLabel: "Lugar de fala",
+    audiencesLabel: "Públicos",
+    depth: {
+      seed: "Semente",
+      enriched: "Enriquecido"
+    },
+    edit: "Editar",
+    save: "Salvar",
+    cancel: "Cancelar",
+    addAudience: "digite um público e aperte Enter",
+    audienceRemoveAria: (value: string) => `remover ${value}`,
+    editValidationError: "preencha assunto, lugar de fala e ao menos um público.",
+    saveError: "não foi possível salvar agora — tente de novo em instantes.",
+    nicheAsk: {
+      heading: "Deixe seu perfil mais específico",
+      respond: "Responder",
+      dismiss: "Dispensar",
+      answerPlaceholder: "conte mais — nomes, casos, debates do seu dia a dia…",
+      submit: "Enviar"
+    }
+  },
+
   contentType: {
     "linkedin-post": "LinkedIn",
     newsletter: "Newsletter",

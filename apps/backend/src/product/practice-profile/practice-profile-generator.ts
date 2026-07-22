@@ -116,6 +116,9 @@ export function enrichPracticeProfile(args: {
   readonly seedProfile: PracticeProfile;
   readonly locale: PracticeProfileLocale;
   readonly deps: PracticeProfileGenerationDeps;
+  // F5-3 · the G5 niche-ask answer, when this enrichment pass is re-triggered from /voice — anchors the
+  // thin dimensions in the author's own specifics, on top of (never instead of) the declared axes.
+  readonly authorSpecifics?: string;
 }): Effect.Effect<PracticeProfileEnrichment, PracticeProfileGenerationError> {
   const axes: DeclaredPracticeAxes = {
     subject: args.seedProfile.subject,
@@ -135,6 +138,13 @@ export function enrichPracticeProfile(args: {
           "",
           "== CURRENT SEED DIMENSIONS (deepen — add named specifics, never dilute) ==",
           JSON.stringify(args.seedProfile.dimensions, null, 2),
+          ...(args.authorSpecifics
+            ? [
+                "",
+                "== AUTHOR-PROVIDED SPECIFICS (the author answered the niche-ask — anchor the thin dimensions in these; never override the declared axes) ==",
+                args.authorSpecifics
+              ]
+            : []),
           "",
           "STEP 1 — In fieldSpecifics, name MORE concrete specifics than the seed: real practitioners, live debates, named cases, numbers. Do not fabricate — if you cannot deepen a dimension, keep the seed value.",
           "STEP 2 — Return every dimension deepened where you named a specific, unchanged where you could not.",

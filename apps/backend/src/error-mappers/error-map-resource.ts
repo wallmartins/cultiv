@@ -1,5 +1,6 @@
 import {
   BackendJobNotFoundError,
+  BackendPracticeProfileNotFoundError,
   BackendVoiceCalibrationSessionNotFoundError,
   BackendVoiceExampleNotFoundError,
   BackendVoiceProfileNotFoundError
@@ -26,6 +27,13 @@ export function mapResourceError(error: unknown, path: string): HttpErrorRespons
     return createHttpErrorResponse(404, "resource_not_found", {
       message: `Voice example ${error.exampleId} was not found for user ${error.userId}`,
       details: { exampleId: error.exampleId, userId: error.userId, path }
+    });
+  }
+
+  if (error instanceof BackendPracticeProfileNotFoundError) {
+    return createHttpErrorResponse(404, "resource_not_found", {
+      message: `Practice profile for user ${error.userId} was not found`,
+      details: { userId: error.userId, path }
     });
   }
 

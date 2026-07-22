@@ -1,4 +1,5 @@
 import type {
+  PracticeIdentityView,
   TraitKey,
   TraitStatus,
   VoiceCoverageItemView,
@@ -11,7 +12,13 @@ import { confidenceRingValue } from "@my-ai-orchestrator/shared";
 import type { AppFormatters, AppMessages } from "@my-ai-orchestrator/ui/app/i18n";
 import { voiceSignalLabel } from "@my-ai-orchestrator/ui/app/i18n";
 import type { RingTone } from "@my-ai-orchestrator/ui/app/primitives";
-import type { CoverageItemVM, TraitBadgeTone, TraitVM } from "@my-ai-orchestrator/ui/app/voice";
+import type {
+  CoverageItemVM,
+  PracticeAxesVM,
+  PracticeNicheAskVM,
+  TraitBadgeTone,
+  TraitVM
+} from "@my-ai-orchestrator/ui/app/voice";
 
 const BADGE_TONE_BY_STATUS: Record<TraitStatus, TraitBadgeTone> = {
   confirmed: "accent",
@@ -140,4 +147,19 @@ export function buildConsentSinceLabel(
 ): string {
   const since = consent.granted ? consent.grantedAt : consent.revokedAt;
   return since ? t.voice.consent.since(format.date(since)) : "";
+}
+
+// F5-1 · pure slices of PracticeIdentityView -> presentational VMs. The edit/nicheAskState
+// objects stay in the container (voice.tsx) since they wire local state + mutations.
+export function buildPracticeAxes(identity: PracticeIdentityView): PracticeAxesVM {
+  return {
+    subject: identity.subject,
+    vantagePoint: identity.vantagePoint,
+    audiences: identity.audiences,
+    depth: identity.depth
+  };
+}
+
+export function buildPracticeNicheAsk(identity: PracticeIdentityView): PracticeNicheAskVM | null {
+  return identity.nicheAsk ? { question: identity.nicheAsk.question } : null;
 }

@@ -56,7 +56,8 @@ export const shell = {
     emptyCta: "calibrar agora →",
     howIThink: "Como eu penso",
     seeFullProfile: "ver perfil completo →",
-    meta: (caption: string, version: number) => `confiança ${caption.toLowerCase()} · versão ${version}`
+    meta: (caption: string, version: number) => `confiança ${caption.toLowerCase()} · versão ${version}`,
+    practiceHeading: "Prática"
   },
   toast: {
     ready: (topic?: string) => (topic ? `"${topic}" ficou pronto` : "sua geração ficou pronta"),

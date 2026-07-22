@@ -64,6 +64,7 @@ function CompanionReady({
   meta,
   proseCore,
   descriptorChips,
+  practice,
   onSeeProfile
 }: Extract<VoiceCompanionContent, { kind: "ready" }>) {
   const t = useMessages();
@@ -82,6 +83,16 @@ function CompanionReady({
       </ProfileCard>
       <VoiceProseCard heading={t.shell.companion.howIThink} body={proseCore} />
       <VoiceDescriptorChips chips={descriptorChips.slice(0, 3)} />
+      {practice ? (
+        <div className="companion-ready-practice">
+          <Mono as="div" className="companion-ready-practice-heading">
+            {t.shell.companion.practiceHeading}
+          </Mono>
+          <div className="companion-ready-practice-line">
+            {practice.subjectLabel}: {practice.subject} · {practice.depthLabel}
+          </div>
+        </div>
+      ) : null}
       <button type="button" className="companion-ready-link" onClick={onSeeProfile}>
         <Mono as="span">{t.shell.companion.seeFullProfile}</Mono>
       </button>

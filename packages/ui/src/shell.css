@@ -456,6 +456,19 @@
   font: inherit;
   padding: 0;
 }
+.companion-ready-practice {
+  padding: 10px 12px;
+  border-top: 1px solid var(--line);
+}
+.companion-ready-practice-heading {
+  color: var(--muted);
+  text-transform: uppercase;
+  font-size: 0.7rem;
+}
+.companion-ready-practice-line {
+  margin-top: 4px;
+  font-size: 0.9rem;
+}
 
 /* ---------- responsive: rail goes off-canvas ---------- */
 
