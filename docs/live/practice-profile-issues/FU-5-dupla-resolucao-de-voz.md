@@ -13,10 +13,24 @@ No caminho síncrono, a voz efetiva é resolvida **duas vezes**: `apps/backend/s
 - Resolver a voz **uma vez** e passar o resultado adiante (ou memoizar por request), preservando o gate de disponibilidade E a persistência única do snapshot.
 
 ## Aceite
-- [ ] 1 resolução + 1 snapshot por geração síncrona; gate de disponibilidade intacto.
+- [x] 1 resolução + 1 snapshot por geração síncrona; gate de disponibilidade intacto.
+
+## Resolução (2026-07-22)
+O gate de disponibilidade (`execution/index.ts`) já resolve a voz efetiva (`effectiveVoice`, tipo
+`EffectiveVoiceResolution`) antes de ramificar sync/async. Passei esse resultado adiante via um campo
+opcional novo `preresolvedVoice` em `ExecutePipelineOptions`; `resolveRuntimeSelectionContext`
+(`runtime-selection.ts`) agora faz `options.preresolvedVoice ?? (yield* resolveEffectiveVoice(...))`,
+então **reusa** a resolução do gate em vez de resolver de novo. Resultado: 1 resolução + 1 snapshot
+por geração síncrona; o gate segue intacto (o `if (!effectiveVoice) fail(...)` continua lá). O
+fallback preserva os outros chamadores que não pré-resolvem (o worker async em `jobs/worker-job.ts`,
+que já resolvia uma única vez). Como efeito colateral bom, o `voice` reportado na resposta passa a ser
+exatamente o mesmo usado na geração (antes podiam divergir no caso-borda sem `language` no request).
 
 ## Verify
 Teste que conta chamadas de `resolveEffectiveVoice` / `voiceProfileSnapshots.create` numa geração síncrona.
+→ `apps/backend/tests/voice-single-resolution.test.ts`: no seam `resolveRuntimeSelectionContext`, com
+`preresolvedVoice` presente ⇒ 0 chamadas a `resolveEffectiveVoice`; ausente ⇒ 1 chamada. (Snapshot é
+persistido *dentro* de `resolveEffectiveVoice`, então contar as chamadas conta os snapshots.)
 
 ## Nota
 Pertence ao **mapa de defeitos de corretude** (`.scratch/defeitos-de-corretude/`); pode ser feito standalone ou dobrado no plano do FU-6.

@@ -213,7 +213,10 @@ export function createBackendExecutionService(options: BackendExecutionOptions):
         providerTransport,
         memory: options.memory,
         corpus: options.corpus,
-        simulateCredits: prepared.simulateCredits
+        simulateCredits: prepared.simulateCredits,
+        // FU-5 · hand the sync runtime the voice already resolved for the availability gate above, so
+        // it does not resolve a second time (which would persist a duplicate snapshot).
+        preresolvedVoice: effectiveVoice
       }).pipe(
         Effect.catchAll((error) =>
           Effect.fail(normalizeExecutionFailure(error, {
