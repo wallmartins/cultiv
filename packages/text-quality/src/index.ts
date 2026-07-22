@@ -7,6 +7,7 @@ export * from "./format/word-targets.js";
 export * from "./domain/domain-classifier.js";
 export * from "./domain/generation-context.js";
 export * from "./domain/tech-terms.js";
+export * from "./discriminability/discriminability.js";
 export * from "./quality/critic.js";
 export * from "./quality/fidelity.js";
 export * from "./quality/drift.js";

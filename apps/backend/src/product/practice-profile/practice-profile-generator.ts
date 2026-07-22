@@ -5,8 +5,7 @@ import {
   type PracticeDimensions,
   type PracticeProfile
 } from "@my-ai-orchestrator/contracts";
-import { namesSpecific } from "./practice-profile-anti-patterns.js";
-import { GENERATOR_ANTI_PATTERN_RULES } from "./practice-profile-anti-patterns.js";
+import { GENERATOR_ANTI_PATTERN_RULES, namesSpecific } from "./practice-profile-anti-patterns.js";
 import { PracticeProfileGenerationError } from "./practice-profile-errors.js";
 import {
   PRACTICE_DIMENSIONS_GUIDE,
@@ -17,8 +16,6 @@ import {
   type PracticeProfileGenerationDeps,
   type PracticeProfileLocale
 } from "./practice-profile-generation-core.js";
-
-export { PracticeProfileGenerationError } from "./practice-profile-errors.js";
 
 // LLM output. `fieldSpecifics` is an elicitation scratchpad (norte G1 "especificidade paramétrica"):
 // the model must name real practitioners/debates/cases BEFORE filling dimensions. Not persisted.
@@ -45,10 +42,13 @@ const JSON_SCHEMA_BLOCK = [
   "}"
 ].join("\n");
 
+// Every specificity-bearing dimension (norte law 3 / T2: no dimension returns generic) — excludes only
+// fieldCliche (naming a cliché is its job) and lexicon (a term list). Kept in sync with findThinDimensions.
 function clicheProbe(generated: GeneratedProfile): readonly string[] {
   return [
     generated.dimensions.point,
     generated.dimensions.evidence,
+    generated.dimensions.readerAssumption,
     generated.dimensions.resistance,
     generated.dimensions.stake,
     ...generated.fieldSpecifics

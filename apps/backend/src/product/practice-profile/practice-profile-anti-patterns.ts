@@ -48,21 +48,32 @@ export function containsGenericCliche(text: string): boolean {
 }
 
 // Deterministic proxy for "names a specific" (norte T2): a digit, a quoted term, or a mid-sentence
-// proper-noun-like token. Field-agnostic — no blocklist, so it generalizes to the long tail.
+// proper noun. Field-agnostic — no blocklist, so it generalizes to the long tail. Mirrors the
+// punctuation-guarded `hasMidSentenceProperNoun` in text-quality's discriminability twin: a capitalized
+// word only counts when the previous token did NOT end a sentence (else sentence-starts read as names).
+const QUOTED_TERM = /["“”'‘’«»][^"“”'‘’«»]{2,}["“”'‘’«»]/;
+const PROPER_NOUN = /^[A-ZÀ-Ý][a-zà-ÿ]+$/;
+
 export function namesSpecific(text: string): boolean {
   const trimmed = text.trim();
   if (trimmed.length === 0) {
     return false;
   }
 
-  if (/\d/.test(trimmed) || /["'“”«»]/.test(trimmed)) {
+  if (/\d/.test(trimmed) || QUOTED_TERM.test(trimmed)) {
     return true;
   }
 
-  const tokens = trimmed.split(/\s+/);
-  return tokens.some(
-    (token, index) => index > 0 && /^[A-ZÀ-Ý][a-zà-ÿ]*[A-ZÀ-Ý]|^[A-ZÀ-Ý][a-zà-ÿ]{2,}/.test(token)
-  );
+  const words = trimmed.split(/\s+/);
+  for (let index = 1; index < words.length; index += 1) {
+    const previous = words[index - 1] ?? "";
+    const word = (words[index] ?? "").replace(/[.,!?;:]+$/, "");
+    if (PROPER_NOUN.test(word) && !/[.!?]$/.test(previous)) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 // Retry trigger for a single generation (G1/G2/G3/G4): fires when a specificity-bearing field reads

@@ -22,3 +22,16 @@ export {
   type PracticeProfileEnrichment
 } from "./practice-profile-generator.js";
 export { buildNicheAsk, type NicheAsk } from "./practice-profile-niche-ask.js";
+export {
+  generateCalibrationAnchors,
+  agnosticCalibrationAnchors,
+  type CalibrationAnchor,
+  type CalibrationAnchorSet
+} from "./practice-profile-calibration-anchor.js";
+export {
+  generateGenerationSlots,
+  backboneGenerationSlots,
+  type GenerationSlot,
+  type GenerationSlotKey,
+  type GenerationSlotSet
+} from "./practice-profile-generation-slots.js";
