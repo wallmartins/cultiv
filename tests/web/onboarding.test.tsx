@@ -113,10 +113,20 @@ describe("calibrate-view (pure)", () => {
     ).toBe("seu teste · ~6 textos · 3 dias restantes");
   });
 
-  it("describeCalibrationError prefers responseMessage, then message, then a generic fallback", () => {
-    expect(describeCalibrationError(t, { responseMessage: "quota excedida" })).toBe("quota excedida");
-    expect(describeCalibrationError(t, { message: "network down" })).toBe("network down");
-    expect(describeCalibrationError(t, {})).toMatch(/não conseguimos confirmar/);
+  it("describeCalibrationError maps known error classes to localized copy and never leaks the raw technical message (C-8)", () => {
+    // The raw backend message never reaches the user (it goes to the console) — an unmapped error
+    // shows the generic fallback, not "quota excedida"/"network down".
+    expect(describeCalibrationError(t, { responseMessage: "quota excedida" })).toBe(t.onboarding.errorFallback);
+    expect(describeCalibrationError(t, { message: "network down" })).toBe(t.onboarding.errorFallback);
+    expect(describeCalibrationError(t, {})).toBe(t.onboarding.errorFallback);
+
+    // Known classes map to localized copy; responseMessage takes precedence over message when matching.
+    expect(describeCalibrationError(t, { message: "Text must contain at least 60 words" })).toBe(t.onboarding.errors.tooShort(60));
+    expect(describeCalibrationError(t, { responseMessage: "Text must contain at least 80 words", message: "ignored" })).toBe(
+      t.onboarding.errors.tooShort(80)
+    );
+    expect(describeCalibrationError(t, { message: "boom", code: "service_unavailable" })).toBe(t.onboarding.errors.derivationFailed);
+    expect(describeCalibrationError(t, { message: "boom", status: 500 })).toBe(t.onboarding.errors.derivationFailed);
   });
 });
 
