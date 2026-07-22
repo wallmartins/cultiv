@@ -3,7 +3,6 @@ import type { VoiceProfileConfidence } from "@my-ai-orchestrator/contracts";
 export const CALIBRATION_WIZARD_STEPS = [
   {
     id: "context_setup",
-    label: "Contexto",
     prompt: "",
     targetWords: 0,
     maxWords: 0,
@@ -12,7 +11,6 @@ export const CALIBRATION_WIZARD_STEPS = [
   },
   {
     id: "micro_opinion",
-    label: "Opinião curta",
     prompt: "Qual é a sua opinião sobre {theme}?",
     targetWords: 60,
     maxWords: 100,
@@ -21,7 +19,6 @@ export const CALIBRATION_WIZARD_STEPS = [
   },
   {
     id: "reasoning_reflection",
-    label: "Como eu penso",
     prompt: "Conte sobre algo que você aprendeu recentemente e como isso mudou sua perspectiva.",
     fixedPrompt:
       "Conte sobre algo que você aprendeu recentemente e como isso mudou sua perspectiva.",
@@ -32,7 +29,6 @@ export const CALIBRATION_WIZARD_STEPS = [
   },
   {
     id: "argument_development",
-    label: "Como eu construo",
     prompt: "Defenda uma posição sobre algo que importa para você.",
     targetWords: 250,
     maxWords: 400,
@@ -41,7 +37,6 @@ export const CALIBRATION_WIZARD_STEPS = [
   },
   {
     id: "format_adaptation",
-    label: "Versatilidade",
     prompt: "Explique algo que você sabe bem para alguém que não conhece o assunto.",
     fixedPrompt: "Explique algo que você sabe bem para alguém que não conhece o assunto.",
     targetWords: 180,
@@ -51,7 +46,6 @@ export const CALIBRATION_WIZARD_STEPS = [
   },
   {
     id: "review_confirm",
-    label: "Revisão",
     prompt: "",
     defaultTheme: ""
   }

@@ -29,7 +29,7 @@ The position an author writes from — the premises their claims rest on, their 
 _Avoid_: Role, job title, seniority, cargo
 
 **Practice Dimensions** _(ADR 0010)_:
-The fixed set of fields every **Practice Profile** answers about any subject — **Point, Evidence, Presupposition, Resistance, Stake, Cliché, Lexicon** — invisible to the author, filled by the LLM, never chosen by it. The subject itself is open: there is no closed list of domains, and reference samples are tests of the generator, not supported verticals. Curated in the norte (`.scratch/adaptacao-por-dominio/norte/backbone-curado.md`).
+The fixed set of fields every **Practice Profile** answers about any subject — **Point, Evidence, Reader Assumption, Resistance, Stake, Cliché, Lexicon** — invisible to the author, filled by the LLM, never chosen by it. The subject itself is open: there is no closed list of domains, and reference samples are tests of the generator, not supported verticals. Curated in the norte (`.scratch/adaptacao-por-dominio/norte/backbone-curado.md`).
 _Avoid_: Vertical taxonomy, domain list, niche catalog
 
 **Rhetorical Mode** _(ADR 0010)_:

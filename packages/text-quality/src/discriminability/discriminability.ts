@@ -58,6 +58,8 @@ const STOPWORDS = new Set([
 ]);
 
 // Small, precise, bilingual — the phrase-that-survives-the-label-swap named in anti-padroes.md.
+// Single source: the backend practice-profile anti-pattern gate imports this module's detector and
+// list instead of keeping a twin (the twins had already diverged).
 const FILLER_PHRASES = [
   "agregar valor",
   "add value",
@@ -68,11 +70,18 @@ const FILLER_PHRASES = [
   "conteudo e rei",
   "content is king",
   "pense fora da caixa",
-  "think outside the box"
+  "pensar fora da caixa",
+  "think outside the box",
+  "leve isso a serio",
+  "take it seriously"
 ];
 
 const QUOTED_TERM_PATTERN = /["“”'‘’«»][^"“”'‘’«»]{2,}["“”'‘’«»]/;
-const PROPER_NOUN_PATTERN = /^[A-ZÀ-Ý][a-zà-ÿ]+$/;
+// A capitalized word (≥2 chars, any mixed tail: Rust, AWS, PostgreSQL, Fly.io) counts as a name only
+// mid-sentence — sentence starts are ambiguous. An internal capital (iOS, eBay) is a name anywhere.
+// Inner dots stay (dotted brands); trailing sentence punctuation is stripped by the caller.
+const CAPITALIZED_TOKEN = /^[A-ZÀ-Ý][\p{L}\p{N}.'’-]+$/u;
+const WORD_TOKEN = /^[\p{L}\p{N}.'’-]+$/u;
 
 function normalize(text: string): string {
   return text
@@ -88,31 +97,36 @@ function tokenize(text: string): readonly string[] {
     .filter((token) => token.length >= 4 && !STOPWORDS.has(token));
 }
 
-function matchesFillerPhrase(text: string): boolean {
+export function containsGenericCliche(text: string): boolean {
   const normalized = normalize(text);
   return FILLER_PHRASES.some((phrase) => normalized.includes(phrase));
 }
 
-function hasMidSentenceProperNoun(text: string): boolean {
-  const words = text.trim().split(/\s+/);
-  for (let index = 1; index < words.length; index++) {
-    const previous = words[index - 1] ?? "";
+function hasInternalCapital(word: string): boolean {
+  return WORD_TOKEN.test(word) && /[a-zà-ÿ]/.test(word) && /[A-ZÀ-Ý]/.test(word.slice(1));
+}
+
+// Deterministic proxy for "names a specific" (norte T2): a digit, a quoted term, or a name-shaped
+// token. Field-agnostic — no blocklist, so it generalizes to the long tail. All-lowercase brands
+// (npm) stay invisible to the proxy; digits or quotes still catch them.
+export function namesSpecific(text: string): boolean {
+  const trimmed = text.trim();
+  if (trimmed.length === 0) return false;
+  if (/\d/.test(trimmed) || QUOTED_TERM_PATTERN.test(trimmed)) return true;
+
+  const words = trimmed.split(/\s+/);
+  for (let index = 0; index < words.length; index++) {
     const word = words[index]?.replace(/[.,!?;:]+$/, "") ?? "";
-    if (!PROPER_NOUN_PATTERN.test(word)) continue;
-    if (!/[.!?]$/.test(previous)) return true;
+    if (hasInternalCapital(word)) return true;
+    if (index === 0) continue;
+    const previous = words[index - 1] ?? "";
+    if (CAPITALIZED_TOKEN.test(word) && !/[.!?]$/.test(previous)) return true;
   }
   return false;
 }
 
-function hasNamedSpecific(text: string): boolean {
-  return /\d/.test(text) || QUOTED_TERM_PATTERN.test(text) || hasMidSentenceProperNoun(text);
-}
-
 export function survivesLabelSwap(field: string): boolean {
-  const trimmed = field.trim();
-  if (trimmed.length === 0) return true;
-  if (matchesFillerPhrase(trimmed)) return true;
-  return !hasNamedSpecific(trimmed);
+  return containsGenericCliche(field) || !namesSpecific(field);
 }
 
 export function fieldSpecificityReport(

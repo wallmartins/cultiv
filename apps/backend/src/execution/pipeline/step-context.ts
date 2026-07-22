@@ -1,3 +1,4 @@
+import type { RhetoricalMode } from "@my-ai-orchestrator/contracts";
 import type { VoiceProfile } from "@my-ai-orchestrator/text-quality";
 import {
   collectVoiceAntiPatterns,
@@ -31,6 +32,7 @@ export interface StepVoiceContext {
 
 export interface StepGenerationHints {
   readonly briefing?: string;
+  readonly rhetoricalMode?: RhetoricalMode;
 }
 
 export function buildStepVoiceContext(
@@ -64,7 +66,8 @@ export function buildStepVoiceContext(
   const argumentLensesSection = buildArgumentLensesSection({
     stepName,
     voiceProfile,
-    briefing: generationHints?.briefing
+    briefing: generationHints?.briefing,
+    rhetoricalMode: generationHints?.rhetoricalMode
   });
 
   const baseVoiceContext = {

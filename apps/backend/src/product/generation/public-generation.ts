@@ -141,7 +141,8 @@ function buildCompositorPipelineInputs(
   return {
     ...briefingInputs,
     wordTarget: plan.parameters.wordTarget,
-    expressionProfile: plan.parameters.expressionProfile
+    expressionProfile: plan.parameters.expressionProfile,
+    rhetoricalMode: plan.parameters.rhetoricalMode
   };
 }
 

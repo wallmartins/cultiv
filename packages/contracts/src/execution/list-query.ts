@@ -58,7 +58,6 @@ export function resolveExecutionsPeriodCutoff(
 export type ExecutionsListFilterItem = {
   readonly createdAt: string;
   readonly status: string;
-  readonly contentType: string;
   readonly lengthTier?: string;
   readonly briefingTopic?: string;
 };

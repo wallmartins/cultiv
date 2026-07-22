@@ -59,7 +59,7 @@ const SPECIFIC_ANCHORS_PAYLOAD = JSON.stringify({
     reasoningReflection:
       "Conte uma decisão de arquitetura sua que se mostrou errada num cutover de 2023 — o que o postmortem de p99 400ms mostrou que você não via?",
     argumentDevelopment:
-      "Descreva como você conduz uma migração arriscada do começo ao fim — incluindo o ponto em que o monólito chato que entrega era a decisão certa.",
+      "Descreva como você conduz uma migração arriscada do começo ao fim — incluindo o ponto em que ficar no monólito de 2M linhas era a decisão certa.",
     formatAdaptation:
       "Explique pra alguém de fora da engenharia por que uma decisão de porta única que custa 3 trimestres não é só 'código feio'."
   }

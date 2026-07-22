@@ -72,7 +72,6 @@ export function createJobRepository(stateRef: StateRef): JobRepository {
             {
               createdAt: record.createdAt,
               status: record.status,
-              contentType: record.contentType,
               ...presentation
             },
             filters
@@ -97,7 +96,6 @@ export function createJobRepository(stateRef: StateRef): JobRepository {
           {
             createdAt: record.createdAt,
             status: record.status,
-            contentType: record.contentType,
             ...presentation
           },
           filters

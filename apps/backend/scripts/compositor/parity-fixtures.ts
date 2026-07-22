@@ -14,6 +14,7 @@ export interface CompositorParityFixture {
   readonly rhetoricalMode: RhetoricalMode;
   readonly scope: GenerationScope;
   readonly qualityMode: QualityMode;
+  readonly briefingKey: string;
   readonly briefing: Record<string, unknown>;
   readonly expectedCompositorPlanSignature: PlanSignature;
   readonly expectedExpressionProfile: string;
@@ -36,6 +37,7 @@ function fixture(args: {
     rhetoricalMode: args.rhetoricalMode,
     scope: args.scope,
     qualityMode: COMPOSITOR_PARITY_QUALITY_MODE,
+    briefingKey: args.briefingKey,
     briefing: { ...CALIBRATION_BRIEFINGS[args.briefingKey] },
     expectedCompositorPlanSignature: args.expectedCompositorPlanSignature,
     expectedExpressionProfile: args.expectedExpressionProfile

@@ -98,12 +98,24 @@ export function isPastStep(session: VoiceCalibrationSessionView, stepId: string)
   return stepId !== session.currentStepId;
 }
 
+// C-8: this feeds the one screen with no generic escape, so the user never sees the backend's raw
+// technical English — known classes map to i18n copy, everything else falls back, and the technical
+// message goes to the console for debugging.
+// ponytail: string-matching the word-count message is an interim mapping — the root fix (a structured
+// error code from the backend) is tracked in the defects map.
 export function describeCalibrationError(t: AppMessages, error: unknown): string {
-  if (error && typeof error === "object") {
-    const responseMessage = "responseMessage" in error ? (error as { responseMessage?: unknown }).responseMessage : undefined;
-    if (typeof responseMessage === "string" && responseMessage) return responseMessage;
-    const message = "message" in error ? (error as { message?: unknown }).message : undefined;
-    if (typeof message === "string" && message) return message;
+  const err = error && typeof error === "object" ? (error as { responseMessage?: unknown; message?: unknown; code?: unknown; status?: unknown }) : undefined;
+  const technical =
+    typeof err?.responseMessage === "string" && err.responseMessage
+      ? err.responseMessage
+      : typeof err?.message === "string" && err.message
+        ? err.message
+        : undefined;
+  if (technical) {
+    console.warn("[calibration] backend error:", technical);
+    const tooShort = /at least (\d+) words/.exec(technical);
+    if (tooShort) return t.onboarding.errors.tooShort(Number(tooShort[1]));
+    if (err?.code === "service_unavailable" || err?.status === 500) return t.onboarding.errors.derivationFailed;
   }
   return t.onboarding.errorFallback;
 }

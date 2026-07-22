@@ -15,6 +15,7 @@ import { up as migrate0016 } from "../src/infra/migrations/0016-billing-status-l
 import { up as migrate0018 } from "../src/infra/migrations/0018-billing-lifecycle-management-fields.js";
 import { up as migrate0019 } from "../src/infra/migrations/0019-execution-reactions.js";
 import { up as migrate0021 } from "../src/infra/migrations/0021-application-users-tombstone.js";
+import { up as migrate0024 } from "../src/infra/migrations/0024-practice-profile.js";
 
 declare const process: {
   readonly env: Record<string, string | undefined>;
@@ -192,6 +193,10 @@ async function ensureTestSchema(db: Kysely<DatabaseTables>): Promise<void> {
     const applicationUsersTable = tablesWithColumns.find((table) => table.name === "application_users");
     if (applicationUsersTable && !applicationUsersTable.columns.some((column) => column.name === "deleted_at")) {
       await migrate0021(db);
+    }
+
+    if (!existingTables.has("practice_profiles")) {
+      await migrate0024(db);
     }
   } finally {
     await sql`select pg_advisory_unlock(94021431)`.execute(db);

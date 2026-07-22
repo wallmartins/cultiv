@@ -1,4 +1,5 @@
 import { Effect } from "effect";
+import type { RhetoricalMode } from "@my-ai-orchestrator/contracts";
 import type { PipelineStep, StepOutput } from "@my-ai-orchestrator/core";
 import { getEffectiveConfig, resolveTemplate, type SkillDefinition, type SkillExecutionContext } from "@my-ai-orchestrator/skills";
 import { buildRefinementSkillContext } from "@my-ai-orchestrator/skills";
@@ -111,7 +112,11 @@ export function createBackendSkillDefinition(
         const previousContent = previousStep ? context.state[previousStep.name] : undefined;
         const briefingText = getBriefingText(context.inputs);
         const stepVoice = buildStepVoiceContext(step.name, voiceProfile, {
-          briefing: briefingText
+          briefing: briefingText,
+          rhetoricalMode:
+            typeof context.inputs.rhetoricalMode === "string"
+              ? (context.inputs.rhetoricalMode as RhetoricalMode)
+              : undefined
         });
         const topic = getTopic(context.inputs, context.state, context.pipeline.name);
         const domain = generationContext?.domain;

@@ -28,7 +28,7 @@ export const PracticeDimensionsSchema = Schema.Struct({
 });
 export type PracticeDimensions = typeof PracticeDimensionsSchema.Type;
 
-// ponytail: F1-4 — `PracticeProfile`/`PracticeProfileDiagnostics` share the bare name with domain's
+// ponytail: F0-1 — `PracticeProfile`/`PracticeProfileDiagnostics` share the bare name with domain's
 // Entity types (packages/domain/src/practice-profile.ts); latent, nothing imports both yet.
 // Disambiguate per the repo convention (cf. `TextQualityVoiceProfile` / `VoiceProfileView`) when a
 // consumer first needs both shapes in one scope.

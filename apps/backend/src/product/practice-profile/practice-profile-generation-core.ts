@@ -7,7 +7,11 @@ import type {
 } from "../ai-policy/ai-policy-types.js";
 import { parseJsonFromLlmResponse } from "../voice/voice-extraction-json.js";
 import { PracticeProfileGenerationError } from "./practice-profile-errors.js";
-import { GENERATOR_CLICHE_RETRY_SUFFIX, detectClicheLeak } from "./practice-profile-anti-patterns.js";
+import {
+  GENERATOR_ANTI_PATTERN_RULES,
+  assessClicheLeak,
+  buildClicheRetrySuffix
+} from "./practice-profile-anti-patterns.js";
 
 // F2-2: the Gemini→Groq chain lives in catalog.json under this routing profile (config, not infra).
 export const PRACTICE_PROFILE_ROUTING_PROFILE_ID = "practice-profile-llm";
@@ -49,6 +53,37 @@ export function formatDeclaredAxes(axes: DeclaredPracticeAxes): string {
   ].join("\n");
 }
 
+// C-1 idempotency rule: identical declared axes ⇒ same practice lifecycle (reuse the stored profile,
+// never regress enriched→seed); changed axes ⇒ legitimate re-seed (ADR 0010 §4). Case and audience
+// order are cosmetic, not a new lifecycle.
+export function sameDeclaredAxes(a: DeclaredPracticeAxes, b: DeclaredPracticeAxes): boolean {
+  const fold = (value: string) => value.trim().toLowerCase();
+  const audiencesA = a.audiences.map(fold).sort();
+  const audiencesB = b.audiences.map(fold).sort();
+  return (
+    fold(a.subject) === fold(b.subject) &&
+    fold(a.vantagePoint) === fold(b.vantagePoint) &&
+    audiencesA.length === audiencesB.length &&
+    audiencesA.every((audience, index) => audience === audiencesB[index])
+  );
+}
+
+// C-10: the system-prompt scaffold shared by every generative surface (G1/G2, G3, G4) — only the
+// role line and an optional output-language note vary per surface.
+export function buildSystemPromptScaffold(args: {
+  readonly role: string;
+  readonly locale: PracticeProfileLocale;
+  readonly languageNote?: string;
+}): string {
+  return [
+    args.role,
+    "Respond with JSON only — no markdown fences or commentary.",
+    `OUTPUT LANGUAGE: write every value in ${localeLabel(args.locale)}.${args.languageNote ? ` ${args.languageNote}` : ""}`,
+    "The average of a field IS that field's cliché. Anchor everything you write in named specifics and steer away from the average.",
+    GENERATOR_ANTI_PATTERN_RULES
+  ].join("\n");
+}
+
 // The seven Practice Dimensions (norte backbone-curado.md). The curated structure the LLM fills — it
 // never decides which dimensions exist, only what each holds for THIS field, anchored in specifics.
 export const PRACTICE_DIMENSIONS_GUIDE = [
@@ -70,6 +105,12 @@ interface PracticeProfileGenerationConfig<T> {
   readonly decode: (input: unknown) => Effect.Effect<T, unknown>;
   // Only specificity-bearing fields — never fieldCliche/lexicon, where naming a cliché is correct.
   readonly selectClicheProbe: (result: T) => readonly string[];
+  // Surface-specific honest escape appended to the cliché-retry suffix (C-10) — only G2 may promise
+  // the G5 niche-ask signal.
+  readonly retryEscape: string;
+  // G2 only: a merely-thin retry output is accepted (honest degrade — thin dimensions become the G5
+  // niche-ask downstream). A filler-phrase hit still fails the attempt on every surface.
+  readonly acceptThinAfterRetry?: boolean;
   readonly temperature?: number;
 }
 
@@ -93,10 +134,11 @@ export function runPracticeProfileGeneration<T>(
     }
 
     let lastError: PracticeProfileGenerationError | undefined;
+    const retrySuffix = buildClicheRetrySuffix(config.retryEscape);
 
     for (const attempt of deps.attempts) {
       for (let retry = 0; retry < 2; retry += 1) {
-        const userPrompt = config.buildUser(retry === 0 ? "" : GENERATOR_CLICHE_RETRY_SUFFIX);
+        const userPrompt = config.buildUser(retry === 0 ? "" : retrySuffix);
         const completion = yield* Effect.either(
           deps.aiAdapters.complete({
             request: {
@@ -129,8 +171,20 @@ export function runPracticeProfileGeneration<T>(
           break;
         }
 
-        if (retry === 0 && detectClicheLeak(config.selectClicheProbe(parsed.right))) {
-          continue;
+        // C-2: the leak check also runs on the retry output — a still-generic second pass counts as
+        // a failed attempt and moves to the next provider instead of shipping a generic result.
+        const leak = assessClicheLeak(config.selectClicheProbe(parsed.right));
+        if (leak.fillerHit || leak.thin) {
+          if (retry === 0) {
+            continue;
+          }
+          if (config.acceptThinAfterRetry && !leak.fillerHit) {
+            return parsed.right;
+          }
+          lastError = new PracticeProfileGenerationError({
+            message: `${config.purpose}: output stayed generic after the cliché retry`
+          });
+          break;
         }
 
         return parsed.right;

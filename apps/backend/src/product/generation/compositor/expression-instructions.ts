@@ -15,12 +15,16 @@ const CHANNEL_FORMAT_BASE: Record<string, string> = {
     "Write for a social feed: punchy opening, tight paragraphs, conversational rhythm, and one core idea."
 };
 
+// C-5: promote re-derived from the mode's definition ("persuade com interesse material", norte
+// genero-dimensoes.md) — persuasion with a declared material interest, honest and evidence-backed,
+// not the changelog framing inherited from the retired update-subscribers intent.
 const MODE_ANGLE: Record<RhetoricalMode, string> = {
   expound: "Lead with the core insight and unfold it in layers: context, mechanism, implication.",
   narrate: "Use narrative progression with scene, tension, and resolution.",
   argue: "State the claim, weigh the trade-offs, and make the reasoning behind the position explicit.",
   instruct: "Guide the reader step by step; move from what, to why, to how.",
-  promote: "Frame what changed, why it matters to the reader, and what to do next."
+  promote:
+    "Make the case for a concrete action with a material payoff for the reader: name what it offers, back the claim with evidence rather than hype, and close with one clear next step."
 };
 
 const EXPRESSION_INSTRUCTIONS = buildExpressionInstructionCatalog();

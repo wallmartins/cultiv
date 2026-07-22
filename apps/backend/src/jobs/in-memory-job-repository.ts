@@ -151,7 +151,6 @@ export function createInMemoryJobRepository(
                 {
                   createdAt: job.createdAt,
                   status: job.status,
-                  contentType: job.contentType,
                   ...presentation
                 },
                 filters

@@ -1,11 +1,10 @@
 import { Effect, Schema } from "effect";
 import type { PracticeProfile } from "@my-ai-orchestrator/contracts";
 import type { WizardStepId } from "@my-ai-orchestrator/domain";
-import { GENERATOR_ANTI_PATTERN_RULES } from "./practice-profile-anti-patterns.js";
 import { PracticeProfileGenerationError } from "./practice-profile-errors.js";
 import {
+  buildSystemPromptScaffold,
   formatDeclaredAxes,
-  localeLabel,
   runPracticeProfileGeneration,
   type PracticeProfileGenerationDeps,
   type PracticeProfileLocale
@@ -81,13 +80,10 @@ const JSON_SCHEMA_BLOCK = [
 ].join("\n");
 
 function buildSystemPrompt(locale: PracticeProfileLocale): string {
-  return [
-    "You write the calibration-anchor prompts for an onboarding wizard. The 4 acts and their word targets are FIXED and never vary — you write ONLY the anchored question text for each, anchored in this author's Practice Profile below.",
-    "Respond with JSON only — no markdown fences or commentary.",
-    `OUTPUT LANGUAGE: write every prompt in ${localeLabel(locale)}.`,
-    "The average of a field IS that field's cliché. Anchor every prompt in named specifics from the profile and steer away from the average.",
-    GENERATOR_ANTI_PATTERN_RULES
-  ].join("\n");
+  return buildSystemPromptScaffold({
+    role: "You write the calibration-anchor prompts for an onboarding wizard. The 4 acts and their word targets are FIXED and never vary — you write ONLY the anchored question text for each, anchored in this author's Practice Profile below.",
+    locale
+  });
 }
 
 // G3 · calibration anchor (synchronous, onboarding). The LLM writes only the anchored prompt text for
@@ -114,7 +110,9 @@ export function generateCalibrationAnchors(args: {
           retrySuffix
         ].join("\n"),
       decode: decodeGeneratedAnchors,
-      selectClicheProbe: clicheProbe
+      selectClicheProbe: clicheProbe,
+      retryEscape:
+        "If you cannot name one, anchor the question in the profile's own named terms — never invent practitioners or cases."
     },
     args.deps
   ).pipe(Effect.map(assembleAnchors));

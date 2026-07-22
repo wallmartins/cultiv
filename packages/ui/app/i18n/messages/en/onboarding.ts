@@ -19,6 +19,10 @@ export const onboarding: AppMessages["onboarding"] = {
   sampleCounter: (index, total) => `sample ${index} of ${total}`,
   fallbackPrompt: "tell it in your own words",
   errorFallback: "we couldn't confirm your voice right now — check your connection and try again.",
+  errors: {
+    derivationFailed: "we couldn't prepare your calibration right now — nothing was lost, try again.",
+    tooShort: (min) => `this sample needs at least ${min} words to count.`
+  },
   trialLabel: "your trial",
   trialDaysRemaining: (n) => `${n} ${n === 1 ? "day" : "days"} left`,
   skipForNow: "Calibrate later →",

@@ -106,6 +106,47 @@ describe("practice profile generator — G1 seed", () => {
 
     expect(exit._tag).toBe("Failure");
   });
+
+  // C-2: the gate is per dimension — one generic field among five specific ones is a leak.
+  it("retries when a single dimension reads as generic (partial genericity)", async () => {
+    const partiallyGeneric = JSON.stringify({
+      fieldSpecifics: ["strangler fig pattern", "join de 40s"],
+      dimensions: { ...SPECIFIC_DIMENSIONS, stake: "isso importa muito para o leitor." }
+    });
+    const { adapter, calls } = scriptedAdapter([partiallyGeneric, SPECIFIC_PAYLOAD]);
+    const profile = await Effect.runPromise(
+      generateSeedPracticeProfile({ userId: "u1", version: 1, axes: AXES, locale: "pt-BR", deps: depsFor(adapter) })
+    );
+
+    expect(calls()).toBe(2);
+    expect(profile.dimensions.stake).toBe(SPECIFIC_DIMENSIONS.stake);
+  });
+
+  // C-2: a still-generic retry output counts as a failed attempt — it never ships.
+  it("fails the attempt when the retry output is still generic", async () => {
+    const { adapter, calls } = scriptedAdapter([GENERIC_PAYLOAD, GENERIC_PAYLOAD]);
+    const exit = await Effect.runPromiseExit(
+      generateSeedPracticeProfile({ userId: "u1", version: 1, axes: AXES, locale: "pt-BR", deps: depsFor(adapter) })
+    );
+
+    expect(calls()).toBe(2);
+    expect(exit._tag).toBe("Failure");
+  });
+
+  it("moves to the next provider after a generic attempt and succeeds there", async () => {
+    const { adapter, calls } = scriptedAdapter([GENERIC_PAYLOAD, GENERIC_PAYLOAD, SPECIFIC_PAYLOAD]);
+    const deps = {
+      attempts: [ATTEMPT, { provider: "groq", model: "llama-4", timeoutMs: 20000 }],
+      aiAdapters: adapter,
+      providerTransport: NOOP_TRANSPORT
+    };
+    const profile = await Effect.runPromise(
+      generateSeedPracticeProfile({ userId: "u1", version: 1, axes: AXES, locale: "pt-BR", deps })
+    );
+
+    expect(calls()).toBe(3);
+    expect(profile.dimensions.point).toBe(SPECIFIC_DIMENSIONS.point);
+  });
 });
 
 describe("practice profile generator — G2 enrichment", () => {

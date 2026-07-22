@@ -1,6 +1,6 @@
 import { Effect, Schedule } from "effect";
 import type { AppLogger } from "@my-ai-orchestrator/core";
-import type { DatabaseClient } from "@my-ai-orchestrator/database";
+import { toPracticeProfileDomain, type DatabaseClient } from "@my-ai-orchestrator/database";
 import type { BillingServiceContract } from "@my-ai-orchestrator/payments";
 import type { AIAdapterServiceContract } from "@my-ai-orchestrator/ai-adapters";
 import {
@@ -10,6 +10,7 @@ import {
 } from "@my-ai-orchestrator/domain";
 import type {
   ConfirmWizardReviewInput,
+  PracticeProfile,
   SetWizardContextInput,
   SubmitWizardStepInput,
   VoiceCalibrationEntitlementView,
@@ -32,10 +33,12 @@ import { buildStepPrompt, type WizardStepAnchor } from "./voice-calibration-cand
 import {
   agnosticCalibrationAnchors,
   contractsProfileToDomain,
+  domainProfileToContracts,
   generateCalibrationAnchors,
   generateSeedPracticeProfile,
   resolvePracticeProfileAttempts,
   resolvePracticeProfileLocale,
+  sameDeclaredAxes,
   type CalibrationAnchorSet,
   type DeclaredPracticeAxes,
   type PracticeProfileGenerationDeps,
@@ -72,6 +75,8 @@ import {
 } from "./voice-shared.js";
 
 const EMPTY_DETERMINISTIC_FEATURES: DeterministicFeatures = extractDeterministicFeatures("");
+
+const SET_CONTEXT_DERIVATION_TIMEOUT = "60 seconds";
 
 const WRITABLE_STEP_IDS = new Set<WizardStepId>([
   "micro_opinion",
@@ -326,24 +331,36 @@ function deriveCalibrationAnchors(args: {
       providerTransport: args.practiceProfile.providerTransport
     };
 
-    const seed = yield* generateSeedPracticeProfile({
-      userId: args.userId,
-      version: 1,
-      axes,
-      locale: args.locale,
-      deps
-    }).pipe(
-      Effect.mapError(
-        (error) => new BackendVoiceCalibrationDerivationError({ sessionId: args.sessionId, message: error.message })
-      )
-    );
+    // C-1 idempotency guard (ADR 0010 §4): identical declared axes reuse the stored profile — an
+    // enriched profile never regresses to a fresh seed on a wizard re-run. Changed axes are a
+    // legitimate re-seed (recalibration = a new lifecycle), with the version bumped past the old one.
+    const existingRecord = yield* args.database.practiceProfiles.getByUser(args.userId).pipe(Effect.orDie);
+    const existing = existingRecord ? toPracticeProfileDomain(existingRecord) : undefined;
 
-    const timestamp = args.now().toISOString();
-    yield* args.database.practiceProfiles
-      .put(contractsProfileToDomain(seed, { createdAt: timestamp, updatedAt: timestamp }), seed.version)
-      .pipe(Effect.orDie);
+    let profile: PracticeProfile;
+    if (existing && sameDeclaredAxes(existing, axes)) {
+      profile = domainProfileToContracts(existing);
+    } else {
+      const seed = yield* generateSeedPracticeProfile({
+        userId: args.userId,
+        version: (existing?.version ?? 0) + 1,
+        axes,
+        locale: args.locale,
+        deps
+      }).pipe(
+        Effect.mapError(
+          (error) => new BackendVoiceCalibrationDerivationError({ sessionId: args.sessionId, message: error.message })
+        )
+      );
 
-    const anchorSet = yield* generateCalibrationAnchors({ profile: seed, locale: args.locale, deps }).pipe(
+      const timestamp = args.now().toISOString();
+      yield* args.database.practiceProfiles
+        .put(contractsProfileToDomain(seed, { createdAt: timestamp, updatedAt: timestamp }), seed.version)
+        .pipe(Effect.orDie);
+      profile = seed;
+    }
+
+    const anchorSet = yield* generateCalibrationAnchors({ profile, locale: args.locale, deps }).pipe(
       Effect.tapError((error) =>
         Effect.sync(() =>
           args.logger?.warn("Calibration anchor generation failed; using field-agnostic anchors", {
@@ -415,6 +432,8 @@ export function createBackendVoiceCalibrationService(
 
         // Derive first: a G1 failure aborts here (F3-2 hard block) BEFORE any session mutation, so the
         // wizard stays on context_setup and the client can retry cleanly against an untouched session.
+        // C-7: an aggregate ceiling over G1+G3 — the worst-case provider chain (~240s) must not sit in
+        // the onboarding critical path; overflow takes the same hard-block path (500 + visible retry).
         const anchorsByStepId = yield* deriveCalibrationAnchors({
           practiceProfile,
           database,
@@ -424,7 +443,16 @@ export function createBackendVoiceCalibrationService(
           userId,
           context,
           locale
-        });
+        }).pipe(
+          Effect.timeoutFail({
+            duration: SET_CONTEXT_DERIVATION_TIMEOUT,
+            onTimeout: () =>
+              new BackendVoiceCalibrationDerivationError({
+                sessionId,
+                message: "Practice profile derivation timed out"
+              })
+          })
+        );
 
         session.context = context;
         session.locale = locale;

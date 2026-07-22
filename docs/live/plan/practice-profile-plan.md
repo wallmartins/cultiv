@@ -5,6 +5,8 @@ Companheiro da **ADR 0010**. Task set ordenado, backend + web, pré-lançamento 
 > **Caminho crítico (2 pré-requisitos que tudo depende):**
 > 1. **Nova forma do briefing** (F0-3) — sem ela, a adaptação de perguntas é cosmética.
 > 2. **Re-chavear o compositor `planGeneration` de intent→gênero×tamanho×canal** (F1-2) — a cirurgia 07+13, uma passada só.
+>
+> **Estado (2026-07-22):** Fases 0–3 entregues (f63a922 · ec4b9f4 · 003ec1b+5d8ad53 · 4348e0f) e auditadas em profundidade. **A Fase 3.5 (consolidação da auditoria) BLOQUEIA a Fase 4** — quem for implementar a Fase 4 começa por ela. Toda fase passa a fechar pelo **Portão de revisão por fase** (seção no fim) antes do commit final.
 
 ---
 
@@ -21,7 +23,7 @@ Companheiro da **ADR 0010**. Task set ordenado, backend + web, pré-lançamento 
 
 - **F1-1 · Remover andaime morto** (compositor já é o caminho vivo, prod): ramo legado `resolve-generation-target.ts:113-133`, `PipelineTypeSchema` (`job.ts:11-22`), `CONTENT_TYPE_PRESETS`, `legacyContentTypeId`, e os 7 pontos do intent (`INTENT_ANGLE`, `PHASE1_LEGACY_INTENT_MAP`, `RHETORICAL_PROFILES`, `defaultPresetByIntentTier`, `INTENT_LENS_PRIORITY`, filtro Postgres `data->>'generationIntent'`, `MeExecutionRequestSchema.intent`).
 - **F1-2 · Re-chavear `planGeneration`** ⚠️ CAMINHO CRÍTICO: de `intent × scope × qualityMode` para **gênero × tamanho × canal**. Os controles de modo (`argument-lenses.ts`, `expression-instructions.ts`) já são tabelas — re-chavear a chave.
-- **F1-3 · Deletar código morto da calibração** (05): `THEMES_BY_DOMAIN`, `themePool`, `pickThemeFromPool`, `rotationIndex`, `step.label`, `capturesFeatures`, `argument_development.defaultTheme`.
+- **F1-3 · Deletar código morto da calibração** (05): `THEMES_BY_DOMAIN`, `themePool`, `pickThemeFromPool`, `rotationIndex`, `step.label`, `capturesFeatures`, ~~`argument_development.defaultTheme`~~ *(correção da auditoria 2026-07-22: NÃO era morto — é o fallback vivo das âncoras G3 em `voice-calibration-context.ts:26`; fica)*.
 
 ## Fase 2 — O gerador (cita o norte, não reescreve)
 
@@ -37,6 +39,48 @@ Companheiro da **ADR 0010**. Task set ordenado, backend + web, pré-lançamento 
 - **F3-4 · Trocar a ponta do seam existente:** `setContext()`→`refreshSessionStepPrompts()`→`buildStepPrompt()` (`voice-calibration-service.ts:290-292`) já reescreve as telas 2–5 — trocar `resolveTheme`/`THEMES_BY_DOMAIN` pela âncora gerada (G3).
 - **F3-5 · Enriquecimento no rebuild de `completeReview`**, pós-consentimento, uma vez, só-acrescenta (`voice-rebuild-pipeline.ts`). G2 + a rede G5 (grounding fino → pergunta no `/voice`).
 
+## Fase 3.5 — Consolidação da auditoria ⚠️ BLOQUEIA A FASE 4
+
+> Origem: auditoria completa das Fases 0–3 (2026-07-22; 5 agentes de revisão + verificação manual dos graves — todos os achados abaixo confirmados no código, com `file:line`). **Nenhum item da Fase 4 começa antes de C-1..C-4 fecharem.** C-5..C-12 fecham junto, ou a exceção é justificada por escrito aqui. Os quatro primeiros tocam o coração do valor do produto: o aparato anti-clichê ("clichê é existencial", ADR 0010 §3) e o ciclo de vida do perfil (§4).
+
+### Defeitos confirmados (ordem de ataque)
+
+- **C-1 · Guarda de idempotência do perfil-semente.** `setContext` deriva G1 e faz `put()` incondicional (`voice-calibration-service.ts:329-344`, upsert puro em `user_id`, sem guarda de depth/versão) — re-rodar o wizard (`maxWizards=10` em criador/pro) regride um perfil `enriched` para semente v1, descartando o enriquecimento G2 e violando o só-acrescenta (ADR 0010 §4). Regra proposta: eixos declarados **idênticos** ⇒ reusa o perfil existente sem re-derivar; eixos **mudados** ⇒ re-seed legítimo (recalibração = novo ciclo de vida, ADR §4). Teste dos dois ramos + do cenário de re-run.
+- **C-2 · Gate de clichê por dimensão + retry sem furo.** `detectClicheLeak` só dispara quando TODAS as dimensões carecem de específico (`.every`, `practice-profile-anti-patterns.ts:88`) — 4 de 5 genéricas passam — e o check é pulado na re-tentativa (`retry === 0 &&`, `practice-profile-generation-core.ts:132`), então uma semente ainda-genérica shippa. Passar a detecção per-dimensão (espelhando o `fieldSpecificityReport` do T2) e re-checar no retry: 2ª saída ainda genérica ⇒ conta como falha da tentativa → próximo provider da cadeia; cadeia esgotada ⇒ G1 bloqueia (piso do onboarding), G3/G4 degradam. Cobrir com testes de genericidade **parcial** (hoje inexistentes — os testes atuais só exercitam payloads 100% genéricos).
+- **C-3 · Detector de específico-nomeado: mixed-case + gêmeos unificados.** `/^[A-ZÀ-Ý][a-zà-ÿ]+$/` rejeita PostgreSQL/TypeScript/iOS/npm como nome próprio (`practice-profile-anti-patterns.ts:55` + gêmeo `discriminability.ts` no text-quality) — retries falso-positivos e disparos falsos de G5 justamente no domínio-vitrine. As listas de filler dos gêmeos **já divergiram** ("pensar" vs "pense fora da caixa"). Reconhecer mixed-case/camelCase, unificar detector + listas (fonte única onde a governança permitir; senão, teste de paridade) e cobrir edge-cases (marcas, acentos pt-BR).
+- **C-4 · Scripts quebrados pela purga F1 + ponto cego do typecheck.** `apps/backend/scripts/analyze-calibration-option-b.ts` (value-import de `resolvePhase1LegacyContentTypeId`, deletado — `billing:analyze-option-b` crasharia na carga) e `scripts/step-planner/briefing-variants.ts` (`GenerationIntent`). Consertar ou deletar os dois, e incluir `apps/backend/scripts/` num gate de typecheck (o `include` dos tsconfigs não os cobre — "lint verde" era ponto cego).
+
+### Divergências e decisões
+
+- **C-5 · `MODE_ANGLE["promote"]` re-derivado do norte.** O texto atual é herança verbatim do intent `update-subscribers` (framing de changelog); o norte define promover como "persuade com interesse material" (`genero-dimensoes.md`). Reescrever a partir da definição do modo. Na mesma passada: decidir o destino do conteúdo de `engage-audience` (fundir num modo ou descartar, por escrito).
+- **C-6 · DECISÃO — lentes de argumento.** F1 **deletou** `INTENT_LENS_PRIORITY` sem substituta (o commit dizia "re-key"); hoje a seleção de lentes é só regex de briefing + voz. Decidir: (a) manter e registrar como corte deliberado, ou (b) re-adicionar como `MODE_LENS_PRIORITY` keyed por `RhetoricalMode` (tabela declarativa, default seguro).
+- **C-7 · Teto de latência no `setContext`.** Pior caso ~240s (G1: 3 tentativas × 2 retries × 20s; G3 esgota a própria cadeia antes do `orElseSucceed`) vs. "rápida, cabe na rota crítica" (norte G1). Timeout agregado externo (~60s) sobre G1+G3; estouro ⇒ mesmo caminho do hard-block F3-2 (500 + retry visível).
+- **C-8 · Localizar os erros da tela sem escape.** `describeCalibrationError` (`calibrate-view.ts:101-109`) prefere a mensagem técnica crua do backend ("no provider attempts configured") — inglês, na única tela em que o usuário não tem saída. Mapear para i18n; a mensagem técnica vai para o log. (Mesma classe do defeito conhecido de word-count — aquele segue no mapa de defeitos.)
+- **C-9 · Higiene de menores.** `ponytail: F1-4` → F0-1 (`contracts/practice-profile.ts:31`; F1-4 não existe); CONTEXT.md "Presupposition" ↔ código `readerAssumption` (alinhar um dos dois — regra "use os termos exatos"); deletar `step.label` (morto, sem leitor); deletar `ExecutionsListFilterItem.contentType` (morto, F0-5 não varreu); corrigir o comentário do `clicheProbe` que sobre-promete sincronia com `findThinDimensions`; combining-marks literais → escapes explícitos no regex de normalização.
+- **C-10 · Dedup do scaffolding de prompt.** ~40% do system-prompt é verbatim-idêntico entre G1/G2, G3 e G4 → extrair `buildSystemPromptScaffold` no core (o autor já extraiu `formatDeclaredAxes`/`PRACTICE_DIMENSIONS_GUIDE` — completar a passada). O sufixo de retry promete "sinal G5" que só o schema do G2 carrega → variante por superfície.
+- **C-11 · Testes faltantes sem ticket próprio.** "G1 sucede + G3 falha ⇒ âncoras agnósticas em `session.anchorsByStepId`" (o `orElseSucceed` não tem teste direto); integração Postgres dos repos practice-profile na suíte gated (`test:postgres`).
+- **C-12 · Processo.** Push do branch + CI verde (os 6 commits nunca rodaram CI — toda verificação foi local); investigar o `pnpm lint` flaky no runner paralelo do pnpm (erro fantasma "eslint not found"; serializado passa limpo).
+
+### Emendas de plano já aplicadas pela auditoria
+- F1-3 corrigido acima (`defaultTheme` não era morto).
+- **F4-7 adicionado à Fase 4** (produtor de gênero) — 6 marcadores `ponytail: F4` apontavam para ticket inexistente.
+- Deferral do grounding G2 registrado (seção "Deferrals de plataforma").
+
+### Resolução da Fase 3.5 (2026-07-22)
+
+- **C-1 ✅** Guarda em `deriveCalibrationAnchors`: eixos idênticos (fold case + ordem de públicos — mudança cosmética não é ciclo de vida novo) ⇒ reusa o perfil armazenado (enriched nunca regride) e gera G3 a partir dele; eixos mudados ⇒ re-seed com `version = anterior + 1`. Testes dos dois ramos + re-run.
+- **C-2 ✅** `assessClicheLeak` per-dimensão ({fillerHit, thin}); leak em QUALQUER dimensão dispara retry; retry ainda genérico ⇒ falha da tentativa → próximo provider. **Exceção de projeto:** G2 aceita saída *thin* (sem filler) após o retry — dimensão magra honesta É o gatilho do G5; reprovar thinness no G2 tornaria o niche-ask inalcançável. `fieldSpecifics` é sondado como unidade (fragmentos curtos ancoram coletivamente). Testes de genericidade parcial adicionados.
+- **C-3 ✅** Fonte única: detector + lista de filler vivem em `text-quality/discriminability` (`namesSpecific`/`containsGenericCliche` exportados); backend importa (sem gêmeo, sem teste de paridade). Reconhece mixed-case/internal-capital (PostgreSQL, TypeScript, iOS, eBay), all-caps (AWS) e marcas com ponto (Fly.io, Node.js); listas de filler fundidas (união). **Limite conhecido:** marcas 100%-minúsculas (npm) seguem invisíveis ao proxy determinístico — sem blocklist por design (generalização à cauda longa); dígitos/aspas ainda capturam.
+- **C-4 ✅ (escopo maior que o auditado)** O gate de typecheck (`tsconfig.scripts.json` + lint encadeado) revelou **5** scripts quebrados, não 2: `analyze-calibration-option-b` **deletado** (análise inteira era intent×pipeline-legado, ambos mortos; decisão de pricing já tomada na ADR 0009); `compositor-parity-harness` **deletado** (comparava com o caminho legado removido na F1 — propósito cumprido); `briefing-variants` re-chaveado por `briefingKey`; `run-calibration-sweep` re-chaveado modo×tier (`BRIEFING_KEY_BY_MODE`); `step-planner-smoke-harness` + erro latente em `live-generation-api` consertados. Scripts `billing:analyze-option-b`/`compositor:parity` removidos dos package.json.
+- **C-5 ✅** `MODE_ANGLE["promote"]` reescrito da definição do norte (persuasão com interesse material declarado, evidência não hype, um próximo passo claro). **Destino do conteúdo de `engage-audience` (por escrito): descartado como ângulo de modo** — "convidar reação" é mecânica de canal (já vive em `CHANNEL_FORMAT_BASE.social`), não modo retórico; sua prioridade de lente (psychological) foi absorvida na linha do promote (C-6).
+- **C-6 ✅ decisão (b)** `MODE_LENS_PRIORITY` keyed por `RhetoricalMode` (tabela declarativa, default seguro = cai em briefing+ordem padrão): expound/argue herdam suas linhas de intent; promote re-derivado do modo (psychological + financial). Fio novo: `plan.parameters.rhetoricalMode` → inputs do pipeline → `buildStepVoiceContext` → lentes. Testes.
+- **C-7 ✅** `Effect.timeoutFail` de 60s agregado sobre a derivação no `setContext`; estouro = mesmo caminho do hard-block (500 + retry visível, sessão intocada). Teste com TestClock.
+- **C-8 ✅** `describeCalibrationError` não repassa mais a mensagem técnica (vai pro console): mapeia word-count → `errors.tooShort(n)` e code `service_unavailable`/500 → `errors.derivationFailed` (pt+en). `ponytail:` o match por string do word-count é interino — raiz (código estruturado no backend) segue no mapa de defeitos.
+- **C-9 ✅** `ponytail: F1-4`→`F0-1` (contracts + bridge); CONTEXT.md "Presupposition"→"Reader Assumption"; `step.label` deletado (6 entradas, sem leitor); `ExecutionsListFilterItem.contentType` deletado (+3 escritores); comentário do `clicheProbe` corrigido; combining-marks resolvido pela unificação C-3 (o normalize do backend morreu).
+- **C-10 ✅** `buildSystemPromptScaffold` no core (role + locale + nota opcional; linha de ancoragem unificada); sufixo de retry ganha escape por superfície via `retryEscape` — só o G2 promete o sinal G5.
+- **C-11 ✅** Teste direto do `orElseSucceed` (G1 ok + G3 falha ⇒ âncoras agnósticas via `getStepPrompt`); `postgres-practice-profile-repository.test.ts` na suíte gated (17/17 verdes contra Postgres real). De brinde: a migração `0024-practice-profile` faltava no `postgres-test-helpers` — adicionada.
+- **C-12 ✅ (diagnóstico) / push pendente** O "pnpm lint flaky" **não é do pnpm**: é o subcomando `lint` do **rtk 0.43.0**, que assume eslint (`pnpm -r exec eslint`), imprime o fantasma "Command eslint not found" **e retorna exit 0** (mascara falha real). O hook às vezes reescreve `pnpm lint`→`rtk lint`. Mitigação: usar `pnpm -r --if-present lint` ou `rtk proxy pnpm lint`; CI roda pnpm cru, não é afetado. Push do branch + CI: executado no fechamento desta fase.
+
 ## Fase 4 — Geração
 
 - **F4-1 · Popular `briefing.audience`** (soquete já ligado — `skill-inputs.ts:44`, `skill-templates.ts:98`; só popular via passo ① de estreitamento).
@@ -45,6 +89,7 @@ Companheiro da **ADR 0010**. Task set ordenado, backend + web, pré-lançamento 
 - **F4-4 · Alavancas de público** via prompt: densidade de jargão + se explicado (vocabulário da dimensão Léxico; o público modula quanto), pressuposição, rampa, encerramento.
 - **F4-5 · Limpar resíduos de prompt:** `skill-templates.ts:261` (linha tech-first morta) → substituir pela modulação positiva de jargão-por-público; `skill-templates.ts:98` → escopar a comprehensibilidade, não estilo.
 - **F4-6 · Vocabulário de chips de canal** (`generate-view.ts:144-154`): tirar os 7 nomes de plataforma → escolher por bucket funcional. Web only, não contrato.
+- **F4-7 · Produtor de gênero** ⚠️ era buraco de plano (auditoria 2026-07-22: 6 marcadores `ponytail: F4` sem ticket correspondente): inferir `RhetoricalMode` (dominante+secundário) + `GenreSignature` das **respostas** dos 4 slots, no **fim** das perguntas, por **substância nunca por léxico** (norte `genero-dimensoes.md`; ADR 0010 §10). Substitui o default `"expound"` (`resolve-generation-target.ts:15-17`, `generation-prefill.ts:189`, `reasoning.ts:69-71`, web `generate.tsx`/`generate-view.ts`).
 
 ## Fase 5 — `/voice` (identidade de escrita)
 
@@ -58,6 +103,21 @@ Companheiro da **ADR 0010**. Task set ordenado, backend + web, pré-lançamento 
 - **F6-2 · Conjunto de avaliação multi-domínio:** semear `apps/backend/scripts/calibration/briefings.ts` + `packages/eval` (hoje tech-only) com domínios por **span de estilo** (tech·marketing·climate + 1 distante), reusando os perfis do norte como padrão-ouro. Rodar discriminabilidade nos textos gerados.
 - **F6-3 · Refactor guardas → tabela declarativa** (decisão do usuário): `development-drift.ts`/`development-critic.ts`/`voice-signature-divergence.ts` (cadeias de `if`) viram `Record<EpistemicPosture, …>` keyed-by-value **com default seguro** (valor sem linha cai em guarda neutra, nunca desprotegido).
 - **F6-4 · Re-chavear o Format Expression Profile** de Content Type (morto no 07) para **canal** (`CONTEXT.md:646` — "how the author sounds on a channel"). Público NÃO entra no FEP (é eixo paralelo).
+
+## Deferrals de plataforma (rastreados)
+
+- **Grounding web do G2** (decisão do autor, 2026-07-21; marcador `ponytail: platform` em `practice-profile-generator.ts:110-112`): `ai-adapters` não tem superfície de grounding/tool-use, então o enriquecimento roda como 2ª passada de especificidade paramétrica — mesma fonte da semente, não o "grounding web nativo do provider" da ADR 0010 §3. O seam é plugável; destrava quando `ai-adapters` ganhar grounding nativo. Até lá, G5 (perguntar ao autor) é o mitigador do buraco epistêmico. Sem fase dona — reavaliar depois da Fase 6.
+
+## Portão de revisão por fase (processo obrigatório)
+
+Toda fase fecha com auditoria completa **antes do commit final** — o mesmo fluxo que produziu a Fase 3.5. Receita executável: `.claude/commands/phase-audit.md` (`/phase-audit <fase>`).
+
+1. **Revisores em modelo DIFERENTE do que implementou** (imparcialidade): implementação em Fable 5 ⇒ revisão em Opus; implementação em Opus ⇒ revisão em Fable. Nunca o mesmo modelo revisando a própria família de saída.
+2. **1 agente por fatia coerente do plano + 1 transversal** (governança, os 5 invariantes da ADR 0010, seams entre fases, ledger de ponytails vs. tickets, qualidade SOLID/dedup), em paralelo, read-only, julgando contra plano + ADR + norte — **lendo o código, nunca a mensagem de commit**.
+3. **O orquestrador re-verifica todo achado major/critical no fonte** antes de aceitá-lo (agentes erram; achado não confirmado não entra).
+4. **Major/critical: consertado antes do commit.** Minor: consertado junto ou vira ticket na fase seguinte. Nada é descartado sem justificativa escrita no plano.
+5. Verificação: `pnpm smoke` + `pnpm guardrails:effect` + typecheck + suíte segura direcionada. **NUNCA `pnpm test` cru** (chama a Groq real e queima quota diária).
+6. O resultado (vereditos por item + achados abertos) entra no plano como seção da fase, e os deferrals ganham ticket — nenhum `ponytail:` pode apontar para ticket inexistente.
 
 ## Coordenação com o mapa de defeitos (não resolver aqui)
 

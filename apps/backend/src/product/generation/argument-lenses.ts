@@ -1,4 +1,4 @@
-import type { PerspectiveShiftDensity } from "@my-ai-orchestrator/contracts";
+import type { PerspectiveShiftDensity, RhetoricalMode } from "@my-ai-orchestrator/contracts";
 import type { VoiceProfile } from "@my-ai-orchestrator/text-quality";
 
 export type ArgumentLens =
@@ -58,6 +58,17 @@ const LENS_BY_ID = Object.fromEntries(
   ARGUMENT_LENS_POOL.map((lens) => [lens.id, lens] as const)
 ) as Record<ArgumentLens, ArgumentLensDefinition>;
 
+// C-6 (decision b): the F1 clean cut deleted INTENT_LENS_PRIORITY without the promised re-key — this
+// is that re-key, a declarative table by RhetoricalMode with a safe default (modes without a line fall
+// through to briefing keywords + DEFAULT_LENS_ORDER). expound/argue inherit their old intent rows;
+// promote is re-derived from the mode's definition ("persuade com interesse material", norte
+// genero-dimensoes.md): how people decide + the material interest itself.
+const MODE_LENS_PRIORITY: Partial<Record<RhetoricalMode, readonly ArgumentLens[]>> = {
+  expound: ["operational", "temporal"],
+  argue: ["operational", "organizational"],
+  promote: ["psychological", "financial"]
+};
+
 const BRIEFING_KEYWORD_LENS: ReadonlyArray<{ readonly pattern: RegExp; readonly lens: ArgumentLens }> = [
   { pattern: /\b(psycholog|emotion|feeling|mental|behavior|motivat)\w*/i, lens: "psychological" },
   { pattern: /\b(cost|budget|revenue|money|invest|roi|profit|financial)\w*/i, lens: "financial" },
@@ -87,6 +98,7 @@ const PERSPECTIVE_SHIFT_MAX_LENSES: Record<PerspectiveShiftDensity, number> = {
 const ARGUMENT_LENS_STEPS = new Set(["draft", "expand", "structure"]);
 
 export interface SelectArgumentLensesInput {
+  readonly rhetoricalMode?: RhetoricalMode;
   readonly briefing?: string;
   readonly perspectiveShiftDensity?: PerspectiveShiftDensity;
   readonly maxLenses?: number;
@@ -139,6 +151,10 @@ export function selectArgumentLenses(input: SelectArgumentLensesInput): readonly
     }
   };
 
+  for (const lens of (input.rhetoricalMode && MODE_LENS_PRIORITY[input.rhetoricalMode]) ?? []) {
+    pushUnique(lens);
+  }
+
   if (briefing) {
     for (const entry of BRIEFING_KEYWORD_LENS) {
       if (entry.pattern.test(briefing)) {
@@ -178,6 +194,7 @@ export function buildArgumentLensesSection(input: {
   readonly stepName: string;
   readonly voiceProfile?: Partial<VoiceProfile>;
   readonly briefing?: string;
+  readonly rhetoricalMode?: RhetoricalMode;
 }): string {
   if (!ARGUMENT_LENS_STEPS.has(input.stepName)) {
     return "";
@@ -185,6 +202,7 @@ export function buildArgumentLensesSection(input: {
 
   const density = resolvePerspectiveShiftDensity(input.voiceProfile);
   const lenses = selectArgumentLenses({
+    rhetoricalMode: input.rhetoricalMode,
     briefing: input.briefing,
     perspectiveShiftDensity: density
   });

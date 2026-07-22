@@ -5,6 +5,7 @@ export {
   PRACTICE_PROFILE_ROUTING_PROFILE_ID,
   resolvePracticeProfileLocale,
   resolvePracticeProfileAttempts,
+  sameDeclaredAxes,
   type PracticeProfileLocale,
   type DeclaredPracticeAxes,
   type PracticeProfileGenerationDeps
@@ -18,7 +19,7 @@ export {
 export { PracticeProfileGenerationError } from "./practice-profile-errors.js";
 export {
   GENERATOR_ANTI_PATTERN_RULES,
-  GENERATOR_CLICHE_RETRY_SUFFIX,
+  buildClicheRetrySuffix,
   detectClicheLeak,
   namesSpecific,
   containsGenericCliche

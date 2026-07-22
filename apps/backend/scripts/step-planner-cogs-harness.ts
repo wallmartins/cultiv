@@ -90,7 +90,7 @@ function compareFixtureVariant(
   variant: ReturnType<typeof briefingVariantsForFixture>[number]
 ): DryRunComparison {
   const basePlan = planGeneration({
-    intent: fixture.intent,
+    rhetoricalMode: fixture.rhetoricalMode,
     scope: fixture.scope,
     qualityMode: fixture.qualityMode
   });
@@ -118,7 +118,7 @@ function cogsPreviewBody(
   briefing: Record<string, unknown>
 ): Record<string, unknown> {
   return {
-    intent: fixture.intent,
+    rhetoricalMode: fixture.rhetoricalMode,
     scope: fixture.scope,
     qualityMode: fixture.qualityMode,
     language: "pt-BR",

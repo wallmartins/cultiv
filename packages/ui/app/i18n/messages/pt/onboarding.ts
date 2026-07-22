@@ -17,6 +17,10 @@ export const onboarding = {
   sampleCounter: (index: number, total: number) => `amostra ${index} de ${total}`,
   fallbackPrompt: "conte com as suas palavras",
   errorFallback: "não conseguimos confirmar sua voz agora — verifique sua conexão e tente de novo.",
+  errors: {
+    derivationFailed: "não conseguimos preparar sua calibração agora — nada foi perdido, tente de novo.",
+    tooShort: (min: number) => `essa amostra precisa de pelo menos ${min} palavras pra valer.`
+  },
   trialLabel: "seu teste",
   trialDaysRemaining: (n: number) => `${n} ${n === 1 ? "dia restante" : "dias restantes"}`,
   skipForNow: "Calibrar depois →",

@@ -1,4 +1,3 @@
-import type { GenerationIntent } from "@my-ai-orchestrator/contracts";
 import { CALIBRATION_BRIEFINGS } from "../calibration/briefings.js";
 import type { CompositorParityFixture } from "../compositor/parity-fixtures.js";
 
@@ -9,59 +8,38 @@ export interface BriefingVariant {
   readonly briefing: Record<string, unknown>;
 }
 
-function minimalBriefingForIntent(intent: GenerationIntent): Record<string, unknown> {
-  switch (intent) {
-    case "explain-deeply":
-      return { topic: "Brief overview" };
-    case "engage-audience":
-      return { topic: "Community update" };
-    case "document-decision":
-      return { decision: "Proceed", systemContext: "Short context" };
-    case "share-idea":
-      return { topic: "Quick idea" };
-    case "tell-story":
-      return { topic: "Short story", hook: "Once" };
-    case "update-subscribers":
-      return { topic: "Monthly update", audience: "subscribers" };
-    default: {
-      const _exhaustive: never = intent;
-      return _exhaustive;
-    }
-  }
+// Keyed by the fixture's calibration-briefing key (descriptive labels, not a contracts type — the
+// GenerationIntent axis these once mapped to died in the Practice Profile Phase 1 clean cut).
+// Unknown keys fall back to a minimal generic topic / the typical briefing plus padded notes.
+const MINIMAL_BRIEFINGS: Readonly<Record<string, Record<string, unknown>>> = {
+  "explain-deeply": { topic: "Brief overview" },
+  "engage-audience": { topic: "Community update" },
+  "document-decision": { decision: "Proceed", systemContext: "Short context" },
+  "share-idea": { topic: "Quick idea" },
+  "tell-story": { topic: "Short story", hook: "Once" },
+  "update-subscribers": { topic: "Monthly update", audience: "subscribers" }
+};
+
+const HEAVY_EXTRAS: Readonly<Record<string, Record<string, unknown>>> = {
+  "explain-deeply": { context: "x".repeat(200) },
+  "document-decision": { systemContext: "x".repeat(401) }
+};
+
+function minimalBriefingFor(briefingKey: string): Record<string, unknown> {
+  return MINIMAL_BRIEFINGS[briefingKey] ?? { topic: "Brief overview" };
 }
 
-function heavyBriefingForIntent(intent: GenerationIntent): Record<string, unknown> {
-  switch (intent) {
-    case "explain-deeply":
-      return {
-        ...CALIBRATION_BRIEFINGS["explain-deeply"],
-        context: "x".repeat(200)
-      };
-    case "engage-audience":
-      return CALIBRATION_BRIEFINGS["engage-audience"];
-    case "document-decision":
-      return {
-        ...CALIBRATION_BRIEFINGS["document-decision"],
-        systemContext: "x".repeat(401)
-      };
-    case "share-idea":
-    case "tell-story":
-    case "update-subscribers":
-      return {
-        ...CALIBRATION_BRIEFINGS[intent],
-        notes: "x".repeat(200)
-      };
-    default: {
-      const _exhaustive: never = intent;
-      return _exhaustive;
-    }
-  }
+function heavyBriefingFor(briefingKey: string): Record<string, unknown> {
+  return {
+    ...CALIBRATION_BRIEFINGS[briefingKey],
+    ...(HEAVY_EXTRAS[briefingKey] ?? { notes: "x".repeat(200) })
+  };
 }
 
 export function briefingVariantsForFixture(fixture: CompositorParityFixture): readonly BriefingVariant[] {
   return [
-    { kind: "minimal", briefing: minimalBriefingForIntent(fixture.intent) },
+    { kind: "minimal", briefing: minimalBriefingFor(fixture.briefingKey) },
     { kind: "typical", briefing: { ...fixture.briefing } },
-    { kind: "heavy", briefing: heavyBriefingForIntent(fixture.intent) }
+    { kind: "heavy", briefing: heavyBriefingFor(fixture.briefingKey) }
   ];
 }

@@ -1,7 +1,7 @@
 import type { PracticeProfile as ContractsPracticeProfile } from "@my-ai-orchestrator/contracts";
 import type { PracticeProfile as DomainPracticeProfile } from "@my-ai-orchestrator/domain";
 
-// F1-4 disambiguation landing (ADR 0010 / contracts practice-profile.ts:31-34): the generator emits the
+// F0-1 disambiguation landing (ADR 0010 / contracts practice-profile.ts:31-34): the generator emits the
 // bare-value contracts `PracticeProfile` (no identity), the repository stores the domain Entity (id +
 // timestamps). This is the one seam that needs both shapes at once, so the conversion lives here.
 // Names spell the direction out (contractsProfileToDomain, not toDomainPracticeProfile) so they don't

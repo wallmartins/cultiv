@@ -1,11 +1,10 @@
 import { Effect, Schema } from "effect";
 import type { PracticeProfile } from "@my-ai-orchestrator/contracts";
-import { GENERATOR_ANTI_PATTERN_RULES } from "./practice-profile-anti-patterns.js";
 import { PracticeProfileGenerationError } from "./practice-profile-errors.js";
 import {
   PRACTICE_DIMENSIONS_GUIDE,
+  buildSystemPromptScaffold,
   formatDeclaredAxes,
-  localeLabel,
   runPracticeProfileGeneration,
   type PracticeProfileGenerationDeps,
   type PracticeProfileLocale
@@ -52,13 +51,10 @@ function clicheProbe(generated: GeneratedSlots): readonly string[] {
 }
 
 function buildSystemPrompt(locale: PracticeProfileLocale): string {
-  return [
-    "You write the 4 curated generation-slot QUESTIONS asked to an author before drafting — the questions themselves, not their answers.",
-    "Respond with JSON only — no markdown fences or commentary.",
-    `OUTPUT LANGUAGE: write every question in ${localeLabel(locale)}.`,
-    "The average of a field IS that field's cliché. Anchor every question in the profile's named specifics and steer away from the average.",
-    GENERATOR_ANTI_PATTERN_RULES
-  ].join("\n");
+  return buildSystemPromptScaffold({
+    role: "You write the 4 curated generation-slot QUESTIONS asked to an author before drafting — the questions themselves, not their answers.",
+    locale
+  });
 }
 
 // G4 · generation slots (synchronous, generation critical path). Takes the profile (enriched if any) +
@@ -97,7 +93,9 @@ export function generateGenerationSlots(args: {
           retrySuffix
         ].join("\n"),
       decode: decodeGeneratedSlots,
-      selectClicheProbe: clicheProbe
+      selectClicheProbe: clicheProbe,
+      retryEscape:
+        "If you cannot name one, anchor the question in the profile's own named terms — never invent practitioners or cases."
     },
     args.deps
   ).pipe(Effect.map((generated) => assembleSlots(generated.slots)));

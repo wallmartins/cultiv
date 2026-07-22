@@ -2,7 +2,7 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import pg from "pg";
-import type { GenerationLengthTier, QualityMode } from "@my-ai-orchestrator/contracts";
+import type { GenerationLengthTier, QualityMode, RhetoricalMode } from "@my-ai-orchestrator/contracts";
 import { CALIBRATION_BRIEFINGS } from "./calibration/briefings.js";
 import { loadCalibrationEnvironment } from "./calibration/load-env.js";
 import { resolveCalibrationRepoPath } from "./calibration/resolve-repo-path.js";
@@ -17,14 +17,24 @@ const { Client } = pg;
 interface SweepManifestEntry {
   readonly cellId: string;
   readonly runIndex: number;
-  readonly intent: string;
+  readonly rhetoricalMode: RhetoricalMode;
   readonly lengthTier: GenerationLengthTier;
   readonly qualityMode: QualityMode;
-  readonly expectedLegacyContentType: string;
+  readonly expectedPlanSignature: string;
   readonly jobId?: string;
   readonly status: "pending" | "queued" | "done" | "failed" | "skipped";
   readonly error?: string;
 }
+
+// Sweep briefings are keyed by descriptive scenario labels (pre-F1 intents); one representative
+// briefing per rhetorical mode keeps the sweep exercising realistic payloads.
+const BRIEFING_KEY_BY_MODE: Readonly<Record<RhetoricalMode, string>> = {
+  expound: "explain-deeply",
+  narrate: "tell-story",
+  argue: "document-decision",
+  instruct: "explain-deeply",
+  promote: "update-subscribers"
+};
 
 interface SweepManifest {
   readonly sweepId: string;
@@ -143,19 +153,19 @@ async function runCell(args: {
   const baseEntry: SweepManifestEntry = {
     cellId: args.cell.id,
     runIndex: args.runIndex,
-    intent: args.cell.intent,
+    rhetoricalMode: args.cell.rhetoricalMode,
     lengthTier: args.cell.lengthTier,
     qualityMode: args.cell.qualityMode,
-    expectedLegacyContentType: args.cell.expectedLegacyContentType,
+    expectedPlanSignature: args.cell.expectedPlanSignature,
     status: "pending"
   };
 
   const previewBody = {
-    intent: args.cell.intent,
+    rhetoricalMode: args.cell.rhetoricalMode,
     scope: { lengthTier: args.cell.lengthTier },
     qualityMode: args.cell.qualityMode,
     language: "pt-BR",
-    briefing: CALIBRATION_BRIEFINGS[args.cell.intent]
+    briefing: CALIBRATION_BRIEFINGS[BRIEFING_KEY_BY_MODE[args.cell.rhetoricalMode]]
   };
 
   const preview = await fetchJson(args.baseUrl, args.token, "/api/generation-preview", previewBody);
@@ -239,7 +249,7 @@ async function main(): Promise<void> {
     for (const cell of profile.cells) {
       for (let runIndex = 0; runIndex < cell.repeats; runIndex += 1) {
         console.log(
-          `[dry-run] ${cell.id} #${runIndex + 1} → ${cell.expectedLegacyContentType} (${cell.qualityMode})`
+          `[dry-run] ${cell.id} #${runIndex + 1} → ${cell.expectedPlanSignature} (${cell.qualityMode})`
         );
       }
     }
@@ -281,10 +291,10 @@ async function main(): Promise<void> {
         manifest.entries.push({
           cellId: cell.id,
           runIndex,
-          intent: cell.intent,
+          rhetoricalMode: cell.rhetoricalMode,
           lengthTier: cell.lengthTier,
           qualityMode: cell.qualityMode,
-          expectedLegacyContentType: cell.expectedLegacyContentType,
+          expectedPlanSignature: cell.expectedPlanSignature,
           status: "failed",
           error: error instanceof Error ? error.message : String(error)
         });

@@ -5,12 +5,12 @@ import {
   type PracticeDimensions,
   type PracticeProfile
 } from "@my-ai-orchestrator/contracts";
-import { GENERATOR_ANTI_PATTERN_RULES, namesSpecific } from "./practice-profile-anti-patterns.js";
+import { namesSpecific } from "./practice-profile-anti-patterns.js";
 import { PracticeProfileGenerationError } from "./practice-profile-errors.js";
 import {
   PRACTICE_DIMENSIONS_GUIDE,
+  buildSystemPromptScaffold,
   formatDeclaredAxes,
-  localeLabel,
   runPracticeProfileGeneration,
   type DeclaredPracticeAxes,
   type PracticeProfileGenerationDeps,
@@ -42,8 +42,10 @@ const JSON_SCHEMA_BLOCK = [
   "}"
 ].join("\n");
 
-// Every specificity-bearing dimension (norte law 3 / T2: no dimension returns generic) — excludes only
-// fieldCliche (naming a cliché is its job) and lexicon (a term list). Kept in sync with findThinDimensions.
+// Every specificity-bearing dimension (norte law 3 / T2: no dimension returns generic) — excludes
+// fieldCliche and lexicon (naming a cliché / listing terms is their job; findThinDimensions covers
+// those two instead). The fieldSpecifics scratchpad is probed as one unit: short fragments may lack
+// a detector-visible anchor individually while anchoring collectively.
 function clicheProbe(generated: GeneratedProfile): readonly string[] {
   return [
     generated.dimensions.point,
@@ -51,18 +53,16 @@ function clicheProbe(generated: GeneratedProfile): readonly string[] {
     generated.dimensions.readerAssumption,
     generated.dimensions.resistance,
     generated.dimensions.stake,
-    ...generated.fieldSpecifics
+    generated.fieldSpecifics.join("; ")
   ];
 }
 
 function buildSystemPrompt(locale: PracticeProfileLocale): string {
-  return [
-    "You derive an author's Practice Profile — the 7 field-specific dimensions behind what they write and for whom.",
-    "Respond with JSON only — no markdown fences or commentary.",
-    `OUTPUT LANGUAGE: write every dimension value in ${localeLabel(locale)}. lexicon holds real field terms (may keep their native form).`,
-    "The average of a field IS that field's cliché. Anchor every dimension in named specifics and steer away from the average.",
-    GENERATOR_ANTI_PATTERN_RULES
-  ].join("\n");
+  return buildSystemPromptScaffold({
+    role: "You derive an author's Practice Profile — the 7 field-specific dimensions behind what they write and for whom.",
+    locale,
+    languageNote: "lexicon holds real field terms (may keep their native form)."
+  });
 }
 
 // G1 · seed tier (synchronous, calibration screen 1→2). Parametric-specificity elicitation: force the
@@ -91,7 +91,9 @@ export function generateSeedPracticeProfile(args: {
           retrySuffix
         ].join("\n"),
       decode: decodeGeneratedProfile,
-      selectClicheProbe: clicheProbe
+      selectClicheProbe: clicheProbe,
+      retryEscape:
+        "If you cannot name one, you do not know the field — leave fieldSpecifics empty and keep the dimension plain instead of inventing."
     },
     args.deps
   ).pipe(
@@ -141,7 +143,10 @@ export function enrichPracticeProfile(args: {
           retrySuffix
         ].join("\n"),
       decode: decodeGeneratedProfile,
-      selectClicheProbe: clicheProbe
+      selectClicheProbe: clicheProbe,
+      retryEscape:
+        "If you cannot name one, keep the seed value unchanged — a thin dimension becomes a question to the author (the G5 niche-ask), never an invention.",
+      acceptThinAfterRetry: true
     },
     args.deps
   ).pipe(
