@@ -62,8 +62,8 @@ const templateLocals = {
   constraints: "",
   previousScore: 0,
   lexiconInstruction: "Author lexicon:",
-  domainPolicy: "Match topic.",
-  generationDomain: "non-technical",
+  audienceModulation: "Match terminology to the briefing topic.",
+  genreSection: "",
   stepLabel: "Step",
   quantitativeConstraintsSection: "",
   argumentLensesSection: ""

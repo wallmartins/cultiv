@@ -46,8 +46,8 @@ describe("system prompt voice injection", () => {
           constraints: "",
           previousScore: 0,
           lexiconInstruction: "Author lexicon (use sparingly):",
-          domainPolicy: "Generation domain: non-technical. Do not use technical jargon.",
-          generationDomain: "non-technical",
+          audienceModulation: "Match terminology to the briefing topic.",
+          genreSection: "",
           quantitativeConstraintsSection: ""
         }
       })
@@ -68,8 +68,8 @@ describe("system prompt voice injection", () => {
     expect(systemPrompt).toContain("Example 2:\nVocê já notou isso?");
     expect(systemPrompt).toContain("Tom pessoal, direto, com observações concretas.");
     expect(systemPrompt).toContain("preserve user voice");
-    expect(systemPrompt).toContain("Generation domain: non-technical");
-    expect(systemPrompt).toContain("Do not use technical jargon");
+    // F4-5: the tech-first domain policy is gone; the audience-modulation section now occupies that slot.
+    expect(systemPrompt).toContain("Match terminology to the briefing topic.");
     expect(systemPrompt).toContain("must feel personal, specific, and unmistakably written by the author");
   });
 
@@ -115,8 +115,8 @@ describe("system prompt voice injection", () => {
           constraints: "",
           previousScore: 0,
           lexiconInstruction: "Author lexicon (use sparingly):",
-          domainPolicy: "Generation domain: non-technical. Do not use technical jargon.",
-          generationDomain: "non-technical",
+          audienceModulation: "Match terminology to the briefing topic.",
+          genreSection: "",
           quantitativeConstraintsSection: ""
         }
       })
