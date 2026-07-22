@@ -1,4 +1,8 @@
-import type { ArgumentDevelopmentSignature, QuantitativeSignals } from "@my-ai-orchestrator/contracts";
+import type {
+  ArgumentDevelopmentSignature,
+  EpistemicPosture,
+  QuantitativeSignals
+} from "@my-ai-orchestrator/contracts";
 import type { VoiceDriftResult } from "../types.js";
 
 const THESIS_MARKERS = [
@@ -36,6 +40,62 @@ const HEDGING_MARKERS = [
   /\bem alguns casos\b/iu,
   /\bnot sure\b/iu
 ];
+
+interface PostureDriftContext {
+  readonly candidate: string;
+  readonly normalized: string;
+  readonly development: ArgumentDevelopmentSignature;
+  readonly structuralStep: boolean;
+}
+
+interface PostureDriftGuard {
+  readonly matches: (context: PostureDriftContext) => boolean;
+  readonly penalty: number;
+  readonly note: string;
+}
+
+// Keyed by development.epistemicPosture. A posture without an entry runs zero guards (neutral,
+// same as today's unhandled postures) — add a posture by adding a row here, nothing else.
+const POSTURE_DRIFT_GUARDS: Partial<Record<EpistemicPosture, readonly PostureDriftGuard[]>> = {
+  exploratory: [
+    {
+      matches: ({ normalized }) => ADVOCACY_MARKERS.some((pattern) => pattern.test(normalized)),
+      penalty: 25,
+      note: "Candidate uses advocacy language inconsistent with exploratory development posture"
+    },
+    {
+      matches: ({ candidate, normalized, structuralStep }) =>
+        structuralStep
+        && hasPrematureThesis(candidate)
+        && !DOUBT_MARKERS.some((pattern) => pattern.test(normalized)),
+      penalty: 30,
+      note: "Candidate defends a thesis early without exploratory moves"
+    }
+  ],
+  investigative: [
+    {
+      matches: ({ normalized }) => ADVOCACY_MARKERS.some((pattern) => pattern.test(normalized)),
+      penalty: 25,
+      note: "Candidate uses advocacy language inconsistent with investigative development posture"
+    }
+  ],
+  advocacy: [
+    {
+      matches: ({ normalized, structuralStep }) =>
+        structuralStep && HEDGING_MARKERS.some((pattern) => pattern.test(normalized)),
+      penalty: 25,
+      note: "Candidate hedges excessively for advocacy development posture"
+    },
+    {
+      matches: ({ normalized, development, structuralStep }) =>
+        structuralStep
+        && development.structuralAntiPatterns.some((pattern) => /slow|warmup|digression/.test(pattern))
+        && /antes de|vamos percorrer|sem fechar|sem chegar/.test(normalized),
+      penalty: 30,
+      note: "Candidate delays the thesis for advocacy development posture"
+    }
+  ]
+};
 
 const FORMAL_MARKERS =
   /\b(portanto|contudo|todavia|entretanto|outrossim|destarte|mediante|consoante|outorga|notoriamente)\b/gi;
@@ -87,36 +147,12 @@ export function evaluateArgumentDevelopmentDrift(
   const normalized = candidate.toLowerCase();
   const structuralStep = stepName === "draft" || stepName === "expand" || stepName === undefined;
 
-  if (development.epistemicPosture === "exploratory" && ADVOCACY_MARKERS.some((pattern) => pattern.test(normalized))) {
-    score -= 25;
-    notes.push("Candidate uses advocacy language inconsistent with exploratory development posture");
-  }
-
-  if (
-    development.epistemicPosture === "investigative"
-    && ADVOCACY_MARKERS.some((pattern) => pattern.test(normalized))
-  ) {
-    score -= 25;
-    notes.push("Candidate uses advocacy language inconsistent with investigative development posture");
-  }
-
-  if (
-    development.epistemicPosture === "advocacy"
-    && structuralStep
-    && HEDGING_MARKERS.some((pattern) => pattern.test(normalized))
-  ) {
-    score -= 25;
-    notes.push("Candidate hedges excessively for advocacy development posture");
-  }
-
-  if (
-    development.epistemicPosture === "advocacy"
-    && structuralStep
-    && development.structuralAntiPatterns.some((pattern) => /slow|warmup|digression/.test(pattern))
-    && /antes de|vamos percorrer|sem fechar|sem chegar/.test(normalized)
-  ) {
-    score -= 30;
-    notes.push("Candidate delays the thesis for advocacy development posture");
+  const postureContext: PostureDriftContext = { candidate, normalized, development, structuralStep };
+  for (const guard of POSTURE_DRIFT_GUARDS[development.epistemicPosture] ?? []) {
+    if (guard.matches(postureContext)) {
+      score -= guard.penalty;
+      notes.push(guard.note);
+    }
   }
 
   if (
@@ -125,16 +161,6 @@ export function evaluateArgumentDevelopmentDrift(
   ) {
     score -= 15;
     notes.push("Candidate matches a structural anti-pattern in development profile");
-  }
-
-  if (
-    development.epistemicPosture === "exploratory"
-    && structuralStep
-    && hasPrematureThesis(candidate)
-    && !DOUBT_MARKERS.some((pattern) => pattern.test(normalized))
-  ) {
-    score -= 30;
-    notes.push("Candidate defends a thesis early without exploratory moves");
   }
 
   if (

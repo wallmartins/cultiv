@@ -29,7 +29,6 @@ export function runQualityLane(
 
     yield* emitLaneProgress(onProgress, lane.laneId, "critic", 30, `Running critic for ${lane.laneId}`);
     const critic = criticizeText(draft, context.voiceProfile, context.request, {
-      domain: context.generationContext?.domain,
       hookText,
       lexicalQualityV2: context.lexicalQualityV2,
       stepName: "draft"
@@ -61,7 +60,7 @@ export function runQualityLane(
       drift,
       score: emptyScore(),
       lexicalPenalty: context.lexicalQualityV2
-        ? evaluateLexicalQuality(refinedDraft, context.generationContext?.domain, hookText).penalty
+        ? evaluateLexicalQuality(refinedDraft, hookText).penalty
         : 0
     };
   });

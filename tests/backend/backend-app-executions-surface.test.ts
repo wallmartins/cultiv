@@ -31,7 +31,7 @@ describe("backend app execution surface", () => {
     expect(syncResponse.status).toBe(200);
     const decodedSync = await Effect.runPromise(decodeSyncExecutionView(await syncResponse.json()));
     expect(decodedSync.voice.voiceProfileSnapshotId).toBe(
-      expectedVoiceProfileSnapshotId("user_1", 2, "short-piece")
+      expectedVoiceProfileSnapshotId("user_1", 2, "professional-network")
     );
 
     const { app: asyncApp } = createExecutionApp("async");
@@ -50,7 +50,7 @@ describe("backend app execution surface", () => {
 
     expect(asyncResponse.status).toBe(202);
     const decodedQueued = await Effect.runPromise(decodeQueuedExecutionView(await asyncResponse.json()));
-    const newsletterSnapshotId = expectedVoiceProfileSnapshotId("user_1", 2, "edition-piece");
+    const newsletterSnapshotId = expectedVoiceProfileSnapshotId("user_1", 2, "email");
     expect(decodedQueued.voice.voiceProfileSnapshotId).toBe(newsletterSnapshotId);
 
     const listResponse = await asyncApp.request("/me/executions?limit=10&offset=0");

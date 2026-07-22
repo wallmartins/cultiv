@@ -16,6 +16,7 @@ import {
 } from "../http/errors.js";
 import { createExecutionFailure, normalizeExecutionFailure } from "./pipeline/execution-failure.js";
 import { executeSyncRun } from "./runtime.js";
+import { readGenerationChannel } from "./pipeline-metadata.js";
 import { stableStringify } from "./quality/quality.js";
 import { createQueuedRun } from "./queued-run.js";
 import { validateTrustedExecutionSnapshot } from "./pipeline/trusted-snapshot.js";
@@ -166,7 +167,7 @@ export function createBackendExecutionService(options: BackendExecutionOptions):
           `generation:${prepared.plan.pipeline.name}:${prepared.plan.request.idempotencyKey ?? "anonymous"}`
         ).userId,
         {
-          contentType: prepared.plan.contentType.id,
+          channel: readGenerationChannel("context" in prepared.request ? prepared.request.context : undefined),
           requestedLanguage: prepared.plan.request.language ?? prepared.plan.contentType.defaultLanguage
         }
       );

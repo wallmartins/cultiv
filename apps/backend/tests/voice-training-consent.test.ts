@@ -131,7 +131,7 @@ describe("Voice training consent-gated ingestion", () => {
 
     const effective = Effect.runSync(
       services.voice.resolveEffectiveVoice("user_6", {
-        contentType: "linkedin-post"
+        channel: "professional-network"
       })
     );
 
@@ -142,7 +142,7 @@ describe("Voice training consent-gated ingestion", () => {
       buildVoiceProfileSnapshotId(
         "user_6",
         effective!.metadata.voiceProfileVersionUsed,
-        "linkedin-post",
+        "professional-network",
         new Date("2026-05-14T00:00:00.000Z")
       )
     );
@@ -259,7 +259,7 @@ describe("Voice consent revocation and derived voice profile invalidation", () =
 
     const effectiveBefore = Effect.runSync(
       services.voice.resolveEffectiveVoice("user_revoke_2", {
-        contentType: "linkedin-post"
+        channel: "professional-network"
       })
     );
     expect(effectiveBefore).toBeDefined();
@@ -268,7 +268,7 @@ describe("Voice consent revocation and derived voice profile invalidation", () =
 
     const effectiveAfter = Effect.runSync(
       services.voice.resolveEffectiveVoice("user_revoke_2", {
-        contentType: "linkedin-post"
+        channel: "professional-network"
       })
     );
     expect(effectiveAfter).toBeUndefined();

@@ -2,6 +2,7 @@ import type {
   ArgumentDevelopmentSignature,
   CoreReasoningSignature,
   DevelopmentTraitProfile,
+  EpistemicPosture,
   ReasoningExtractionResult,
   TraitKey
 } from "@my-ai-orchestrator/contracts";
@@ -10,6 +11,36 @@ export interface VoiceSignatureDivergence {
   readonly hasConflict: boolean;
   readonly reasons: readonly string[];
 }
+
+interface PostureDivergenceGuard {
+  readonly matches: (core: CoreReasoningSignature, development: ArgumentDevelopmentSignature) => boolean;
+  readonly reason: string;
+}
+
+// Keyed by development.epistemicPosture. A posture without an entry raises zero reasons (neutral,
+// same as today's unhandled postures) — add a posture by adding a row here, nothing else.
+const POSTURE_DIVERGENCE_GUARDS: Partial<Record<EpistemicPosture, readonly PostureDivergenceGuard[]>> = {
+  exploratory: [
+    {
+      matches: (core) =>
+        core.certaintyLevel === "high" || core.conclusionPace === "fast" || core.judgmentFrequency === "high",
+      reason: "exploratory_posture_conflicts_with_core_certainty_or_pace"
+    }
+  ],
+  advocacy: [
+    {
+      matches: (core) =>
+        core.judgmentFrequency === "low" && (core.readerRelationship === "observer" || core.conclusionPace === "slow"),
+      reason: "advocacy_conflicts_with_observational_core"
+    }
+  ],
+  investigative: [
+    {
+      matches: (core, development) => core.judgmentFrequency === "high" && hasDoubtOrExperimentMoves(development),
+      reason: "investigative_moves_conflict_with_high_judgment"
+    }
+  ]
+};
 
 export function evaluateVoiceSignatureDivergence(args: {
   readonly reasoning: ReasoningExtractionResult;
@@ -21,27 +52,10 @@ export function evaluateVoiceSignatureDivergence(args: {
   const development = args.development;
   const traitProfile = args.traitProfile ?? development.traitProfile;
 
-  if (
-    development.epistemicPosture === "exploratory"
-    && (core.certaintyLevel === "high" || core.conclusionPace === "fast" || core.judgmentFrequency === "high")
-  ) {
-    reasons.push("exploratory_posture_conflicts_with_core_certainty_or_pace");
-  }
-
-  if (
-    development.epistemicPosture === "advocacy"
-    && core.judgmentFrequency === "low"
-    && (core.readerRelationship === "observer" || core.conclusionPace === "slow")
-  ) {
-    reasons.push("advocacy_conflicts_with_observational_core");
-  }
-
-  if (
-    development.epistemicPosture === "investigative"
-    && core.judgmentFrequency === "high"
-    && hasDoubtOrExperimentMoves(development)
-  ) {
-    reasons.push("investigative_moves_conflict_with_high_judgment");
+  for (const guard of POSTURE_DIVERGENCE_GUARDS[development.epistemicPosture] ?? []) {
+    if (guard.matches(core, development)) {
+      reasons.push(guard.reason);
+    }
   }
 
   if (hasProseCollapse(core.narrativeProse, development.developmentProse)) {
@@ -59,6 +73,10 @@ export function evaluateVoiceSignatureDivergence(args: {
     }
 
     const openingMode = traitProfile.traits.openingMode ?? traitProfile.records.openingMode?.value;
+    // ponytail: this compound check stays outside POSTURE_DIVERGENCE_GUARDS (F6-3) — it keys on a
+    // posture but also needs traitProfile (a third input the table's (core, development) guards lack).
+    // It's a single-posture conjunction, not a growing per-posture chain, so it doesn't reintroduce
+    // the antipattern; widen the guard signature only if more traitProfile+posture rules appear.
     if (
       openingMode === "thesis"
       && development.epistemicPosture === "exploratory"

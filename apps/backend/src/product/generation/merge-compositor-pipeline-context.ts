@@ -32,7 +32,7 @@ export function mergeCompositorPipelineContext(
     wordTarget: compositorPlan.parameters.wordTarget,
     lengthTier: compositorPlan.parameters.lengthTier,
     [PIPELINE_METADATA_KEYS.rhetoricalMode]: compositorPlan.parameters.rhetoricalMode,
-    generationChannel: channel,
+    [PIPELINE_METADATA_KEYS.generationChannel]: channel,
     [PIPELINE_METADATA_KEYS.compositor]: toCompositorMetadata(compositorPlan),
     ...(plannerMetadata ? { [PIPELINE_METADATA_KEYS.stepPlanner]: plannerMetadata } : {})
   };

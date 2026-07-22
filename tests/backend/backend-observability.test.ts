@@ -59,7 +59,7 @@ describe("backend observability", () => {
 
     const effective = Effect.runSync(
       services.voice.resolveEffectiveVoice("user_1", {
-        contentType: "linkedin-post",
+        channel: "professional-network",
         requestedLanguage: "pt-BR"
       })
     );

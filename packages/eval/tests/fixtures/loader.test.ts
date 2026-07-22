@@ -66,7 +66,8 @@ describe("loadFixtures", () => {
   it("loads all committed voice-fidelity fixtures without validation errors", () => {
     const cases = loadFixtures({ suite: "voice-fidelity" }, actualFixtureRoot);
 
-    expect(cases).toHaveLength(10);
+    // F6-2: 10 tech fixtures + 3 style-span domains (marketing, climate, legal).
+    expect(cases).toHaveLength(13);
     expect(cases.every((c) => c.suite === "voice-fidelity")).toBe(true);
   });
 

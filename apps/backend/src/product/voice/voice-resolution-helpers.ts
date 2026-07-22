@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import type {
   ExecutionVoiceMetadataView,
   FallbackReasonCode,
+  GenerationChannel,
   VoiceAdaptationMode,
   VoiceProfileConfidence,
   VoiceSignalSummary
@@ -59,7 +60,7 @@ export function buildEffectiveVoiceMetadata(args: {
     };
   };
   readonly context: {
-    readonly contentType: string;
+    readonly channel: GenerationChannel;
     readonly requestedLanguage?: string;
   };
   readonly confidence: VoiceProfileConfidence;
@@ -123,9 +124,9 @@ export function resolveFallbackReasonCode(
 export function buildVoiceProfileSnapshotId(
   userId: string,
   profileVersion: number,
-  contentType: string,
+  channel: GenerationChannel,
   timestamp: Date
 ): string {
-  const canonical = `${userId}:v${profileVersion}:${contentType}:${timestamp.toISOString()}`;
+  const canonical = `${userId}:v${profileVersion}:${channel}:${timestamp.toISOString()}`;
   return `vps:${createHash("sha256").update(canonical).digest("hex").slice(0, 32)}`;
 }

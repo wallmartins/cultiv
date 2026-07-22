@@ -4,8 +4,6 @@ import {
   collectVoiceExampleTexts,
   formatVoiceExamples
 } from "../../apps/backend/src/execution/skill-inputs.js";
-import { filterLexiconForDomain } from "../../apps/backend/src/product/voice/voice-hints.js";
-import { classifyGenerationDomain } from "../../packages/text-quality/src/domain/domain-classifier.js";
 
 describe("voice prompt inputs", () => {
   it("formats author examples for prompt injection", () => {
@@ -26,17 +24,6 @@ describe("voice prompt inputs", () => {
         antiPatternsExplicit: ["metáforas de software fora de contexto"]
       })
     ).toEqual(["generic linkedin tone", "metáforas de software fora de contexto"]);
-  });
-
-  it("filters technical lexicon on non-technical domains", () => {
-    const domain = classifyGenerationDomain({
-      contentType: "linkedin-post",
-      briefing: "Escreva sobre aprendizado e carreira."
-    });
-
-    expect(
-      filterLexiconForDomain(["cache", "observação", "deploy"], domain)
-    ).toEqual(["observação"]);
   });
 
   it("collects trimmed signature phrases from the voice profile", () => {

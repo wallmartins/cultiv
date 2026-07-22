@@ -1,0 +1,20 @@
+{
+  "id": "voice-fidelity-marketing-conversion-01",
+  "suite": "voice-fidelity",
+  "input": {
+    "contentType": "blog-post",
+    "briefing": "Write about why a well-reviewed case study still is not converting",
+    "voiceProfile": {
+      "type": "fixture",
+      "path": "voice-fidelity/profiles/marketing-senior.json"
+    },
+    "qualityMode": "balanced"
+  },
+  "expectations": {
+    "mustContain": ["case study"],
+    "mustNotContain": ["engajamento e autenticidade", "agregar valor", "conteúdo é rei"],
+    "wordCountRange": { "min": 150, "max": 500 },
+    "minDriftScore": 60
+  },
+  "tags": ["blog", "marketing", "persuasive", "domain:marketing"]
+}

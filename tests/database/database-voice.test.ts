@@ -85,7 +85,7 @@ describe("database voice aggregate", () => {
       userId: "user_1",
       sourceProfileId: "voice-profile:user_1",
       sourceProfileVersion: 2,
-      contentType: "linkedin-post",
+      channel: "professional-network",
       confidence: "medium",
       adaptationMode: "standard",
       appliedSignals: {
@@ -94,7 +94,7 @@ describe("database voice aggregate", () => {
         antiPatterns: ["o problema"]
       },
       resolutionContext: {
-        contentType: "linkedin-post"
+        channel: "professional-network"
       },
       createdAt: "2026-05-14T00:00:00.000Z"
     });
@@ -107,7 +107,7 @@ describe("database voice aggregate", () => {
     expect(diagnosticsRecord.version).toBe(1);
     expect(toVoiceProfileDiagnosticsDomain(diagnosticsRecord).materialBase.totalExamples).toBe(1);
     expect(snapshotRecord.version).toBe(1);
-    expect(toVoiceProfileSnapshotDomain(snapshotRecord).contentType).toBe("linkedin-post");
+    expect(toVoiceProfileSnapshotDomain(snapshotRecord).channel).toBe("professional-network");
   });
 
   it("persists voice examples, profiles, snapshots and batches", () => {
@@ -188,7 +188,7 @@ describe("database voice aggregate", () => {
       userId: "user_1",
       sourceProfileId: "voice-profile:user_1",
       sourceProfileVersion: 3,
-      contentType: "newsletter",
+      channel: "email",
       confidence: "high",
       adaptationMode: "standard",
       appliedSignals: {
@@ -197,7 +197,7 @@ describe("database voice aggregate", () => {
         antiPatterns: ["a soluÃ§Ã£o"]
       },
       resolutionContext: {
-        contentType: "newsletter"
+        channel: "email"
       },
       createdAt: "2026-05-14T00:10:00.000Z"
     }));

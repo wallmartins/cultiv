@@ -15,7 +15,6 @@ import {
   type ExecutePipelineAttemptArgs,
   type ExecutePipelineAttemptResult
 } from "../pipeline/pipeline-attempt.js";
-import { filterLexiconForDomain } from "../../product/voice/voice-hints.js";
 import { resolveGenerationRuntimeContext } from "../pipeline/generation-runtime.js";
 import { resolveBriefingText } from "./quality-briefing.js";
 import { buildRuntimeQualityLanes, laneCountForQualityMode } from "./quality-lanes.js";
@@ -41,8 +40,7 @@ export function executeQualitySelectionAttempt(
   const runtimeInputs = toRuntimeInputRecord(sanitizedInput);
   const briefing = resolveBriefingText(runtimeInputs);
   const generationContext = resolveGenerationRuntimeContext({
-    contentType: options.plan.contentType.id,
-    inputs: runtimeInputs
+    contentType: options.plan.contentType.id
   });
   const lexicalQualityV2 = options.services.featureFlags.isEnabled("generation.lexicalQualityV2", {
     contentType: options.plan.contentType.id,
@@ -61,7 +59,7 @@ export function executeQualitySelectionAttempt(
   const voiceHints = options.voice?.voiceHints
     ? {
         ...options.voice.voiceHints,
-        lexicon: filterLexiconForDomain(options.voice.voiceHints.lexicon ?? [], generationContext.domain)
+        lexicon: options.voice.voiceHints.lexicon ?? []
       }
     : undefined;
 

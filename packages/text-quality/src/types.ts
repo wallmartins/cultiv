@@ -1,6 +1,6 @@
 import type { Effect } from "effect";
 import type { PipelineRequest, TextQualityVoiceProfile } from "@my-ai-orchestrator/contracts";
-import type { GenerationContext } from "./domain/generation-context.js";
+import type { GenerationContext } from "./format/generation-context.js";
 
 export type VoiceProfile = TextQualityVoiceProfile;
 

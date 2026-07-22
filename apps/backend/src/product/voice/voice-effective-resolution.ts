@@ -13,7 +13,7 @@ import {
   resolveAdaptationMode,
   resolveFallbackReasonCode
 } from "./voice-resolution-helpers.js";
-import { buildVoiceHints, selectExamplesForContentType } from "./voice-hints.js";
+import { buildVoiceHints, selectExamplesForChannel } from "./voice-hints.js";
 import { toVoiceProfileDomain } from "@my-ai-orchestrator/database";
 
 export function resolveEffectiveVoice(
@@ -49,7 +49,7 @@ export function resolveEffectiveVoice(
     const profile = toVoiceProfileDomain(profileRecord);
     const examples = yield* database.voiceExamples.listByUser(userId);
     const activeExamples = examples.filter((example) => example.state === "active");
-    const matchingExamples = selectExamplesForContentType(activeExamples, context.contentType);
+    const matchingExamples = selectExamplesForChannel(activeExamples, context.channel);
     const pinnedMatchingExamples = matchingExamples.filter((example) => example.pinned);
     const fallbackReasonCode = resolveFallbackReasonCode(diagnostics.pendingRebuild.status);
     const usedFallbackVoiceProfile = fallbackReasonCode !== undefined;
@@ -63,7 +63,6 @@ export function resolveEffectiveVoice(
     const reasoningSignatureEnabled =
       options?.featureFlags?.isEnabled("voice.reasoningSignatureV1", {
         userId,
-        contentType: context.contentType,
         environment: options?.config?.environment
       }) ?? false;
     const voiceHints = buildVoiceHints(
@@ -73,10 +72,9 @@ export function resolveEffectiveVoice(
       context,
       confidence,
       adaptationMode,
-      undefined,
       { reasoningSignatureEnabled }
     );
-    const snapshotId = buildVoiceProfileSnapshotId(userId, profile.version, context.contentType, now());
+    const snapshotId = buildVoiceProfileSnapshotId(userId, profile.version, context.channel, now());
     const metadata = buildEffectiveVoiceMetadata({
       profile: {
         profileVersion: profile.version,
@@ -98,12 +96,12 @@ export function resolveEffectiveVoice(
       userId,
       sourceProfileId: profile.id,
       sourceProfileVersion: profile.version,
-      contentType: context.contentType,
+      channel: context.channel,
       confidence,
       adaptationMode,
       appliedSignals: buildAppliedSignals(voiceHints),
       resolutionContext: {
-        contentType: context.contentType,
+        channel: context.channel,
         requestedLanguage: context.requestedLanguage,
         voiceProfileConfidence: confidence,
         voiceAdaptationMode: adaptationMode,
@@ -115,14 +113,14 @@ export function resolveEffectiveVoice(
     yield* observability.recordVoiceSnapshotPersisted({
       userId,
       snapshotId,
-      contentType: context.contentType,
+      channel: context.channel,
       requestedLanguage: context.requestedLanguage,
       voiceProfileVersionUsed: profile.version
     });
     logger?.info("Persisted execution voice snapshot", {
       userId,
       snapshotId,
-      contentType: context.contentType,
+      channel: context.channel,
       requestedLanguage: context.requestedLanguage
     });
 

@@ -7,7 +7,7 @@ describe("voice profile snapshot ids", () => {
     const snapshotId = buildVoiceProfileSnapshotId(
       userId,
       12,
-      "edition-piece",
+      "email",
       new Date("2026-06-24T12:00:00.000Z")
     );
 

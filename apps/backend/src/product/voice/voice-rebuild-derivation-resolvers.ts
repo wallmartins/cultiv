@@ -1,5 +1,4 @@
 import type { VoiceExampleRecord } from "@my-ai-orchestrator/database";
-import { isTechLexiconTerm } from "@my-ai-orchestrator/text-quality";
 import type { VoiceProfileConfidence } from "@my-ai-orchestrator/contracts";
 
 export function resolvePrimaryLanguage(activeExamples: readonly VoiceExampleRecord[]): string {
@@ -47,7 +46,7 @@ export function resolveLexicon(activeExamples: readonly VoiceExampleRecord[]): r
 
   const frequencies = new Map<string, number>();
   for (const token of activeExamples.flatMap((example) => tokenize(example.text))) {
-    if (token.length < 5 || stopWords.has(token) || isTechLexiconTerm(token)) {
+    if (token.length < 5 || stopWords.has(token)) {
       continue;
     }
 

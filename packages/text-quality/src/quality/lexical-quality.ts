@@ -1,5 +1,3 @@
-import type { DomainProfile } from "../domain/domain-classifier.js";
-import { countTechTermHits } from "../domain/tech-terms.js";
 import { countEmDashes } from "./em-dash.js";
 
 const STOPWORDS = new Set([
@@ -81,7 +79,6 @@ export interface LexicalQualityMetrics {
   readonly typeTokenRatio: number;
   readonly topTermConcentration: number;
   readonly repeatedBigramCount: number;
-  readonly techTermHits: number;
   readonly spacedLemmaRepeats: number;
   readonly emDashCount: number;
 }
@@ -94,10 +91,9 @@ export interface LexicalQualityEvaluation {
 
 export function evaluateLexicalQuality(
   text: string,
-  domain?: DomainProfile,
   hookText?: string
 ): LexicalQualityEvaluation {
-  const metrics = measureLexicalQuality(text, domain, hookText);
+  const metrics = measureLexicalQuality(text, hookText);
   const findings: string[] = [];
   let penalty = 0;
 
@@ -119,11 +115,6 @@ export function evaluateLexicalQuality(
   if (metrics.spacedLemmaRepeats > 0) {
     findings.push("Same word repeated too often across the text");
     penalty += Math.min(28, metrics.spacedLemmaRepeats * 10);
-  }
-
-  if (domain && domain.domain === "non-technical" && metrics.techTermHits > 0) {
-    findings.push("Technical jargon detected in a non-technical text");
-    penalty += Math.min(40, metrics.techTermHits * 12);
   }
 
   if (hookText && hookText.trim().length > 0) {
@@ -148,7 +139,6 @@ export function evaluateLexicalQuality(
 
 export function measureLexicalQuality(
   text: string,
-  domain?: DomainProfile,
   hookText?: string
 ): LexicalQualityMetrics {
   const tokens = tokenizeContent(text);
@@ -162,7 +152,6 @@ export function measureLexicalQuality(
     typeTokenRatio: tokens.length === 0 ? 1 : uniqueTokens.size / tokens.length,
     topTermConcentration: topFrequency,
     repeatedBigramCount: countRepeatedBigrams(text),
-    techTermHits: domain?.domain === "non-technical" ? countTechTermHits(text) : 0,
     spacedLemmaRepeats: countSpacedLemmaRepeats(frequencies),
     emDashCount: countEmDashes(text)
   };

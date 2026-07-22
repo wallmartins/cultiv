@@ -1,0 +1,20 @@
+{
+  "id": "voice-fidelity-climate-internal-sale-01",
+  "suite": "voice-fidelity",
+  "input": {
+    "contentType": "blog-post",
+    "briefing": "Write about why the corporate recycling pilot never turns into a contract",
+    "voiceProfile": {
+      "type": "fixture",
+      "path": "voice-fidelity/profiles/climate-tech-pm.json"
+    },
+    "qualityMode": "balanced"
+  },
+  "expectations": {
+    "mustContain": ["recycling pilot"],
+    "mustNotContain": ["compromisso com o planeta", "impacto positivo", "consciência ambiental"],
+    "wordCountRange": { "min": 150, "max": 500 },
+    "minDriftScore": 60
+  },
+  "tags": ["blog", "climate", "operational", "domain:climate"]
+}

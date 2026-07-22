@@ -193,7 +193,7 @@ describe("backend voice service", () => {
 
     const effective = Effect.runSync(
       services.voice.resolveEffectiveVoice("user_1", {
-        contentType: "linkedin-post",
+        channel: "professional-network",
         requestedLanguage: "en-US"
       })
     );
@@ -204,7 +204,7 @@ describe("backend voice service", () => {
       buildVoiceProfileSnapshotId(
         "user_1",
         effective!.metadata.voiceProfileVersionUsed,
-        "linkedin-post",
+        "professional-network",
         new Date("2026-05-14T00:00:00.000Z")
       )
     );

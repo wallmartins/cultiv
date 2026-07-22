@@ -2,13 +2,13 @@ import type { VoiceExampleRecord } from "@my-ai-orchestrator/database";
 import type {
   ArgumentDevelopmentSignature,
   CoreReasoningSignature,
+  GenerationChannel,
   VoiceAdaptationMode,
   VoiceProfileConfidence
 } from "@my-ai-orchestrator/contracts";
-import type { DomainProfile, VoiceProfile } from "@my-ai-orchestrator/text-quality";
-import { filterTechLexiconTerms, isTechLexiconTerm } from "@my-ai-orchestrator/text-quality";
+import type { VoiceProfile } from "@my-ai-orchestrator/text-quality";
 import { normalizeLanguage, unique } from "./voice-utils.js";
-import { resolveContentTypeVoicePreset } from "./voice-presets.js";
+import { resolveChannelVoicePreset } from "./voice-presets.js";
 
 export function buildVoiceHints(
   profile: {
@@ -30,15 +30,14 @@ export function buildVoiceHints(
   matchingExamples: readonly VoiceExampleRecord[],
   pinnedMatchingExamples: readonly VoiceExampleRecord[],
   context: {
-    readonly contentType: string;
+    readonly channel: GenerationChannel;
     readonly requestedLanguage?: string;
   },
   confidence: VoiceProfileConfidence,
   adaptationMode: VoiceAdaptationMode,
-  domainProfile?: DomainProfile,
   options?: { readonly reasoningSignatureEnabled?: boolean }
 ): Partial<VoiceProfile> {
-  const preset = resolveContentTypeVoicePreset(context.contentType);
+  const preset = resolveChannelVoicePreset(context.channel);
   const reasoningSignatureEnabled = options?.reasoningSignatureEnabled === true;
   const languageMismatch =
     typeof context.requestedLanguage === "string"
@@ -59,7 +58,6 @@ export function buildVoiceHints(
   const antiPatterns = unique([
     ...profile.antiPatterns.slice(0, confidence === "low" ? 3 : 6),
     ...derivedAntiPatterns,
-    ...(domainProfile?.domain === "non-technical" ? ["forced tech metaphors unrelated to the topic"] : []),
     ...(languageMismatch ? ["language drift"] : [])
   ]);
   const explicitFromExamples = unique(
@@ -68,13 +66,10 @@ export function buildVoiceHints(
   const antiPatternsExplicit = explicitFromExamples;
 
   const profileLexicon = unique(profile.lexicon);
-  const lexicon = filterLexiconForDomain(
-    unique([
-      ...profileLexicon.slice(0, confidence === "low" ? 4 : 8),
-      ...extractLexicon(matchingExamples, confidence === "low" ? 6 : 12)
-    ]).slice(0, confidence === "low" ? 4 : 8),
-    domainProfile
-  );
+  const lexicon = unique([
+    ...profileLexicon.slice(0, confidence === "low" ? 4 : 8),
+    ...extractLexicon(matchingExamples, confidence === "low" ? 6 : 12)
+  ]).slice(0, confidence === "low" ? 4 : 8);
 
   const userLabels = unique(
     matchingExamples.flatMap((example) => example.classificationLabels ?? [])
@@ -111,37 +106,51 @@ export function buildVoiceHints(
   };
 }
 
-export function filterLexiconForDomain(
-  lexicon: readonly string[],
-  domainProfile?: DomainProfile
-): readonly string[] {
-  if (!domainProfile || domainProfile.allowTechnicalLexicon) {
-    return lexicon;
-  }
+// A voice example's Content Type maps to the channel it reads on. The FEP (ADR 0010 F6-4) narrows
+// examples by channel, not by the retired Content Type. Unknown types → "unspecified" (never a
+// specific-channel match). Length format aliases collapse onto the same channel bucket.
+const CHANNEL_BY_CONTENT_TYPE: Record<string, GenerationChannel> = {
+  "linkedin-post": "professional-network",
+  "twitter-thread": "social",
+  newsletter: "email",
+  blog: "blog",
+  "long-form-blog": "blog",
+  "validation-post": "professional-network",
+  "architecture-post": "professional-network"
+};
 
-  return filterTechLexiconTerms(lexicon);
+function channelForContentType(contentType: string | undefined): GenerationChannel {
+  return (contentType ? CHANNEL_BY_CONTENT_TYPE[contentType] : undefined) ?? "unspecified";
 }
 
-export function selectExamplesForContentType(
+function exampleServesChannel(example: VoiceExampleRecord, channel: GenerationChannel): boolean {
+  if (channelForContentType(example.explicitContentType) === channel) {
+    return true;
+  }
+
+  return (example.effectiveContentTypeHints ?? []).some(
+    (hint) => channelForContentType(hint) === channel
+  );
+}
+
+export function selectExamplesForChannel(
   examples: readonly VoiceExampleRecord[],
-  contentType: string
+  channel: GenerationChannel
 ): VoiceExampleRecord[] {
-  return [...examples]
-    .filter((example) => {
-      if (example.explicitContentType === contentType) {
-        return true;
-      }
+  // `unspecified` = the author picked no channel, so don't narrow — the whole voice is in scope.
+  const scoped =
+    channel === "unspecified"
+      ? [...examples]
+      : examples.filter((example) => exampleServesChannel(example, channel));
 
-      return (example.effectiveContentTypeHints ?? []).includes(contentType);
-    })
-    .sort((left, right) => {
-      const pinnedRank = Number(right.pinned) - Number(left.pinned);
-      if (pinnedRank !== 0) {
-        return pinnedRank;
-      }
+  return scoped.sort((left, right) => {
+    const pinnedRank = Number(right.pinned) - Number(left.pinned);
+    if (pinnedRank !== 0) {
+      return pinnedRank;
+    }
 
-      return right.updatedAt.localeCompare(left.updatedAt);
-    });
+    return right.updatedAt.localeCompare(left.updatedAt);
+  });
 }
 
 export function deriveExampleStyleMarkers(text: string): readonly string[] {
@@ -196,7 +205,7 @@ export function extractLexicon(examples: readonly VoiceExampleRecord[], limit: n
       .toLowerCase()
       .split(/[^\p{L}0-9]+/u)
       .map((value) => value.trim())
-      .filter((value) => value.length > 4 && !LEXICON_STOPWORDS.has(value) && !isTechLexiconTerm(value))
+      .filter((value) => value.length > 4 && !LEXICON_STOPWORDS.has(value))
   )) {
     frequencies.set(token, (frequencies.get(token) ?? 0) + 1);
   }

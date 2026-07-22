@@ -45,7 +45,7 @@ describe("backend app execution surface", () => {
     expect(decodedFirst.content).toContain("provider:gemini:");
     expect(decodedFirst.trace).toBeDefined();
     expect(decodedFirst.voice?.voiceProfileSnapshotId).toBe(
-      expectedVoiceProfileSnapshotId("user_1", 2, "short-piece")
+      expectedVoiceProfileSnapshotId("user_1", 2, "unspecified")
     );
 
     const secondResponse = await app.request("/me/executions/run", {

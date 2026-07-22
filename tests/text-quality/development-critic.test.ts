@@ -25,6 +25,16 @@ describe("development critic", () => {
     expect(findings.some((finding) => finding.type === "structural_advocacy_arc")).toBe(true);
   });
 
+  it("falls back to the neutral guard for a posture without a table entry", () => {
+    const findings = collectDevelopmentFindings(
+      { ...development, epistemicPosture: "expository", structuralAntiPatterns: [] },
+      "Portanto a conclusão é clara logo no início. Você deve sempre fazer assim sem hesitar.",
+      "draft"
+    );
+
+    expect(findings).toEqual([]);
+  });
+
   it("returns no findings when development signature is absent", () => {
     expect(collectDevelopmentFindings(undefined, "Any text", "draft")).toEqual([]);
   });

@@ -1,4 +1,5 @@
-import type { CompositorMetadata, ExecutionTelemetry, PlanSignature } from "@my-ai-orchestrator/contracts";
+import type { CompositorMetadata, ExecutionTelemetry, GenerationChannel, PlanSignature } from "@my-ai-orchestrator/contracts";
+import { isGenerationChannel } from "@my-ai-orchestrator/contracts";
 
 // Backend-internal generation metadata rides inside PipelineRequest.context under these keys.
 // This module owns the keys and the read guards so a duck-typed reader can't silently drift
@@ -9,8 +10,10 @@ import type { CompositorMetadata, ExecutionTelemetry, PlanSignature } from "@my-
 export const PIPELINE_METADATA_KEYS = {
   compositor: "compositor",
   stepPlanner: "stepPlanner",
-  rhetoricalMode: "rhetoricalMode"
+  rhetoricalMode: "rhetoricalMode",
+  generationChannel: "generationChannel"
 } as const;
+
 
 const PLAN_SIGNATURES = new Set<PlanSignature>([
   "short-piece",
@@ -57,4 +60,12 @@ export function readStepPlannerTelemetry(context: unknown): ExecutionTelemetry["
     basePlanSignature,
     finalPlanSignature
   };
+}
+
+// The generation channel rides in the same context bag (written by merge-compositor-pipeline-context)
+// and keys the Format Expression Profile (ADR 0010 F6-4). Unknown/absent → "unspecified" so a legacy
+// or channel-less request degrades to the un-narrowed voice, never throws.
+export function readGenerationChannel(context: unknown): GenerationChannel {
+  const value = asRecord(context)?.[PIPELINE_METADATA_KEYS.generationChannel];
+  return isGenerationChannel(value) ? value : "unspecified";
 }

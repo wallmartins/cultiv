@@ -69,7 +69,7 @@ The offline harmonization step after parallel **Reasoning Extraction** and **Arg
 _Avoid_: User-visible conflict card, dual profile, generation gate, unconditional third extraction call
 
 **Format Expression Profile**:
-Per-format register and expression traits — such as formality, technical density, and channel conventions — derived only when the author has enough active examples; optional in cold start. A **voice** artifact (how the author sounds on a channel). Still keyed by **Content Type** in the live code today; ADR 0010 (F6-4) re-keys it to **channel** once **Content Type** is fully retired — not yet done. Audience does **not** enter here — it is a parallel accessibility axis, not a voice one.
+Per-format register and expression traits — such as formality, technical density, and channel conventions — derived only when the author has enough active examples; optional in cold start. A **voice** artifact (how the author sounds on a channel). Keyed by **channel** (`GenerationChannel`) throughout the voice-resolution surface, re-keyed from the retired **Content Type** by ADR 0010 (F6-4). Audience does **not** enter here — it is a parallel accessibility axis, not a voice one.
 _Avoid_: Format voice preset, channel persona, per-format cognitive profile, audience register
 
 **Derived Anti-Patterns**:

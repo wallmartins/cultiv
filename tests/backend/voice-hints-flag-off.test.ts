@@ -29,7 +29,7 @@ describe("buildVoiceHints reasoning flag", () => {
   };
 
   it("does not expose reasoning fields or derived anti-patterns when flag is off", () => {
-    const hints = buildVoiceHints(profile, [], [], { contentType: "linkedin-post" }, "high", "standard", undefined, {
+    const hints = buildVoiceHints(profile, [], [], { channel: "professional-network" }, "high", "standard", {
       reasoningSignatureEnabled: false
     });
 
@@ -41,7 +41,7 @@ describe("buildVoiceHints reasoning flag", () => {
   });
 
   it("exposes reasoning fields and derived anti-patterns when flag is on", () => {
-    const hints = buildVoiceHints(profile, [], [], { contentType: "linkedin-post" }, "high", "standard", undefined, {
+    const hints = buildVoiceHints(profile, [], [], { channel: "professional-network" }, "high", "standard", {
       reasoningSignatureEnabled: true
     });
 

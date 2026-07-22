@@ -1,0 +1,38 @@
+{
+  "userId": "eval-marketing-senior",
+  "tone": "persuasive",
+  "cadence": "brisk",
+  "description": "Writes copy that sells rather than copy that is merely pretty — anchors every claim in something the reader can see, not a slogan.",
+  "lexicon": ["copy", "CTA", "funil", "conversão", "lead", "posicionamento", "hook", "headline", "oferta", "prova social", "NPS"],
+  "constraints": ["show a concrete before/after instead of asserting a benefit", "name the buying objection before answering it"],
+  "antiPatterns": ["vague benefit claims", "hype without a mechanism"],
+  "antiPatternsExplicit": [
+    "engajamento e autenticidade",
+    "conte uma história",
+    "agregar valor",
+    "conteúdo é rei",
+    "jornada do cliente"
+  ],
+  "rules": ["open with what the reader should do next", "close by naming why now, not later"],
+  "styleMarkers": ["first-person", "short paragraph"],
+  "userLabels": ["marketing", "copywriter", "persuasive"],
+  "coreReasoningSignature": {
+    "narrativeProse": "Leads with the action the reader should take and the belief that makes it necessary, then proves it with something concrete instead of a claim.",
+    "certaintyLevel": "high",
+    "judgmentFrequency": "high",
+    "conclusionPace": "fast",
+    "readerRelationship": "advisor",
+    "authoritySource": "practice",
+    "derivedAntiPatterns": ["unproven benefit language", "generic engagement talk"]
+  },
+  "argumentDevelopmentSignature": {
+    "developmentProse": "States the intended action, shows evidence instead of asserting it, names the buying objection, then closes with urgency.",
+    "moveLabels": ["action", "proof", "objection", "urgency"],
+    "transitionTendencies": [
+      { "from": "action", "to": "proof", "frequency": "common" },
+      { "from": "objection", "to": "urgency", "frequency": "occasional" }
+    ],
+    "epistemicPosture": "promotional",
+    "structuralAntiPatterns": ["hand_wavy_claim", "absolute_prescription"]
+  }
+}

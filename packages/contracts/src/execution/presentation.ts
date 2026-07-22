@@ -3,6 +3,7 @@ import type {
   GenerationChannel,
   GenerationLengthTier
 } from "../generation-scope.js";
+import { isGenerationChannel } from "../generation-scope.js";
 import { RHETORICAL_MODES, type RhetoricalMode } from "../reasoning.js";
 import type { PipelineRequest } from "./request.js";
 
@@ -16,14 +17,6 @@ export type ExecutionPresentation = {
 const RHETORICAL_MODE_SET = new Set<RhetoricalMode>(RHETORICAL_MODES);
 
 const GENERATION_LENGTH_TIERS = new Set<GenerationLengthTier>(["short", "medium", "long"]);
-
-const GENERATION_CHANNELS = new Set<GenerationChannel>([
-  "unspecified",
-  "professional-network",
-  "blog",
-  "email",
-  "social"
-]);
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
@@ -42,9 +35,7 @@ function asGenerationLengthTier(value: unknown): GenerationLengthTier | undefine
 }
 
 function asGenerationChannel(value: unknown): GenerationChannel | undefined {
-  return typeof value === "string" && GENERATION_CHANNELS.has(value as GenerationChannel)
-    ? (value as GenerationChannel)
-    : undefined;
+  return isGenerationChannel(value) ? value : undefined;
 }
 
 function pickTopicFromRecord(record: Record<string, unknown>): string | undefined {

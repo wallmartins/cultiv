@@ -15,11 +15,10 @@ export function selectBestCandidate(
   }
 
   const qualityProfile = resolveContentTypeQualityProfile(context.request);
-  const eligible = context.lexicalQualityV2 && context.generationContext
+  const eligible = context.lexicalQualityV2
     ? candidates.filter((candidate) =>
       authorizeLexicalOutput({
         text: candidate.refinedDraft,
-        domain: context.generationContext!.domain,
         profile: qualityProfile,
         lexicalQualityV2: true
       }).decision === "pass"
@@ -63,10 +62,9 @@ function scoreCandidateForSelection(
 
   score += scoreLengthAlignment(candidate.refinedDraft, context);
 
-  if (context.lexicalQualityV2 && context.generationContext) {
+  if (context.lexicalQualityV2) {
     const gate = authorizeLexicalOutput({
       text: candidate.refinedDraft,
-      domain: context.generationContext.domain,
       profile: qualityProfile,
       lexicalQualityV2: true
     });

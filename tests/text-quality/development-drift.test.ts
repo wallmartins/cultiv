@@ -18,6 +18,21 @@ describe("argument development drift", () => {
     expect(evaluateArgumentDevelopmentDrift(undefined, "Any candidate", "draft").score).toBe(100);
   });
 
+  it("falls back to the neutral guard for a posture without a table entry", () => {
+    const result = evaluateArgumentDevelopmentDrift(
+      {
+        ...TEST_ARGUMENT_DEVELOPMENT_EXTRACTION_FIXTURE.development,
+        epistemicPosture: "expository",
+        structuralAntiPatterns: []
+      },
+      "Portanto, a conclusão é que você deve sempre fazer assim.\n\nO certo é seguir este caminho sem hesitar.",
+      "draft"
+    );
+
+    expect(result.score).toBe(100);
+    expect(result.notes).toEqual([]);
+  });
+
   it("does not penalize candidates for missing move label substrings", () => {
     const result = evaluateArgumentDevelopmentDrift(
       TEST_ARGUMENT_DEVELOPMENT_EXTRACTION_FIXTURE.development,
