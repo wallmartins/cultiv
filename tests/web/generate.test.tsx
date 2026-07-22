@@ -6,7 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
 import { beforeEach, describe, expect, it } from "vitest";
-import type { GenerationPreviewResponse } from "@my-ai-orchestrator/contracts";
+import type { GenerationPreviewResponse, GenreSignature, MePracticeProfileResponse } from "@my-ai-orchestrator/contracts";
 import { makeAppRuntime, queryKeys, RuntimeProvider, useWizardSessionStore } from "@my-ai-orchestrator/shared";
 import { messagesFor } from "@my-ai-orchestrator/ui/app/i18n";
 import { GenerateContainer } from "~/routes/generate.js";
@@ -254,6 +254,120 @@ describe("generate surface (S3)", () => {
 
     expect(await screen.findByText("Seus créditos acabaram — e a renovação não passou.")).toBeInTheDocument();
     expect(screen.queryByText("Sobre o que você quer")).not.toBeInTheDocument();
+  });
+
+  it("narrowing — 2+ declared audiences render the chip step before the questions (F4-2)", async () => {
+    const queryClient = newQueryClient();
+    queryClient.setQueryData(queryKeys.entitlement(), entitlementFixture);
+    queryClient.setQueryData(queryKeys.practiceProfile(), {
+      profile: {
+        subject: "engenharia de software",
+        vantagePoint: "líder técnico em startup",
+        audiences: ["gestores de produto", "devs"],
+        depth: "seed"
+      }
+    } satisfies MePracticeProfileResponse);
+
+    renderGenerate(queryClient);
+
+    const textarea = await screen.findByPlaceholderText("Cole uma ideia, uma inquietação, um tema…");
+    fireEvent.change(textarea, { target: { value: "hábitos de escrita" } });
+    fireEvent.keyDown(textarea, { key: "Enter" });
+
+    expect(await screen.findByText("Pra quem é esse texto, dessa vez?")).toBeInTheDocument();
+    expect(screen.getByText("gestores de produto")).toBeInTheDocument();
+    expect(screen.getByText("devs")).toBeInTheDocument();
+    expect(screen.queryByPlaceholderText("Responda com uma ou duas frases…")).not.toBeInTheDocument();
+  });
+
+  it("narrowing — '+ adicionar público' confirms an ephemeral audience for this generation only", async () => {
+    const queryClient = newQueryClient();
+    queryClient.setQueryData(queryKeys.entitlement(), entitlementFixture);
+    queryClient.setQueryData(queryKeys.practiceProfile(), {
+      profile: {
+        subject: "engenharia de software",
+        vantagePoint: "líder técnico em startup",
+        audiences: ["gestores de produto", "devs"],
+        depth: "seed"
+      }
+    } satisfies MePracticeProfileResponse);
+
+    renderGenerate(queryClient);
+
+    const themeTextarea = await screen.findByPlaceholderText("Cole uma ideia, uma inquietação, um tema…");
+    fireEvent.change(themeTextarea, { target: { value: "hábitos de escrita" } });
+    fireEvent.keyDown(themeTextarea, { key: "Enter" });
+
+    const addInput = await screen.findByPlaceholderText("outro público…");
+    fireEvent.change(addInput, { target: { value: "recrutadores técnicos" } });
+    fireEvent.click(screen.getByText("+ adicionar"));
+
+    // Adding immediately confirms it as the narrowed audience — same one-click narrowing as
+    // clicking a declared chip — and it's never written back to the Practice Profile.
+    expect(useWizardSessionStore.getState().phase).not.toBe("narrowing");
+    expect(useWizardSessionStore.getState().audience).toBe("recrutadores técnicos");
+  });
+
+  it("narrowing — 0 or 1 declared audiences auto-skip straight past the chip step (F4-2 buffer)", async () => {
+    const queryClient = newQueryClient();
+    queryClient.setQueryData(queryKeys.entitlement(), entitlementFixture);
+    queryClient.setQueryData(queryKeys.practiceProfile(), {
+      profile: {
+        subject: "engenharia de software",
+        vantagePoint: "líder técnico em startup",
+        audiences: ["gestores de produto"],
+        depth: "seed"
+      }
+    } satisfies MePracticeProfileResponse);
+
+    renderGenerate(queryClient);
+
+    const textarea = await screen.findByPlaceholderText("Cole uma ideia, uma inquietação, um tema…");
+    fireEvent.change(textarea, { target: { value: "hábitos de escrita" } });
+    fireEvent.keyDown(textarea, { key: "Enter" });
+
+    // Synchronous within submitTheme — no narrowing phase, and the single declared audience is
+    // already confirmed before the (network) prefill call even fires.
+    expect(useWizardSessionStore.getState().phase).not.toBe("narrowing");
+    expect(useWizardSessionStore.getState().audience).toBe("gestores de produto");
+    expect(screen.queryByText("Pra quem é esse texto, dessa vez?")).not.toBeInTheDocument();
+  });
+
+  it("genre threading — the inferred dominant rhetorical mode drives the preview quote, not the 'expound' default (F4-7)", async () => {
+    const theme = "hábitos de escrita";
+    const steps = buildGuidedSteps(t, fallbackQuestionPlan(t, theme));
+    const answers = steps
+      .filter((step) => step.kind !== "channel")
+      .map((step) => ({ questionId: step.id, text: "", skipped: true }));
+    const briefing = buildBriefing(theme, steps, answers);
+    const genre: GenreSignature = {
+      rhetoricalMode: { dominant: "argue" },
+      epistemicPosture: "advocacy",
+      prose: "defende uma tese contestável com evidência, não só a expõe"
+    };
+
+    const queryClient = newQueryClient();
+    queryClient.setQueryData(queryKeys.entitlement(), entitlementFixture);
+    // Seeded only under "argue" — a component that still queried under the old "expound" default
+    // would cache-miss and the cost band would stay on "calculando…" instead.
+    queryClient.setQueryData(
+      queryKeys.preview({ rhetoricalMode: "argue", scope: SCOPE, briefing, includeRecommendation: true }),
+      previewFixture
+    );
+
+    useWizardSessionStore.setState({
+      phase: "thread",
+      theme,
+      prefill: { rhetoricalMode: "expound", scope: SCOPE },
+      genre,
+      questionPlan: fallbackQuestionPlan(t, theme),
+      answers,
+      qIndex: steps.length
+    });
+
+    renderGenerate(queryClient);
+
+    expect(await screen.findByText("custo: 2 créditos · saldo depois: 10 · modo: equilibrado")).toBeInTheDocument();
   });
 });
 

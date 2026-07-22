@@ -1,5 +1,6 @@
 export { GenerateSurface, type GenerateSurfaceProps, type ComposerRegion } from "./GenerateSurface.js";
 export { ThemeHero, type ThemeHeroProps } from "./ThemeHero.js";
+export { AudiencePicker, type AudiencePickerProps } from "./AudiencePicker.js";
 export { AnalyzingIndicator, type AnalyzingIndicatorProps } from "./AnalyzingIndicator.js";
 export { GuidedThread, type GuidedThreadProps } from "./GuidedThread.js";
 export { ThreadMessage, type ThreadMessageProps } from "./ThreadMessage.js";

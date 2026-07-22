@@ -279,9 +279,13 @@ export function createMinimalServices(
     } as any,
     generationPrefill: {
       infer: () => Effect.succeed({
-        prefill: { intent: "share-idea", scope: { lengthTier: "short" } },
-        intentAmbiguity: null,
+        prefill: { scope: { lengthTier: "short" } },
         questionPlan: []
+      })
+    } as any,
+    genreInference: {
+      infer: () => Effect.succeed({
+        genre: { rhetoricalMode: { dominant: "expound" }, epistemicPosture: "expository", prose: "" }
       })
     } as any,
     policyEvidence: {

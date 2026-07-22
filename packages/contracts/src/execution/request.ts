@@ -7,7 +7,7 @@ import {
 } from "./job.js";
 import { PlanSignatureSchema } from "../plan-signature.js";
 import { GenerationScopeSchema } from "../generation-scope.js";
-import { RhetoricalModeSchema } from "../reasoning.js";
+import { GenreSignatureSchema, RhetoricalModeSchema } from "../reasoning.js";
 
 export const SimplifiedPipelineRequestSchema = Schema.Struct({
   userId: Schema.String,
@@ -52,6 +52,10 @@ export type PipelineRequest = typeof PipelineRequestSchema.Type;
 
 export const MeExecutionRequestSchema = Schema.Struct({
   rhetoricalMode: Schema.optional(RhetoricalModeSchema),
+  // F4-7 — the inferred genre. `rhetoricalMode` (the dominant mode) drives the compositor and pricing;
+  // this carries the full signature (secondary mode + posture + prose) that enriches the generation
+  // prompt. Optional: absent = the pre-Phase-4 default (expository prose).
+  genre: Schema.optional(GenreSignatureSchema),
   scope: Schema.optional(GenerationScopeSchema),
   briefing: Schema.Union(Schema.String, Schema.Record({ key: Schema.String, value: Schema.Unknown })),
   importedContext: Schema.optional(Schema.String),

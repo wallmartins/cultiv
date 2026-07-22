@@ -105,10 +105,10 @@ function assembleSlots(slots: GeneratedSlots["slots"]): GenerationSlotSet {
   return SLOT_ORDER.map((slot) => ({ slot, question: slots[slot] }));
 }
 
-// Degrade path (norte G4: "cai no backbone atual de 4 ângulos — a instância de tech"). Reproduces the
-// current generic backbone copy (generation-prefill.ts BACKBONE_QUESTION_COPY) rather than importing
-// it, so this module has no dependency on the surface it is meant to replace. Callers (Phase 4) apply
-// this fallback themselves — it is not auto-wired into generateGenerationSlots.
+// Degrade path (norte G4: "cai no backbone atual de 4 ângulos — a instância de tech"). This is the
+// single source of the generic 4-angle backbone copy: the prefill (F4-3) delegates to
+// backboneGenerationSlots for its own degrade rather than keeping a duplicate. Not auto-wired into
+// generateGenerationSlots — callers apply it themselves.
 const BACKBONE_COPY: Readonly<
   Record<PracticeProfileLocale, Readonly<Record<GenerationSlotKey, (theme: string) => string>>>
 > = {

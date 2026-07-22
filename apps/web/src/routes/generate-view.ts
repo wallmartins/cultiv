@@ -23,8 +23,8 @@ export interface GuidedStep {
 
 // The backend's own graceful fallback (generation-prefill.ts buildResponse) already absorbs LLM
 // failure into a valid 200 response — this is only reached if the /me/generation-prefill call
-// itself rejects (network/infra). Mirrors BACKBONE_QUESTION_COPY["pt-BR"] so the session degrades
-// to the exact same 4 questions the server would have produced.
+// itself rejects (network/infra). Mirrors the backend's generic backbone (backboneGenerationSlots,
+// pt-BR) so the session degrades to the exact same 4 questions the server would have produced.
 export function fallbackQuestionPlan(t: AppMessages, theme: string): readonly GenerationPrefillQuestion[] {
   return [
     { id: "thesis", angle: "thesis", prompt: t.generate.fallbackQuestion.thesis(theme) },
@@ -82,10 +82,11 @@ export function buildThreadMessages(
 }
 
 // ADR 0010 §6: theme -> topic, backbone angle -> labeled slot (thesis -> payload, experience ->
-// anchor, tension -> resistance, motivation -> stake). `audience` passes through only when the
-// caller has one — the narrowing UI is a later phase. Skipped/blank answers are omitted entirely
-// — never a placeholder — so a lighter briefing degrades gracefully into a lighter pipeline rather
-// than faking content.
+// anchor, tension -> resistance, motivation -> stake). `audience` is the F4-2 narrowing result
+// (one declared audience, the common denominator of all of them, or an ephemeral one) — passes
+// through only when the caller has one. Skipped/blank answers are omitted entirely — never a
+// placeholder — so a lighter briefing degrades gracefully into a lighter pipeline rather than
+// faking content.
 export function buildBriefing(
   theme: string,
   steps: readonly GuidedStep[],
@@ -122,9 +123,9 @@ export function buildBriefing(
         stake = text;
         break;
       case "extra":
-        // ponytail: F4 — "extra" follow-ups have no slot of their own (backbone-curado.md defines
-        // payload/anchor/resistance/stake, not a 5th); folds into payload until the slot-aware
-        // question plan replaces this 4-angle vocabulary.
+        // "extra" follow-ups have no slot of their own (backbone-curado.md defines exactly
+        // payload/anchor/resistance/stake, not a 5th), so they fold into the payload. F4-3 keeps the
+        // four backbone angles — the G4 slots map 1:1 onto them — so this is the settled shape.
         foldIntoPayload(text);
         break;
     }
@@ -140,26 +141,74 @@ export function buildBriefing(
   };
 }
 
+// F4-2 (ADR 0010 §6) — the two buffers around audience narrowing: 0 or 1 declared audiences means
+// there's nothing to narrow between (auto-skip, straight to prefill); 2+ means the chip step
+// renders and the author either picks one or declines (common denominator, see below).
+export type NarrowingBuffer =
+  | { readonly kind: "skip"; readonly audience?: string }
+  | { readonly kind: "narrow"; readonly audiences: readonly string[] };
+
+export function resolveNarrowingBuffer(declaredAudiences: readonly string[]): NarrowingBuffer {
+  if (declaredAudiences.length <= 1) return { kind: "skip", audience: declaredAudiences[0] };
+  return { kind: "narrow", audiences: declaredAudiences };
+}
+
+// Declining to narrow folds every declared audience into one descriptor — still a single
+// `briefing.audience` string, just an un-narrowed one.
+export function commonDenominatorAudience(declaredAudiences: readonly string[]): string {
+  return declaredAudiences.join(", ");
+}
+
+// Declared chips + this generation's ephemeral additions ("+ adicionar público"), deduped in
+// display order. Ephemeral audiences never reach the Practice Profile — they only ever flow
+// through the `audience` field of this one prefill/briefing.
+export function mergeAudienceOptions(
+  declaredAudiences: readonly string[],
+  ephemeralAudiences: readonly string[]
+): readonly string[] {
+  const seen = new Set<string>();
+  const merged: string[] = [];
+  for (const audience of [...declaredAudiences, ...ephemeralAudiences]) {
+    if (seen.has(audience)) continue;
+    seen.add(audience);
+    merged.push(audience);
+  }
+  return merged;
+}
+
 export interface PlatformOption {
   readonly id: string;
   readonly label: string;
   readonly channel: GenerationChannel;
 }
 
-// Rich platform vocabulary -> the 4 GenerationChannel buckets (ADR 0004 §2). ids match the
-// backend's detectPlatformInTheme heuristic (generation-prefill-platform.ts) so detectedPlatform
-// preselects the right chip. Labels come from the dictionary; only the id -> channel mapping
-// (business logic, not copy) lives here.
+// F4-6 — the channel step picks by functional bucket, not platform brand (web-only vocabulary
+// change; the 4 GenerationChannel values themselves are unchanged). id === channel, so
+// selectPlatform's id -> channel lookup keeps working unmodified.
 export function platformOptions(t: AppMessages): readonly PlatformOption[] {
   return [
-    { id: "linkedin", label: t.generate.platformLabel.linkedin, channel: "professional-network" },
-    { id: "x", label: t.generate.platformLabel.x, channel: "social" },
-    { id: "instagram", label: t.generate.platformLabel.instagram, channel: "social" },
-    { id: "medium", label: t.generate.platformLabel.medium, channel: "blog" },
-    { id: "substack", label: t.generate.platformLabel.substack, channel: "blog" },
-    { id: "blog", label: t.generate.platformLabel.blog, channel: "blog" },
-    { id: "newsletter", label: t.generate.platformLabel.newsletter, channel: "email" }
+    { id: "professional-network", label: t.generate.channelBucketLabel.professionalNetwork, channel: "professional-network" },
+    { id: "social", label: t.generate.channelBucketLabel.social, channel: "social" },
+    { id: "blog", label: t.generate.channelBucketLabel.blog, channel: "blog" },
+    { id: "email", label: t.generate.channelBucketLabel.email, channel: "email" }
   ];
+}
+
+// The backend's detectPlatformInTheme heuristic (generation-prefill-platform.ts) still returns a
+// raw platform name (e.g. "linkedin") — this maps it onto the bucket the chip UI now offers, so
+// detectedPlatform keeps preselecting the right chip after F4-6.
+const PLATFORM_TO_CHANNEL: Record<string, GenerationChannel> = {
+  linkedin: "professional-network",
+  x: "social",
+  instagram: "social",
+  medium: "blog",
+  substack: "blog",
+  blog: "blog",
+  newsletter: "email"
+};
+
+export function detectedPlatformChannel(detectedPlatform: string | undefined): GenerationChannel | undefined {
+  return detectedPlatform ? PLATFORM_TO_CHANNEL[detectedPlatform] : undefined;
 }
 
 export function formatCostLabel(
@@ -241,12 +290,15 @@ export interface PastedThemeParse {
 
 const LINK_PATTERN = /\[[^\]]+\]\((https?:\/\/[^\s)]+)\)|(https?:\/\/[^\s)]+)/g;
 
-// Best-effort channel guess from the pasted body itself (same platformOptions vocabulary the
-// channel step uses) — this is the paste sub-flow's own read, separate from the backend's
-// detectPlatformInTheme (that only runs once the theme is submitted).
+// Best-effort channel guess from the pasted body itself — this is the paste sub-flow's own read,
+// separate from the backend's detectPlatformInTheme (that only runs once the theme is submitted).
+// Scans for raw platform names (same table detectedPlatformChannel maps), then reports the
+// functional bucket label the channel step actually offers post-F4-6.
 function guessChannel(t: AppMessages, pasted: string): string {
   const lower = pasted.toLowerCase();
-  const match = platformOptions(t).find((option) => lower.includes(option.id));
+  const platform = Object.keys(PLATFORM_TO_CHANNEL).find((candidate) => lower.includes(candidate));
+  const bucket = platform ? PLATFORM_TO_CHANNEL[platform] : undefined;
+  const match = platformOptions(t).find((option) => option.channel === bucket);
   return match?.label ?? t.common.freeText;
 }
 

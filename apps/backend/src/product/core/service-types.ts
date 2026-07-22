@@ -12,6 +12,7 @@ import type { BackendAIPolicyServiceContract } from "../ai-policy/ai-policy-type
 import type { BackendSafetyPolicyServiceContract } from "../safety-policy/safety-policy-types.js";
 import type { BackendGenerationPreviewService } from "../generation/generation-preview-types.js";
 import type { BackendGenerationPrefillService } from "../generation/generation-prefill-types.js";
+import type { BackendGenreInferenceService } from "../generation/genre-producer.js";
 import type { BackendPublicInputSafetyGatewayService } from "../../safety/public-input-safety-types.js";
 import type { BackendOutputReleaseGateService } from "../../safety/output-release-types.js";
 import type { BackendVoiceConsentService } from "../../safety/voice-consent-types.js";
@@ -48,6 +49,7 @@ export interface BackendProductServices {
   readonly usagePolicy: BackendUsagePolicy;
   readonly generationPreview: BackendGenerationPreviewService;
   readonly generationPrefill: BackendGenerationPrefillService;
+  readonly genreInference: BackendGenreInferenceService;
   readonly voiceRebuild: BackendVoiceRebuildService;
   readonly voice: BackendVoiceService;
   readonly voiceCalibration: BackendVoiceCalibrationService;

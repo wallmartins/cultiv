@@ -1,17 +1,14 @@
 import { Effect } from "effect";
-import type { RhetoricalMode } from "@my-ai-orchestrator/contracts";
+import type { GenreSignature, RhetoricalMode } from "@my-ai-orchestrator/contracts";
 import type { PipelineStep, StepOutput } from "@my-ai-orchestrator/core";
 import { getEffectiveConfig, resolveTemplate, type SkillDefinition, type SkillExecutionContext } from "@my-ai-orchestrator/skills";
 import { buildRefinementSkillContext } from "@my-ai-orchestrator/skills";
-import type { GenerationContext, VoiceProfile } from "@my-ai-orchestrator/text-quality";
+import type { VoiceProfile } from "@my-ai-orchestrator/text-quality";
 import { replaceEmDashesWithCommas } from "@my-ai-orchestrator/text-quality";
 import { normalizeText, stripTemplateHeaders } from "./quality/quality.js";
 import type { BackendSkillOptions } from "./skill-types.js";
-import {
-  resolveGenerationDomainLabel,
-  resolveLexiconInstruction,
-  resolvePromptDomainPolicy
-} from "./pipeline/prompt-domain-policy.js";
+import { buildAudienceModulationSection, resolveLexiconInstruction } from "./pipeline/audience-modulation.js";
+import { buildGenreSection } from "./pipeline/genre-section.js";
 import { buildStepVoiceContext } from "./pipeline/step-context.js";
 import {
   classifyStep,
@@ -85,7 +82,6 @@ export function createBackendSkillDefinition(
     execute: (context) =>
       Effect.gen(function* () {
         const voiceProfile = context.state.voiceProfile as Partial<VoiceProfile> | undefined;
-        const generationContext = context.state.generationContext as GenerationContext | undefined;
         const voiceExampleTexts = collectVoiceExampleTexts(voiceProfile);
         const stepExamples = step.name === "hook"
           ? voiceExampleTexts.slice(0, 1)
@@ -119,7 +115,11 @@ export function createBackendSkillDefinition(
               : undefined
         });
         const topic = getTopic(context.inputs, context.state, context.pipeline.name);
-        const domain = generationContext?.domain;
+        const audience = typeof context.inputs.audience === "string" ? context.inputs.audience : undefined;
+        const genre =
+          typeof context.inputs.genre === "object" && context.inputs.genre !== null
+            ? (context.inputs.genre as GenreSignature)
+            : undefined;
         const contextWordTarget = resolveContextWordTarget(context.inputs);
         const expressionProfile =
           typeof context.inputs.expressionProfile === "string" ? context.inputs.expressionProfile : undefined;
@@ -152,9 +152,9 @@ export function createBackendSkillDefinition(
             voiceConstraints: stepVoice.voiceConstraints,
             antiPatterns: stepVoice.antiPatterns,
             lexicon: stepVoice.lexicon,
-            lexiconInstruction: domain ? resolveLexiconInstruction(domain) : "Author lexicon (use sparingly):",
-            domainPolicy: domain ? resolvePromptDomainPolicy(domain) : "Match metaphors and terminology to the briefing topic.",
-            generationDomain: domain ? resolveGenerationDomainLabel(domain.domain) : "briefing-based",
+            lexiconInstruction: resolveLexiconInstruction(audience),
+            audienceModulation: buildAudienceModulationSection(audience),
+            genreSection: buildGenreSection(genre),
             cadence: voiceProfile?.cadence ?? "natural",
             voiceExamples: stepVoice.voiceExamples,
             authorReasoning: stepVoice.authorReasoning,

@@ -13,6 +13,7 @@ export const queryKeys = {
   calibrationSession: (sessionId: string) => ["voice", "calibration", sessionId] as const,
   calibrationEntitlement: () => ["voice", "calibration", "entitlement"] as const,
   onboarding: () => ["onboarding"] as const,
+  practiceProfile: () => ["practice-profile"] as const,
   entitlement: () => ["entitlement"] as const,
   billingPlans: () => ["billing", "plans"] as const,
   billingTopups: () => ["billing", "topups"] as const,

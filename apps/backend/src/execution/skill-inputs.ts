@@ -3,6 +3,17 @@ import type { VoiceProfile } from "@my-ai-orchestrator/text-quality";
 
 import { stripRuntimeMetadata } from "./pipeline/sanitized-generation-input.js";
 
+// Compositor/runtime parameters ride alongside the briefing fields on the spread pipeline inputs
+// (public-generation buildCompositorPipelineInputs). They are not briefing content, so the fallback
+// serialization must not leak them into {{briefingText}} — the labeled branch already ignores them.
+const NON_BRIEFING_INPUT_KEYS = new Set([
+  "importedContext",
+  "wordTarget",
+  "expressionProfile",
+  "rhetoricalMode",
+  "genre"
+]);
+
 export function resolveLanguage(context: SkillExecutionContext): string | undefined {
   const language = context.inputs.language;
   if (typeof language === "string" && language.trim().length > 0) {
@@ -51,7 +62,7 @@ export function getBriefingText(inputs: Readonly<Record<string, unknown>>): stri
   }
 
   const fallbackPayload = Object.fromEntries(
-    Object.entries(generationPayload).filter(([key]) => key !== "importedContext")
+    Object.entries(generationPayload).filter(([key]) => !NON_BRIEFING_INPUT_KEYS.has(key))
   );
   return appendImportedContext(JSON.stringify(fallbackPayload), importedContext);
 }

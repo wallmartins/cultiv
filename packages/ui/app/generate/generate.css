@@ -140,7 +140,8 @@
   gap: 10px;
 }
 .generate-question-panel,
-.generate-channel-panel {
+.generate-channel-panel,
+.generate-audience-panel {
   padding: 14px 14px 10px;
   transition: border-color 0.2s;
   animation: fadeUp 0.3s var(--ease-standard);
@@ -149,7 +150,8 @@
   border-color: var(--accent);
   box-shadow: var(--glow-ring);
 }
-.generate-channel-panel {
+.generate-channel-panel,
+.generate-audience-panel {
   padding: 14px;
 }
 .generate-question-footer {
@@ -169,10 +171,34 @@
 .generate-skip-link:hover {
   color: var(--muted);
 }
-.generate-channel-chips {
+.generate-channel-chips,
+.generate-audience-chips {
   display: flex;
   flex-wrap: wrap;
   gap: 7px;
+}
+.generate-audience-add {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+.generate-audience-add input {
+  flex: 1;
+  min-width: 0;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-input);
+  padding: 8px 12px;
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 0.88rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.generate-audience-add input:focus {
+  border-color: var(--accent);
+  box-shadow: var(--glow-ring);
 }
 .generate-session-done {
   padding: 16px;

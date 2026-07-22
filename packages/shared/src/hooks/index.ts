@@ -40,6 +40,10 @@ export { useOnboarding, useCompleteOnboarding } from "./onboarding.js";
 
 export { useGeneratePrefill } from "./generation-prefill.js";
 
+export { useGenreInference } from "./genre-inference.js";
+
+export { usePracticeProfile } from "./practice-profile.js";
+
 export {
   useEntitlement,
   usePlans,

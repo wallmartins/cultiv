@@ -1,6 +1,6 @@
-// Platform/quality-mode/gate keys line up with the contracts' own literal unions (GenerationChannel
-// ids, QualityMode, BillingGenerationGate) so generate-view.ts can index this object directly with
-// those types without this package importing them.
+// quality-mode/gate keys line up with the contracts' own literal unions (QualityMode,
+// BillingGenerationGate) so generate-view.ts can index this object directly with those types
+// without this package importing them.
 export const generate = {
   hero: {
     eyebrow: "escreve como você pensa",
@@ -16,6 +16,11 @@ export const generate = {
   channelPrompt: "Onde você vai publicar?",
   channelNote: "opcional — pular deixa como texto livre",
   channelSkipLink: "pular · fica como texto livre →",
+  audienceEyebrow: "público · estreitar",
+  audiencePrompt: "Pra quem é esse texto, dessa vez?",
+  audienceAddPlaceholder: "outro público…",
+  audienceAddAction: "+ adicionar",
+  audienceSkipLink: "usar todos os públicos →",
   questionPlaceholder: "Responda com uma ou duas frases…",
   questionSkipLink: "pular pergunta →",
   answerAction: "Responder →",
@@ -35,14 +40,11 @@ export const generate = {
     motivation: "Por que esse tema importa pra você agora?"
   },
   questionEyebrow: (current: number, total: number) => `pergunta ${current} de ${total} · pulável`,
-  platformLabel: {
-    linkedin: "LinkedIn",
-    x: "X",
-    instagram: "Instagram",
-    medium: "Medium",
-    substack: "Substack",
-    blog: "Blog próprio",
-    newsletter: "Newsletter"
+  channelBucketLabel: {
+    professionalNetwork: "Rede profissional",
+    social: "Redes sociais",
+    blog: "Blog",
+    email: "Newsletter"
   },
   qualityModeLabel: {
     fast: "rápido",

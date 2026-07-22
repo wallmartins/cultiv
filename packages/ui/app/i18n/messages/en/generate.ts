@@ -15,6 +15,11 @@ export const generate: AppMessages["generate"] = {
   channelPrompt: "Where will you publish this?",
   channelNote: "optional — skipping leaves it as free text",
   channelSkipLink: "skip · stays as free text →",
+  audienceEyebrow: "audience · narrow",
+  audiencePrompt: "Who's this text for, this time?",
+  audienceAddPlaceholder: "another audience…",
+  audienceAddAction: "+ add",
+  audienceSkipLink: "use every audience →",
   questionPlaceholder: "Answer in a sentence or two…",
   questionSkipLink: "skip question →",
   answerAction: "Answer →",
@@ -33,14 +38,11 @@ export const generate: AppMessages["generate"] = {
     motivation: "Why does this topic matter to you right now?"
   },
   questionEyebrow: (current, total) => `question ${current} of ${total} · skippable`,
-  platformLabel: {
-    linkedin: "LinkedIn",
-    x: "X",
-    instagram: "Instagram",
-    medium: "Medium",
-    substack: "Substack",
-    blog: "Own blog",
-    newsletter: "Newsletter"
+  channelBucketLabel: {
+    professionalNetwork: "Professional network",
+    social: "Social media",
+    blog: "Blog",
+    email: "Newsletter"
   },
   qualityModeLabel: {
     fast: "fast",

@@ -43,6 +43,24 @@ export const PracticeProfileSchema = Schema.Struct({
 });
 export type PracticeProfile = typeof PracticeProfileSchema.Type;
 
+// F4-2 — the declared axes exposed to the generation flow so the audience-narrowing step can offer
+// the author's own audiences as chips. Read-only projection of the sovereign axes (§1) only — never
+// the derived dimensions, which stay server-side (they drive the generator, not the UI).
+export const PracticeProfileDeclaredViewSchema = Schema.Struct({
+  subject: Schema.String,
+  vantagePoint: Schema.String,
+  audiences: Schema.Array(Schema.String),
+  depth: PracticeProfileDepthSchema
+});
+export type PracticeProfileDeclaredView = typeof PracticeProfileDeclaredViewSchema.Type;
+
+export const MePracticeProfileResponseSchema = Schema.Struct({
+  // null when the author has no practice profile yet — the narrowing step then renders nothing and the
+  // generation runs with no narrowed audience at all (the prefill/briefing omit the audience field).
+  profile: Schema.NullOr(PracticeProfileDeclaredViewSchema)
+});
+export type MePracticeProfileResponse = typeof MePracticeProfileResponseSchema.Type;
+
 export const EnrichmentSuggestionResponseSchema = Schema.Literal("accepted", "rejected");
 export type EnrichmentSuggestionResponse = typeof EnrichmentSuggestionResponseSchema.Type;
 
@@ -72,6 +90,10 @@ export const PracticeProfileDiagnosticsSchema = Schema.Struct({
 export type PracticeProfileDiagnostics = typeof PracticeProfileDiagnosticsSchema.Type;
 
 export const decodePracticeProfile = createSchemaDecoder("PracticeProfile", PracticeProfileSchema);
+export const decodeMePracticeProfileResponse = createSchemaDecoder(
+  "MePracticeProfileResponse",
+  MePracticeProfileResponseSchema
+);
 export const decodePracticeProfileDiagnostics = createSchemaDecoder(
   "PracticeProfileDiagnostics",
   PracticeProfileDiagnosticsSchema

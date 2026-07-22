@@ -3,9 +3,11 @@ import { createAccountClient, type AccountClient } from "./account.js";
 import { createBillingClient, type BillingClient } from "./billing.js";
 import type { ClientSdkConfig } from "./config.js";
 import { createGenerationPrefillClient, type GenerationPrefillClient } from "./generation-prefill.js";
+import { createGenreInferenceClient, type GenreInferenceClient } from "./genre-inference.js";
 import type { ClientSdkError } from "./errors.js";
 import { createExecutionsClient, type ExecutionsClient } from "./executions.js";
 import { createOnboardingClient, type OnboardingClient } from "./onboarding.js";
+import { createPracticeProfileClient, type PracticeProfileClient } from "./practice-profile.js";
 import { createPreviewClient, type PreviewClient } from "./preview.js";
 import { createHttpTransport, type HttpTransport } from "./transport.js";
 import { createVoiceClient, type VoiceClient } from "./voice.js";
@@ -21,6 +23,8 @@ export interface ClientSdk {
   readonly voiceCalibration: VoiceCalibrationClient;
   readonly onboarding: OnboardingClient;
   readonly generationPrefill: GenerationPrefillClient;
+  readonly genreInference: GenreInferenceClient;
+  readonly practiceProfile: PracticeProfileClient;
   readonly billing: BillingClient;
   readonly account: AccountClient;
   readonly transport: HttpTransport;
@@ -41,6 +45,8 @@ export function createClientSdk(config: ClientSdkConfig): ClientSdk {
     voiceCalibration: createVoiceCalibrationClient(transport),
     onboarding: createOnboardingClient(transport),
     generationPrefill: createGenerationPrefillClient(transport),
+    genreInference: createGenreInferenceClient(transport),
+    practiceProfile: createPracticeProfileClient(transport),
     billing: createBillingClient(transport),
     account: createAccountClient(transport),
     transport,

@@ -66,9 +66,9 @@ export const EpistemicPostureSchema = Schema.Literal(
 );
 export type EpistemicPosture = typeof EpistemicPostureSchema.Type;
 
-// The rhetorical genre axis. Consumed by the compositor (Phase 1 F1-2 re-key); its producer —
-// genre inference at the end of the generation questions — lands in Phase 4 (F4-3), so the request
-// carries it optionally and the resolver defaults it until then (ponytail: F4).
+// The rhetorical genre axis. Consumed by the compositor (Phase 1 F1-2 re-key); its producer is the
+// genre inference at the end of the generation questions (F4-7, /me/genre-inference). The request
+// carries the dominant mode optionally; the resolver defaults it (expound) as the degrade path.
 // English wire values matching every other contracts enum; norte pt names in comments (genero-dimensoes.md §A):
 // expound=expor · narrate=narrar · argue=argumentar · instruct=instruir · promote=promover.
 // Single source for the value list so consumers (compositor, presentation guard) don't re-hand-list it.

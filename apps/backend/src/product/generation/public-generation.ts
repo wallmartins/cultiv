@@ -97,8 +97,11 @@ function toInternalPipelineRequest(
 ): Effect.Effect<PipelineRequest, BackendAIPolicyCatalogError | BackendValidationError> {
   return Effect.gen(function* () {
     const stepPlannerEnabled = isGenerationStepPlannerEnabled(services.featureFlags, config);
+    // The dominant mode drives the compositor (and pricing). It is the genre's dominant mode, so a
+    // request carrying `genre` but no top-level `rhetoricalMode` must still plan under that mode —
+    // otherwise the pipeline would price/plan as expound while the prompt (inputs.genre) says otherwise.
     const resolvedTarget = yield* resolveGenerationTarget({
-      rhetoricalMode: request.rhetoricalMode,
+      rhetoricalMode: request.rhetoricalMode ?? request.genre?.rhetoricalMode.dominant,
       scope: request.scope,
       stepPlannerEnabled,
       briefing: request.briefing,
@@ -117,7 +120,7 @@ function toInternalPipelineRequest(
     return {
       userId: request.userId,
       pipeline: resolvedTarget.compositor.pipeline,
-      inputs: buildCompositorPipelineInputs(request.briefing, plan),
+      inputs: buildCompositorPipelineInputs(request.briefing, plan, request.genre),
       importedContext: request.importedContext,
       context,
       language: request.language,
@@ -133,7 +136,8 @@ function toInternalPipelineRequest(
 
 function buildCompositorPipelineInputs(
   briefing: BackendPublicGenerationRequest["briefing"],
-  plan: import("@my-ai-orchestrator/contracts").ExecutionPlan
+  plan: import("@my-ai-orchestrator/contracts").ExecutionPlan,
+  genre: BackendPublicGenerationRequest["genre"]
 ): Record<string, unknown> {
   const briefingInputs =
     typeof briefing === "object" && briefing !== null ? briefing : { briefing };
@@ -142,7 +146,10 @@ function buildCompositorPipelineInputs(
     ...briefingInputs,
     wordTarget: plan.parameters.wordTarget,
     expressionProfile: plan.parameters.expressionProfile,
-    rhetoricalMode: plan.parameters.rhetoricalMode
+    // The compositor keys on the dominant mode (plan.parameters.rhetoricalMode); the full genre
+    // signature (F4-7) rides alongside so the prompt layer can render its secondary mode + prose.
+    rhetoricalMode: plan.parameters.rhetoricalMode,
+    ...(genre ? { genre } : {})
   };
 }
 

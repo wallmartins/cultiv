@@ -13,6 +13,8 @@ import { registerExecutionRoutes } from "../routes/execution-routes.js";
 import { registerOnboardingRoutes } from "../routes/onboarding-routes.js";
 import { registerGenerationPreviewRoutes } from "../routes/generation-preview-routes.js";
 import { registerGenerationPrefillRoutes } from "../routes/generation-prefill-routes.js";
+import { registerGenreInferenceRoutes } from "../routes/genre-inference-routes.js";
+import { registerPracticeProfileRoutes } from "../routes/practice-profile-routes.js";
 import { registerExperimentalExecutionRoutes } from "../routes/experimental-execution-routes.js";
 import { registerInternalPolicyRoutes } from "../routes/internal-policy-routes.js";
 import { registerInternalOverrideRoutes } from "../routes/internal-override-routes.js";
@@ -94,6 +96,14 @@ export function registerBackendRoutes(app: Hono, options: BackendRouteOptions): 
     services: options.services
   });
   registerGenerationPrefillRoutes(app, {
+    config: options.config,
+    services: options.services
+  });
+  registerGenreInferenceRoutes(app, {
+    config: options.config,
+    services: options.services
+  });
+  registerPracticeProfileRoutes(app, {
     config: options.config,
     services: options.services
   });

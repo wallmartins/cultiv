@@ -7,6 +7,7 @@ import type { BackendSafetyPolicyBootstrapError } from "../safety-policy/safety-
 import { createBackendUsagePolicy } from "../usage/usage-policy.js";
 import { createBackendGenerationPreviewService } from "../generation/generation-preview.js";
 import { createBackendGenerationPrefillService } from "../generation/generation-prefill.js";
+import { createBackendGenreInferenceService } from "../generation/genre-producer.js";
 import { createBackendPublicInputSafetyGatewayService } from "../../safety/public-input-safety.js";
 import { createBackendOutputReleaseGateService } from "../../safety/output-release.js";
 import { createBackendVoiceConsentService } from "../../safety/voice-consent.js";
@@ -189,6 +190,12 @@ export function createBackendProductServices(
         featureFlags: dependencies.featureFlags
       }),
       generationPrefill: createBackendGenerationPrefillService({
+        database: dependencies.database,
+        aiAdapters: dependencies.aiAdapters,
+        providerTransport,
+        aiPolicy: dependencies.aiPolicy
+      }),
+      genreInference: createBackendGenreInferenceService({
         aiAdapters: dependencies.aiAdapters,
         providerTransport,
         aiPolicy: dependencies.aiPolicy

@@ -8,6 +8,7 @@ export * from "./plan-signature.js";
 export * from "./generate-prefill.js";
 export * from "./generation-prefill.js";
 export * from "./generation-preview.js";
+export * from "./genre-inference.js";
 export * from "./billing.js";
 export * from "./billing-checkout.js";
 export * from "./voice.js";

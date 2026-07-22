@@ -12,8 +12,9 @@ import { materializeCompositorPipeline } from "./compositor/plan-materializer.js
 import { formatPatchOp } from "./step-planner/format-patch-op.js";
 import { patchExecutionPlan } from "./step-planner/step-planner.js";
 
-// ponytail: F4 — the genre producer (theme-first inference at the end of the generation questions)
-// lands in Phase 4; until then a request without a mode plans as expository prose.
+// The dominant mode is inferred at the end of the generation questions (the /me/genre-inference
+// producer, F4-7) and threaded onto the request. This default is the degrade path: an API caller — or
+// a degraded inference — that sends no mode plans as expository prose.
 const DEFAULT_RHETORICAL_MODE: RhetoricalMode = "expound";
 
 export interface StepPlannerTelemetry {
