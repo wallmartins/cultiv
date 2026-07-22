@@ -45,8 +45,3 @@ export function assessClicheLeak(specificityBearingFields: readonly string[]): C
     thin: nonEmpty.some((field) => !namesSpecific(field))
   };
 }
-
-export function detectClicheLeak(specificityBearingFields: readonly string[]): boolean {
-  const report = assessClicheLeak(specificityBearingFields);
-  return report.fillerHit || report.thin;
-}

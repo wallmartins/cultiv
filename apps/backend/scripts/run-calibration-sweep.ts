@@ -310,7 +310,6 @@ async function main(): Promise<void> {
   console.log("Next steps:");
   console.log(`  DATABASE_URL=... pnpm billing:export-jobs docs/superpowers/reports/calibration-jobs-sweep.json`);
   console.log(`  pnpm billing:calibrate docs/superpowers/reports/calibration-jobs-sweep.json --report docs/superpowers/reports/calibration-after-sweep.md`);
-  console.log(`  pnpm billing:analyze-option-b docs/superpowers/reports/calibration-jobs-sweep.json`);
 }
 
 main().catch((error) => {

@@ -33,7 +33,7 @@ The fixed set of fields every **Practice Profile** answers about any subject —
 _Avoid_: Vertical taxonomy, domain list, niche catalog
 
 **Rhetorical Mode** _(ADR 0010)_:
-The text-level genre dimension inferred at the end of the generation questions — a **dominant mode plus an optional secondary**, from expose / narrate / argue / instruct / promote. Classified **by substance** (what the payload does), never by keyword. Hybrid representation: a reduced enum for control plus open prose for the prompt. Curated in the norte (`genero-dimensoes.md`). Genre is a property of the text, not of the author.
+The text-level genre dimension inferred at the end of the generation questions — a **dominant mode plus an optional secondary**, from expound / narrate / argue / instruct / promote. Classified **by substance** (what the payload does), never by keyword. Hybrid representation: a reduced enum for control plus open prose for the prompt. Curated in the norte (`genero-dimensoes.md`). Genre is a property of the text, not of the author.
 _Avoid_: Content type, format name, closed genre taxonomy, intent
 
 **Voice Profile**:

@@ -77,10 +77,6 @@ const FILLER_PHRASES = [
 ];
 
 const QUOTED_TERM_PATTERN = /["“”'‘’«»][^"“”'‘’«»]{2,}["“”'‘’«»]/;
-// A capitalized word (≥2 chars, any mixed tail: Rust, AWS, PostgreSQL, Fly.io) counts as a name only
-// mid-sentence — sentence starts are ambiguous. An internal capital (iOS, eBay) is a name anywhere.
-// Inner dots stay (dotted brands); trailing sentence punctuation is stripped by the caller.
-const CAPITALIZED_TOKEN = /^[A-ZÀ-Ý][\p{L}\p{N}.'’-]+$/u;
 const WORD_TOKEN = /^[\p{L}\p{N}.'’-]+$/u;
 
 function normalize(text: string): string {
@@ -106,6 +102,17 @@ function hasInternalCapital(word: string): boolean {
   return WORD_TOKEN.test(word) && /[a-zà-ÿ]/.test(word) && /[A-ZÀ-Ý]/.test(word.slice(1));
 }
 
+// Mid-sentence name shapes: a capitalized word with a lowercase somewhere (Rust, PostgreSQL, Fly.io,
+// São) at any length, or an ALL-CAPS token only when acronym-shaped (2-4 chars: AWS, EKS, LGPD) —
+// longer all-caps reads as emphasis (MUITO, NEVER), which is exactly the generic prose the gate
+// exists to catch. A missed long acronym (HTTPS) costs one cheap retry; a passed emphasis word
+// poisons a profile.
+function isNameShapedMidSentence(word: string): boolean {
+  if (word.length < 2 || !WORD_TOKEN.test(word) || !/^[A-ZÀ-Ý]/.test(word)) return false;
+  if (/[a-zà-ÿ]/.test(word)) return true;
+  return word.length <= 4;
+}
+
 // Deterministic proxy for "names a specific" (norte T2): a digit, a quoted term, or a name-shaped
 // token. Field-agnostic — no blocklist, so it generalizes to the long tail. All-lowercase brands
 // (npm) stay invisible to the proxy; digits or quotes still catch them.
@@ -120,7 +127,7 @@ export function namesSpecific(text: string): boolean {
     if (hasInternalCapital(word)) return true;
     if (index === 0) continue;
     const previous = words[index - 1] ?? "";
-    if (CAPITALIZED_TOKEN.test(word) && !/[.!?]$/.test(previous)) return true;
+    if (isNameShapedMidSentence(word) && !/[.!?]$/.test(previous)) return true;
   }
   return false;
 }

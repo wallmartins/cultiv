@@ -35,6 +35,12 @@ describe("namesSpecific", () => {
 
   it("accepts mid-sentence all-caps acronyms", () => {
     expect(namesSpecific("o incidente na AWS derrubou o checkout")).toBe(true);
+    expect(namesSpecific("a LGPD exige base legal para o tratamento")).toBe(true);
+  });
+
+  it("rejects all-caps emphasis words — only acronym-shaped all-caps count", () => {
+    expect(namesSpecific("isso é MUITO importante para o time")).toBe(false);
+    expect(namesSpecific("É ENORME o impacto disso no produto")).toBe(false);
   });
 
   it("accepts dotted brand names, including at the end of a sentence", () => {

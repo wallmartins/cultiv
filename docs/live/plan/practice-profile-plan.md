@@ -81,6 +81,16 @@ Companheiro da **ADR 0010**. Task set ordenado, backend + web, pré-lançamento 
 - **C-11 ✅** Teste direto do `orElseSucceed` (G1 ok + G3 falha ⇒ âncoras agnósticas via `getStepPrompt`); `postgres-practice-profile-repository.test.ts` na suíte gated (17/17 verdes contra Postgres real). De brinde: a migração `0024-practice-profile` faltava no `postgres-test-helpers` — adicionada.
 - **C-12 ✅ (diagnóstico) / push pendente** O "pnpm lint flaky" **não é do pnpm**: é o subcomando `lint` do **rtk 0.43.0**, que assume eslint (`pnpm -r exec eslint`), imprime o fantasma "Command eslint not found" **e retorna exit 0** (mascara falha real). O hook às vezes reescreve `pnpm lint`→`rtk lint`. Mitigação: usar `pnpm -r --if-present lint` ou `rtk proxy pnpm lint`; CI roda pnpm cru, não é afetado. Push do branch + CI: executado no fechamento desta fase.
 
+### Portão de revisão da Fase 3.5 (2026-07-22, revisores em Opus, implementação em Fable)
+
+4 revisores (3 fatias + 1 transversal), read-only, contra `4348e0f..3db5c61`. **Vereditos: 11 de 12 itens FAITHFUL; C-3 PARTIAL → consertado → FAITHFUL.** Gates re-rodados pelos revisores: smoke 3/3 · guardrails 2/2 · voice-profile-centralization 7/7 · lint dos 18 pacotes limpo · suíte segura 394/394 · Postgres gated 17/17 (verificado independentemente por 2 revisores). Scripts re-chaveados do C-4 executados de verdade (build real + sweep dry-run 15/15 células + smoke harness 5/5 cenários).
+
+Achados e destino:
+- **MAJOR (confirmado por 2 revisores independentes): ênfase em ALL-CAPS lida como específico.** O regex novo do C-3 aceitava qualquer palavra 100%-maiúscula mid-sentence ("MUITO", "ENORME") como nome — furava o invariante 3 da ADR ("a média é o clichê") sem retry. **Consertado antes do commit final:** all-caps só conta em forma de acrônimo (2–4 chars: AWS, LGPD); mais longo é ênfase ⇒ genérico. Falso negativo (HTTPS) custa 1 retry barato; falso positivo envenenaria perfil. Testes de regressão dos dois lados.
+- **MINOR consertados junto:** dedup de audiências no `sameDeclaredAxes` (duplicata cosmética não é ciclo de vida novo); dica morta `billing:analyze-option-b` removida do sweep; `detectClicheLeak` órfão deletado (produção usa `assessClicheLeak`); deriva pré-existente CONTEXT.md "expose"→"expound" (mesma classe do C-9).
+- **Test-gaps fechados:** fronteira da exceção do G2 pinada (filler no retry falha mesmo com `acceptThinAfterRetry`); genericidade parcial coberta também em G3 e G4 (antes só G1).
+- **INFO registrados, não-bloqueantes:** estado parcial put-então-timeout é self-healing pelo reuse do próprio C-1; corrida de `setContext` concorrente (dupla aba) é pré-existente e sem lock — se virar defeito observável, é ticket do mapa de defeitos; diagnostics stale pós-re-seed é dormente (nada consome `pendingNicheAskDimensions` até F5-3).
+
 ## Fase 4 — Geração
 
 - **F4-1 · Popular `briefing.audience`** (soquete já ligado — `skill-inputs.ts:44`, `skill-templates.ts:98`; só popular via passo ① de estreitamento).

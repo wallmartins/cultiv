@@ -185,6 +185,22 @@ describe("practice profile generator — G2 enrichment", () => {
 
     expect([...thinDimensions].sort()).toEqual(["lexicon", "readerAssumption"]);
   });
+
+  // The design exception's boundary: G2 accepts a merely-thin retry output, but a filler-phrase hit
+  // still fails the attempt — accept-thin never becomes accept-cliché.
+  it("still fails G2 when the retry output carries a filler phrase, despite acceptThinAfterRetry", async () => {
+    const fillerPayload = JSON.stringify({
+      fieldSpecifics: ["join de 40s"],
+      dimensions: { ...SPECIFIC_DIMENSIONS, stake: "você precisa pensar fora da caixa." }
+    });
+    const { adapter, calls } = scriptedAdapter([fillerPayload, fillerPayload]);
+    const exit = await Effect.runPromiseExit(
+      enrichPracticeProfile({ seedProfile, locale: "pt-BR", deps: depsFor(adapter) })
+    );
+
+    expect(calls()).toBe(2);
+    expect(exit._tag).toBe("Failure");
+  });
 });
 
 describe("practice profile generator — G5 niche-ask", () => {

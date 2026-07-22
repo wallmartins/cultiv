@@ -115,6 +115,26 @@ describe("practice profile generator — G4 generation slots", () => {
     expect(slots[0]?.question).toBe(SPECIFIC_SLOTS.payload);
   });
 
+  // C-2 is per dimension: one generic slot among four specific ones is enough to trigger the retry.
+  it("retries when a single slot reads as generic (partial genericity)", async () => {
+    const partiallyGeneric = JSON.stringify({
+      slots: { ...SPECIFIC_SLOTS, stake: "isso importa muito pra ele agora." }
+    });
+    const { adapter, calls } = scriptedAdapter([partiallyGeneric, SPECIFIC_SLOTS_PAYLOAD]);
+    const slots = await Effect.runPromise(
+      generateGenerationSlots({
+        profile: MARKETING_PROFILE,
+        theme: THEME,
+        narrowedAudience: NARROWED_AUDIENCE,
+        locale: "pt-BR",
+        deps: depsFor(adapter)
+      })
+    );
+
+    expect(calls()).toBe(2);
+    expect(slots[3]?.question).toBe(SPECIFIC_SLOTS.stake);
+  });
+
   it("fails with a tagged error when every provider attempt is exhausted", async () => {
     const adapter: AIAdapterServiceContract = {
       complete: () => Effect.fail(new AIAdapterTransportError({ provider: "gemini", message: "timeout" }))

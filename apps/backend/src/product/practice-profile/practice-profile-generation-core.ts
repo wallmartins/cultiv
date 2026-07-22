@@ -54,12 +54,13 @@ export function formatDeclaredAxes(axes: DeclaredPracticeAxes): string {
 }
 
 // C-1 idempotency rule: identical declared axes ⇒ same practice lifecycle (reuse the stored profile,
-// never regress enriched→seed); changed axes ⇒ legitimate re-seed (ADR 0010 §4). Case and audience
-// order are cosmetic, not a new lifecycle.
+// never regress enriched→seed); changed axes ⇒ legitimate re-seed (ADR 0010 §4). Case, audience
+// order, and duplicated audience entries are cosmetic, not a new lifecycle.
 export function sameDeclaredAxes(a: DeclaredPracticeAxes, b: DeclaredPracticeAxes): boolean {
   const fold = (value: string) => value.trim().toLowerCase();
-  const audiencesA = a.audiences.map(fold).sort();
-  const audiencesB = b.audiences.map(fold).sort();
+  const foldSet = (values: readonly string[]) => [...new Set(values.map(fold))].sort();
+  const audiencesA = foldSet(a.audiences);
+  const audiencesB = foldSet(b.audiences);
   return (
     fold(a.subject) === fold(b.subject) &&
     fold(a.vantagePoint) === fold(b.vantagePoint) &&

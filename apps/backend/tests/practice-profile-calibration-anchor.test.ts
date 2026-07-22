@@ -111,6 +111,21 @@ describe("practice profile generator — G3 calibration anchor", () => {
     expect(anchors[0].prompt).toBe(parsed.anchors.microOpinion);
   });
 
+  // C-2 is per dimension: one generic anchor among four specific ones is enough to trigger the retry.
+  it("retries when a single anchor reads as generic (partial genericity)", async () => {
+    const specific = JSON.parse(SPECIFIC_ANCHORS_PAYLOAD) as { anchors: Record<string, string> };
+    const partiallyGeneric = JSON.stringify({
+      anchors: { ...specific.anchors, formatAdaptation: "explique isso pra alguém que não conhece o assunto." }
+    });
+    const { adapter, calls } = scriptedAdapter([partiallyGeneric, SPECIFIC_ANCHORS_PAYLOAD]);
+    const anchors = await Effect.runPromise(
+      generateCalibrationAnchors({ profile: PROFILE, locale: "pt-BR", deps: depsFor(adapter) })
+    );
+
+    expect(calls()).toBe(2);
+    expect(anchors[3].prompt).toBe(specific.anchors.formatAdaptation);
+  });
+
   it("fails with a tagged error when every provider attempt is exhausted", async () => {
     const adapter: AIAdapterServiceContract = {
       complete: () => Effect.fail(new AIAdapterTransportError({ provider: "gemini", message: "timeout" }))

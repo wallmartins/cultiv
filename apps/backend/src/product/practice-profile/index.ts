@@ -19,8 +19,8 @@ export {
 export { PracticeProfileGenerationError } from "./practice-profile-errors.js";
 export {
   GENERATOR_ANTI_PATTERN_RULES,
+  assessClicheLeak,
   buildClicheRetrySuffix,
-  detectClicheLeak,
   namesSpecific,
   containsGenericCliche
 } from "./practice-profile-anti-patterns.js";
