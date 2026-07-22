@@ -15,7 +15,15 @@ Decidir por escrito:
 - (b) deletar as 3 chaves (o trabalho vive nos perfis) — ponytail: deleção > dado morto.
 
 ## Aceite
-- [ ] Nenhum dado morto: as chaves são consumidas por um sweep OU removidas; decisão registrada.
+- [x] Nenhum dado morto: as chaves são consumidas por um sweep OU removidas; decisão registrada.
+
+## Decisão (2026-07-22)
+Escolhida a opção **(b) deletar** — ponytail: deleção > dado morto. O T1/T2 substantivo já vive
+nos perfis JSON do eval (`packages/eval/.../profiles/`); as 3 chaves em `briefings.ts` eram âncoras
+bem-feitas mas decorativas, sem leitor (`run-calibration-sweep`'s `BRIEFING_KEY_BY_MODE` é
+mode-keyed, e `parity-fixtures`/`briefing-variants` são keyed por input do chamador). Removidas
+junto do bloco de comentário F6-2. Um eixo de domínio no sweep (opção a) só se justificaria com uso
+real do sweep por-domínio, que não existe.
 
 ## Verify
 `grep` das 3 chaves → todas têm leitor, ou não existem mais.
