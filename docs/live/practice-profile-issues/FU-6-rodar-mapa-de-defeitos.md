@@ -22,7 +22,27 @@ O **mapa de defeitos de corretude** é um wayfinder **separado** do mapa de dom�
 - (3) Implementar por fases, com o mesmo portão de revisão por fase (revisor em modelo ≠ implementador).
 
 ## Aceite
-- [ ] Mapa de defeitos com plano formal em `docs/` + issues atômicas; defeitos fechados por fase com portão.
+- [x] Mapa de defeitos com plano formal em `docs/` + issues atômicas. **(promoção — feito 2026-07-22)**
+- [ ] Defeitos fechados por fase com portão. **(implementação — deferida a sessões dedicadas)**
+
+## Resolução parcial (2026-07-22) — promoção feita, implementação deferida
+Decisão do usuário: **"promover a `docs/` agora, implementar depois"**. Entregue o passo 1+2 do ticket:
+- **(1) Triagem/atualização:** o wayfinder `.scratch/defeitos-de-corretude/` foi triado e os itens roteados
+  incorporados — **FU-5** (dupla resolução de voz) já está **fechado nesta branch**; a mensagem de erro crua
+  em inglês virou **CD-5**; a deriva default/CI da reasoning-signature virou **CD-1**. O `map.md` registra a
+  promoção em "Decisions so far".
+- **(2) Promoção a `/implement`-ready:**
+  - Plano: [`docs/live/plan/correctness-defects-plan.md`](../plan/correctness-defects-plan.md) — task set
+    ordenado, corte antes/depois do beta, dependências, verificações rodáveis, coordenação com o mapa irmão,
+    e as decisões abertas com recomendação.
+  - Issues atômicas: [`docs/live/correctness-defects-issues/`](../correctness-defects-issues/) — CD-1..CD-7 +
+    INDEX, no formato dos tickets do Practice Profile (Contexto / Decisão / Mudança / Aceite / Verify), com
+    cada `file:line` rastreável ao survey.
+  - **Sem ADR ainda** — nenhuma decisão que a mereça (postura pt-first; default da reasoning-signature) está
+    confirmada. ADR 0011 é escrita quando uma delas for decidida numa sessão de implementação.
+- **(3) Implementar por fases com portão:** **deferido** — é o track restante, rodado como o Practice
+  Profile (revisor em modelo ≠ implementador). As decisões de produto genuínas ficam abertas nas issues por
+  design (o wayfinder manda grilá-las **na** sessão de implementação, com verify-antes-de-decidir).
 
 ## Verify
 Por ticket do plano de defeitos, como no Practice Profile.
