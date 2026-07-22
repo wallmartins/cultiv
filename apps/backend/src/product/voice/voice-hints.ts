@@ -9,6 +9,7 @@ import type {
 import type { VoiceProfile } from "@my-ai-orchestrator/text-quality";
 import { normalizeLanguage, unique } from "./voice-utils.js";
 import { resolveChannelVoicePreset } from "./voice-presets.js";
+import { channelForContentType } from "../generation/channel-content-types.js";
 
 export function buildVoiceHints(
   profile: {
@@ -106,23 +107,10 @@ export function buildVoiceHints(
   };
 }
 
-// A voice example's Content Type maps to the channel it reads on. The FEP (ADR 0010 F6-4) narrows
-// examples by channel, not by the retired Content Type. Unknown types → "unspecified" (never a
-// specific-channel match). Length format aliases collapse onto the same channel bucket.
-const CHANNEL_BY_CONTENT_TYPE: Record<string, GenerationChannel> = {
-  "linkedin-post": "professional-network",
-  "twitter-thread": "social",
-  newsletter: "email",
-  blog: "blog",
-  "long-form-blog": "blog",
-  "validation-post": "professional-network",
-  "architecture-post": "professional-network"
-};
-
-function channelForContentType(contentType: string | undefined): GenerationChannel {
-  return (contentType ? CHANNEL_BY_CONTENT_TYPE[contentType] : undefined) ?? "unspecified";
-}
-
+// A voice example's Content Type maps to the channel it reads on (FEP, ADR 0010 F6-4 — narrows by
+// channel, not by the retired Content Type). The channel↔content-type correspondence is the shared
+// FU-4 source (channelForContentType): unknown types → "unspecified", length aliases collapse onto
+// the same channel bucket.
 function exampleServesChannel(example: VoiceExampleRecord, channel: GenerationChannel): boolean {
   if (channelForContentType(example.explicitContentType) === channel) {
     return true;

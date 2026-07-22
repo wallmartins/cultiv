@@ -14,7 +14,17 @@
 - Teste de round-trip/consistência.
 
 ## Aceite
-- [ ] Uma fonte; adicionar canal/content-type toca 1 lugar; teste guarda a consistência bidirecional.
+- [x] Uma fonte; adicionar canal/content-type toca 1 lugar; teste guarda a consistência bidirecional.
+
+## Resolução (2026-07-22)
+Fonte única: `apps/backend/src/product/generation/channel-content-types.ts` — tabela
+`CHANNEL_CONTENT_TYPES` (canal → lista ordenada de content-types; o 1º é o formato canônico do
+word-target, os demais são aliases legados só pra volta). Ambas as direções derivam dela:
+`channelPrimaryContentType(channel)` (consumido por `compositor/scale.ts`) e `channelForContentType(ct)`
+(consumido por `voice/voice-hints.ts`). Os dois `Record` locais divergentes foram removidos. Teste de
+round-trip/consistência: `apps/backend/tests/channel-content-types.test.ts` (6 casos — cobertura por
+canal, round-trip do formato canônico, reverso de todo alias, unicidade do content-type, sentinela
+`unspecified`, e paridade com os valores que os dois call-sites codificavam).
 
 ## Verify
 `pnpm vitest run` no teste de round-trip novo.
