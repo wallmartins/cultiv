@@ -1,0 +1,71 @@
+/* Boot + route states: the branded loader and the friendly full-screen error surface. Rendered by
+   apps/web boot-states.tsx (kept out of the packages/ui JS chunk so the initial bundle stays lean),
+   styled here so both themes and every design token apply. Reduced motion is handled globally in
+   base.css, which freezes the orbit into a static brand mark — the label still says "loading". */
+
+.brand-boot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-md);
+  min-height: 60dvh;
+  padding: var(--sp-2xl) var(--sp-lg);
+  text-align: center;
+  animation: fadeIn var(--t-med) var(--ease-out);
+}
+.brand-boot.is-full {
+  min-height: 100dvh;
+}
+
+.brand-boot-mark {
+  width: 56px;
+  height: 56px;
+  color: var(--ink);
+}
+.brand-boot-mark.is-danger {
+  color: var(--danger);
+}
+
+/* Faint full ring the accent arc orbits over — the brand mark, at rest. */
+.brand-boot-ring {
+  opacity: 0.16;
+}
+
+/* The accent arc sweeps the ring: this IS the loading indicator, reusing the mark's own accent
+   stroke rather than bolting on a generic spinner. transform-box: view-box pins the rotation to the
+   circle's center (48,48) in viewBox units. */
+.brand-boot-arc {
+  transform-box: view-box;
+  transform-origin: 48px 48px;
+  animation: orbit 0.9s linear infinite;
+}
+
+.brand-boot-label {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+
+.brand-boot-title {
+  margin: var(--sp-xs) 0 0;
+  font-family: var(--font-headline);
+  font-weight: 400;
+  font-size: 1.7rem;
+  line-height: 1.2;
+  color: var(--ink);
+  text-wrap: balance;
+}
+.brand-boot-body {
+  margin: 0;
+  max-width: 42ch;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--muted);
+  text-wrap: pretty;
+}
+.brand-boot-action {
+  margin-top: var(--sp-sm);
+}

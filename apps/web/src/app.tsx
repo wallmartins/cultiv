@@ -7,6 +7,7 @@ import { I18nProvider, useMessages } from "@my-ai-orchestrator/ui/app/i18n";
 import { router, type AppAuth } from "./router.js";
 import { loadRuntime } from "./runtime-loader.js";
 import { queryClient } from "./query-client.js";
+import { BrandError, BrandLoader } from "./boot-states.js";
 
 // The provider wraps AppContent rather than living inside it: the loading and load-failed states
 // below return before the router mounts, and they need copy too.
@@ -75,20 +76,13 @@ function AppContent() {
   }, [routerMounted, auth.isAuthenticated]);
 
   // Recarregar, e não só tentar de novo: a causa provável é um deploy novo que trocou os hashes
-  // dos chunks, e só um index.html fresco aponta pros que existem.
+  // dos chunks, e só um index.html fresco aponta pros que existem — por isso action="reload".
   if (runtimeFailed) {
-    return (
-      <p role="alert">
-        {t.app.loadFailed}{" "}
-        <button type="button" onClick={() => window.location.reload()}>
-          {t.app.reload}
-        </button>
-      </p>
-    );
+    return <BrandError full title={t.app.loadFailed} body={t.app.loadFailedBody} action="reload" />;
   }
 
   if (!routerMounted) {
-    return <p>{t.app.loading}</p>;
+    return <BrandLoader full />;
   }
 
   const routerTree = (

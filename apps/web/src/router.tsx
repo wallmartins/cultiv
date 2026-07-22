@@ -12,7 +12,6 @@ import type { QueryClient } from "@tanstack/react-query";
 import type { Effect } from "effect";
 import type { ClientSdk, ClientSdkError } from "@my-ai-orchestrator/client-sdk";
 import type { LogoutOptions, RedirectLoginOptions, User as Auth0User } from "@auth0/auth0-react";
-import { useMessages } from "@my-ai-orchestrator/ui/app/i18n";
 // "/light" e não o barrel: o barrel reexporta makeAppRuntime (ManagedRuntime) e traria
 // Effect + client-sdk pro chunk inicial. Ver packages/shared/src/light.ts.
 import {
@@ -25,6 +24,7 @@ import {
 } from "@my-ai-orchestrator/shared/light";
 import { queryClient } from "./query-client.js";
 import { readPendingCheckout } from "./routes/pending-checkout-storage.js";
+import { BrandError, BrandLoader } from "./boot-states.js";
 
 // Cada superfície vira um chunk próprio: o primeiro carregamento (que muitas vezes só redireciona
 // pro Auth0) não paga por telas que o autor ainda não abriu. As rotas continuam declaradas aqui,
@@ -309,32 +309,13 @@ export const router = createRouter({
   defaultPreload: "intent",
   // Com as superfícies em chunks separados, uma navegação pode esperar um download. O padrão de
   // defaultPendingMs (1s) segura este aviso: carregamento rápido não pisca nada na tela.
-  defaultPendingComponent: () => <RoutePending />,
+  defaultPendingComponent: () => <BrandLoader />,
   // Sem isto, um loader que rejeita (ex.: o GET da execução em /g/$id) não renderiza nada: a URL
-  // já mudou e a tela fica em branco, com o erro só no console. Markup inline de propósito —
-  // importar um componente de packages/ui aqui puxaria o chunk dele pro carregamento inicial.
-  defaultErrorComponent: ({ error, reset }) => <RouteError error={error} reset={reset} />
+  // já mudou e a tela fica em branco, com o erro só no console. BrandError (boot-states, local ao
+  // apps/web — não puxa o chunk de packages/ui) mapeia o ClientSdkError para uma mensagem amigável
+  // em vez de despejar o "Failed to fetch" cru; reset re-executa o loader.
+  defaultErrorComponent: ({ error, reset }) => <BrandError error={error} onRetry={reset} />
 });
-
-function RoutePending() {
-  const t = useMessages();
-  return <p className="route-pending">{t.app.loading}</p>;
-}
-
-// Markup inline de propósito (ver acima); o módulo de i18n já está no chunk inicial via app.tsx,
-// então lê-lo aqui não puxa nada novo.
-function RouteError({ error, reset }: { error: unknown; reset: () => void }) {
-  const t = useMessages();
-  return (
-    <div className="route-error">
-      <p>{t.app.routeError}</p>
-      <p className="route-error-detail">{error instanceof Error ? error.message : String(error)}</p>
-      <button type="button" onClick={reset}>
-        {t.common.retry}
-      </button>
-    </div>
-  );
-}
 
 declare module "@tanstack/react-router" {
   interface Register {
