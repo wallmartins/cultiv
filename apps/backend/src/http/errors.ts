@@ -79,6 +79,19 @@ export class BackendVoiceCalibrationValidationError extends Data.TaggedError(
   readonly message: string;
 }> {}
 
+// F3-2 onboarding floor: the seed Practice Profile (G1) could not be derived because the upstream
+// provider chain (Gemini→Groq) was exhausted. A transient failure — never a client input error — so the
+// body carries the "service_unavailable" code, but the HTTP status is 500 (not 503) on purpose: the
+// client-sdk auto-retries 503 mutations generically, which would compound with the calibration hook's
+// F3-2 invisible retry (up to 9 upstream LLM calls). 500 keeps that retry singular and intentional; the
+// wizard blocks step 1→2 until a retry succeeds, with no generic escape (ADR 0010 §5).
+export class BackendVoiceCalibrationDerivationError extends Data.TaggedError(
+  "BackendVoiceCalibrationDerivationError"
+)<{
+  readonly sessionId?: string;
+  readonly message: string;
+}> {}
+
 export class BackendExecutionNotFoundError extends Data.TaggedError("BackendExecutionNotFoundError")<{
   readonly executionId: string;
   readonly userId: string;

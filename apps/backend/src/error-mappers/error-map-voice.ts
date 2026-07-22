@@ -4,7 +4,10 @@ import {
   VoiceExampleValidationError,
   VoicePinnedLimitExceededError
 } from "@my-ai-orchestrator/domain";
-import { BackendVoiceCalibrationValidationError } from "../http/errors.js";
+import {
+  BackendVoiceCalibrationDerivationError,
+  BackendVoiceCalibrationValidationError
+} from "../http/errors.js";
 import { createHttpErrorResponse } from "../http/error-response-core.js";
 import type { HttpErrorResponse } from "../http/error-response-core.js";
 
@@ -52,6 +55,16 @@ export function mapVoiceError(error: unknown, path: string): HttpErrorResponse |
       details: {
         sessionId: error.sessionId,
         stepId: error.stepId,
+        path
+      }
+    });
+  }
+
+  if (error instanceof BackendVoiceCalibrationDerivationError) {
+    return createHttpErrorResponse(500, "service_unavailable", {
+      message: error.message,
+      details: {
+        sessionId: error.sessionId,
         path
       }
     });

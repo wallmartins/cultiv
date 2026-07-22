@@ -25,6 +25,7 @@ export interface PracticeProfileDiagnostics extends Entity<string> {
   readonly updating: boolean;
   readonly summary?: string;
   readonly enrichmentSuggestions?: Readonly<Partial<Record<PracticeDimensionKey, EnrichmentSuggestionRecord>>>;
+  readonly pendingNicheAskDimensions?: readonly PracticeDimensionKey[];
   readonly createdAt: string;
   readonly updatedAt: string;
 }

@@ -2,6 +2,7 @@ import { Effect, Schedule } from "effect";
 import type { AppLogger } from "@my-ai-orchestrator/core";
 import type { DatabaseClient } from "@my-ai-orchestrator/database";
 import type { BillingServiceContract } from "@my-ai-orchestrator/payments";
+import type { AIAdapterServiceContract } from "@my-ai-orchestrator/ai-adapters";
 import {
   CALIBRATION_WIZARD_STEPS,
   VOICE_CALIBRATION_PLAN_LIMITS,
@@ -14,17 +15,32 @@ import type {
   VoiceCalibrationEntitlementView,
   VoiceCalibrationSessionView,
   VoiceCalibrationStepPromptView,
-  VoiceCalibrationStepState
+  VoiceCalibrationStepState,
+  WizardContext
 } from "@my-ai-orchestrator/contracts";
 import type { VoiceExample } from "@my-ai-orchestrator/domain";
 import {
+  BackendVoiceCalibrationDerivationError,
   BackendVoiceCalibrationSessionNotFoundError,
   BackendVoiceCalibrationValidationError
 } from "../../http/errors.js";
 import type { BackendVoiceConsentService } from "../../safety/voice-consent-types.js";
-import type { BillingPlanTier } from "../ai-policy/ai-policy-types.js";
+import type { BillingPlanTier, BackendAIPolicyServiceContract } from "../ai-policy/ai-policy-types.js";
+import type { BackendProviderTransport } from "../../execution/pipeline/provider-transport.js";
 import { resolveStoredUserPlanTier } from "../billing/resolve-user-billing.js";
-import { buildStepPrompt } from "./voice-calibration-candidates.js";
+import { buildStepPrompt, type WizardStepAnchor } from "./voice-calibration-candidates.js";
+import {
+  agnosticCalibrationAnchors,
+  contractsProfileToDomain,
+  generateCalibrationAnchors,
+  generateSeedPracticeProfile,
+  resolvePracticeProfileAttempts,
+  resolvePracticeProfileLocale,
+  type CalibrationAnchorSet,
+  type DeclaredPracticeAxes,
+  type PracticeProfileGenerationDeps,
+  type PracticeProfileLocale
+} from "../practice-profile/index.js";
 import {
   countCompletedVoiceCalibrationSessions,
   createVoiceCalibrationSession,
@@ -171,6 +187,7 @@ function createWizardVoiceExample(
     readonly topicTag: string;
     readonly deterministicFeatures: DeterministicFeatures;
     readonly textLengthBucket: string;
+    readonly language: string;
   }
 ) {
   return Effect.gen(function* () {
@@ -192,7 +209,7 @@ function createWizardVoiceExample(
           id: buildExampleId(args.userId, existing.length + 1),
           userId: args.userId,
           text: args.text.trim(),
-          language: "pt-BR",
+          language: args.language,
           state: "active",
           classificationLabels: [...buildWizardExampleLabels(args.stepId, args.topicTag)],
           antiPatternsExplicit: [],
@@ -237,13 +254,120 @@ function createWizardVoiceExample(
   });
 }
 
+// The generation surfaces (G1 seed + G3 anchors) that setContext drives. Optional: when absent (unit
+// tests, a deployment without the practice-profile routing profile) the wizard keeps the legacy
+// theme-based prompts and never blocks.
+export interface VoiceCalibrationPracticeProfileDeps {
+  readonly aiAdapters: AIAdapterServiceContract;
+  readonly providerTransport: BackendProviderTransport;
+  readonly aiPolicy: BackendAIPolicyServiceContract;
+}
+
+function toDeclaredAxes(context: WizardContext): DeclaredPracticeAxes | undefined {
+  const subject = context.subject?.trim();
+  const vantagePoint = context.vantagePoint?.trim();
+  const audiences = (context.audiences ?? []).map((audience) => audience.trim()).filter((audience) => audience.length > 0);
+  if (!subject || !vantagePoint || audiences.length === 0) {
+    return undefined;
+  }
+  return { subject, vantagePoint, audiences };
+}
+
+function indexAnchorsByStep(anchors: CalibrationAnchorSet): Partial<Record<WizardStepId, WizardStepAnchor>> {
+  const byStep: Partial<Record<WizardStepId, WizardStepAnchor>> = {};
+  for (const anchor of anchors) {
+    byStep[anchor.wizardStepId] = { prompt: anchor.prompt, wordTarget: anchor.wordTarget };
+  }
+  return byStep;
+}
+
+// F3-1/F3-4 — derive the seed Practice Profile (G1) and generated calibration anchors (G3) between
+// wizard screen 1 and 2. Returns undefined (legacy prompts) when the feature is not configured, and
+// fails with BackendVoiceCalibrationDerivationError when the provider chain is exhausted (F3-2 hard
+// block). G3 alone degrades to field-agnostic wording — only G1 blocks (norte gerador-spec §G1/§G3).
+function deriveCalibrationAnchors(args: {
+  readonly practiceProfile: VoiceCalibrationPracticeProfileDeps | undefined;
+  readonly database: DatabaseClient;
+  readonly now: () => Date;
+  readonly logger: AppLogger | undefined;
+  readonly sessionId: string;
+  readonly userId: string;
+  readonly context: WizardContext;
+  readonly locale: PracticeProfileLocale;
+}): Effect.Effect<Partial<Record<WizardStepId, WizardStepAnchor>> | undefined, BackendVoiceCalibrationDerivationError> {
+  return Effect.gen(function* () {
+    if (!args.practiceProfile) {
+      return undefined;
+    }
+
+    const axes = toDeclaredAxes(args.context);
+    if (!axes) {
+      return undefined;
+    }
+
+    const policy = yield* args.practiceProfile.aiPolicy.getActivePolicy().pipe(
+      Effect.mapError((error) => new BackendVoiceCalibrationDerivationError({ sessionId: args.sessionId, message: error.message }))
+    );
+    const attempts = resolvePracticeProfileAttempts(policy);
+    if (attempts.length === 0) {
+      // Deps are wired but the practice-profile routing profile is absent/empty in the active policy —
+      // a misconfiguration (F2-2 expects it live in prod), not a deliberate off state. Warn so it's
+      // distinguishable from the deps-absent path above, then fall back to the legacy prompts.
+      args.logger?.warn("Practice profile routing profile has no attempts; skipping seed derivation", {
+        userId: args.userId,
+        sessionId: args.sessionId
+      });
+      return undefined;
+    }
+
+    const deps: PracticeProfileGenerationDeps = {
+      attempts,
+      aiAdapters: args.practiceProfile.aiAdapters,
+      providerTransport: args.practiceProfile.providerTransport
+    };
+
+    const seed = yield* generateSeedPracticeProfile({
+      userId: args.userId,
+      version: 1,
+      axes,
+      locale: args.locale,
+      deps
+    }).pipe(
+      Effect.mapError(
+        (error) => new BackendVoiceCalibrationDerivationError({ sessionId: args.sessionId, message: error.message })
+      )
+    );
+
+    const timestamp = args.now().toISOString();
+    yield* args.database.practiceProfiles
+      .put(contractsProfileToDomain(seed, { createdAt: timestamp, updatedAt: timestamp }), seed.version)
+      .pipe(Effect.orDie);
+
+    const anchorSet = yield* generateCalibrationAnchors({ profile: seed, locale: args.locale, deps }).pipe(
+      Effect.tapError((error) =>
+        Effect.sync(() =>
+          args.logger?.warn("Calibration anchor generation failed; using field-agnostic anchors", {
+            userId: args.userId,
+            sessionId: args.sessionId,
+            reason: error.message
+          })
+        )
+      ),
+      Effect.orElseSucceed(() => agnosticCalibrationAnchors(args.locale))
+    );
+
+    return indexAnchorsByStep(anchorSet);
+  });
+}
+
 export function createBackendVoiceCalibrationService(
   database: DatabaseClient,
   voiceRebuild: BackendVoiceRebuildService,
   billing: BillingServiceContract,
   now: () => Date,
   voiceConsent?: BackendVoiceConsentService,
-  logger?: AppLogger
+  logger?: AppLogger,
+  practiceProfile?: VoiceCalibrationPracticeProfileDeps
 ): BackendVoiceCalibrationService {
   return {
     startSession(userId) {
@@ -272,7 +396,7 @@ export function createBackendVoiceCalibrationService(
       });
     },
 
-    setContext(sessionId, userId, context) {
+    setContext(sessionId, userId, input) {
       return Effect.gen(function* () {
         const session = yield* requireSession(sessionId, userId);
         yield* assertSessionInProgress(session);
@@ -286,7 +410,27 @@ export function createBackendVoiceCalibrationService(
           );
         }
 
+        const { locale: requestedLocale, ...context } = input;
+        const locale = resolvePracticeProfileLocale(requestedLocale);
+
+        // Derive first: a G1 failure aborts here (F3-2 hard block) BEFORE any session mutation, so the
+        // wizard stays on context_setup and the client can retry cleanly against an untouched session.
+        const anchorsByStepId = yield* deriveCalibrationAnchors({
+          practiceProfile,
+          database,
+          now,
+          logger,
+          sessionId,
+          userId,
+          context,
+          locale
+        });
+
         session.context = context;
+        session.locale = locale;
+        if (anchorsByStepId) {
+          session.anchorsByStepId = anchorsByStepId;
+        }
         refreshSessionStepPrompts(session, now);
 
         if (session.currentStepId === "context_setup") {
@@ -310,7 +454,7 @@ export function createBackendVoiceCalibrationService(
         const session = yield* requireSession(sessionId, userId);
         yield* assertSessionInProgress(session);
 
-        const built = buildStepPrompt(stepId, session.context);
+        const built = buildStepPrompt(stepId, session.anchorsByStepId?.[stepId]);
         return {
           stepId,
           prompt: built.prompt,
@@ -382,7 +526,8 @@ export function createBackendVoiceCalibrationService(
           text,
           topicTag,
           deterministicFeatures,
-          textLengthBucket
+          textLengthBucket,
+          language: session.locale ?? "pt-BR"
         });
 
         session.exampleIdsByStepId[input.stepId] = example.id;

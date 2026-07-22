@@ -32,7 +32,7 @@ Companheiro da **ADR 0010**. Task set ordenado, backend + web, pré-lançamento 
 ## Fase 3 — Onboarding
 
 - **F3-1 · Derivação síncrona do perfil-semente** entre tela 1 e 2 — **nova chamada de LLM síncrona no funil** (hoje não há nenhuma). Latência/timeout/degradado.
-- **F3-2 · Piso do onboarding = bloquear+retentar SEM escape genérico** (custo assimétrico; NÃO é o piso "nunca bloqueia" da ADR 0004, que é da geração): auto-retry 2× invisível → falha visível + botão de retry → "continuar assim mesmo" de-enfatizado. Cadeia Gemini→Groq por baixo.
+- **F3-2 · Piso do onboarding = bloquear+retentar SEM escape genérico** (custo assimétrico; NÃO é o piso "nunca bloqueia" da ADR 0004, que é da geração): auto-retry 2× invisível → falha visível + botão de retry, **sem "continuar assim mesmo"** (decisão 2026-07-22, fiel à ADR 0010 §5 e ao norte `gerador-spec.md` §G1 — só a semente G1 bloqueia, nunca âncora agnóstica; amostra genérica envenena o perfil permanentemente). Cadeia Gemini→Groq por baixo (o status de falha é HTTP 500, não 503, pra não compor com o retry de mutação do client-sdk).
 - **F3-3 · Locale na assinatura** (`buildStepPrompt`/`resolveTheme`, `voice-calibration-candidates.ts:28`): o prompt gerado nasce no idioma pedido; hoje só pt-BR.
 - **F3-4 · Trocar a ponta do seam existente:** `setContext()`→`refreshSessionStepPrompts()`→`buildStepPrompt()` (`voice-calibration-service.ts:290-292`) já reescreve as telas 2–5 — trocar `resolveTheme`/`THEMES_BY_DOMAIN` pela âncora gerada (G3).
 - **F3-5 · Enriquecimento no rebuild de `completeReview`**, pós-consentimento, uma vez, só-acrescenta (`voice-rebuild-pipeline.ts`). G2 + a rede G5 (grounding fino → pergunta no `/voice`).

@@ -6,6 +6,10 @@ import {
   TEST_ARGUMENT_DEVELOPMENT_EXTRACTION_FIXTURE,
   TEST_ARGUMENT_DEVELOPMENT_EXTRACTION_FIXTURE_PT
 } from "../../product/voice/argument-development-extraction.js";
+import {
+  TEST_CALIBRATION_ANCHORS_FIXTURE,
+  TEST_PRACTICE_PROFILE_SEED_FIXTURE
+} from "../../product/practice-profile/practice-profile-test-fixtures.js";
 
 export interface BackendProviderTransport {
   readonly complete: (providerRequest: AIProviderRequest) => Effect.Effect<unknown, AIAdapterTransportError>;
@@ -275,6 +279,17 @@ function renderTestResponse(providerRequest: AIProviderRequest): string {
       score: 82,
       rationale: "Candidate matches the author's observational reasoning and moderate certainty."
     });
+  }
+
+  if (
+    providerRequest.metadata?.purpose === "practice-profile-seed"
+    || providerRequest.metadata?.purpose === "practice-profile-enrichment"
+  ) {
+    return JSON.stringify(TEST_PRACTICE_PROFILE_SEED_FIXTURE);
+  }
+
+  if (providerRequest.metadata?.purpose === "practice-profile-calibration-anchor") {
+    return JSON.stringify(TEST_CALIBRATION_ANCHORS_FIXTURE);
   }
 
   const bodyMessages = Array.isArray((providerRequest.body as Record<string, unknown>).messages)

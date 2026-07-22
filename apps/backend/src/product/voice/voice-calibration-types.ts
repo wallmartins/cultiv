@@ -11,6 +11,7 @@ import type {
 } from "@my-ai-orchestrator/contracts";
 import type { WizardStepId } from "@my-ai-orchestrator/domain";
 import type {
+  BackendVoiceCalibrationDerivationError,
   BackendVoiceCalibrationSessionNotFoundError,
   BackendVoiceCalibrationValidationError,
   BackendVoiceTrainingConsentFailureError,
@@ -32,6 +33,7 @@ export interface BackendVoiceCalibrationService {
     VoiceCalibrationSessionView,
     | BackendVoiceCalibrationSessionNotFoundError
     | BackendVoiceCalibrationValidationError
+    | BackendVoiceCalibrationDerivationError
   >;
   readonly getSession: (
     sessionId: string,

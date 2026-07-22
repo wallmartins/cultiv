@@ -39,6 +39,7 @@ import {
   markRebuildFailure,
   markRebuildQueued
 } from "./voice-rebuild-pipeline-diagnostics.js";
+import { enrichPracticeProfileForUser } from "../practice-profile/practice-profile-enrichment.js";
 
 export interface BackendVoiceRebuildDependencies {
   readonly aiAdapters?: AIAdapterServiceContract;
@@ -322,6 +323,20 @@ function processUserRebuild(deps: VoiceRebuildPipelineDeps, userId: string) {
       snapshotId: derivedState.profile.snapshotId
     });
     yield* clearProfileImpactFlags(database, allExamples, nextVersion, timestamp);
+
+    yield* enrichPracticeProfileForUser(
+      {
+        database,
+        now,
+        aiAdapters: dependencies.aiAdapters,
+        providerTransport: dependencies.providerTransport,
+        aiPolicy: dependencies.aiPolicy,
+        logger
+      },
+      userId,
+      resolveReasoningOutputLanguage(allExamples).bcp47
+    );
+
     yield* observability.recordVoiceRebuildCompleted({
       userId,
       version: derivedState.profile.version,

@@ -7,7 +7,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { VoiceCalibrationSessionView } from "@my-ai-orchestrator/contracts";
-import { makeAppRuntime, queryKeys, RuntimeProvider, useShellStore } from "@my-ai-orchestrator/shared";
+import { makeAppRuntime, queryKeys, RuntimeProvider, useShellStore, useUiLanguage } from "@my-ai-orchestrator/shared";
 import { CalibrationWizard, type Step1ContextProps, type WizardStepContent } from "@my-ai-orchestrator/ui/app/onboarding";
 import { LockedCenter, LockedCompanionEmpty } from "@my-ai-orchestrator/ui/app/locked";
 import { DEFAULT_LOCALE, messagesFor } from "@my-ai-orchestrator/ui/app/i18n";
@@ -466,6 +466,128 @@ describe("CalibrateContainer (S6 — full wizard, container-level)", () => {
       restore();
       vi.mocked(readPostResetContext).mockReset();
       vi.mocked(clearPostResetContext).mockReset();
+    }
+  });
+
+  // F3 — setContext now derives a seed practice profile server-side (LLM in the loop): slower,
+  // and it can fail. These three cover the floor: locale rides the request, a terminal failure
+  // blocks step 1→2 with a retry (no continue-anyway), and a transient one recovers invisibly.
+  function fillStep1AndContinue() {
+    fireEvent.change(screen.getByLabelText("sobre o que você mais escreve?"), { target: { value: "produto" } });
+    fireEvent.change(screen.getByLabelText("de onde você fala sobre isso?"), { target: { value: "fundador técnico" } });
+    fireEvent.change(screen.getByLabelText("pra quem você escreve?"), { target: { value: "fundadores" } });
+    fireEvent.keyDown(screen.getByLabelText("pra quem você escreve?"), { key: "Enter" });
+    fireEvent.click(screen.getByText("Continuar").closest("button")!);
+  }
+
+  it("setContext — sends the UI locale in the request body (F3-3)", async () => {
+    storeSessionId("voice-calibration:test-1");
+    useUiLanguage.setState({ language: "pt-BR" });
+    const queryClient = newQueryClient();
+    queryClient.setQueryData(queryKeys.calibrationSession("voice-calibration:test-1"), sessionAt("context_setup", { context: undefined }));
+    queryClient.setQueryData(queryKeys.voiceProfile(), noVoiceProfileFixture);
+    queryClient.setQueryData(queryKeys.entitlement(), entitlementFixture);
+
+    let contextBody: unknown;
+    const restore = installFetchMock([
+      { method: "POST", test: /\/me\/voice-calibration\/sessions$/, handle: () => ({ body: sessionAt("context_setup", { context: undefined }) }) },
+      {
+        method: "POST",
+        test: /\/voice-calibration\/sessions\/[^/]+\/context$/,
+        handle: ({ body }) => {
+          contextBody = body;
+          return { body: sessionAt("micro_opinion") };
+        }
+      }
+    ]);
+
+    try {
+      renderCalibrate(queryClient);
+      await screen.findByLabelText("sobre o que você mais escreve?");
+      fillStep1AndContinue();
+
+      expect(await screen.findByText("Qual é a sua opinião sobre trabalho remoto?")).toBeInTheDocument();
+      expect(contextBody).toMatchObject({ subject: "produto", vantagePoint: "fundador técnico", audiences: ["fundadores"], locale: "pt-BR" });
+    } finally {
+      restore();
+      useUiLanguage.setState({ language: "en" });
+    }
+  });
+
+  it("setContext — a terminal failure blocks the step 1→2 transition and offers retry, with no continue-anyway escape", async () => {
+    storeSessionId("voice-calibration:test-1");
+    const queryClient = newQueryClient();
+    queryClient.setQueryData(queryKeys.calibrationSession("voice-calibration:test-1"), sessionAt("context_setup", { context: undefined }));
+    queryClient.setQueryData(queryKeys.voiceProfile(), noVoiceProfileFixture);
+    queryClient.setQueryData(queryKeys.entitlement(), entitlementFixture);
+
+    let contextCalls = 0;
+    const restore = installFetchMock([
+      { method: "POST", test: /\/me\/voice-calibration\/sessions$/, handle: () => ({ body: sessionAt("context_setup", { context: undefined }) }) },
+      {
+        method: "POST",
+        test: /\/voice-calibration\/sessions\/[^/]+\/context$/,
+        handle: () => {
+          contextCalls += 1;
+          // 500, not 503/429/504 — keeps this outside the transport's own retry set, so every
+          // count here is exclusively the mutation-level retry under test.
+          return { status: 500, body: { code: "internal_error", message: "provider chain exhausted" } };
+        }
+      }
+    ]);
+
+    try {
+      renderCalibrate(queryClient);
+      await screen.findByLabelText("sobre o que você mais escreve?");
+      fillStep1AndContinue();
+
+      expect(await screen.findByText("Refazer", undefined, { timeout: 3000 })).toBeInTheDocument();
+      expect(screen.queryByText("vamos te conhecer")).not.toBeInTheDocument();
+      expect(screen.queryByText("Qual é a sua opinião sobre trabalho remoto?")).not.toBeInTheDocument();
+      expect(screen.queryByText("Continuar assim mesmo")).not.toBeInTheDocument();
+      const callsAfterFirstFailure = contextCalls;
+      expect(callsAfterFirstFailure).toBeGreaterThan(1); // the 2 invisible retries already ran
+
+      fireEvent.click(screen.getByText("Refazer"));
+      expect(await screen.findByText("construindo sua voz…")).toBeInTheDocument();
+      expect(await screen.findByText("Refazer", undefined, { timeout: 3000 })).toBeInTheDocument();
+      expect(contextCalls).toBeGreaterThan(callsAfterFirstFailure);
+    } finally {
+      restore();
+    }
+  });
+
+  it("setContext — a transient failure recovers through the invisible retry, no error UI shown", async () => {
+    storeSessionId("voice-calibration:test-1");
+    const queryClient = newQueryClient();
+    queryClient.setQueryData(queryKeys.calibrationSession("voice-calibration:test-1"), sessionAt("context_setup", { context: undefined }));
+    queryClient.setQueryData(queryKeys.voiceProfile(), noVoiceProfileFixture);
+    queryClient.setQueryData(queryKeys.entitlement(), entitlementFixture);
+
+    let attempts = 0;
+    const restore = installFetchMock([
+      { method: "POST", test: /\/me\/voice-calibration\/sessions$/, handle: () => ({ body: sessionAt("context_setup", { context: undefined }) }) },
+      {
+        method: "POST",
+        test: /\/voice-calibration\/sessions\/[^/]+\/context$/,
+        handle: () => {
+          attempts += 1;
+          if (attempts === 1) return { status: 500, body: { code: "internal_error", message: "temporary" } };
+          return { body: sessionAt("micro_opinion") };
+        }
+      }
+    ]);
+
+    try {
+      renderCalibrate(queryClient);
+      await screen.findByLabelText("sobre o que você mais escreve?");
+      fillStep1AndContinue();
+
+      expect(await screen.findByText("Qual é a sua opinião sobre trabalho remoto?", undefined, { timeout: 3000 })).toBeInTheDocument();
+      expect(screen.queryByText("Refazer")).not.toBeInTheDocument();
+      expect(attempts).toBe(2);
+    } finally {
+      restore();
     }
   });
 });

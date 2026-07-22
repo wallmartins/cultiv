@@ -213,7 +213,12 @@ export function createBackendProductServices(
         dependencies.billing,
         now,
         voiceConsent,
-        safeLogger
+        safeLogger,
+        {
+          aiAdapters: dependencies.aiAdapters,
+          providerTransport,
+          aiPolicy: dependencies.aiPolicy
+        }
       ),
       policyEvidence,
       operationalOverride,

@@ -11,6 +11,7 @@ import {
   useStartCalibration,
   useSubmitCalibrationAnswer,
   useToastStore,
+  useUiLanguage,
   useVoiceProfile
 } from "@my-ai-orchestrator/shared";
 import { CalibrationWizard, type ResultStepState, type WizardStepContent } from "@my-ai-orchestrator/ui/app/onboarding";
@@ -40,6 +41,7 @@ export function WizardOverlay() {
   const recalOpen = useShellStore((state) => state.recalOpen);
   const closeRecal = useShellStore((state) => state.closeRecal);
   const pushToast = useToastStore((state) => state.push);
+  const uiLanguage = useUiLanguage((state) => state.language);
 
   const [sessionId, setSessionId] = useState<string | undefined>(undefined);
   const startedRef = useRef(false);
@@ -95,7 +97,7 @@ export function WizardOverlay() {
   function handleContextContinue() {
     if (!sessionId) return;
     setContextMutation.mutate(
-      { subject: subject.trim(), vantagePoint: vantagePoint.trim(), audiences },
+      { subject: subject.trim(), vantagePoint: vantagePoint.trim(), audiences, locale: uiLanguage },
       { onSuccess: (updated) => setDisplayStepId(updated.currentStepId) }
     );
   }
@@ -168,6 +170,17 @@ export function WizardOverlay() {
     if (!session) return undefined;
 
     if (stepId === CONTEXT_STEP_ID) {
+      // Same floor as calibrate.tsx's full wizard: block + retry on setContext failure, no
+      // "continue anyway" escape — reuses the review/result kinds' existing building/error states.
+      if (setContextMutation.isError) {
+        return {
+          kind: "result",
+          props: { state: { kind: "error", message: describeCalibrationError(t, setContextMutation.error), onRetry: handleContextContinue } }
+        };
+      }
+      if (setContextMutation.isPending) {
+        return { kind: "review", props: { state: { kind: "building" } } };
+      }
       return {
         kind: "context",
         props: {

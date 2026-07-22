@@ -13,6 +13,7 @@ import {
   useStartCalibration,
   useSubmitCalibrationAnswer,
   useToastStore,
+  useUiLanguage,
   useVoiceProfile
 } from "@my-ai-orchestrator/shared";
 import { Pill } from "@my-ai-orchestrator/ui/app/primitives";
@@ -57,6 +58,7 @@ export function CalibrateContainer() {
   const companionOpen = useShellStore((state) => state.companionOpen);
   const toggleCompanion = useShellStore((state) => state.toggleCompanion);
   const pushToast = useToastStore((state) => state.push);
+  const uiLanguage = useUiLanguage((state) => state.language);
 
   // 1e — set by settings.tsx right before a reset; consumed once, here, at the gate the reset
   // redirects to.
@@ -123,7 +125,7 @@ export function CalibrateContainer() {
   function handleContextContinue() {
     if (!sessionId) return;
     setContextMutation.mutate(
-      { subject: subject.trim(), vantagePoint: vantagePoint.trim(), audiences },
+      { subject: subject.trim(), vantagePoint: vantagePoint.trim(), audiences, locale: uiLanguage },
       { onSuccess: (updated) => setDisplayStepId(updated.currentStepId) }
     );
   }
@@ -216,6 +218,19 @@ export function CalibrateContainer() {
     if (!session) return undefined;
 
     if (stepId === CONTEXT_STEP_ID) {
+      // setContext now derives the seed practice profile server-side (LLM in the loop) — a
+      // multi-second wait, and no "continue anyway" escape on failure (a generic sample would
+      // permanently poison the profile). Reuses the wizard's existing building/error vocabulary
+      // (steps 6/7) instead of a bespoke one; the retry button just re-fires the same mutation.
+      if (setContextMutation.isError) {
+        return {
+          kind: "result",
+          props: { state: { kind: "error", message: describeCalibrationError(t, setContextMutation.error), onRetry: handleContextContinue } }
+        };
+      }
+      if (setContextMutation.isPending) {
+        return { kind: "review", props: { state: { kind: "building" } } };
+      }
       return {
         kind: "context",
         props: {

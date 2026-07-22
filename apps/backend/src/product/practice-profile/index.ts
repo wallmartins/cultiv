@@ -4,10 +4,17 @@
 export {
   PRACTICE_PROFILE_ROUTING_PROFILE_ID,
   resolvePracticeProfileLocale,
+  resolvePracticeProfileAttempts,
   type PracticeProfileLocale,
   type DeclaredPracticeAxes,
   type PracticeProfileGenerationDeps
 } from "./practice-profile-generation-core.js";
+export {
+  practiceProfileEntityId,
+  practiceProfileDiagnosticsEntityId,
+  contractsProfileToDomain,
+  domainProfileToContracts
+} from "./practice-profile-domain-bridge.js";
 export { PracticeProfileGenerationError } from "./practice-profile-errors.js";
 export {
   GENERATOR_ANTI_PATTERN_RULES,
@@ -35,3 +42,7 @@ export {
   type GenerationSlotKey,
   type GenerationSlotSet
 } from "./practice-profile-generation-slots.js";
+export {
+  enrichPracticeProfileForUser,
+  type PracticeProfileEnrichmentDeps
+} from "./practice-profile-enrichment.js";

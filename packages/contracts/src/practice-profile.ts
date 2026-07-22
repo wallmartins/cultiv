@@ -63,7 +63,11 @@ export const PracticeProfileDiagnosticsSchema = Schema.Struct({
   // (same reason voice.ts's traitConfirmations keys on Schema.String, not TraitKeySchema).
   enrichmentSuggestions: Schema.optional(
     Schema.Record({ key: Schema.String, value: EnrichmentSuggestionRecordSchema })
-  )
+  ),
+  // G5 niche-ask (norte gerador-spec §G5): dimensions that came back thin from G2 enrichment and
+  // still owe the author a specificity question in /voice (F5-3). Distinct from enrichmentSuggestions,
+  // which records the author's accept/reject responses — these are the *pending* asks.
+  pendingNicheAskDimensions: Schema.optional(Schema.Array(PracticeDimensionKeySchema))
 });
 export type PracticeProfileDiagnostics = typeof PracticeProfileDiagnosticsSchema.Type;
 

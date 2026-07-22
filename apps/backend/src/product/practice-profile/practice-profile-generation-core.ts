@@ -1,13 +1,28 @@
 import { Effect } from "effect";
 import type { AIAdapterServiceContract } from "@my-ai-orchestrator/ai-adapters";
 import type { BackendProviderTransport } from "../../execution/pipeline/provider-transport.js";
-import type { AIPolicyProviderModelAttempt } from "../ai-policy/ai-policy-types.js";
+import type {
+  AIPolicyProviderModelAttempt,
+  ResolvedAIPolicyVersion
+} from "../ai-policy/ai-policy-types.js";
 import { parseJsonFromLlmResponse } from "../voice/voice-extraction-json.js";
 import { PracticeProfileGenerationError } from "./practice-profile-errors.js";
 import { GENERATOR_CLICHE_RETRY_SUFFIX, detectClicheLeak } from "./practice-profile-anti-patterns.js";
 
 // F2-2: the Gemini→Groq chain lives in catalog.json under this routing profile (config, not infra).
 export const PRACTICE_PROFILE_ROUTING_PROFILE_ID = "practice-profile-llm";
+
+// The provider chain both the onboarding seam (G1/G3) and the rebuild enrichment (G2) resolve the same
+// way — preferred then fallback attempts of the practice-profile routing profile (empty if unconfigured,
+// which the generation core surfaces as "no provider attempts configured").
+export function resolvePracticeProfileAttempts(
+  policy: ResolvedAIPolicyVersion
+): readonly AIPolicyProviderModelAttempt[] {
+  const routingProfile = policy.routingProfiles[PRACTICE_PROFILE_ROUTING_PROFILE_ID];
+  return routingProfile
+    ? [...routingProfile.preferredAttempts, ...routingProfile.fallbackAttempts]
+    : [];
+}
 
 export type PracticeProfileLocale = "pt-BR" | "en-US";
 
