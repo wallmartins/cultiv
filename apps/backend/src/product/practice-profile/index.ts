@@ -1,0 +1,24 @@
+// Practice Profile generator (ADR 0010, plan Phase 2). The 5 generative surfaces (norte gerador-spec):
+// G1/G2 = seed→enriched profile, G3 = calibration anchor, G4 = generation slots, G5 = niche-ask.
+// All share the same rule: curated structure, LLM fill.
+export {
+  PRACTICE_PROFILE_ROUTING_PROFILE_ID,
+  resolvePracticeProfileLocale,
+  type PracticeProfileLocale,
+  type DeclaredPracticeAxes,
+  type PracticeProfileGenerationDeps
+} from "./practice-profile-generation-core.js";
+export { PracticeProfileGenerationError } from "./practice-profile-errors.js";
+export {
+  GENERATOR_ANTI_PATTERN_RULES,
+  GENERATOR_CLICHE_RETRY_SUFFIX,
+  detectClicheLeak,
+  namesSpecific,
+  containsGenericCliche
+} from "./practice-profile-anti-patterns.js";
+export {
+  generateSeedPracticeProfile,
+  enrichPracticeProfile,
+  type PracticeProfileEnrichment
+} from "./practice-profile-generator.js";
+export { buildNicheAsk, type NicheAsk } from "./practice-profile-niche-ask.js";

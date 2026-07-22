@@ -87,6 +87,36 @@
       }
     },
     {
+      "id": "practice-profile-llm",
+      "preferredAttempts": [
+        {
+          "provider": "gemini",
+          "model": "gemini-3.1-flash-lite",
+          "timeoutMs": 20000
+        }
+      ],
+      "fallbackAttempts": [
+        {
+          "provider": "gemini",
+          "model": "gemini-2.5-flash",
+          "timeoutMs": 20000
+        },
+        {
+          "provider": "groq",
+          "model": "llama-3.3-70b-versatile",
+          "timeoutMs": 15000
+        }
+      ],
+      "operationalConstraints": {
+        "fallbackOn": [
+          "transport_error",
+          "timeout",
+          "provider_unavailable",
+          "invalid_response"
+        ]
+      }
+    },
+    {
       "id": "voice-judge-llm",
       "preferredAttempts": [
         {

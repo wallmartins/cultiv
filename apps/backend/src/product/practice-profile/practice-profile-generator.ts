@@ -1,0 +1,201 @@
+import { Effect, Schema } from "effect";
+import {
+  PracticeDimensionsSchema,
+  type PracticeDimensionKey,
+  type PracticeDimensions,
+  type PracticeProfile
+} from "@my-ai-orchestrator/contracts";
+import { namesSpecific } from "./practice-profile-anti-patterns.js";
+import { GENERATOR_ANTI_PATTERN_RULES } from "./practice-profile-anti-patterns.js";
+import { PracticeProfileGenerationError } from "./practice-profile-errors.js";
+import {
+  PRACTICE_DIMENSIONS_GUIDE,
+  formatDeclaredAxes,
+  localeLabel,
+  runPracticeProfileGeneration,
+  type DeclaredPracticeAxes,
+  type PracticeProfileGenerationDeps,
+  type PracticeProfileLocale
+} from "./practice-profile-generation-core.js";
+
+export { PracticeProfileGenerationError } from "./practice-profile-errors.js";
+
+// LLM output. `fieldSpecifics` is an elicitation scratchpad (norte G1 "especificidade paramétrica"):
+// the model must name real practitioners/debates/cases BEFORE filling dimensions. Not persisted.
+const GeneratedProfileSchema = Schema.Struct({
+  fieldSpecifics: Schema.Array(Schema.String),
+  dimensions: PracticeDimensionsSchema
+});
+type GeneratedProfile = typeof GeneratedProfileSchema.Type;
+const decodeGeneratedProfile = Schema.decodeUnknown(GeneratedProfileSchema);
+
+const JSON_SCHEMA_BLOCK = [
+  "Return JSON only, no markdown fences or commentary, matching:",
+  "{",
+  '  "fieldSpecifics": ["string"],',
+  '  "dimensions": {',
+  '    "point": "string",',
+  '    "evidence": "string",',
+  '    "readerAssumption": "string",',
+  '    "resistance": "string",',
+  '    "stake": "string",',
+  '    "fieldCliche": "string",',
+  '    "lexicon": ["string"]',
+  "  }",
+  "}"
+].join("\n");
+
+function clicheProbe(generated: GeneratedProfile): readonly string[] {
+  return [
+    generated.dimensions.point,
+    generated.dimensions.evidence,
+    generated.dimensions.resistance,
+    generated.dimensions.stake,
+    ...generated.fieldSpecifics
+  ];
+}
+
+function buildSystemPrompt(locale: PracticeProfileLocale): string {
+  return [
+    "You derive an author's Practice Profile — the 7 field-specific dimensions behind what they write and for whom.",
+    "Respond with JSON only — no markdown fences or commentary.",
+    `OUTPUT LANGUAGE: write every dimension value in ${localeLabel(locale)}. lexicon holds real field terms (may keep their native form).`,
+    "The average of a field IS that field's cliché. Anchor every dimension in named specifics and steer away from the average.",
+    GENERATOR_ANTI_PATTERN_RULES
+  ].join("\n");
+}
+
+// G1 · seed tier (synchronous, calibration screen 1→2). Parametric-specificity elicitation: force the
+// model to name concrete specifics of the field, then fill the dimensions from them. No external call.
+export function generateSeedPracticeProfile(args: {
+  readonly userId: string;
+  readonly version: number;
+  readonly axes: DeclaredPracticeAxes;
+  readonly locale: PracticeProfileLocale;
+  readonly deps: PracticeProfileGenerationDeps;
+}): Effect.Effect<PracticeProfile, PracticeProfileGenerationError> {
+  return runPracticeProfileGeneration<GeneratedProfile>(
+    {
+      purpose: "practice-profile-seed",
+      system: buildSystemPrompt(args.locale),
+      buildUser: (retrySuffix) =>
+        [
+          formatDeclaredAxes(args.axes),
+          "",
+          PRACTICE_DIMENSIONS_GUIDE,
+          "",
+          "STEP 1 — In fieldSpecifics, name concrete specifics of THIS field: real practitioners, live debates, evidence norms, named cases or numbers. If you cannot name any, the field is unknown to you — leave fieldSpecifics empty rather than invent.",
+          "STEP 2 — Fill each dimension anchored in those specifics. A generic dimension is a failure, not a fill.",
+          "",
+          JSON_SCHEMA_BLOCK,
+          retrySuffix
+        ].join("\n"),
+      decode: decodeGeneratedProfile,
+      selectClicheProbe: clicheProbe
+    },
+    args.deps
+  ).pipe(
+    Effect.map((generated) => assembleProfile({ ...args, depth: "seed", dimensions: generated.dimensions }))
+  );
+}
+
+export interface PracticeProfileEnrichment {
+  readonly profile: PracticeProfile;
+  // Dimensions that came back thin (no named specific) — the G5 niche-ask trigger (norte G2 degrade).
+  readonly thinDimensions: readonly PracticeDimensionKey[];
+}
+
+// G2 · enrichment tier (asynchronous, rebuild post-consent). Deepens the seed's dimensions with more
+// named specifics; only-adds, never rewrites the declared axes (03/05).
+// ponytail: platform — the norte's ceiling is provider-native web grounding; ai-adapters has no
+// tool/grounding surface yet (see ADR 0010 / F2-2 "config, not new infra"). Until it does, enrichment
+// is a deeper parametric-specificity pass. Thin dimensions still surface for the G5 niche-ask.
+export function enrichPracticeProfile(args: {
+  readonly seedProfile: PracticeProfile;
+  readonly locale: PracticeProfileLocale;
+  readonly deps: PracticeProfileGenerationDeps;
+}): Effect.Effect<PracticeProfileEnrichment, PracticeProfileGenerationError> {
+  const axes: DeclaredPracticeAxes = {
+    subject: args.seedProfile.subject,
+    vantagePoint: args.seedProfile.vantagePoint,
+    audiences: args.seedProfile.audiences
+  };
+
+  return runPracticeProfileGeneration<GeneratedProfile>(
+    {
+      purpose: "practice-profile-enrichment",
+      system: buildSystemPrompt(args.locale),
+      buildUser: (retrySuffix) =>
+        [
+          formatDeclaredAxes(axes),
+          "",
+          PRACTICE_DIMENSIONS_GUIDE,
+          "",
+          "== CURRENT SEED DIMENSIONS (deepen — add named specifics, never dilute) ==",
+          JSON.stringify(args.seedProfile.dimensions, null, 2),
+          "",
+          "STEP 1 — In fieldSpecifics, name MORE concrete specifics than the seed: real practitioners, live debates, named cases, numbers. Do not fabricate — if you cannot deepen a dimension, keep the seed value.",
+          "STEP 2 — Return every dimension deepened where you named a specific, unchanged where you could not.",
+          "",
+          JSON_SCHEMA_BLOCK,
+          retrySuffix
+        ].join("\n"),
+      decode: decodeGeneratedProfile,
+      selectClicheProbe: clicheProbe
+    },
+    args.deps
+  ).pipe(
+    Effect.map((generated) => ({
+      profile: assembleProfile({
+        userId: args.seedProfile.userId,
+        version: args.seedProfile.version,
+        axes,
+        depth: "enriched",
+        dimensions: generated.dimensions
+      }),
+      thinDimensions: findThinDimensions(generated.dimensions)
+    }))
+  );
+}
+
+function assembleProfile(args: {
+  readonly userId: string;
+  readonly version: number;
+  readonly axes: DeclaredPracticeAxes;
+  readonly depth: PracticeProfile["depth"];
+  readonly dimensions: PracticeDimensions;
+}): PracticeProfile {
+  return {
+    userId: args.userId,
+    version: args.version,
+    depth: args.depth,
+    subject: args.axes.subject,
+    vantagePoint: args.axes.vantagePoint,
+    audiences: args.axes.audiences,
+    dimensions: args.dimensions
+  };
+}
+
+function findThinDimensions(dimensions: PracticeDimensions): readonly PracticeDimensionKey[] {
+  const thin: PracticeDimensionKey[] = [];
+  const prose: readonly [PracticeDimensionKey, string][] = [
+    ["point", dimensions.point],
+    ["evidence", dimensions.evidence],
+    ["readerAssumption", dimensions.readerAssumption],
+    ["resistance", dimensions.resistance],
+    ["stake", dimensions.stake],
+    ["fieldCliche", dimensions.fieldCliche]
+  ];
+
+  for (const [key, value] of prose) {
+    if (!namesSpecific(value)) {
+      thin.push(key);
+    }
+  }
+
+  if (dimensions.lexicon.length === 0) {
+    thin.push("lexicon");
+  }
+
+  return thin;
+}
