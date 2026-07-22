@@ -108,10 +108,10 @@ export interface PracticeProfileEnrichment {
 }
 
 // G2 · enrichment tier (asynchronous, rebuild post-consent). Deepens the seed's dimensions with more
-// named specifics; only-adds, never rewrites the declared axes (03/05).
-// ponytail: platform — the norte's ceiling is provider-native web grounding; ai-adapters has no
-// tool/grounding surface yet (see ADR 0010 / F2-2 "config, not new infra"). Until it does, enrichment
-// is a deeper parametric-specificity pass. Thin dimensions still surface for the G5 niche-ask.
+// named specifics; only-adds, never rewrites the declared axes (03/05). Runs with provider-native web
+// grounding (FU-2, the norte's ceiling): the Gemini google_search tool anchors the deepening in real
+// practitioners/debates/cases. The Gemini→Groq fallback runs ungrounded (Groq has no grounding
+// surface); thin dimensions still surface for the G5 niche-ask either way.
 export function enrichPracticeProfile(args: {
   readonly seedProfile: PracticeProfile;
   readonly locale: PracticeProfileLocale;
@@ -156,7 +156,8 @@ export function enrichPracticeProfile(args: {
       selectClicheProbe: clicheProbe,
       retryEscape:
         "If you cannot name one, keep the seed value unchanged — a thin dimension becomes a question to the author (the G5 niche-ask), never an invention.",
-      acceptThinAfterRetry: true
+      acceptThinAfterRetry: true,
+      grounding: true
     },
     args.deps
   ).pipe(

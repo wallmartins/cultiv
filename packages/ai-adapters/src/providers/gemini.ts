@@ -25,7 +25,11 @@ export function createGeminiAdapter(): AIProviderAdapter {
               topP: request.topP,
               maxOutputTokens: request.maxTokens,
               stopSequences: request.stop
-            }
+            },
+            // Provider-native web grounding (FU-2). `google_search` is the current Gemini 2.x/3.x tool
+            // name (the 1.5-era name was `google_search_retrieval`); the practice-profile chain runs
+            // gemini-3.1/2.5, so this is the right form. Only emitted when a caller asks to ground.
+            ...(request.grounding?.webSearch ? { tools: [{ google_search: {} }] } : {})
           }
         };
       }),

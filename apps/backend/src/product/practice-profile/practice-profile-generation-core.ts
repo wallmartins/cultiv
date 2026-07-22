@@ -112,6 +112,10 @@ interface PracticeProfileGenerationConfig<T> {
   // G2 only: a merely-thin retry output is accepted (honest degrade — thin dimensions become the G5
   // niche-ask downstream). A filler-phrase hit still fails the attempt on every surface.
   readonly acceptThinAfterRetry?: boolean;
+  // FU-2 · request provider-native web grounding for this surface. Only G2 enrichment sets it — the
+  // seed tier stays a pure parametric-specificity pass (no external call). Providers without a
+  // grounding surface (the Groq fallback) ignore the flag and run ungrounded.
+  readonly grounding?: boolean;
   readonly temperature?: number;
 }
 
@@ -150,6 +154,7 @@ export function runPracticeProfileGeneration<T>(
                 { role: "user", content: userPrompt }
               ],
               temperature: config.temperature ?? 0.3,
+              ...(config.grounding ? { grounding: { webSearch: true } } : {}),
               metadata: {
                 purpose: config.purpose,
                 adapter: attempt.provider,

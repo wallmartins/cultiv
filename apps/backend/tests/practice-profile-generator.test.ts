@@ -1,6 +1,6 @@
 import { Effect } from "effect";
 import { describe, expect, it } from "vitest";
-import type { AIAdapterServiceContract } from "@my-ai-orchestrator/ai-adapters";
+import type { AIAdapterServiceContract, AIModelRequest } from "@my-ai-orchestrator/ai-adapters";
 import { AIAdapterTransportError } from "@my-ai-orchestrator/ai-adapters";
 import type { PracticeProfile } from "@my-ai-orchestrator/contracts";
 import type { BackendProviderTransport } from "../src/execution/pipeline/provider-transport.js";
@@ -33,6 +33,22 @@ function scriptedAdapter(texts: readonly string[]): { adapter: AIAdapterServiceC
 
 function depsFor(adapter: AIAdapterServiceContract): PracticeProfileGenerationDeps {
   return { attempts: [ATTEMPT], aiAdapters: adapter, providerTransport: NOOP_TRANSPORT };
+}
+
+function capturingAdapter(text: string): { adapter: AIAdapterServiceContract; requests: AIModelRequest[] } {
+  const requests: AIModelRequest[] = [];
+  const adapter: AIAdapterServiceContract = {
+    complete: (call) =>
+      Effect.sync(() => {
+        requests.push(call.request);
+        return {
+          request: call.request,
+          providerRequest: {} as never,
+          response: { provider: call.request.provider, model: call.request.model, text }
+        };
+      })
+  };
+  return { adapter, requests };
 }
 
 const SPECIFIC_DIMENSIONS = {
@@ -200,6 +216,34 @@ describe("practice profile generator — G2 enrichment", () => {
 
     expect(calls()).toBe(2);
     expect(exit._tag).toBe("Failure");
+  });
+});
+
+describe("practice profile generator — FU-2 web grounding", () => {
+  const seedProfile: PracticeProfile = {
+    userId: "u1",
+    version: 2,
+    depth: "seed",
+    subject: AXES.subject,
+    vantagePoint: AXES.vantagePoint,
+    audiences: AXES.audiences,
+    dimensions: SPECIFIC_DIMENSIONS
+  };
+
+  it("G2 enrichment asks the provider to ground in a native web search", async () => {
+    const { adapter, requests } = capturingAdapter(SPECIFIC_PAYLOAD);
+    await Effect.runPromise(enrichPracticeProfile({ seedProfile, locale: "pt-BR", deps: depsFor(adapter) }));
+
+    expect(requests[0]?.grounding).toEqual({ webSearch: true });
+  });
+
+  it("G1 seed stays a pure parametric pass — it never requests grounding", async () => {
+    const { adapter, requests } = capturingAdapter(SPECIFIC_PAYLOAD);
+    await Effect.runPromise(
+      generateSeedPracticeProfile({ userId: "u1", version: 1, axes: AXES, locale: "pt-BR", deps: depsFor(adapter) })
+    );
+
+    expect(requests[0]?.grounding).toBeUndefined();
   });
 });
 
