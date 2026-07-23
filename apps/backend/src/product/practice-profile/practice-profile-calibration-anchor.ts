@@ -59,16 +59,17 @@ function assembleAnchors(generated: GeneratedAnchors): CalibrationAnchorSet {
 }
 
 const CALIBRATION_ACT_GUIDE = [
-  "== THE 4 CALIBRATION ACTS (fixed structure — write ONLY the anchored question text for each) ==",
+  "== THE 4 CALIBRATION ACTS (fixed structure — write ONLY the question text for each) ==",
   "The '~N words' on each act is how much the AUTHOR writes in REPLY — it is NEVER the length of the question you write.",
   "Every question is a single, direct, second-person question: ONE sentence, ONE thing asked. No stacked or multi-part questions, no chained 'and how/why do you…' follow-ups, no preamble or framing — just the question a person could answer off the top of their head. A short qualifying clause is fine; a second question is not.",
-  "1. Reação (author replies ~60 words) — anchor in fieldCliche: ask about one field consensus/practice that doesn't hold up. Keep resistance implicit — do NOT also ask about it.",
-  "2. Reflexão (author replies ~150 words) — anchor in evidence: ask for a real decision that turned out wrong, told through this field's evidence norm (an incident, a number, a case).",
+  "Use the dimensions below only to pick the field's AREA, register, and vocabulary — never to name a specific case, claim, company, or number inside the question. Point each question at a category the author owns ('a decision in your work', 'a received practice in your field') and let them fill in the concrete example from their own experience.",
+  "1. Reação (author replies ~60 words) — use fieldCliche as your read of what this field over-repeats, then ask which received practice in the AUTHOR'S OWN area they think doesn't hold up — name the area, not the specific claim. Keep resistance implicit — do NOT also ask about it.",
+  "2. Reflexão (author replies ~150 words) — use evidence as your read of what counts as proof here, then ask for one of the author's OWN decisions that turned out wrong and what they later saw — framed so any practitioner in the field answers from their own work, never presupposing a specific incident, number, or case.",
   // Act 3 keeps resistance + stake (unlike act 1, collapsed to one dim): here the two form ONE
   // walk-through question — the stake is what makes the decision risky — not the compound debate act 1
   // produced. The one-sentence rule above already blocks it from splitting. Deliberate, not an oversight.
-  "3. Desenvolvimento (author replies ~250 words) — anchor in resistance + stake: ask to walk through one risky decision end to end, including the honest case where NOT deciding that way was right.",
-  "4. Tradução (author replies ~180 words) — anchor in readerAssumption: ask to explain one field-insider concept to an outsider, crossing exactly the gap this profile's readerAssumption names.",
+  "3. Desenvolvimento (author replies ~250 words) — use resistance + stake to ask the author to walk through one of their OWN risky decisions end to end, including the honest case where the safer choice was right; the stake is what made it risky, not an external example.",
+  "4. Tradução (author replies ~180 words) — use readerAssumption to ask the author to explain a concept insiders in their field take for granted to a specific kind of outsider, crossing exactly the gap this profile names — name the concept's DOMAIN, but let the author pick the concept.",
   "Do not restate the act name or the word count — just the question text."
 ].join("\n");
 
@@ -86,8 +87,10 @@ const JSON_SCHEMA_BLOCK = [
 
 function buildSystemPrompt(locale: PracticeProfileLocale): string {
   return buildSystemPromptScaffold({
-    role: "You write the calibration-anchor prompts for an onboarding wizard. The 4 acts and their word targets are FIXED and never vary — you write ONLY the anchored question text for each, anchored in this author's Practice Profile below. Anchor in named specifics WITHOUT inflating the question: each stays one short, direct, objective sentence — specificity is in the noun you name, never in the length of the ask.",
-    locale
+    role: "You write the 4 calibration questions for an onboarding wizard. The acts and their word targets are FIXED and never vary — you write ONLY the question text for each, shaped by this author's Practice Profile below. Each question ELICITS the author's own specific; it never presupposes one. Shape it with the field's own area, register, and vocabulary so a marketer's question could never be a lawyer's — but the concrete case, name, or number is what the AUTHOR supplies in the answer, never what you name in the question. Never reference a company, product, technology, framework, event, person, or case study the author must already recognize, and never assert the author personally lived a specific incident. A question the author cannot answer off the top of their head has failed. Each is one short, direct sentence.",
+    locale,
+    specificityLine:
+      "The average of a field IS that field's cliché — steer every question away from it. But the named specific belongs in the author's ANSWER: shape the question in the field's own terms and let the author supply the case, never name one they must already know."
   });
 }
 
@@ -116,8 +119,12 @@ export function generateCalibrationAnchors(args: {
         ].join("\n"),
       decode: decodeGeneratedAnchors,
       selectClicheProbe: clicheProbe,
-      retryEscape:
-        "If you cannot name one, anchor the question in the profile's own named terms — never invent practitioners or cases."
+      // A calibration question elicits the author's specific — it must NOT be gated on naming one
+      // (that force is exactly what produced "why is rewriting in Rust a fallacy?"). Only the dead-
+      // filler blocklist gates here; field-shaping is carried by the prompt + the dimensions context.
+      allowThin: true,
+      retrySuffix:
+        "\n\nRETRY: A question read generic or used a dead cliché phrase. Rewrite it in the field's own area and vocabulary — still one question the author can answer off the top of their head, still eliciting THEIR own example, never naming a company, technology, or case they must already recognize."
     },
     args.deps
   ).pipe(Effect.map(assembleAnchors));

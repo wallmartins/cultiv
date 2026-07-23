@@ -63,30 +63,36 @@ const PROFILE: PracticeProfile = {
   }
 };
 
-const SPECIFIC_ANCHORS_PAYLOAD = JSON.stringify({
+// The corrected style: each question is shaped by the field (software engineering) but names no proper
+// noun/number — the concrete case belongs in the author's answer, so it reads answerable off the top of
+// the head. Under the eliciting gate this passes on the first attempt (namesSpecific no longer gates it).
+const ELICITING_ANCHORS_PAYLOAD = JSON.stringify({
   anchors: {
-    microOpinion: "Qual consenso sobre reescrever em Rust você acha que não sobrevive a produção com 2M linhas?",
+    microOpinion:
+      "Qual prática consagrada em arquitetura de sistemas você acha que raramente se justifica na prática?",
     reasoningReflection:
-      "Conte uma decisão de arquitetura sua que se mostrou errada num cutover de 2023 — o que o postmortem de p99 400ms mostrou que você não via?",
+      "Conte sobre uma decisão de arquitetura sua que se mostrou errada — o que só ficou claro quando algo quebrou em produção?",
     argumentDevelopment:
-      "Descreva como você conduz uma migração arriscada do começo ao fim — incluindo o ponto em que ficar no monólito de 2M linhas era a decisão certa.",
+      "Descreva do começo ao fim uma migração arriscada que você conduziu, incluindo o ponto em que ficar no que já existia era a decisão certa.",
     formatAdaptation:
-      "Explique pra alguém de fora da engenharia por que uma decisão de porta única que custa 3 trimestres não é só 'código feio'."
+      "Explique para alguém de fora da engenharia um conceito que toda liderança técnica trata como óbvio, e por que ele importa."
   }
 });
 
-const GENERIC_ANCHORS_PAYLOAD = JSON.stringify({
+// A dead-cliché batch: post-fix the only thing that still gates a question is the filler-phrase blocklist
+// ("agregar valor"), not the proper-noun proxy — a generic-but-clean elicited question is now accepted.
+const FILLER_ANCHORS_PAYLOAD = JSON.stringify({
   anchors: {
-    microOpinion: "fale sobre o seu tema de forma simples.",
-    reasoningReflection: "conte sobre uma vez que você errou e aprendeu algo.",
-    argumentDevelopment: "descreva uma decisão difícil que você tomou no seu trabalho.",
-    formatAdaptation: "explique isso pra alguém que não conhece o assunto."
+    microOpinion: "Como você pensa em agregar valor no seu trabalho?",
+    reasoningReflection: "Conte sobre uma vez que você errou e aprendeu algo.",
+    argumentDevelopment: "Descreva uma decisão difícil que você tomou no seu trabalho.",
+    formatAdaptation: "Explique isso pra alguém que não conhece o assunto."
   }
 });
 
 describe("practice profile generator — G3 calibration anchor", () => {
   it("assembles the 4 fixed acts, in order, anchored in the generated prompts", async () => {
-    const { adapter, calls } = scriptedAdapter([SPECIFIC_ANCHORS_PAYLOAD]);
+    const { adapter, calls } = scriptedAdapter([ELICITING_ANCHORS_PAYLOAD]);
     const anchors = await Effect.runPromise(
       generateCalibrationAnchors({ profile: PROFILE, locale: "pt-BR", deps: depsFor(adapter) })
     );
@@ -101,7 +107,7 @@ describe("practice profile generator — G3 calibration anchor", () => {
     ]);
     expect(anchors.map((a) => a.wordTarget)).toEqual([60, 150, 250, 180]);
 
-    const parsed = JSON.parse(SPECIFIC_ANCHORS_PAYLOAD) as {
+    const parsed = JSON.parse(ELICITING_ANCHORS_PAYLOAD) as {
       anchors: Record<"microOpinion" | "reasoningReflection" | "argumentDevelopment" | "formatAdaptation", string>;
     };
     expect(anchors[0].prompt).toBe(parsed.anchors.microOpinion);
@@ -110,12 +116,41 @@ describe("practice profile generator — G3 calibration anchor", () => {
     expect(anchors[3].prompt).toBe(parsed.anchors.formatAdaptation);
   });
 
+  // Core regression guard: a calibration question ELICITS the author's specific — the concrete case
+  // belongs in their answer — so a question naming no proper noun/number is correct and must pass on the
+  // first attempt. The old namesSpecific gate rejected exactly these, and its retry ("add a NAMED
+  // specific") is what manufactured "why is rewriting in Rust a fallacy?".
+  it("accepts an eliciting question that names no proper noun, on the first attempt", async () => {
+    const { adapter, calls } = scriptedAdapter([ELICITING_ANCHORS_PAYLOAD]);
+    const anchors = await Effect.runPromise(
+      generateCalibrationAnchors({ profile: PROFILE, locale: "pt-BR", deps: depsFor(adapter) })
+    );
+
+    expect(calls()).toBe(1);
+    const parsed = JSON.parse(ELICITING_ANCHORS_PAYLOAD) as { anchors: { microOpinion: string } };
+    expect(anchors[0].prompt).toBe(parsed.anchors.microOpinion);
+  });
+
+  // The prompt must forbid presupposing knowledge the author may not have (a named company/technology/
+  // case) and steer the specific to the author's answer, so the question stays answerable off the head.
+  it("instructs the model to elicit the author's specific, not presuppose a named case", async () => {
+    const { adapter, prompts } = scriptedAdapter([ELICITING_ANCHORS_PAYLOAD]);
+    await Effect.runPromise(generateCalibrationAnchors({ profile: PROFILE, locale: "pt-BR", deps: depsFor(adapter) }));
+
+    const combined = `${prompts()[0].system}\n${prompts()[0].user}`;
+    expect(combined).toMatch(/ELICITS the author's own specific/i);
+    expect(combined).toMatch(/never reference a company/i);
+    expect(combined).toMatch(/off the top of their head/i);
+    // The named specific is steered to the answer, never named in the question.
+    expect(combined).toMatch(/belongs in the author's ANSWER/i);
+  });
+
   // Regression guard: the label "Opinião curta"/"Quick take" promises a short, objective question, but
   // the '~N words' targets describe the AUTHOR'S reply, not the question. The prompt must say so and cap
   // each question to one sentence — otherwise the ~60-word answer target leaks into the question length
   // and act 1 balloons into a two-part debate.
   it("instructs the model to keep each question a single short question, not size it to the answer target", async () => {
-    const { adapter, prompts } = scriptedAdapter([SPECIFIC_ANCHORS_PAYLOAD]);
+    const { adapter, prompts } = scriptedAdapter([ELICITING_ANCHORS_PAYLOAD]);
     await Effect.runPromise(generateCalibrationAnchors({ profile: PROFILE, locale: "pt-BR", deps: depsFor(adapter) }));
 
     const sent = prompts()[0];
@@ -130,30 +165,32 @@ describe("practice profile generator — G3 calibration anchor", () => {
     expect(combined).toMatch(/Keep resistance implicit/i);
   });
 
-  it("retries once against the cliché suffix when the whole batch reads as generic", async () => {
-    const { adapter, calls } = scriptedAdapter([GENERIC_ANCHORS_PAYLOAD, SPECIFIC_ANCHORS_PAYLOAD]);
+  // Post-fix the retry no longer fires on a missing proper noun (that manufactured the presupposition) —
+  // only a dead filler phrase ("agregar valor") does: retry once, then ship the clean rewrite.
+  it("retries once against the cliché suffix when the batch carries a dead filler phrase", async () => {
+    const { adapter, calls } = scriptedAdapter([FILLER_ANCHORS_PAYLOAD, ELICITING_ANCHORS_PAYLOAD]);
     const anchors = await Effect.runPromise(
       generateCalibrationAnchors({ profile: PROFILE, locale: "pt-BR", deps: depsFor(adapter) })
     );
 
     expect(calls()).toBe(2);
-    const parsed = JSON.parse(SPECIFIC_ANCHORS_PAYLOAD) as { anchors: { microOpinion: string } };
+    const parsed = JSON.parse(ELICITING_ANCHORS_PAYLOAD) as { anchors: { microOpinion: string } };
     expect(anchors[0].prompt).toBe(parsed.anchors.microOpinion);
   });
 
-  // C-2 is per dimension: one generic anchor among four specific ones is enough to trigger the retry.
-  it("retries when a single anchor reads as generic (partial genericity)", async () => {
-    const specific = JSON.parse(SPECIFIC_ANCHORS_PAYLOAD) as { anchors: Record<string, string> };
-    const partiallyGeneric = JSON.stringify({
-      anchors: { ...specific.anchors, formatAdaptation: "explique isso pra alguém que não conhece o assunto." }
+  // The filler gate is per anchor: one filler phrase among four clean questions still triggers the retry.
+  it("retries when a single anchor carries a filler phrase (partial genericity)", async () => {
+    const eliciting = JSON.parse(ELICITING_ANCHORS_PAYLOAD) as { anchors: Record<string, string> };
+    const partiallyFiller = JSON.stringify({
+      anchors: { ...eliciting.anchors, formatAdaptation: "Explique isso pensando em agregar valor pra quem não conhece." }
     });
-    const { adapter, calls } = scriptedAdapter([partiallyGeneric, SPECIFIC_ANCHORS_PAYLOAD]);
+    const { adapter, calls } = scriptedAdapter([partiallyFiller, ELICITING_ANCHORS_PAYLOAD]);
     const anchors = await Effect.runPromise(
       generateCalibrationAnchors({ profile: PROFILE, locale: "pt-BR", deps: depsFor(adapter) })
     );
 
     expect(calls()).toBe(2);
-    expect(anchors[3].prompt).toBe(specific.anchors.formatAdaptation);
+    expect(anchors[3].prompt).toBe(eliciting.anchors.formatAdaptation);
   });
 
   it("fails with a tagged error when every provider attempt is exhausted", async () => {

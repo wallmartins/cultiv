@@ -75,12 +75,16 @@ export function buildSystemPromptScaffold(args: {
   readonly role: string;
   readonly locale: PracticeProfileLocale;
   readonly languageNote?: string;
+  // Default (G1/G2/G4 — writing field claims): anchor everything you write in named specifics. G3
+  // overrides it — a calibration question elicits the author's specific, it never names one.
+  readonly specificityLine?: string;
 }): string {
   return [
     args.role,
     "Respond with JSON only — no markdown fences or commentary.",
     `OUTPUT LANGUAGE: write every value in ${localeLabel(args.locale)}.${args.languageNote ? ` ${args.languageNote}` : ""}`,
-    "The average of a field IS that field's cliché. Anchor everything you write in named specifics and steer away from the average.",
+    args.specificityLine ??
+      "The average of a field IS that field's cliché. Anchor everything you write in named specifics and steer away from the average.",
     GENERATOR_ANTI_PATTERN_RULES
   ].join("\n");
 }
@@ -107,8 +111,16 @@ interface PracticeProfileGenerationConfig<T> {
   // Only specificity-bearing fields — never fieldCliche/lexicon, where naming a cliché is correct.
   readonly selectClicheProbe: (result: T) => readonly string[];
   // Surface-specific honest escape appended to the cliché-retry suffix (C-10) — only G2 may promise
-  // the G5 niche-ask signal.
-  readonly retryEscape: string;
+  // the G5 niche-ask signal. Omit when `retrySuffix` supplies the whole suffix (G3).
+  readonly retryEscape?: string;
+  // Full retry-suffix override. G3 writes ELICITING questions, so its retry must steer AWAY from
+  // naming a presupposed case — the opposite of the shared "add a NAMED specific" suffix.
+  readonly retrySuffix?: string;
+  // G3 only: this surface writes eliciting QUESTIONS, not field claims. A question that names no
+  // proper noun/number is correct — its specific belongs in the author's ANSWER — so the `thin`
+  // proxy (namesSpecific) must not gate it; only the dead-filler blocklist does. Dimensions (G1/G2)
+  // keep the full gate: they must name field specifics for the generator to reuse.
+  readonly allowThin?: boolean;
   // G2 only: a merely-thin retry output is accepted (honest degrade — thin dimensions become the G5
   // niche-ask downstream). A filler-phrase hit still fails the attempt on every surface.
   readonly acceptThinAfterRetry?: boolean;
@@ -139,7 +151,7 @@ export function runPracticeProfileGeneration<T>(
     }
 
     let lastError: PracticeProfileGenerationError | undefined;
-    const retrySuffix = buildClicheRetrySuffix(config.retryEscape);
+    const retrySuffix = config.retrySuffix ?? buildClicheRetrySuffix(config.retryEscape ?? "");
 
     for (const attempt of deps.attempts) {
       for (let retry = 0; retry < 2; retry += 1) {
@@ -180,7 +192,8 @@ export function runPracticeProfileGeneration<T>(
         // C-2: the leak check also runs on the retry output — a still-generic second pass counts as
         // a failed attempt and moves to the next provider instead of shipping a generic result.
         const leak = assessClicheLeak(config.selectClicheProbe(parsed.right));
-        if (leak.fillerHit || leak.thin) {
+        const thin = leak.thin && !config.allowThin;
+        if (leak.fillerHit || thin) {
           if (retry === 0) {
             continue;
           }

@@ -196,30 +196,44 @@ describe("CalibrationWizard (presentational)", () => {
     expect(screen.getByText("Continuar").closest("button")).not.toBeDisabled();
   });
 
-  it("ReviewStep/ConsentAuthorization — Criar minha voz disabled without consent", async () => {
-    await renderWithRouter(
-      <CalibrationWizard
-        variant="full"
-        progress={[]}
-        content={{ kind: "review", props: { state: { kind: "consent", consent: { granted: false, onToggle: () => {}, onCreateVoice: () => {} } } } }}
-      />
+  // Consent moved to step 1 (before the first sample) — the gate now lives on Step1Context, and
+  // the review step only builds the voice.
+  it("Step1Context — with consent required, Continuar stays disabled until consent is granted", async () => {
+    const onToggle = vi.fn();
+    const filled = { subject: "produto", vantagePoint: "fundador técnico", audiences: ["fundadores"] };
+    const { unmount } = await renderWithRouter(
+      <CalibrationWizard variant="full" progress={[]} content={step1Content({ ...filled, consent: { granted: false, onToggle } })} />
     );
-    expect(screen.getByText("Criar minha voz").closest("button")).toBeDisabled();
+    expect(screen.getByText("Continuar").closest("button")).toBeDisabled();
+    fireEvent.click(screen.getByText("autorizo o uso das minhas amostras"));
+    expect(onToggle).toHaveBeenCalledWith(true);
+    unmount();
+
+    await renderWithRouter(
+      <CalibrationWizard variant="full" progress={[]} content={step1Content({ ...filled, consent: { granted: true, onToggle } })} />
+    );
+    expect(screen.getByText("Continuar").closest("button")).not.toBeDisabled();
   });
 
-  it("ReviewStep/ConsentAuthorization — granted consent enables Criar minha voz and calls onCreateVoice", async () => {
+  it("ReviewStep — confirm state runs onCreateVoice on click; pending disables the button", async () => {
     const onCreateVoice = vi.fn();
-    await renderWithRouter(
-      <CalibrationWizard
-        variant="full"
-        progress={[]}
-        content={{ kind: "review", props: { state: { kind: "consent", consent: { granted: true, onToggle: () => {}, onCreateVoice } } } }}
-      />
+    const { unmount } = await renderWithRouter(
+      <CalibrationWizard variant="full" progress={[]} content={{ kind: "review", props: { state: { kind: "confirm", confirm: { onCreateVoice } } } }} />
     );
     const createButton = screen.getByText("Criar minha voz").closest("button")!;
     expect(createButton).not.toBeDisabled();
     fireEvent.click(createButton);
     expect(onCreateVoice).toHaveBeenCalledTimes(1);
+    unmount();
+
+    await renderWithRouter(
+      <CalibrationWizard
+        variant="full"
+        progress={[]}
+        content={{ kind: "review", props: { state: { kind: "confirm", confirm: { onCreateVoice: () => {}, pending: true } } } }}
+      />
+    );
+    expect(screen.getByText("Criar minha voz").closest("button")).toBeDisabled();
   });
 
   it("ReviewStep — building state shows the collapse-in-place spinner copy", async () => {
@@ -333,7 +347,7 @@ describe("CalibrateContainer (S6 — full wizard, container-level)", () => {
     clearStoredSessionId();
   });
 
-  it("consent gate — Criar minha voz stays disabled until granted, then completing builds and shows the ready voice", async () => {
+  it("review step — Criar minha voz is live (consent already granted on step 1), building shows the ready voice", async () => {
     storeSessionId("voice-calibration:test-1");
     const queryClient = newQueryClient();
     queryClient.setQueryData(queryKeys.calibrationSession("voice-calibration:test-1"), sessionAt("review_confirm"));
@@ -344,7 +358,6 @@ describe("CalibrateContainer (S6 — full wizard, container-level)", () => {
       // Belt-and-suspenders: readStoredSessionId is best-effort (jsdom's localStorage can be a
       // no-op) — if the container falls back to starting fresh, it still lands on this session.
       { method: "POST", test: /\/me\/voice-calibration\/sessions$/, handle: () => ({ body: sessionAt("review_confirm") }) },
-      { method: "POST", test: /\/me\/voice-training-consent$/, handle: () => ({ body: { granted: true, grantedAt: "2026-07-17T00:00:00Z" } }) },
       { method: "POST", test: /\/voice-calibration\/sessions\/[^/]+\/complete$/, handle: () => ({ body: sessionAt("review_confirm", { status: "completed" }) }) },
       { method: "GET", test: /\/me\/voice-profile$/, handle: () => ({ body: voiceProfileFixture }) }
     ]);
@@ -352,10 +365,9 @@ describe("CalibrateContainer (S6 — full wizard, container-level)", () => {
     try {
       renderCalibrate(queryClient);
 
-      expect((await screen.findByText("Criar minha voz")).closest("button")).toBeDisabled();
-
-      fireEvent.click(screen.getByText("autorizo o uso das minhas amostras"));
-      const createButton = screen.getByText("Criar minha voz").closest("button")!;
+      // Consent is captured on step 1, before the first sample — the review action no longer gates
+      // on it, so Criar minha voz is enabled the moment the review step renders.
+      const createButton = (await screen.findByText("Criar minha voz")).closest("button")!;
       expect(createButton).not.toBeDisabled();
       fireEvent.click(createButton);
 
@@ -487,6 +499,8 @@ describe("CalibrateContainer (S6 — full wizard, container-level)", () => {
     fireEvent.change(screen.getByLabelText("de onde você fala sobre isso?"), { target: { value: "fundador técnico" } });
     fireEvent.change(screen.getByLabelText("pra quem você escreve?"), { target: { value: "fundadores" } });
     fireEvent.keyDown(screen.getByLabelText("pra quem você escreve?"), { key: "Enter" });
+    // Consent is now collected here, before the first sample — Continuar stays disabled until it's checked.
+    fireEvent.click(screen.getByText("autorizo o uso das minhas amostras"));
     fireEvent.click(screen.getByText("Continuar").closest("button")!);
   }
 
@@ -501,6 +515,11 @@ describe("CalibrateContainer (S6 — full wizard, container-level)", () => {
     let contextBody: unknown;
     const restore = installFetchMock([
       { method: "POST", test: /\/me\/voice-calibration\/sessions$/, handle: () => ({ body: sessionAt("context_setup", { context: undefined }) }) },
+      // Continuar grants consent first, then sets context; the grant's onSuccess invalidates the
+      // voice-profile/entitlement queries the container already observes, so answer those refetches too.
+      { method: "POST", test: /\/me\/voice-training-consent$/, handle: () => ({ body: { granted: true, grantedAt: "2026-07-17T00:00:00Z" } }) },
+      { method: "GET", test: /\/me\/voice-profile$/, handle: () => ({ body: noVoiceProfileFixture }) },
+      { method: "GET", test: /\/me\/billing\/entitlement$/, handle: () => ({ body: entitlementFixture }) },
       {
         method: "POST",
         test: /\/voice-calibration\/sessions\/[^/]+\/context$/,
@@ -534,6 +553,11 @@ describe("CalibrateContainer (S6 — full wizard, container-level)", () => {
     let contextCalls = 0;
     const restore = installFetchMock([
       { method: "POST", test: /\/me\/voice-calibration\/sessions$/, handle: () => ({ body: sessionAt("context_setup", { context: undefined }) }) },
+      // Consent is granted before setContext runs — keep it (and its invalidation refetches) green so
+      // every failure counted below is exclusively setContext's, not a blocked grant.
+      { method: "POST", test: /\/me\/voice-training-consent$/, handle: () => ({ body: { granted: true, grantedAt: "2026-07-17T00:00:00Z" } }) },
+      { method: "GET", test: /\/me\/voice-profile$/, handle: () => ({ body: noVoiceProfileFixture }) },
+      { method: "GET", test: /\/me\/billing\/entitlement$/, handle: () => ({ body: entitlementFixture }) },
       {
         method: "POST",
         test: /\/voice-calibration\/sessions\/[^/]+\/context$/,
@@ -577,6 +601,11 @@ describe("CalibrateContainer (S6 — full wizard, container-level)", () => {
     let attempts = 0;
     const restore = installFetchMock([
       { method: "POST", test: /\/me\/voice-calibration\/sessions$/, handle: () => ({ body: sessionAt("context_setup", { context: undefined }) }) },
+      // Consent is granted before setContext; keep the grant and its invalidation refetches green so
+      // only setContext's own attempts are counted below.
+      { method: "POST", test: /\/me\/voice-training-consent$/, handle: () => ({ body: { granted: true, grantedAt: "2026-07-17T00:00:00Z" } }) },
+      { method: "GET", test: /\/me\/voice-profile$/, handle: () => ({ body: noVoiceProfileFixture }) },
+      { method: "GET", test: /\/me\/billing\/entitlement$/, handle: () => ({ body: entitlementFixture }) },
       {
         method: "POST",
         test: /\/voice-calibration\/sessions\/[^/]+\/context$/,
