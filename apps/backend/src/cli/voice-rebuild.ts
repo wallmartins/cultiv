@@ -1,5 +1,8 @@
 import { Effect } from "effect";
+import { Kysely, PostgresDialect } from "kysely";
 import { bootstrapBackendConfig } from "../config/config.js";
+import { acquirePostgresPool, releasePostgresPool } from "../infra/postgres-bootstrap.js";
+import type { DatabaseTables } from "../infra/postgres-tables.js";
 import { createBackendProductServices } from "../product.js";
 
 // Rebuilds one author's Voice Profile from the examples already in Postgres, in this process.
@@ -9,14 +12,9 @@ import { createBackendProductServices } from "../product.js";
 async function main() {
   const userId = process.argv[2];
 
-  if (!userId || userId.startsWith("--")) {
-    console.error("Usage: pnpm --filter @my-ai-orchestrator/backend voice:rebuild <userId>");
-    console.error("");
-    // application_users has no email column — external_subject is the Auth0 `sub`.
-    console.error("Find the id with:");
-    console.error(
-      "  psql \"$DATABASE_URL\" -c \"select id, external_subject, created_at from application_users order by created_at desc limit 20;\""
-    );
+  if (!userId || (userId.startsWith("--") && userId !== "--list")) {
+    console.error("Usage: voice:rebuild <userId>");
+    console.error("       voice:rebuild --list    # ids with a voice profile, newest first");
     process.exit(1);
   }
 
@@ -25,6 +23,11 @@ async function main() {
   if (!config.databaseUrl) {
     console.error("DATABASE_URL is required to rebuild a voice profile");
     process.exit(1);
+  }
+
+  if (userId === "--list") {
+    await listAuthors(config.databaseUrl);
+    return;
   }
 
   const services = await Effect.runPromise(createBackendProductServices(config, { now: () => new Date() }));
@@ -46,6 +49,32 @@ async function main() {
   if (after?.diagnostics.pendingRebuild.status === "failed") {
     console.error("Rebuild failed — the previous snapshot is still active. See diagnostics.summary above.");
     process.exit(1);
+  }
+}
+
+// Saves an operator the psql-inside-docker detour: this process already holds DATABASE_URL, and
+// application_users has no email column — external_subject is the Auth0 `sub`.
+async function listAuthors(databaseUrl: string) {
+  const pool = await Effect.runPromise(acquirePostgresPool(databaseUrl));
+
+  try {
+    const db = new Kysely<DatabaseTables>({ dialect: new PostgresDialect({ pool }) });
+    const rows = await db
+      .selectFrom("application_users")
+      .select(["id", "external_subject", "status", "created_at"])
+      .where("deleted_at", "is", null)
+      .orderBy("created_at", "desc")
+      .limit(20)
+      .execute();
+
+    if (rows.length === 0) {
+      console.info("No application users found.");
+      return;
+    }
+
+    console.table(rows);
+  } finally {
+    await Effect.runPromise(releasePostgresPool(pool));
   }
 }
 
