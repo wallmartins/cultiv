@@ -1,14 +1,35 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { TraitConfirmationInput } from "@my-ai-orchestrator/contracts";
+import type { TraitConfirmationInput, VoiceProfileScreenView } from "@my-ai-orchestrator/contracts";
 import { useRun } from "../runtime/useRun.js";
 import { queryKeys } from "./query-keys.js";
 import { withSdk } from "./with-sdk.js";
+
+// A 404 means "hasn't calibrated yet" — the normal state before an author's first Voice Profile
+// Rebuild, not a failure. `select` unwraps the cached `null` back to `undefined` so callers keep
+// their existing `VoiceProfileScreenView | undefined` type (matches router.tsx's shell-gate fetch,
+// same query key — both must resolve the same shape or whichever wins the cache race breaks the other).
+function isVoiceProfileNotFound(error: unknown): boolean {
+  return (
+    typeof error === "object"
+    && error !== null
+    && (error as { _tag?: unknown })._tag === "ClientSdkHttpStatusError"
+    && (error as { status?: unknown }).status === 404
+  );
+}
 
 export function useVoiceProfile() {
   const run = useRun();
   return useQuery({
     queryKey: queryKeys.voiceProfile(),
-    queryFn: () => run(withSdk((sdk) => sdk.voice.getProfile()))
+    queryFn: async (): Promise<VoiceProfileScreenView | null> => {
+      try {
+        return await run(withSdk((sdk) => sdk.voice.getProfile()));
+      } catch (error) {
+        if (isVoiceProfileNotFound(error)) return null;
+        throw error;
+      }
+    },
+    select: (data) => data ?? undefined
   });
 }
 
