@@ -97,8 +97,15 @@ export const DeterministicFeaturesSchema = Schema.Struct({
   // firstPersonRatio. An author who narrates in first person here and in the third person there
   // has no settled stance, and it is the disagreement between examples — on either axis — that
   // says so.
-  firstPersonRatio: Schema.Number,
-  thirdPersonRatio: Schema.Number
+  //
+  // Defaulted, not required: these axes postdate the profiles already in Postgres, and this
+  // struct is decoded on the way OUT (validateResponseBody) as well as in. Requiring them turned
+  // every pre-existing profile into an HTTP 500 — the stored aggregate is descriptive only, so
+  // reading a legacy one as zero is harmless and the next rebuild overwrites it with real values.
+  // What must never read as zero is the per-example figure the score is computed from; that one
+  // is recomputed from text by resolveDeterministicFeatures.
+  firstPersonRatio: Schema.optionalWith(Schema.Number, { default: () => 0 }),
+  thirdPersonRatio: Schema.optionalWith(Schema.Number, { default: () => 0 })
 });
 export type DeterministicFeatures = typeof DeterministicFeaturesSchema.Type;
 
