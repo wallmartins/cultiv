@@ -87,6 +87,13 @@ export function resolveRules(
 ): readonly string[] {
   const rules = new Set<string>();
 
+  // Only first person gets a rule, so a settled third-person voice gets no instruction at all —
+  // a real asymmetry, but pronoun density does not fix it. Measured on a first-person author's
+  // four wizard answers: 0.0084 first vs 0.0060 third, a dominance of 1.4x. pt-BR is pro-drop, so
+  // "Passei semanas", "Busquei", "estruturei" carry no pronoun to count, while "ele"/"dele" attach
+  // to objects rather than the narrative subject. A density rule would have stripped this author
+  // of the first-person instruction he legitimately has. First-person verb morphology (-ei, -amos,
+  // -íamos) is the promising signal, and needs more than one author's corpus to justify.
   if (activeExamples.some((example) => /\b(eu|minha|minhas|meu|meus)\b/i.test(normalizeText(example.text)))) {
     rules.add("prefer_first_person_when_relevant");
   }

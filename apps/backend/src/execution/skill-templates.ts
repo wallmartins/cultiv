@@ -96,7 +96,7 @@ function buildSystemTemplate(): string {
     "== TOPIC AND AUDIENCE ==",
     "{{audienceModulation}}",
     "The briefing defines topic and angle; examples and comparisons should be ones the audience above would recognize. How the author uses metaphor and imagery is a voice trait and does not change with audience.",
-    "When tone is personal, keep the author present in first person with specific lived detail, not a detached essay voice.",
+    "When tone is personal, keep the author present with specific lived detail, not a detached essay voice. Follow the voice rules above for grammatical person — do not default to first person.",
     "",
     "== FORMAT ==",
     "{{formatInstructions}}",
