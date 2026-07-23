@@ -114,20 +114,29 @@ jobs:
     needs: changes
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-monorepo
+      # Sharded across 4 runners: file collection + transform (not raw test execution) dominates
+      # wall time on CI's smaller CPUs, and --shard splits that cost across parallel jobs instead of
+      # one runner paying it for all ~280 files serially-parallel.
       - name: Full unit suite
         if: needs.changes.outputs.shared == 'true' || (needs.changes.outputs.web == 'true' && needs.changes.outputs.backend == 'true')
-        run: pnpm test:ci
+        run: pnpm test:ci -- --shard=${{ matrix.shard }}/4
       - name: Backend unit suite
         if: needs.changes.outputs.backend == 'true' && needs.changes.outputs.web != 'true' && needs.changes.outputs.shared != 'true'
-        run: pnpm test:ci:backend
+        run: pnpm test:ci:backend -- --shard=${{ matrix.shard }}/4
+      # Small suites (~20 files): sharding would just multiply fixed checkout/install overhead
+      # for no wall-clock gain, so only shard 1 runs them, unsharded.
       - name: Web unit suite
-        if: needs.changes.outputs.web == 'true' && needs.changes.outputs.backend != 'true' && needs.changes.outputs.shared != 'true'
+        if: matrix.shard == 1 && needs.changes.outputs.web == 'true' && needs.changes.outputs.backend != 'true' && needs.changes.outputs.shared != 'true'
         run: pnpm test:ci:web
       - name: Smoke tests (docs-only / out-of-scope diffs)
-        if: needs.changes.outputs.shared != 'true' && needs.changes.outputs.web != 'true' && needs.changes.outputs.backend != 'true'
+        if: matrix.shard == 1 && needs.changes.outputs.shared != 'true' && needs.changes.outputs.web != 'true' && needs.changes.outputs.backend != 'true'
         run: pnpm smoke
 
   eval:
