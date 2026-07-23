@@ -14,13 +14,23 @@ import {
 const NOOP_TRANSPORT = { complete: () => Effect.succeed(undefined) } as unknown as BackendProviderTransport;
 const ATTEMPT = { provider: "gemini", model: "gemini-3.1-flash-lite", timeoutMs: 20000 };
 
-function scriptedAdapter(texts: readonly string[]): { adapter: AIAdapterServiceContract; calls: () => number } {
+function scriptedAdapter(texts: readonly string[]): {
+  adapter: AIAdapterServiceContract;
+  calls: () => number;
+  prompts: () => readonly { system: string; user: string }[];
+} {
   let i = 0;
+  const captured: { system: string; user: string }[] = [];
   const adapter: AIAdapterServiceContract = {
     complete: (call) =>
       Effect.sync(() => {
         const text = texts[Math.min(i, texts.length - 1)] ?? "";
         i += 1;
+        const messages = call.request.messages as readonly { role: string; content: string }[];
+        captured.push({
+          system: messages.find((m) => m.role === "system")?.content ?? "",
+          user: messages.find((m) => m.role === "user")?.content ?? ""
+        });
         return {
           request: call.request,
           providerRequest: {} as never,
@@ -28,7 +38,7 @@ function scriptedAdapter(texts: readonly string[]): { adapter: AIAdapterServiceC
         };
       })
   };
-  return { adapter, calls: () => i };
+  return { adapter, calls: () => i, prompts: () => captured };
 }
 
 function depsFor(adapter: AIAdapterServiceContract): PracticeProfileGenerationDeps {
@@ -98,6 +108,26 @@ describe("practice profile generator — G3 calibration anchor", () => {
     expect(anchors[1].prompt).toBe(parsed.anchors.reasoningReflection);
     expect(anchors[2].prompt).toBe(parsed.anchors.argumentDevelopment);
     expect(anchors[3].prompt).toBe(parsed.anchors.formatAdaptation);
+  });
+
+  // Regression guard: the label "Opinião curta"/"Quick take" promises a short, objective question, but
+  // the '~N words' targets describe the AUTHOR'S reply, not the question. The prompt must say so and cap
+  // each question to one sentence — otherwise the ~60-word answer target leaks into the question length
+  // and act 1 balloons into a two-part debate.
+  it("instructs the model to keep each question a single short question, not size it to the answer target", async () => {
+    const { adapter, prompts } = scriptedAdapter([SPECIFIC_ANCHORS_PAYLOAD]);
+    await Effect.runPromise(generateCalibrationAnchors({ profile: PROFILE, locale: "pt-BR", deps: depsFor(adapter) }));
+
+    const sent = prompts()[0];
+    const combined = `${sent.system}\n${sent.user}`;
+    // The word count is disclaimed as the reply length, never the question length.
+    expect(combined).toMatch(/REPLY/i);
+    expect(combined).toMatch(/NEVER the length of the question/i);
+    // One question, one sentence — no stacked/multi-part asks.
+    expect(combined).toMatch(/ONE sentence/i);
+    expect(combined).toMatch(/No stacked or multi-part questions/i);
+    // Act 1 anchors in the cliché only; resistance stays implicit (no compound debate question).
+    expect(combined).toMatch(/Keep resistance implicit/i);
   });
 
   it("retries once against the cliché suffix when the whole batch reads as generic", async () => {

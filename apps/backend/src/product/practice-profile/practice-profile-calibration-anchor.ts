@@ -60,11 +60,16 @@ function assembleAnchors(generated: GeneratedAnchors): CalibrationAnchorSet {
 
 const CALIBRATION_ACT_GUIDE = [
   "== THE 4 CALIBRATION ACTS (fixed structure — write ONLY the anchored question text for each) ==",
-  "1. Reação (~60 words) — anchor in fieldCliche + resistance: ask about a field consensus/practice that doesn't hold up.",
-  "2. Reflexão (~150 words) — anchor in evidence: ask for a real decision that turned out wrong, told through this field's evidence norm (an incident, a number, a case).",
-  "3. Desenvolvimento (~250 words) — anchor in resistance + stake: ask to walk through a risky decision end to end, including the honest case where NOT deciding that way was right.",
-  "4. Tradução (~180 words) — anchor in readerAssumption: ask to explain a field-insider concept to an outsider, crossing exactly the gap this profile's readerAssumption names.",
-  "Write each prompt as a direct question to the author, in second person. Do not restate the act name or word target — just the question text."
+  "The '~N words' on each act is how much the AUTHOR writes in REPLY — it is NEVER the length of the question you write.",
+  "Every question is a single, direct, second-person question: ONE sentence, ONE thing asked. No stacked or multi-part questions, no chained 'and how/why do you…' follow-ups, no preamble or framing — just the question a person could answer off the top of their head. A short qualifying clause is fine; a second question is not.",
+  "1. Reação (author replies ~60 words) — anchor in fieldCliche: ask about one field consensus/practice that doesn't hold up. Keep resistance implicit — do NOT also ask about it.",
+  "2. Reflexão (author replies ~150 words) — anchor in evidence: ask for a real decision that turned out wrong, told through this field's evidence norm (an incident, a number, a case).",
+  // Act 3 keeps resistance + stake (unlike act 1, collapsed to one dim): here the two form ONE
+  // walk-through question — the stake is what makes the decision risky — not the compound debate act 1
+  // produced. The one-sentence rule above already blocks it from splitting. Deliberate, not an oversight.
+  "3. Desenvolvimento (author replies ~250 words) — anchor in resistance + stake: ask to walk through one risky decision end to end, including the honest case where NOT deciding that way was right.",
+  "4. Tradução (author replies ~180 words) — anchor in readerAssumption: ask to explain one field-insider concept to an outsider, crossing exactly the gap this profile's readerAssumption names.",
+  "Do not restate the act name or the word count — just the question text."
 ].join("\n");
 
 const JSON_SCHEMA_BLOCK = [
@@ -81,7 +86,7 @@ const JSON_SCHEMA_BLOCK = [
 
 function buildSystemPrompt(locale: PracticeProfileLocale): string {
   return buildSystemPromptScaffold({
-    role: "You write the calibration-anchor prompts for an onboarding wizard. The 4 acts and their word targets are FIXED and never vary — you write ONLY the anchored question text for each, anchored in this author's Practice Profile below.",
+    role: "You write the calibration-anchor prompts for an onboarding wizard. The 4 acts and their word targets are FIXED and never vary — you write ONLY the anchored question text for each, anchored in this author's Practice Profile below. Anchor in named specifics WITHOUT inflating the question: each stays one short, direct, objective sentence — specificity is in the noun you name, never in the length of the ask.",
     locale
   });
 }
