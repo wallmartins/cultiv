@@ -154,7 +154,9 @@ export function CalibrateContainer() {
       onSuccess: () => {
         clearStoredSessionId();
         void navigate({ to: "/generate" });
-      }
+      },
+      onError: (error) =>
+        pushToast({ id: "calibrate-finish-error", kind: "error", topic: t.onboarding.toast.finishError, message: describeCalibrationError(t, error) })
     });
   }
 
@@ -190,9 +192,15 @@ export function CalibrateContainer() {
   }
 
   function handleBridgeContinue() {
-    clearStoredSessionId();
-    if (!companionOpen) toggleCompanion();
-    void navigate({ to: "/generate" });
+    completeOnboardingMutation.mutate(undefined, {
+      onSuccess: () => {
+        clearStoredSessionId();
+        if (!companionOpen) toggleCompanion();
+        void navigate({ to: "/generate" });
+      },
+      onError: (error) =>
+        pushToast({ id: "calibrate-finish-error", kind: "error", topic: t.onboarding.toast.finishError, message: describeCalibrationError(t, error) })
+    });
   }
 
   // completeReview only returns the session (status flips to "completed") — confidence/prose come

@@ -31,7 +31,8 @@ export const onboarding: AppMessages["onboarding"] = {
   toast: {
     submitError: "we couldn't save that sample",
     skipError: "we couldn't skip that step",
-    startFailed: "we couldn't start your calibration right now."
+    startFailed: "we couldn't start your calibration right now.",
+    finishError: "we couldn't finish your calibration right now."
   },
 
   overlay: {

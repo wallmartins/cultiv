@@ -29,7 +29,8 @@ export const onboarding = {
   toast: {
     submitError: "não conseguimos salvar essa amostra",
     skipError: "não conseguimos pular essa etapa",
-    startFailed: "não conseguimos iniciar a sua calibração agora."
+    startFailed: "não conseguimos iniciar a sua calibração agora.",
+    finishError: "não conseguimos concluir a sua calibração agora."
   },
 
   overlay: {
