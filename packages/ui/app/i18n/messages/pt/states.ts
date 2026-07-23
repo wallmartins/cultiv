@@ -119,7 +119,7 @@ export const states = {
     },
     lockedCenter: {
       notice: "nenhuma geração real ainda — o exemplo abaixo é ilustrativo",
-      calibrateCta: "Calibrar minha voz →"
+      calibrateCta: "Reativar minha voz →"
     },
     companionEmpty: {
       description: "sua voz aparece aqui depois da calibração",

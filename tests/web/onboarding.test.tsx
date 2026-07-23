@@ -306,7 +306,7 @@ describe("locked workspace (presentational)", () => {
     const onCalibrate = vi.fn();
     await renderWithRouter(<LockedCenter onCalibrate={onCalibrate} />);
     expect(screen.getByText("exemplo")).toBeInTheDocument();
-    fireEvent.click(screen.getByText("Calibrar minha voz →"));
+    fireEvent.click(screen.getByText("Reativar minha voz →"));
     expect(onCalibrate).toHaveBeenCalledTimes(1);
   });
 

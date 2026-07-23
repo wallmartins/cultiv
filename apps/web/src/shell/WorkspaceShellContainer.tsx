@@ -265,7 +265,11 @@ export function WorkspaceShellContainer({ children }: WorkspaceShellContainerPro
             : undefined
         }
       >
-        {locked && pathname !== "/voice" ? <LockedCenter onCalibrate={() => navigate({ to: "/calibrate" })} /> : children}
+        {/* locked only ever means consent was refused/revoked (deriveAppMode), and consent is
+            granted on /voice — which is why that route is exempt above. Sending this CTA to
+            /calibrate instead was a dead end: the gate there bounces anyone who already has a
+            profile straight back to /voice. */}
+        {locked && pathname !== "/voice" ? <LockedCenter onCalibrate={goVoice} /> : children}
       </WorkspaceShell>
       <WizardOverlay />
     </>

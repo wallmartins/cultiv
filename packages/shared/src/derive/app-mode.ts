@@ -6,8 +6,11 @@ import type {
 
 export type AppMode = "calibrate" | "locked" | "normal";
 
-// GAP #9 — the two reason codes the spec calls out as blocking (contratos-por-superficie.md).
-const LOCKED_REASON_CODES = new Set(["insufficient_examples", "subscription_inactive"]);
+// GAP #9 — contratos-por-superficie.md frames the gate as "sem voz → wizard; recusou → travado":
+// consent is what blocks. `insufficient_examples` is a *quality* advisory, not an entitlement one —
+// deriveReasonCodes emits it below 5 active examples and the calibration wizard only produces 4
+// writing steps, so treating it as blocking locked out every author the moment they onboarded.
+const LOCKED_REASON_CODES = new Set(["subscription_inactive"]);
 
 export function deriveAppMode(
   onboarding: OnboardingStatusView | undefined,

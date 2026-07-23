@@ -115,7 +115,7 @@ export const states: AppMessages["states"] = {
     },
     lockedCenter: {
       notice: "no real generation yet — the example below is illustrative",
-      calibrateCta: "Calibrate my voice →"
+      calibrateCta: "Reactivate my voice →"
     },
     companionEmpty: {
       description: "your voice shows up here after calibration",

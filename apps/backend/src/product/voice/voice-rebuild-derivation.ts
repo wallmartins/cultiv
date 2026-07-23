@@ -191,25 +191,16 @@ export function resolveNextProfileVersion(
 
 const CONFIDENCE_ORDER: readonly VoiceProfileConfidence[] = ["low", "medium", "high"];
 
-function upgradeConfidence(level: VoiceProfileConfidence): VoiceProfileConfidence {
-  const index = CONFIDENCE_ORDER.indexOf(level);
-  return CONFIDENCE_ORDER[Math.min(index + 1, CONFIDENCE_ORDER.length - 1)]!;
-}
-
-function downgradeConfidence(level: VoiceProfileConfidence): VoiceProfileConfidence {
-  const index = CONFIDENCE_ORDER.indexOf(level);
-  return CONFIDENCE_ORDER[Math.max(index - 1, 0)]!;
-}
-
-function minConfidence(
-  level: VoiceProfileConfidence,
-  cap: VoiceProfileConfidence
+function lowestConfidence(
+  ...levels: readonly VoiceProfileConfidence[]
 ): VoiceProfileConfidence {
-  return CONFIDENCE_ORDER.indexOf(level) <= CONFIDENCE_ORDER.indexOf(cap) ? level : cap;
+  return levels.reduce((lowest, level) =>
+    CONFIDENCE_ORDER.indexOf(level) < CONFIDENCE_ORDER.indexOf(lowest) ? level : lowest
+  );
 }
 
 function deriveLegacyConfidence(activeExamples: readonly VoiceExampleRecord[]): VoiceProfileConfidence {
-  if (activeExamples.length < 5) {
+  if (activeExamples.length < 4) {
     return "low";
   }
 
@@ -221,34 +212,46 @@ function deriveLegacyConfidence(activeExamples: readonly VoiceExampleRecord[]): 
   return "high";
 }
 
+// Where a defined voice stops being "defined". Calibrated against five reference corpora: a
+// first-person voice (0.964), that same voice with one off-key text (0.962), the wizard's four
+// answers at their real target lengths (0.960), a settled third-person voice (0.965), and a
+// writer with no settled form (0.618). Real cases cluster at either end, so both bands sit in
+// the empty space between them rather than on top of a case they have to adjudicate.
+const STYLE_DEFINITION_HIGH = 0.85;
+const STYLE_DEFINITION_MEDIUM = 0.7;
+
+// Confidence is the lowest of four independent ceilings, not a chain of nudges. Each answers a
+// different question, and the weakest one is the honest answer:
+//
+//   style      — do the examples agree on a form? (writing the same way every time IS the style;
+//                this only rises with agreement, and is never penalised for being too consistent)
+//   extraction — did both halves of the profile actually come out?
+//   material   — was the calibration completed at all?
+//   plan       — what does the author's plan allow?
 function deriveCompositeConfidence(
   activeExamples: readonly VoiceExampleRecord[],
   signals: QuantitativeSignals,
   cap: VoiceProfileConfidence
 ): VoiceProfileConfidence {
-  let base: VoiceProfileConfidence =
-    activeExamples.length >= 5 ? "high" : activeExamples.length >= 3 ? "medium" : "low";
+  // Both terms measure agreement of form; topic independence asks it again across subjects, so a
+  // style that only holds within one topic is not yet a voice. The weaker one governs.
+  const styleDefinition = Math.min(signals.consistencyScore, signals.topicIndependenceScore);
+  const style: VoiceProfileConfidence =
+    styleDefinition >= STYLE_DEFINITION_HIGH
+      ? "high"
+      : styleDefinition >= STYLE_DEFINITION_MEDIUM
+        ? "medium"
+        : "low";
 
-  if (signals.consistencyScore > 0.7) {
-    base = upgradeConfidence(base);
-  }
+  const extraction: VoiceProfileConfidence =
+    signals.extractionQuality.reasoningExtracted && signals.extractionQuality.developmentExtracted
+      ? "high"
+      : "medium";
 
-  if (signals.topicIndependenceScore > 0.6) {
-    base = upgradeConfidence(base);
-  }
+  const material: VoiceProfileConfidence =
+    activeExamples.length >= 4 ? "high" : activeExamples.length >= 2 ? "medium" : "low";
 
-  if (
-    signals.extractionQuality.reasoningExtracted
-    && signals.extractionQuality.developmentExtracted
-  ) {
-    base = upgradeConfidence(base);
-  }
-
-  if (signals.consistencyScore > 0.95) {
-    base = downgradeConfidence(base);
-  }
-
-  return minConfidence(base, cap);
+  return lowestConfidence(style, extraction, material, cap);
 }
 
 export function deriveConfidence(
@@ -257,7 +260,7 @@ export function deriveConfidence(
   cap?: VoiceProfileConfidence
 ): VoiceProfileConfidence {
   if (!signals) {
-    return deriveLegacyConfidence(activeExamples);
+    return lowestConfidence(deriveLegacyConfidence(activeExamples), cap ?? "high");
   }
 
   return deriveCompositeConfidence(activeExamples, signals, cap ?? "high");
@@ -267,7 +270,12 @@ function deriveReasonCodes(activeExamples: readonly VoiceExampleRecord[]): reado
   const reasonCodes: ReasonCode[] = [];
   const diversityScore = calculateDiversityScore(activeExamples);
 
-  if (activeExamples.length < 5) {
+  // The wizard's four writing steps ARE a complete calibration — below four it was not finished.
+  // At exactly four we report nothing and let extraction quality drive confidence instead
+  // (deriveCompositeConfidence upgrades once reasoning AND development both landed). Diversity
+  // only becomes a fair question once there is material beyond the wizard, which carries no
+  // channel/format metadata of its own.
+  if (activeExamples.length < 4) {
     reasonCodes.push("insufficient_examples");
   }
 

@@ -91,7 +91,14 @@ export const DeterministicFeaturesSchema = Schema.Struct({
   emotionalityScore: Schema.Number,
   certaintyMarkerCount: Schema.Number,
   hedgingMarkerCount: Schema.Number,
-  transitionMarkerCount: Schema.Number
+  transitionMarkerCount: Schema.Number,
+  // Perspective density, measured on both poles so neither is merely the absence of the other:
+  // a settled third-person writer scores high on thirdPersonRatio rather than just zero on
+  // firstPersonRatio. An author who narrates in first person here and in the third person there
+  // has no settled stance, and it is the disagreement between examples — on either axis — that
+  // says so.
+  firstPersonRatio: Schema.Number,
+  thirdPersonRatio: Schema.Number
 });
 export type DeterministicFeatures = typeof DeterministicFeaturesSchema.Type;
 

@@ -405,6 +405,9 @@ export interface CreateVoiceExampleInput {
   readonly channel?: string;
   readonly explicitContentType?: string;
   readonly context?: string;
+  // Marks the example as wizard-sourced (isWizardVoiceExample), which is what makes the rebuild
+  // build quantitative signals and take the composite confidence path instead of the legacy one.
+  readonly topicTag?: string;
 }
 
 export function createVoiceExampleInDatabase(
@@ -437,6 +440,7 @@ export function createVoiceExampleInDatabase(
       channel: input.channel,
       explicitContentType: input.explicitContentType,
       context: input.context,
+      topicTag: input.topicTag,
       evaluation,
       createdAt: timestamp,
       updatedAt: timestamp

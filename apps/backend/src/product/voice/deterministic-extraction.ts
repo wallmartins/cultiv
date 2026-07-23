@@ -17,6 +17,8 @@ export interface DeterministicFeatures {
   readonly certaintyMarkerCount: number;
   readonly hedgingMarkerCount: number;
   readonly transitionMarkerCount: number;
+  readonly firstPersonRatio: number;
+  readonly thirdPersonRatio: number;
 }
 
 const CERTAINTY_MARKERS =
@@ -30,6 +32,13 @@ const FORMAL_MARKERS =
 const INFORMAL_MARKERS = /\b(cara|tipo|ne|pra|ta|vc|vcs|blz|show|massa|legal demais)\b/gi;
 const EMOTION_MARKERS =
   /\b(amor|odio|incriv|maravilh|terrivel|horrivel|passion|excit|frustrat|angry|feliz|triste|awesome|amazing)\b/gi;
+const FIRST_PERSON_MARKERS =
+  /\b(eu|meu|minha|meus|minhas|mim|comigo|nos|nosso|nossa|nossos|nossas|i|me|my|mine|we|us|our|ours)\b/gi;
+// Unambiguous third-person pronouns only. "seu/sua" is deliberately absent: in pt-BR it is just
+// as often second person (você → seu), and a marker that fires on the wrong perspective is worse
+// than a narrower one that fires on the right.
+const THIRD_PERSON_MARKERS =
+  /\b(ele|ela|eles|elas|dele|dela|deles|delas|lhe|lhes|he|him|his|she|her|hers|they|them|their|theirs)\b/gi;
 
 const NUMERIC_KEYS: readonly (keyof DeterministicFeatures)[] = [
   "typeTokenRatio",
@@ -45,16 +54,24 @@ const NUMERIC_KEYS: readonly (keyof DeterministicFeatures)[] = [
   "emotionalityScore",
   "certaintyMarkerCount",
   "hedgingMarkerCount",
-  "transitionMarkerCount"
+  "transitionMarkerCount",
+  "firstPersonRatio",
+  "thirdPersonRatio"
 ];
 
+// The axes that actually separate "this author has a style" from "these four texts share an
+// author by accident". Measured against three reference corpora (a defined voice, that same
+// voice with one off-key text, and a voice with no settled form): each of these moves ~10x
+// between the coherent and the incoherent case. Deliberately excluded — typeTokenRatio and
+// hapaxRatio (lexical diversity tracks text length, and scored the incoherent corpus as MORE
+// consistent than the coherent one), punctuationDensity (noise), and formality/emotionality
+// (sparse marker counts that collapse to zero on short texts and only dilute the average).
 const CONSISTENCY_KEYS: readonly (keyof DeterministicFeatures)[] = [
-  "typeTokenRatio",
-  "avgWordLength",
   "avgSentenceLength",
-  "formalityScore",
-  "punctuationDensity",
-  "emotionalityScore"
+  "avgWordLength",
+  "avgDependencyDepth",
+  "firstPersonRatio",
+  "thirdPersonRatio"
 ];
 
 function round(value: number, digits = 4): number {
@@ -120,6 +137,36 @@ function normalizedVarianceAcross(values: readonly number[]): number {
   return Math.min(1, coefficientOfVariation);
 }
 
+function median(values: readonly number[]): number {
+  const sorted = [...values].sort((left, right) => left - right);
+  const middle = Math.floor(sorted.length / 2);
+  return sorted.length % 2 === 0 ? (sorted[middle - 1]! + sorted[middle]!) / 2 : sorted[middle]!;
+}
+
+// Dispersion with the single most divergent sample dropped. Writing one text in a register you
+// never use again is noise, not the absence of a style — it must not sink an otherwise coherent
+// voice. Two divergent texts still do, because the trim only ever removes one. The median (not
+// the mean) picks the outlier: the mean is dragged by the very sample we are trying to find.
+// Below four samples there is nothing to spare, so the plain measure stands.
+function robustNormalizedVarianceAcross(values: readonly number[]): number {
+  if (values.length < 4) {
+    return normalizedVarianceAcross(values);
+  }
+
+  const center = median(values);
+  let outlierIndex = 0;
+  let widestDistance = -1;
+  values.forEach((value, index) => {
+    const distance = Math.abs(value - center);
+    if (distance > widestDistance) {
+      widestDistance = distance;
+      outlierIndex = index;
+    }
+  });
+
+  return normalizedVarianceAcross(values.filter((_, index) => index !== outlierIndex));
+}
+
 function averageMetric(
   features: readonly DeterministicFeatures[],
   key: keyof DeterministicFeatures
@@ -157,7 +204,9 @@ export function extractDeterministicFeatures(text: string): DeterministicFeature
       emotionalityScore: 0,
       certaintyMarkerCount: 0,
       hedgingMarkerCount: 0,
-      transitionMarkerCount: 0
+      transitionMarkerCount: 0,
+      firstPersonRatio: 0,
+      thirdPersonRatio: 0
     };
   }
 
@@ -176,6 +225,9 @@ export function extractDeterministicFeatures(text: string): DeterministicFeature
   const avgSentenceLength =
     sentenceLengths.reduce((total, length) => total + length, 0) / Math.max(1, sentenceLengths.length);
   const punctuationCount = (trimmed.match(/[,.!?;:—\-()[\]""'']/g) ?? []).length;
+  const normalizedForMarkers = normalizeText(trimmed);
+  const firstPersonCount = countMatches(normalizedForMarkers, FIRST_PERSON_MARKERS);
+  const thirdPersonCount = countMatches(normalizedForMarkers, THIRD_PERSON_MARKERS);
   const formalCount = countMatches(trimmed, FORMAL_MARKERS);
   const informalCount = countMatches(trimmed, INFORMAL_MARKERS);
   const emotionCount = countMatches(trimmed, EMOTION_MARKERS);
@@ -203,7 +255,9 @@ export function extractDeterministicFeatures(text: string): DeterministicFeature
     emotionalityScore: round((emotionCount + exclamationCount) / emotionalityDenominator),
     certaintyMarkerCount: countMatches(trimmed, CERTAINTY_MARKERS),
     hedgingMarkerCount: countMatches(trimmed, HEDGING_MARKERS),
-    transitionMarkerCount: countMatches(trimmed, TRANSITION_MARKERS)
+    transitionMarkerCount: countMatches(trimmed, TRANSITION_MARKERS),
+    firstPersonRatio: round(firstPersonCount / Math.max(1, words.length)),
+    thirdPersonRatio: round(thirdPersonCount / Math.max(1, words.length))
   };
 }
 
@@ -228,7 +282,7 @@ export function computeConsistencyScore(features: readonly DeterministicFeatures
   }
 
   const normalizedVariances = CONSISTENCY_KEYS.map((key) =>
-    normalizedVarianceAcross(features.map((feature) => feature[key]))
+    robustNormalizedVarianceAcross(features.map((feature) => feature[key]))
   );
   const averageVariance =
     normalizedVariances.reduce((total, value) => total + value, 0) / normalizedVariances.length;
@@ -258,7 +312,7 @@ export function computeTopicIndependenceScore(
 
   const aggregates = [...groups.values()].map((group) => aggregateDeterministicFeatures(group));
   const normalizedVariances = CONSISTENCY_KEYS.map((key) =>
-    normalizedVarianceAcross(aggregates.map((aggregate) => aggregate[key]))
+    robustNormalizedVarianceAcross(aggregates.map((aggregate) => aggregate[key]))
   );
   const averageVariance =
     normalizedVariances.reduce((total, value) => total + value, 0) / normalizedVariances.length;
@@ -287,7 +341,7 @@ export function computeCrossLengthConsistency(
 
   const aggregates = [...groups.values()].map((group) => aggregateDeterministicFeatures(group));
   const normalizedVariances = CONSISTENCY_KEYS.map((key) =>
-    normalizedVarianceAcross(aggregates.map((aggregate) => aggregate[key]))
+    robustNormalizedVarianceAcross(aggregates.map((aggregate) => aggregate[key]))
   );
   const averageVariance =
     normalizedVariances.reduce((total, value) => total + value, 0) / normalizedVariances.length;
@@ -300,7 +354,14 @@ export function buildQuantitativeSignalsFromWizardExamples(
   extractionQuality: QuantitativeSignals["extractionQuality"]
 ): QuantitativeSignals {
   const features = wizardExamples.map((example) => {
-    const base = example.deterministicFeatures ?? extractDeterministicFeatures(example.text);
+    // Rows persisted before firstPersonRatio existed come back from the JSON column without it
+    // (the repository casts, it does not decode), which would read as a perfect score on an axis
+    // that was never measured. Recompute those from the text instead of trusting the gap.
+    const stored = example.deterministicFeatures;
+    const base =
+      stored === undefined || stored.firstPersonRatio === undefined || stored.thirdPersonRatio === undefined
+        ? extractDeterministicFeatures(example.text)
+        : stored;
     return example.textLengthBucket
       ? { ...base, textLengthBucket: example.textLengthBucket }
       : base;

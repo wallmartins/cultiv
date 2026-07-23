@@ -47,71 +47,86 @@ function createSignals(overrides: Partial<QuantitativeSignals> = {}): Quantitati
   };
 }
 
+const COMPLETE_EXTRACTION = {
+  reasoningExtracted: true,
+  developmentExtracted: true,
+  reconciliationNeeded: false
+} as const;
+
 describe("deriveConfidence", () => {
-  it("keeps legacy low confidence when fewer than five active examples and no signals", () => {
+  it("keeps legacy low confidence below a complete calibration and no signals", () => {
+    expect(deriveConfidence(createLegacyHighConfidenceExamples(3))).toBe("low");
+    expect(deriveConfidence(createLegacyHighConfidenceExamples(4))).toBe("high");
+  });
+
+  it("never penalises a voice for being consistent", () => {
+    // The whole point of a Voice Profile: an author who writes the same way every time has a
+    // style, not a defect. This used to be downgraded as "suspiciously generic".
+    const signals = createSignals({
+      consistencyScore: 0.99,
+      topicIndependenceScore: 0.99,
+      extractionQuality: COMPLETE_EXTRACTION
+    });
+
+    expect(deriveConfidence(createLegacyHighConfidenceExamples(4), signals)).toBe("high");
+  });
+
+  it("bands confidence by how defined the style is", () => {
     const examples = createLegacyHighConfidenceExamples(4);
+    const withStyle = (score: number) =>
+      createSignals({
+        consistencyScore: score,
+        topicIndependenceScore: score,
+        extractionQuality: COMPLETE_EXTRACTION
+      });
 
-    expect(deriveConfidence(examples)).toBe("low");
+    expect(deriveConfidence(examples, withStyle(0.9))).toBe("high");
+    expect(deriveConfidence(examples, withStyle(0.75))).toBe("medium");
+    expect(deriveConfidence(examples, withStyle(0.5))).toBe("low");
   });
 
-  it("keeps legacy high confidence when five diverse examples exist without signals", () => {
-    const examples = createLegacyHighConfidenceExamples(5);
-
-    expect(deriveConfidence(examples)).toBe("high");
-  });
-
-  it("uses composite base from example count when signals are present", () => {
-    const examples = createLegacyHighConfidenceExamples(3);
-
-    expect(deriveConfidence(examples, createSignals())).toBe("medium");
-    expect(deriveConfidence(createLegacyHighConfidenceExamples(2), createSignals())).toBe("low");
-    expect(deriveConfidence(createLegacyHighConfidenceExamples(5), createSignals())).toBe("high");
-  });
-
-  it("boosts composite confidence for strong consistency and topic independence", () => {
-    const examples = createLegacyHighConfidenceExamples(3);
+  it("lets the weaker of consistency and topic independence govern", () => {
+    // A form that only holds inside one subject is not yet a voice.
     const signals = createSignals({
-      consistencyScore: 0.75,
-      topicIndependenceScore: 0.65,
-      extractionQuality: {
-        reasoningExtracted: true,
-        developmentExtracted: true,
-        reconciliationNeeded: false
-      }
+      consistencyScore: 0.99,
+      topicIndependenceScore: 0.5,
+      extractionQuality: COMPLETE_EXTRACTION
     });
 
-    expect(deriveConfidence(examples, signals)).toBe("high");
+    expect(deriveConfidence(createLegacyHighConfidenceExamples(4), signals)).toBe("low");
   });
 
-  it("downgrades suspiciously generic consistency above 0.95", () => {
-    const examples = createLegacyHighConfidenceExamples(5);
+  it("caps confidence at medium when half the profile is missing", () => {
     const signals = createSignals({
-      consistencyScore: 0.96,
-      topicIndependenceScore: 0.9,
-      extractionQuality: {
-        reasoningExtracted: true,
-        developmentExtracted: true,
-        reconciliationNeeded: false
-      }
+      consistencyScore: 0.95,
+      topicIndependenceScore: 0.95,
+      extractionQuality: { ...COMPLETE_EXTRACTION, developmentExtracted: false }
     });
 
-    expect(deriveConfidence(examples, signals)).toBe("medium");
+    expect(deriveConfidence(createLegacyHighConfidenceExamples(4), signals)).toBe("medium");
+  });
+
+  it("caps confidence by how much material the author actually gave", () => {
+    const signals = createSignals({
+      consistencyScore: 0.95,
+      topicIndependenceScore: 0.95,
+      extractionQuality: COMPLETE_EXTRACTION
+    });
+
+    expect(deriveConfidence(createLegacyHighConfidenceExamples(4), signals)).toBe("high");
     expect(deriveConfidence(createLegacyHighConfidenceExamples(3), signals)).toBe("medium");
+    expect(deriveConfidence(createLegacyHighConfidenceExamples(1), signals)).toBe("low");
   });
 
   it("respects an optional confidence cap", () => {
-    const examples = createLegacyHighConfidenceExamples(5);
     const signals = createSignals({
-      consistencyScore: 0.8,
-      topicIndependenceScore: 0.7,
-      extractionQuality: {
-        reasoningExtracted: true,
-        developmentExtracted: true,
-        reconciliationNeeded: false
-      }
+      consistencyScore: 0.95,
+      topicIndependenceScore: 0.95,
+      extractionQuality: COMPLETE_EXTRACTION
     });
 
-    expect(deriveConfidence(examples, signals, "medium")).toBe("medium");
+    expect(deriveConfidence(createLegacyHighConfidenceExamples(4), signals, "medium")).toBe("medium");
+    expect(deriveConfidence(createLegacyHighConfidenceExamples(4), undefined, "medium")).toBe("medium");
   });
 });
 

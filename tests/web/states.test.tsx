@@ -239,7 +239,7 @@ describe("edge states (S10a) — mount + no jargon", () => {
   it("locked/LockedCenter — notice + CTA + embedded demo render", () => {
     render(<LockedCenter onCalibrate={noop} />);
     expect(screen.getByText("nenhuma geração real ainda — o exemplo abaixo é ilustrativo")).toBeInTheDocument();
-    expect(screen.getByText("Calibrar minha voz →")).toBeInTheDocument();
+    expect(screen.getByText("Reativar minha voz →")).toBeInTheDocument();
     expect(screen.getByText("exemplo")).toBeInTheDocument();
   });
 

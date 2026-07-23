@@ -56,7 +56,9 @@ describe("deterministic extraction", () => {
       emotionalityScore: 0,
       certaintyMarkerCount: 0,
       hedgingMarkerCount: 0,
-      transitionMarkerCount: 0
+      transitionMarkerCount: 0,
+      firstPersonRatio: 0,
+      thirdPersonRatio: 0
     });
   });
 
