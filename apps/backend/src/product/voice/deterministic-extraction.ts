@@ -32,6 +32,10 @@ const FORMAL_MARKERS =
 const INFORMAL_MARKERS = /\b(cara|tipo|ne|pra|ta|vc|vcs|blz|show|massa|legal demais)\b/gi;
 const EMOTION_MARKERS =
   /\b(amor|odio|incriv|maravilh|terrivel|horrivel|passion|excit|frustrat|angry|feliz|triste|awesome|amazing)\b/gi;
+// Explicit pronouns only. pt-BR is pro-drop — "Passei semanas afinando isso" is first person with
+// no pronoun in sight — so this measures how much an author *foregrounds* themselves, not whether
+// they narrate in first person. That is still a stylistic choice worth tracking, but it is a
+// weaker signal in Portuguese than in English, and thirdPersonRatio carries more of the load.
 const FIRST_PERSON_MARKERS =
   /\b(eu|meu|minha|meus|minhas|mim|comigo|nos|nosso|nossa|nossos|nossas|i|me|my|mine|we|us|our|ours)\b/gi;
 // Unambiguous third-person pronouns only. "seu/sua" is deliberately absent: in pt-BR it is just
@@ -261,6 +265,20 @@ export function extractDeterministicFeatures(text: string): DeterministicFeature
   };
 }
 
+// The only sanctioned way to read an example's features. Rows persisted before an axis existed
+// come back from the JSON column without it — the repository casts, it does not decode — so the
+// field is missing at runtime while the type says otherwise. Averaging that yields NaN, and
+// treating it as zero would claim perfect agreement on an axis that was never measured. Recompute
+// from the text instead; it is a handful of regexes over material we already hold.
+export function resolveDeterministicFeatures(example: VoiceExampleRecord): DeterministicFeatures {
+  const stored = example.deterministicFeatures;
+  const complete =
+    stored !== undefined
+    && NUMERIC_KEYS.every((key) => typeof stored[key] === "number" && Number.isFinite(stored[key]));
+
+  return complete ? stored : extractDeterministicFeatures(example.text);
+}
+
 export function aggregateDeterministicFeatures(
   features: readonly DeterministicFeatures[]
 ): DeterministicFeatures {
@@ -354,14 +372,7 @@ export function buildQuantitativeSignalsFromWizardExamples(
   extractionQuality: QuantitativeSignals["extractionQuality"]
 ): QuantitativeSignals {
   const features = wizardExamples.map((example) => {
-    // Rows persisted before firstPersonRatio existed come back from the JSON column without it
-    // (the repository casts, it does not decode), which would read as a perfect score on an axis
-    // that was never measured. Recompute those from the text instead of trusting the gap.
-    const stored = example.deterministicFeatures;
-    const base =
-      stored === undefined || stored.firstPersonRatio === undefined || stored.thirdPersonRatio === undefined
-        ? extractDeterministicFeatures(example.text)
-        : stored;
+    const base = resolveDeterministicFeatures(example);
     return example.textLengthBucket
       ? { ...base, textLengthBucket: example.textLengthBucket }
       : base;

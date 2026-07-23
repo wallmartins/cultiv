@@ -11,7 +11,7 @@ import {
   aggregateDeterministicFeatures,
   computeConsistencyScore,
   computeTopicIndependenceScore,
-  extractDeterministicFeatures,
+  resolveDeterministicFeatures,
   type DeterministicFeatures
 } from "./deterministic-extraction.js";
 import { resolveTextLengthBucket, type TextLengthBucket } from "./voice-calibration-service-helpers.js";
@@ -146,7 +146,7 @@ function buildStepObservation(example: VoiceExampleRecord): StepObservation {
   const text = example.text.trim();
   const sentences = splitSentences(text);
   const wordCount = text.split(/\s+/).filter((token) => token.length > 0).length;
-  const features = example.deterministicFeatures ?? extractDeterministicFeatures(text);
+  const features = resolveDeterministicFeatures(example);
 
   return {
     stepId: resolveWizardStepId(example) ?? "micro_opinion",
@@ -265,9 +265,7 @@ export function buildVoiceSignatureBrief(
     return undefined;
   }
 
-  const features = wizardExamples.map(
-    (example) => example.deterministicFeatures ?? extractDeterministicFeatures(example.text)
-  );
+  const features = wizardExamples.map(resolveDeterministicFeatures);
   const topicTags = wizardExamples.map(resolveWizardTopicTag);
   const stepObservations = wizardExamples.map(buildStepObservation);
   const aggregate = aggregateDeterministicFeatures(features);

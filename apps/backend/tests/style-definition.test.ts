@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
+import type { VoiceExampleRecord } from "@my-ai-orchestrator/database";
 import {
   computeConsistencyScore,
-  extractDeterministicFeatures
+  extractDeterministicFeatures,
+  resolveDeterministicFeatures
 } from "../src/product/voice/deterministic-extraction.js";
 
 // The reference corpora the STYLE_DEFINITION_* bands in voice-rebuild-derivation.ts are calibrated
@@ -64,6 +66,23 @@ describe("style definition", () => {
 
   it("drops below the medium band when the author has no settled form", () => {
     expect(styleDefinition(NO_SETTLED_FORM)).toBeLessThan(MEDIUM_BAND);
+  });
+
+  it("recomputes features persisted before an axis existed instead of averaging a hole", () => {
+    // A row written before firstPersonRatio/thirdPersonRatio: the JSON column has the old shape,
+    // the repository casts rather than decodes, so the fields are simply absent at runtime.
+    const text = NO_SETTLED_FORM[0]!; // carries explicit "eu"/"mim" — see the pro-drop note below
+    const legacyFeatures = { ...extractDeterministicFeatures(text) } as Record<string, number>;
+    delete legacyFeatures.firstPersonRatio;
+    delete legacyFeatures.thirdPersonRatio;
+
+    const legacyExample = { text, deterministicFeatures: legacyFeatures } as unknown as VoiceExampleRecord;
+
+    const resolved = resolveDeterministicFeatures(legacyExample);
+
+    expect(resolved.firstPersonRatio).toBeGreaterThan(0);
+    expect(Number.isFinite(resolved.thirdPersonRatio)).toBe(true);
+    expect(Number.isFinite(computeConsistencyScore([resolved, resolved]))).toBe(true);
   });
 
   it("keeps a real margin between a defined voice and an undefined one", () => {
