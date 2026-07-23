@@ -11,6 +11,7 @@ import {
   usePreview,
   useToastStore,
   useUiLanguage,
+  useVoiceProfile,
   useWizardSessionStore
 } from "@my-ai-orchestrator/shared";
 import { GenerateSurface, type ComposerRegion } from "@my-ai-orchestrator/ui/app/generate";
@@ -81,6 +82,7 @@ export function GenerateContainer() {
   const genreMutation = useGenreInference();
   const practiceProfile = usePracticeProfile();
   const entitlement = useEntitlement();
+  const voiceProfile = useVoiceProfile();
   const uiLanguage = useUiLanguage((state) => state.language);
   const pushToast = useToastStore((state) => state.push);
   // Same "all" query the shell's running-watch keeps warm (packages/shared useRunningExecutionsWatch)
@@ -353,6 +355,11 @@ export function GenerateContainer() {
       messages={buildThreadMessages(theme, steps, answers)}
       composerRegion={composerRegion}
       costBand={phase === "thread" && !showQueueGate ? { costLabel, onGenerate: handleGenerate, blockedReason } : undefined}
+      voiceNotice={
+        voiceProfile.data?.diagnostics.pendingRebuild.status === "failed"
+          ? { text: t.generate.voiceRebuildNotice, onReview: () => navigate({ to: "/voice" }) }
+          : undefined
+      }
     />
   );
 }

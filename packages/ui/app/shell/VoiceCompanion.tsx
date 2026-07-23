@@ -65,6 +65,7 @@ function CompanionReady({
   proseCore,
   descriptorChips,
   practice,
+  rebuildFailure,
   onSeeProfile
 }: Extract<VoiceCompanionContent, { kind: "ready" }>) {
   const t = useMessages();
@@ -81,6 +82,19 @@ function CompanionReady({
           </Mono>
         </div>
       </ProfileCard>
+      {rebuildFailure ? (
+        <div className="companion-ready-nudge">
+          <div className="companion-ready-nudge-text">{rebuildFailure.text}</div>
+          <button
+            type="button"
+            className="companion-ready-link"
+            onClick={rebuildFailure.onRetry}
+            disabled={rebuildFailure.pending}
+          >
+            <Mono as="span">{t.common.retry}</Mono>
+          </button>
+        </div>
+      ) : null}
       <VoiceProseCard heading={t.shell.companion.howIThink} body={proseCore} />
       <VoiceDescriptorChips chips={descriptorChips.slice(0, 3)} />
       {practice ? (

@@ -22,7 +22,8 @@ export {
   useConsentStatus,
   useGrantConsent,
   useRevokeConsent,
-  useRecordTraitConfirmation
+  useRecordTraitConfirmation,
+  useRequestRebuild
 } from "./voice.js";
 
 export {

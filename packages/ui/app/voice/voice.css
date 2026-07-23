@@ -434,6 +434,17 @@
   font-size: 0.9rem;
 }
 
+/* Failed voice rebuild — a soft, retryable state (not a load error). Same quiet card as the load
+   error; the retry Pill below the message carries the call to action, no colored accent needed. */
+.voice-rebuild-failed-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 20px 24px;
+  color: var(--muted);
+}
+
 /* F5 — practice section ("sua identidade de escrita": voz + prática). Reuses the trait/panel visual
    language and the wizard field inputs, colocated here so /voice never reaches into onboarding.css. */
 .voice-practice-section {

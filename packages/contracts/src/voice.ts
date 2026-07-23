@@ -53,6 +53,7 @@ export const NextActionCodeSchema = Schema.Literal(
   "review_conflicting_examples",
   "remove_pinned_example",
   "retry_batch_commit",
+  "retry_voice_rebuild",
   "wait_for_profile_update",
   "upgrade_plan"
 );

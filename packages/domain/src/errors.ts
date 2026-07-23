@@ -26,6 +26,7 @@ export const canonicalNextActionCodes = [
   "review_conflicting_examples",
   "remove_pinned_example",
   "retry_batch_commit",
+  "retry_voice_rebuild",
   "wait_for_profile_update",
   "upgrade_plan"
 ] as const satisfies readonly NextActionCode[];
@@ -38,11 +39,11 @@ export const reasonCodeDefaultNextActions: Readonly<Record<ReasonCode, readonly 
   plan_restriction: ["upgrade_plan"],
   subscription_inactive: ["upgrade_plan"],
   feature_flag_disabled: ["wait_for_profile_update"],
-  rebuild_failed: ["wait_for_profile_update"],
+  rebuild_failed: ["retry_voice_rebuild"],
   rebuild_in_progress: ["wait_for_profile_update"],
-  reasoning_extraction_failed: ["wait_for_profile_update"],
-  development_extraction_failed: ["wait_for_profile_update"],
-  voice_signature_reconciliation_failed: ["wait_for_profile_update"],
+  reasoning_extraction_failed: ["retry_voice_rebuild"],
+  development_extraction_failed: ["retry_voice_rebuild"],
+  voice_signature_reconciliation_failed: ["retry_voice_rebuild"],
   language_conflict: ["review_conflicting_examples"],
   too_many_pinned_examples: ["remove_pinned_example"],
   invalid_example_payload: ["retry_batch_commit"],

@@ -75,6 +75,25 @@ export function registerVoiceRoutes(app: Hono, options: VoiceRouteOptions): void
     })
   );
 
+  app.post("/me/voice-profile/rebuild", async (c) => {
+    const userId = await resolveActorUserId(c, options.config, Routes.PostMeVoiceProfileRebuild, options.services);
+    // User-initiated retry after a failed extraction. schedule() is idempotent (in-memory queue
+    // collapses concurrent requests); the pipeline re-runs model fallback + repair. We return the
+    // refreshed screen so the client observes pendingRebuild flip to in_progress, then poll to done.
+    await runEffectOrThrow(options.services.voiceRebuild.schedule(userId));
+    const response = await runEffectOrThrow(options.services.voice.getProfileScreen(userId));
+    if (!response) {
+      throw new BackendVoiceProfileNotFoundError({ userId });
+    }
+
+    const validated = await validateResponseBody(
+      VoiceProfileScreenViewSchema,
+      response satisfies VoiceProfileScreenView,
+      "VoiceProfileScreenView"
+    );
+    return c.json(validated);
+  });
+
   app.post("/me/voice-profile/trait-confirmations", async (c) => {
     const userId = await resolveActorUserId(c, options.config, Routes.PostMeVoiceProfileTraitConfirmations, options.services);
     const rawBody = await readJsonBody(c, Routes.PostMeVoiceProfileTraitConfirmations);

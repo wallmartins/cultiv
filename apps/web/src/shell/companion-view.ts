@@ -18,7 +18,9 @@ export function buildCompanionContent(
   locked: boolean,
   profile: VoiceProfileScreenView | undefined,
   practiceIdentity: MePracticeIdentityResponse | undefined,
-  onNavigateVoice: () => void
+  onNavigateVoice: () => void,
+  onRetryRebuild: () => void,
+  rebuildPending: boolean
 ): VoiceCompanionContent {
   if (locked) {
     return { kind: "locked", onCalibrate: onNavigateVoice };
@@ -41,6 +43,10 @@ export function buildCompanionContent(
     proseCore: profile.reasoning?.core.narrativeProse ?? "",
     descriptorChips: profile.profile.styleMarkers.slice(0, 3).map((marker) => voiceSignalLabel(t, marker)),
     practice: buildCompanionPractice(t, practiceIdentity),
+    rebuildFailure:
+      profile.diagnostics.pendingRebuild.status === "failed"
+        ? { text: t.shell.companion.rebuildFailedText, onRetry: onRetryRebuild, pending: rebuildPending }
+        : null,
     onSeeProfile: onNavigateVoice
   };
 }

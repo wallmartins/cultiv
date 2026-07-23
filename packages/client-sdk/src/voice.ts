@@ -32,6 +32,7 @@ export interface VoiceClient {
   readonly grantConsent: (input?: VoiceConsentInput) => Effect.Effect<VoiceTrainingConsentStatusView, ClientSdkError>;
   readonly revokeConsent: (input?: VoiceConsentInput) => Effect.Effect<VoiceTrainingConsentStatusView, ClientSdkError>;
   readonly getProfile: (input?: VoiceGetProfileInput) => Effect.Effect<VoiceProfileScreenView, ClientSdkError>;
+  readonly requestRebuild: (input?: VoiceGetProfileInput) => Effect.Effect<VoiceProfileScreenView, ClientSdkError>;
   readonly recordTraitConfirmation: (
     input: VoiceTraitConfirmationInput
   ) => Effect.Effect<VoiceProfileDiagnosticsView, ClientSdkError>;
@@ -100,6 +101,19 @@ export function createVoiceClient(transport: HttpTransport): VoiceClient {
         });
 
         return yield* decodeOkResponseEffect(response, "voice profile", decodeVoiceProfileScreenView);
+      });
+    },
+
+    requestRebuild(input = {}) {
+      return Effect.gen(function* () {
+        const response = yield* transport.send({
+          method: "POST",
+          path: "/me/voice-profile/rebuild",
+          signal: input.signal,
+          idempotencyKey: createIdempotencyKey()
+        });
+
+        return yield* decodeOkResponseEffect(response, "voice profile rebuild", decodeVoiceProfileScreenView);
       });
     },
 

@@ -7,6 +7,8 @@ export const voice = {
   proseDevelopmentHeading: "Como eu desenvolvo um texto",
   proseFallback: "prosa ainda não disponível — recalibrar gera uma nova leitura.",
   errorText: "não foi possível carregar o perfil de voz.",
+  rebuildFailedText:
+    "não consegui ler sua voz na última tentativa. Nada foi inventado — tente de novo para gerar uma nova leitura.",
   emptyDescription: "sua voz aparece aqui depois da calibração",
   emptyCta: "calibrar agora →",
   loadingAriaLabel: "carregando perfil de voz",

@@ -9,6 +9,7 @@ export const generate: AppMessages["generate"] = {
     placeholder: "Paste an idea, a nagging thought, a topic…",
     footerNote: "the guided session comes after · skippable"
   },
+  voiceRebuildNotice: "your voice hasn't finished updating — review",
   analyzingTheme: "analyzing your topic…",
   startingGeneration: "starting the generation…",
   channelEyebrow: "channel · optional",

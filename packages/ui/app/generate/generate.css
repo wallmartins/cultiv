@@ -79,6 +79,23 @@
   flex-direction: column;
   min-height: 0;
 }
+/* Quiet strip above the thread — flags composing over a profile whose rebuild failed, links to
+   /voice for the retry. A divider, not an alarm: muted text that firms up on hover. */
+.generate-voice-notice {
+  width: 100%;
+  padding: 8px 48px;
+  border: none;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.85rem;
+  text-align: left;
+  cursor: pointer;
+}
+.generate-voice-notice:hover {
+  color: var(--ink);
+}
 .generate-thread-region {
   flex: 1;
   display: flex;

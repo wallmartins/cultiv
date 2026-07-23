@@ -57,7 +57,8 @@ export const shell: AppMessages["shell"] = {
     howIThink: "How I think",
     seeFullProfile: "see full profile →",
     meta: (caption, version) => `${caption.toLowerCase()} confidence · version ${version}`,
-    practiceHeading: "Practice"
+    practiceHeading: "Practice",
+    rebuildFailedText: "we couldn't read your voice last time — nothing was invented."
   },
   toast: {
     ready: (topic) => (topic ? `"${topic}" is ready` : "your generation is ready"),

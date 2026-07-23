@@ -8,6 +8,7 @@ import {
   useGrantConsent,
   usePracticeIdentity,
   useRecordTraitConfirmation,
+  useRequestRebuild,
   useRespondToNicheAsk,
   useRevokeConsent,
   useShellStore,
@@ -57,6 +58,7 @@ export function VoiceContainer() {
   const profileQuery = useVoiceProfile();
   const consentQuery = useConsentStatus();
   const recordTrait = useRecordTraitConfirmation();
+  const requestRebuild = useRequestRebuild();
   const grantConsent = useGrantConsent();
   const revokeConsent = useRevokeConsent();
   // Same "all" query the shell's running-watch keeps warm — cache hit, not a second round-trip.
@@ -197,12 +199,21 @@ export function VoiceContainer() {
         }
       : null;
 
+    const rebuildFailed = profile.diagnostics.pendingRebuild.status === "failed";
+
     state = {
       kind: "ready",
       ring: buildRing(profile, t),
       headline: t.common.confidence.headline[profile.profile.confidence],
       versionLabel: buildVersionLabel(profile, t),
       onRecalibrate: requestRecalibrate,
+      rebuildFailure: rebuildFailed
+        ? {
+            text: t.voice.rebuildFailedText,
+            onRetry: () => requestRebuild.mutate(),
+            pending: requestRebuild.isPending
+          }
+        : null,
       proseCore: prose.core,
       proseDevelopment: prose.development,
       descriptorChips: buildDescriptorChips(profile, t),

@@ -45,6 +45,10 @@ export interface VoiceProfileReadyState {
     readonly onGrant: () => void;
   };
   readonly revokeDialog: { readonly open: boolean; readonly onCancel: () => void; readonly onConfirm: () => void };
+  // A voice rebuild attempt failed after model fallback + repair — no prose is fabricated, the last
+  // valid snapshot is kept, and the author retries. Present only while pendingRebuild.status ===
+  // "failed"; the container wires onRetry to POST /me/voice-profile/rebuild.
+  readonly rebuildFailure?: { readonly text: string; readonly onRetry: () => void; readonly pending: boolean } | null;
   // F5 · the practice half of "sua identidade de escrita". null/absent → not derived yet (render nothing);
   // the container (voice-mappers.ts) builds it from the practice-identity read.
   readonly practice?: PracticeSectionVM | null;
@@ -100,6 +104,18 @@ function ReadyScreen({ state }: { state: VoiceProfileReadyState }) {
       <Mono as="div" className="voice-page-eyebrow">
         {t.voice.pageEyebrow}
       </Mono>
+      {state.rebuildFailure ? (
+        <Panel className="voice-rebuild-failed-panel">
+          <div className="voice-error-text">{state.rebuildFailure.text}</div>
+          <Pill
+            variant="secondary"
+            onClick={state.rebuildFailure.onRetry}
+            disabled={state.rebuildFailure.pending}
+          >
+            {t.common.retry}
+          </Pill>
+        </Panel>
+      ) : null}
       {/* seam: S10 — drift nudge (VoiceDriftNudge) slots here as an inline <Banner tone="warning">,
           snoozeable 7d, never a modal (ticket 15). Not implemented in S5. */}
       <div className="voice-header-row">

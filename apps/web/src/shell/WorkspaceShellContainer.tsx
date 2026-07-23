@@ -11,6 +11,7 @@ import {
   usePracticeIdentity,
   useRunningExecutionsWatch,
   useShellStore,
+  useRequestRebuild,
   useThemeStore,
   useToastStore,
   useUiLanguage,
@@ -100,6 +101,7 @@ export function WorkspaceShellContainer({ children }: WorkspaceShellContainerPro
   });
   const entitlement = useEntitlement();
   const voiceProfile = useVoiceProfile();
+  const requestRebuild = useRequestRebuild();
   const uiLanguage = useUiLanguage((state) => state.language);
   // Same "cache hit, no second fetch" reasoning as voiceProfile above — the companion can mount
   // on /generate before the author ever visits /voice.
@@ -244,7 +246,15 @@ export function WorkspaceShellContainer({ children }: WorkspaceShellContainerPro
         companion={{
           open: companionOpen,
           onClose: closeCompanion,
-          content: buildCompanionContent(t, locked, voiceProfile.data, practiceIdentity.data, goVoice)
+          content: buildCompanionContent(
+            t,
+            locked,
+            voiceProfile.data,
+            practiceIdentity.data,
+            goVoice,
+            () => requestRebuild.mutate(),
+            requestRebuild.isPending
+          )
         }}
         toast={
           activeToast

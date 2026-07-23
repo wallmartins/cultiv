@@ -57,7 +57,8 @@ export const shell = {
     howIThink: "Como eu penso",
     seeFullProfile: "ver perfil completo →",
     meta: (caption: string, version: number) => `confiança ${caption.toLowerCase()} · versão ${version}`,
-    practiceHeading: "Prática"
+    practiceHeading: "Prática",
+    rebuildFailedText: "não consegui ler sua voz na última tentativa — nada foi inventado."
   },
   toast: {
     ready: (topic?: string) => (topic ? `"${topic}" ficou pronto` : "sua geração ficou pronta"),

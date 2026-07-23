@@ -10,6 +10,7 @@ export const generate = {
     placeholder: "Cole uma ideia, uma inquietação, um tema…",
     footerNote: "a sessão guiada vem depois · pulável"
   },
+  voiceRebuildNotice: "sua voz não terminou de atualizar — revisar",
   analyzingTheme: "analisando o seu tema…",
   startingGeneration: "iniciando a geração…",
   channelEyebrow: "canal · opcional",

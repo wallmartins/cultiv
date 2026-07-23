@@ -105,4 +105,20 @@ describe("backend app voice surface", () => {
     expect(decoded.materialBase.totalExamples).toBe(3);
   });
 
+  it("schedules a retry and returns the screen on POST /me/voice-profile/rebuild", async () => {
+    const config = createBackendAppTestConfig({ billingUserId: "user_1" });
+    const services = createBackendAppTestServices(config);
+    seedVoiceProfileState(services);
+    const app = createBackendAppTestApp(config, services);
+
+    const response = await app.request("/me/voice-profile/rebuild", { method: "POST" });
+    expect(response.status).toBe(200);
+
+    const decoded = await Effect.runPromise(decodeVoiceProfileScreenView(await response.json()));
+    expect(decoded.profile.snapshotId).toContain("user_1");
+
+    // Let the fire-and-forget rebuild settle so it doesn't leak into other tests.
+    await Effect.runPromise(services.voiceRebuild.drain("user_1"));
+  });
+
 });

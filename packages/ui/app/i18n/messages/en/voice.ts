@@ -9,6 +9,8 @@ export const voice: AppMessages["voice"] = {
   proseDevelopmentHeading: "How I develop a piece",
   proseFallback: "prose isn't available yet — recalibrating generates a new reading.",
   errorText: "couldn't load your voice profile.",
+  rebuildFailedText:
+    "we couldn't read your voice on the last attempt. Nothing was invented — try again to generate a fresh reading.",
   emptyDescription: "your voice shows up here after calibration",
   emptyCta: "calibrate now →",
   loadingAriaLabel: "loading voice profile",

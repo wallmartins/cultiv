@@ -51,5 +51,8 @@ export type VoiceCompanionContent =
       readonly proseCore: string;
       readonly descriptorChips: readonly string[];
       readonly practice?: VoiceCompanionPractice | null;
+      // Present only while pendingRebuild.status === "failed" — the same retry the /voice banner
+      // offers, mirrored here since the companion can mount during /generate before /voice is seen.
+      readonly rebuildFailure?: { readonly text: string; readonly onRetry: () => void; readonly pending: boolean } | null;
       readonly onSeeProfile: () => void;
     };

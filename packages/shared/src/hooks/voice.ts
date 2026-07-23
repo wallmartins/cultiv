@@ -24,6 +24,9 @@ export function useVoiceProfile() {
           )
         )
       ),
+    // While a rebuild is running (after calibration or a retry), poll so the screen advances from
+    // in_progress to the finished prose — or back to the failed banner — without a manual refresh.
+    refetchInterval: (query) => (query.state.data?.diagnostics.updating ? 2000 : false),
     select: (data) => data ?? undefined
   });
 }
@@ -65,6 +68,19 @@ export function useRecordTraitConfirmation() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (input: TraitConfirmationInput) => run(withSdk((sdk) => sdk.voice.recordTraitConfirmation(input))),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: queryKeys.voiceProfile() });
+    }
+  });
+}
+
+// Author-initiated retry after a failed extraction. Re-runs the rebuild (model fallback + repair);
+// invalidating the profile query lets the polling above pick up in_progress → done.
+export function useRequestRebuild() {
+  const run = useRun();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: () => run(withSdk((sdk) => sdk.voice.requestRebuild())),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: queryKeys.voiceProfile() });
     }

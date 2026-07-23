@@ -34,10 +34,13 @@ export interface GenerateSurfaceProps {
   readonly messages: readonly ThreadMessageData[];
   readonly composerRegion?: ComposerRegion;
   readonly costBand?: CostPreviewBandProps;
+  // Shown across the generation phases when the voice rebuild failed — a light nudge to /voice (where
+  // the retry lives) so the author knows they're composing over an unfinished profile, not silence.
+  readonly voiceNotice?: { readonly text: string; readonly onReview: () => void };
 }
 
 // Orchestrates by phase — no state of its own, just picks which block renders (breakdown 08 §1a).
-export function GenerateSurface({ phase, hero, pastedPreview, messages, composerRegion, costBand }: GenerateSurfaceProps) {
+export function GenerateSurface({ phase, hero, pastedPreview, messages, composerRegion, costBand, voiceNotice }: GenerateSurfaceProps) {
   const t = useMessages();
   if (phase === "hero") {
     if (pastedPreview) {
@@ -54,6 +57,11 @@ export function GenerateSurface({ phase, hero, pastedPreview, messages, composer
 
   return (
     <div className="generate-surface">
+      {voiceNotice ? (
+        <button type="button" className="generate-voice-notice" onClick={voiceNotice.onReview}>
+          {voiceNotice.text}
+        </button>
+      ) : null}
       <div className="generate-thread-region">
         <GuidedThread
           messages={messages}

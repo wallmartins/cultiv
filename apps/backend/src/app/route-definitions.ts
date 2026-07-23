@@ -15,6 +15,7 @@ export const Routes = {
   GetMeVoiceTrainingConsent: "GET /me/voice-training-consent",
   PostMeVoiceTrainingConsent: "POST /me/voice-training-consent",
   GetMeVoiceProfile: "GET /me/voice-profile",
+  PostMeVoiceProfileRebuild: "POST /me/voice-profile/rebuild",
   PostMeVoiceProfileTraitConfirmations: "POST /me/voice-profile/trait-confirmations",
 
   PostMeVoiceCalibrationSessions: "POST /me/voice-calibration/sessions",
