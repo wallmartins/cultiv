@@ -211,8 +211,8 @@ describe("rail pagination + cross-status empty variant (2f — LongHistoryRail d
 
     fireEvent.click(await screen.findByText("FALHAS"));
 
-    expect(await screen.findByText(/resultados em outros status/)).toBeInTheDocument();
+    expect(await screen.findByText(/1 resultado em outros status/)).toBeInTheDocument();
     fireEvent.click(screen.getByText(/Limpar filtro e mostrar/));
-    expect(screen.queryByText(/resultados em outros status/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/resultado em outros status/)).not.toBeInTheDocument();
   });
 });

@@ -1,4 +1,5 @@
 import { Mono } from "../primitives/index.js";
+import { useMessages } from "../i18n/index.js";
 import { BuildingVoice } from "./BuildingVoice.js";
 import { ConsentAuthorization, type ConsentAuthorizationProps } from "./ConsentAuthorization.js";
 
@@ -13,6 +14,7 @@ export interface ReviewStepProps {
 }
 
 export function ReviewStep({ state }: ReviewStepProps) {
+  const t = useMessages();
   if (state.kind === "building") {
     return <BuildingVoice />;
   }
@@ -20,7 +22,7 @@ export function ReviewStep({ state }: ReviewStepProps) {
   return (
     <div className="wizard-review-step">
       <Mono eyebrow className="wizard-step-eyebrow">
-        revisão
+        {t.onboarding.review.eyebrow}
       </Mono>
       <ConsentAuthorization {...state.consent} />
     </div>

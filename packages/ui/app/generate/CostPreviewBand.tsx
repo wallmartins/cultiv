@@ -1,4 +1,5 @@
 import { Mono, Pill } from "../primitives/index.js";
+import { useMessages } from "../i18n/index.js";
 
 export interface CostPreviewBandProps {
   readonly costLabel: string;
@@ -11,15 +12,16 @@ export interface CostPreviewBandProps {
 // questions escape hatch, on by default per breakdown §3 state 4/7. blockedReason (GAP #8's
 // canGenerate) replaces the persuasive nudge with the actual reason and disables the CTA.
 export function CostPreviewBand({ costLabel, onGenerate, showSkipGenerate = true, blockedReason }: CostPreviewBandProps) {
+  const t = useMessages();
   return (
     <div className="generate-cost-row">
       <div className="generate-cost-col">
         <Mono style={{ color: "var(--muted)" }}>{costLabel}</Mono>
-        <Mono style={{ color: "var(--dim)" }}>{blockedReason ?? "quanto mais você conta, mais denso fica o texto"}</Mono>
+        <Mono style={{ color: "var(--dim)" }}>{blockedReason ?? t.generate.costHint}</Mono>
       </div>
       {showSkipGenerate ? (
         <Pill variant="outline" onClick={onGenerate} disabled={Boolean(blockedReason)}>
-          Gerar agora →
+          {t.generate.generateNow}
         </Pill>
       ) : null}
     </div>

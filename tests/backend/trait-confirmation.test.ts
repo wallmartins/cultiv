@@ -107,10 +107,9 @@ describe("trait confirmation API", () => {
       },
       [],
       [],
-      { contentType: "linkedin-post" },
+      { channel: "professional-network" },
       "medium",
       "standard",
-      undefined,
       { reasoningSignatureEnabled: true }
     );
 
@@ -141,10 +140,9 @@ describe("trait confirmation API", () => {
       },
       [],
       [],
-      { contentType: "linkedin-post" },
+      { channel: "professional-network" },
       "medium",
       "standard",
-      undefined,
       { reasoningSignatureEnabled: true }
     );
 

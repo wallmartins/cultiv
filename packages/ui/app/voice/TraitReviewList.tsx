@@ -1,3 +1,4 @@
+import { useMessages } from "../i18n/index.js";
 import { Mono, Serif } from "../primitives/index.js";
 import { TraitRow } from "./TraitRow.js";
 import type { TraitVM } from "./types.js";
@@ -10,14 +11,16 @@ export interface TraitReviewListProps {
 }
 
 export function TraitReviewList({ traits, onConfirm, onContest, pendingTraitKey }: TraitReviewListProps) {
+  const t = useMessages();
+
   return (
     <div className="voice-traits-section">
       <div className="voice-traits-heading-row">
         <Serif as="h2" size="24px" className="voice-traits-heading">
-          Os 7 traços da sua voz
+          {t.voice.traits.heading}
         </Serif>
         <Mono as="span" className="voice-traits-hint">
-          confirmar ou contestar afina a voz
+          {t.voice.traits.hint}
         </Mono>
       </div>
       <div className="voice-trait-list">

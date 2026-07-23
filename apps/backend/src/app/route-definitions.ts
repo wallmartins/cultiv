@@ -4,8 +4,6 @@ export const Routes = {
   Ready: "GET /ready",
   ApiReady: "GET /api/ready",
 
-  GetMeGenerationIntents: "GET /me/generation-intents",
-
   PostMeExecutionsRun: "POST /me/executions/run",
   GetMeExecutions: "GET /me/executions",
   GetMeExecution: "GET /me/executions/:executionId",
@@ -49,6 +47,11 @@ export const Routes = {
 
   PostApiGenerationPreview: "POST /api/generation-preview",
   PostMeGenerationPrefill: "POST /me/generation-prefill",
+  PostMeGenreInference: "POST /me/genre-inference",
+  GetMePracticeProfile: "GET /me/practice-profile",
+  GetMePracticeIdentity: "GET /me/practice-identity",
+  PostMePracticeDeclaration: "POST /me/practice-profile/declaration",
+  PostMePracticeNicheAsk: "POST /me/practice-profile/niche-ask",
 
   GetInternalPolicies: "GET /api/internal/policies",
   PostInternalPoliciesActivate: "POST /api/internal/policies/activate",

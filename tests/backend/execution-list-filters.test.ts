@@ -41,14 +41,13 @@ function createIntentPipelineRequest(userId: string): PipelineRequest {
 }
 
 describe("execution list filters", () => {
-  it("normalizes query filters and matches jobs by period, status, intent, and length tier", () => {
+  it("normalizes query filters and matches jobs by period, status, and length tier", () => {
     const now = Date.parse("2026-06-24T12:00:00.000Z");
     vi.setSystemTime(now);
 
     const filters = normalizeExecutionsListFilters({
       period: "7d",
       status: "done",
-      intent: "update-subscribers",
       lengthTier: "long"
     });
 
@@ -59,7 +58,6 @@ describe("execution list filters", () => {
           createdAt: "2026-06-20T00:00:00.000Z",
           status: "done",
           contentType: "newsletter",
-          generationIntent: "update-subscribers",
           lengthTier: "long"
         },
         filters
@@ -71,7 +69,6 @@ describe("execution list filters", () => {
           createdAt: "2026-06-01T00:00:00.000Z",
           status: "done",
           contentType: "newsletter",
-          generationIntent: "update-subscribers",
           lengthTier: "long"
         },
         filters
@@ -83,7 +80,6 @@ describe("execution list filters", () => {
           createdAt: "2026-06-20T00:00:00.000Z",
           status: "failed",
           contentType: "newsletter",
-          generationIntent: "update-subscribers",
           lengthTier: "long"
         },
         filters
@@ -141,7 +137,6 @@ describe("execution list filters", () => {
       repository.listJobsForUser("user-a", 10, 0, {
         period: "30d",
         status: "failed",
-        intent: "share-idea",
         lengthTier: "short"
       })
     );
@@ -190,7 +185,7 @@ describe("execution list filters", () => {
     const token = createBackendTestAccessToken({ userId: "auth0|test-user" });
 
     const response = await app.request(
-      "/me/executions?period=30d&status=done&intent=share-idea&lengthTier=short&q=voz&limit=5&offset=10",
+      "/me/executions?period=30d&status=done&lengthTier=short&q=voz&limit=5&offset=10",
       {
         headers: { Authorization: `Bearer ${token}` }
       }
@@ -200,7 +195,6 @@ describe("execution list filters", () => {
     expect(listJobsForUser).toHaveBeenCalledWith("user-1", 5, 10, {
       period: "30d",
       status: "done",
-      intent: "share-idea",
       lengthTier: "short",
       q: "voz"
     });

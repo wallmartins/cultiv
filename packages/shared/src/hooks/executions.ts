@@ -129,9 +129,32 @@ function patchExecutionsListPage(page: ExecutionsPageView | undefined, snapshot:
   return { ...page, items };
 }
 
+// SSE transitions carry only the delta (progress/result/error); `snapshot` is populated solely by
+// the polling fallback. Fold the delta onto the last known view so the UI advances on either
+// transport — without this the SSE path never updates the cache and the progress ring sits at 0%.
+export function foldTransition(
+  current: ExecutionStatusView | undefined,
+  transition: ExecutionTransition
+): ExecutionStatusView | undefined {
+  if (transition.snapshot) return transition.snapshot;
+  if (!current) return undefined;
+
+  switch (transition.type) {
+    case "started":
+    case "progressed":
+      return { ...current, status: "running", progress: transition.progress };
+    case "completed":
+      return { ...current, status: "done", result: transition.result, completedAt: transition.occurredAt };
+    case "failed":
+      return { ...current, status: "failed", error: transition.error, completedAt: transition.occurredAt };
+    case "cancelled":
+      return { ...current, status: "cancelled", completedAt: transition.occurredAt };
+  }
+}
+
 function applyTransitionToCache(qc: QueryClient, id: string, transition: ExecutionTransition): void {
-  if (!transition.snapshot) return;
-  const snapshot = transition.snapshot;
+  const snapshot = foldTransition(qc.getQueryData<ExecutionStatusView>(queryKeys.execution(id)), transition);
+  if (!snapshot) return;
   qc.setQueryData(queryKeys.execution(id), snapshot);
   qc.setQueriesData<ExecutionsPageView>({ queryKey: ["executions", "list"] }, (page) =>
     patchExecutionsListPage(page, snapshot)
@@ -157,6 +180,10 @@ function startExecutionWatch(
         onTransition: (transition) => {
           applyTransitionToCache(qc, id, transition);
           if (transition.type === "completed" || transition.type === "failed" || transition.type === "cancelled") {
+            // The terminal SSE payload has no voice/telemetry/credits — the merge above unblocks the
+            // UI immediately, this refetches the authoritative view behind it.
+            void qc.invalidateQueries({ queryKey: queryKeys.execution(id) });
+            void qc.invalidateQueries({ queryKey: ["executions", "list"] });
             onTerminal?.(transition);
           }
         },
@@ -228,7 +255,9 @@ export function useRunningExecutionsWatch() {
             id,
             executionId: id,
             kind: transition.type === "completed" ? "success" : "error",
-            topic: transition.snapshot?.briefingTopic
+            // applyTransitionToCache ran first, so the cached view is the freshest source here —
+            // the SSE transition itself carries no snapshot.
+            topic: qc.getQueryData<ExecutionStatusView>(queryKeys.execution(id))?.briefingTopic
           });
         })
       );

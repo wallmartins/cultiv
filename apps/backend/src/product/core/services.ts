@@ -7,6 +7,7 @@ import type { BackendSafetyPolicyBootstrapError } from "../safety-policy/safety-
 import { createBackendUsagePolicy } from "../usage/usage-policy.js";
 import { createBackendGenerationPreviewService } from "../generation/generation-preview.js";
 import { createBackendGenerationPrefillService } from "../generation/generation-prefill.js";
+import { createBackendGenreInferenceService } from "../generation/genre-producer.js";
 import { createBackendPublicInputSafetyGatewayService } from "../../safety/public-input-safety.js";
 import { createBackendOutputReleaseGateService } from "../../safety/output-release.js";
 import { createBackendVoiceConsentService } from "../../safety/voice-consent.js";
@@ -21,6 +22,7 @@ import { createBackendProviderTransport } from "../../execution/pipeline/provide
 import type { BackendProviderTransport } from "../../execution/pipeline/provider-transport.js";
 import { createBackendVoiceService } from "../voice/voice-service.js";
 import { createBackendVoiceCalibrationService } from "../voice/voice-calibration-service.js";
+import { createBackendPracticeProfileService } from "../practice-profile/practice-profile-service.js";
 import { createBackendObservabilityService } from "./observability.js";
 import { createBackendApplicationUserMemoryRepository } from "../../auth/application-user-memory.js";
 import { createBackendOperatorMemoryRepository } from "../../auth/operator-memory.js";
@@ -189,6 +191,12 @@ export function createBackendProductServices(
         featureFlags: dependencies.featureFlags
       }),
       generationPrefill: createBackendGenerationPrefillService({
+        database: dependencies.database,
+        aiAdapters: dependencies.aiAdapters,
+        providerTransport,
+        aiPolicy: dependencies.aiPolicy
+      }),
+      genreInference: createBackendGenreInferenceService({
         aiAdapters: dependencies.aiAdapters,
         providerTransport,
         aiPolicy: dependencies.aiPolicy
@@ -213,8 +221,21 @@ export function createBackendProductServices(
         dependencies.billing,
         now,
         voiceConsent,
-        safeLogger
+        safeLogger,
+        {
+          aiAdapters: dependencies.aiAdapters,
+          providerTransport,
+          aiPolicy: dependencies.aiPolicy
+        }
       ),
+      practiceProfile: createBackendPracticeProfileService({
+        database: dependencies.database,
+        now,
+        aiAdapters: dependencies.aiAdapters,
+        providerTransport,
+        aiPolicy: dependencies.aiPolicy,
+        logger: safeLogger
+      }),
       policyEvidence,
       operationalOverride,
       redaction,

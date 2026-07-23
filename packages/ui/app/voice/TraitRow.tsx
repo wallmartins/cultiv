@@ -1,3 +1,4 @@
+import { useMessages } from "../i18n/index.js";
 import { Mono, Pill, Ring } from "../primitives/index.js";
 import type { TraitBadgeTone, TraitVM } from "./types.js";
 
@@ -15,6 +16,7 @@ const BADGE_CLASS: Record<TraitBadgeTone, string> = {
 };
 
 export function TraitRow({ trait, onConfirm, onContest, pending }: TraitRowProps) {
+  const t = useMessages();
   const confirmActive = trait.badgeTone === "accent";
   const contestActive = trait.badgeTone === "danger";
 
@@ -35,7 +37,7 @@ export function TraitRow({ trait, onConfirm, onContest, pending }: TraitRowProps
           disabled={pending}
           onClick={onConfirm}
         >
-          Confere
+          {t.voice.traits.confirm}
         </Pill>
         <Pill
           variant="outline"
@@ -43,7 +45,7 @@ export function TraitRow({ trait, onConfirm, onContest, pending }: TraitRowProps
           disabled={pending}
           onClick={onContest}
         >
-          Nem tanto
+          {t.voice.traits.contest}
         </Pill>
       </div>
     </div>

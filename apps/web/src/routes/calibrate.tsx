@@ -13,11 +13,13 @@ import {
   useStartCalibration,
   useSubmitCalibrationAnswer,
   useToastStore,
+  useUiLanguage,
   useVoiceProfile
 } from "@my-ai-orchestrator/shared";
 import { Pill } from "@my-ai-orchestrator/ui/app/primitives";
 import { CalibrationWizard, type ResultStepState, type WizardStepContent } from "@my-ai-orchestrator/ui/app/onboarding";
 import { PostResetReturn } from "@my-ai-orchestrator/ui/app/states";
+import { useMessages } from "@my-ai-orchestrator/ui/app/i18n";
 import {
   buildProgress,
   buildVoicePreviewVM,
@@ -26,7 +28,6 @@ import {
   CONTEXT_STEP_ID,
   describeCalibrationError,
   formatCalibrationTrialLine,
-  formatResetDate,
   helperCopyFor,
   isLowConfidence,
   isPastStep,
@@ -41,8 +42,8 @@ import {
   type PostResetContext
 } from "./calibrate-view.js";
 
-function firstName(name: string | undefined): string {
-  return name?.trim().split(/\s+/)[0] ?? "você";
+function firstName(name: string | undefined, fallback: string): string {
+  return name?.trim().split(/\s+/)[0] ?? fallback;
 }
 
 type Phase = "wizard" | "result" | "bridge";
@@ -51,11 +52,13 @@ type Phase = "wizard" | "result" | "bridge";
 // auth-only, no loader). No router loader available, so the session is created/resumed on mount
 // instead of via ensureQueryData; localStorage carries the sessionId across reloads.
 export function CalibrateContainer() {
+  const t = useMessages();
   const navigate = useNavigate();
   const { auth } = useRouteContext({ from: "/calibrate" });
   const companionOpen = useShellStore((state) => state.companionOpen);
   const toggleCompanion = useShellStore((state) => state.toggleCompanion);
   const pushToast = useToastStore((state) => state.push);
+  const uiLanguage = useUiLanguage((state) => state.language);
 
   // 1e — set by settings.tsx right before a reset; consumed once, here, at the gate the reset
   // redirects to.
@@ -87,16 +90,17 @@ export function CalibrateContainer() {
     if (session && displayStepId === undefined) setDisplayStepId(session.currentStepId);
   }, [session, displayStepId]);
 
-  const [domain, setDomain] = useState("");
-  const [audience, setAudience] = useState("");
-  const [strength, setStrength] = useState("");
+  const [subject, setSubject] = useState("");
+  const [vantagePoint, setVantagePoint] = useState("");
+  const [audiences, setAudiences] = useState<readonly string[]>([]);
+  const [audienceDraft, setAudienceDraft] = useState("");
   const contextInitRef = useRef(false);
   useEffect(() => {
     if (!session?.context || contextInitRef.current) return;
     contextInitRef.current = true;
-    setDomain(session.context.domain ?? "");
-    setAudience(session.context.audience ?? "");
-    setStrength(session.context.selfDeclaredStrength ?? "");
+    setSubject(session.context.subject ?? "");
+    setVantagePoint(session.context.vantagePoint ?? "");
+    setAudiences(session.context.audiences ?? []);
   }, [session]);
 
   const [writingDraft, setWritingDraft] = useState("");
@@ -121,9 +125,20 @@ export function CalibrateContainer() {
   function handleContextContinue() {
     if (!sessionId) return;
     setContextMutation.mutate(
-      { domain: domain.trim(), audience: audience.trim(), selfDeclaredStrength: strength.trim() || undefined },
+      { subject: subject.trim(), vantagePoint: vantagePoint.trim(), audiences, locale: uiLanguage },
       { onSuccess: (updated) => setDisplayStepId(updated.currentStepId) }
     );
+  }
+
+  function handleAudienceAdd() {
+    const value = audienceDraft.trim();
+    if (!value || audiences.includes(value)) return;
+    setAudiences((current) => [...current, value]);
+    setAudienceDraft("");
+  }
+
+  function handleAudienceRemove(value: string) {
+    setAudiences((current) => current.filter((candidate) => candidate !== value));
   }
 
   function handleSkipForNow() {
@@ -142,7 +157,7 @@ export function CalibrateContainer() {
       {
         onSuccess: (updated) => setDisplayStepId(updated.currentStepId),
         onError: (error) =>
-          pushToast({ id: "calibrate-submit-error", kind: "error", topic: "não conseguimos salvar essa amostra", message: describeCalibrationError(error) })
+          pushToast({ id: "calibrate-submit-error", kind: "error", topic: t.onboarding.toast.submitError, message: describeCalibrationError(t, error) })
       }
     );
   }
@@ -152,7 +167,7 @@ export function CalibrateContainer() {
     skipStepMutation.mutate(stepId, {
       onSuccess: (updated) => setDisplayStepId(updated.currentStepId),
       onError: (error) =>
-        pushToast({ id: "calibrate-skip-error", kind: "error", topic: "não conseguimos pular essa etapa", message: describeCalibrationError(error) })
+        pushToast({ id: "calibrate-skip-error", kind: "error", topic: t.onboarding.toast.skipError, message: describeCalibrationError(t, error) })
     });
   }
 
@@ -161,7 +176,7 @@ export function CalibrateContainer() {
       await grantConsentMutation.mutateAsync();
       await completeReviewMutation.mutateAsync({});
     } catch (error) {
-      setResultState({ kind: "error", message: describeCalibrationError(error), onRetry: handleCreateVoice });
+      setResultState({ kind: "error", message: describeCalibrationError(t, error), onRetry: handleCreateVoice });
       setPhase("result");
     }
   }
@@ -180,10 +195,10 @@ export function CalibrateContainer() {
     const profile = voiceProfileQuery.data;
     if (!profile || !hasVoiceProfile(profile)) return;
 
-    const low = isLowConfidence(profile) ? weakestWritingStep(session) : undefined;
+    const low = isLowConfidence(profile) ? weakestWritingStep(t, session) : undefined;
     setResultState({
       kind: "success",
-      preview: buildVoicePreviewVM(profile),
+      preview: buildVoicePreviewVM(profile, t),
       lowConfidence: low
         ? {
             weakStepLabel: low.label,
@@ -193,25 +208,41 @@ export function CalibrateContainer() {
             }
           }
         : undefined,
-      trialLine: formatCalibrationTrialLine(entitlementQuery.data, new Date()),
+      trialLine: formatCalibrationTrialLine(t, entitlementQuery.data, new Date()),
       onContinue: () => setPhase("bridge")
     });
     setPhase("result");
-  }, [phase, completeReviewMutation.isSuccess, voiceProfileQuery.data, session, entitlementQuery.data]);
+  }, [phase, completeReviewMutation.isSuccess, voiceProfileQuery.data, session, entitlementQuery.data, t]);
 
   function buildWizardContent(stepId: string): WizardStepContent | undefined {
     if (!session) return undefined;
 
     if (stepId === CONTEXT_STEP_ID) {
+      // setContext now derives the seed practice profile server-side (LLM in the loop) — a
+      // multi-second wait, and no "continue anyway" escape on failure (a generic sample would
+      // permanently poison the profile). Reuses the wizard's existing building/error vocabulary
+      // (steps 6/7) instead of a bespoke one; the retry button just re-fires the same mutation.
+      if (setContextMutation.isError) {
+        return {
+          kind: "result",
+          props: { state: { kind: "error", message: describeCalibrationError(t, setContextMutation.error), onRetry: handleContextContinue } }
+        };
+      }
+      if (setContextMutation.isPending) {
+        return { kind: "review", props: { state: { kind: "building" } } };
+      }
       return {
         kind: "context",
         props: {
-          domain,
-          onDomainChange: setDomain,
-          audience,
-          onAudienceChange: setAudience,
-          strength,
-          onStrengthChange: setStrength,
+          subject,
+          onSubjectChange: setSubject,
+          vantagePoint,
+          onVantagePointChange: setVantagePoint,
+          audiences,
+          audienceDraft,
+          onAudienceDraftChange: setAudienceDraft,
+          onAudienceAdd: handleAudienceAdd,
+          onAudienceRemove: handleAudienceRemove,
           onContinue: handleContextContinue,
           pending: setContextMutation.isPending,
           onSkipForNow: handleSkipForNow
@@ -232,7 +263,7 @@ export function CalibrateContainer() {
               onToggle: setConsentGranted,
               onCreateVoice: handleCreateVoice,
               pending,
-              trialLine: formatCalibrationTrialLine(entitlementQuery.data, new Date()),
+              trialLine: formatCalibrationTrialLine(t, entitlementQuery.data, new Date()),
               onSkipForNow: handleSkipForNow
             }
           }
@@ -249,9 +280,9 @@ export function CalibrateContainer() {
     return {
       kind: "writing",
       props: {
-        eyebrow: writingStepEyebrow(stepId),
-        prompt: step?.prompt || "conte com as suas palavras",
-        helperCopy: helperCopyFor(stepId),
+        eyebrow: writingStepEyebrow(t, stepId),
+        prompt: step?.prompt || t.onboarding.fallbackPrompt,
+        helperCopy: helperCopyFor(t, stepId),
         value: writingDraft,
         onChange: setWritingDraft,
         minWords: range.min,
@@ -272,11 +303,11 @@ export function CalibrateContainer() {
   if (postReset) {
     return (
       <PostResetReturn
-        name={firstName(auth.user?.name)}
-        resetDate={formatResetDate(postReset.resetDate)}
+        name={firstName(auth.user?.name, t.onboarding.nameFallback)}
+        resetDate={postReset.resetDate}
         priorContext={{ topic: postReset.topic, audience: postReset.audience }}
         onResume={() => {
-          setAudience(postReset.audience);
+          setAudiences([postReset.audience]);
           clearPostResetContext();
           setPostReset(undefined);
         }}
@@ -292,14 +323,14 @@ export function CalibrateContainer() {
     return (
       <div className="wizard-full-screen">
         <div className="wizard-full-inner">
-          <p>não conseguimos iniciar a sua calibração agora.</p>
+          <p>{t.onboarding.toast.startFailed}</p>
           <Pill
             onClick={() => {
               startedRef.current = false;
               startMutation.reset();
             }}
           >
-            Tentar de novo
+            {t.common.retry}
           </Pill>
         </div>
       </div>
@@ -319,11 +350,11 @@ export function CalibrateContainer() {
   if (!session || !displayStepId) return null;
 
   if (phase === "result" && resultState) {
-    return <CalibrationWizard variant="full" progress={buildProgress(session, displayStepId)} content={{ kind: "result", props: { state: resultState } }} />;
+    return <CalibrationWizard variant="full" progress={buildProgress(t, session, displayStepId)} content={{ kind: "result", props: { state: resultState } }} />;
   }
 
   const content = buildWizardContent(displayStepId);
   if (!content) return null;
 
-  return <CalibrationWizard variant="full" progress={buildProgress(session, displayStepId)} content={content} />;
+  return <CalibrationWizard variant="full" progress={buildProgress(t, session, displayStepId)} content={content} />;
 }

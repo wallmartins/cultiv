@@ -15,6 +15,13 @@ export interface AIMessage {
   readonly name?: string;
 }
 
+export interface AIGroundingRequest {
+  // Ask the provider to ground the completion in a native web search. Providers that expose a
+  // grounding surface (Gemini's google_search tool) honor it; those without one (OpenAI-compatible /
+  // Groq / Ollama) ignore it, so a routing chain can degrade to an ungrounded fallback silently.
+  readonly webSearch: boolean;
+}
+
 export interface AIUsage {
   readonly inputTokens?: number;
   readonly outputTokens?: number;
@@ -30,6 +37,7 @@ export interface AIModelRequest {
   readonly topP?: number;
   readonly stop?: readonly string[];
   readonly stream?: boolean;
+  readonly grounding?: AIGroundingRequest;
   readonly metadata?: Readonly<Record<string, unknown>>;
 }
 

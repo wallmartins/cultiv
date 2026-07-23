@@ -2,9 +2,7 @@ import { describe, expect, it } from "vitest";
 import { CALIBRATION_WIZARD_STEPS } from "@my-ai-orchestrator/domain";
 import {
   getCalibrationWizardStep,
-  resolveTheme,
-  THEMES_BY_DOMAIN,
-  type WizardContext
+  resolveTheme
 } from "../src/product/voice/voice-calibration-context.js";
 
 describe("voice calibration context", () => {
@@ -20,43 +18,29 @@ describe("voice calibration context", () => {
     ]);
   });
 
-  it("resolves domain-specific opinion themes for micro_opinion", () => {
-    const step = getCalibrationWizardStep("micro_opinion");
-    expect(step).toBeDefined();
-
-    const context: WizardContext = { domain: "tecnologia", audience: "colegas" };
-    expect(resolveTheme(step!, context)).toBe(THEMES_BY_DOMAIN.tecnologia.opinion);
-  });
-
-  it("resolves domain-specific argument themes for argument_development", () => {
-    const step = getCalibrationWizardStep("argument_development");
-    expect(step).toBeDefined();
-
-    const context: WizardContext = { domain: "negocios" };
-    expect(resolveTheme(step!, context)).toBe(THEMES_BY_DOMAIN.negocios.argument);
-  });
-
   it("returns fixed prompts for reasoning and format adaptation steps", () => {
     const reasoning = getCalibrationWizardStep("reasoning_reflection");
     const adaptation = getCalibrationWizardStep("format_adaptation");
 
-    expect(resolveTheme(reasoning!, { domain: "tecnologia" })).toBe(reasoning!.fixedPrompt);
-    expect(resolveTheme(adaptation!, { domain: "educacao" })).toBe(adaptation!.fixedPrompt);
+    expect(resolveTheme(reasoning!)).toBe(reasoning!.fixedPrompt);
+    expect(resolveTheme(adaptation!)).toBe(adaptation!.fixedPrompt);
   });
 
-  it("falls back to default theme when domain is missing", () => {
-    const step = getCalibrationWizardStep("micro_opinion");
-    expect(resolveTheme(step!)).toBe(step!.defaultTheme);
+  // F3-4 removed THEMES_BY_DOMAIN: the generated calibration anchor (G3) is the real per-subject prompt.
+  // resolveTheme is now only the anchor-less fallback (default/fixed text).
+  it("falls back to default theme for writable steps without a generated anchor", () => {
+    const micro = getCalibrationWizardStep("micro_opinion");
+    const argument = getCalibrationWizardStep("argument_development");
+
+    expect(resolveTheme(micro!)).toBe(micro!.defaultTheme);
+    expect(resolveTheme(argument!)).toBe(argument!.defaultTheme);
   });
 
-  it("falls back to default theme for unknown domains", () => {
-    const step = getCalibrationWizardStep("micro_opinion");
-    expect(resolveTheme(step!, { domain: "desconhecido" })).toBe(step!.defaultTheme);
-  });
+  it("returns empty theme for context_setup and default for review_confirm", () => {
+    const contextStep = getCalibrationWizardStep("context_setup");
+    const review = getCalibrationWizardStep("review_confirm");
 
-  it("defines themes for all supported domains", () => {
-    expect(Object.keys(THEMES_BY_DOMAIN).sort()).toEqual(
-      ["criativo", "educacao", "negocios", "saude", "tecnologia"].sort()
-    );
+    expect(resolveTheme(contextStep!)).toBe("");
+    expect(resolveTheme(review!)).toBe(review!.defaultTheme);
   });
 });

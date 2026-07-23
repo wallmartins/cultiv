@@ -1,6 +1,6 @@
 import { Effect } from "effect";
 import { describe, expect, it } from "vitest";
-import { DatabaseError } from "@my-ai-orchestrator/database";
+import { DatabaseError, type DatabaseClient } from "@my-ai-orchestrator/database";
 import type { AIAdapterServiceContract } from "@my-ai-orchestrator/ai-adapters";
 import { AIAdapterTransportError } from "@my-ai-orchestrator/ai-adapters";
 import type { BackendProviderTransport } from "../src/execution/pipeline/provider-transport.js";
@@ -46,12 +46,20 @@ function createAiPolicyStub(overrides?: Partial<BackendAIPolicyServiceContract>)
 
 const NOOP_PROVIDER_TRANSPORT = { complete: () => Effect.succeed(undefined) } as unknown as BackendProviderTransport;
 
+// No persisted profile ⇒ the prefill degrades to the generic backbone (backboneGenerationSlots),
+// which reproduces the four fixed angles these tests assert. The G4 slot path (profile present) is
+// exercised in generation-prefill-slots.test.ts.
+const NO_PROFILE_DATABASE = {
+  practiceProfiles: { getByUser: () => Effect.succeed(undefined) }
+} as unknown as DatabaseClient;
+
 describe("generation prefill service", () => {
   it("falls back gracefully to the default response when the LLM call fails, without failing the flow", async () => {
     const aiAdapters: AIAdapterServiceContract = {
       complete: () => Effect.fail(new AIAdapterTransportError({ provider: "gemini", message: "timeout" }))
     };
     const service = createBackendGenerationPrefillService({
+      database: NO_PROFILE_DATABASE,
       aiAdapters,
       providerTransport: NOOP_PROVIDER_TRANSPORT,
       aiPolicy: createAiPolicyStub()
@@ -61,9 +69,8 @@ describe("generation prefill service", () => {
       service.infer({ userId: "user-1", theme: "Por que times pequenos entregam mais rápido" })
     );
 
-    expect(response.prefill.intent).toBe("share-idea");
     expect(response.prefill.scope).toEqual({ lengthTier: "short" });
-    expect(response.intentAmbiguity).toBeNull();
+    expect(response.prefill.rhetoricalMode).toBeUndefined();
     expect(response.questionPlan).toHaveLength(4);
     expect(response.questionPlan.map((question) => question.angle)).toEqual([
       "thesis",
@@ -73,11 +80,8 @@ describe("generation prefill service", () => {
     ]);
   });
 
-  it("decodes a well-formed LLM response into the full response, including ambiguity and extra questions", async () => {
+  it("decodes a well-formed LLM response into the full response, including extra questions", async () => {
     const llmPayload = {
-      intent: "explain-deeply",
-      ambiguous: true,
-      alternativeIntent: "share-idea",
       lengthTier: "long",
       briefingSeed: "Como microsserviços afetam a velocidade de entrega.",
       extraQuestions: [{ prompt: "Que métrica você usaria para provar isso?" }]
@@ -95,6 +99,7 @@ describe("generation prefill service", () => {
         })
     };
     const service = createBackendGenerationPrefillService({
+      database: NO_PROFILE_DATABASE,
       aiAdapters,
       providerTransport: NOOP_PROVIDER_TRANSPORT,
       aiPolicy: createAiPolicyStub()
@@ -108,10 +113,9 @@ describe("generation prefill service", () => {
       })
     );
 
-    expect(response.prefill.intent).toBe("explain-deeply");
     expect(response.prefill.scope).toEqual({ lengthTier: "long" });
     expect(response.prefill.briefing).toEqual({ topic: llmPayload.briefingSeed });
-    expect(response.intentAmbiguity).toEqual({ ambiguous: true, alternative: "share-idea" });
+    expect(response.prefill.rhetoricalMode).toBeUndefined();
     expect(response.detectedPlatform).toBe("linkedin");
     expect(response.questionPlan).toHaveLength(5);
     expect(response.questionPlan.at(-1)).toMatchObject({ id: "extra-1", angle: "extra" });
@@ -122,6 +126,7 @@ describe("generation prefill service", () => {
       complete: () => Effect.die("should not be called when there are no attempts")
     };
     const service = createBackendGenerationPrefillService({
+      database: NO_PROFILE_DATABASE,
       aiAdapters,
       providerTransport: NOOP_PROVIDER_TRANSPORT,
       aiPolicy: createAiPolicyStub({
@@ -139,8 +144,8 @@ describe("generation prefill service", () => {
 
     const response = await Effect.runPromise(service.infer({ userId: "user-1", theme: "Um tema qualquer" }));
 
-    expect(response.prefill.intent).toBe("share-idea");
-    expect(response.intentAmbiguity).toBeNull();
+    expect(response.prefill.scope).toEqual({ lengthTier: "short" });
+    expect(response.prefill.rhetoricalMode).toBeUndefined();
   });
 
   it("fails the flow (does not fall back) when reading the active AI policy hits a genuine infra error", async () => {
@@ -148,6 +153,7 @@ describe("generation prefill service", () => {
       complete: () => Effect.die("should not be called")
     };
     const service = createBackendGenerationPrefillService({
+      database: NO_PROFILE_DATABASE,
       aiAdapters,
       providerTransport: NOOP_PROVIDER_TRANSPORT,
       aiPolicy: createAiPolicyStub({

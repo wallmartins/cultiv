@@ -13,7 +13,8 @@ import {
   useToastStore,
   useUiLanguage
 } from "@my-ai-orchestrator/shared";
-import { DELETE_CONFIRM_WORD, SettingsScreen } from "@my-ai-orchestrator/ui/app/settings";
+import { useFormat, useMessages } from "@my-ai-orchestrator/ui/app/i18n";
+import { SettingsScreen } from "@my-ai-orchestrator/ui/app/settings";
 import { resolvePlanName } from "./billing-view.js";
 import { storePostResetContext } from "./calibrate-view.js";
 import { audienceFromChannel, consentMirrorSinceLabel, initialsFrom } from "./settings-view.js";
@@ -21,6 +22,8 @@ import { audienceFromChannel, consentMirrorSinceLabel, initialsFrom } from "./se
 // Container for /app/settings (route wired by router.tsx). Only file in S9 that touches
 // shared/sdk/router — packages/ui/app/settings stays props-in.
 export function SettingsContainer() {
+  const t = useMessages();
+  const format = useFormat();
   const { auth } = useRouteContext({ from: "/_shell" });
   const navigate = useNavigate();
   const pushToast = useToastStore((state) => state.push);
@@ -56,14 +59,14 @@ export function SettingsContainer() {
       return () => clearTimeout(timer);
     }
     if (job.status === "ready") {
-      pushToast({ id: `export-${job.jobId}`, kind: "success", topic: "export pronto", message: job.downloadUrl ?? undefined });
+      pushToast({ id: `export-${job.jobId}`, kind: "success", topic: t.settings.exportReadyTopic, message: job.downloadUrl ?? undefined });
       setExportJobId(undefined);
     }
     if (job.status === "failed") {
-      pushToast({ id: `export-${job.jobId}`, kind: "error", topic: "não foi possível exportar" });
+      pushToast({ id: `export-${job.jobId}`, kind: "error", topic: t.settings.exportFailedTopic });
       setExportJobId(undefined);
     }
-  }, [exportJobId, exportJobQuery.data, exportJobQuery.refetch, pushToast]);
+  }, [exportJobId, exportJobQuery.data, exportJobQuery.refetch, pushToast, t]);
 
   const exportPending =
     exportAccount.isPending ||
@@ -88,7 +91,7 @@ export function SettingsContainer() {
           storePostResetContext({
             resetDate: new Date().toISOString(),
             topic: lastExecution.briefingTopic,
-            audience: audienceFromChannel(lastExecution.channel)
+            audience: audienceFromChannel(t, lastExecution.channel)
           });
         }
         // PostResetReturn (recognized re-onboarding) renders at /calibrate when a snapshot was
@@ -99,7 +102,7 @@ export function SettingsContainer() {
   };
 
   const handleConfirmDelete = () => {
-    if (deleteConfirmText !== DELETE_CONFIRM_WORD) return;
+    if (deleteConfirmText !== t.settings.deleteConfirmWord) return;
     deleteAccount.mutate({ confirmation: deleteConfirmText }, { onSuccess: doLogout });
   };
 
@@ -109,6 +112,7 @@ export function SettingsContainer() {
         name: auth.user?.name ?? "",
         email: auth.user?.email ?? "",
         avatarInitials: initialsFrom(auth.user?.name, auth.user?.email),
+        avatarUrl: auth.user?.picture,
         onLogout: doLogout
       }}
       preferences={{
@@ -119,7 +123,7 @@ export function SettingsContainer() {
         consent: consentQuery.data
           ? {
               granted: consentQuery.data.granted,
-              sinceLabel: consentMirrorSinceLabel(consentQuery.data),
+              sinceLabel: consentMirrorSinceLabel(t, format, consentQuery.data),
               onGoVoice: goVoice
             }
           : undefined,
@@ -130,7 +134,7 @@ export function SettingsContainer() {
       plan={
         entitlementQuery.data
           ? {
-              planName: resolvePlanName(entitlementQuery.data, plansQuery.data?.plans),
+              planName: resolvePlanName(t, entitlementQuery.data, plansQuery.data?.plans),
               credits: entitlementQuery.data.availableCredits,
               onGoBilling: goBilling
             }

@@ -86,7 +86,7 @@ export function findStepPlannerSmokeScenario(id: string): StepPlannerSmokeScenar
 
 export function smokePreviewBody(scenario: StepPlannerSmokeScenario): Record<string, unknown> {
   return {
-    intent: scenario.fixture.intent,
+    rhetoricalMode: scenario.fixture.rhetoricalMode,
     scope: scenario.fixture.scope,
     qualityMode: COMPOSITOR_PARITY_QUALITY_MODE,
     language: "pt-BR",

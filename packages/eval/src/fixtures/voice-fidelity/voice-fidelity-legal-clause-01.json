@@ -1,0 +1,20 @@
+{
+  "id": "voice-fidelity-legal-clause-01",
+  "suite": "voice-fidelity",
+  "input": {
+    "contentType": "blog-post",
+    "briefing": "Write about the early termination clause that looks protective and is not",
+    "voiceProfile": {
+      "type": "fixture",
+      "path": "voice-fidelity/profiles/legal-precise.json"
+    },
+    "qualityMode": "balanced"
+  },
+  "expectations": {
+    "mustContain": ["termination clause"],
+    "mustNotContain": ["segurança jurídica plena", "transparência total"],
+    "wordCountRange": { "min": 150, "max": 500 },
+    "minDriftScore": 60
+  },
+  "tags": ["blog", "legal", "precise-cautious", "domain:legal"]
+}

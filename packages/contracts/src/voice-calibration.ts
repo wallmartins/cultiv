@@ -3,9 +3,9 @@ import { createSchemaDecoder } from "./shared.js";
 import { VoiceProfileConfidenceSchema } from "./voice.js";
 
 export const WizardContextSchema = Schema.Struct({
-  domain: Schema.optional(Schema.String),
-  audience: Schema.optional(Schema.String),
-  selfDeclaredStrength: Schema.optional(Schema.String)
+  subject: Schema.optional(Schema.String),
+  vantagePoint: Schema.optional(Schema.String),
+  audiences: Schema.optional(Schema.Array(Schema.String))
 });
 export type WizardContext = typeof WizardContextSchema.Type;
 
@@ -47,7 +47,14 @@ export const SubmitWizardStepInputSchema = Schema.Struct({
 });
 export type SubmitWizardStepInput = typeof SubmitWizardStepInputSchema.Type;
 
-export const SetWizardContextInputSchema = WizardContextSchema;
+// F3-3 — the requested output locale rides the setContext payload (mirrors the prefill's
+// language-in-body pattern) so the seed-profile (G1) and calibration anchors (G3) are born in the
+// author's UI language. A loose tag, normalized server-side; kept off WizardContext so the stored
+// declared practice stays pure (locale is a request concern, not a practice axis).
+export const SetWizardContextInputSchema = Schema.Struct({
+  ...WizardContextSchema.fields,
+  locale: Schema.optional(Schema.String)
+});
 export type SetWizardContextInput = typeof SetWizardContextInputSchema.Type;
 
 export const ConfirmWizardReviewInputSchema = Schema.Struct({

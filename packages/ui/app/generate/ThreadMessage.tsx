@@ -5,8 +5,7 @@ export interface ThreadMessageProps {
   readonly message: ThreadMessageData;
 }
 
-// design L176–187: user bubble right-aligned; system = Serif question + optional impact note
-// (also carries the ambiguity question — same chrome, only content differs).
+// design L176–187: user bubble right-aligned; system = Serif question + optional impact note.
 export function ThreadMessage({ message }: ThreadMessageProps) {
   if (message.kind === "user") {
     return <div className="generate-user-bubble">{message.text}</div>;

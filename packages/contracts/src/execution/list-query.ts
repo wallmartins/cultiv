@@ -1,6 +1,6 @@
 import { Schema } from "effect";
 import { createSchemaDecoder } from "../shared.js";
-import { GenerationIntentSchema, GenerationLengthTierSchema, type GenerationIntent, type GenerationLengthTier } from "../generation-intent.js";
+import { GenerationLengthTierSchema, type GenerationLengthTier } from "../generation-scope.js";
 import { JobStatusSchema } from "./job.js";
 
 export const ExecutionsListPeriodSchema = Schema.Literal("7d", "30d", "90d", "all");
@@ -9,13 +9,14 @@ export type ExecutionsListPeriod = typeof ExecutionsListPeriodSchema.Type;
 export const ExecutionsListStatusFilterSchema = Schema.Union(Schema.Literal("all"), JobStatusSchema);
 export type ExecutionsListStatusFilter = typeof ExecutionsListStatusFilterSchema.Type;
 
+// F0-5 dropped the dormant `intent`/`contentType` facets. The history facet by rhetorical `modo`
+// (dominant RhetoricalMode) that replaces `intent` awaits its producer (F2) + the intent-machinery
+// removal (F1-1); `period`/`status`/`lengthTier`/`q` stay the live facets.
 export const ExecutionsListQuerySchema = Schema.Struct({
   limit: Schema.optional(Schema.Number),
   offset: Schema.optional(Schema.Number),
   period: Schema.optional(ExecutionsListPeriodSchema),
   status: Schema.optional(ExecutionsListStatusFilterSchema),
-  contentType: Schema.optional(Schema.String),
-  intent: Schema.optional(GenerationIntentSchema),
   lengthTier: Schema.optional(GenerationLengthTierSchema),
   q: Schema.optional(Schema.String)
 });
@@ -24,8 +25,6 @@ export type ExecutionsListQuery = typeof ExecutionsListQuerySchema.Type;
 export type ExecutionsListFilters = {
   readonly period: ExecutionsListPeriod;
   readonly status: ExecutionsListStatusFilter;
-  readonly contentType?: string;
-  readonly intent?: GenerationIntent;
   readonly lengthTier?: GenerationLengthTier;
   readonly q?: string;
 };
@@ -33,16 +32,12 @@ export type ExecutionsListFilters = {
 export const decodeExecutionsListQuery = createSchemaDecoder("ExecutionsListQuery", ExecutionsListQuerySchema);
 
 export function normalizeExecutionsListFilters(query: Partial<ExecutionsListQuery>): ExecutionsListFilters {
-  const contentType = query.contentType?.trim();
-  const intent = query.intent;
   const lengthTier = query.lengthTier;
   const q = query.q?.trim();
 
   return {
     period: query.period ?? "all",
     status: query.status ?? "all",
-    ...(contentType && contentType !== "all" ? { contentType } : {}),
-    ...(intent ? { intent } : {}),
     ...(lengthTier ? { lengthTier } : {}),
     ...(q ? { q } : {})
   };
@@ -63,8 +58,6 @@ export function resolveExecutionsPeriodCutoff(
 export type ExecutionsListFilterItem = {
   readonly createdAt: string;
   readonly status: string;
-  readonly contentType: string;
-  readonly generationIntent?: string;
   readonly lengthTier?: string;
   readonly briefingTopic?: string;
 };
@@ -79,14 +72,6 @@ export function matchesExecutionsListFilters(
   }
 
   if (filters.status !== "all" && item.status !== filters.status) {
-    return false;
-  }
-
-  if (filters.contentType && item.contentType !== filters.contentType) {
-    return false;
-  }
-
-  if (filters.intent && item.generationIntent !== filters.intent) {
     return false;
   }
 

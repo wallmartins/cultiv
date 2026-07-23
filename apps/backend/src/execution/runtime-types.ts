@@ -22,6 +22,11 @@ export interface ExecutePipelineOptions {
   readonly corpus?: CorpusManager;
   readonly onProgress?: (progress: JobProgress) => void;
   readonly existingCreditReservationId?: string;
+  // FU-5 · the effective voice already resolved upstream (the availability gate in execution/index.ts).
+  // When present, the sync runtime reuses it instead of resolving a second time — one resolution and
+  // one `voiceProfileSnapshots` row per sync generation. Absent for callers that don't pre-resolve, in
+  // which case `resolveRuntimeSelectionContext` resolves it itself.
+  readonly preresolvedVoice?: EffectiveVoiceResolution;
 }
 
 export interface RuntimeSelectionContext {

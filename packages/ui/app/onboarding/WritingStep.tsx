@@ -1,4 +1,5 @@
 import { Mono, Panel, Pill, Serif } from "../primitives/index.js";
+import { useMessages } from "../i18n/index.js";
 
 export interface WritingStepProps {
   readonly eyebrow: string;
@@ -49,6 +50,7 @@ export function WritingStep({
   pending = false,
   readOnly = false
 }: WritingStepProps) {
+  const t = useMessages();
   const count = countWords(value);
   const state = counterState(count, minWords, maxWords);
 
@@ -61,7 +63,7 @@ export function WritingStep({
         {prompt}
       </Serif>
       {readOnly ? (
-        <p className="wizard-writing-helper">essa amostra já foi enviada — dá pra reler, mas não editar aqui.</p>
+        <p className="wizard-writing-helper">{t.onboarding.writing.readOnlyHelper}</p>
       ) : helperCopy ? (
         <p className="wizard-writing-helper">{helperCopy}</p>
       ) : null}
@@ -71,29 +73,29 @@ export function WritingStep({
         value={value}
         onChange={(event) => onChange(event.target.value)}
         readOnly={readOnly}
-        placeholder="escreva com as suas palavras — não precisa ser perfeito"
+        placeholder={t.onboarding.writing.placeholder}
         rows={8}
       />
       {readOnly ? null : (
         <Mono as="div" className={`wizard-word-counter is-${state}`}>
-          {count} / {minWords}–{maxWords} palavras
-          {state === "below" ? ` · mais um pouco — cerca de ${targetWords} é o ideal` : null}
-          {state === "in-range" ? " · boa faixa" : null}
-          {state === "over" ? " · tudo bem, pode manter" : null}
+          {count} / {minWords}–{t.common.words(maxWords)}
+          {state === "below" ? ` · ${t.onboarding.writing.counterBelow(targetWords)}` : null}
+          {state === "in-range" ? ` · ${t.onboarding.writing.counterInRange}` : null}
+          {state === "over" ? ` · ${t.onboarding.writing.counterOver}` : null}
         </Mono>
       )}
       <div className="wizard-step-footer">
         <Pill variant="secondary" onClick={onBack} disabled={pending}>
-          Voltar
+          {t.common.back}
         </Pill>
         <div className="wizard-writing-forward">
           {!readOnly && onSkip ? (
             <button type="button" className="wizard-skip-link" onClick={onSkip} disabled={pending}>
-              <Mono as="span">pular esta amostra →</Mono>
+              <Mono as="span">{t.onboarding.writing.skipLink}</Mono>
             </button>
           ) : null}
           <Pill variant="primary" onClick={onContinue} disabled={pending || (!readOnly && value.trim() === "")}>
-            {readOnly ? "Voltar para onde parei" : "Continuar"}
+            {readOnly ? t.onboarding.writing.resumeAtCurrent : t.common.continue}
           </Pill>
         </div>
       </div>

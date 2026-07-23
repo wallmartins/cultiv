@@ -194,6 +194,8 @@ export const expectedDatabaseTables = [
   "voice_profile_diagnostics",
   "voice_profile_snapshots",
   "voice_example_batches",
+  "practice_profiles",
+  "practice_profile_diagnostics",
   "application_users",
   "operators",
   "audit_records",

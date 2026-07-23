@@ -15,4 +15,4 @@ export { ResetAccountRow, type ResetAccountRowProps } from "./ResetAccountRow.js
 export { DeleteAccountRow, type DeleteAccountRowProps } from "./DeleteAccountRow.js";
 export { PlanSummarySection, type PlanSummarySectionProps } from "./PlanSummarySection.js";
 export { ResetDialog, type ResetDialogProps } from "./ResetDialog.js";
-export { DeleteDialog, DELETE_CONFIRM_WORD, type DeleteDialogProps } from "./DeleteDialog.js";
+export { DeleteDialog, type DeleteDialogProps } from "./DeleteDialog.js";

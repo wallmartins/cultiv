@@ -31,8 +31,7 @@ describe("POST /me/generation-prefill", () => {
           Effect.sync(() => {
             receivedInput = input;
             return {
-              prefill: { intent: "share-idea" as const, scope: { lengthTier: "short" as const } },
-              intentAmbiguity: null,
+              prefill: { scope: { lengthTier: "short" as const } },
               detectedPlatform: "linkedin",
               questionPlan: [{ id: "thesis", angle: "thesis" as const, prompt: "Qual é a tese?" }]
             };
@@ -51,8 +50,7 @@ describe("POST /me/generation-prefill", () => {
     expect(response.status).toBe(200);
     const body = await response.json();
     expect(body).toMatchObject({
-      prefill: { intent: "share-idea", scope: { lengthTier: "short" } },
-      intentAmbiguity: null,
+      prefill: { scope: { lengthTier: "short" } },
       detectedPlatform: "linkedin"
     });
     expect(body.questionPlan).toHaveLength(1);

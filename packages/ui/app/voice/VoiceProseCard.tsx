@@ -1,3 +1,4 @@
+import { useMessages } from "../i18n/index.js";
 import { Mono, Panel, Serif } from "../primitives/index.js";
 
 export interface VoiceProseCardProps {
@@ -5,16 +6,15 @@ export interface VoiceProseCardProps {
   readonly body: string;
 }
 
-const FALLBACK_BODY = "prosa ainda não disponível — recalibrar gera uma nova leitura.";
-
 export function VoiceProseCard({ heading, body }: VoiceProseCardProps) {
+  const t = useMessages();
   return (
     <Panel dialog className="voice-prose-card">
       <Mono as="div" className="voice-prose-card-heading">
         {heading}
       </Mono>
       <Serif as="p" size="1.08rem" lineHeight="1.6">
-        {body || FALLBACK_BODY}
+        {body || t.voice.proseFallback}
       </Serif>
     </Panel>
   );

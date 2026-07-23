@@ -31,6 +31,7 @@ export interface RailProps {
   readonly voiceConfidenceValue?: number;
   readonly onToggleCompanion: () => void;
   readonly avatarInitials: string;
+  readonly avatarUrl?: string;
   readonly onOpenVoiceProfile: () => void;
   readonly onOpenBilling: () => void;
   readonly onOpenSettings: () => void;
@@ -57,6 +58,7 @@ export function Rail({
   voiceConfidenceValue,
   onToggleCompanion,
   avatarInitials,
+  avatarUrl,
   onOpenVoiceProfile,
   onOpenBilling,
   onOpenSettings,
@@ -91,6 +93,7 @@ export function Rail({
         voiceConfidenceValue={voiceConfidenceValue}
         onToggleCompanion={onToggleCompanion}
         avatarInitials={avatarInitials}
+        avatarUrl={avatarUrl}
         onOpenVoiceProfile={onOpenVoiceProfile}
         onOpenBilling={onOpenBilling}
         onOpenSettings={onOpenSettings}

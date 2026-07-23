@@ -1,9 +1,11 @@
 import "./voice.css";
+import { useMessages } from "../i18n/index.js";
 import { Mono, Panel, Pill, type RingTone } from "../primitives/index.js";
 import { ConfidenceRing } from "./ConfidenceRing.js";
 import { ConsentPanel } from "./ConsentPanel.js";
 import { MaterialBaseCoverage } from "./MaterialBaseCoverage.js";
 import { MaterialBaseSamples, type MaterialBaseSampleVM } from "./MaterialBaseSamples.js";
+import { PracticeSection } from "./PracticeSection.js";
 import { RevokeConfirmDialog } from "./RevokeConfirmDialog.js";
 import { TraitReviewList } from "./TraitReviewList.js";
 import { VoiceDescriptorChips } from "./VoiceDescriptorChips.js";
@@ -11,7 +13,7 @@ import { VoiceEmptyState } from "./VoiceEmptyState.js";
 import { VoiceHeader } from "./VoiceHeader.js";
 import { VoiceLoadingSkeleton } from "./VoiceLoadingSkeleton.js";
 import { VoiceProseCard } from "./VoiceProseCard.js";
-import type { CoverageItemVM, TraitVM } from "./types.js";
+import type { CoverageItemVM, PracticeSectionVM, TraitVM } from "./types.js";
 
 export interface VoiceProfileReadyState {
   readonly kind: "ready";
@@ -43,6 +45,9 @@ export interface VoiceProfileReadyState {
     readonly onGrant: () => void;
   };
   readonly revokeDialog: { readonly open: boolean; readonly onCancel: () => void; readonly onConfirm: () => void };
+  // F5 · the practice half of "sua identidade de escrita". null/absent → not derived yet (render nothing);
+  // the container (voice-mappers.ts) builds it from the practice-identity read.
+  readonly practice?: PracticeSectionVM | null;
 }
 
 export type VoiceProfileScreenState =
@@ -56,6 +61,7 @@ export interface VoiceProfileScreenProps {
 }
 
 export function VoiceProfileScreen({ state }: VoiceProfileScreenProps) {
+  const t = useMessages();
   return (
     <div className="voice-screen">
       <div className="voice-screen-inner">
@@ -65,8 +71,8 @@ export function VoiceProfileScreen({ state }: VoiceProfileScreenProps) {
           <VoiceEmptyState
             onCalibrate={state.onCalibrate}
             size={84}
-            description="sua voz aparece aqui depois da calibração"
-            ctaLabel="calibrar agora →"
+            description={t.voice.emptyDescription}
+            ctaLabel={t.voice.emptyCta}
           />
         ) : null}
         {state.kind === "ready" ? <ReadyScreen state={state} /> : null}
@@ -76,35 +82,43 @@ export function VoiceProfileScreen({ state }: VoiceProfileScreenProps) {
 }
 
 function ErrorPanel({ onRetry }: { onRetry: () => void }) {
+  const t = useMessages();
   return (
     <Panel className="voice-error-panel">
-      <div className="voice-error-text">não foi possível carregar o perfil de voz.</div>
+      <div className="voice-error-text">{t.voice.errorText}</div>
       <Pill variant="secondary" onClick={onRetry}>
-        tentar de novo
+        {t.common.retry}
       </Pill>
     </Panel>
   );
 }
 
 function ReadyScreen({ state }: { state: VoiceProfileReadyState }) {
+  const t = useMessages();
   return (
     <>
       <Mono as="div" className="voice-page-eyebrow">
-        Perfil de voz · como a Cultiv aprende você
+        {t.voice.pageEyebrow}
       </Mono>
       {/* seam: S10 — drift nudge (VoiceDriftNudge) slots here as an inline <Banner tone="warning">,
           snoozeable 7d, never a modal (ticket 15). Not implemented in S5. */}
       <div className="voice-header-row">
-        <ConfidenceRing value={state.ring.value} caption={state.ring.caption} tone={state.ring.tone} size={96} eyebrow="CONFIANÇA" />
+        <ConfidenceRing
+          value={state.ring.value}
+          caption={state.ring.caption}
+          tone={state.ring.tone}
+          size={96}
+          eyebrow={t.voice.confidenceEyebrow}
+        />
         <VoiceHeader headline={state.headline} versionLabel={state.versionLabel} />
         <Pill variant="secondary" onClick={state.onRecalibrate}>
-          Recalibrar →
+          {t.voice.recalibrate}
         </Pill>
       </div>
 
       <div className="voice-prose-grid">
-        <VoiceProseCard heading="Como eu penso" body={state.proseCore} />
-        <VoiceProseCard heading="Como eu desenvolvo um texto" body={state.proseDevelopment} />
+        <VoiceProseCard heading={t.voice.proseCoreHeading} body={state.proseCore} />
+        <VoiceProseCard heading={t.voice.proseDevelopmentHeading} body={state.proseDevelopment} />
       </div>
 
       <VoiceDescriptorChips chips={state.descriptorChips} />
@@ -118,8 +132,10 @@ function ReadyScreen({ state }: { state: VoiceProfileReadyState }) {
         pendingTraitKey={state.pendingTraitKey}
       />
 
+      {state.practice ? <PracticeSection vm={state.practice} /> : null}
+
       <div className="voice-material-section">
-        <h2 className="voice-material-heading">Material-base</h2>
+        <h2 className="voice-material-heading">{t.voice.materialBase.sectionHeading}</h2>
         <div className="voice-material-grid">
           <MaterialBaseSamples
             heading={state.materialBase.heading}

@@ -10,10 +10,11 @@ import type { BackendProductServices } from "../product.js";
 import { createErrorBody, runEffectOrThrow, validateResponseBody } from "../http/http.js";
 import type { BackendJobStoreServiceContract } from "../jobs/job-store.js";
 import { registerExecutionRoutes } from "../routes/execution-routes.js";
-import { registerGenerationIntentRoutes } from "../routes/generation-intent-routes.js";
 import { registerOnboardingRoutes } from "../routes/onboarding-routes.js";
 import { registerGenerationPreviewRoutes } from "../routes/generation-preview-routes.js";
 import { registerGenerationPrefillRoutes } from "../routes/generation-prefill-routes.js";
+import { registerGenreInferenceRoutes } from "../routes/genre-inference-routes.js";
+import { registerPracticeProfileRoutes } from "../routes/practice-profile-routes.js";
 import { registerExperimentalExecutionRoutes } from "../routes/experimental-execution-routes.js";
 import { registerInternalPolicyRoutes } from "../routes/internal-policy-routes.js";
 import { registerInternalOverrideRoutes } from "../routes/internal-override-routes.js";
@@ -90,15 +91,19 @@ export function registerBackendRoutes(app: Hono, options: BackendRouteOptions): 
     config: options.config,
     services: options.services
   });
-  registerGenerationIntentRoutes(app, {
-    config: options.config,
-    services: options.services
-  });
   registerGenerationPreviewRoutes(app, {
     config: options.config,
     services: options.services
   });
   registerGenerationPrefillRoutes(app, {
+    config: options.config,
+    services: options.services
+  });
+  registerGenreInferenceRoutes(app, {
+    config: options.config,
+    services: options.services
+  });
+  registerPracticeProfileRoutes(app, {
     config: options.config,
     services: options.services
   });

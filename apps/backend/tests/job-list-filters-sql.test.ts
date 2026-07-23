@@ -20,24 +20,18 @@ function compileWith(filters: Parameters<typeof applyJobListFilters>[1]) {
 }
 
 describe("applyJobListFilters", () => {
-  it("filtra por generationIntent e lengthTier, não só status/contentType/q", () => {
+  it("filtra por lengthTier e q, não só status", () => {
     const compiled = compileWith(
       normalizeExecutionsListFilters({
         status: "failed",
-        contentType: "twitter-thread",
-        intent: "share-idea",
         lengthTier: "short",
         q: "voz"
       })
     );
 
     expect(compiled.sql).toContain("data->>'status'");
-    expect(compiled.sql).toContain("data->>'contentType'");
     expect(compiled.sql).toContain("data->>'briefingTopic'");
-    // os dois que faltavam: a API aceitava o filtro e o SQL ignorava
-    expect(compiled.sql).toContain("data->>'generationIntent'");
     expect(compiled.sql).toContain("data->>'lengthTier'");
-    expect(compiled.parameters).toContain("share-idea");
     expect(compiled.parameters).toContain("short");
   });
 

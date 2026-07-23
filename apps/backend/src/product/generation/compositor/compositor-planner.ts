@@ -2,19 +2,19 @@ import { createHash } from "node:crypto";
 import type {
   ExecutionPlan,
   GenerationChannel,
-  GenerationIntent,
   GenerationScope,
   PlannedStep,
   PlanSignature,
-  QualityMode
+  QualityMode,
+  RhetoricalMode
 } from "@my-ai-orchestrator/contracts";
 import { pickBasePreset, resolveExpressionProfile } from "./expression.js";
 import { getPreset, resolveDominantPlanSignature } from "./presets.js";
-import { getRhetoricalProfile } from "./rhetorical-profiles.js";
+import { modeUsesStructureStep } from "./rhetorical-profiles.js";
 import { gateHeavySteps, resolveWordTarget } from "./scale.js";
 
 export interface PlanGenerationInput {
-  readonly intent: GenerationIntent;
+  readonly rhetoricalMode: RhetoricalMode;
   readonly scope: GenerationScope;
   readonly qualityMode: QualityMode;
 }
@@ -74,13 +74,12 @@ function removeStep(steps: PlannedStep[], name: string): PlannedStep[] {
   return steps.filter((step) => step.name !== name);
 }
 
-function applyIntentPatches(
+function applyModePatches(
   steps: PlannedStep[],
-  intent: GenerationIntent,
+  rhetoricalMode: RhetoricalMode,
   lengthTier: GenerationScope["lengthTier"]
 ): PlannedStep[] {
-  const rhetorical = getRhetoricalProfile(intent);
-  if (!rhetorical.structureStep) {
+  if (!modeUsesStructureStep(rhetoricalMode)) {
     return steps;
   }
 
@@ -124,7 +123,7 @@ function resolvePlanSignature(steps: readonly PlannedStep[], basePresetId: PlanS
 
 function createPlanId(input: PlanGenerationInput): string {
   const channel = input.scope.channel ?? "unspecified";
-  const payload = `${input.intent}:${input.scope.lengthTier}:${channel}:${input.qualityMode}`;
+  const payload = `${input.rhetoricalMode}:${input.scope.lengthTier}:${channel}:${input.qualityMode}`;
   return createHash("sha256").update(payload).digest("hex").slice(0, 16);
 }
 
@@ -132,13 +131,13 @@ export function planGeneration(input: PlanGenerationInput): ExecutionPlan {
   const channel = input.scope.channel ?? "unspecified";
   const { lengthTier } = input.scope;
   const basePresetId = pickBasePreset({
-    intent: input.intent,
+    rhetoricalMode: input.rhetoricalMode,
     lengthTier,
     channel: input.scope.channel
   });
 
   let steps = cloneSteps(getPreset(basePresetId).steps);
-  steps = applyIntentPatches(steps, input.intent, lengthTier);
+  steps = applyModePatches(steps, input.rhetoricalMode, lengthTier);
   steps = applyChannelPatches(steps, channel);
   steps = applyScaleGates(steps, lengthTier);
 
@@ -148,12 +147,11 @@ export function planGeneration(input: PlanGenerationInput): ExecutionPlan {
     steps,
     parameters: {
       wordTarget: resolveWordTarget({
-        intent: input.intent,
         lengthTier,
         channel
       }),
-      expressionProfile: resolveExpressionProfile({ intent: input.intent, channel }),
-      intent: input.intent,
+      expressionProfile: resolveExpressionProfile({ rhetoricalMode: input.rhetoricalMode, channel }),
+      rhetoricalMode: input.rhetoricalMode,
       lengthTier
     }
   };

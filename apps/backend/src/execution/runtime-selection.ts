@@ -11,6 +11,7 @@ import {
   resolveSelection
 } from "./quality/quality.js";
 import { laneCountForQualityMode } from "./quality/quality-lanes.js";
+import { readGenerationChannel } from "./pipeline-metadata.js";
 
 export function resolveRuntimeSelectionContext(options: ExecutePipelineOptions): Effect.Effect<RuntimeSelectionContext, BackendExecutionFailedError> {
   return Effect.gen(function* () {
@@ -54,13 +55,17 @@ export function resolveRuntimeSelectionContext(options: ExecutePipelineOptions):
   });
   const refinementEnabled =
     refinementFlagEnabled && (planEntitlement === null || planEntitlement.canRefine);
-  const voice = yield* options.services.voice.resolveEffectiveVoice(
-    billingIdentity.userId,
-    {
-      contentType: options.plan.contentType.id,
-      requestedLanguage: options.request.language ?? options.plan.contentType.defaultLanguage
-    }
-  );
+  // FU-5 · reuse the voice resolved by the upstream availability gate when it threaded one through;
+  // only resolve (and persist a snapshot) here when no caller pre-resolved.
+  const voice =
+    options.preresolvedVoice ??
+    (yield* options.services.voice.resolveEffectiveVoice(
+      billingIdentity.userId,
+      {
+        channel: readGenerationChannel("context" in options.request ? options.request.context : undefined),
+        requestedLanguage: options.request.language ?? options.plan.contentType.defaultLanguage
+      }
+    ));
 
   return {
     billingIdentity,

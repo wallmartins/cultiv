@@ -1,4 +1,5 @@
 import { Mono, Panel, Pill, Serif } from "../primitives/index.js";
+import { useMessages } from "../i18n/index.js";
 
 export interface ConsentAuthorizationProps {
   readonly granted: boolean;
@@ -14,18 +15,16 @@ export interface ConsentAuthorizationProps {
 // Gate duro (ADR 0005 §3): "Criar minha voz" só habilita com o switch marcado — recusar aqui
 // significa nenhuma chamada de completeReview/grantConsent acontece.
 export function ConsentAuthorization({ granted, onToggle, onCreateVoice, pending = false, trialLine, onSkipForNow }: ConsentAuthorizationProps) {
+  const t = useMessages();
   return (
     <Panel className="wizard-consent-authorization">
       <Mono eyebrow className="wizard-step-eyebrow">
-        autorização formal
+        {t.onboarding.consent.eyebrow}
       </Mono>
       <Serif as="h2" size="1.25rem" lineHeight={1.35} className="wizard-consent-heading">
-        posso usar essas amostras pra construir a sua voz?
+        {t.onboarding.consent.heading}
       </Serif>
-      <p className="wizard-consent-body">
-        seus textos são analisados só pra modelar o seu perfil de voz. você pode revogar a qualquer
-        momento em "sua voz".
-      </p>
+      <p className="wizard-consent-body">{t.onboarding.consent.body}</p>
       <label className="wizard-consent-toggle">
         <input
           type="checkbox"
@@ -33,7 +32,7 @@ export function ConsentAuthorization({ granted, onToggle, onCreateVoice, pending
           onChange={(event) => onToggle(event.target.checked)}
           disabled={pending}
         />
-        <span>autorizo o uso das minhas amostras</span>
+        <span>{t.onboarding.consent.checkboxLabel}</span>
       </label>
       {trialLine ? (
         <Mono as="p" className="wizard-trial-line">
@@ -41,11 +40,11 @@ export function ConsentAuthorization({ granted, onToggle, onCreateVoice, pending
         </Mono>
       ) : null}
       <Pill variant="primary" className="wide" onClick={onCreateVoice} disabled={!granted || pending}>
-        Criar minha voz
+        {t.onboarding.consent.createVoice}
       </Pill>
       {onSkipForNow ? (
         <button type="button" className="wizard-skip-link wizard-consent-skip" onClick={onSkipForNow} disabled={pending}>
-          <Mono as="span">Calibrar depois →</Mono>
+          <Mono as="span">{t.onboarding.skipForNow}</Mono>
         </button>
       ) : null}
     </Panel>

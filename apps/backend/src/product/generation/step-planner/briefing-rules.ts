@@ -1,13 +1,13 @@
 import type {
-  GenerationIntent,
   GenerationLengthTier,
-  PlannedStep
+  PlannedStep,
+  RhetoricalMode
 } from "@my-ai-orchestrator/contracts";
 import type { StepPlannerPatchOp } from "./types.js";
 
 export interface DerivePatchOpsInput {
   readonly briefing: string | Record<string, unknown>;
-  readonly intent: GenerationIntent;
+  readonly rhetoricalMode: RhetoricalMode;
   readonly lengthTier: GenerationLengthTier;
 }
 
@@ -21,18 +21,22 @@ const STRUCTURE_STEP: PlannedStep = {
 const SHORT_BRIEFING_CHAR_LIMIT = 200;
 const LONG_SYSTEM_CONTEXT_CHAR_LIMIT = 400;
 
+// Mode re-key of the old intent rules (F1-3): expound←explain-deeply (a layered exposition on a thin
+// briefing skips research/outline), promote←engage-audience (a call-to-action without a posed question
+// drops the hook), argue←document-decision (a claim over long context earns a structure pass). The two
+// `question`/`systemContext` branches read briefing fields nothing populates yet — dead until defeitos/07.
 export function derivePatchOps(input: DerivePatchOpsInput): StepPlannerPatchOp[] {
   const ops: StepPlannerPatchOp[] = [];
 
-  if (input.intent === "explain-deeply" && isShortBriefing(input.briefing)) {
+  if (input.rhetoricalMode === "expound" && isShortBriefing(input.briefing)) {
     ops.push({ type: "removeStep", name: "research" }, { type: "removeStep", name: "outline" });
   }
 
-  if (input.intent === "engage-audience" && !hasBriefingQuestion(input.briefing)) {
+  if (input.rhetoricalMode === "promote" && !hasBriefingQuestion(input.briefing)) {
     ops.push({ type: "removeStep", name: "hook" });
   }
 
-  if (input.intent === "document-decision" && hasLongSystemContext(input.briefing)) {
+  if (input.rhetoricalMode === "argue" && hasLongSystemContext(input.briefing)) {
     ops.push({
       type: "insertStep",
       before: "draft",

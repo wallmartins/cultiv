@@ -14,5 +14,6 @@ export type {
   HistoryStatusFilterUI,
   RailEmptyReason,
   ShellTheme,
-  VoiceCompanionContent
+  VoiceCompanionContent,
+  VoiceCompanionPractice
 } from "./types.js";

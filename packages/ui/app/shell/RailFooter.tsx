@@ -1,10 +1,12 @@
 import { useState } from "react";
-import { Ring } from "../primitives/index.js";
+import { Avatar, Ring } from "../primitives/index.js";
+import { useMessages } from "../i18n/index.js";
 
 export interface RailFooterProps {
   readonly voiceConfidenceValue?: number;
   readonly onToggleCompanion: () => void;
   readonly avatarInitials: string;
+  readonly avatarUrl?: string;
   readonly onOpenVoiceProfile: () => void;
   readonly onOpenBilling: () => void;
   readonly onOpenSettings: () => void;
@@ -15,19 +17,22 @@ export function RailFooter({
   voiceConfidenceValue,
   onToggleCompanion,
   avatarInitials,
+  avatarUrl,
   onOpenVoiceProfile,
   onOpenBilling,
   onOpenSettings,
   onLogout
 }: RailFooterProps) {
+  const t = useMessages();
   return (
     <div className="rail-footer">
       <button type="button" className="rail-footer-voice" onClick={onToggleCompanion}>
         <Ring value={voiceConfidenceValue ?? 0} size={24} width={2.5} tone="accent" />
-        <span className="rail-footer-voice-label">Sua voz</span>
+        <span className="rail-footer-voice-label">{t.shell.yourVoice}</span>
       </button>
       <AvatarMenu
         initials={avatarInitials}
+        pictureUrl={avatarUrl}
         onOpenVoiceProfile={onOpenVoiceProfile}
         onOpenBilling={onOpenBilling}
         onOpenSettings={onOpenSettings}
@@ -39,13 +44,15 @@ export function RailFooter({
 
 interface AvatarMenuProps {
   readonly initials: string;
+  readonly pictureUrl?: string;
   readonly onOpenVoiceProfile: () => void;
   readonly onOpenBilling: () => void;
   readonly onOpenSettings: () => void;
   readonly onLogout: () => void;
 }
 
-function AvatarMenu({ initials, onOpenVoiceProfile, onOpenBilling, onOpenSettings, onLogout }: AvatarMenuProps) {
+function AvatarMenu({ initials, pictureUrl, onOpenVoiceProfile, onOpenBilling, onOpenSettings, onLogout }: AvatarMenuProps) {
+  const t = useMessages();
   const [open, setOpen] = useState(false);
   const select = (action: () => void) => {
     action();
@@ -60,22 +67,23 @@ function AvatarMenu({ initials, onOpenVoiceProfile, onOpenBilling, onOpenSetting
         onClick={() => setOpen((current) => !current)}
         aria-haspopup="menu"
         aria-expanded={open}
+        aria-label={t.shell.account}
       >
-        {initials}
+        <Avatar src={pictureUrl} initials={initials} />
       </button>
       {open ? (
         <div className="avatar-dropdown" role="menu">
           <button type="button" className="avatar-dropdown-item" role="menuitem" onClick={() => select(onOpenVoiceProfile)}>
-            Perfil de voz
+            {t.shell.voiceProfile}
           </button>
           <button type="button" className="avatar-dropdown-item" role="menuitem" onClick={() => select(onOpenBilling)}>
-            Planos &amp; billing
+            {t.shell.billing}
           </button>
           <button type="button" className="avatar-dropdown-item" role="menuitem" onClick={() => select(onOpenSettings)}>
-            Configurações
+            {t.shell.settings}
           </button>
           <button type="button" className="avatar-dropdown-item" role="menuitem" onClick={() => select(onLogout)}>
-            Sair
+            {t.shell.logout}
           </button>
         </div>
       ) : null}

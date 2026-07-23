@@ -1,4 +1,3 @@
-import type { DomainProfile } from "../domain/domain-classifier.js";
 import { evaluateLexicalQuality } from "../quality/lexical-quality.js";
 import type { ContentTypeQualityProfile } from "../quality/content-type-quality-profile.js";
 
@@ -11,7 +10,6 @@ export interface LexicalReleaseGateResult {
 
 export function authorizeLexicalOutput(input: {
   readonly text: string;
-  readonly domain: DomainProfile;
   readonly profile: ContentTypeQualityProfile;
   readonly hookText?: string;
   readonly lexicalQualityV2: boolean;
@@ -20,7 +18,7 @@ export function authorizeLexicalOutput(input: {
     return { decision: "pass", reasons: [] };
   }
 
-  const evaluation = evaluateLexicalQuality(input.text, input.domain, input.hookText);
+  const evaluation = evaluateLexicalQuality(input.text, input.hookText);
   if (evaluation.findings.length === 0) {
     return { decision: "pass", reasons: [] };
   }
@@ -30,8 +28,7 @@ export function authorizeLexicalOutput(input: {
   }
 
   const hardReject =
-    (input.domain.domain === "non-technical" && evaluation.metrics.techTermHits > 0)
-    || evaluation.metrics.topTermConcentration > 0.14
+    evaluation.metrics.topTermConcentration > 0.14
     || evaluation.metrics.spacedLemmaRepeats >= 2
     || evaluation.metrics.emDashCount > 0;
 

@@ -2,7 +2,7 @@ import { Effect } from "effect";
 import { describe, expect, it } from "vitest";
 import { decodeGenerationPreviewResponse } from "@my-ai-orchestrator/contracts";
 import { createExecutionTelemetry } from "../../apps/backend";
-import { mergeIntentPipelineContext } from "../../apps/backend/src/product/generation/merge-intent-pipeline-context.js";
+import { mergeCompositorPipelineContext } from "../../apps/backend/src/product/generation/merge-compositor-pipeline-context.js";
 import { resolveGenerationTarget } from "../../apps/backend/src/product/generation/resolve-generation-target.js";
 import {
   backendAppTestStartedAt,
@@ -12,12 +12,11 @@ import {
 } from "./backend-app.fixtures.js";
 
 describe("step planner execution integration", () => {
-  it("patches engage-audience plans for minimal briefings but not heavy ones with a question", async () => {
+  it("patches promote plans for minimal briefings but not heavy ones with a question", async () => {
     const minimal = await Effect.runPromise(
       resolveGenerationTarget({
-        intent: "engage-audience",
+        rhetoricalMode: "promote",
         scope: { lengthTier: "short", channel: "social" },
-        compositorEnabled: true,
         stepPlannerEnabled: true,
         briefing: { topic: "Community update" },
         qualityMode: "balanced"
@@ -25,9 +24,8 @@ describe("step planner execution integration", () => {
     );
     const heavy = await Effect.runPromise(
       resolveGenerationTarget({
-        intent: "engage-audience",
+        rhetoricalMode: "promote",
         scope: { lengthTier: "short", channel: "social" },
-        compositorEnabled: true,
         stepPlannerEnabled: true,
         briefing: {
           topic: "Monorepos atrasam times pequenos?",
@@ -66,7 +64,7 @@ describe("step planner execution integration", () => {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
-        intent: "document-decision",
+        rhetoricalMode: "argue",
         scope: { lengthTier: "medium" },
         briefing: {
           decision: "Adopt immutable snapshots",
@@ -86,19 +84,18 @@ describe("step planner execution integration", () => {
   it("carries step planner metadata from merge context into execution telemetry", () => {
     const resolved = Effect.runSync(
       resolveGenerationTarget({
-        intent: "engage-audience",
+        rhetoricalMode: "promote",
         scope: { lengthTier: "short", channel: "social" },
-        compositorEnabled: true,
         stepPlannerEnabled: true,
         briefing: { topic: "Community update" },
         qualityMode: "balanced"
       })
     );
 
-    const context = mergeIntentPipelineContext(
+    const context = mergeCompositorPipelineContext(
       undefined,
-      resolved.resolvedIntent,
-      resolved.compositor?.plan,
+      resolved.compositor.plan,
+      "social",
       resolved.stepPlanner
     );
 
@@ -106,7 +103,7 @@ describe("step planner execution integration", () => {
       executedCount: 3,
       maxLLMCalls: 4,
       request: {
-        pipeline: resolved.compositor!.pipeline,
+        pipeline: resolved.compositor.pipeline,
         inputs: {},
         context
       }

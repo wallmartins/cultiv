@@ -1,3 +1,4 @@
+import { useMessages } from "../i18n/index.js";
 import { Mono, Panel, Serif } from "../primitives/index.js";
 
 export interface MaterialBaseSampleVM {
@@ -27,6 +28,8 @@ export function MaterialBaseSamples({
   footnote,
   samples
 }: MaterialBaseSamplesProps) {
+  const t = useMessages();
+
   return (
     <Panel className="voice-material-card">
       <Mono as="div" className="voice-material-card-heading">
@@ -45,10 +48,10 @@ export function MaterialBaseSamples({
         </div>
       ) : (
         <div className="voice-material-stats">
-          <Stat value={totalExamples} label="total" />
-          <Stat value={activeExamples} label="ativos" />
-          <Stat value={excludedExamples} label="excluídos" />
-          <Stat value={pinnedExamples} label="fixados" />
+          <Stat value={totalExamples} label={t.voice.materialBase.stat.total} />
+          <Stat value={activeExamples} label={t.voice.materialBase.stat.active} />
+          <Stat value={excludedExamples} label={t.voice.materialBase.stat.excluded} />
+          <Stat value={pinnedExamples} label={t.voice.materialBase.stat.pinned} />
         </div>
       )}
       <div className="voice-material-footnote">{footnote}</div>

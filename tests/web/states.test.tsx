@@ -8,13 +8,17 @@ import {
   DegradedDeliveryBanner,
   DowngradeSurplus,
   LongTimeoutWatch,
+  PastedThemeFormatted,
   PaymentPendingZeroCredits,
   PostResetReturn,
   QueueAndTrialGate,
+  RecalibrateWithRunning,
   ReconnectionReconcile,
   VoiceDriftNudge
 } from "@my-ai-orchestrator/ui/app/states";
 import { ExecutionDetail, type ExecutionDetailProps } from "@my-ai-orchestrator/ui/app/detail";
+import { DemoGeneration, LockedCenter, LockedCompanionEmpty } from "@my-ai-orchestrator/ui/app/locked";
+import { I18nProvider } from "@my-ai-orchestrator/ui/app/i18n";
 
 const noop = () => {};
 
@@ -64,11 +68,11 @@ describe("edge states (S10a) — mount + no jargon", () => {
     expect(screen.getByText("Regularizar pagamento →")).toBeInTheDocument();
   });
 
-  it("PostResetReturn — name, resetDate, priorContext are props", () => {
+  it("PostResetReturn — name, resetDate, priorContext are props; resetDate renders through format.date", () => {
     render(
       <PostResetReturn
         name="Rafael"
-        resetDate="10/07"
+        resetDate="2026-07-10T15:00:00.000Z"
         priorContext={{ topic: "engenharia de software e times", audience: "líderes técnicos" }}
         onResume={noop}
         onFresh={noop}
@@ -76,6 +80,7 @@ describe("edge states (S10a) — mount + no jargon", () => {
     );
     expect(screen.getByText("De volta ao começo, Rafael.")).toBeInTheDocument();
     expect(screen.getByText("engenharia de software e times")).toBeInTheDocument();
+    expect(screen.getByText(/10 de jul\. de 2026/)).toBeInTheDocument();
   });
 
   it("ReconnectionReconcile — ready/resumed arrays drive the reconciliation copy", () => {
@@ -137,5 +142,110 @@ describe("edge states (S10a) — mount + no jargon", () => {
 
     rerender(<ExecutionDetail {...baseDetailProps()} />);
     expect(screen.queryByText("Este texto saiu abaixo do combinado")).not.toBeInTheDocument();
+  });
+
+  it("RecalibrateWithRunning — gender-agreement plural (texto/textos, escrito/escritos)", () => {
+    const { rerender } = render(
+      <RecalibrateWithRunning
+        running={[{ topic: "tema único", progress: 0.4 }]}
+        fromVersion={2}
+        toVersion={3}
+        onProceed={noop}
+        onWait={noop}
+      />
+    );
+    expect(screen.getByText("Você tem 1 texto sendo escrito agora.")).toBeInTheDocument();
+
+    rerender(
+      <RecalibrateWithRunning
+        running={[
+          { topic: "tema um", progress: 0.4 },
+          { topic: "tema dois", progress: 0.6 }
+        ]}
+        fromVersion={2}
+        toVersion={3}
+        onProceed={noop}
+        onWait={noop}
+      />
+    );
+    expect(screen.getByText("Você tem 2 textos sendo escritos agora.")).toBeInTheDocument();
+  });
+
+  it("PastedThemeFormatted — link count double-pluralization (link/links guardado/guardados)", () => {
+    const { rerender } = render(
+      <PastedThemeFormatted
+        pasted="# título\ntexto colado"
+        title="Um título claro"
+        channel="Blog"
+        angles={["ângulo um", "ângulo dois"]}
+        linkCount={1}
+        onUseAsPasted={noop}
+        onConfirm={noop}
+      />
+    );
+    expect(screen.getByText(/1 link guardado como referência/)).toBeInTheDocument();
+
+    rerender(
+      <PastedThemeFormatted
+        pasted="# título\ntexto colado"
+        title="Um título claro"
+        channel="Blog"
+        angles={["ângulo um", "ângulo dois"]}
+        linkCount={3}
+        onUseAsPasted={noop}
+        onConfirm={noop}
+      />
+    );
+    expect(screen.getByText(/3 links guardados como referência/)).toBeInTheDocument();
+  });
+
+  it("English locale — restructured pluralization sites read naturally, not word-by-word", () => {
+    const { rerender } = render(
+      <I18nProvider locale="en">
+        <RecalibrateWithRunning running={[{ topic: "single topic", progress: 0.4 }]} fromVersion={2} toVersion={3} onProceed={noop} onWait={noop} />
+      </I18nProvider>
+    );
+    expect(screen.getByText("You have 1 text being written right now.")).toBeInTheDocument();
+
+    rerender(
+      <I18nProvider locale="en">
+        <PastedThemeFormatted
+          pasted="pasted text"
+          title="A clear title"
+          channel="Blog"
+          angles={["angle one"]}
+          linkCount={2}
+          onUseAsPasted={noop}
+          onConfirm={noop}
+        />
+      </I18nProvider>
+    );
+    expect(screen.getByText(/2 links saved as reference/)).toBeInTheDocument();
+
+    rerender(
+      <I18nProvider locale="en">
+        <LongTimeoutWatch theme="topic" progress={0.5} elapsed="3 min ago" refundCredits={1} onCancel={noop} onWait={noop} />
+      </I18nProvider>
+    );
+    expect(screen.getByText("Cancel and refund 1 credit")).toBeInTheDocument();
+  });
+
+  it("locked/DemoGeneration — default demo prose renders (pt-BR)", () => {
+    render(<DemoGeneration />);
+    expect(screen.getByText("exemplo")).toBeInTheDocument();
+    expect(screen.getByText("por que times pequenos escrevem melhor")).toBeInTheDocument();
+  });
+
+  it("locked/LockedCenter — notice + CTA + embedded demo render", () => {
+    render(<LockedCenter onCalibrate={noop} />);
+    expect(screen.getByText("nenhuma geração real ainda — o exemplo abaixo é ilustrativo")).toBeInTheDocument();
+    expect(screen.getByText("Calibrar minha voz →")).toBeInTheDocument();
+    expect(screen.getByText("exemplo")).toBeInTheDocument();
+  });
+
+  it("locked/LockedCompanionEmpty — reuses VoiceEmptyState with localized copy", () => {
+    render(<LockedCompanionEmpty onCalibrate={noop} />);
+    expect(screen.getByText("sua voz aparece aqui depois da calibração")).toBeInTheDocument();
+    expect(screen.getByText("calibrar minha voz →")).toBeInTheDocument();
   });
 });

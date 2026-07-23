@@ -100,7 +100,7 @@ describe("Public Route Auth Integration", () => {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`
       },
-      body: JSON.stringify({ contentType: "linkedin-post", briefing: "Test" })
+      body: JSON.stringify({ rhetoricalMode: "expound", scope: { lengthTier: "short" }, briefing: "Test" })
     });
 
     expect(response.status).toBe(200);

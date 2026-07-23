@@ -33,7 +33,8 @@ describe("backend product bundle", () => {
         "content-type": "application/json"
       },
       body: JSON.stringify({
-        contentType: "validation-post",
+        rhetoricalMode: "expound",
+        scope: { lengthTier: "short" },
         briefing: {
           topic: "Product integration",
           keyPoints: ["database", "adapters", "feature flags"]

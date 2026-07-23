@@ -140,7 +140,7 @@ export function deriveReasoningProseFromBrief(
 
 function inferEpistemicPosture(brief: VoiceSignatureBrief): EpistemicPosture {
   if (brief.suggestedReasoning.certaintyLevel === "high") {
-    return "advocacy_mixed";
+    return "advocacy";
   }
 
   if (brief.aggregate.hedgingMarkerCount > brief.aggregate.certaintyMarkerCount) {

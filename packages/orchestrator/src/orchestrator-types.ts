@@ -7,7 +7,7 @@ import type {
   JobStatus,
   PipelineDefinition,
   PipelineRequest,
-  PipelineType,
+  PlanSignature,
   QualityMode
 } from "@my-ai-orchestrator/contracts";
 import type {
@@ -49,7 +49,7 @@ export interface OrchestrationStepErrorProgress extends OrchestrationStepProgres
 
 export interface NormalizedOrchestrationRequest {
   readonly variant: "simplified" | "explicit";
-  readonly pipelineType: PipelineType | null;
+  readonly pipelineType: PlanSignature | null;
   readonly pipelineName: string;
   readonly contentTypeId: string;
   readonly language: string;
@@ -62,7 +62,7 @@ export interface NormalizedOrchestrationRequest {
 
 export interface OrchestrationPlan {
   readonly request: NormalizedOrchestrationRequest;
-  readonly pipelineType: PipelineType | null;
+  readonly pipelineType: PlanSignature | null;
   readonly pipeline: PipelineDefinition;
   readonly contentType: ContentType;
   readonly executionPlan: ExecutionPlan;
@@ -72,10 +72,10 @@ export interface OrchestrationPlan {
 }
 
 export interface OrchestrationCatalog {
-  readonly pipelines: Readonly<Record<PipelineType, PipelineDefinition>>;
+  readonly pipelines: Readonly<Record<PlanSignature, PipelineDefinition>>;
   readonly contentTypes: Readonly<Record<string, ContentTypeDefinition>>;
-  readonly defaultLanguageByPipeline: Readonly<Record<PipelineType, string>>;
-  readonly defaultQualityModeByPipeline: Readonly<Record<PipelineType, QualityMode>>;
+  readonly defaultLanguageByPipeline: Readonly<Record<PlanSignature, string>>;
+  readonly defaultQualityModeByPipeline: Readonly<Record<PlanSignature, QualityMode>>;
 }
 
 export interface OrchestrationPolicy {

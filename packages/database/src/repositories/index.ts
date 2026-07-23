@@ -10,6 +10,8 @@ import type {
   JobRepository,
   MemoryRepository,
   PipelineRepository,
+  PracticeProfileDiagnosticsRepository,
+  PracticeProfileRepository,
   VoiceExampleBatchRepository,
   VoiceExampleRepository,
   VoiceProfileDiagnosticsRepository,
@@ -24,6 +26,8 @@ import { createExecutionReactionRepository } from "./execution-reaction-reposito
 import { createJobRepository } from "./job-repository.js";
 import { createMemoryRepository } from "./memory-repository.js";
 import { createPipelineRepository } from "./pipeline-repository.js";
+import { createPracticeProfileRepository } from "./practice-profile-repository.js";
+import { createPracticeProfileDiagnosticsRepository } from "./practice-profile-diagnostics-repository.js";
 import { createVoiceExampleRepository } from "./voice-example-repository.js";
 import { createVoiceExampleBatchRepository } from "./voice-example-batch-repository.js";
 import { createVoiceProfileDiagnosticsRepository } from "./voice-profile-diagnostics-repository.js";
@@ -44,7 +48,9 @@ export function createState(seed: DatabaseSeed): DatabaseState {
     voiceTrainingConsents: indexBy(seed.voiceTrainingConsents ?? [], (record) => record.userId),
     auditRecords: indexBy(seed.auditRecords ?? [], (record) => record.id),
     executionReactions: indexBy(seed.executionReactions ?? [], (record) => record.executionId),
-    voiceExampleBatches: indexBy(seed.voiceExampleBatches ?? [], (record) => record.id)
+    voiceExampleBatches: indexBy(seed.voiceExampleBatches ?? [], (record) => record.id),
+    practiceProfiles: indexBy(seed.practiceProfiles ?? [], (record) => record.userId),
+    practiceProfileDiagnostics: indexBy(seed.practiceProfileDiagnostics ?? [], (record) => record.userId)
   };
 }
 
@@ -63,6 +69,8 @@ export function createClient(state: DatabaseState): DatabaseClient {
     voiceTrainingConsents: createVoiceTrainingConsentRepository(stateRef),
     executionReactions: createExecutionReactionRepository(stateRef),
     voiceExampleBatches: createVoiceExampleBatchRepository(stateRef),
+    practiceProfiles: createPracticeProfileRepository(stateRef),
+    practiceProfileDiagnostics: createPracticeProfileDiagnosticsRepository(stateRef),
     audit: createAuditRepository(stateRef),
     transaction: (operation) =>
       Effect.gen(function* () {
@@ -124,4 +132,14 @@ export function createExecutionReactionRepositoryFromClient(client: DatabaseClie
 
 export function createVoiceExampleBatchRepositoryFromClient(client: DatabaseClient): VoiceExampleBatchRepository {
   return client.voiceExampleBatches;
+}
+
+export function createPracticeProfileRepositoryFromClient(client: DatabaseClient): PracticeProfileRepository {
+  return client.practiceProfiles;
+}
+
+export function createPracticeProfileDiagnosticsRepositoryFromClient(
+  client: DatabaseClient
+): PracticeProfileDiagnosticsRepository {
+  return client.practiceProfileDiagnostics;
 }

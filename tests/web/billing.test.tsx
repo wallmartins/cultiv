@@ -8,11 +8,18 @@ import type { BillingEntitlementView, LedgerStatementRow } from "@my-ai-orchestr
 import React from "react";
 import { describe, expect, it } from "vitest";
 import { makeAppRuntime, queryKeys, RuntimeProvider } from "@my-ai-orchestrator/shared";
+import { DEFAULT_LOCALE, makeFormatters, messagesFor } from "@my-ai-orchestrator/ui/app/i18n";
 import { BillingScreen, type BalanceCardProps, type PlanCardProps } from "@my-ai-orchestrator/ui/app/billing";
 import { BillingRoute } from "~/routes/billing.js";
 import { buildLedgerRows, deriveSubscriptionState, resolveCycleCredits, resolvePlanName } from "~/routes/billing-view.js";
 import { entitlementFixture } from "./fixtures.js";
 import { renderWithRouter } from "./render-with-router.js";
+
+// Components render outside I18nProvider in this file (falls back to pt-BR, per CONVENTIONS.md);
+// pure view functions take the dictionary as a parameter, so tests construct the same pt-BR
+// instance to keep both sides consistent.
+const t = messagesFor(DEFAULT_LOCALE);
+const format = makeFormatters(DEFAULT_LOCALE);
 
 function newQueryClient() {
   return new QueryClient({ defaultOptions: { queries: { staleTime: Infinity, retry: false } } });
@@ -40,7 +47,7 @@ function renderBilling(queryClient: QueryClient) {
 const NOW = new Date("2026-07-17T12:00:00Z");
 
 function billingProps(entitlement: BillingEntitlementView) {
-  const view = deriveSubscriptionState(entitlement, NOW);
+  const view = deriveSubscriptionState(t, format, entitlement, NOW);
   const balance: BalanceCardProps = {
     texts: 6,
     credits: entitlement.availableCredits,
@@ -48,7 +55,7 @@ function billingProps(entitlement: BillingEntitlementView) {
     renewLabel: view.renewLabel
   };
   const plan: PlanCardProps = {
-    planName: resolvePlanName(entitlement, undefined),
+    planName: resolvePlanName(t, entitlement, undefined),
     payMethod: view.payMethod,
     onSwitchPlan: () => {}
   };
@@ -64,7 +71,7 @@ describe("billing-view derive (pure)", () => {
       quotaRemaining: 3,
       paymentMethod: null
     };
-    const view = deriveSubscriptionState(entitlement, NOW);
+    const view = deriveSubscriptionState(t, format, entitlement, NOW);
     expect(view.renewLabel).toBe("teste · termina em 4 dias");
     expect(view.payMethod).toBe("sem método de pagamento ainda");
     expect(view.banner).toMatchObject({
@@ -73,7 +80,7 @@ describe("billing-view derive (pure)", () => {
       message: "3 gerações restantes · qualidade cheia, o limite é só volume",
       actionLabel: "Ver planos →"
     });
-    expect(resolvePlanName(entitlement, undefined)).toBe("Teste grátis");
+    expect(resolvePlanName(t, entitlement, undefined)).toBe("Teste grátis");
   });
 
   it("active — no banner, renewLabel from renewsAt, payMethod from real pix field", () => {
@@ -83,8 +90,8 @@ describe("billing-view derive (pure)", () => {
       renewsAt: "2026-08-01T00:00:00Z",
       paymentMethod: { kind: "pix", gateway: "asaas" }
     };
-    const view = deriveSubscriptionState(entitlement, NOW);
-    expect(view.renewLabel).toBe("renova em 01/08");
+    const view = deriveSubscriptionState(t, format, entitlement, NOW);
+    expect(view.renewLabel).toBe(`renova em ${format.date("2026-08-01T00:00:00Z")}`);
     expect(view.payMethod).toBe("pix · ASAAS");
     expect(view.banner).toBeUndefined();
   });
@@ -96,8 +103,8 @@ describe("billing-view derive (pure)", () => {
       renewsAt: "2026-08-01T00:00:00Z",
       paymentMethod: { kind: "card", brandLast4: "4242", gateway: "stripe" }
     };
-    const view = deriveSubscriptionState(entitlement, NOW);
-    expect(view.renewLabel).toBe("renova em 01/08");
+    const view = deriveSubscriptionState(t, format, entitlement, NOW);
+    expect(view.renewLabel).toBe(`renova em ${format.date("2026-08-01T00:00:00Z")}`);
     expect(view.payMethod).toBe("cartão final 4242 · Stripe");
     expect(view.banner).toMatchObject({ tone: "danger", title: "Pagamento pendente", actionLabel: "Regularizar →" });
   });
@@ -108,8 +115,8 @@ describe("billing-view derive (pure)", () => {
       status: "canceled",
       accessUntil: "2026-07-30T00:00:00Z"
     };
-    const view = deriveSubscriptionState(entitlement, NOW);
-    expect(view.renewLabel).toBe("acesso até 30/07 · sem renovação");
+    const view = deriveSubscriptionState(t, format, entitlement, NOW);
+    expect(view.renewLabel).toBe(`acesso até ${format.date("2026-07-30T00:00:00Z")} · sem renovação`);
     expect(view.banner).toMatchObject({ tone: "neutral", title: "Assinatura cancelada", actionLabel: "Reativar →" });
   });
 
@@ -120,19 +127,33 @@ describe("billing-view derive (pure)", () => {
       { id: "3", category: "refund", creditsDelta: 1, occurredAt: "2026-06-24T00:00:00Z", note: "geração falhou — créditos devolvidos" },
       { id: "4", category: "expiration", creditsDelta: -5, occurredAt: "2026-06-20T00:00:00Z" }
     ];
-    const built = buildLedgerRows(rows, NOW);
+    const built = buildLedgerRows(t, format, rows, NOW);
     expect(built).toEqual([
       { id: "1", amount: "-2", tone: "debit", label: "Geração", sub: '"A falácia de delegar"', date: "hoje" },
-      { id: "2", amount: "+30", tone: "credit", label: "Créditos do mês (Criador)", sub: undefined, date: "01/07" },
+      {
+        id: "2",
+        amount: "+30",
+        tone: "credit",
+        label: "Créditos do mês (Criador)",
+        sub: undefined,
+        date: format.date("2026-07-01T00:00:00Z")
+      },
       {
         id: "3",
         amount: "+1",
         tone: "credit",
         label: "Estorno",
         sub: "geração falhou — créditos devolvidos",
-        date: "24/06"
+        date: format.date("2026-06-24T00:00:00Z")
       },
-      { id: "4", amount: "-5", tone: "expire", label: "Expiração", sub: undefined, date: "20/06" }
+      {
+        id: "4",
+        amount: "-5",
+        tone: "expire",
+        label: "Expiração",
+        sub: undefined,
+        date: format.date("2026-06-20T00:00:00Z")
+      }
     ]);
   });
 });
@@ -202,6 +223,8 @@ describe("BillingScreen render (S8)", () => {
   it("populated ledger renders curated rows", async () => {
     const { balance, plan } = billingProps({ ...entitlementFixture, status: "active" });
     const rows = buildLedgerRows(
+      t,
+      format,
       [{ id: "1", category: "generation", creditsDelta: -2, occurredAt: NOW.toISOString(), topic: "A falácia de delegar" }],
       NOW
     );

@@ -7,17 +7,28 @@ import type { BackendConfig } from "../../apps/backend";
 import { createBackendProductServices } from "../../apps/backend";
 import { AIAdapterTransportError, type AIProviderRequest } from "../../packages/ai-adapters";
 import { seedExecutionVoiceState } from "./backend-app.fixtures.js";
+import { planGeneration } from "../../apps/backend/src/product/generation/compositor/compositor-planner.js";
+import { mergeCompositorPipelineContext } from "../../apps/backend/src/product/generation/merge-compositor-pipeline-context.js";
 
 describe("backend execution service worker path", () => {
   it("uses the same provider transport path for llm steps in sync and async execution while skipping local steps", async () => {
+    // serial-piece has exactly 2 llm steps (draft, tighten) plus 2 local steps (analyze,
+    // sanitize) — matches the original 2-llm-call shape this test exercises.
+    const plan = planGeneration({
+      rhetoricalMode: "narrate",
+      scope: { lengthTier: "medium" },
+      qualityMode: "fast"
+    });
+    const compositorContext = mergeCompositorPipelineContext(undefined, plan, "unspecified");
     const generationRequest = {
       userId: "backend",
-      pipelineType: "validation-post",
-      contentType: "validation-post",
+      pipelineType: plan.planSignature,
+      contentType: plan.planSignature,
       briefing: {
         topic: "Shared runtime",
         keyPoints: ["sync", "async", "same core"]
       },
+      context: compositorContext,
       qualityMode: "fast",
       model: "gpt-4.1",
       adapter: "openai",

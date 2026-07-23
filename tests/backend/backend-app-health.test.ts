@@ -100,7 +100,8 @@ describe("backend app health and pipeline contracts", () => {
         authorization: createBackendTestAuthorizationHeader({ userId: "health-user" })
       },
       body: JSON.stringify({
-        contentType: "validation-post",
+        rhetoricalMode: "expound",
+        scope: { lengthTier: "short" },
         briefing: {
           topic: "Shared contract validation"
         },
@@ -113,7 +114,7 @@ describe("backend app health and pipeline contracts", () => {
     const createdBody = await createdResponse.json();
     const decodedCreated = await Effect.runPromise(decodeQueuedExecutionView(createdBody));
     expect(decodedCreated.jobId).toMatch(/^[0-9a-f-]{36}$/);
-    expect(decodedCreated.contentType).toBe("validation-post");
+    expect(decodedCreated.contentType).toBe("short-piece");
     expect(decodedCreated.estimatedSteps).toBeGreaterThan(0);
 
     const statusResponse = await app.request(`/me/executions/${decodedCreated.jobId}`, {
@@ -127,7 +128,7 @@ describe("backend app health and pipeline contracts", () => {
     const decodedStatus = await Effect.runPromise(decodeExecutionStatusView(statusBody));
     expect(decodedStatus).toMatchObject({
       jobId: decodedCreated.jobId,
-      contentType: "validation-post"
+      contentType: "short-piece"
     });
     expect(["queued", "running", "done"]).toContain(decodedStatus.status);
   });

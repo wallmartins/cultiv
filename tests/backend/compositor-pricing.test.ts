@@ -45,20 +45,20 @@ describe("compositor pricing", () => {
     expect(medium.lengthTier).toBe("medium");
   });
 
-  it("keeps legacy contentType pricing when compositor keys are absent", () => {
+  it("fails to resolve pricing when compositor keys are absent (legacy content types were purged)", () => {
     const services = Effect.runSync(createBackendProductServices(baseConfig));
 
-    const legacy = Effect.runSync(
-      services.aiPolicy.resolvePricingEnvelope({
-        planTier: "pro",
-        contentType: "linkedin-post",
-        qualityMode: "balanced"
-      })
+    const result = Effect.runSync(
+      Effect.either(
+        services.aiPolicy.resolvePricingEnvelope({
+          planTier: "pro",
+          contentType: "edition-piece",
+          qualityMode: "balanced"
+        })
+      )
     );
 
-    expect(legacy.creditPrice).toBe(2.5);
-    expect(legacy.planSignature).toBeUndefined();
-    expect(legacy.lengthTier).toBeUndefined();
+    expect(result._tag).toBe("Left");
   });
 
   it("changes quote id when compositor length tier changes", () => {

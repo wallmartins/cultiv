@@ -5,6 +5,8 @@ import type {
   Job,
   MemoryRecord as DomainMemoryRecord,
   Pipeline,
+  PracticeProfile,
+  PracticeProfileDiagnostics,
   VoiceExample,
   VoiceProfileDiagnostics,
   VoiceProfileSnapshot,
@@ -78,6 +80,15 @@ export interface VoiceProfileSnapshotRecord extends VoiceProfileSnapshot {
   readonly version: number;
 }
 
+export interface PracticeProfileRecord extends Omit<PracticeProfile, "version"> {
+  readonly profileVersion: number;
+  readonly version: number;
+}
+
+export interface PracticeProfileDiagnosticsRecord extends PracticeProfileDiagnostics {
+  readonly version: number;
+}
+
 export interface VoiceTrainingConsentRecord extends VoiceTrainingConsent {
   readonly version: number;
 }
@@ -127,6 +138,8 @@ export interface DatabaseState {
   readonly auditRecords: Record<string, AuditRecord>;
   readonly executionReactions: Record<string, ExecutionReactionRecord>;
   readonly voiceExampleBatches: Record<string, VoiceExampleBatchRecord>;
+  readonly practiceProfiles: Record<string, PracticeProfileRecord>;
+  readonly practiceProfileDiagnostics: Record<string, PracticeProfileDiagnosticsRecord>;
 }
 
 export interface JobCreateOptions {
@@ -261,6 +274,21 @@ export interface VoiceProfileSnapshotRepository {
   removeByUser: (userId: string) => Effect.Effect<number, DatabaseError>;
 }
 
+export interface PracticeProfileRepository {
+  put: (record: PracticeProfile, version?: number) => Effect.Effect<PracticeProfileRecord, DatabaseError>;
+  getByUser: (userId: string) => Effect.Effect<PracticeProfileRecord | undefined, DatabaseError>;
+  removeByUser: (userId: string) => Effect.Effect<boolean, DatabaseError>;
+}
+
+export interface PracticeProfileDiagnosticsRepository {
+  put: (
+    record: PracticeProfileDiagnostics,
+    version?: number
+  ) => Effect.Effect<PracticeProfileDiagnosticsRecord, DatabaseError>;
+  getByUser: (userId: string) => Effect.Effect<PracticeProfileDiagnosticsRecord | undefined, DatabaseError>;
+  removeByUser: (userId: string) => Effect.Effect<boolean, DatabaseError>;
+}
+
 export interface VoiceTrainingConsentRepository {
   readonly put: (
     record: VoiceTrainingConsent,
@@ -287,6 +315,8 @@ export interface DatabaseClient {
   readonly voiceTrainingConsents: VoiceTrainingConsentRepository;
   readonly executionReactions: ExecutionReactionRepository;
   readonly voiceExampleBatches: VoiceExampleBatchRepository;
+  readonly practiceProfiles: PracticeProfileRepository;
+  readonly practiceProfileDiagnostics: PracticeProfileDiagnosticsRepository;
   readonly audit: AuditRepository;
   readonly transaction: <T, E>(
     operation: (client: DatabaseClient) => Effect.Effect<T, E>
@@ -307,6 +337,8 @@ export interface DatabaseSnapshot {
   readonly auditRecords: Record<string, AuditRecord>;
   readonly executionReactions: Record<string, ExecutionReactionRecord>;
   readonly voiceExampleBatches: Record<string, VoiceExampleBatchRecord>;
+  readonly practiceProfiles: Record<string, PracticeProfileRecord>;
+  readonly practiceProfileDiagnostics: Record<string, PracticeProfileDiagnosticsRecord>;
 }
 
 export interface DatabaseSeed {
@@ -322,4 +354,6 @@ export interface DatabaseSeed {
   readonly auditRecords?: readonly AuditRecord[];
   readonly executionReactions?: readonly ExecutionReactionRecord[];
   readonly voiceExampleBatches?: readonly VoiceExampleBatchRecord[];
+  readonly practiceProfiles?: readonly PracticeProfileRecord[];
+  readonly practiceProfileDiagnostics?: readonly PracticeProfileDiagnosticsRecord[];
 }

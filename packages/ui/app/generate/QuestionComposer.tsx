@@ -1,5 +1,6 @@
 import type { KeyboardEvent } from "react";
 import { Mono, Panel, Pill, Serif } from "../primitives/index.js";
+import { useMessages } from "../i18n/index.js";
 
 export interface QuestionComposerProps {
   readonly eyebrow: string;
@@ -11,9 +12,9 @@ export interface QuestionComposerProps {
   readonly onSkip: () => void;
 }
 
-// showComposer (design L197–207) — one question at a time; also serves the ambiguity question
-// (same chrome, note carries the impact line).
+// showComposer (design L197–207) — one question at a time; note carries the impact line.
 export function QuestionComposer({ eyebrow, prompt, note, value, onChange, onSubmit, onSkip }: QuestionComposerProps) {
+  const t = useMessages();
   function handleKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
@@ -35,15 +36,15 @@ export function QuestionComposer({ eyebrow, prompt, note, value, onChange, onSub
         value={value}
         onChange={(event) => onChange(event.target.value)}
         onKeyDown={handleKeyDown}
-        placeholder="Responda com uma ou duas frases…"
+        placeholder={t.generate.questionPlaceholder}
         rows={2}
       />
       <div className="generate-question-footer">
         <button type="button" onClick={onSkip} className="mono generate-skip-link">
-          pular pergunta →
+          {t.generate.questionSkipLink}
         </button>
         <Pill variant="primary" onClick={onSubmit} disabled={!value.trim()}>
-          Responder →
+          {t.generate.answerAction}
         </Pill>
       </div>
     </Panel>

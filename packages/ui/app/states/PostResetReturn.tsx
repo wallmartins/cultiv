@@ -1,4 +1,5 @@
 import { Pill, Ring, StatusDot } from "../primitives/index.js";
+import { useFormat, useMessages } from "../i18n/index.js";
 
 export interface PostResetReturnPriorContext {
   readonly topic: string;
@@ -7,6 +8,7 @@ export interface PostResetReturnPriorContext {
 
 export interface PostResetReturnProps {
   readonly name: string;
+  // ISO date string — rendered through format.date, not pre-formatted by the caller.
   readonly resetDate: string;
   readonly priorContext: PostResetReturnPriorContext;
   readonly onResume: () => void;
@@ -15,6 +17,8 @@ export interface PostResetReturnProps {
 
 // 1e — onboarding return screen after an account reset (trigger lives in config/14).
 export function PostResetReturn({ name, resetDate, priorContext, onResume, onFresh }: PostResetReturnProps) {
+  const t = useMessages();
+  const format = useFormat();
   return (
     <div
       style={{
@@ -43,12 +47,11 @@ export function PostResetReturn({ name, resetDate, priorContext, onResume, onFre
           maxWidth: 440
         }}
       >
-        De volta ao começo, {name}.
+        {t.states.postResetReturn.title(name)}
       </h1>
 
       <div style={{ fontSize: "0.88rem", color: "var(--muted)", lineHeight: 1.6, maxWidth: 420 }}>
-        Sua conta foi resetada em {resetDate}: voz, exemplos e histórico foram apagados. Seu login e seu
-        plano continuam os mesmos.
+        {t.states.postResetReturn.body(format.date(resetDate))}
       </div>
 
       <div
@@ -66,19 +69,18 @@ export function PostResetReturn({ name, resetDate, priorContext, onResume, onFre
       >
         <StatusDot tone="accent" size={7} style={{ marginTop: 6 }} />
         <div style={{ fontSize: "0.84rem", color: "var(--muted)", lineHeight: 1.6 }}>
-          Da última vez você escrevia sobre{" "}
-          <span style={{ color: "var(--ink)" }}>{priorContext.topic}</span>, para{" "}
-          <span style={{ color: "var(--ink)" }}>{priorContext.audience}</span>. Quer partir daí ou começar
-          do zero?
+          {t.states.postResetReturn.priorContextIntro}{" "}
+          <span style={{ color: "var(--ink)" }}>{priorContext.topic}</span>, {t.states.postResetReturn.priorContextFor}{" "}
+          <span style={{ color: "var(--ink)" }}>{priorContext.audience}</span>. {t.states.postResetReturn.priorContextQuestion}
         </div>
       </div>
 
       <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap", justifyContent: "center" }}>
         <Pill variant="secondary" onClick={onFresh} style={{ padding: "10px 20px", fontSize: "0.86rem" }}>
-          Começar do zero
+          {t.states.postResetReturn.startFresh}
         </Pill>
         <Pill variant="primary" onClick={onResume} style={{ padding: "10px 22px", fontSize: "0.9rem" }}>
-          Recalibrar com esse contexto →
+          {t.states.postResetReturn.recalibrateWithContext}
         </Pill>
       </div>
     </div>

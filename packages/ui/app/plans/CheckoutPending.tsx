@@ -1,4 +1,5 @@
 import { Panel, Pill, Serif } from "../primitives/index.js";
+import { useMessages } from "../i18n/index.js";
 import type { CheckoutProductKind } from "./types.js";
 
 export interface CheckoutPendingProps {
@@ -16,24 +17,18 @@ function DashedRing() {
   );
 }
 
-// Mirrors CheckoutSuccess's per-product COPY table — a subscriber topping up isn't "usando o
-// teste" (trial framing only fits a not-yet-subscribed checkout).
-const COPY: Record<CheckoutProductKind, string> = {
-  subscription: "Pix e boleto podem levar alguns minutos. Avisamos assim que confirmar — pode continuar usando o teste.",
-  topup: "Pix e boleto podem levar alguns minutos. Avisamos assim que confirmar — seus créditos entram na conta na hora."
-};
-
 export function CheckoutPending({ product, onDone }: CheckoutPendingProps) {
+  const t = useMessages();
   return (
     <Panel dialog className="checkout-overlay-panel">
       <DashedRing />
       <Serif className="checkout-overlay-title" size="1.5rem">
-        Pagamento em análise.
+        {t.plans.checkout.pending.title}
       </Serif>
-      <div className="checkout-overlay-sub">{COPY[product]}</div>
+      <div className="checkout-overlay-sub">{t.plans.checkout.pending.copy[product]}</div>
       <div className="checkout-overlay-actions">
         <Pill variant="outline" onClick={onDone}>
-          Voltar ao app →
+          {t.plans.checkout.pending.done}
         </Pill>
       </div>
     </Panel>

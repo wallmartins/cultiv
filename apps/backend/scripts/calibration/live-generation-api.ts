@@ -130,7 +130,7 @@ function readJobMetadata(jobData: Record<string, unknown> | undefined): Record<s
 function readTelemetry(jobData: Record<string, unknown> | undefined): Record<string, unknown> | undefined {
   const metadata = readJobMetadata(jobData);
   const telemetry = metadata?.telemetry;
-  return telemetry && typeof telemetry === "object" ? telemetry : undefined;
+  return telemetry && typeof telemetry === "object" ? (telemetry as Record<string, unknown>) : undefined;
 }
 
 export function readUsdCost(jobData: Record<string, unknown> | undefined): number | undefined {

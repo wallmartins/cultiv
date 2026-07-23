@@ -63,6 +63,20 @@ export interface VoiceProfileSnapshotsTable {
   created_at: string;
 }
 
+export interface PracticeProfilesTable {
+  id: string;
+  user_id: string;
+  data: string;
+  version: number;
+}
+
+export interface PracticeProfileDiagnosticsTable {
+  id: string;
+  user_id: string;
+  data: string;
+  version: number;
+}
+
 export interface VoiceExampleBatchesTable {
   id: string;
   user_id: string;
@@ -292,6 +306,8 @@ export interface DatabaseTables {
   voice_profile_diagnostics: VoiceProfileDiagnosticsTable;
   voice_profile_snapshots: VoiceProfileSnapshotsTable;
   voice_example_batches: VoiceExampleBatchesTable;
+  practice_profiles: PracticeProfilesTable;
+  practice_profile_diagnostics: PracticeProfileDiagnosticsTable;
   application_users: ApplicationUsersTable;
   operators: OperatorsTable;
   audit_records: AuditRecordsTable;

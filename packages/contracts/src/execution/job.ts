@@ -8,20 +8,6 @@ export type ExecutionMode = typeof ExecutionModeSchema.Type;
 export const JobStatusSchema = Schema.Literal("queued", "running", "done", "failed", "cancelled");
 export type JobStatus = typeof JobStatusSchema.Type;
 
-export const PipelineTypeSchema = Schema.Literal(
-  "long-form-blog",
-  "validation-post",
-  "architecture-post",
-  "linkedin-post",
-  "twitter-thread",
-  "newsletter",
-  "short-piece",
-  "long-piece",
-  "serial-piece",
-  "edition-piece"
-);
-export type PipelineType = typeof PipelineTypeSchema.Type;
-
 export const QualityModeSchema = Schema.Literal("fast", "balanced", "strict");
 export type QualityMode = typeof QualityModeSchema.Type;
 

@@ -2,11 +2,12 @@ import { Cause, Context, Effect, Exit, Layer } from "effect";
 import { createAccountClient, type AccountClient } from "./account.js";
 import { createBillingClient, type BillingClient } from "./billing.js";
 import type { ClientSdkConfig } from "./config.js";
-import { createGenerationIntentsClient, type GenerationIntentsClient } from "./generation-intents.js";
 import { createGenerationPrefillClient, type GenerationPrefillClient } from "./generation-prefill.js";
+import { createGenreInferenceClient, type GenreInferenceClient } from "./genre-inference.js";
 import type { ClientSdkError } from "./errors.js";
 import { createExecutionsClient, type ExecutionsClient } from "./executions.js";
 import { createOnboardingClient, type OnboardingClient } from "./onboarding.js";
+import { createPracticeProfileClient, type PracticeProfileClient } from "./practice-profile.js";
 import { createPreviewClient, type PreviewClient } from "./preview.js";
 import { createHttpTransport, type HttpTransport } from "./transport.js";
 import { createVoiceClient, type VoiceClient } from "./voice.js";
@@ -21,8 +22,9 @@ export interface ClientSdk {
   readonly voice: VoiceClient;
   readonly voiceCalibration: VoiceCalibrationClient;
   readonly onboarding: OnboardingClient;
-  readonly generationIntents: GenerationIntentsClient;
   readonly generationPrefill: GenerationPrefillClient;
+  readonly genreInference: GenreInferenceClient;
+  readonly practiceProfile: PracticeProfileClient;
   readonly billing: BillingClient;
   readonly account: AccountClient;
   readonly transport: HttpTransport;
@@ -42,8 +44,9 @@ export function createClientSdk(config: ClientSdkConfig): ClientSdk {
     voice: createVoiceClient(transport),
     voiceCalibration: createVoiceCalibrationClient(transport),
     onboarding: createOnboardingClient(transport),
-    generationIntents: createGenerationIntentsClient(transport),
     generationPrefill: createGenerationPrefillClient(transport),
+    genreInference: createGenreInferenceClient(transport),
+    practiceProfile: createPracticeProfileClient(transport),
     billing: createBillingClient(transport),
     account: createAccountClient(transport),
     transport,

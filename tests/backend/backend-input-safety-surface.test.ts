@@ -83,7 +83,8 @@ describe("backend input safety surface", () => {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
-        contentType: "newsletter",
+        rhetoricalMode: "promote",
+        scope: { lengthTier: "medium", channel: "email" },
         briefing: "Resumo sobre rollout",
         importedContext: "<script>alert(1)</script><p>Contexto externo</p>"
       })

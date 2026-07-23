@@ -19,7 +19,8 @@ describe("backend app execution surface", () => {
     const app = createBackendAppTestApp(config, services);
 
     const payload = {
-      contentType: "validation-post",
+      rhetoricalMode: "expound",
+      scope: { lengthTier: "short" },
       briefing: {
         topic: "Monorepo migration",
         keyPoints: ["packages first", "backend second", "typed contracts"]
@@ -39,12 +40,12 @@ describe("backend app execution surface", () => {
     const firstBody = await firstResponse.json();
     const decodedFirst = await Effect.runPromise(decodeSyncExecutionView(firstBody));
     expect(decodedFirst.mode).toBe("sync");
-    expect(decodedFirst.contentType).toBe("validation-post");
-    expect(decodedFirst.pipelineName).toBe("validation-post");
+    expect(decodedFirst.contentType).toBe("short-piece");
+    expect(decodedFirst.pipelineName).toBe("short-piece");
     expect(decodedFirst.content).toContain("provider:gemini:");
     expect(decodedFirst.trace).toBeDefined();
     expect(decodedFirst.voice?.voiceProfileSnapshotId).toBe(
-      expectedVoiceProfileSnapshotId("user_1", 2, "validation-post")
+      expectedVoiceProfileSnapshotId("user_1", 2, "unspecified")
     );
 
     const secondResponse = await app.request("/me/executions/run", {
@@ -74,7 +75,8 @@ describe("backend app execution surface", () => {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
-        contentType: "newsletter",
+        rhetoricalMode: "promote",
+        scope: { lengthTier: "long", channel: "email" },
         briefing: {
           topic: "Architecture async"
         }
@@ -86,7 +88,7 @@ describe("backend app execution surface", () => {
     const body = await response.json();
     const decoded = await Effect.runPromise(decodeQueuedExecutionView(body));
     expect(decoded.status).toBe("queued");
-    expect(decoded.contentType).toBe("newsletter");
+    expect(decoded.contentType).toBe("edition-piece");
     expect(decoded.jobId).toMatch(/^[0-9a-f-]{36}$/);
 
     const completed = await waitForJobStatus(app, decoded.jobId, "done");

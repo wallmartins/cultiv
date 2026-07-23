@@ -1,5 +1,5 @@
 import { Effect } from "effect";
-import type { PipelineType } from "@my-ai-orchestrator/contracts";
+import type { PlanSignature } from "@my-ai-orchestrator/contracts";
 import {
   CandidateGenerationError,
   CandidateSelectionError,
@@ -15,7 +15,6 @@ import {
   type ExecutePipelineAttemptArgs,
   type ExecutePipelineAttemptResult
 } from "../pipeline/pipeline-attempt.js";
-import { filterLexiconForDomain } from "../../product/voice/voice-hints.js";
 import { resolveGenerationRuntimeContext } from "../pipeline/generation-runtime.js";
 import { resolveBriefingText } from "./quality-briefing.js";
 import { buildRuntimeQualityLanes, laneCountForQualityMode } from "./quality-lanes.js";
@@ -41,19 +40,18 @@ export function executeQualitySelectionAttempt(
   const runtimeInputs = toRuntimeInputRecord(sanitizedInput);
   const briefing = resolveBriefingText(runtimeInputs);
   const generationContext = resolveGenerationRuntimeContext({
-    contentType: options.plan.contentType.id,
-    inputs: runtimeInputs
+    contentType: options.plan.contentType.id
   });
   const lexicalQualityV2 = options.services.featureFlags.isEnabled("generation.lexicalQualityV2", {
     contentType: options.plan.contentType.id,
-    pipelineType: options.plan.contentType.id as PipelineType,
+    pipelineType: options.plan.contentType.id as PlanSignature,
     qualityMode: options.qualityMode,
     userId: options.billingIdentity.userId,
     environment: options.config.environment
   });
   const reasoningSignatureEnabled = options.services.featureFlags.isEnabled("voice.reasoningSignatureV1", {
     contentType: options.plan.contentType.id,
-    pipelineType: options.plan.contentType.id as PipelineType,
+    pipelineType: options.plan.contentType.id as PlanSignature,
     qualityMode: options.qualityMode,
     userId: options.billingIdentity.userId,
     environment: options.config.environment
@@ -61,7 +59,7 @@ export function executeQualitySelectionAttempt(
   const voiceHints = options.voice?.voiceHints
     ? {
         ...options.voice.voiceHints,
-        lexicon: filterLexiconForDomain(options.voice.voiceHints.lexicon ?? [], generationContext.domain)
+        lexicon: options.voice.voiceHints.lexicon ?? []
       }
     : undefined;
 

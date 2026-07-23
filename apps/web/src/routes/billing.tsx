@@ -8,6 +8,7 @@ import {
   usePlans,
   useSubscriptionCancel
 } from "@my-ai-orchestrator/shared";
+import { useFormat, useMessages } from "@my-ai-orchestrator/ui/app/i18n";
 import { BillingScreen, type PlanCardAction } from "@my-ai-orchestrator/ui/app/billing";
 import { PaymentPendingZeroCredits } from "@my-ai-orchestrator/ui/app/states";
 import {
@@ -19,6 +20,8 @@ import {
 } from "./billing-view.js";
 
 export function BillingRoute() {
+  const t = useMessages();
+  const format = useFormat();
   const navigate = useNavigate();
   const entitlement = useEntitlement();
   const ledger = useLedger();
@@ -28,7 +31,7 @@ export function BillingRoute() {
 
   const now = useMemo(() => new Date(), [entitlement.data]);
   const data = entitlement.data;
-  const view = data ? deriveSubscriptionState(data, now) : undefined;
+  const view = data ? deriveSubscriptionState(t, format, data, now) : undefined;
 
   const goPlans = () => void navigate({ to: "/plans" });
 
@@ -68,7 +71,7 @@ export function BillingRoute() {
   if (data && data.gate === "past_due") {
     return (
       <PaymentPendingZeroCredits
-        planName={resolvePlanName(data, plans.data?.plans)}
+        planName={resolvePlanName(t, data, plans.data?.plans)}
         cycleCredits={resolveCycleCredits(data, plans.data?.plans)}
         onRegularize={regularize}
       />
@@ -79,10 +82,10 @@ export function BillingRoute() {
 
   const secondaryAction: PlanCardAction | undefined = data
     ? data.management.canManageViaPortal
-      ? { label: "Gerenciar assinatura →", onClick: openPortal, pending: portalSession.isPending }
+      ? { label: t.billing.manageSubscription, onClick: openPortal, pending: portalSession.isPending }
       : data.management.canCancel
         ? {
-            label: "Cancelar assinatura",
+            label: t.billing.cancelSubscription,
             onClick: () => cancelSubscription.mutate(),
             tone: "danger",
             pending: cancelSubscription.isPending
@@ -107,14 +110,14 @@ export function BillingRoute() {
       plan={
         data && view
           ? {
-              planName: resolvePlanName(data, plans.data?.plans),
+              planName: resolvePlanName(t, data, plans.data?.plans),
               payMethod: view.payMethod,
               onSwitchPlan: goPlans,
               secondaryAction
             }
           : undefined
       }
-      ledgerRows={ledger.data ? buildLedgerRows(ledger.data.items, now) : []}
+      ledgerRows={ledger.data ? buildLedgerRows(t, format, ledger.data.items, now) : []}
       ledgerLoading={ledger.isLoading}
     />
   );

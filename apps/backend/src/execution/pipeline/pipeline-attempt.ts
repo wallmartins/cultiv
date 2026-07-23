@@ -2,7 +2,6 @@ import { Effect } from "effect";
 import { ContextManagerService, TraceRecorderService, createContextManagerLayer, createTraceRecorderLayer } from "@my-ai-orchestrator/core";
 import { runStepWithRetries } from "@my-ai-orchestrator/orchestrator";
 import type { BackendExecutionFailedError } from "../../http/errors.js";
-import { filterLexiconForDomain } from "../../product/voice/voice-hints.js";
 import { resolveGenerationRuntimeContext } from "./generation-runtime.js";
 import { createBackendSkillDefinition } from "../skills.js";
 import { createExecutionFailure, normalizeExecutionFailure } from "./execution-failure.js";
@@ -54,13 +53,12 @@ export function executePipelineAttempt(
     runtimeInputs
   );
   const generationContext = resolveGenerationRuntimeContext({
-    contentType: options.plan.contentType.id,
-    inputs: runtimeInputs
+    contentType: options.plan.contentType.id
   });
   const voiceHints = options.voice?.voiceHints
     ? {
         ...options.voice.voiceHints,
-        lexicon: filterLexiconForDomain(options.voice.voiceHints.lexicon ?? [], generationContext.domain)
+        lexicon: options.voice.voiceHints.lexicon ?? []
       }
     : undefined;
   const runtimeState = {

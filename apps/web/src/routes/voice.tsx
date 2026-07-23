@@ -2,23 +2,29 @@ import { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { TRAIT_KEYS, type TraitKey } from "@my-ai-orchestrator/contracts";
 import {
-  confidenceHeadline,
   hasVoiceProfile,
   useConsentStatus,
   useExecutionsList,
   useGrantConsent,
+  usePracticeIdentity,
   useRecordTraitConfirmation,
+  useRespondToNicheAsk,
   useRevokeConsent,
   useShellStore,
+  useUiLanguage,
+  useUpdateDeclaredAxes,
   useVoiceProfile
 } from "@my-ai-orchestrator/shared";
-import { VoiceProfileScreen, type VoiceProfileScreenState } from "@my-ai-orchestrator/ui/app/voice";
+import { useFormat, useMessages } from "@my-ai-orchestrator/ui/app/i18n";
+import { VoiceProfileScreen, type PracticeSectionVM, type VoiceProfileScreenState } from "@my-ai-orchestrator/ui/app/voice";
 import { RecalibrateWithRunning } from "@my-ai-orchestrator/ui/app/states";
 import {
   buildConsentSinceLabel,
   buildCoverage,
   buildDescriptorChips,
   buildMaterialBaseSamples,
+  buildPracticeAxes,
+  buildPracticeNicheAsk,
   buildProse,
   buildRing,
   buildTraits,
@@ -42,6 +48,8 @@ function isTraitKey(value: string): value is TraitKey {
 // VoiceProseCard/ConfidenceRing implementation (breakdown-10 §0).
 export function VoiceContainer() {
   const navigate = useNavigate();
+  const t = useMessages();
+  const format = useFormat();
   const toggleRecal = useShellStore((state) => state.toggleRecal);
   const [revokeDialogOpen, setRevokeDialogOpen] = useState(false);
   const [recalConfirmOpen, setRecalConfirmOpen] = useState(false);
@@ -56,6 +64,80 @@ export function VoiceContainer() {
   const runningItems = (runningExecutions.data?.items ?? []).filter(
     (item) => item.status === "queued" || item.status === "running"
   );
+
+  const uiLanguage = useUiLanguage((state) => state.language);
+  const identityQuery = usePracticeIdentity(uiLanguage);
+  const updateAxes = useUpdateDeclaredAxes(uiLanguage);
+  const respondNiche = useRespondToNicheAsk(uiLanguage);
+
+  const [practiceEditOpen, setPracticeEditOpen] = useState(false);
+  const [practiceSubject, setPracticeSubject] = useState("");
+  const [practiceVantagePoint, setPracticeVantagePoint] = useState("");
+  const [practiceAudiences, setPracticeAudiences] = useState<readonly string[]>([]);
+  const [practiceAudienceDraft, setPracticeAudienceDraft] = useState("");
+  const [practiceEditError, setPracticeEditError] = useState<string | undefined>(undefined);
+
+  const [nicheAnswerOpen, setNicheAnswerOpen] = useState(false);
+  const [nicheAnswer, setNicheAnswer] = useState("");
+
+  const identity = identityQuery.data?.profile;
+
+  function openPracticeEdit() {
+    if (!identity) return;
+    setPracticeSubject(identity.subject);
+    setPracticeVantagePoint(identity.vantagePoint);
+    setPracticeAudiences(identity.audiences);
+    setPracticeAudienceDraft("");
+    setPracticeEditError(undefined);
+    setPracticeEditOpen(true);
+  }
+
+  function cancelPracticeEdit() {
+    setPracticeEditOpen(false);
+    setPracticeEditError(undefined);
+  }
+
+  function addPracticeAudience() {
+    const value = practiceAudienceDraft.trim();
+    if (!value || practiceAudiences.includes(value)) return;
+    setPracticeAudiences((current) => [...current, value]);
+    setPracticeAudienceDraft("");
+  }
+
+  function removePracticeAudience(value: string) {
+    setPracticeAudiences((current) => current.filter((candidate) => candidate !== value));
+  }
+
+  function savePracticeEdit() {
+    const subject = practiceSubject.trim();
+    const vantagePoint = practiceVantagePoint.trim();
+    if (!subject || !vantagePoint || practiceAudiences.length === 0) {
+      setPracticeEditError(t.voice.practice.editValidationError);
+      return;
+    }
+    setPracticeEditError(undefined);
+    updateAxes.mutate(
+      { subject, vantagePoint, audiences: practiceAudiences },
+      {
+        onSuccess: () => setPracticeEditOpen(false),
+        onError: () => setPracticeEditError(t.voice.practice.saveError)
+      }
+    );
+  }
+
+  function submitNicheAnswer() {
+    const answer = nicheAnswer.trim();
+    if (!answer) return;
+    respondNiche.mutate(
+      { action: "answer", answer },
+      {
+        onSuccess: () => {
+          setNicheAnswer("");
+          setNicheAnswerOpen(false);
+        }
+      }
+    );
+  }
 
   const goCalibrate = () => navigate({ to: "/calibrate" });
 
@@ -82,16 +164,49 @@ export function VoiceContainer() {
     const consent = consentQuery.data;
     const prose = buildProse(profile);
 
+    const practice: PracticeSectionVM | null = identity
+      ? {
+          axes: buildPracticeAxes(identity),
+          nicheAsk: buildPracticeNicheAsk(identity),
+          edit: {
+            open: practiceEditOpen,
+            subject: practiceSubject,
+            vantagePoint: practiceVantagePoint,
+            audiences: practiceAudiences,
+            audienceDraft: practiceAudienceDraft,
+            pending: updateAxes.isPending,
+            error: practiceEditError,
+            onOpen: openPracticeEdit,
+            onCancel: cancelPracticeEdit,
+            onSubjectChange: setPracticeSubject,
+            onVantagePointChange: setPracticeVantagePoint,
+            onAudienceDraftChange: setPracticeAudienceDraft,
+            onAudienceAdd: addPracticeAudience,
+            onAudienceRemove: removePracticeAudience,
+            onSave: savePracticeEdit
+          },
+          nicheAskState: {
+            answerOpen: nicheAnswerOpen,
+            answer: nicheAnswer,
+            pending: respondNiche.isPending,
+            onRespondOpen: () => setNicheAnswerOpen(true),
+            onAnswerChange: setNicheAnswer,
+            onAnswerSubmit: submitNicheAnswer,
+            onDismiss: () => respondNiche.mutate({ action: "dismiss" })
+          }
+        }
+      : null;
+
     state = {
       kind: "ready",
-      ring: buildRing(profile),
-      headline: confidenceHeadline(profile.profile.confidence),
-      versionLabel: buildVersionLabel(profile),
+      ring: buildRing(profile, t),
+      headline: t.common.confidence.headline[profile.profile.confidence],
+      versionLabel: buildVersionLabel(profile, t),
       onRecalibrate: requestRecalibrate,
       proseCore: prose.core,
       proseDevelopment: prose.development,
-      descriptorChips: buildDescriptorChips(profile),
-      traits: buildTraits(profile),
+      descriptorChips: buildDescriptorChips(profile, t),
+      traits: buildTraits(profile, t),
       onConfirmTrait: (traitKey) => {
         if (isTraitKey(traitKey)) recordTrait.mutate({ traitKey, response: "confirmed" });
       },
@@ -100,18 +215,18 @@ export function VoiceContainer() {
       },
       pendingTraitKey: recordTrait.isPending ? recordTrait.variables?.traitKey : undefined,
       materialBase: {
-        heading: `${profile.materialBase.totalExamples} amostras da calibração · leitura`,
+        heading: t.voice.materialBase.heading(t.common.samples(profile.materialBase.totalExamples)),
         totalExamples: profile.materialBase.totalExamples,
         activeExamples: profile.materialBase.activeExamples,
         excludedExamples: profile.materialBase.excludedExamples,
         pinnedExamples: profile.materialBase.pinnedExamples,
-        footnote: "novos exemplos só entram recalibrando",
+        footnote: t.voice.materialBase.footnote,
         samples: buildMaterialBaseSamples(profile)
       },
-      coverage: buildCoverage(profile.diagnostics),
+      coverage: buildCoverage(profile.diagnostics, t),
       consent: {
         state: consent.granted ? "granted" : "revoked",
-        sinceLabel: buildConsentSinceLabel(consent),
+        sinceLabel: buildConsentSinceLabel(consent, t, format),
         onRevoke: () => setRevokeDialogOpen(true),
         onGrant: () => grantConsent.mutate()
       },
@@ -119,7 +234,8 @@ export function VoiceContainer() {
         open: revokeDialogOpen,
         onCancel: () => setRevokeDialogOpen(false),
         onConfirm: () => revokeConsent.mutate(undefined, { onSuccess: () => setRevokeDialogOpen(false) })
-      }
+      },
+      practice
     };
   }
 
@@ -133,7 +249,7 @@ export function VoiceContainer() {
           <div onClick={(event) => event.stopPropagation()}>
             <RecalibrateWithRunning
               running={runningItems.map((item) => ({
-                topic: item.briefingTopic ?? "sem tema",
+                topic: item.briefingTopic ?? t.common.noTopic,
                 progress: (item.progress?.percent ?? 0) / 100
               }))}
               fromVersion={currentVersion}

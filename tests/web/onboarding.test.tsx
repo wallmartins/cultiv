@@ -7,9 +7,10 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { VoiceCalibrationSessionView } from "@my-ai-orchestrator/contracts";
-import { makeAppRuntime, queryKeys, RuntimeProvider, useShellStore } from "@my-ai-orchestrator/shared";
+import { makeAppRuntime, queryKeys, RuntimeProvider, useShellStore, useUiLanguage } from "@my-ai-orchestrator/shared";
 import { CalibrationWizard, type Step1ContextProps, type WizardStepContent } from "@my-ai-orchestrator/ui/app/onboarding";
 import { LockedCenter, LockedCompanionEmpty } from "@my-ai-orchestrator/ui/app/locked";
+import { DEFAULT_LOCALE, messagesFor } from "@my-ai-orchestrator/ui/app/i18n";
 import { CalibrateContainer } from "~/routes/calibrate.js";
 import {
   buildProgress,
@@ -46,7 +47,7 @@ function sessionAt(currentStepId: string, overrides: Partial<VoiceCalibrationSes
     sessionId: "voice-calibration:test-1",
     userId: "test-user",
     status: "in_progress",
-    context: { domain: "produto", audience: "fundadores" },
+    context: { subject: "produto", vantagePoint: "fundador técnico", audiences: ["fundadores"] },
     currentStepId,
     steps: [
       { stepId: "context_setup", prompt: "" },
@@ -86,8 +87,10 @@ function newQueryClient() {
 }
 
 describe("calibrate-view (pure)", () => {
+  const t = messagesFor(DEFAULT_LOCALE);
+
   it("buildProgress marks steps before currentStepId done, the displayed one active, the rest upcoming", () => {
-    const progress = buildProgress(sessionAt("review_confirm"), "format_adaptation");
+    const progress = buildProgress(t, sessionAt("review_confirm"), "format_adaptation");
     expect(progress.map((step) => step.status)).toEqual(["done", "done", "done", "done", "active", "upcoming"]);
   });
 
@@ -98,22 +101,32 @@ describe("calibrate-view (pure)", () => {
   });
 
   it("weakestWritingStep points at the writing step with the fewest words", () => {
-    const weakest = weakestWritingStep(sessionAt("review_confirm"));
+    const weakest = weakestWritingStep(t, sessionAt("review_confirm"));
     expect(weakest).toEqual({ stepId: "format_adaptation", label: "Versatilidade" });
   });
 
   it("formatCalibrationTrialLine is only informative while trialing, degrades without trialEndsAt", () => {
     const now = new Date("2026-07-17T00:00:00Z");
-    expect(formatCalibrationTrialLine({ ...entitlementFixture, status: "active" }, now)).toBeUndefined();
+    expect(formatCalibrationTrialLine(t, { ...entitlementFixture, status: "active" }, now)).toBeUndefined();
     expect(
-      formatCalibrationTrialLine({ ...entitlementFixture, status: "trialing", trialEndsAt: "2026-07-20T00:00:00Z" }, now)
+      formatCalibrationTrialLine(t, { ...entitlementFixture, status: "trialing", trialEndsAt: "2026-07-20T00:00:00Z" }, now)
     ).toBe("seu teste · ~6 textos · 3 dias restantes");
   });
 
-  it("describeCalibrationError prefers responseMessage, then message, then a generic fallback", () => {
-    expect(describeCalibrationError({ responseMessage: "quota excedida" })).toBe("quota excedida");
-    expect(describeCalibrationError({ message: "network down" })).toBe("network down");
-    expect(describeCalibrationError({})).toMatch(/não conseguimos confirmar/);
+  it("describeCalibrationError maps known error classes to localized copy and never leaks the raw technical message (C-8)", () => {
+    // The raw backend message never reaches the user (it goes to the console) — an unmapped error
+    // shows the generic fallback, not "quota excedida"/"network down".
+    expect(describeCalibrationError(t, { responseMessage: "quota excedida" })).toBe(t.onboarding.errorFallback);
+    expect(describeCalibrationError(t, { message: "network down" })).toBe(t.onboarding.errorFallback);
+    expect(describeCalibrationError(t, {})).toBe(t.onboarding.errorFallback);
+
+    // Known classes map to localized copy; responseMessage takes precedence over message when matching.
+    expect(describeCalibrationError(t, { message: "Text must contain at least 60 words" })).toBe(t.onboarding.errors.tooShort(60));
+    expect(describeCalibrationError(t, { responseMessage: "Text must contain at least 80 words", message: "ignored" })).toBe(
+      t.onboarding.errors.tooShort(80)
+    );
+    expect(describeCalibrationError(t, { message: "boom", code: "service_unavailable" })).toBe(t.onboarding.errors.derivationFailed);
+    expect(describeCalibrationError(t, { message: "boom", status: 500 })).toBe(t.onboarding.errors.derivationFailed);
   });
 });
 
@@ -122,26 +135,33 @@ describe("CalibrationWizard (presentational)", () => {
     return {
       kind: "context",
       props: {
-        domain: "",
-        onDomainChange: () => {},
-        audience: "",
-        onAudienceChange: () => {},
-        strength: "",
-        onStrengthChange: () => {},
+        subject: "",
+        onSubjectChange: () => {},
+        vantagePoint: "",
+        onVantagePointChange: () => {},
+        audiences: [],
+        audienceDraft: "",
+        onAudienceDraftChange: () => {},
+        onAudienceAdd: () => {},
+        onAudienceRemove: () => {},
         onContinue: () => {},
         ...overrides
       }
     };
   }
 
-  it("Step1Context — Continuar disabled while domain/audience are empty", async () => {
+  it("Step1Context — Continuar disabled while subject/vantagePoint/audiences are empty", async () => {
     await renderWithRouter(<CalibrationWizard variant="full" progress={[]} content={step1Content()} />);
     expect(screen.getByText("Continuar").closest("button")).toBeDisabled();
   });
 
-  it("Step1Context — Continuar enables once both domain and audience are filled", async () => {
+  it("Step1Context — Continuar enables once subject, vantagePoint and at least one audience are filled", async () => {
     await renderWithRouter(
-      <CalibrationWizard variant="full" progress={[]} content={step1Content({ domain: "produto", audience: "fundadores" })} />
+      <CalibrationWizard
+        variant="full"
+        progress={[]}
+        content={step1Content({ subject: "produto", vantagePoint: "fundador técnico", audiences: ["fundadores"] })}
+      />
     );
     expect(screen.getByText("Continuar").closest("button")).not.toBeDisabled();
   });
@@ -410,7 +430,9 @@ describe("CalibrateContainer (S6 — full wizard, container-level)", () => {
       fireEvent.click(screen.getByText("Recalibrar com esse contexto →"));
 
       expect(await screen.findByText("vamos te conhecer")).toBeInTheDocument();
-      expect(screen.getByLabelText("pra quem você escreve?")).toHaveValue("quem te lê no LinkedIn");
+      // onResume seeds audiences[] (not the single audience field it used to) — the prior context
+      // renders as a removable chip, not a prefilled input value.
+      expect(screen.getByText("quem te lê no LinkedIn ×")).toBeInTheDocument();
       expect(clearPostResetContext).toHaveBeenCalledTimes(1);
     } finally {
       restore();
@@ -454,6 +476,128 @@ describe("CalibrateContainer (S6 — full wizard, container-level)", () => {
       restore();
       vi.mocked(readPostResetContext).mockReset();
       vi.mocked(clearPostResetContext).mockReset();
+    }
+  });
+
+  // F3 — setContext now derives a seed practice profile server-side (LLM in the loop): slower,
+  // and it can fail. These three cover the floor: locale rides the request, a terminal failure
+  // blocks step 1→2 with a retry (no continue-anyway), and a transient one recovers invisibly.
+  function fillStep1AndContinue() {
+    fireEvent.change(screen.getByLabelText("sobre o que você mais escreve?"), { target: { value: "produto" } });
+    fireEvent.change(screen.getByLabelText("de onde você fala sobre isso?"), { target: { value: "fundador técnico" } });
+    fireEvent.change(screen.getByLabelText("pra quem você escreve?"), { target: { value: "fundadores" } });
+    fireEvent.keyDown(screen.getByLabelText("pra quem você escreve?"), { key: "Enter" });
+    fireEvent.click(screen.getByText("Continuar").closest("button")!);
+  }
+
+  it("setContext — sends the UI locale in the request body (F3-3)", async () => {
+    storeSessionId("voice-calibration:test-1");
+    useUiLanguage.setState({ language: "pt-BR" });
+    const queryClient = newQueryClient();
+    queryClient.setQueryData(queryKeys.calibrationSession("voice-calibration:test-1"), sessionAt("context_setup", { context: undefined }));
+    queryClient.setQueryData(queryKeys.voiceProfile(), noVoiceProfileFixture);
+    queryClient.setQueryData(queryKeys.entitlement(), entitlementFixture);
+
+    let contextBody: unknown;
+    const restore = installFetchMock([
+      { method: "POST", test: /\/me\/voice-calibration\/sessions$/, handle: () => ({ body: sessionAt("context_setup", { context: undefined }) }) },
+      {
+        method: "POST",
+        test: /\/voice-calibration\/sessions\/[^/]+\/context$/,
+        handle: ({ body }) => {
+          contextBody = body;
+          return { body: sessionAt("micro_opinion") };
+        }
+      }
+    ]);
+
+    try {
+      renderCalibrate(queryClient);
+      await screen.findByLabelText("sobre o que você mais escreve?");
+      fillStep1AndContinue();
+
+      expect(await screen.findByText("Qual é a sua opinião sobre trabalho remoto?")).toBeInTheDocument();
+      expect(contextBody).toMatchObject({ subject: "produto", vantagePoint: "fundador técnico", audiences: ["fundadores"], locale: "pt-BR" });
+    } finally {
+      restore();
+      useUiLanguage.setState({ language: "en" });
+    }
+  });
+
+  it("setContext — a terminal failure blocks the step 1→2 transition and offers retry, with no continue-anyway escape", async () => {
+    storeSessionId("voice-calibration:test-1");
+    const queryClient = newQueryClient();
+    queryClient.setQueryData(queryKeys.calibrationSession("voice-calibration:test-1"), sessionAt("context_setup", { context: undefined }));
+    queryClient.setQueryData(queryKeys.voiceProfile(), noVoiceProfileFixture);
+    queryClient.setQueryData(queryKeys.entitlement(), entitlementFixture);
+
+    let contextCalls = 0;
+    const restore = installFetchMock([
+      { method: "POST", test: /\/me\/voice-calibration\/sessions$/, handle: () => ({ body: sessionAt("context_setup", { context: undefined }) }) },
+      {
+        method: "POST",
+        test: /\/voice-calibration\/sessions\/[^/]+\/context$/,
+        handle: () => {
+          contextCalls += 1;
+          // 500, not 503/429/504 — keeps this outside the transport's own retry set, so every
+          // count here is exclusively the mutation-level retry under test.
+          return { status: 500, body: { code: "internal_error", message: "provider chain exhausted" } };
+        }
+      }
+    ]);
+
+    try {
+      renderCalibrate(queryClient);
+      await screen.findByLabelText("sobre o que você mais escreve?");
+      fillStep1AndContinue();
+
+      expect(await screen.findByText("Refazer", undefined, { timeout: 3000 })).toBeInTheDocument();
+      expect(screen.queryByText("vamos te conhecer")).not.toBeInTheDocument();
+      expect(screen.queryByText("Qual é a sua opinião sobre trabalho remoto?")).not.toBeInTheDocument();
+      expect(screen.queryByText("Continuar assim mesmo")).not.toBeInTheDocument();
+      const callsAfterFirstFailure = contextCalls;
+      expect(callsAfterFirstFailure).toBeGreaterThan(1); // the 2 invisible retries already ran
+
+      fireEvent.click(screen.getByText("Refazer"));
+      expect(await screen.findByText("construindo sua voz…")).toBeInTheDocument();
+      expect(await screen.findByText("Refazer", undefined, { timeout: 3000 })).toBeInTheDocument();
+      expect(contextCalls).toBeGreaterThan(callsAfterFirstFailure);
+    } finally {
+      restore();
+    }
+  });
+
+  it("setContext — a transient failure recovers through the invisible retry, no error UI shown", async () => {
+    storeSessionId("voice-calibration:test-1");
+    const queryClient = newQueryClient();
+    queryClient.setQueryData(queryKeys.calibrationSession("voice-calibration:test-1"), sessionAt("context_setup", { context: undefined }));
+    queryClient.setQueryData(queryKeys.voiceProfile(), noVoiceProfileFixture);
+    queryClient.setQueryData(queryKeys.entitlement(), entitlementFixture);
+
+    let attempts = 0;
+    const restore = installFetchMock([
+      { method: "POST", test: /\/me\/voice-calibration\/sessions$/, handle: () => ({ body: sessionAt("context_setup", { context: undefined }) }) },
+      {
+        method: "POST",
+        test: /\/voice-calibration\/sessions\/[^/]+\/context$/,
+        handle: () => {
+          attempts += 1;
+          if (attempts === 1) return { status: 500, body: { code: "internal_error", message: "temporary" } };
+          return { body: sessionAt("micro_opinion") };
+        }
+      }
+    ]);
+
+    try {
+      renderCalibrate(queryClient);
+      await screen.findByLabelText("sobre o que você mais escreve?");
+      fillStep1AndContinue();
+
+      expect(await screen.findByText("Qual é a sua opinião sobre trabalho remoto?", undefined, { timeout: 3000 })).toBeInTheDocument();
+      expect(screen.queryByText("Refazer")).not.toBeInTheDocument();
+      expect(attempts).toBe(2);
+    } finally {
+      restore();
     }
   });
 });

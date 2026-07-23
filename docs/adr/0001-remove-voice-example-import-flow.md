@@ -34,3 +34,9 @@ Remove all code related to the old voice example import flow:
 - The `VoiceExample` domain entity and its database table (`voice_examples`) remain — they are still produced by the calibration wizard.
 - The `VoiceExampleBatch*` database table type and postgres repository are removed, but the table creation in migration `0001` stays (migrations are append-only).
 - Future import capabilities (e.g., bulk upload from external sources) would need to be designed from scratch, not resurrected from this code.
+
+---
+
+## Emendada pela ADR 0010 — Practice Profile (2026-07-21)
+
+Ver `docs/adr/0010-practice-profile.md` → Consequências. Esta ADR continua válida; a 0010 emenda pontos específicos (calibração gerada do Practice Profile / intent muda de momento e representação / `/voice` vira identidade de escrita, conforme o caso). Consulte a 0010 antes de tratar esta como intocada.

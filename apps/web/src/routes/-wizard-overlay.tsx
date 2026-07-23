@@ -11,9 +11,11 @@ import {
   useStartCalibration,
   useSubmitCalibrationAnswer,
   useToastStore,
+  useUiLanguage,
   useVoiceProfile
 } from "@my-ai-orchestrator/shared";
 import { CalibrationWizard, type ResultStepState, type WizardStepContent } from "@my-ai-orchestrator/ui/app/onboarding";
+import { useMessages } from "@my-ai-orchestrator/ui/app/i18n";
 import {
   buildProgress,
   buildVoicePreviewVM,
@@ -35,9 +37,11 @@ import {
 // onRecalibrate). No "calibrar depois" (voice already exists), no localStorage session — closing
 // mid-wizard just drops progress, reopening starts a fresh session. No bridge — closing IS the exit.
 export function WizardOverlay() {
+  const t = useMessages();
   const recalOpen = useShellStore((state) => state.recalOpen);
   const closeRecal = useShellStore((state) => state.closeRecal);
   const pushToast = useToastStore((state) => state.push);
+  const uiLanguage = useUiLanguage((state) => state.language);
 
   const [sessionId, setSessionId] = useState<string | undefined>(undefined);
   const startedRef = useRef(false);
@@ -69,9 +73,10 @@ export function WizardOverlay() {
     if (session && displayStepId === undefined) setDisplayStepId(session.currentStepId);
   }, [recalOpen, session, displayStepId]);
 
-  const [domain, setDomain] = useState("");
-  const [audience, setAudience] = useState("");
-  const [strength, setStrength] = useState("");
+  const [subject, setSubject] = useState("");
+  const [vantagePoint, setVantagePoint] = useState("");
+  const [audiences, setAudiences] = useState<readonly string[]>([]);
+  const [audienceDraft, setAudienceDraft] = useState("");
   const [writingDraft, setWritingDraft] = useState("");
   useEffect(() => {
     if (!displayStepId) return;
@@ -92,9 +97,20 @@ export function WizardOverlay() {
   function handleContextContinue() {
     if (!sessionId) return;
     setContextMutation.mutate(
-      { domain: domain.trim(), audience: audience.trim(), selfDeclaredStrength: strength.trim() || undefined },
+      { subject: subject.trim(), vantagePoint: vantagePoint.trim(), audiences, locale: uiLanguage },
       { onSuccess: (updated) => setDisplayStepId(updated.currentStepId) }
     );
+  }
+
+  function handleAudienceAdd() {
+    const value = audienceDraft.trim();
+    if (!value || audiences.includes(value)) return;
+    setAudiences((current) => [...current, value]);
+    setAudienceDraft("");
+  }
+
+  function handleAudienceRemove(value: string) {
+    setAudiences((current) => current.filter((candidate) => candidate !== value));
   }
 
   function handleWritingContinue(stepId: string) {
@@ -104,7 +120,7 @@ export function WizardOverlay() {
       {
         onSuccess: (updated) => setDisplayStepId(updated.currentStepId),
         onError: (error) =>
-          pushToast({ id: "calibrate-submit-error", kind: "error", topic: "não conseguimos salvar essa amostra", message: describeCalibrationError(error) })
+          pushToast({ id: "calibrate-submit-error", kind: "error", topic: t.onboarding.toast.submitError, message: describeCalibrationError(t, error) })
       }
     );
   }
@@ -114,7 +130,7 @@ export function WizardOverlay() {
     skipStepMutation.mutate(stepId, {
       onSuccess: (updated) => setDisplayStepId(updated.currentStepId),
       onError: (error) =>
-        pushToast({ id: "calibrate-skip-error", kind: "error", topic: "não conseguimos pular essa etapa", message: describeCalibrationError(error) })
+        pushToast({ id: "calibrate-skip-error", kind: "error", topic: t.onboarding.toast.skipError, message: describeCalibrationError(t, error) })
     });
   }
 
@@ -123,7 +139,7 @@ export function WizardOverlay() {
       await grantConsentMutation.mutateAsync();
       await completeReviewMutation.mutateAsync({});
     } catch (error) {
-      setResultState({ kind: "error", message: describeCalibrationError(error), onRetry: handleCreateVoice });
+      setResultState({ kind: "error", message: describeCalibrationError(t, error), onRetry: handleCreateVoice });
     }
   }
 
@@ -132,10 +148,10 @@ export function WizardOverlay() {
     const profile = voiceProfileQuery.data;
     if (!profile || !hasVoiceProfile(profile)) return;
 
-    const low = isLowConfidence(profile) ? weakestWritingStep(session) : undefined;
+    const low = isLowConfidence(profile) ? weakestWritingStep(t, session) : undefined;
     setResultState({
       kind: "success",
-      preview: buildVoicePreviewVM(profile),
+      preview: buildVoicePreviewVM(profile, t),
       lowConfidence: low
         ? {
             weakStepLabel: low.label,
@@ -145,24 +161,38 @@ export function WizardOverlay() {
             }
           }
         : undefined,
-      trialLine: formatCalibrationTrialLine(entitlementQuery.data, new Date()),
+      trialLine: formatCalibrationTrialLine(t, entitlementQuery.data, new Date()),
       onContinue: closeRecal
     });
-  }, [recalOpen, resultState, completeReviewMutation.isSuccess, voiceProfileQuery.data, session, entitlementQuery.data, closeRecal]);
+  }, [recalOpen, resultState, completeReviewMutation.isSuccess, voiceProfileQuery.data, session, entitlementQuery.data, closeRecal, t]);
 
   function buildWizardContent(stepId: string): WizardStepContent | undefined {
     if (!session) return undefined;
 
     if (stepId === CONTEXT_STEP_ID) {
+      // Same floor as calibrate.tsx's full wizard: block + retry on setContext failure, no
+      // "continue anyway" escape — reuses the review/result kinds' existing building/error states.
+      if (setContextMutation.isError) {
+        return {
+          kind: "result",
+          props: { state: { kind: "error", message: describeCalibrationError(t, setContextMutation.error), onRetry: handleContextContinue } }
+        };
+      }
+      if (setContextMutation.isPending) {
+        return { kind: "review", props: { state: { kind: "building" } } };
+      }
       return {
         kind: "context",
         props: {
-          domain,
-          onDomainChange: setDomain,
-          audience,
-          onAudienceChange: setAudience,
-          strength,
-          onStrengthChange: setStrength,
+          subject,
+          onSubjectChange: setSubject,
+          vantagePoint,
+          onVantagePointChange: setVantagePoint,
+          audiences,
+          audienceDraft,
+          onAudienceDraftChange: setAudienceDraft,
+          onAudienceAdd: handleAudienceAdd,
+          onAudienceRemove: handleAudienceRemove,
           onContinue: handleContextContinue,
           pending: setContextMutation.isPending
         }
@@ -182,7 +212,7 @@ export function WizardOverlay() {
               onToggle: setConsentGranted,
               onCreateVoice: handleCreateVoice,
               pending,
-              trialLine: formatCalibrationTrialLine(entitlementQuery.data, new Date())
+              trialLine: formatCalibrationTrialLine(t, entitlementQuery.data, new Date())
             }
           }
         }
@@ -198,9 +228,9 @@ export function WizardOverlay() {
     return {
       kind: "writing",
       props: {
-        eyebrow: writingStepEyebrow(stepId),
-        prompt: step?.prompt || "conte com as suas palavras",
-        helperCopy: helperCopyFor(stepId),
+        eyebrow: writingStepEyebrow(t, stepId),
+        prompt: step?.prompt || t.onboarding.fallbackPrompt,
+        helperCopy: helperCopyFor(t, stepId),
         value: writingDraft,
         onChange: setWritingDraft,
         minWords: range.min,
@@ -229,5 +259,5 @@ export function WizardOverlay() {
   const content = buildWizardContent(displayStepId);
   if (!content) return null;
 
-  return <CalibrationWizard variant="light" progress={buildProgress(session, displayStepId)} content={content} onClose={closeRecal} />;
+  return <CalibrationWizard variant="light" progress={buildProgress(t, session, displayStepId)} content={content} onClose={closeRecal} />;
 }

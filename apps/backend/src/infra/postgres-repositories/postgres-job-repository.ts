@@ -338,8 +338,8 @@ export function createPostgresJobRepository(
 }
 
 // Exportado para teste: o SQL gerado é verificável sem banco (query.compile()), e a suíte
-// Postgres é gated por BACKEND_TEST_DATABASE_URL — foi assim que `intent`/`lengthTier` ficaram
-// sem filtro em produção sem nenhum teste reclamar.
+// Postgres é gated por BACKEND_TEST_DATABASE_URL — é aqui que a paridade dos filtros vivos
+// (period/status/lengthTier/q) fica garantida sem depender do banco real.
 export function applyJobListFilters<QB extends SelectQueryBuilder<DatabaseTables, "jobs", object>>(
   query: QB,
   filters?: ExecutionsListFilters
@@ -356,14 +356,6 @@ export function applyJobListFilters<QB extends SelectQueryBuilder<DatabaseTables
 
   if (filters.status !== "all") {
     next = next.where(sql`data->>'status'`, "=", filters.status) as QB;
-  }
-
-  if (filters.contentType) {
-    next = next.where(sql`data->>'contentType'`, "=", filters.contentType) as QB;
-  }
-
-  if (filters.intent) {
-    next = next.where(sql`data->>'generationIntent'`, "=", filters.intent) as QB;
   }
 
   if (filters.lengthTier) {

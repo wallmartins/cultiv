@@ -18,12 +18,6 @@
       "lifecycle": "legacy-supported",
       "catalogPath": "./2026-05-16/catalog.json",
       "pricingPath": "./2026-05-16/pricing.json"
-    },
-    {
-      "version": "2026-04-01",
-      "lifecycle": "legacy-supported",
-      "catalogPath": "./2026-04-01/catalog.json",
-      "pricingPath": "./2026-04-01/pricing.json"
     }
   ]
 }

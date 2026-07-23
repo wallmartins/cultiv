@@ -3,6 +3,17 @@ import type { VoiceProfile } from "@my-ai-orchestrator/text-quality";
 
 import { stripRuntimeMetadata } from "./pipeline/sanitized-generation-input.js";
 
+// Compositor/runtime parameters ride alongside the briefing fields on the spread pipeline inputs
+// (public-generation buildCompositorPipelineInputs). They are not briefing content, so the fallback
+// serialization must not leak them into {{briefingText}} — the labeled branch already ignores them.
+const NON_BRIEFING_INPUT_KEYS = new Set([
+  "importedContext",
+  "wordTarget",
+  "expressionProfile",
+  "rhetoricalMode",
+  "genre"
+]);
+
 export function resolveLanguage(context: SkillExecutionContext): string | undefined {
   const language = context.inputs.language;
   if (typeof language === "string" && language.trim().length > 0) {
@@ -32,24 +43,26 @@ export function getBriefingText(inputs: Readonly<Record<string, unknown>>): stri
   if (briefing && typeof briefing === "object") {
     const summary = briefing as Record<string, unknown>;
     const topic = typeof summary.topic === "string" ? summary.topic : undefined;
-    const goal = typeof summary.goal === "string" ? summary.goal : undefined;
     const audience = typeof summary.audience === "string" ? summary.audience : undefined;
-    const keyPoints = Array.isArray(summary.keyPoints)
-      ? summary.keyPoints.filter((item): item is string => typeof item === "string")
-      : [];
+    const payload = typeof summary.payload === "string" ? summary.payload : undefined;
+    const anchor = typeof summary.anchor === "string" ? summary.anchor : undefined;
+    const resistance = typeof summary.resistance === "string" ? summary.resistance : undefined;
+    const stake = typeof summary.stake === "string" ? summary.stake : undefined;
 
     return appendImportedContext([
       topic ? `Topic: ${topic}` : undefined,
-      goal ? `Goal: ${goal}` : undefined,
       audience ? `Audience: ${audience}` : undefined,
-      keyPoints.length > 0 ? `Key points: ${keyPoints.join("; ")}` : undefined
+      payload ? `Payload: ${payload}` : undefined,
+      anchor ? `Anchor: ${anchor}` : undefined,
+      resistance ? `Resistance: ${resistance}` : undefined,
+      stake ? `Stake: ${stake}` : undefined
     ]
       .filter((part): part is string => typeof part === "string")
       .join(" | "), importedContext);
   }
 
   const fallbackPayload = Object.fromEntries(
-    Object.entries(generationPayload).filter(([key]) => key !== "importedContext")
+    Object.entries(generationPayload).filter(([key]) => !NON_BRIEFING_INPUT_KEYS.has(key))
   );
   return appendImportedContext(JSON.stringify(fallbackPayload), importedContext);
 }

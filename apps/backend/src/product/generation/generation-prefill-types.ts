@@ -6,6 +6,9 @@ export interface BackendGenerationPrefillRequest {
   readonly userId: string;
   readonly theme: string;
   readonly language?: string;
+  // F0-6 — the narrowed-audience socket; F4-3 consumes it to instantiate the 4 audience-aware
+  // slots (carga·ancoragem·resistência·stake) in place of up-front intent classification.
+  readonly audience?: string;
 }
 
 export interface BackendGenerationPrefillService {

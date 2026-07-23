@@ -76,7 +76,7 @@ describe("backend policy activation", () => {
       method: "POST",
       headers: operatorHeaders,
       body: JSON.stringify({
-        policyVersion: "2026-04-01"
+        policyVersion: "2026-06-22"
       })
     });
     expect(activateResponse.status).toBe(200);
@@ -87,10 +87,10 @@ describe("backend policy activation", () => {
         history: Array<{ policyVersion: string; updatedBy: string }>;
       };
     };
-    expect(activated.activePointer.activePolicyVersion).toBe("2026-04-01");
+    expect(activated.activePointer.activePolicyVersion).toBe("2026-06-22");
     expect(activated.activePointer.updatedBy).toBe("operator_1");
     expect(activated.activePointer.history.at(-1)).toMatchObject({
-      policyVersion: "2026-04-01",
+      policyVersion: "2026-06-22",
       updatedBy: "operator_1"
     });
   });
@@ -116,7 +116,8 @@ describe("backend policy activation", () => {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
-        contentType: "newsletter",
+        rhetoricalMode: "expound",
+        scope: { lengthTier: "medium" },
         qualityMode: "balanced",
         briefing: {
           topic: "Policy activation safety"
@@ -136,7 +137,7 @@ describe("backend policy activation", () => {
         "x-backend-permissions": "ai_policy.activate"
       },
       body: JSON.stringify({
-        policyVersion: "2026-04-01"
+        policyVersion: "2026-06-22"
       })
     });
     expect(activateResponse.status).toBe(200);
@@ -145,7 +146,8 @@ describe("backend policy activation", () => {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
-        contentType: "newsletter",
+        rhetoricalMode: "expound",
+        scope: { lengthTier: "medium" },
         qualityMode: "balanced",
         briefing: {
           topic: "Policy activation safety"
@@ -180,10 +182,16 @@ describe("backend policy activation", () => {
       servicesB.aiPolicy.resolveExecutionSnapshot({
         request: {
           userId: "user_1",
-          pipelineType: "newsletter",
-          contentType: "newsletter",
+          pipelineType: "edition-piece",
+          contentType: "edition-piece",
           briefing: { topic: "Pinned snapshot" },
-          qualityMode: "balanced"
+          qualityMode: "balanced",
+          context: {
+            compositor: {
+              planSignature: "edition-piece",
+              lengthTier: "medium"
+            }
+          }
         },
         planTier: "pro",
         executionMode: "sync",
@@ -195,7 +203,7 @@ describe("backend policy activation", () => {
 
     Effect.runSync(
       servicesA.aiPolicy.activatePolicyVersion({
-        policyVersion: "2026-04-01",
+        policyVersion: "2026-06-22",
         actor: "operator_1",
         approvedAt: backendAppTestStartedAt.toISOString()
       })
@@ -206,7 +214,7 @@ describe("backend policy activation", () => {
 
     clock.current = new Date(backendAppTestNow.getTime() + 2_000);
     const reloadedPolicy = Effect.runSync(servicesB.aiPolicy.getActivePolicy());
-    expect(reloadedPolicy.version).toBe("2026-04-01");
+    expect(reloadedPolicy.version).toBe("2026-06-22");
     expect(snapshotBeforeActivation.policyVersion).toBe("2026-07-20");
   });
 

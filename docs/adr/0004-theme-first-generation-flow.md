@@ -71,3 +71,9 @@ A tela primária passa a abrir com o **campo de tema** em foco. Usuários de pri
 - O catálogo de content types e o `inputSchema` **deixam de dirigir o formulário** do fluxo primário (podem seguir existindo para uso interno/derivação e para a extensão até alinhamento).
 - A qualidade depende de o `intent` inferido estar certo. Mitigado pela pergunta de ambiguidade, pelo "Ajustar" (tamanho/canal) e por regenerar. Requer um **eval** (~15–20 temas) na implementação para afinar o prompt e o limiar de ambiguidade — não bloqueia esta decisão.
 - **Compatível com a Fase 2:** o mapa intent×lengthTier→content type e word targets estão marcados `@phase1-legacy` ("replaced by generationProfile in Phase 2"). O prefill desenhado aqui vira o **produtor do futuro `generationProfile`** — a migração é natural, não uma reescrita.
+
+---
+
+## Emendada pela ADR 0010 — Practice Profile (2026-07-21)
+
+Ver `docs/adr/0010-practice-profile.md` → Consequências. Esta ADR continua válida; a 0010 emenda pontos específicos (calibração gerada do Practice Profile / intent muda de momento e representação / `/voice` vira identidade de escrita, conforme o caso). Consulte a 0010 antes de tratar esta como intocada.

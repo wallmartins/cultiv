@@ -10,7 +10,7 @@ describe("M2-26: Paridade Funcional - Contract Decoding", () => {
     it("decodifica simplified request valido", async () => {
       const raw = {
         userId: "user-123",
-        pipelineType: "twitter-thread",
+        pipelineType: "short-piece",
         briefing: "Crie um tweet sobre IA"
       };
 

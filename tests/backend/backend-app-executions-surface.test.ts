@@ -18,7 +18,8 @@ describe("backend app execution surface", () => {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
-        contentType: "linkedin-post",
+        rhetoricalMode: "expound",
+        scope: { lengthTier: "short", channel: "professional-network" },
         briefing: {
           topic: "Monorepo migration",
           audience: "engineering leaders"
@@ -30,7 +31,7 @@ describe("backend app execution surface", () => {
     expect(syncResponse.status).toBe(200);
     const decodedSync = await Effect.runPromise(decodeSyncExecutionView(await syncResponse.json()));
     expect(decodedSync.voice.voiceProfileSnapshotId).toBe(
-      expectedVoiceProfileSnapshotId("user_1", 2, "linkedin-post")
+      expectedVoiceProfileSnapshotId("user_1", 2, "professional-network")
     );
 
     const { app: asyncApp } = createExecutionApp("async");
@@ -38,7 +39,8 @@ describe("backend app execution surface", () => {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
-        contentType: "newsletter",
+        rhetoricalMode: "promote",
+        scope: { lengthTier: "medium", channel: "email" },
         briefing: {
           topic: "Observability",
           audience: "platform teams"
@@ -48,7 +50,7 @@ describe("backend app execution surface", () => {
 
     expect(asyncResponse.status).toBe(202);
     const decodedQueued = await Effect.runPromise(decodeQueuedExecutionView(await asyncResponse.json()));
-    const newsletterSnapshotId = expectedVoiceProfileSnapshotId("user_1", 2, "newsletter");
+    const newsletterSnapshotId = expectedVoiceProfileSnapshotId("user_1", 2, "email");
     expect(decodedQueued.voice.voiceProfileSnapshotId).toBe(newsletterSnapshotId);
 
     const listResponse = await asyncApp.request("/me/executions?limit=10&offset=0");
@@ -68,14 +70,13 @@ describe("backend app execution surface", () => {
     expect(eventsResponse.headers.get("content-type")).toContain("text/event-stream");
   });
 
-  it("rejects an unknown contentType before reaching the execution runtime", async () => {
+  it("rejects a request missing a generation scope before reaching the execution runtime", async () => {
     const { app } = createExecutionApp("sync");
 
     const response = await app.request("/me/executions/run", {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
-        contentType: "unknown-content-type",
         briefing: {
           topic: "Policy drift"
         }
@@ -84,8 +85,7 @@ describe("backend app execution surface", () => {
 
     expect(response.status).toBe(400);
     const error = await Effect.runPromise(decodeApiErrorResponse(await response.json()));
-    expect(error.code).toBe("invalid_request");
     expect(error.category).toBe("invalid_request");
-    expect(error.message).toContain("unknown-content-type");
+    expect(error.message).toContain("generation scope");
   });
 });

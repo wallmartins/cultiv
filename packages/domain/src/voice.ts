@@ -5,6 +5,7 @@ import type {
   ClosingMode,
   CoreReasoningSignature,
   DeterministicFeatures,
+  GenerationChannel,
   InsightTiming,
   NextActionCode,
   OpeningMode,
@@ -131,7 +132,10 @@ export interface VoiceProfileSnapshot extends Entity<string> {
   readonly userId: string;
   readonly sourceProfileId: string;
   readonly sourceProfileVersion: number;
-  readonly contentType: string;
+  // The Format Expression Profile is keyed by channel (ADR 0010 F6-4 — "how the author sounds on a
+  // channel"), not the retired Content Type. Persisted inside the snapshot's JSON `data` column, so
+  // this is a shape change with no SQL migration.
+  readonly channel: GenerationChannel;
   readonly confidence: VoiceProfileConfidence;
   readonly adaptationMode: VoiceAdaptationMode;
   readonly appliedSignals: {

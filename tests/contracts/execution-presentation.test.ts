@@ -3,13 +3,13 @@ import { resolveExecutionPresentation } from "@my-ai-orchestrator/contracts";
 import type { PipelineRequest } from "@my-ai-orchestrator/contracts";
 
 describe("resolveExecutionPresentation", () => {
-  it("reads intent, length tier, channel, and topic from compositor pipeline requests", () => {
+  it("reads rhetorical mode, length tier, channel, and topic from compositor pipeline requests", () => {
     const request = {
       userId: "user-1",
       pipeline: { name: "short-piece", steps: [] },
       inputs: { topic: "Aprendizado contínuo na carreira" },
       context: {
-        generationIntent: "share-idea",
+        rhetoricalMode: "expound",
         generationChannel: "professional-network",
         compositor: {
           planId: "plan-1",
@@ -22,40 +22,34 @@ describe("resolveExecutionPresentation", () => {
     } satisfies PipelineRequest;
 
     expect(resolveExecutionPresentation(request, "short-piece")).toEqual({
-      generationIntent: "share-idea",
+      rhetoricalMode: "expound",
       briefingTopic: "Aprendizado contínuo na carreira",
       lengthTier: "short",
       channel: "professional-network"
     });
   });
 
-  it("falls back to legacy content type mapping when intent metadata is missing", () => {
+  it("only summarizes the briefing topic when compositor metadata is missing", () => {
     const request = {
       userId: "user-1",
-      pipelineType: "newsletter",
-      briefing: { topic: "Atualização semanal" },
-      contentType: "newsletter"
+      pipelineType: "edition-piece",
+      briefing: { topic: "Atualização semanal" }
     } satisfies PipelineRequest;
 
-    expect(resolveExecutionPresentation(request, "newsletter")).toEqual({
-      generationIntent: "update-subscribers",
-      briefingTopic: "Atualização semanal",
-      lengthTier: "long"
+    expect(resolveExecutionPresentation(request, "edition-piece")).toEqual({
+      briefingTopic: "Atualização semanal"
     });
   });
 
   it("summarizes plain-text briefing when topic is absent", () => {
     const request = {
       userId: "user-1",
-      pipelineType: "linkedin-post",
-      briefing: "  Ideia sobre consistência editorial  ",
-      contentType: "linkedin-post"
+      pipelineType: "short-piece",
+      briefing: "  Ideia sobre consistência editorial  "
     } satisfies PipelineRequest;
 
-    expect(resolveExecutionPresentation(request, "linkedin-post")).toMatchObject({
-      generationIntent: "share-idea",
-      briefingTopic: "Ideia sobre consistência editorial",
-      lengthTier: "short"
+    expect(resolveExecutionPresentation(request, "short-piece")).toEqual({
+      briefingTopic: "Ideia sobre consistência editorial"
     });
   });
 });

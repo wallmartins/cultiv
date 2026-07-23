@@ -1,4 +1,5 @@
 import { Mono, Pill, Serif } from "../primitives/index.js";
+import { useMessages } from "../i18n/index.js";
 
 export interface DetailFailedProps {
   readonly reason: string;
@@ -7,6 +8,7 @@ export interface DetailFailedProps {
 
 // dFailed (design L~978) — credits were never debited for a failed run; the copy says so explicitly.
 export function DetailFailed({ reason, onRedo }: DetailFailedProps) {
+  const t = useMessages();
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 14, padding: "40px 0", alignItems: "center", textAlign: "center" }}>
       <span
@@ -24,11 +26,11 @@ export function DetailFailed({ reason, onRedo }: DetailFailedProps) {
       >
         ×
       </span>
-      <Serif size="1.5rem">Esta geração falhou</Serif>
+      <Serif size="1.5rem">{t.detail.failedTitle}</Serif>
       <p style={{ fontSize: "0.9rem", color: "var(--muted)", maxWidth: 400, lineHeight: 1.6, margin: 0 }}>{reason}</p>
-      <Mono style={{ color: "var(--muted)" }}>seus créditos não foram cobrados</Mono>
+      <Mono style={{ color: "var(--muted)" }}>{t.detail.creditsNotCharged}</Mono>
       <Pill variant="primary" onClick={onRedo}>
-        Refazer geração →
+        {t.detail.redo}
       </Pill>
     </div>
   );

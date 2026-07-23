@@ -1,7 +1,8 @@
-import type { GenerationIntent } from "@my-ai-orchestrator/contracts";
-
+// Keys are descriptive calibration-scenario labels (not a contracts type) — the rhetorical
+// genre axis these once mapped 1:1 to (`GenerationIntent`) was removed in the Practice Profile
+// Phase 1 clean cut; several labels below now map onto the same `RhetoricalMode`.
 /** Minimal briefing payloads for calibration sweeps (safe, generic copy). */
-export const CALIBRATION_BRIEFINGS: Readonly<Record<GenerationIntent, Record<string, unknown>>> = {
+export const CALIBRATION_BRIEFINGS: Readonly<Record<string, Record<string, unknown>>> = {
   "share-idea": {
     topic: "Delegar decisões de produto sem perder alinhamento",
     audience: "lideranças de produto",

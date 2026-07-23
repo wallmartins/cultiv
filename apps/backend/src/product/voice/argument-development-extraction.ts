@@ -139,7 +139,7 @@ function buildDevelopmentExtractionSystemPrompt(outputLanguage: ReasoningOutputL
     '    "developmentProse": "string",',
     '    "moveLabels": ["author-specific move label"],',
     '    "transitionTendencies": [{ "from": "move", "to": "move", "frequency": "rare|occasional|common|dominant" }],',
-    '    "epistemicPosture": "exploratory|investigative|advocacy_mixed",',
+    '    "epistemicPosture": "exploratory|investigative|advocacy|expository|instructive|experiential|promotional|not_applicable",',
     '    "structuralAntiPatterns": ["wrong arc label"]',
     "  },",
     '  "traits": {',

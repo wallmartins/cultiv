@@ -1,5 +1,5 @@
 import { Schema } from "effect";
-import { PipelineTypeSchema, QualityModeSchema } from "@my-ai-orchestrator/contracts";
+import { QualityModeSchema } from "@my-ai-orchestrator/contracts";
 import { GenerationLengthTierSchema, PlanSignatureSchema } from "@my-ai-orchestrator/contracts";
 
 const CompositorQualityPriceGridSchema = Schema.Record({
@@ -71,13 +71,13 @@ export const AIPolicyCatalogDocumentSchema = Schema.Struct({
       id: Schema.String,
       label: Schema.String,
       defaultLanguage: Schema.String,
-      pipelineType: PipelineTypeSchema,
+      pipelineType: PlanSignatureSchema,
       internal: Schema.optional(Schema.Boolean)
     })
   ),
   pipelines: Schema.Array(
     Schema.Struct({
-      pipelineType: PipelineTypeSchema,
+      pipelineType: PlanSignatureSchema,
       contentType: Schema.String,
       defaultLanguage: Schema.String,
       defaultQualityMode: QualityModeSchema,

@@ -1,4 +1,4 @@
-import type { GenerationIntent, PerspectiveShiftDensity } from "@my-ai-orchestrator/contracts";
+import type { PerspectiveShiftDensity, RhetoricalMode } from "@my-ai-orchestrator/contracts";
 import type { VoiceProfile } from "@my-ai-orchestrator/text-quality";
 
 export type ArgumentLens =
@@ -58,10 +58,15 @@ const LENS_BY_ID = Object.fromEntries(
   ARGUMENT_LENS_POOL.map((lens) => [lens.id, lens] as const)
 ) as Record<ArgumentLens, ArgumentLensDefinition>;
 
-const INTENT_LENS_PRIORITY: Partial<Record<GenerationIntent, readonly ArgumentLens[]>> = {
-  "document-decision": ["operational", "organizational"],
-  "engage-audience": ["psychological", "team"],
-  "explain-deeply": ["operational", "temporal"]
+// C-6 (decision b): the F1 clean cut deleted INTENT_LENS_PRIORITY without the promised re-key — this
+// is that re-key, a declarative table by RhetoricalMode with a safe default (modes without a line fall
+// through to briefing keywords + DEFAULT_LENS_ORDER). expound/argue inherit their old intent rows;
+// promote is re-derived from the mode's definition ("persuade com interesse material", norte
+// genero-dimensoes.md): how people decide + the material interest itself.
+const MODE_LENS_PRIORITY: Partial<Record<RhetoricalMode, readonly ArgumentLens[]>> = {
+  expound: ["operational", "temporal"],
+  argue: ["operational", "organizational"],
+  promote: ["psychological", "financial"]
 };
 
 const BRIEFING_KEYWORD_LENS: ReadonlyArray<{ readonly pattern: RegExp; readonly lens: ArgumentLens }> = [
@@ -93,7 +98,7 @@ const PERSPECTIVE_SHIFT_MAX_LENSES: Record<PerspectiveShiftDensity, number> = {
 const ARGUMENT_LENS_STEPS = new Set(["draft", "expand", "structure"]);
 
 export interface SelectArgumentLensesInput {
-  readonly intent?: string;
+  readonly rhetoricalMode?: RhetoricalMode;
   readonly briefing?: string;
   readonly perspectiveShiftDensity?: PerspectiveShiftDensity;
   readonly maxLenses?: number;
@@ -138,7 +143,6 @@ export function resolveMaxLensesFromDensity(
 export function selectArgumentLenses(input: SelectArgumentLensesInput): readonly ArgumentLens[] {
   const maxLenses = resolveMaxLensesFromDensity(input.perspectiveShiftDensity, input.maxLenses);
   const briefing = normalizeBriefing(input.briefing);
-  const intent = asGenerationIntent(input.intent);
   const ordered: ArgumentLens[] = [];
 
   const pushUnique = (lens: ArgumentLens) => {
@@ -147,7 +151,7 @@ export function selectArgumentLenses(input: SelectArgumentLensesInput): readonly
     }
   };
 
-  for (const lens of intent ? INTENT_LENS_PRIORITY[intent] ?? [] : []) {
+  for (const lens of (input.rhetoricalMode && MODE_LENS_PRIORITY[input.rhetoricalMode]) ?? []) {
     pushUnique(lens);
   }
 
@@ -189,8 +193,8 @@ export function formatArgumentLensesPromptBlock(lenses: readonly ArgumentLens[])
 export function buildArgumentLensesSection(input: {
   readonly stepName: string;
   readonly voiceProfile?: Partial<VoiceProfile>;
-  readonly intent?: string;
   readonly briefing?: string;
+  readonly rhetoricalMode?: RhetoricalMode;
 }): string {
   if (!ARGUMENT_LENS_STEPS.has(input.stepName)) {
     return "";
@@ -198,7 +202,7 @@ export function buildArgumentLensesSection(input: {
 
   const density = resolvePerspectiveShiftDensity(input.voiceProfile);
   const lenses = selectArgumentLenses({
-    intent: input.intent,
+    rhetoricalMode: input.rhetoricalMode,
     briefing: input.briefing,
     perspectiveShiftDensity: density
   });
@@ -212,21 +216,6 @@ function normalizeBriefing(briefing: string | undefined): string {
   }
 
   return briefing.trim();
-}
-
-function asGenerationIntent(intent: string | undefined): GenerationIntent | undefined {
-  if (
-    intent === "share-idea"
-    || intent === "explain-deeply"
-    || intent === "engage-audience"
-    || intent === "tell-story"
-    || intent === "update-subscribers"
-    || intent === "document-decision"
-  ) {
-    return intent;
-  }
-
-  return undefined;
 }
 
 export function isArgumentLensStep(stepName: string): boolean {

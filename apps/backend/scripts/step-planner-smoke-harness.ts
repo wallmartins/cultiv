@@ -72,7 +72,7 @@ function sortedOps(ops: readonly string[]): string[] {
 
 function runDryScenario(scenario: StepPlannerSmokeScenario): DryRunResult {
   const basePlan = planGeneration({
-    intent: scenario.fixture.intent,
+    rhetoricalMode: scenario.fixture.rhetoricalMode,
     scope: scenario.fixture.scope,
     qualityMode: scenario.fixture.qualityMode
   });

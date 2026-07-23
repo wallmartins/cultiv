@@ -1,6 +1,7 @@
 import type { BillingEntitlementView, VoiceCalibrationSessionView, VoiceProfileScreenView } from "@my-ai-orchestrator/contracts";
-import { confidenceCaption, confidenceHeadline, confidenceRingValue, creditsAsTexts } from "@my-ai-orchestrator/shared";
+import { confidenceRingValue, creditsAsTexts } from "@my-ai-orchestrator/shared";
 import type { VoicePreviewVM, WizardStepVM } from "@my-ai-orchestrator/ui/app/onboarding";
+import { voiceSignalLabel, type AppMessages } from "@my-ai-orchestrator/ui/app/i18n";
 
 // Mirrors apps/backend/.../product/voice/voice-calibration-service.ts CALIBRATION_WIZARD_STEPS
 // (packages/domain — not importable from apps/web, no dependency edge) — ids/labels/word ranges
@@ -15,15 +16,6 @@ export const WRITING_STEP_ORDER = [
 ] as const;
 export const STEP_ORDER = [CONTEXT_STEP_ID, ...WRITING_STEP_ORDER, REVIEW_STEP_ID] as const;
 
-const STEP_LABEL: Record<string, string> = {
-  [CONTEXT_STEP_ID]: "Contexto",
-  micro_opinion: "Opinião curta",
-  reasoning_reflection: "Como eu penso",
-  argument_development: "Como eu construo",
-  format_adaptation: "Versatilidade",
-  [REVIEW_STEP_ID]: "Revisão"
-};
-
 // GAP-A (breakdown-11 §2.3) — no useStepPrompt/getStepPrompt hook exists yet in packages/shared,
 // so targetWords/minWords/maxWords (VoiceCalibrationStepPromptView) aren't reachable through a
 // hook. Fallback numbers per breakdown-11 §1.1 ("Ficha 5, mas server é SSOT") until that hook lands.
@@ -34,48 +26,43 @@ const WORD_TARGETS: Record<string, { readonly min: number; readonly target: numb
   format_adaptation: { min: 180, target: 180, max: 300 }
 };
 
-const HELPER_COPY: Record<string, string> = {
-  micro_opinion: "sem rodeio — só a sua opinião, do jeito que você diria numa conversa.",
-  reasoning_reflection: "conte como se estivesse explicando pra um amigo, sem enfeitar.",
-  argument_development: "defenda o ponto até o fim — não precisa amaciar.",
-  format_adaptation: "explique com calma, como se a pessoa não soubesse nada do assunto."
-};
-
-export function stepLabel(stepId: string): string {
-  return STEP_LABEL[stepId] ?? stepId;
+export function stepLabel(t: AppMessages, stepId: string): string {
+  const label: Record<string, string> = t.onboarding.stepLabel;
+  return label[stepId] ?? stepId;
 }
 
 export function wordTargetsFor(stepId: string): { readonly min: number; readonly target: number; readonly max: number } {
   return WORD_TARGETS[stepId] ?? { min: 0, target: 0, max: 100_000 };
 }
 
-export function helperCopyFor(stepId: string): string | undefined {
-  return HELPER_COPY[stepId];
+export function helperCopyFor(t: AppMessages, stepId: string): string | undefined {
+  const helper: Record<string, string> = t.onboarding.helperCopy;
+  return helper[stepId];
 }
 
-export function writingStepEyebrow(stepId: string): string {
+export function writingStepEyebrow(t: AppMessages, stepId: string): string {
   const index = WRITING_STEP_ORDER.indexOf(stepId as (typeof WRITING_STEP_ORDER)[number]);
-  return `amostra ${index + 1} de ${WRITING_STEP_ORDER.length}`;
+  return t.onboarding.sampleCounter(index + 1, WRITING_STEP_ORDER.length);
 }
 
-export function buildProgress(session: VoiceCalibrationSessionView, displayStepId: string): readonly WizardStepVM[] {
+export function buildProgress(t: AppMessages, session: VoiceCalibrationSessionView, displayStepId: string): readonly WizardStepVM[] {
   const serverIndex = STEP_ORDER.indexOf(session.currentStepId as (typeof STEP_ORDER)[number]);
   return STEP_ORDER.map((id, index) => ({
     id,
-    label: stepLabel(id),
+    label: stepLabel(t, id),
     status: id === displayStepId ? "active" : index < serverIndex ? "done" : "upcoming"
   }));
 }
 
-export function buildVoicePreviewVM(profile: VoiceProfileScreenView): VoicePreviewVM {
+export function buildVoicePreviewVM(profile: VoiceProfileScreenView, t: AppMessages): VoicePreviewVM {
   const confidence = profile.profile.confidence;
   return {
     ringValue: confidenceRingValue(confidence),
-    ringCaption: confidenceCaption(confidence),
-    headline: confidenceHeadline(confidence),
+    ringCaption: t.common.confidence.caption[confidence],
+    headline: t.common.confidence.headline[confidence],
     proseCore: profile.reasoning?.core.narrativeProse ?? "",
     proseDevelopment: profile.reasoning?.development?.developmentProse,
-    descriptorChips: profile.profile.styleMarkers
+    descriptorChips: profile.profile.styleMarkers.map((marker) => voiceSignalLabel(t, marker))
   };
 }
 
@@ -85,13 +72,13 @@ export function isLowConfidence(profile: VoiceProfileScreenView): boolean {
 
 // Points "reescrever esta amostra" at whichever writing step has the fewest words — the
 // session doesn't rank samples itself, so word count is the honest proxy available client-side.
-export function weakestWritingStep(session: VoiceCalibrationSessionView): { readonly stepId: string; readonly label: string } | undefined {
+export function weakestWritingStep(t: AppMessages, session: VoiceCalibrationSessionView): { readonly stepId: string; readonly label: string } | undefined {
   const candidates = session.steps.filter((step) =>
     (WRITING_STEP_ORDER as readonly string[]).includes(step.stepId)
   );
   if (candidates.length === 0) return undefined;
   const weakest = candidates.reduce((min, step) => ((step.wordCount ?? 0) < (min.wordCount ?? 0) ? step : min));
-  return { stepId: weakest.stepId, label: stepLabel(weakest.stepId) };
+  return { stepId: weakest.stepId, label: stepLabel(t, weakest.stepId) };
 }
 
 export function stepBefore(stepId: string): string | undefined {
@@ -111,14 +98,26 @@ export function isPastStep(session: VoiceCalibrationSessionView, stepId: string)
   return stepId !== session.currentStepId;
 }
 
-export function describeCalibrationError(error: unknown): string {
-  if (error && typeof error === "object") {
-    const responseMessage = "responseMessage" in error ? (error as { responseMessage?: unknown }).responseMessage : undefined;
-    if (typeof responseMessage === "string" && responseMessage) return responseMessage;
-    const message = "message" in error ? (error as { message?: unknown }).message : undefined;
-    if (typeof message === "string" && message) return message;
+// C-8: this feeds the one screen with no generic escape, so the user never sees the backend's raw
+// technical English — known classes map to i18n copy, everything else falls back, and the technical
+// message goes to the console for debugging.
+// ponytail: string-matching the word-count message is an interim mapping — the root fix (a structured
+// error code from the backend) is tracked in the defects map.
+export function describeCalibrationError(t: AppMessages, error: unknown): string {
+  const err = error && typeof error === "object" ? (error as { responseMessage?: unknown; message?: unknown; code?: unknown; status?: unknown }) : undefined;
+  const technical =
+    typeof err?.responseMessage === "string" && err.responseMessage
+      ? err.responseMessage
+      : typeof err?.message === "string" && err.message
+        ? err.message
+        : undefined;
+  if (technical) {
+    console.warn("[calibration] backend error:", technical);
+    const tooShort = /at least (\d+) words/.exec(technical);
+    if (tooShort) return t.onboarding.errors.tooShort(Number(tooShort[1]));
+    if (err?.code === "service_unavailable" || err?.status === 500) return t.onboarding.errors.derivationFailed;
   }
-  return "não conseguimos confirmar sua voz agora — verifique sua conexão e tente de novo.";
+  return t.onboarding.errorFallback;
 }
 
 // 1e — PostResetReturn (breakdown-15 §1). AccountResetResponse only carries onboardingRequired
@@ -157,22 +156,17 @@ export function clearPostResetContext(): void {
   }
 }
 
-export function formatResetDate(iso: string): string {
-  const date = new Date(iso);
-  return `${String(date.getUTCDate()).padStart(2, "0")}/${String(date.getUTCMonth() + 1).padStart(2, "0")}`;
-}
-
 function daysUntil(iso: string, now: Date): number {
   return Math.max(0, Math.ceil((new Date(iso).getTime() - now.getTime()) / 86_400_000));
 }
 
 // Same honest-fields approach as generate-view.ts's formatTrialLine — no trial-generation-count
 // contract exists (GAP #8), so this reads only what BillingEntitlementView actually carries.
-export function formatCalibrationTrialLine(entitlement: BillingEntitlementView | undefined, now: Date): string | undefined {
+export function formatCalibrationTrialLine(t: AppMessages, entitlement: BillingEntitlementView | undefined, now: Date): string | undefined {
   if (!entitlement || entitlement.status !== "trialing") return undefined;
   const texts = creditsAsTexts(entitlement.availableCredits, entitlement.canonicalCreditCost);
   const days = entitlement.trialEndsAt ? daysUntil(entitlement.trialEndsAt, now) : undefined;
-  return ["seu teste", `~${texts} textos`, days !== undefined ? `${days} dias restantes` : undefined]
+  return [t.onboarding.trialLabel, `~${t.common.texts(texts)}`, days !== undefined ? t.onboarding.trialDaysRemaining(days) : undefined]
     .filter((part): part is string => Boolean(part))
     .join(" · ");
 }

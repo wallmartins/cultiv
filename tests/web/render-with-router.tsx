@@ -16,7 +16,7 @@ import React, { type ReactElement } from "react";
 export async function renderAndSettle(ui: ReactElement, options?: RenderOptions): Promise<RenderResult> {
   const result = render(ui, options);
   await waitFor(() => {
-    expect(document.querySelector(".route-pending")).toBeNull();
+    expect(document.querySelector('.brand-boot[role="status"]')).toBeNull();
     expect(document.body.textContent).not.toBe("");
   });
   return result;

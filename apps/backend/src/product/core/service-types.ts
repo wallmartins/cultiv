@@ -12,12 +12,14 @@ import type { BackendAIPolicyServiceContract } from "../ai-policy/ai-policy-type
 import type { BackendSafetyPolicyServiceContract } from "../safety-policy/safety-policy-types.js";
 import type { BackendGenerationPreviewService } from "../generation/generation-preview-types.js";
 import type { BackendGenerationPrefillService } from "../generation/generation-prefill-types.js";
+import type { BackendGenreInferenceService } from "../generation/genre-producer.js";
 import type { BackendPublicInputSafetyGatewayService } from "../../safety/public-input-safety-types.js";
 import type { BackendOutputReleaseGateService } from "../../safety/output-release-types.js";
 import type { BackendVoiceConsentService } from "../../safety/voice-consent-types.js";
 import type { BackendVoiceRebuildService } from "../voice/voice-rebuild-types.js";
 import type { BackendVoiceService } from "../voice/voice-types.js";
 import type { BackendVoiceCalibrationService } from "../voice/voice-calibration-types.js";
+import type { BackendPracticeProfileService } from "../practice-profile/practice-profile-service.js";
 import type { BackendApplicationUserRepository } from "../../auth/application-user.js";
 import type { BackendOperatorRepository } from "../../auth/operator.js";
 import type { BackendPolicyEvidenceService } from "../../safety/policy-evidence-types.js";
@@ -48,9 +50,11 @@ export interface BackendProductServices {
   readonly usagePolicy: BackendUsagePolicy;
   readonly generationPreview: BackendGenerationPreviewService;
   readonly generationPrefill: BackendGenerationPrefillService;
+  readonly genreInference: BackendGenreInferenceService;
   readonly voiceRebuild: BackendVoiceRebuildService;
   readonly voice: BackendVoiceService;
   readonly voiceCalibration: BackendVoiceCalibrationService;
+  readonly practiceProfile: BackendPracticeProfileService;
   readonly voiceConsent: BackendVoiceConsentService;
   readonly policyEvidence: BackendPolicyEvidenceService;
   readonly operationalOverride: BackendOperationalOverrideService;

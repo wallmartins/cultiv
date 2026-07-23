@@ -5,7 +5,9 @@ import {
   type PastedThemeFormattedProps,
   type QueueAndTrialGateProps
 } from "../states/index.js";
+import { useMessages } from "../i18n/index.js";
 import { AnalyzingIndicator } from "./AnalyzingIndicator.js";
+import { AudiencePicker, type AudiencePickerProps } from "./AudiencePicker.js";
 import { ChannelPicker, type ChannelPickerProps } from "./ChannelPicker.js";
 import { CostPreviewBand, type CostPreviewBandProps } from "./CostPreviewBand.js";
 import { GuidedThread } from "./GuidedThread.js";
@@ -17,6 +19,7 @@ import type { GeneratePhase, ThreadMessageData } from "./types.js";
 // The sticky composer area shows exactly one of these at a time — mutually exclusive per design
 // (showComposer | showChannels | sessionDone | queue-gate).
 export type ComposerRegion =
+  | { readonly kind: "audience"; readonly props: AudiencePickerProps }
   | { readonly kind: "question"; readonly props: QuestionComposerProps }
   | { readonly kind: "channel"; readonly props: ChannelPickerProps }
   | { readonly kind: "done"; readonly props: SessionDoneCardProps }
@@ -35,6 +38,7 @@ export interface GenerateSurfaceProps {
 
 // Orchestrates by phase — no state of its own, just picks which block renders (breakdown 08 §1a).
 export function GenerateSurface({ phase, hero, pastedPreview, messages, composerRegion, costBand }: GenerateSurfaceProps) {
+  const t = useMessages();
   if (phase === "hero") {
     if (pastedPreview) {
       return (
@@ -57,14 +61,15 @@ export function GenerateSurface({ phase, hero, pastedPreview, messages, composer
             phase === "analyzing" ? (
               <AnalyzingIndicator />
             ) : phase === "firing" ? (
-              <AnalyzingIndicator label="iniciando a geração…" />
+              <AnalyzingIndicator label={t.generate.startingGeneration} />
             ) : undefined
           }
         />
       </div>
-      {phase === "thread" ? (
+      {phase === "thread" || phase === "narrowing" ? (
         <div className="generate-composer-sticky">
           <div className="generate-composer-inner">
+            {composerRegion?.kind === "audience" ? <AudiencePicker {...composerRegion.props} /> : null}
             {composerRegion?.kind === "question" ? <QuestionComposer {...composerRegion.props} /> : null}
             {composerRegion?.kind === "channel" ? <ChannelPicker {...composerRegion.props} /> : null}
             {composerRegion?.kind === "done" ? <SessionDoneCard {...composerRegion.props} /> : null}

@@ -57,9 +57,37 @@ export type TransitionTendency = typeof TransitionTendencySchema.Type;
 export const EpistemicPostureSchema = Schema.Literal(
   "exploratory",
   "investigative",
-  "advocacy_mixed"
+  "advocacy",
+  "expository",
+  "instructive",
+  "experiential",
+  "promotional",
+  "not_applicable"
 );
 export type EpistemicPosture = typeof EpistemicPostureSchema.Type;
+
+// The rhetorical genre axis. Consumed by the compositor (Phase 1 F1-2 re-key); its producer is the
+// genre inference at the end of the generation questions (F4-7, /me/genre-inference). The request
+// carries the dominant mode optionally; the resolver defaults it (expound) as the degrade path.
+// English wire values matching every other contracts enum; norte pt names in comments (genero-dimensoes.md §A):
+// expound=expor · narrate=narrar · argue=argumentar · instruct=instruir · promote=promover.
+// Single source for the value list so consumers (compositor, presentation guard) don't re-hand-list it.
+export const RHETORICAL_MODES = ["expound", "narrate", "argue", "instruct", "promote"] as const;
+export const RhetoricalModeSchema = Schema.Literal(...RHETORICAL_MODES);
+export type RhetoricalMode = typeof RhetoricalModeSchema.Type;
+
+export const RhetoricalModeProfileSchema = Schema.Struct({
+  dominant: RhetoricalModeSchema,
+  secondary: Schema.optional(RhetoricalModeSchema)
+});
+export type RhetoricalModeProfile = typeof RhetoricalModeProfileSchema.Type;
+
+export const GenreSignatureSchema = Schema.Struct({
+  rhetoricalMode: RhetoricalModeProfileSchema,
+  epistemicPosture: EpistemicPostureSchema,
+  prose: Schema.String
+});
+export type GenreSignature = typeof GenreSignatureSchema.Type;
 
 export const TraitFrequencySchema = Schema.Literal("rare", "occasional", "common", "dominant");
 export type TraitFrequency = typeof TraitFrequencySchema.Type;

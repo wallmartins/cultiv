@@ -1,6 +1,6 @@
 {
   "version": "current",
-  "timestamp": "2026-07-07T14:29:48.981Z",
+  "timestamp": "2026-07-22T18:40:53.243Z",
   "suite": "voice-fidelity",
   "results": [
     {
@@ -36,6 +36,22 @@
       }
     },
     {
+      "caseId": "voice-fidelity-climate-internal-sale-01",
+      "scores": {
+        "deterministic": 100,
+        "heuristic": 44,
+        "evalComposite": 66
+      }
+    },
+    {
+      "caseId": "voice-fidelity-legal-clause-01",
+      "scores": {
+        "deterministic": 100,
+        "heuristic": 45,
+        "evalComposite": 67
+      }
+    },
+    {
       "caseId": "voice-fidelity-linkedin-casual-01",
       "scores": {
         "deterministic": 100,
@@ -57,6 +73,14 @@
         "deterministic": 100,
         "heuristic": 52,
         "evalComposite": 71
+      }
+    },
+    {
+      "caseId": "voice-fidelity-marketing-conversion-01",
+      "scores": {
+        "deterministic": 100,
+        "heuristic": 49,
+        "evalComposite": 69
       }
     },
     {
@@ -85,9 +109,9 @@
     }
   ],
   "summary": {
-    "avgEvalComposite": 72,
-    "minEvalComposite": 69,
-    "passRate": 90,
+    "avgEvalComposite": 71,
+    "minEvalComposite": 66,
+    "passRate": 69,
     "regressions": []
   }
 }

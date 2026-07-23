@@ -9,6 +9,7 @@ export {
   useClearReaction,
   useExecutionWatch,
   useRunningExecutionsWatch,
+  foldTransition,
   type SubmitReactionInput
 } from "./executions.js";
 
@@ -37,9 +38,16 @@ export {
 
 export { useOnboarding, useCompleteOnboarding } from "./onboarding.js";
 
-export { useGenerationIntents } from "./generation-intents.js";
-
 export { useGeneratePrefill } from "./generation-prefill.js";
+
+export { useGenreInference } from "./genre-inference.js";
+
+export {
+  usePracticeProfile,
+  usePracticeIdentity,
+  useUpdateDeclaredAxes,
+  useRespondToNicheAsk
+} from "./practice-profile.js";
 
 export {
   useEntitlement,

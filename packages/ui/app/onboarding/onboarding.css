@@ -143,6 +143,11 @@
 .wizard-field-textarea {
   resize: vertical;
 }
+.wizard-audience-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
 .wizard-consent-notice {
   font-size: 0.84rem;
 }

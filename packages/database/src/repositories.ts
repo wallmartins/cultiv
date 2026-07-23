@@ -12,5 +12,7 @@ export {
   createAuditRepositoryFromClient,
   createVoiceTrainingConsentRepositoryFromClient,
   createExecutionReactionRepositoryFromClient,
-  createVoiceExampleBatchRepositoryFromClient
+  createVoiceExampleBatchRepositoryFromClient,
+  createPracticeProfileRepositoryFromClient,
+  createPracticeProfileDiagnosticsRepositoryFromClient
 } from "./repositories/index.js";

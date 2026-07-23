@@ -1,19 +1,19 @@
 import { describe, expect, it } from "vitest";
-import { COGNITIVE_PRESET_RULE_MARKERS, resolveContentTypeVoicePreset } from "../../apps/backend/src/product/voice/voice-presets.js";
+import type { GenerationChannel } from "@my-ai-orchestrator/contracts";
+import { COGNITIVE_PRESET_RULE_MARKERS, resolveChannelVoicePreset } from "../../apps/backend/src/product/voice/voice-presets.js";
 
 describe("voice preset governance", () => {
-  it("does not inject cognitive narrative rules into content type presets", () => {
-    const contentTypes = [
-      "linkedin-post",
-      "twitter-thread",
-      "newsletter",
-      "long-form-blog",
-      "validation-post",
-      "architecture-post"
+  it("does not inject cognitive narrative rules into channel presets", () => {
+    const channels: readonly GenerationChannel[] = [
+      "unspecified",
+      "professional-network",
+      "blog",
+      "email",
+      "social"
     ];
 
-    for (const contentType of contentTypes) {
-      const preset = resolveContentTypeVoicePreset(contentType);
+    for (const channel of channels) {
+      const preset = resolveChannelVoicePreset(channel);
       const serialized = JSON.stringify(preset).toLowerCase();
 
       for (const marker of COGNITIVE_PRESET_RULE_MARKERS) {

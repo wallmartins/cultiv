@@ -8,7 +8,8 @@ import type {
   VoiceCalibrationStepState,
   WizardContext
 } from "@my-ai-orchestrator/contracts";
-import { buildStepPrompt } from "./voice-calibration-candidates.js";
+import { buildStepPrompt, type WizardStepAnchor } from "./voice-calibration-candidates.js";
+import type { PracticeProfileLocale } from "../practice-profile/index.js";
 
 const sessions = new Map<string, VoiceCalibrationSessionRecord>();
 
@@ -17,17 +18,20 @@ export interface VoiceCalibrationSessionRecord {
   readonly userId: string;
   status: VoiceCalibrationSessionStatus;
   context?: WizardContext;
+  // F3-3 — the resolved output locale for this session, set once from the setContext payload.
+  locale?: PracticeProfileLocale;
+  // F3-4 — the generated calibration anchors (G3) keyed by writable step, overriding the legacy text.
+  anchorsByStepId?: Partial<Record<WizardStepId, WizardStepAnchor>>;
   currentStepId: WizardStepId;
   steps: VoiceCalibrationStepState[];
   exampleIdsByStepId: Record<string, string>;
-  themeRotationIndex: number;
   readonly createdAt: string;
   updatedAt: string;
 }
 
-function buildInitialSteps(context?: WizardContext, rotationIndex = 0): VoiceCalibrationStepState[] {
+function buildInitialSteps(): VoiceCalibrationStepState[] {
   return CALIBRATION_WIZARD_STEPS.map((step) => {
-    const built = buildStepPrompt(step.id, context, rotationIndex);
+    const built = buildStepPrompt(step.id);
     return {
       stepId: step.id,
       theme: built.theme,
@@ -45,7 +49,6 @@ export function createVoiceCalibrationSession(userId: string, now: () => Date): 
     currentStepId: CALIBRATION_WIZARD_STEPS[0]!.id,
     steps: buildInitialSteps(),
     exampleIdsByStepId: {},
-    themeRotationIndex: 0,
     createdAt: timestamp,
     updatedAt: timestamp
   };
@@ -81,11 +84,8 @@ export function refreshSessionStepPrompts(
       return stepState;
     }
 
-    const built = buildStepPrompt(
-      stepState.stepId as WizardStepId,
-      session.context,
-      session.themeRotationIndex
-    );
+    const stepId = stepState.stepId as WizardStepId;
+    const built = buildStepPrompt(stepId, session.anchorsByStepId?.[stepId]);
     return {
       ...stepState,
       theme: built.theme,

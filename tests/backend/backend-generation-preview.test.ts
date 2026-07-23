@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { Effect } from "effect";
-import { decodeGenerationPreviewResponse, resolvePhase1LegacyContentTypeId } from "@my-ai-orchestrator/contracts";
-import { resolveEffectiveWordTarget, toIntentWordTarget } from "@my-ai-orchestrator/text-quality";
+import { decodeGenerationPreviewResponse } from "@my-ai-orchestrator/contracts";
 import {
   backendAppTestStartedAt,
   createBackendAppTestApp,
@@ -27,7 +26,8 @@ describe("backend generation preview", () => {
     const reservationsBefore = services.billing.listReservations("user_1", "criador");
 
     const payload = {
-      contentType: "newsletter",
+      rhetoricalMode: "promote",
+      scope: { lengthTier: "medium", channel: "email" },
       qualityMode: "strict",
       briefing: {
         topic: "AI policy rollout",
@@ -52,7 +52,7 @@ describe("backend generation preview", () => {
     });
     const secondDecoded = await Effect.runPromise(decodeGenerationPreviewResponse(await secondResponse.json()));
 
-    expect(decoded.pricingSnapshot.contentType).toBe("newsletter");
+    expect(decoded.pricingSnapshot.contentType).toBe("edition-piece");
     expect(decoded.pricingSnapshot.qualityMode).toBe("strict");
     expect(decoded.pricingSnapshot.creditPrice).toBe(5);
     expect(decoded.pricingSnapshot.quoteId).toMatch(/^quote_[a-f0-9]{64}$/);
@@ -66,7 +66,6 @@ describe("backend generation preview", () => {
     expect(decoded.quotaRemaining).toBeLessThanOrEqual(decoded.quotaLimit);
     expect(decoded.currentBalance).toBeTypeOf("number");
     expect(decoded.canonicalCreditCost).toBe(2.5);
-    expect(decoded.options.contentTypes.some((contentType) => contentType.id === "newsletter")).toBe(true);
     expect(decoded.options.qualityModes.find((mode) => mode.id === "strict")?.allowed).toBe(true);
     const recommended = decoded.options.qualityModes.filter((mode) => mode.recommended);
     expect(recommended).toHaveLength(1);
@@ -98,7 +97,8 @@ describe("backend generation preview", () => {
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
         userId: "user_2",
-        contentType: "architecture-post",
+        rhetoricalMode: "expound",
+        scope: { lengthTier: "long" },
         briefing: {
           systemContext: "We need to separate product orchestration from runtime execution and preserve quote integrity.",
           tradeoffs: ["coordination overhead", "clearer ownership", "lower drift risk"],
@@ -122,14 +122,14 @@ describe("backend generation preview", () => {
     expect(decoded.pricingSnapshot.qualityMode).toBe("balanced");
   });
 
-  it("resolves share-idea short to linkedin-post pricing with resolvedIntent", async () => {
+  it("resolves expound short to short-piece pricing", async () => {
     const config = createBackendAppTestConfig({ billingUserId: "user_intent_preview" });
     const services = createBackendAppTestServices(config);
 
     services.billing.upsertSubscription({
       id: "sub_user_intent_preview_pro",
       userId: "user_intent_preview",
-      planId: "pro",
+      planId: "criador",
       status: "active",
       startedAt: backendAppTestStartedAt.toISOString()
     });
@@ -139,7 +139,7 @@ describe("backend generation preview", () => {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
-        intent: "share-idea",
+        rhetoricalMode: "expound",
         scope: { lengthTier: "short" },
         briefing: {
           topic: "Delegating product decisions"
@@ -151,24 +151,12 @@ describe("backend generation preview", () => {
 
     const decoded = await Effect.runPromise(decodeGenerationPreviewResponse(await response.json()));
 
-    expect(decoded.pricingSnapshot.contentType).toBe("linkedin-post");
+    expect(decoded.pricingSnapshot.contentType).toBe("short-piece");
     expect(decoded.pricingSnapshot.creditPrice).toBeGreaterThan(0);
-    const wordTarget = toIntentWordTarget(
-      resolveEffectiveWordTarget({
-        contentType: resolvePhase1LegacyContentTypeId("share-idea", "short"),
-        lengthTier: "short"
-      })
-    );
-
-    expect(decoded.resolvedIntent).toEqual({
-      intent: "share-idea",
-      scope: { lengthTier: "short" },
-      wordTargetMin: wordTarget.min,
-      wordTargetMax: wordTarget.max
-    });
+    expect(decoded.compositor?.lengthTier).toBe("short");
   });
 
-  it("rejects preview requests without intent+scope or contentType", async () => {
+  it("rejects preview requests without a generation scope", async () => {
     const config = createBackendAppTestConfig({ billingUserId: "user_preview_validation" });
     const services = createBackendAppTestServices(config);
 
@@ -209,7 +197,8 @@ describe("backend generation preview", () => {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
-        contentType: "newsletter",
+        rhetoricalMode: "promote",
+        scope: { lengthTier: "medium", channel: "email" },
         qualityMode: "strict",
         includeRecommendation: false,
         briefing: {

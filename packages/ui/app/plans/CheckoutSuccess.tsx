@@ -1,4 +1,5 @@
 import { Panel, Pill, Ring, Serif } from "../primitives/index.js";
+import { useMessages } from "../i18n/index.js";
 import type { CheckoutProductKind } from "./types.js";
 
 export interface CheckoutSuccessProps {
@@ -7,19 +8,9 @@ export interface CheckoutSuccessProps {
   readonly onDone: () => void;
 }
 
-const COPY: Record<CheckoutProductKind, { title: string; sub: (itemLabel: string) => string }> = {
-  subscription: {
-    title: "Assinatura ativa.",
-    sub: (itemLabel) => `Bem-vindo ao ${itemLabel} — seus créditos do mês já estão na conta.`
-  },
-  topup: {
-    title: "Créditos adicionados.",
-    sub: (itemLabel) => `Seu ${itemLabel} já está na conta.`
-  }
-};
-
 export function CheckoutSuccess({ product, itemLabel, onDone }: CheckoutSuccessProps) {
-  const copy = COPY[product];
+  const t = useMessages();
+  const copy = t.plans.checkout.success[product];
 
   return (
     <Panel dialog className="checkout-overlay-panel">
@@ -34,7 +25,7 @@ export function CheckoutSuccess({ product, itemLabel, onDone }: CheckoutSuccessP
       <div className="checkout-overlay-sub">{copy.sub(itemLabel)}</div>
       <div className="checkout-overlay-actions">
         <Pill variant="primary" onClick={onDone}>
-          Voltar a escrever →
+          {t.plans.checkout.success.done}
         </Pill>
       </div>
     </Panel>

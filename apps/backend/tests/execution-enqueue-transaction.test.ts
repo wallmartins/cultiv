@@ -14,8 +14,8 @@ import {
 function createPipelineRequest(overrides: Partial<PipelineRequest> = {}): PipelineRequest {
   return {
     userId: "user-42",
-    pipelineType: "validation-post",
-    contentType: "validation-post",
+    pipelineType: "serial-piece",
+    contentType: "serial-piece",
     briefing: { topic: "Enqueue test", keyPoints: ["atomic"] },
     ...overrides
   } as PipelineRequest;

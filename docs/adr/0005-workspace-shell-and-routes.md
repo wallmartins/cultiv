@@ -103,3 +103,9 @@ Estas rotas/contratos **não existem** e precisam ser criados na implementação
 - **Coerência com ADR 0004** (o histórico e o "Ajustar" respeitam o intent invisível), **ADR 0001** (calibração é o único ponto de entrada; resetar/recalibrar sempre voltam ao wizard) e **ADR 0003** (stack e contratos reusados; `voice.*`, `executions.*`, `billing.getEntitlement` intocados).
 - **Novos contratos a implementar** (§8) — especificados, não construídos aqui. O eixo de billing (planos/checkout/gestão) fica para o **ADR de Billing/Plans** (mapa, tickets 09/10/12).
 - **Protótipos são descartáveis** — as variantes validadas entram reescritas de verdade na implementação do `/app`; ficam linkados como assets, não colados.
+
+---
+
+## Emendada pela ADR 0010 — Practice Profile (2026-07-21)
+
+Ver `docs/adr/0010-practice-profile.md` → Consequências. Esta ADR continua válida; a 0010 emenda pontos específicos (calibração gerada do Practice Profile / intent muda de momento e representação / `/voice` vira identidade de escrita, conforme o caso). Consulte a 0010 antes de tratar esta como intocada.

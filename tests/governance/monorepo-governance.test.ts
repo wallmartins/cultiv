@@ -92,8 +92,8 @@ describe("monorepo governance", () => {
 
     const plan = buildOrchestrationPlan({
       userId: "user_1",
-      pipelineType: "validation-post",
-      briefing: "Write a validation post"
+      pipelineType: "serial-piece",
+      briefing: "Write a serial post"
     });
 
     const registry = createSkillRegistry();
@@ -138,7 +138,7 @@ describe("monorepo governance", () => {
       inputs: {}
     }));
 
-    expect(plan.pipeline.name).toBe("validation-post");
+    expect(plan.pipeline.name).toBe("serial-piece");
     expect(plan.estimatedSteps).toBe(4);
     expect(serviceName).toBe("monorepo-smoke");
     expect(execution.name).toBe("summarize");

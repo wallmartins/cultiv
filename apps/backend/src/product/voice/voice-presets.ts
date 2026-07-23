@@ -1,44 +1,21 @@
-export function resolveContentTypeVoicePreset(contentType: string): {
+import type { GenerationChannel } from "@my-ai-orchestrator/contracts";
+
+// The Format Expression Profile's channel register (ADR 0010 F6-4 — "how the author sounds on a
+// channel"), keyed by GenerationChannel now that Content Type is retired. Length lives in the
+// compositor word target (compositor/scale.ts), so these carry only register/structure hints, never
+// word counts. `unspecified` is the neutral default: preserve the voice, add no channel shaping.
+const CHANNEL_VOICE_CONSTRAINTS: Record<GenerationChannel, readonly string[]> = {
+  "professional-network": ["preserve user voice", "prefer 2-4 short paragraphs"],
+  social: ["preserve user voice", "keep each unit concise", "maintain momentum"],
+  email: ["preserve user voice", "use clear section transitions"],
+  blog: ["preserve user voice", "allow longer explanations and sections"],
+  unspecified: ["preserve user voice"]
+};
+
+export function resolveChannelVoicePreset(channel: GenerationChannel): {
   readonly constraints: readonly string[];
-  readonly lexicon: readonly string[];
 } {
-  switch (contentType) {
-    case "linkedin-post":
-      return {
-        constraints: ["preserve user voice", "keep the full post between 130 and 220 words", "prefer 2-4 short paragraphs"],
-        lexicon: []
-      };
-    case "twitter-thread":
-      return {
-        constraints: ["preserve user voice", "keep each tweet concise", "maintain thread momentum"],
-        lexicon: []
-      };
-    case "newsletter":
-      return {
-        constraints: ["preserve user voice", "use clear section transitions"],
-        lexicon: []
-      };
-    case "long-form-blog":
-      return {
-        constraints: ["preserve user voice", "allow longer explanations and sections"],
-        lexicon: []
-      };
-    case "validation-post":
-      return {
-        constraints: ["preserve user voice", "keep claims tied to supplied evidence"],
-        lexicon: []
-      };
-    case "architecture-post":
-      return {
-        constraints: ["preserve user voice", "surface explicit tradeoffs and constraints"],
-        lexicon: []
-      };
-    default:
-      return {
-        constraints: ["preserve user voice"],
-        lexicon: []
-      };
-  }
+  return { constraints: CHANNEL_VOICE_CONSTRAINTS[channel] ?? CHANNEL_VOICE_CONSTRAINTS.unspecified };
 }
 
 export const COGNITIVE_PRESET_RULE_MARKERS = [

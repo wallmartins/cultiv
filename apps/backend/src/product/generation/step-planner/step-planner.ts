@@ -1,5 +1,5 @@
 import type { ExecutionPlan } from "@my-ai-orchestrator/contracts";
-import type { GenerationChannel, GenerationIntent } from "@my-ai-orchestrator/contracts";
+import type { GenerationChannel, RhetoricalMode } from "@my-ai-orchestrator/contracts";
 import { pickBasePreset } from "../compositor/expression.js";
 import { resolveDominantPlanSignature } from "../compositor/presets.js";
 import { derivePatchOps } from "./briefing-rules.js";
@@ -19,16 +19,16 @@ export function patchExecutionPlan(
   const basePlanSignature = basePlan.planSignature;
   const ops = derivePatchOps({
     briefing,
-    intent: basePlan.parameters.intent,
+    rhetoricalMode: basePlan.parameters.rhetoricalMode,
     lengthTier: basePlan.parameters.lengthTier
   });
   const patchedStepsPlan = applyPatchOps(basePlan, ops);
   const basePresetId = pickBasePreset({
-    intent: basePlan.parameters.intent,
+    rhetoricalMode: basePlan.parameters.rhetoricalMode,
     lengthTier: basePlan.parameters.lengthTier,
     channel: resolveChannelFromExpressionProfile(
       basePlan.parameters.expressionProfile,
-      basePlan.parameters.intent
+      basePlan.parameters.rhetoricalMode
     )
   });
 
@@ -44,9 +44,9 @@ export function patchExecutionPlan(
 
 function resolveChannelFromExpressionProfile(
   expressionProfile: string,
-  intent: GenerationIntent
+  rhetoricalMode: RhetoricalMode
 ): GenerationChannel {
-  if (expressionProfile === `${intent}-default`) {
+  if (expressionProfile === `${rhetoricalMode}-default`) {
     return "unspecified";
   }
 

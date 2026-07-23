@@ -11,7 +11,7 @@ describe("orchestrator and skills integration", () => {
   it("decodes a shared request contract and builds a normalized orchestration plan", () => {
     const request = Effect.runSync(decodePipelineRequest({
       userId: "user_1",
-      pipelineType: "validation-post",
+      pipelineType: "serial-piece",
       briefing: "Write a validation post about modular monorepos",
       language: "pt-BR",
       qualityMode: "balanced",
@@ -21,19 +21,19 @@ describe("orchestrator and skills integration", () => {
     const plan = buildOrchestrationPlan(request);
 
     expect(plan.request.variant).toBe("simplified");
-    expect(plan.request.pipelineName).toBe("validation-post");
+    expect(plan.request.pipelineName).toBe("serial-piece");
     expect(plan.request.language).toBe("pt-BR");
     expect(plan.request.input).toEqual({
       briefing: "Write a validation post about modular monorepos"
     });
     expect(plan.estimatedSteps).toBe(4);
-    expect(plan.stepProgress.map((step) => step.skill)).toEqual(["analyze", "draft", "refine", "sanitize"]);
+    expect(plan.stepProgress.map((step) => step.skill)).toEqual(["analyze", "draft", "tighten", "sanitize"]);
   });
 
   it("executes a language-aware skill through the orchestration job lifecycle", async () => {
     const request = Effect.runSync(decodePipelineRequest({
       userId: "user_2",
-      pipelineType: "validation-post",
+      pipelineType: "serial-piece",
       briefing: "Compare Effect layers with traditional dependency injection",
       language: "en-US",
       qualityMode: "strict"

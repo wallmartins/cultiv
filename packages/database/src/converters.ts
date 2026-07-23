@@ -4,6 +4,8 @@ import type {
   Job,
   MemoryRecord as DomainMemoryRecord,
   Pipeline,
+  PracticeProfile,
+  PracticeProfileDiagnostics,
   VoiceExample,
   VoiceProfileDiagnostics,
   VoiceProfileSnapshot,
@@ -16,6 +18,8 @@ import type {
   JobRecord,
   MemoryEntryRecord,
   PipelineRecord,
+  PracticeProfileDiagnosticsRecord,
+  PracticeProfileRecord,
   VoiceExampleRecord,
   VoiceProfileDiagnosticsRecord,
   VoiceProfileRecord,
@@ -134,6 +138,40 @@ export function toVoiceProfileDiagnosticsRecord(record: VoiceProfileDiagnostics,
 }
 
 export function toVoiceProfileDiagnosticsDomain(record: VoiceProfileDiagnosticsRecord): VoiceProfileDiagnostics {
+  const { version, ...diagnostics } = record;
+  return diagnostics;
+}
+
+export function toPracticeProfileRecord(record: PracticeProfile, version = 1): PracticeProfileRecord {
+  const { version: profileVersion, ...profile } = record;
+  return {
+    ...profile,
+    profileVersion,
+    version
+  };
+}
+
+export function toPracticeProfileDomain(record: PracticeProfileRecord): PracticeProfile {
+  const { version, profileVersion, ...profile } = record;
+  return {
+    ...profile,
+    version: profileVersion
+  };
+}
+
+export function toPracticeProfileDiagnosticsRecord(
+  record: PracticeProfileDiagnostics,
+  version = 1
+): PracticeProfileDiagnosticsRecord {
+  return {
+    ...record,
+    version
+  };
+}
+
+export function toPracticeProfileDiagnosticsDomain(
+  record: PracticeProfileDiagnosticsRecord
+): PracticeProfileDiagnostics {
   const { version, ...diagnostics } = record;
   return diagnostics;
 }

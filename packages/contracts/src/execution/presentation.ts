@@ -1,45 +1,30 @@
 import type { CompositorMetadata } from "../generation-compositor.js";
 import type {
   GenerationChannel,
-  GenerationIntent,
   GenerationLengthTier
-} from "../generation-intent.js";
-import { mapLegacyContentTypeToPhase1Intent } from "../generation-intent-legacy-map.js";
+} from "../generation-scope.js";
+import { isGenerationChannel } from "../generation-scope.js";
+import { RHETORICAL_MODES, type RhetoricalMode } from "../reasoning.js";
 import type { PipelineRequest } from "./request.js";
 
 export type ExecutionPresentation = {
-  readonly generationIntent?: GenerationIntent;
+  readonly rhetoricalMode?: RhetoricalMode;
   readonly briefingTopic?: string;
   readonly lengthTier?: GenerationLengthTier;
   readonly channel?: GenerationChannel;
 };
 
-const GENERATION_INTENTS = new Set<GenerationIntent>([
-  "share-idea",
-  "explain-deeply",
-  "engage-audience",
-  "tell-story",
-  "update-subscribers",
-  "document-decision"
-]);
+const RHETORICAL_MODE_SET = new Set<RhetoricalMode>(RHETORICAL_MODES);
 
 const GENERATION_LENGTH_TIERS = new Set<GenerationLengthTier>(["short", "medium", "long"]);
-
-const GENERATION_CHANNELS = new Set<GenerationChannel>([
-  "unspecified",
-  "professional-network",
-  "blog",
-  "email",
-  "social"
-]);
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
 }
 
-function asGenerationIntent(value: unknown): GenerationIntent | undefined {
-  return typeof value === "string" && GENERATION_INTENTS.has(value as GenerationIntent)
-    ? (value as GenerationIntent)
+function asRhetoricalMode(value: unknown): RhetoricalMode | undefined {
+  return typeof value === "string" && RHETORICAL_MODE_SET.has(value as RhetoricalMode)
+    ? (value as RhetoricalMode)
     : undefined;
 }
 
@@ -50,9 +35,7 @@ function asGenerationLengthTier(value: unknown): GenerationLengthTier | undefine
 }
 
 function asGenerationChannel(value: unknown): GenerationChannel | undefined {
-  return typeof value === "string" && GENERATION_CHANNELS.has(value as GenerationChannel)
-    ? (value as GenerationChannel)
-    : undefined;
+  return isGenerationChannel(value) ? value : undefined;
 }
 
 function pickTopicFromRecord(record: Record<string, unknown>): string | undefined {
@@ -142,32 +125,23 @@ function resolveBriefingTopic(request: PipelineRequest | undefined): string | un
 
 export function resolveExecutionPresentation(
   request: PipelineRequest | undefined,
-  contentType: string
+  _contentType: string
 ): ExecutionPresentation {
-  let generationIntent: GenerationIntent | undefined;
+  let rhetoricalMode: RhetoricalMode | undefined;
   let lengthTier: GenerationLengthTier | undefined;
   let channel: GenerationChannel | undefined;
 
   if (request && "pipeline" in request) {
     const context = isRecord(request.context) ? request.context : undefined;
-    generationIntent = asGenerationIntent(context?.generationIntent);
+    rhetoricalMode = asRhetoricalMode(context?.rhetoricalMode);
     channel = asGenerationChannel(context?.generationChannel);
     lengthTier = readCompositorMetadata(context)?.lengthTier;
   }
 
   const briefingTopic = resolveBriefingTopic(request);
 
-  if (!generationIntent || !lengthTier) {
-    const legacy = mapLegacyContentTypeToPhase1Intent(contentType);
-    if (legacy) {
-      generationIntent = generationIntent ?? legacy.intent;
-      lengthTier = lengthTier ?? legacy.scope.lengthTier;
-      channel = channel ?? legacy.scope.channel;
-    }
-  }
-
   return {
-    ...(generationIntent ? { generationIntent } : {}),
+    ...(rhetoricalMode ? { rhetoricalMode } : {}),
     ...(briefingTopic ? { briefingTopic } : {}),
     ...(lengthTier ? { lengthTier } : {}),
     ...(channel ? { channel } : {})

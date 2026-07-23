@@ -24,6 +24,7 @@ import {
 } from "@my-ai-orchestrator/shared/light";
 import { queryClient } from "./query-client.js";
 import { readPendingCheckout } from "./routes/pending-checkout-storage.js";
+import { BrandError, BrandLoader } from "./boot-states.js";
 
 // Cada superfície vira um chunk próprio: o primeiro carregamento (que muitas vezes só redireciona
 // pro Auth0) não paga por telas que o autor ainda não abriu. As rotas continuam declaradas aqui,
@@ -308,19 +309,12 @@ export const router = createRouter({
   defaultPreload: "intent",
   // Com as superfícies em chunks separados, uma navegação pode esperar um download. O padrão de
   // defaultPendingMs (1s) segura este aviso: carregamento rápido não pisca nada na tela.
-  defaultPendingComponent: () => <p className="route-pending">Carregando…</p>,
+  defaultPendingComponent: () => <BrandLoader />,
   // Sem isto, um loader que rejeita (ex.: o GET da execução em /g/$id) não renderiza nada: a URL
-  // já mudou e a tela fica em branco, com o erro só no console. Markup inline de propósito —
-  // importar um componente de packages/ui aqui puxaria o chunk dele pro carregamento inicial.
-  defaultErrorComponent: ({ error, reset }) => (
-    <div className="route-error">
-      <p>Não deu para carregar esta tela.</p>
-      <p className="route-error-detail">{error instanceof Error ? error.message : String(error)}</p>
-      <button type="button" onClick={reset}>
-        Tentar de novo
-      </button>
-    </div>
-  )
+  // já mudou e a tela fica em branco, com o erro só no console. BrandError (boot-states, local ao
+  // apps/web — não puxa o chunk de packages/ui) mapeia o ClientSdkError para uma mensagem amigável
+  // em vez de despejar o "Failed to fetch" cru; reset re-executa o loader.
+  defaultErrorComponent: ({ error, reset }) => <BrandError error={error} onRetry={reset} />
 });
 
 declare module "@tanstack/react-router" {

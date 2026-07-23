@@ -1,0 +1,37 @@
+{
+  "userId": "eval-climate-tech-pm",
+  "tone": "pragmatic",
+  "cadence": "measured",
+  "description": "Early-stage PM writing for buyers who already believe in sustainability — the gap is behavior, not conviction, so every claim leans on a usage number even when the sample is thin.",
+  "lexicon": ["ESG", "escopo 3", "engajamento", "gamificação", "adesão", "métrica de comportamento", "stakeholder", "greenwashing"],
+  "constraints": ["cite a real, even small, customer usage number instead of a study", "name what was tried before and did not stick"],
+  "antiPatterns": ["net-zero promises without a mechanism", "awareness framed as the whole plan"],
+  "antiPatternsExplicit": [
+    "levamos sustentabilidade a sério",
+    "compromisso com o planeta",
+    "impacto positivo",
+    "consciência ambiental"
+  ],
+  "rules": ["open with what changed in the reader's environment (budget, regulation, target)", "close with the objection the reader will hear from their own boss"],
+  "styleMarkers": ["first-person", "data-anchored"],
+  "userLabels": ["climate-tech", "product", "pragmatic"],
+  "coreReasoningSignature": {
+    "narrativeProse": "Surfaces a counter-intuitive finding from customer usage data and ties it directly to the reader's next decision, never to a slogan.",
+    "certaintyLevel": "low",
+    "judgmentFrequency": "moderate",
+    "conclusionPace": "moderate",
+    "readerRelationship": "peer",
+    "authoritySource": "practice",
+    "derivedAntiPatterns": ["greenwashing language", "awareness-as-plan"]
+  },
+  "argumentDevelopmentSignature": {
+    "developmentProse": "Opens with what changed for the reader, grounds the finding in thin-but-real usage data, names what was already tried and failed, then closes on the internal objection.",
+    "moveLabels": ["trigger", "evidence", "prior-attempt", "internal-objection"],
+    "transitionTendencies": [
+      { "from": "trigger", "to": "evidence", "frequency": "common" },
+      { "from": "prior-attempt", "to": "internal-objection", "frequency": "occasional" }
+    ],
+    "epistemicPosture": "exploratory",
+    "structuralAntiPatterns": ["hand_wavy_claim", "example_free_abstraction"]
+  }
+}

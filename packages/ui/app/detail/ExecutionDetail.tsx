@@ -1,4 +1,5 @@
 import { Mono, Serif } from "../primitives/index.js";
+import { useMessages } from "../i18n/index.js";
 import type { ExecutionReactionValue, GenerationLengthTier } from "./types.js";
 import { DegradedDeliveryBanner, DegradedWordCount } from "../states/index.js";
 import { ReactionRow } from "./ReactionRow.js";
@@ -50,6 +51,7 @@ export function ExecutionDetail({
   reactionPending,
   degraded
 }: ExecutionDetailProps) {
+  const t = useMessages();
   const isDegraded = degraded !== undefined && degraded.deliveredWords < degraded.requestedWords;
 
   return (
@@ -72,7 +74,7 @@ export function ExecutionDetail({
             </>
           ) : null}
         </Mono>
-        {usedFallbackVoiceProfile ? <Mono style={{ color: "var(--dim)" }}>voz de demonstração</Mono> : null}
+        {usedFallbackVoiceProfile ? <Mono style={{ color: "var(--dim)" }}>{t.detail.demoVoice}</Mono> : null}
         <Serif as="h1" size="34px" lineHeight={1.15} style={{ letterSpacing: "-0.01em", margin: 0 }}>
           {topic}
         </Serif>

@@ -6,26 +6,26 @@ import {
 } from "../../packages/contracts/src/generation-preview.js";
 import { MeExecutionRequestSchema } from "../../packages/contracts/src/execution/request.js";
 
-describe("generation preview and execution intent contracts", () => {
-  it("decodes preview request with intent and scope", () => {
+describe("generation preview and execution contracts", () => {
+  it("decodes preview request with rhetoricalMode and scope", () => {
     const decoded = Schema.decodeUnknownSync(GenerationPreviewRequestSchema)({
-      intent: "share-idea",
+      rhetoricalMode: "expound",
       scope: { lengthTier: "short", channel: "professional-network" },
       briefing: { topic: "Delegação" },
       qualityMode: "balanced"
     });
 
-    expect(decoded.intent).toBe("share-idea");
+    expect(decoded.rhetoricalMode).toBe("expound");
     expect(decoded.scope?.lengthTier).toBe("short");
     expect(decoded.scope?.channel).toBe("professional-network");
   });
 
-  it("decodes preview response with resolvedIntent metadata", () => {
+  it("decodes preview response with qualityModes options only", () => {
     const decoded = Schema.decodeUnknownSync(GenerationPreviewResponseSchema)({
       pricingSnapshot: {
         quoteId: "quote_123",
         policyVersion: "0.1.0",
-        contentType: "linkedin-post",
+        contentType: "short-piece",
         qualityMode: "balanced",
         creditPrice: 2.5
       },
@@ -35,45 +35,35 @@ describe("generation preview and execution intent contracts", () => {
       quotaLimit: 1000,
       quotaCost: 1,
       canonicalCreditCost: 2.5,
-      resolvedIntent: {
-        intent: "share-idea",
-        scope: { lengthTier: "short" },
-        wordTargetMin: 150,
-        wordTargetMax: 400
-      },
       options: {
-        contentTypes: [],
         qualityModes: []
       }
     });
 
-    expect(decoded.resolvedIntent?.intent).toBe("share-idea");
-    expect(decoded.resolvedIntent?.scope.lengthTier).toBe("short");
-    expect(decoded.resolvedIntent?.wordTargetMin).toBe(150);
-    expect(decoded.resolvedIntent?.wordTargetMax).toBe(400);
+    expect(decoded.pricingSnapshot.contentType).toBe("short-piece");
+    expect(decoded.options.qualityModes).toEqual([]);
+    expect((decoded as Record<string, unknown>).resolvedIntent).toBeUndefined();
   });
 
-  it("decodes execution request with intent and scope without contentType", () => {
+  it("decodes execution request with rhetoricalMode and scope", () => {
     const decoded = Schema.decodeUnknownSync(MeExecutionRequestSchema)({
-      intent: "share-idea",
+      rhetoricalMode: "expound",
       scope: { lengthTier: "short" },
       briefing: "Quick thought on delegation",
       qualityMode: "balanced"
     });
 
-    expect(decoded.intent).toBe("share-idea");
+    expect(decoded.rhetoricalMode).toBe("expound");
     expect(decoded.scope?.lengthTier).toBe("short");
-    expect(decoded.contentType).toBeUndefined();
   });
 
-  it("still decodes legacy execution request with contentType only", () => {
+  it("decodes execution request with only a briefing (rhetoricalMode and scope both optional)", () => {
     const decoded = Schema.decodeUnknownSync(MeExecutionRequestSchema)({
-      contentType: "newsletter",
       briefing: { topic: "Migração" },
       qualityMode: "strict"
     });
 
-    expect(decoded.contentType).toBe("newsletter");
-    expect(decoded.intent).toBeUndefined();
+    expect(decoded.rhetoricalMode).toBeUndefined();
+    expect(decoded.scope).toBeUndefined();
   });
 });

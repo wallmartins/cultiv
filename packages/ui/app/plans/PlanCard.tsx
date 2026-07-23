@@ -1,4 +1,5 @@
 import { Mono, Pill } from "../primitives/index.js";
+import { useMessages } from "../i18n/index.js";
 import type { PlanCardData } from "./types.js";
 
 export interface PlanCardProps {
@@ -6,6 +7,7 @@ export interface PlanCardProps {
 }
 
 export function PlanCard({ plan }: PlanCardProps) {
+  const t = useMessages();
   const classes = ["plan-card", plan.featured && "is-featured"].filter(Boolean).join(" ");
 
   return (
@@ -14,13 +16,17 @@ export function PlanCard({ plan }: PlanCardProps) {
       <div className="plan-card-name">{plan.name}</div>
       <div>
         <span className="num plan-card-price">{plan.priceLabel}</span>
-        <Mono className="plan-card-price-note"> /mês{plan.billNote}</Mono>
+        <Mono className="plan-card-price-note">
+          {" "}
+          {t.plans.perMonth}
+          {plan.billNote}
+        </Mono>
       </div>
       <div className="plan-card-features">
         <div className="plan-card-feature">
           <span className="plan-card-dot" />
           <span>
-            <span className="num">{plan.generations}</span> gerações/mês
+            <span className="num">{plan.generations}</span> {t.plans.generationsPerMonth}
           </span>
         </div>
         {plan.features.map((feature) => (

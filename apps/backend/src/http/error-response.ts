@@ -7,6 +7,7 @@ import { mapPolicyError } from "../error-mappers/error-map-policy.js";
 import { mapResourceError } from "../error-mappers/error-map-resource.js";
 import { mapSafetyError } from "../error-mappers/error-map-safety.js";
 import { mapVoiceError } from "../error-mappers/error-map-voice.js";
+import { mapPracticeProfileError } from "../error-mappers/error-map-practice-profile.js";
 import { mapBillingError } from "../error-mappers/error-map-billing.js";
 import { mapDatabaseError } from "../error-mappers/error-map-database.js";
 import { mapAccountError } from "../error-mappers/error-map-account.js";
@@ -26,6 +27,9 @@ export function mapErrorToHttp(error: unknown, path: string): HttpErrorResponse 
 
   const voiceResult = mapVoiceError(error, path);
   if (voiceResult) return voiceResult;
+
+  const practiceProfileResult = mapPracticeProfileError(error, path);
+  if (practiceProfileResult) return practiceProfileResult;
 
   const safetyResult = mapSafetyError(error, path);
   if (safetyResult) return safetyResult;

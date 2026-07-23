@@ -111,8 +111,8 @@ export function createDurableTestPipelineRequest(
 ): PipelineRequest {
   return {
     userId: "durable-test-user",
-    pipelineType: "validation-post",
-    contentType: "validation-post",
+    pipelineType: "short-piece",
+    contentType: "short-piece",
     briefing: {
       topic: "Durable runtime integration",
       keyPoints: ["postgres", "redis", "outbox"]

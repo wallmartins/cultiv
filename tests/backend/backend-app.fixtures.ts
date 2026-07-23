@@ -1,5 +1,6 @@
 import { Effect } from "effect";
 import { decodeExecutionStatusView } from "@my-ai-orchestrator/contracts";
+import type { GenerationChannel } from "@my-ai-orchestrator/contracts";
 import { createBackendApp } from "../../apps/backend";
 import type { BackendConfig } from "../../apps/backend";
 import { createBackendProductServices } from "../../apps/backend";
@@ -14,10 +15,10 @@ export const voiceProfileSnapshotIdPattern = /^vps:[a-f0-9]{32}$/;
 export function expectedVoiceProfileSnapshotId(
   userId: string,
   profileVersion: number,
-  contentType: string,
+  channel: GenerationChannel,
   at: Date = backendAppTestStartedAt
 ): string {
-  return buildVoiceProfileSnapshotId(userId, profileVersion, contentType, at);
+  return buildVoiceProfileSnapshotId(userId, profileVersion, channel, at);
 }
 
 export const backendAppBaseConfig: BackendConfig = {

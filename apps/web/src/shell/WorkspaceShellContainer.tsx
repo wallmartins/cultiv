@@ -8,14 +8,17 @@ import {
   useEntitlement,
   useExecutionsList,
   useHistoryFilterStore,
+  usePracticeIdentity,
   useRunningExecutionsWatch,
   useShellStore,
   useThemeStore,
   useToastStore,
+  useUiLanguage,
   useUnreadStore,
   useVoiceProfile
 } from "@my-ai-orchestrator/shared";
 import { WorkspaceShell, type HistoryStatusFilterUI } from "@my-ai-orchestrator/ui/app";
+import { useFormat, useMessages, type AppMessages } from "@my-ai-orchestrator/ui/app/i18n";
 import { LockedCenter } from "@my-ai-orchestrator/ui/app/locked";
 import { WizardOverlay } from "../routes/-wizard-overlay.js";
 import { buildCompanionContent } from "./companion-view.js";
@@ -25,18 +28,19 @@ import { buildToastText } from "./toast-view.js";
 const TOAST_AUTO_DISMISS_MS = 6000;
 const HISTORY_PAGE_STEP = 20;
 
-const TOPBAR_LABEL: Record<string, string> = {
-  "/generate": "NOVA GERAÇÃO",
-  "/voice": "SUA VOZ",
-  "/plans": "PLANOS",
-  "/billing": "BILLING",
-  "/settings": "CONFIGURAÇÕES"
+const TOPBAR_KEY: Record<string, keyof AppMessages["shell"]["topbar"]> = {
+  "/generate": "generate",
+  "/voice": "voice",
+  "/plans": "plans",
+  "/billing": "billing",
+  "/settings": "settings"
 };
 
-function topbarLabelFor(pathname: string): string {
-  if (pathname in TOPBAR_LABEL) return TOPBAR_LABEL[pathname];
-  if (pathname.startsWith("/g/")) return "GERAÇÃO";
-  return "CULTIV";
+function topbarLabelFor(t: AppMessages, pathname: string): string {
+  const key = TOPBAR_KEY[pathname];
+  if (key) return t.shell.topbar[key];
+  if (pathname.startsWith("/g/")) return t.shell.topbar.detail;
+  return t.shell.topbar.fallback;
 }
 
 function initialsFrom(name: string | undefined, email: string | undefined): string {
@@ -56,6 +60,8 @@ export interface WorkspaceShellContainerProps {
 export function WorkspaceShellContainer({ children }: WorkspaceShellContainerProps) {
   const { appMode, auth } = useRouteContext({ from: "/_shell" });
   const locked = appMode === "locked";
+  const t = useMessages();
+  const format = useFormat();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (state) => state.location.pathname });
 
@@ -94,6 +100,10 @@ export function WorkspaceShellContainer({ children }: WorkspaceShellContainerPro
   });
   const entitlement = useEntitlement();
   const voiceProfile = useVoiceProfile();
+  const uiLanguage = useUiLanguage((state) => state.language);
+  // Same "cache hit, no second fetch" reasoning as voiceProfile above — the companion can mount
+  // on /generate before the author ever visits /voice.
+  const practiceIdentity = usePracticeIdentity(uiLanguage);
   const unread = useUnreadStore((state) => state.unread);
 
   // Keeps the rail's live items + unread dots + the toast/notifications signal below current
@@ -122,7 +132,7 @@ export function WorkspaceShellContainer({ children }: WorkspaceShellContainerPro
     notifiedIdsRef.current.add(activeToast.id);
     if (!completionNotifications.enabled || typeof Notification === "undefined" || !document.hidden) return;
     const executionId = activeToast.executionId;
-    const notification = new Notification(buildToastText(activeToast));
+    const notification = new Notification(buildToastText(t, activeToast));
     notification.onclick = () => {
       window.focus();
       if (executionId) {
@@ -152,8 +162,8 @@ export function WorkspaceShellContainer({ children }: WorkspaceShellContainerPro
   const activeExecutionId = pathname.startsWith("/g/") ? pathname.slice(3) : undefined;
   const now = useMemo(() => new Date(), [executions.data]);
   const groups = useMemo(
-    () => buildHistoryGroups(executions.data, unread, activeExecutionId, now),
-    [executions.data, unread, activeExecutionId, now]
+    () => buildHistoryGroups(t, format, executions.data, unread, activeExecutionId, now),
+    [t, format, executions.data, unread, activeExecutionId, now]
   );
   // Período entra na conta junto com busca/status: filtrar por "7D" e não achar nada é rail
   // filtrado vazio ("limpe a busca ou os filtros"), não "você nunca gerou nada".
@@ -178,8 +188,11 @@ export function WorkspaceShellContainer({ children }: WorkspaceShellContainerPro
   const otherStatusMatches = otherStatusQuery.data?.total ?? 0;
 
   const creditsLabel = entitlement.data
-    ? `${entitlement.data.availableCredits} créditos · ~${creditsAsTexts(entitlement.data.availableCredits, entitlement.data.canonicalCreditCost)} textos`
-    : "— créditos";
+    ? t.shell.creditsLabel(
+        entitlement.data.availableCredits,
+        creditsAsTexts(entitlement.data.availableCredits, entitlement.data.canonicalCreditCost)
+      )
+    : t.shell.creditsUnknown;
 
   const goVoice = () => navigate({ to: "/voice" });
 
@@ -216,13 +229,14 @@ export function WorkspaceShellContainer({ children }: WorkspaceShellContainerPro
           voiceConfidenceValue: voiceProfile.data ? confidenceRingValue(voiceProfile.data.profile.confidence) : undefined,
           onToggleCompanion: toggleCompanion,
           avatarInitials: initialsFrom(auth.user?.name, auth.user?.email),
+          avatarUrl: auth.user?.picture,
           onOpenVoiceProfile: goVoice,
           onOpenBilling: () => navigate({ to: "/billing" }),
           onOpenSettings: () => navigate({ to: "/settings" }),
           onLogout: () => auth.logout({ logoutParams: { returnTo: window.location.origin } })
         }}
         topbar={{
-          label: topbarLabelFor(pathname),
+          label: topbarLabelFor(t, pathname),
           creditsLabel,
           onToggleTheme: toggleTheme,
           onToggleRail: toggleRail
@@ -230,12 +244,12 @@ export function WorkspaceShellContainer({ children }: WorkspaceShellContainerPro
         companion={{
           open: companionOpen,
           onClose: closeCompanion,
-          content: buildCompanionContent(locked, voiceProfile.data, goVoice)
+          content: buildCompanionContent(t, locked, voiceProfile.data, practiceIdentity.data, goVoice)
         }}
         toast={
           activeToast
             ? {
-                text: buildToastText(activeToast),
+                text: buildToastText(t, activeToast),
                 ...(activeToast.executionId ? { onClick: () => openToast(activeToast) } : {})
               }
             : undefined

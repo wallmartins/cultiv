@@ -1,4 +1,5 @@
 import { Banner, Mono, Pill, Ring, StatusDot } from "../primitives/index.js";
+import { useMessages, type AppMessages } from "../i18n/index.js";
 
 export interface ReconnectionReadyItem {
   readonly topic: string;
@@ -17,16 +18,23 @@ export interface ReconnectionReconcileProps {
   readonly onView: () => void;
 }
 
-function reconcileBody(offlineMins: number, ready: readonly ReconnectionReadyItem[], resumed: readonly ReconnectionResumedItem[]): string {
-  const intro = `Você ficou offline por ${offlineMins} minutos.`;
+function reconcileBody(
+  t: AppMessages,
+  offlineMins: number,
+  ready: readonly ReconnectionReadyItem[],
+  resumed: readonly ReconnectionResumedItem[]
+): string {
+  const s = t.states.reconnectionReconcile;
+  const intro = s.offlineIntro(offlineMins);
   const events: string[] = [];
-  if (ready[0]) events.push(`"${ready[0].topic}" ficou pronto`);
-  if (resumed[0]) events.push(`"${resumed[0].topic}" segue escrevendo (${Math.round(resumed[0].progress * 100)}%)`);
-  return events.length === 0 ? intro : `${intro} Nesse tempo, ${events.join(" e ")}.`;
+  if (ready[0]) events.push(s.readyEvent(ready[0].topic));
+  if (resumed[0]) events.push(s.resumedEvent(resumed[0].topic, Math.round(resumed[0].progress * 100)));
+  return events.length === 0 ? intro : s.sinceThen(intro, events.join(` ${s.and} `));
 }
 
 // 2a — resiliência do useExecutionWatch: banner ambiente do shell ao reconectar do offline.
 export function ReconnectionReconcile({ offlineMins, ready, resumed, onView }: ReconnectionReconcileProps) {
+  const t = useMessages();
   return (
     <div style={{ maxWidth: 560, display: "flex", flexDirection: "column", gap: 16 }}>
       <Banner
@@ -35,13 +43,13 @@ export function ReconnectionReconcile({ offlineMins, ready, resumed, onView }: R
         icon={<StatusDot tone="accent" size={7} style={{ marginTop: 6 }} />}
         action={
           <Pill variant="outline" tone="accent" onClick={onView} style={{ padding: "7px 14px", fontSize: "0.8rem", whiteSpace: "nowrap" }}>
-            Ver o pronto →
+            {t.states.reconnectionReconcile.viewReady}
           </Pill>
         }
       >
-        <div style={{ fontSize: "0.88rem", fontWeight: 600 }}>De volta — aqui vai o que aconteceu</div>
+        <div style={{ fontSize: "0.88rem", fontWeight: 600 }}>{t.states.reconnectionReconcile.title}</div>
         <div style={{ fontSize: "0.8rem", color: "var(--muted)", marginTop: 3, lineHeight: 1.55 }}>
-          {reconcileBody(offlineMins, ready, resumed)}
+          {reconcileBody(t, offlineMins, ready, resumed)}
         </div>
       </Banner>
 
@@ -73,7 +81,7 @@ export function ReconnectionReconcile({ offlineMins, ready, resumed, onView }: R
             <div style={{ minWidth: 0 }}>
               <div style={{ fontSize: "0.855rem" }}>{item.topic}</div>
               <Mono style={{ display: "block", marginTop: 4, color: "var(--accent)", animation: "breathe 1.6s var(--ease-standard) infinite" }}>
-                retomado · escrevendo… {Math.round(item.progress * 100)}%
+                {t.states.reconnectionReconcile.resumedStatus(Math.round(item.progress * 100))}
               </Mono>
             </div>
           </div>

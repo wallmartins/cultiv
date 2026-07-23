@@ -6,6 +6,27 @@ import type { BackendConfig } from "../../apps/backend";
 import { BackendExecutionFailedError, BackendExecutionIntegrityError, createBackendProductServices } from "../../apps/backend";
 import { AIAdapterTransportError } from "@my-ai-orchestrator/ai-adapters";
 import { seedExecutionVoiceState } from "./backend-app.fixtures.js";
+import { planGeneration } from "../../apps/backend/src/product/generation/compositor/compositor-planner.js";
+import { mergeCompositorPipelineContext } from "../../apps/backend/src/product/generation/merge-compositor-pipeline-context.js";
+
+// A raw ExplicitPipelineRequest/SimplifiedPipelineRequest bypasses resolveGenerationTarget (and
+// the context it populates), so pricing (size-keyed via pricesByPlan since the 2026-07-20 policy)
+// needs the same compositor metadata a real /me/executions/run request would carry, and the
+// pipeline's step names/skills must match the catalog's compositor preset exactly (see
+// ai-policy-pipeline-validation.ts) — build both from the same plan to keep them in lockstep.
+function buildSerialPieceFixture() {
+  const plan = planGeneration({
+    rhetoricalMode: "narrate",
+    scope: { lengthTier: "medium" },
+    qualityMode: "balanced"
+  });
+  const context = mergeCompositorPipelineContext(undefined, plan, "unspecified");
+  return {
+    plan,
+    context,
+    steps: plan.steps.map((step) => ({ name: step.name, skill: step.skill }))
+  };
+}
 
 describe("backend execution service sync", () => {
   it("reserves and captures billing credits for a successful sync execution", async () => {
@@ -30,17 +51,13 @@ describe("backend execution service sync", () => {
       services,
       now: () => new Date("2026-05-11T00:00:05.000Z")
     });
+    const fixture = buildSerialPieceFixture();
 
     const response = await Effect.runPromise(
       service.execute({
         pipeline: {
-          name: "validation-post",
-          steps: [
-            { name: "analyze", skill: "analyze" },
-            { name: "draft", skill: "draft" },
-            { name: "refine", skill: "refine" },
-            { name: "sanitize", skill: "sanitize" }
-          ]
+          name: fixture.plan.planSignature,
+          steps: fixture.steps
         },
         inputs: {
           briefing: {
@@ -48,6 +65,7 @@ describe("backend execution service sync", () => {
             keyPoints: ["packages first", "backend second"]
           }
         },
+        context: fixture.context,
         model: "gemini-3.1-flash-lite",
         adapter: "openai",
         idempotencyKey: "idem-billing-run",
@@ -56,7 +74,7 @@ describe("backend execution service sync", () => {
     );
 
     expect(response.mode).toBe("sync");
-    expect(response.pipelineName).toBe("validation-post");
+    expect(response.pipelineName).toBe("serial-piece");
     expect(response.content).toContain("Monorepo migration");
 
     const ledger = services.billing.listLedger("backend", "criador");
@@ -86,16 +104,18 @@ describe("backend execution service sync", () => {
       services,
       now: () => new Date("2026-05-11T00:00:05.000Z")
     });
+    const fixture = buildSerialPieceFixture();
 
     const snapshot = Effect.runSync(
       services.aiPolicy.resolveExecutionSnapshot({
         request: {
           userId: "backend",
-          pipelineType: "validation-post",
-          contentType: "validation-post",
+          pipelineType: fixture.plan.planSignature,
+          contentType: fixture.plan.planSignature,
           briefing: {
             topic: "Policy integrity"
           },
+          context: fixture.context,
           qualityMode: "balanced"
         },
         planTier: "pro",
@@ -109,7 +129,7 @@ describe("backend execution service sync", () => {
       ...snapshot,
       pricingEnvelope: {
         ...snapshot.pricingEnvelope,
-        contentType: "newsletter"
+        contentType: "edition-piece"
       }
     } as const;
 
@@ -153,18 +173,14 @@ describe("backend execution service sync", () => {
           )
       }
     });
+    const fixture = buildSerialPieceFixture();
 
     const result = await Effect.runPromise(
       Effect.either(
         service.execute({
           pipeline: {
-            name: "validation-post",
-            steps: [
-              { name: "analyze", skill: "analyze" },
-              { name: "draft", skill: "draft" },
-              { name: "refine", skill: "refine" },
-              { name: "sanitize", skill: "sanitize" }
-            ]
+            name: fixture.plan.planSignature,
+            steps: fixture.steps
           },
           inputs: {
             briefing: {
@@ -172,6 +188,7 @@ describe("backend execution service sync", () => {
               keyPoints: ["packages first", "backend second"]
             }
           },
+          context: fixture.context,
           model: "gemini-3.1-flash-lite",
           adapter: "openai",
           idempotencyKey: "idem-provider-failure",
@@ -184,7 +201,7 @@ describe("backend execution service sync", () => {
     if (result._tag === "Left") {
       expect(result.left).toBeInstanceOf(BackendExecutionFailedError);
       expect(result.left.reason).toBe("pipeline_step_failed");
-      expect(result.left.message).toContain('Pipeline "validation-post" failed at step "analyze"');
+      expect(result.left.message).toContain('Pipeline "serial-piece" failed at step "analyze"');
       expect(result.left.message).toContain("simulated transport failure");
     }
   });

@@ -1,4 +1,5 @@
 import { Mono, StatusDot } from "../primitives/index.js";
+import { useMessages } from "../i18n/index.js";
 
 export interface TrialBannerProps {
   readonly used: number;
@@ -8,12 +9,11 @@ export interface TrialBannerProps {
 }
 
 export function TrialBanner({ used, remaining, totalGenerations, daysRemaining }: TrialBannerProps) {
+  const t = useMessages();
   return (
     <div className="trial-banner">
       <StatusDot tone="accent" size={6} />
-      <Mono>
-        {used} de {totalGenerations} gerações usadas · {remaining} restantes · {daysRemaining} dias de teste
-      </Mono>
+      <Mono>{t.plans.trialBanner(used, totalGenerations, remaining, t.common.days(daysRemaining))}</Mono>
     </div>
   );
 }

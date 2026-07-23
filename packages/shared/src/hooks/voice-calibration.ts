@@ -28,13 +28,19 @@ export function useStartCalibration() {
   });
 }
 
+// F3 — setContext now derives a seed practice profile server-side (LLM in the loop), so a
+// transient provider hiccup shouldn't surface as a hard failure straight away: retry twice,
+// invisibly, before the caller ever sees isError. isPending stays true across these retries, so
+// the container's loading state already covers the wait.
 export function useSetContext(sessionId: string) {
   const run = useRun();
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (input: SetWizardContextInput) =>
       run(withSdk((sdk) => sdk.voiceCalibration.setContext({ sessionId, ...input }))),
-    onSuccess: (session) => qc.setQueryData(queryKeys.calibrationSession(sessionId), session)
+    onSuccess: (session) => qc.setQueryData(queryKeys.calibrationSession(sessionId), session),
+    retry: 2,
+    retryDelay: 300
   });
 }
 

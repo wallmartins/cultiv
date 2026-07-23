@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Cultiv — an AI writing engine that learns an author's personal voice and generates text that sounds like them. A **pnpm 11 monorepo** (`cultiv`) requiring **Node ≥ 22.13**. Public product name is **Cultiv**; internal workspace packages use the `@my-ai-orchestrator/*` scope. See `README.md` for the product overview and `CONTEXT.md` for the authoritative domain glossary (Voice Profile, Reasoning Signature, Pipeline, Content Type, etc.) — use those exact terms and heed each entry's `_Avoid_` list.
 
-> **Web is mid-recreation.** Recent commits removed `packages/ui` and are "recreating web entirely". The README still documents `apps/web` and `packages/ui`, but neither exists on disk right now (`apps/landing` holds only build artifacts). Treat README's web/design-system sections as aspirational, not current. The **backend and `packages/*` are the real, live code.**
+> **Web exists and is live.** `apps/web` and `packages/ui` were recreated and are populated, real code — under active development through the Practice Profile track (Phases 4/5 touch both). An earlier note here said they didn't exist on disk; that is stale (corrected 2026-07-22). The **backend and `packages/*` are the primary live code**; `apps/landing` is a separate landing surface.
 
 ## Commands
 

@@ -2,6 +2,7 @@ import { Effect } from "effect";
 import type { DatabaseError } from "@my-ai-orchestrator/database";
 import type {
   ExecutionVoiceMetadataView,
+  GenerationChannel,
   TraitConfirmationInput,
   VoiceProfileDiagnosticsView,
   VoiceProfileScreenView
@@ -20,7 +21,7 @@ export interface BackendVoiceService {
 }
 
 export interface EffectiveVoiceContext {
-  readonly contentType: string;
+  readonly channel: GenerationChannel;
   readonly requestedLanguage?: string;
 }
 

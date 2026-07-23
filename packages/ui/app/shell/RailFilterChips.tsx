@@ -1,4 +1,5 @@
 import { Chip } from "../primitives/index.js";
+import { useMessages } from "../i18n/index.js";
 import type { HistoryPeriodFilterUI, HistoryStatusFilterUI } from "./types.js";
 
 export interface RailFilterChipsProps {
@@ -8,34 +9,25 @@ export interface RailFilterChipsProps {
   readonly onPeriodChange: (period: HistoryPeriodFilterUI) => void;
 }
 
-const FILTERS: ReadonlyArray<{ readonly key: HistoryStatusFilterUI; readonly label: string }> = [
-  { key: "all", label: "TODOS" },
-  { key: "done", label: "PRONTOS" },
-  { key: "running", label: "RODANDO" },
-  { key: "queued", label: "NA FILA" },
-  { key: "failed", label: "FALHAS" },
-  { key: "cancelled", label: "CANCELADOS" }
-];
-
-const PERIODS: ReadonlyArray<{ readonly key: HistoryPeriodFilterUI; readonly label: string }> = [
-  { key: "all", label: "SEMPRE" },
-  { key: "7d", label: "7D" },
-  { key: "30d", label: "30D" },
-  { key: "90d", label: "90D" }
-];
+// Keys only — the labels come from the dictionary, keyed by these.
+const FILTER_KEYS: readonly HistoryStatusFilterUI[] = ["all", "done", "running", "queued", "failed", "cancelled"];
+const PERIOD_KEYS: readonly HistoryPeriodFilterUI[] = ["all", "7d", "30d", "90d"];
 
 export function RailFilterChips({ active, onChange, activePeriod, onPeriodChange }: RailFilterChipsProps) {
+  const t = useMessages();
+  const filters = FILTER_KEYS.map((key) => ({ key, label: t.shell.statusFilter[key] }));
+  const periods = PERIOD_KEYS.map((key) => ({ key, label: t.shell.periodFilter[key] }));
   return (
     <>
       <div className="rail-filters">
-        {FILTERS.map((filter) => (
+        {filters.map((filter) => (
           <Chip key={filter.key} mono active={active === filter.key} onClick={() => onChange(filter.key)}>
             {filter.label}
           </Chip>
         ))}
       </div>
       <div className="rail-filters rail-filters-period">
-        {PERIODS.map((period) => (
+        {periods.map((period) => (
           <Chip
             key={period.key}
             mono

@@ -53,7 +53,7 @@ export function buildCalibrationReport(options: BuildCalibrationReportOptions): 
   );
 
   const canonicalCell =
-    cellStats.find((cell) => cell.contentType === "validation-post" && cell.qualityMode === "balanced")!;
+    cellStats.find((cell) => cell.contentType === "serial-piece" && cell.qualityMode === "balanced")!;
   const creditUsdValue = deriveCreditUsdValue({
     canonicalCostUsd: canonicalCell.costUsdP50,
     targetMargin,
@@ -102,7 +102,7 @@ export function formatCalibrationReport(report: CalibrationReport): string {
     `Observed jobs: ${report.telemetryRows.length}`,
     `Target margin: ${(report.targetMargin * 100).toFixed(1)}%`,
     `Credit USD value (revenue/credit): $${report.creditUsdValue.toFixed(6)}`,
-    `Canonical credit cost (validation-post × balanced): ${report.canonicalCreditCost}`,
+    `Canonical credit cost (serial-piece × balanced): ${report.canonicalCreditCost}`,
     ``,
     `## Observed generations`,
     ``
@@ -147,18 +147,18 @@ export function formatCalibrationReport(report: CalibrationReport): string {
   lines.push(``);
 
   const proBalanced = report.pricing.find(
-    (p) => p.planTier === "pro" && p.contentType === "validation-post" && p.qualityMode === "balanced"
+    (p) => p.planTier === "pro" && p.contentType === "serial-piece" && p.qualityMode === "balanced"
   )!;
-  const proStrictBlog = report.pricing.find(
-    (p) => p.planTier === "pro" && p.contentType === "long-form-blog" && p.qualityMode === "strict"
+  const proStrictLongPiece = report.pricing.find(
+    (p) => p.planTier === "pro" && p.contentType === "long-piece" && p.qualityMode === "strict"
   )!;
   lines.push(`## Reference conversions`, ``);
   lines.push(`- 1 quota ≈ ${report.canonicalCreditCost} internal credits`);
   lines.push(
-    `- Pro balanced validation-post: ${proBalanced.creditPrice} credits ≈ ${Math.ceil(proBalanced.creditPrice / report.canonicalCreditCost)} quota(s)`
+    `- Pro balanced serial-piece: ${proBalanced.creditPrice} credits ≈ ${Math.ceil(proBalanced.creditPrice / report.canonicalCreditCost)} quota(s)`
   );
   lines.push(
-    `- Pro strict long-form-blog: ${proStrictBlog.creditPrice} credits ≈ ${Math.ceil(proStrictBlog.creditPrice / report.canonicalCreditCost)} quota(s)`
+    `- Pro strict long-piece: ${proStrictLongPiece.creditPrice} credits ≈ ${Math.ceil(proStrictLongPiece.creditPrice / report.canonicalCreditCost)} quota(s)`
   );
 
   return lines.join("\n");

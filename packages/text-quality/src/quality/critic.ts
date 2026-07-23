@@ -1,5 +1,4 @@
 import type { PipelineRequest } from "@my-ai-orchestrator/contracts";
-import type { DomainProfile } from "../domain/domain-classifier.js";
 import type { CriticFinding, CriticResult, VoiceProfile } from "../types.js";
 import { countWords, resolveOutputWordTarget } from "../format/output-length.js";
 import {
@@ -15,7 +14,6 @@ import { containsEmDash } from "./em-dash.js";
 import { evaluateLexicalQuality } from "./lexical-quality.js";
 
 export interface CriticEvaluationOptions {
-  readonly domain?: DomainProfile;
   readonly hookText?: string;
   readonly lexicalQualityV2?: boolean;
   readonly stepName?: string;
@@ -63,11 +61,11 @@ export function criticizeText(
   }
 
   if (options?.lexicalQualityV2) {
-    const lexical = evaluateLexicalQuality(text, options.domain, options.hookText);
+    const lexical = evaluateLexicalQuality(text, options.hookText);
     for (const message of lexical.findings) {
       findings.push({
         type: "redundant",
-        severity: message.includes("Technical jargon") ? "high" : "medium",
+        severity: "medium",
         message
       });
     }

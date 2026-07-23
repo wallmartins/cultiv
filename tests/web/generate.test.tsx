@@ -6,8 +6,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
 import { beforeEach, describe, expect, it } from "vitest";
-import type { GenerationPreviewResponse } from "@my-ai-orchestrator/contracts";
+import type { GenerationPreviewResponse, GenreSignature, MePracticeProfileResponse } from "@my-ai-orchestrator/contracts";
 import { makeAppRuntime, queryKeys, RuntimeProvider, useWizardSessionStore } from "@my-ai-orchestrator/shared";
+import { messagesFor } from "@my-ai-orchestrator/ui/app/i18n";
 import { GenerateContainer } from "~/routes/generate.js";
 import {
   buildBriefing,
@@ -44,6 +45,11 @@ function newQueryClient() {
   return new QueryClient({ defaultOptions: { queries: { staleTime: Infinity, retry: false } } });
 }
 
+// GenerateContainer falls back to pt-BR (DEFAULT_LOCALE) when rendered outside <I18nProvider>
+// (see renderGenerate above) — this mirrors that fallback for the pure generate-view.ts helpers
+// called directly in these tests.
+const t = messagesFor("pt-BR");
+
 const previewFixture: GenerationPreviewResponse = {
   pricingSnapshot: { quoteId: "quote-1", policyVersion: "v1", contentType: "linkedin-post", qualityMode: "balanced", creditPrice: 2 },
   currentBalance: 12,
@@ -51,7 +57,7 @@ const previewFixture: GenerationPreviewResponse = {
   quotaRemaining: 12,
   quotaLimit: 20,
   quotaCost: 2,
-  options: { contentTypes: [], qualityModes: [] }
+  options: { qualityModes: [] }
 };
 
 const SCOPE = { lengthTier: "short" as const };
@@ -79,22 +85,21 @@ describe("generate surface (S3)", () => {
 
   it("thread — echoes the theme, asks the first backbone question numbered, shows the cost band", async () => {
     const theme = "aprender mais rápido com IA";
-    const steps = buildGuidedSteps(fallbackQuestionPlan(theme), null, "share-idea");
+    const steps = buildGuidedSteps(t, fallbackQuestionPlan(t, theme));
     const briefing = buildBriefing(theme, steps, []);
 
     const queryClient = newQueryClient();
     queryClient.setQueryData(queryKeys.entitlement(), entitlementFixture);
     queryClient.setQueryData(
-      queryKeys.preview({ intent: "share-idea", scope: SCOPE, briefing, includeRecommendation: true }),
+      queryKeys.preview({ rhetoricalMode: "expound", scope: SCOPE, briefing, includeRecommendation: true }),
       previewFixture
     );
 
     useWizardSessionStore.setState({
       phase: "thread",
       theme,
-      prefill: { intent: "share-idea", scope: SCOPE },
-      questionPlan: fallbackQuestionPlan(theme),
-      intentAmbiguity: null,
+      prefill: { rhetoricalMode: "expound", scope: SCOPE },
+      questionPlan: fallbackQuestionPlan(t, theme),
       answers: [],
       qIndex: 0
     });
@@ -109,26 +114,25 @@ describe("generate surface (S3)", () => {
 
   it("answering a question echoes a user bubble and advances the composer to the next question", async () => {
     const theme = "hábitos de escrita";
-    const steps = buildGuidedSteps(fallbackQuestionPlan(theme), null, "share-idea");
+    const steps = buildGuidedSteps(t, fallbackQuestionPlan(t, theme));
     const answeredBriefing = buildBriefing(theme, steps, [{ questionId: "thesis", text: "escrever todo dia", skipped: false }]);
 
     const queryClient = newQueryClient();
     queryClient.setQueryData(queryKeys.entitlement(), entitlementFixture);
     queryClient.setQueryData(
-      queryKeys.preview({ intent: "share-idea", scope: SCOPE, briefing: buildBriefing(theme, steps, []), includeRecommendation: true }),
+      queryKeys.preview({ rhetoricalMode: "expound", scope: SCOPE, briefing: buildBriefing(theme, steps, []), includeRecommendation: true }),
       previewFixture
     );
     queryClient.setQueryData(
-      queryKeys.preview({ intent: "share-idea", scope: SCOPE, briefing: answeredBriefing, includeRecommendation: true }),
+      queryKeys.preview({ rhetoricalMode: "expound", scope: SCOPE, briefing: answeredBriefing, includeRecommendation: true }),
       previewFixture
     );
 
     useWizardSessionStore.setState({
       phase: "thread",
       theme,
-      prefill: { intent: "share-idea", scope: SCOPE },
-      questionPlan: fallbackQuestionPlan(theme),
-      intentAmbiguity: null,
+      prefill: { rhetoricalMode: "expound", scope: SCOPE },
+      questionPlan: fallbackQuestionPlan(t, theme),
       answers: [],
       qIndex: 0
     });
@@ -146,7 +150,7 @@ describe("generate surface (S3)", () => {
 
   it("session done — shows the session-done card once every step is answered/skipped", async () => {
     const theme = "voz autêntica";
-    const steps = buildGuidedSteps(fallbackQuestionPlan(theme), null, "share-idea");
+    const steps = buildGuidedSteps(t, fallbackQuestionPlan(t, theme));
     const answers = steps
       .filter((step) => step.kind !== "channel")
       .map((step) => ({ questionId: step.id, text: "", skipped: true }));
@@ -155,16 +159,15 @@ describe("generate surface (S3)", () => {
     const queryClient = newQueryClient();
     queryClient.setQueryData(queryKeys.entitlement(), entitlementFixture);
     queryClient.setQueryData(
-      queryKeys.preview({ intent: "share-idea", scope: SCOPE, briefing, includeRecommendation: true }),
+      queryKeys.preview({ rhetoricalMode: "expound", scope: SCOPE, briefing, includeRecommendation: true }),
       previewFixture
     );
 
     useWizardSessionStore.setState({
       phase: "thread",
       theme,
-      prefill: { intent: "share-idea", scope: SCOPE },
-      questionPlan: fallbackQuestionPlan(theme),
-      intentAmbiguity: null,
+      prefill: { rhetoricalMode: "expound", scope: SCOPE },
+      questionPlan: fallbackQuestionPlan(t, theme),
       answers,
       qIndex: steps.length // past the channel step too — session done
     });
@@ -176,7 +179,7 @@ describe("generate surface (S3)", () => {
 
   it("session done — last trial generation with 2+ already running shows the queue gate instead", async () => {
     const theme = "voz autêntica";
-    const steps = buildGuidedSteps(fallbackQuestionPlan(theme), null, "share-idea");
+    const steps = buildGuidedSteps(t, fallbackQuestionPlan(t, theme));
     const answers = steps
       .filter((step) => step.kind !== "channel")
       .map((step) => ({ questionId: step.id, text: "", skipped: true }));
@@ -185,7 +188,7 @@ describe("generate surface (S3)", () => {
     const queryClient = newQueryClient();
     queryClient.setQueryData(queryKeys.entitlement(), { ...entitlementFixture, status: "trialing", quotaRemaining: 1 });
     queryClient.setQueryData(
-      queryKeys.preview({ intent: "share-idea", scope: SCOPE, briefing, includeRecommendation: true }),
+      queryKeys.preview({ rhetoricalMode: "expound", scope: SCOPE, briefing, includeRecommendation: true }),
       previewFixture
     );
     queryClient.setQueryData(
@@ -199,9 +202,8 @@ describe("generate surface (S3)", () => {
     useWizardSessionStore.setState({
       phase: "thread",
       theme,
-      prefill: { intent: "share-idea", scope: SCOPE },
-      questionPlan: fallbackQuestionPlan(theme),
-      intentAmbiguity: null,
+      prefill: { rhetoricalMode: "expound", scope: SCOPE },
+      questionPlan: fallbackQuestionPlan(t, theme),
       answers,
       qIndex: steps.length
     });
@@ -216,9 +218,13 @@ describe("generate surface (S3)", () => {
   it("hero — pasting markdown detours into the confirm card; confirming submits the cleaned title", async () => {
     const queryClient = newQueryClient();
     queryClient.setQueryData(queryKeys.entitlement(), entitlementFixture);
-    const briefing = buildBriefing("Por que abandonei o roadmap trimestral", buildGuidedSteps(fallbackQuestionPlan(""), null, "share-idea"), []);
+    const briefing = buildBriefing(
+      "Por que abandonei o roadmap trimestral",
+      buildGuidedSteps(t, fallbackQuestionPlan(t, "")),
+      []
+    );
     queryClient.setQueryData(
-      queryKeys.preview({ intent: "share-idea", scope: SCOPE, briefing, includeRecommendation: true }),
+      queryKeys.preview({ rhetoricalMode: "expound", scope: SCOPE, briefing, includeRecommendation: true }),
       previewFixture
     );
 
@@ -249,6 +255,120 @@ describe("generate surface (S3)", () => {
     expect(await screen.findByText("Seus créditos acabaram — e a renovação não passou.")).toBeInTheDocument();
     expect(screen.queryByText("Sobre o que você quer")).not.toBeInTheDocument();
   });
+
+  it("narrowing — 2+ declared audiences render the chip step before the questions (F4-2)", async () => {
+    const queryClient = newQueryClient();
+    queryClient.setQueryData(queryKeys.entitlement(), entitlementFixture);
+    queryClient.setQueryData(queryKeys.practiceProfile(), {
+      profile: {
+        subject: "engenharia de software",
+        vantagePoint: "líder técnico em startup",
+        audiences: ["gestores de produto", "devs"],
+        depth: "seed"
+      }
+    } satisfies MePracticeProfileResponse);
+
+    renderGenerate(queryClient);
+
+    const textarea = await screen.findByPlaceholderText("Cole uma ideia, uma inquietação, um tema…");
+    fireEvent.change(textarea, { target: { value: "hábitos de escrita" } });
+    fireEvent.keyDown(textarea, { key: "Enter" });
+
+    expect(await screen.findByText("Pra quem é esse texto, dessa vez?")).toBeInTheDocument();
+    expect(screen.getByText("gestores de produto")).toBeInTheDocument();
+    expect(screen.getByText("devs")).toBeInTheDocument();
+    expect(screen.queryByPlaceholderText("Responda com uma ou duas frases…")).not.toBeInTheDocument();
+  });
+
+  it("narrowing — '+ adicionar público' confirms an ephemeral audience for this generation only", async () => {
+    const queryClient = newQueryClient();
+    queryClient.setQueryData(queryKeys.entitlement(), entitlementFixture);
+    queryClient.setQueryData(queryKeys.practiceProfile(), {
+      profile: {
+        subject: "engenharia de software",
+        vantagePoint: "líder técnico em startup",
+        audiences: ["gestores de produto", "devs"],
+        depth: "seed"
+      }
+    } satisfies MePracticeProfileResponse);
+
+    renderGenerate(queryClient);
+
+    const themeTextarea = await screen.findByPlaceholderText("Cole uma ideia, uma inquietação, um tema…");
+    fireEvent.change(themeTextarea, { target: { value: "hábitos de escrita" } });
+    fireEvent.keyDown(themeTextarea, { key: "Enter" });
+
+    const addInput = await screen.findByPlaceholderText("outro público…");
+    fireEvent.change(addInput, { target: { value: "recrutadores técnicos" } });
+    fireEvent.click(screen.getByText("+ adicionar"));
+
+    // Adding immediately confirms it as the narrowed audience — same one-click narrowing as
+    // clicking a declared chip — and it's never written back to the Practice Profile.
+    expect(useWizardSessionStore.getState().phase).not.toBe("narrowing");
+    expect(useWizardSessionStore.getState().audience).toBe("recrutadores técnicos");
+  });
+
+  it("narrowing — 0 or 1 declared audiences auto-skip straight past the chip step (F4-2 buffer)", async () => {
+    const queryClient = newQueryClient();
+    queryClient.setQueryData(queryKeys.entitlement(), entitlementFixture);
+    queryClient.setQueryData(queryKeys.practiceProfile(), {
+      profile: {
+        subject: "engenharia de software",
+        vantagePoint: "líder técnico em startup",
+        audiences: ["gestores de produto"],
+        depth: "seed"
+      }
+    } satisfies MePracticeProfileResponse);
+
+    renderGenerate(queryClient);
+
+    const textarea = await screen.findByPlaceholderText("Cole uma ideia, uma inquietação, um tema…");
+    fireEvent.change(textarea, { target: { value: "hábitos de escrita" } });
+    fireEvent.keyDown(textarea, { key: "Enter" });
+
+    // Synchronous within submitTheme — no narrowing phase, and the single declared audience is
+    // already confirmed before the (network) prefill call even fires.
+    expect(useWizardSessionStore.getState().phase).not.toBe("narrowing");
+    expect(useWizardSessionStore.getState().audience).toBe("gestores de produto");
+    expect(screen.queryByText("Pra quem é esse texto, dessa vez?")).not.toBeInTheDocument();
+  });
+
+  it("genre threading — the inferred dominant rhetorical mode drives the preview quote, not the 'expound' default (F4-7)", async () => {
+    const theme = "hábitos de escrita";
+    const steps = buildGuidedSteps(t, fallbackQuestionPlan(t, theme));
+    const answers = steps
+      .filter((step) => step.kind !== "channel")
+      .map((step) => ({ questionId: step.id, text: "", skipped: true }));
+    const briefing = buildBriefing(theme, steps, answers);
+    const genre: GenreSignature = {
+      rhetoricalMode: { dominant: "argue" },
+      epistemicPosture: "advocacy",
+      prose: "defende uma tese contestável com evidência, não só a expõe"
+    };
+
+    const queryClient = newQueryClient();
+    queryClient.setQueryData(queryKeys.entitlement(), entitlementFixture);
+    // Seeded only under "argue" — a component that still queried under the old "expound" default
+    // would cache-miss and the cost band would stay on "calculando…" instead.
+    queryClient.setQueryData(
+      queryKeys.preview({ rhetoricalMode: "argue", scope: SCOPE, briefing, includeRecommendation: true }),
+      previewFixture
+    );
+
+    useWizardSessionStore.setState({
+      phase: "thread",
+      theme,
+      prefill: { rhetoricalMode: "expound", scope: SCOPE },
+      genre,
+      questionPlan: fallbackQuestionPlan(t, theme),
+      answers,
+      qIndex: steps.length
+    });
+
+    renderGenerate(queryClient);
+
+    expect(await screen.findByText("custo: 2 créditos · saldo depois: 10 · modo: equilibrado")).toBeInTheDocument();
+  });
 });
 
 describe("generate-view: trial/queue/paste pure helpers", () => {
@@ -270,8 +390,8 @@ describe("generate-view: trial/queue/paste pure helpers", () => {
   });
 
   it("formatQueueEta floors at ~1 min, scales with running count", () => {
-    expect(formatQueueEta(0)).toBe("~1 min");
-    expect(formatQueueEta(2)).toBe("~4 min");
+    expect(formatQueueEta(t, 0)).toBe("~1 min");
+    expect(formatQueueEta(t, 2)).toBe("~4 min");
   });
 
   it("looksLikeMarkdown flags headings/bullets/links/bold, not plain prose", () => {
@@ -292,7 +412,7 @@ describe("generate-view: trial/queue/paste pure helpers", () => {
       "fonte: https://example.com/post"
     ].join("\n");
 
-    const parsed = parsePastedTheme(pasted);
+    const parsed = parsePastedTheme(t, pasted);
     expect(parsed.title).toBe("Por que abandonei o roadmap trimestral");
     expect(parsed.angles).toEqual(["times pequenos decidem mais rápido", "métricas de vaidade escondem o que importa"]);
     expect(parsed.linkCount).toBe(1);

@@ -1,4 +1,4 @@
-import type { ArgumentDevelopmentSignature } from "@my-ai-orchestrator/contracts";
+import type { ArgumentDevelopmentSignature, EpistemicPosture } from "@my-ai-orchestrator/contracts";
 import type { CriticFinding } from "../types.js";
 
 const THESIS_MARKERS = [
@@ -17,6 +17,40 @@ const ADVOCACY_MARKERS = [
   /\bthe only way\b/iu
 ];
 
+interface PostureCriticContext {
+  readonly normalized: string;
+  readonly firstThird: string;
+  readonly structuralStep: boolean;
+}
+
+interface PostureCriticGuard {
+  readonly matches: (context: PostureCriticContext) => boolean;
+  readonly finding: CriticFinding;
+}
+
+// Keyed by development.epistemicPosture. A posture without an entry raises zero findings (neutral,
+// same as today's unhandled postures) — add a posture by adding a row here, nothing else.
+const POSTURE_CRITIC_GUARDS: Partial<Record<EpistemicPosture, readonly PostureCriticGuard[]>> = {
+  exploratory: [
+    {
+      matches: ({ structuralStep, firstThird }) => structuralStep && THESIS_MARKERS.some((pattern) => pattern.test(firstThird)),
+      finding: {
+        type: "structural_premature_thesis",
+        severity: "high",
+        message: "Text defends a conclusion too early for exploratory development"
+      }
+    },
+    {
+      matches: ({ normalized }) => ADVOCACY_MARKERS.some((pattern) => pattern.test(normalized)),
+      finding: {
+        type: "structural_advocacy_arc",
+        severity: "medium",
+        message: "Text uses advocacy framing inconsistent with exploratory development"
+      }
+    }
+  ]
+};
+
 export function collectDevelopmentFindings(
   development: ArgumentDevelopmentSignature | undefined,
   text: string,
@@ -31,27 +65,11 @@ export function collectDevelopmentFindings(
   const structuralStep = stepName === "draft" || stepName === "expand" || stepName === undefined;
   const firstThird = text.slice(0, Math.max(1, Math.floor(text.length / 3)));
 
-  if (
-    structuralStep
-    && development.epistemicPosture === "exploratory"
-    && THESIS_MARKERS.some((pattern) => pattern.test(firstThird))
-  ) {
-    findings.push({
-      type: "structural_premature_thesis",
-      severity: "high",
-      message: "Text defends a conclusion too early for exploratory development"
-    });
-  }
-
-  if (
-    development.epistemicPosture === "exploratory"
-    && ADVOCACY_MARKERS.some((pattern) => pattern.test(normalized))
-  ) {
-    findings.push({
-      type: "structural_advocacy_arc",
-      severity: "medium",
-      message: "Text uses advocacy framing inconsistent with exploratory development"
-    });
+  const postureContext: PostureCriticContext = { normalized, firstThird, structuralStep };
+  for (const guard of POSTURE_CRITIC_GUARDS[development.epistemicPosture] ?? []) {
+    if (guard.matches(postureContext)) {
+      findings.push(guard.finding);
+    }
   }
 
   for (const antiPattern of development.structuralAntiPatterns) {

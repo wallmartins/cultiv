@@ -4,16 +4,16 @@ import { derivePatchOps } from "../../apps/backend/src/product/generation/step-p
 import { patchExecutionPlan } from "../../apps/backend/src/product/generation/step-planner/step-planner.js";
 
 describe("derivePatchOps", () => {
-  it("removes research and outline for explain-deeply with a short briefing", () => {
+  it("removes research and outline for expound with a short briefing", () => {
     const basePlan = planGeneration({
-      intent: "explain-deeply",
+      rhetoricalMode: "expound",
       scope: { lengthTier: "long", channel: "blog" },
       qualityMode: "balanced"
     });
 
     const ops = derivePatchOps({
       briefing: { topic: "Brief overview" },
-      intent: basePlan.parameters.intent,
+      rhetoricalMode: basePlan.parameters.rhetoricalMode,
       lengthTier: basePlan.parameters.lengthTier
     });
 
@@ -23,9 +23,9 @@ describe("derivePatchOps", () => {
     ]);
   });
 
-  it("does not trim research for explain-deeply when briefing text is long enough", () => {
+  it("does not trim research for expound when briefing text is long enough", () => {
     const basePlan = planGeneration({
-      intent: "explain-deeply",
+      rhetoricalMode: "expound",
       scope: { lengthTier: "long", channel: "blog" },
       qualityMode: "balanced"
     });
@@ -37,48 +37,48 @@ describe("derivePatchOps", () => {
 
     const ops = derivePatchOps({
       briefing,
-      intent: basePlan.parameters.intent,
+      rhetoricalMode: basePlan.parameters.rhetoricalMode,
       lengthTier: basePlan.parameters.lengthTier
     });
 
     expect(ops).toEqual([]);
   });
 
-  it("removes hook for engage-audience when briefing has no question", () => {
+  it("removes hook for promote when briefing has no question", () => {
     const basePlan = planGeneration({
-      intent: "engage-audience",
+      rhetoricalMode: "promote",
       scope: { lengthTier: "short", channel: "social" },
       qualityMode: "balanced"
     });
 
     const ops = derivePatchOps({
       briefing: { topic: "Community update" },
-      intent: basePlan.parameters.intent,
+      rhetoricalMode: basePlan.parameters.rhetoricalMode,
       lengthTier: basePlan.parameters.lengthTier
     });
 
     expect(ops).toEqual([{ type: "removeStep", name: "hook" }]);
   });
 
-  it("keeps hook for engage-audience when briefing includes a question", () => {
+  it("keeps hook for promote when briefing includes a question", () => {
     const basePlan = planGeneration({
-      intent: "engage-audience",
+      rhetoricalMode: "promote",
       scope: { lengthTier: "short", channel: "social" },
       qualityMode: "balanced"
     });
 
     const ops = derivePatchOps({
       briefing: { topic: "Community update", question: "What would you change?" },
-      intent: basePlan.parameters.intent,
+      rhetoricalMode: basePlan.parameters.rhetoricalMode,
       lengthTier: basePlan.parameters.lengthTier
     });
 
     expect(ops).toEqual([]);
   });
 
-  it("inserts structure before draft for document-decision with long systemContext", () => {
+  it("inserts structure before draft for argue with long systemContext", () => {
     const basePlan = planGeneration({
-      intent: "document-decision",
+      rhetoricalMode: "argue",
       scope: { lengthTier: "short" },
       qualityMode: "balanced"
     });
@@ -88,7 +88,7 @@ describe("derivePatchOps", () => {
         decision: "Adopt compositor planning",
         systemContext: "x".repeat(401)
       },
-      intent: basePlan.parameters.intent,
+      rhetoricalMode: basePlan.parameters.rhetoricalMode,
       lengthTier: basePlan.parameters.lengthTier
     });
 
@@ -110,7 +110,7 @@ describe("derivePatchOps", () => {
 describe("patchExecutionPlan", () => {
   it("returns patched plan, ops, and base plan signature", () => {
     const basePlan = planGeneration({
-      intent: "engage-audience",
+      rhetoricalMode: "promote",
       scope: { lengthTier: "short", channel: "social" },
       qualityMode: "balanced"
     });

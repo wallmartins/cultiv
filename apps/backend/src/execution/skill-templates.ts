@@ -92,10 +92,10 @@ function buildSystemTemplate(): string {
     "{{authorDevelopmentSection}}",
     "{{argumentLensesSection}}",
     "{{quantitativeConstraintsSection}}",
-    "== TOPIC, AUDIENCE, AND DOMAIN ==",
-    "Generation domain: {{generationDomain}}",
-    "{{domainPolicy}}",
-    "The briefing defines topic, audience, and angle. Examples, comparisons, and metaphors must fit that context.",
+    "{{genreSection}}",
+    "== TOPIC AND AUDIENCE ==",
+    "{{audienceModulation}}",
+    "The briefing defines topic and angle; examples and comparisons should be ones the audience above would recognize. How the author uses metaphor and imagery is a voice trait and does not change with audience.",
     "When tone is personal, keep the author present in first person with specific lived detail, not a detached essay voice.",
     "",
     "== FORMAT ==",
@@ -258,7 +258,7 @@ export function resolveOutputRules(stepName: string): string {
     "Prefer lived progression, observation, and consequence over rigid numbered validation of a thesis",
     "When mentioning benefits, consequences, or trade-offs, derive them from concrete situations in the text instead of listing them abstractly",
     "When using metaphors or analogies, they must fit the briefing topic and audience",
-    "Do not use technical jargon, tool names, or software metaphors unless the generation domain is technical",
+    "Calibrate jargon and technical vocabulary to the audience defined in the prompt — use the author's own terms freely where that audience already knows them, translate or explain them where it doesn't",
     "Do not use em dashes (— or –); use commas or periods instead",
     "When tone is personal, keep first-person presence and specific lived detail throughout the piece"
   ];

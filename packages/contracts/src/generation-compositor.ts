@@ -1,5 +1,6 @@
 import { Schema } from "effect";
-import { GenerationIntentSchema, GenerationLengthTierSchema } from "./generation-intent.js";
+import { GenerationLengthTierSchema } from "./generation-scope.js";
+import { RhetoricalModeSchema } from "./reasoning.js";
 import { PlanSignatureSchema, type PlanSignature } from "./plan-signature.js";
 
 export { PlanSignatureSchema, type PlanSignature };
@@ -15,7 +16,7 @@ export type PlannedStep = typeof PlannedStepSchema.Type;
 export const ExecutionPlanParametersSchema = Schema.Struct({
   wordTarget: Schema.Struct({ min: Schema.Number, max: Schema.Number }),
   expressionProfile: Schema.String,
-  intent: GenerationIntentSchema,
+  rhetoricalMode: RhetoricalModeSchema,
   lengthTier: GenerationLengthTierSchema
 });
 export type ExecutionPlanParameters = typeof ExecutionPlanParametersSchema.Type;

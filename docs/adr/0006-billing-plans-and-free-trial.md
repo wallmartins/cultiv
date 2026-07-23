@@ -89,3 +89,9 @@ O ADR 0005 §3 diz "confirmar o perfil = destrava a geração". **Com o trial, a
 - **Landing e backend deixam de divergir** — um SSOT (backend), a landing derivada no build.
 - **Custos são teóricos** (`theoretical-cost.ts`); o `telemetry-ingest.ts` existe pra recalibrar com custo **observado** quando houver volume — a margem e as cotas devem ser revisitadas com dados reais.
 - **Protótipos são descartáveis** — linkados como assets, reescritos de verdade na implementação.
+
+---
+
+## Pressão surfada pela ADR 0010 — Practice Profile (2026-07-21) — QUESTÃO ABERTA, não resolvida
+
+A ADR 0010 **não** reabre pricing. O toque é menor (o compositor já precifica por `planSignature`; preço por tamanho não muda). Fica **aberta uma questão**: se algum domínio precisar de **passos de pipeline diferentes** (ex.: verificação para texto jurídico = crédito adicional), isso encosta aqui. **Nada sinaliza isso hoje** — registrado como questão aberta, não decisão.

@@ -31,6 +31,14 @@ export interface HistoryGroupData {
 
 export type RailEmptyReason = "never-generated" | "filtered";
 
+// F5-4 · strict read-only subset of the /voice practice section (packages/ui/app/voice/
+// PracticeSectionVM) — a display-ready line, no depth enum/edit affordance leaking in here.
+export interface VoiceCompanionPractice {
+  readonly subjectLabel: string;
+  readonly subject: string;
+  readonly depthLabel: string;
+}
+
 export type VoiceCompanionContent =
   | { readonly kind: "empty"; readonly onCalibrate: () => void }
   | { readonly kind: "locked"; readonly onCalibrate: () => void }
@@ -42,5 +50,6 @@ export type VoiceCompanionContent =
       readonly meta: string;
       readonly proseCore: string;
       readonly descriptorChips: readonly string[];
+      readonly practice?: VoiceCompanionPractice | null;
       readonly onSeeProfile: () => void;
     };

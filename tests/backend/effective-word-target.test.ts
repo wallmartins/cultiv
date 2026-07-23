@@ -4,7 +4,7 @@ import {
   resolveOutputWordTargetForFormatName,
   toIntentWordTarget
 } from "../../packages/text-quality/src/format/word-targets.js";
-import { resolveGenerationIntent } from "../../apps/backend/src/product/generation/intent-resolver.js";
+import { resolveWordTarget } from "../../apps/backend/src/product/generation/compositor/scale.js";
 import { resolveOutputWordTarget } from "../../packages/text-quality/src/format/output-length.js";
 
 describe("resolveEffectiveWordTarget", () => {
@@ -31,15 +31,14 @@ describe("resolveEffectiveWordTarget", () => {
     expect(target.maxWords).toBeLessThanOrEqual(2500);
   });
 
-  it("resolves intent word targets from content type and channel", () => {
-    const resolved = resolveGenerationIntent({
-      intent: "engage-audience",
-      scope: { lengthTier: "medium", channel: "professional-network" }
+  it("resolves word targets from length tier and channel (not rhetorical mode)", () => {
+    const resolved = resolveWordTarget({
+      lengthTier: "medium",
+      channel: "professional-network"
     });
 
-    expect(resolved.legacyContentTypeId).toBe("linkedin-post");
-    expect(resolved.wordTarget.max).toBeLessThanOrEqual(300);
-    expect(resolved.wordTarget.min).toBeGreaterThanOrEqual(130);
+    expect(resolved.max).toBeLessThanOrEqual(300);
+    expect(resolved.min).toBeGreaterThanOrEqual(130);
   });
 
   it("uses explicit context wordTarget for quality scoring", () => {

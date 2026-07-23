@@ -1,4 +1,5 @@
 import { Mono, Panel, Pill, Ring, Serif } from "../primitives/index.js";
+import { useMessages } from "../i18n/index.js";
 
 export interface LongTimeoutWatchProps {
   readonly theme: string;
@@ -11,6 +12,7 @@ export interface LongTimeoutWatchProps {
 
 // 1b — the live-progress view once the watch passes 2/5 min (breakdown-15 §1).
 export function LongTimeoutWatch({ theme, progress, elapsed, refundCredits, onCancel, onWait }: LongTimeoutWatchProps) {
+  const t = useMessages();
   return (
     <div
       style={{
@@ -32,25 +34,24 @@ export function LongTimeoutWatch({ theme, progress, elapsed, refundCredits, onCa
         <span style={{ fontFamily: "var(--font-ui)", fontSize: "1.5rem" }}>{Math.round(progress * 100)}%</span>
       </Ring>
 
-      <Serif size="1.6rem">escrevendo com a sua voz…</Serif>
+      <Serif size="1.6rem">{t.states.longTimeoutWatch.writing}</Serif>
 
       <Mono>{theme} · {elapsed}</Mono>
 
       <Panel style={{ padding: "13px 18px", maxWidth: 400 }}>
         <div style={{ fontSize: "0.84rem", color: "var(--muted)", lineHeight: 1.6 }}>
-          Está demorando mais que o normal. O texto continua sendo escrito — pode fechar esta tela que
-          a gente avisa quando ficar pronto.
+          {t.states.longTimeoutWatch.slowNotice}
         </div>
       </Panel>
 
       <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
         <Pill variant="secondary" onClick={onCancel}>
           {refundCredits !== undefined
-            ? `Cancelar e estornar ${refundCredits} crédito${refundCredits === 1 ? "" : "s"}`
-            : "Cancelar e estornar os créditos reservados"}
+            ? t.states.longTimeoutWatch.cancelWithCredits(t.common.credits(refundCredits))
+            : t.states.longTimeoutWatch.cancelGeneric}
         </Pill>
         <Pill variant="primary" onClick={onWait} style={{ padding: "8px 16px", fontSize: "0.84rem" }}>
-          Continuar esperando →
+          {t.states.longTimeoutWatch.continueWaiting}
         </Pill>
       </div>
     </div>

@@ -1,4 +1,5 @@
 import { Chip, Mono, Pill, Ring, Serif } from "../primitives/index.js";
+import { useMessages } from "../i18n/index.js";
 
 export interface VoiceDriftNudgeProps {
   readonly confidenceFrom: number;
@@ -10,12 +11,13 @@ export interface VoiceDriftNudgeProps {
 // 2c — inline nudge (never a modal), snooze 7d. Confidence tone routes through Ring's tone
 // prop only — this file's name doesn't earn the tone-context exception for a raw token.
 export function VoiceDriftNudge({ confidenceFrom, confidenceTo, onRecalibrate, onSnooze }: VoiceDriftNudgeProps) {
+  const t = useMessages();
   return (
     <div style={{ maxWidth: 560, display: "flex", flexDirection: "column", gap: 16 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-        <Mono style={{ color: "var(--dim)" }}>soou como você?</Mono>
-        <Chip tone="neutral">Confere</Chip>
-        <Chip tone="danger">Nem tanto</Chip>
+        <Mono style={{ color: "var(--dim)" }}>{t.states.voiceDriftNudge.prompt}</Mono>
+        <Chip tone="neutral">{t.states.voiceDriftNudge.confirms}</Chip>
+        <Chip tone="danger">{t.states.voiceDriftNudge.notReally}</Chip>
       </div>
 
       <div
@@ -35,23 +37,21 @@ export function VoiceDriftNudge({ confidenceFrom, confidenceTo, onRecalibrate, o
 
         <div style={{ flex: 1, minWidth: 0 }}>
           <Serif size="1.15rem" lineHeight={1.35}>
-            Sua voz parece ter mudado desde a calibração.
+            {t.states.voiceDriftNudge.title}
           </Serif>
           <div style={{ fontSize: "0.82rem", color: "var(--muted)", marginTop: 5, lineHeight: 1.6 }}>
-            Foi o terceiro "nem tanto" seguido — a confiança caiu de {confidenceFrom} pra {confidenceTo}.
-            Normal: a escrita de todo mundo evolui. Uma recalibração rápida (só as amostras que mudaram)
-            realinha.
+            {t.states.voiceDriftNudge.explanation(confidenceFrom, confidenceTo)}
           </div>
           <div style={{ display: "flex", gap: 10, marginTop: 12, flexWrap: "wrap" }}>
             <Pill variant="primary" onClick={onRecalibrate} style={{ padding: "7px 16px", fontSize: "0.82rem" }}>
-              Recalibrar agora →
+              {t.states.recalibrateNow}
             </Pill>
             <button
               type="button"
               onClick={onSnooze}
               style={{ background: "none", border: "none", padding: 0, cursor: "pointer", alignSelf: "center" }}
             >
-              <Mono style={{ color: "var(--dim)" }}>depois · não mostrar por 7 dias</Mono>
+              <Mono style={{ color: "var(--dim)" }}>{t.states.voiceDriftNudge.snooze}</Mono>
             </button>
           </div>
         </div>

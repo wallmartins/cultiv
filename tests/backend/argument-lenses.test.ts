@@ -10,37 +10,25 @@ import {
 import type { VoiceProfile } from "@my-ai-orchestrator/text-quality";
 
 describe("argument lenses", () => {
-  it("selects intent-default lenses for document-decision", () => {
+  it("selects the default lens order up to the density-derived max (high)", () => {
     expect(
       selectArgumentLenses({
-        intent: "document-decision",
         perspectiveShiftDensity: "high"
       })
-    ).toEqual(["operational", "organizational", "psychological"]);
+    ).toEqual(["operational", "psychological", "team"]);
   });
 
-  it("selects intent-default lenses for engage-audience", () => {
+  it("selects the default lens order up to the density-derived max (moderate)", () => {
     expect(
       selectArgumentLenses({
-        intent: "engage-audience",
         perspectiveShiftDensity: "moderate"
       })
-    ).toEqual(["psychological", "team"]);
-  });
-
-  it("selects intent-default lenses for explain-deeply", () => {
-    expect(
-      selectArgumentLenses({
-        intent: "explain-deeply",
-        perspectiveShiftDensity: "moderate"
-      })
-    ).toEqual(["operational", "temporal"]);
+    ).toEqual(["operational", "psychological"]);
   });
 
   it("adds briefing keyword lenses before fallback order", () => {
     expect(
       selectArgumentLenses({
-        intent: "share-idea",
         briefing: "Team collaboration and budget trade-offs for next quarter",
         perspectiveShiftDensity: "high"
       })
@@ -49,7 +37,6 @@ describe("argument lenses", () => {
 
   it("is deterministic for the same input", () => {
     const input = {
-      intent: "document-decision",
       briefing: "Leadership culture and long-term timeline",
       perspectiveShiftDensity: "high" as const
     };
@@ -66,7 +53,6 @@ describe("argument lenses", () => {
   it("limits lenses to maxLenses override", () => {
     expect(
       selectArgumentLenses({
-        intent: "explain-deeply",
         maxLenses: 1
       })
     ).toEqual(["operational"]);
@@ -156,13 +142,11 @@ describe("argument lenses", () => {
     const draftSection = buildArgumentLensesSection({
       stepName: "draft",
       voiceProfile,
-      intent: "engage-audience",
       briefing: "Briefing"
     });
     const hookSection = buildArgumentLensesSection({
       stepName: "hook",
       voiceProfile,
-      intent: "engage-audience",
       briefing: "Briefing"
     });
 
