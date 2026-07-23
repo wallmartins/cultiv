@@ -217,8 +217,8 @@ function deriveLegacyConfidence(activeExamples: readonly VoiceExampleRecord[]): 
 // answers at their real target lengths (0.960), a settled third-person voice (0.965), and a
 // writer with no settled form (0.618). Real cases cluster at either end, so both bands sit in
 // the empty space between them rather than on top of a case they have to adjudicate.
-const STYLE_DEFINITION_HIGH = 0.85;
-const STYLE_DEFINITION_MEDIUM = 0.7;
+export const STYLE_DEFINITION_HIGH = 0.85;
+export const STYLE_DEFINITION_MEDIUM = 0.7;
 
 // Confidence is the lowest of four independent ceilings, not a chain of nudges. Each answers a
 // different question, and the weakest one is the honest answer:

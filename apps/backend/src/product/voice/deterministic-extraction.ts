@@ -308,6 +308,17 @@ export function computeConsistencyScore(features: readonly DeterministicFeatures
   return round(Math.max(0, Math.min(1, 1 - averageVariance)));
 }
 
+// Same measurement computeConsistencyScore averages, kept per axis so an operator can see which
+// one is dragging a profile down instead of staring at a single opaque number.
+export function explainConsistency(
+  features: readonly DeterministicFeatures[]
+): readonly { readonly key: string; readonly dispersion: number }[] {
+  return CONSISTENCY_KEYS.map((key) => ({
+    key,
+    dispersion: round(robustNormalizedVarianceAcross(features.map((feature) => feature[key])))
+  }));
+}
+
 export function computeTopicIndependenceScore(
   features: readonly DeterministicFeatures[],
   topicTags: readonly string[]
