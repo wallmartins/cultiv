@@ -23,6 +23,8 @@
     "step-planner:smoke:dev": "tsx scripts/step-planner-smoke-harness.ts",
     "rotate-voice-key": "node dist/cli/rotate-voice-protection-key.js",
     "rotate-voice-key:dev": "tsx src/cli/rotate-voice-protection-key.ts",
+    "voice:rebuild": "node dist/cli/voice-rebuild.js",
+    "voice:rebuild:dev": "tsx src/cli/voice-rebuild.ts",
     "rotate-voice-key:dry-run": "node dist/cli/rotate-voice-protection-key.js --dry-run"
   },
   "dependencies": {

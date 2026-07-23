@@ -28,6 +28,7 @@ await esbuild.build({
     "src/cli/worker-main.ts",
     "src/cli/migrate.ts",
     "src/cli/rotate-voice-protection-key.ts",
+    "src/cli/voice-rebuild.ts",
     "src/cli/billing-activate.ts",
     "src/cli/billing-lifecycle-sweep.ts"
   ],
