@@ -11,7 +11,6 @@ import {
 import type { QueryClient } from "@tanstack/react-query";
 import type { Effect } from "effect";
 import type { ClientSdk, ClientSdkError } from "@my-ai-orchestrator/client-sdk";
-import type { VoiceProfileScreenView } from "@my-ai-orchestrator/contracts";
 import type { LogoutOptions, RedirectLoginOptions, User as Auth0User } from "@auth0/auth0-react";
 // "/light" e não o barrel: o barrel reexporta makeAppRuntime (ManagedRuntime) e traria
 // Effect + client-sdk pro chunk inicial. Ver packages/shared/src/light.ts.
@@ -77,56 +76,44 @@ async function runSdk<A>(
   return runtime.runPromise(E.flatMap(ClientSdkService, f));
 }
 
-// A 404 here means "hasn't calibrated yet", not a failure — it's the normal state for every
-// author before their first Voice Profile Rebuild. Swallow it into `null` so the shell gate
-// (Promise.all below) doesn't crash the whole app for every brand-new signup.
-function isVoiceProfileNotFound(error: unknown): boolean {
-  return (
-    typeof error === "object"
-    && error !== null
-    && (error as { _tag?: unknown })._tag === "ClientSdkHttpStatusError"
-    && (error as { status?: unknown }).status === 404
-  );
-}
-
-async function fetchVoiceProfileOrNull(runtime: AppRuntime): Promise<VoiceProfileScreenView | null> {
-  try {
-    return await runSdk(runtime, (sdk) => sdk.voice.getProfile());
-  } catch (error) {
-    if (isVoiceProfileNotFound(error)) return null;
-    throw error;
-  }
-}
-
-// Seeds the same query keys useOnboarding/useConsentStatus/useVoiceProfile read, so the shell's
-// gate and the surfaces that later mount under it share one fetch.
+// The shell gate. A brand-new author hasn't finished onboarding and has no Voice Profile yet, so
+// GET /me/voice-profile 404s — that's expected. Don't fetch it until onboarding is complete: an
+// incomplete author is sent to /calibrate, and only a *completed* author's missing profile is a real
+// inconsistency worth surfacing (the fetch rejects → the route's error screen takes over). Fetching
+// the profile before we know onboarding status is what put the raw 404 on every first-run screen.
 async function resolveAppMode(qc: QueryClient, runtime: AppRuntime): Promise<AppMode> {
-  const [onboarding, consent, voiceProfile] = await Promise.all([
-    qc.ensureQueryData({
-      queryKey: queryKeys.onboarding(),
-      queryFn: () => runSdk(runtime, (sdk) => sdk.onboarding.getStatus())
-    }),
+  const onboarding = await qc.ensureQueryData({
+    queryKey: queryKeys.onboarding(),
+    queryFn: () => runSdk(runtime, (sdk) => sdk.onboarding.getStatus())
+  });
+  if (!onboarding?.completed) {
+    return "calibrate";
+  }
+
+  // Onboarding done: seed the same query keys useConsentStatus/useVoiceProfile read, so the shell
+  // and the surfaces that mount under it share one fetch.
+  const [consent, voiceProfile] = await Promise.all([
     qc.ensureQueryData({
       queryKey: queryKeys.voiceConsent(),
       queryFn: () => runSdk(runtime, (sdk) => sdk.voice.getConsentStatus())
     }),
     qc.ensureQueryData({
       queryKey: queryKeys.voiceProfile(),
-      queryFn: () => fetchVoiceProfileOrNull(runtime)
+      queryFn: () => runSdk(runtime, (sdk) => sdk.voice.getProfile())
     })
   ]);
 
-  return deriveAppMode(onboarding, consent, voiceProfile?.diagnostics);
+  return deriveAppMode(onboarding, consent, voiceProfile.diagnostics);
 }
 
-// Mesma queryKey do resolveAppMode/useVoiceProfile: o gate de /calibrate reaproveita o fetch
-// que o shell já faria em vez de pedir o perfil de novo.
+// Only reached when appMode !== "calibrate" (onboarding complete), so resolveAppMode already cached
+// the profile — this is a cache read, and a genuine 404 here would have failed the gate above first.
 async function resolveHasVoiceProfile(qc: QueryClient, runtime: AppRuntime): Promise<boolean> {
   const voiceProfile = await qc.ensureQueryData({
     queryKey: queryKeys.voiceProfile(),
-    queryFn: () => fetchVoiceProfileOrNull(runtime)
+    queryFn: () => runSdk(runtime, (sdk) => sdk.voice.getProfile())
   });
-  return hasVoiceProfile(voiceProfile ?? undefined);
+  return hasVoiceProfile(voiceProfile);
 }
 
 const rootRoute = createRootRouteWithContext<RouterContext>()({

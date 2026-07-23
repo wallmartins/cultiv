@@ -1,34 +1,29 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { TraitConfirmationInput, VoiceProfileScreenView } from "@my-ai-orchestrator/contracts";
+import { Effect } from "effect";
+import type { TraitConfirmationInput } from "@my-ai-orchestrator/contracts";
 import { useRun } from "../runtime/useRun.js";
 import { queryKeys } from "./query-keys.js";
 import { withSdk } from "./with-sdk.js";
 
-// A 404 means "hasn't calibrated yet" — the normal state before an author's first Voice Profile
-// Rebuild, not a failure. `select` unwraps the cached `null` back to `undefined` so callers keep
-// their existing `VoiceProfileScreenView | undefined` type (matches router.tsx's shell-gate fetch,
-// same query key — both must resolve the same shape or whichever wins the cache race breaks the other).
-function isVoiceProfileNotFound(error: unknown): boolean {
-  return (
-    typeof error === "object"
-    && error !== null
-    && (error as { _tag?: unknown })._tag === "ClientSdkHttpStatusError"
-    && (error as { status?: unknown }).status === 404
-  );
-}
-
+// A 404 from GET /me/voice-profile means "hasn't calibrated yet" — expected before an author's first
+// Voice Profile Rebuild, not a failure. It MUST be caught at the Effect level (here), not around
+// runPromise: runPromise rejects with a FiberFailure that wraps the ClientSdkHttpStatusError, so a
+// try/catch inspecting error._tag/.status never matches. `select` maps the null back to undefined so
+// callers keep their `VoiceProfileScreenView | undefined` type.
 export function useVoiceProfile() {
   const run = useRun();
   return useQuery({
     queryKey: queryKeys.voiceProfile(),
-    queryFn: async (): Promise<VoiceProfileScreenView | null> => {
-      try {
-        return await run(withSdk((sdk) => sdk.voice.getProfile()));
-      } catch (error) {
-        if (isVoiceProfileNotFound(error)) return null;
-        throw error;
-      }
-    },
+    queryFn: () =>
+      run(
+        withSdk((sdk) =>
+          sdk.voice.getProfile().pipe(
+            Effect.catchTag("ClientSdkHttpStatusError", (error) =>
+              error.status === 404 ? Effect.succeed(null) : Effect.fail(error)
+            )
+          )
+        )
+      ),
     select: (data) => data ?? undefined
   });
 }
