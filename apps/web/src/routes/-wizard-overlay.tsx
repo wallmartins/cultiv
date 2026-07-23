@@ -4,7 +4,6 @@ import {
   useCompleteCalibration,
   useCalibrationSession,
   useEntitlement,
-  useGrantConsent,
   useSetContext,
   useShellStore,
   useSkipStep,
@@ -85,13 +84,11 @@ export function WizardOverlay() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [displayStepId]);
 
-  const [consentGranted, setConsentGranted] = useState(false);
   const [resultState, setResultState] = useState<ResultStepState | undefined>();
 
   const setContextMutation = useSetContext(sessionId ?? "");
   const submitAnswerMutation = useSubmitCalibrationAnswer(sessionId ?? "");
   const skipStepMutation = useSkipStep(sessionId ?? "");
-  const grantConsentMutation = useGrantConsent();
   const completeReviewMutation = useCompleteCalibration(sessionId ?? "");
 
   function handleContextContinue() {
@@ -135,8 +132,9 @@ export function WizardOverlay() {
   }
 
   async function handleCreateVoice() {
+    // Recalibration only reaches here for an author who already has a voice — consent is already
+    // granted, so the review action just rebuilds it.
     try {
-      await grantConsentMutation.mutateAsync();
       await completeReviewMutation.mutateAsync({});
     } catch (error) {
       setResultState({ kind: "error", message: describeCalibrationError(t, error), onRetry: handleCreateVoice });
@@ -200,16 +198,14 @@ export function WizardOverlay() {
     }
 
     if (stepId === REVIEW_STEP_ID) {
-      const pending = grantConsentMutation.isPending || completeReviewMutation.isPending;
+      const pending = completeReviewMutation.isPending;
       if (pending) return { kind: "review", props: { state: { kind: "building" } } };
       return {
         kind: "review",
         props: {
           state: {
-            kind: "consent",
-            consent: {
-              granted: consentGranted,
-              onToggle: setConsentGranted,
+            kind: "confirm",
+            confirm: {
               onCreateVoice: handleCreateVoice,
               pending,
               trialLine: formatCalibrationTrialLine(t, entitlementQuery.data, new Date())

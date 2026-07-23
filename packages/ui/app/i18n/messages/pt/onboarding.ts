@@ -61,7 +61,8 @@ export const onboarding = {
   },
 
   review: {
-    eyebrow: "revisão"
+    eyebrow: "revisão",
+    heading: "tudo pronto pra construir a sua voz?"
   },
 
   step1: {

@@ -2,11 +2,10 @@ export { CalibrationWizard, type CalibrationWizardProps, type WizardStepContent 
 export { WizardProgress, type WizardProgressProps } from "./WizardProgress.js";
 export { Step1Context, type Step1ContextProps } from "./Step1Context.js";
 export { WritingStep, type WritingStepProps } from "./WritingStep.js";
-export { ReviewStep, type ReviewStepProps, type ReviewStepState } from "./ReviewStep.js";
+export { ReviewStep, type ReviewStepProps, type ReviewStepState, type ReviewConfirmProps } from "./ReviewStep.js";
 export { BuildingVoice, type BuildingVoiceProps } from "./BuildingVoice.js";
 export { VoicePreview, type VoicePreviewProps } from "./VoicePreview.js";
 export { LowConfidenceReview, type LowConfidenceReviewProps } from "./LowConfidenceReview.js";
-export { ConsentAuthorization, type ConsentAuthorizationProps } from "./ConsentAuthorization.js";
 export { ResultStep, type ResultStepProps, type ResultStepState } from "./ResultStep.js";
 export { WelcomeBridge, type WelcomeBridgeProps } from "./WelcomeBridge.js";
 export type { VoicePreviewVM, WizardStepStatus, WizardStepVM } from "./types.js";

@@ -15,6 +15,12 @@ export interface Step1ContextProps {
   readonly pending?: boolean;
   /** Omitted in the light (recalibrate) chrome — the × close covers that escape there. */
   readonly onSkipForNow?: () => void;
+  /** First calibration only: consent is collected here, before any sample is submitted. Omitted on
+   * recalibrate, where consent is already granted. When present, Continuar requires it checked. */
+  readonly consent?: {
+    readonly granted: boolean;
+    readonly onToggle: (granted: boolean) => void;
+  };
 }
 
 export function Step1Context({
@@ -29,10 +35,15 @@ export function Step1Context({
   onAudienceRemove,
   onContinue,
   pending = false,
-  onSkipForNow
+  onSkipForNow,
+  consent
 }: Step1ContextProps) {
   const t = useMessages();
-  const canContinue = subject.trim().length > 0 && vantagePoint.trim().length > 0 && audiences.length > 0;
+  const canContinue =
+    subject.trim().length > 0 &&
+    vantagePoint.trim().length > 0 &&
+    audiences.length > 0 &&
+    (consent === undefined || consent.granted);
 
   return (
     <Panel className="wizard-step-panel">
@@ -100,6 +111,17 @@ export function Step1Context({
       <Banner tone="accent" className="wizard-consent-notice">
         {t.onboarding.step1.consentBanner}
       </Banner>
+      {consent ? (
+        <label className="wizard-consent-toggle">
+          <input
+            type="checkbox"
+            checked={consent.granted}
+            onChange={(event) => consent.onToggle(event.target.checked)}
+            disabled={pending}
+          />
+          <span>{t.onboarding.consent.checkboxLabel}</span>
+        </label>
+      ) : null}
       <div className="wizard-step-footer">
         {onSkipForNow ? (
           <button type="button" className="wizard-skip-link" onClick={onSkipForNow}>

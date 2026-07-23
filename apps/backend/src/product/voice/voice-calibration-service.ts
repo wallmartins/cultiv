@@ -389,10 +389,10 @@ export function createBackendVoiceCalibrationService(
   return {
     startSession(userId) {
       return Effect.gen(function* () {
-        if (voiceConsent) {
-          yield* voiceConsent.assertConsent(userId);
-        }
-
+        // No consent gate here: starting a session persists no voice data, and a brand-new author
+        // is routed straight to the wizard before they can grant anything — gating this 403s them
+        // out of onboarding entirely. Consent is enforced at the write path (createWizardVoiceExample),
+        // and the frontend collects it on the context step before the first submission.
         const planTier = resolvePlanTier(billing, userId);
         const limits = VOICE_CALIBRATION_PLAN_LIMITS[planTier];
         const completed = countCompletedVoiceCalibrationSessions(userId);

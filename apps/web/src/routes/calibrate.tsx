@@ -122,8 +122,16 @@ export function CalibrateContainer() {
   const completeReviewMutation = useCompleteCalibration(sessionId ?? "");
   const completeOnboardingMutation = useCompleteOnboarding();
 
-  function handleContextContinue() {
+  async function handleContextContinue() {
     if (!sessionId) return;
+    // Consent is captured here, before the first writing sample is submitted (the backend gates the
+    // write path, not session start). A failed grant surfaces via grantConsentMutation.isError in the
+    // context branch below; only a granted author moves on to setContext + the first writing step.
+    try {
+      await grantConsentMutation.mutateAsync();
+    } catch {
+      return;
+    }
     setContextMutation.mutate(
       { subject: subject.trim(), vantagePoint: vantagePoint.trim(), audiences, locale: uiLanguage },
       { onSuccess: (updated) => setDisplayStepId(updated.currentStepId) }
@@ -172,8 +180,8 @@ export function CalibrateContainer() {
   }
 
   async function handleCreateVoice() {
+    // Consent was already granted on the context step — the review action just builds the voice.
     try {
-      await grantConsentMutation.mutateAsync();
       await completeReviewMutation.mutateAsync({});
     } catch (error) {
       setResultState({ kind: "error", message: describeCalibrationError(t, error), onRetry: handleCreateVoice });
@@ -218,17 +226,19 @@ export function CalibrateContainer() {
     if (!session) return undefined;
 
     if (stepId === CONTEXT_STEP_ID) {
-      // setContext now derives the seed practice profile server-side (LLM in the loop) — a
-      // multi-second wait, and no "continue anyway" escape on failure (a generic sample would
-      // permanently poison the profile). Reuses the wizard's existing building/error vocabulary
+      // Continuar first grants consent, then derives the seed practice profile server-side (LLM in
+      // the loop) — a multi-second wait, and no "continue anyway" escape on failure (a generic sample
+      // would permanently poison the profile). Reuses the wizard's existing building/error vocabulary
       // (steps 6/7) instead of a bespoke one; the retry button just re-fires the same mutation.
-      if (setContextMutation.isError) {
+      if (grantConsentMutation.isError || setContextMutation.isError) {
+        const error = setContextMutation.error ?? grantConsentMutation.error;
         return {
           kind: "result",
-          props: { state: { kind: "error", message: describeCalibrationError(t, setContextMutation.error), onRetry: handleContextContinue } }
+          props: { state: { kind: "error", message: describeCalibrationError(t, error), onRetry: handleContextContinue } }
         };
       }
-      if (setContextMutation.isPending) {
+      const contextPending = grantConsentMutation.isPending || setContextMutation.isPending;
+      if (contextPending) {
         return { kind: "review", props: { state: { kind: "building" } } };
       }
       return {
@@ -244,23 +254,22 @@ export function CalibrateContainer() {
           onAudienceAdd: handleAudienceAdd,
           onAudienceRemove: handleAudienceRemove,
           onContinue: handleContextContinue,
-          pending: setContextMutation.isPending,
-          onSkipForNow: handleSkipForNow
+          pending: contextPending,
+          onSkipForNow: handleSkipForNow,
+          consent: { granted: consentGranted, onToggle: setConsentGranted }
         }
       };
     }
 
     if (stepId === REVIEW_STEP_ID) {
-      const pending = grantConsentMutation.isPending || completeReviewMutation.isPending;
+      const pending = completeReviewMutation.isPending;
       if (pending) return { kind: "review", props: { state: { kind: "building" } } };
       return {
         kind: "review",
         props: {
           state: {
-            kind: "consent",
-            consent: {
-              granted: consentGranted,
-              onToggle: setConsentGranted,
+            kind: "confirm",
+            confirm: {
               onCreateVoice: handleCreateVoice,
               pending,
               trialLine: formatCalibrationTrialLine(t, entitlementQuery.data, new Date()),

@@ -21,6 +21,13 @@ const config: BackendConfig = {
   billingUserId: "backend"
 };
 
+// Long enough to clear the micro_opinion word-count floor — the first writable step, where a
+// voice example is persisted and the consent gate now lives.
+const CONSENT_TEST_SAMPLE =
+  "Acredito que aprender a programar em 2026 ainda vale a pena porque a tecnologia continua mudando o mercado de trabalho. " +
+  "Mesmo com ferramentas de inteligência artificial, entender lógica e estrutura ajuda a tomar decisões melhores. " +
+  "Para mim, programar não é só escrever código, é aprender a pensar com clareza e resolver problemas reais.";
+
 describe("Voice training consent-gated ingestion", () => {
   it("allows voice example creation when explicit consent is present", () => {
     const services = Effect.runSync(
@@ -50,9 +57,19 @@ describe("Voice training consent-gated ingestion", () => {
       })
     );
 
+    // Starting a session and stepping into the wizard persists nothing, so it no longer needs
+    // consent — the gate is on the first writing submission, which is what creates a voice example.
+    const started = Effect.runSync(services.voiceCalibration.startSession("user_2"));
+    Effect.runSync(
+      services.voiceCalibration.setContext(started.sessionId, "user_2", { subject: "tecnologia" })
+    );
+
     const result = Effect.runSync(
       Effect.either(
-        services.voiceCalibration.startSession("user_2")
+        services.voiceCalibration.submitStep(started.sessionId, "user_2", {
+          stepId: "micro_opinion",
+          text: CONSENT_TEST_SAMPLE
+        })
       )
     );
 
@@ -290,9 +307,19 @@ describe("Voice consent revocation and derived voice profile invalidation", () =
     );
     Effect.runSync(services.voiceConsent.revokeConsent("user_revoke_3"));
 
+    // The session can still be started after revocation (no data persists), but re-ingestion is
+    // refused at the first writing submission.
+    const started = Effect.runSync(services.voiceCalibration.startSession("user_revoke_3"));
+    Effect.runSync(
+      services.voiceCalibration.setContext(started.sessionId, "user_revoke_3", { subject: "tecnologia" })
+    );
+
     const result = Effect.runSync(
       Effect.either(
-        services.voiceCalibration.startSession("user_revoke_3")
+        services.voiceCalibration.submitStep(started.sessionId, "user_revoke_3", {
+          stepId: "micro_opinion",
+          text: CONSENT_TEST_SAMPLE
+        })
       )
     );
 

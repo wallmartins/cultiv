@@ -63,7 +63,8 @@ export const onboarding: AppMessages["onboarding"] = {
   },
 
   review: {
-    eyebrow: "review"
+    eyebrow: "review",
+    heading: "ready to build your voice?"
   },
 
   step1: {
