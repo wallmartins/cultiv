@@ -70,12 +70,19 @@ const NUMERIC_KEYS: readonly (keyof DeterministicFeatures)[] = [
 // hapaxRatio (lexical diversity tracks text length, and scored the incoherent corpus as MORE
 // consistent than the coherent one), punctuationDensity (noise), and formality/emotionality
 // (sparse marker counts that collapse to zero on short texts and only dilute the average).
+// Grammatical person is deliberately NOT here, though both ratios are still extracted and stored.
+// The calibration wizard prescribes a different rhetorical situation per step — state an opinion,
+// recount a decision you made, argue a position, explain something to a layperson — and person
+// follows the situation, not the author. Measured against a real author's four wizard answers,
+// the two person axes produced 73% of the total dispersion (0.21 and 0.39 against 0.01-0.12 for
+// everything else) and cost a coherent voice its confidence: 0.836 with them, 0.928 without.
+// They bought nothing in exchange — the incoherent reference corpus scored 0.618 with them and
+// 0.613 without. Person may be worth reinstating for imported material, where nothing dictates
+// the mode; for wizard answers it measures the prompt.
 const CONSISTENCY_KEYS: readonly (keyof DeterministicFeatures)[] = [
   "avgSentenceLength",
   "avgWordLength",
-  "avgDependencyDepth",
-  "firstPersonRatio",
-  "thirdPersonRatio"
+  "avgDependencyDepth"
 ];
 
 function round(value: number, digits = 4): number {
