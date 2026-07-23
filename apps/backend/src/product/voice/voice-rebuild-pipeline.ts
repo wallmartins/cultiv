@@ -18,11 +18,7 @@ import { buildQuantitativeSignalsFromWizardExamples } from "./deterministic-extr
 import { deriveMetaphorSignature } from "./metaphor-signature.js";
 import { extractSignaturePhrases, resolveReasoningOutputLanguage } from "./reasoning-extraction.js";
 import { isWizardVoiceExample } from "./wizard-voice-examples.js";
-import {
-  buildVoiceSignatureBrief,
-  synthesizeDevelopmentFromBrief,
-  synthesizeReasoningExtractionFromBrief
-} from "./voice-signature-brief.js";
+import { buildVoiceSignatureBrief } from "./voice-signature-brief.js";
 import type {
   ArgumentDevelopmentExtractionResult,
   ArgumentDevelopmentSignature,
@@ -256,22 +252,9 @@ function processUserRebuild(deps: VoiceRebuildPipelineDeps, userId: string) {
       }
     }
 
-    if (signatureBrief) {
-      const outputLanguage = resolveReasoningOutputLanguage(allExamples);
-
-      if (!reasoning) {
-        reasoning = synthesizeReasoningExtractionFromBrief(signatureBrief, outputLanguage);
-        reasoningExtractionFailed = false;
-        logger?.info("Used deterministic reasoning fallback from signature brief", { userId });
-      }
-
-      if (!development && activeExamples.length >= 2) {
-        development = synthesizeDevelopmentFromBrief(signatureBrief, outputLanguage);
-        developmentExtractionFailed = false;
-        logger?.info("Used deterministic development fallback from signature brief", { userId });
-      }
-    }
-
+    // No content fallback: when extraction fails after model fallback + repair, reasoning/development
+    // stay undefined so deriveVoiceRebuildState keeps the previous valid snapshot and marks the
+    // rebuild as failed (surfacing a retry) instead of fabricating generic template prose.
     let quantitativeSignals: QuantitativeSignals | undefined;
     let signatureOpenings: readonly string[] | undefined;
     let signatureClosings: readonly string[] | undefined;

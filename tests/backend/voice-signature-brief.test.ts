@@ -2,13 +2,8 @@ import { describe, expect, it } from "vitest";
 import type { VoiceExampleRecord } from "@my-ai-orchestrator/database";
 import {
   buildVoiceSignatureBrief,
-  deriveDevelopmentProseFromBrief,
-  deriveReasoningProseFromBrief,
-  detectTopicLeakage,
-  synthesizeDevelopmentFromBrief,
-  synthesizeReasoningExtractionFromBrief
+  detectTopicLeakage
 } from "../../apps/backend/src/product/voice/voice-signature-brief.js";
-import { resolveReasoningOutputLanguage } from "../../apps/backend/src/product/voice/reasoning-extraction.js";
 
 const wizardExamples: VoiceExampleRecord[] = [
   {
@@ -66,29 +61,6 @@ describe("voice signature brief", () => {
     expect(brief?.stepObservations).toHaveLength(3);
     expect(brief?.suggestedReasoning.certaintyLevel).toBeDefined();
     expect(brief?.aggregate.avgSentenceLength).toBeGreaterThan(0);
-  });
-
-  it("produces topic-independent fallback prose", () => {
-    const brief = buildVoiceSignatureBrief(wizardExamples)!;
-    const outputLanguage = resolveReasoningOutputLanguage(wizardExamples);
-    const reasoning = deriveReasoningProseFromBrief(brief, outputLanguage);
-    const development = deriveDevelopmentProseFromBrief(brief, outputLanguage);
-
-    expect(reasoning).not.toMatch(/trabalho remoto|ferramentas de ia/i);
-    expect(development).not.toMatch(/trabalho remoto|ferramentas de ia/i);
-    expect(reasoning.length).toBeGreaterThan(40);
-    expect(development.length).toBeGreaterThan(40);
-  });
-
-  it("synthesizes full extraction payloads from the brief", () => {
-    const brief = buildVoiceSignatureBrief(wizardExamples)!;
-    const outputLanguage = resolveReasoningOutputLanguage(wizardExamples);
-    const reasoning = synthesizeReasoningExtractionFromBrief(brief, outputLanguage);
-    const development = synthesizeDevelopmentFromBrief(brief, outputLanguage);
-
-    expect(reasoning.core.narrativeProse).toContain("dúvida");
-    expect(development.developmentProse.length).toBeGreaterThan(0);
-    expect(development.moveLabels.length).toBeGreaterThan(0);
   });
 
   it("flags topic leakage in prose", () => {

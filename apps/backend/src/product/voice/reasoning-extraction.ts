@@ -23,6 +23,7 @@ import {
   type ReasoningOutputLanguage,
   type SignatureExtractionConfig
 } from "./voice-signature-extraction.js";
+import { sanitizeReasoningRaw } from "./voice-signature-sanitize.js";
 
 export { ReasoningExtractionError } from "./voice-extraction-errors.js";
 export {
@@ -46,6 +47,9 @@ const reasoningExtractionConfig: SignatureExtractionConfig<ReasoningExtractionRe
   normalize: normalizeExtractionResult,
   selectProse: (result) => result.core.narrativeProse,
   languageRetrySuffix: LANGUAGE_RETRY_SUFFIX,
+  sanitizeRaw: sanitizeReasoningRaw,
+  schemaRepairSuffix: (message) =>
+    `\n\nRETRY: Your previous JSON did not match the schema (${message.slice(0, 200)}). Return corrected JSON only, with core present and every required enum field set to one of the listed literals. No commentary.`,
   makeError: (message) => new ReasoningExtractionError({ message }),
   failMessage: "Reasoning extraction failed"
 };

@@ -138,6 +138,10 @@ export interface SignatureExtractionConfig<TResult, TError> {
   readonly makeError: (message: string) => TError;
   readonly failMessage: string;
   readonly precondition?: (activeExamples: readonly VoiceExampleRecord[]) => Effect.Effect<void, TError>;
+  // Coerce hallucinated categorical enums to safe defaults before decode (never fabricates prose).
+  readonly sanitizeRaw?: (raw: unknown) => unknown;
+  // Suffix appended to re-ask the SAME model after a schema-decode failure (deterministic fault).
+  readonly schemaRepairSuffix?: (errorMessage: string) => string;
 }
 
 export interface SignatureExtractionArgs {
@@ -147,6 +151,8 @@ export interface SignatureExtractionArgs {
   readonly providerTransport: BackendProviderTransport;
   readonly brief?: VoiceSignatureBrief;
 }
+
+const MAX_CORRECTIVE_PASSES = 3;
 
 export function runSignatureExtraction<TResult, TError>(
   config: SignatureExtractionConfig<TResult, TError>,
@@ -161,12 +167,18 @@ export function runSignatureExtraction<TResult, TError>(
     const outputLanguage = resolveReasoningOutputLanguage(activeExamples);
     const messages = config.buildMessages(activeExamples, outputLanguage, args.brief);
     const systemPrompt = messages.system;
-    let userPrompt = messages.user;
+    const baseUserPrompt = messages.user;
 
     let lastError: TError | undefined;
 
+    // Model fallback is the ONLY fallback: try each provider/model attempt in order. Within one
+    // model we allow a few corrective passes — schema repair, wrong-language, topic-leakage. A
+    // transport error is transient, so we jump straight to the next model; a schema-decode failure
+    // is deterministic for that output, so we re-ask the SAME model with the error before moving on.
     for (const attempt of args.attempts) {
-      for (let languageRetry = 0; languageRetry < 2; languageRetry += 1) {
+      let userPrompt = baseUserPrompt;
+
+      for (let pass = 0; pass < MAX_CORRECTIVE_PASSES; pass += 1) {
         const completion = yield* Effect.either(
           args.aiAdapters.complete({
             request: {
@@ -193,21 +205,28 @@ export function runSignatureExtraction<TResult, TError>(
           break;
         }
 
-        const parsed = yield* parseSignatureResponse(config, completion.right.response.text).pipe(Effect.either);
+        const parsed = yield* parseSignatureResponse(config, completion.right.response.text).pipe(
+          Effect.either
+        );
         if (parsed._tag === "Left") {
-          lastError = parsed.left;
+          lastError = parsed.left.error;
+          if (config.schemaRepairSuffix && pass < MAX_CORRECTIVE_PASSES - 1) {
+            userPrompt = `${baseUserPrompt}${config.schemaRepairSuffix(parsed.left.message)}`;
+            continue;
+          }
           break;
         }
 
         const prose = config.selectProse(parsed.right);
+        const canRetry = pass < MAX_CORRECTIVE_PASSES - 1;
 
-        if (outputLanguage.primary === "pt" && languageRetry === 0 && !isLikelyPortugueseText(prose)) {
-          userPrompt = `${config.buildMessages(activeExamples, outputLanguage, args.brief).user}${config.languageRetrySuffix}`;
+        if (outputLanguage.primary === "pt" && canRetry && !isLikelyPortugueseText(prose)) {
+          userPrompt = `${baseUserPrompt}${config.languageRetrySuffix}`;
           continue;
         }
 
-        if (languageRetry === 0 && detectTopicLeakage(prose, activeExamples)) {
-          userPrompt = `${config.buildMessages(activeExamples, outputLanguage, args.brief).user}${TOPIC_LEAKAGE_RETRY_SUFFIX}`;
+        if (canRetry && detectTopicLeakage(prose, activeExamples)) {
+          userPrompt = `${baseUserPrompt}${TOPIC_LEAKAGE_RETRY_SUFFIX}`;
           continue;
         }
 
@@ -222,11 +241,20 @@ export function runSignatureExtraction<TResult, TError>(
 function parseSignatureResponse<TResult, TError>(
   config: SignatureExtractionConfig<TResult, TError>,
   content: string
-): Effect.Effect<TResult, TError> {
+): Effect.Effect<TResult, { readonly error: TError; readonly message: string }> {
   return Effect.gen(function* () {
-    const parsed = yield* parseJsonFromLlmResponse(content).pipe(Effect.mapError(config.makeError));
-    const decoded = yield* config.decode(parsed).pipe(
-      Effect.mapError((error) => config.makeError(error instanceof Error ? error.message : "Invalid extraction schema"))
+    const parsed = yield* parseJsonFromLlmResponse(content).pipe(
+      Effect.mapError((error) => {
+        const message = typeof error === "string" ? error : "Invalid JSON in extraction response";
+        return { error: config.makeError(message), message };
+      })
+    );
+    const sanitized = config.sanitizeRaw ? config.sanitizeRaw(parsed) : parsed;
+    const decoded = yield* config.decode(sanitized).pipe(
+      Effect.mapError((error) => {
+        const message = error instanceof Error ? error.message : "Invalid extraction schema";
+        return { error: config.makeError(message), message };
+      })
     );
 
     return config.normalize(decoded);

@@ -46,13 +46,6 @@ export interface VoiceSignatureBrief {
   readonly structuralNotes: readonly string[];
 }
 
-export {
-  deriveDevelopmentProseFromBrief,
-  deriveReasoningProseFromBrief,
-  synthesizeDevelopmentFromBrief,
-  synthesizeReasoningExtractionFromBrief
-} from "./voice-signature-brief-fallback.js";
-
 const STOPWORDS = new Set([
   "a",
   "o",

@@ -24,6 +24,7 @@ import {
   type ReasoningOutputLanguage,
   type SignatureExtractionConfig
 } from "./voice-signature-extraction.js";
+import { sanitizeDevelopmentRaw } from "./voice-signature-sanitize.js";
 
 export { ArgumentDevelopmentExtractionError } from "./voice-extraction-errors.js";
 
@@ -43,6 +44,9 @@ const argumentDevelopmentExtractionConfig: SignatureExtractionConfig<
   normalize: normalizeDevelopmentExtractionResult,
   selectProse: (result) => result.development.developmentProse,
   languageRetrySuffix: LANGUAGE_RETRY_SUFFIX,
+  sanitizeRaw: sanitizeDevelopmentRaw,
+  schemaRepairSuffix: (message) =>
+    `\n\nRETRY: Your previous JSON did not match the schema (${message.slice(0, 200)}). Return corrected JSON only. epistemicPosture MUST be one of the listed literals; every transitionTendencies[].frequency MUST be rare|occasional|common|dominant. No commentary.`,
   makeError: (message) => new ArgumentDevelopmentExtractionError({ message }),
   failMessage: "Argument development extraction failed",
   precondition: (activeExamples) =>
