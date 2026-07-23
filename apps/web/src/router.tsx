@@ -11,6 +11,7 @@ import {
 import type { QueryClient } from "@tanstack/react-query";
 import type { Effect } from "effect";
 import type { ClientSdk, ClientSdkError } from "@my-ai-orchestrator/client-sdk";
+import type { VoiceProfileScreenView } from "@my-ai-orchestrator/contracts";
 import type { LogoutOptions, RedirectLoginOptions, User as Auth0User } from "@auth0/auth0-react";
 // "/light" e não o barrel: o barrel reexporta makeAppRuntime (ManagedRuntime) e traria
 // Effect + client-sdk pro chunk inicial. Ver packages/shared/src/light.ts.
@@ -76,6 +77,27 @@ async function runSdk<A>(
   return runtime.runPromise(E.flatMap(ClientSdkService, f));
 }
 
+// A 404 here means "hasn't calibrated yet", not a failure — it's the normal state for every
+// author before their first Voice Profile Rebuild. Swallow it into `null` so the shell gate
+// (Promise.all below) doesn't crash the whole app for every brand-new signup.
+function isVoiceProfileNotFound(error: unknown): boolean {
+  return (
+    typeof error === "object"
+    && error !== null
+    && (error as { _tag?: unknown })._tag === "ClientSdkHttpStatusError"
+    && (error as { status?: unknown }).status === 404
+  );
+}
+
+async function fetchVoiceProfileOrNull(runtime: AppRuntime): Promise<VoiceProfileScreenView | null> {
+  try {
+    return await runSdk(runtime, (sdk) => sdk.voice.getProfile());
+  } catch (error) {
+    if (isVoiceProfileNotFound(error)) return null;
+    throw error;
+  }
+}
+
 // Seeds the same query keys useOnboarding/useConsentStatus/useVoiceProfile read, so the shell's
 // gate and the surfaces that later mount under it share one fetch.
 async function resolveAppMode(qc: QueryClient, runtime: AppRuntime): Promise<AppMode> {
@@ -90,11 +112,11 @@ async function resolveAppMode(qc: QueryClient, runtime: AppRuntime): Promise<App
     }),
     qc.ensureQueryData({
       queryKey: queryKeys.voiceProfile(),
-      queryFn: () => runSdk(runtime, (sdk) => sdk.voice.getProfile())
+      queryFn: () => fetchVoiceProfileOrNull(runtime)
     })
   ]);
 
-  return deriveAppMode(onboarding, consent, voiceProfile.diagnostics);
+  return deriveAppMode(onboarding, consent, voiceProfile?.diagnostics);
 }
 
 // Mesma queryKey do resolveAppMode/useVoiceProfile: o gate de /calibrate reaproveita o fetch
@@ -102,9 +124,9 @@ async function resolveAppMode(qc: QueryClient, runtime: AppRuntime): Promise<App
 async function resolveHasVoiceProfile(qc: QueryClient, runtime: AppRuntime): Promise<boolean> {
   const voiceProfile = await qc.ensureQueryData({
     queryKey: queryKeys.voiceProfile(),
-    queryFn: () => runSdk(runtime, (sdk) => sdk.voice.getProfile())
+    queryFn: () => fetchVoiceProfileOrNull(runtime)
   });
-  return hasVoiceProfile(voiceProfile);
+  return hasVoiceProfile(voiceProfile ?? undefined);
 }
 
 const rootRoute = createRootRouteWithContext<RouterContext>()({
