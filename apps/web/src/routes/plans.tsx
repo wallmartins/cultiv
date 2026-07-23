@@ -45,6 +45,7 @@ export function PlansRoute() {
   const [currency, setCurrency] = useState<"BRL" | "USD">("BRL");
   const [pending, setPending] = useState<PendingCheckout | undefined>();
   const [downgradeConfirm, setDowngradeConfirm] = useState<DowngradeConfirm | undefined>();
+  const [checkoutError, setCheckoutError] = useState<{ readonly retry: () => void } | undefined>();
 
   const entitlement = useEntitlement();
   const plansQuery = usePlans();
@@ -78,12 +79,16 @@ export function PlansRoute() {
     billingPeriod: "monthly" | "annual" | "one_time";
     itemLabel: string;
   }) {
+    setCheckoutError(undefined);
     setPending({ product: input.productKind, itemLabel: input.itemLabel });
     checkout.mutate(
       { productKind: input.productKind, internalRef: input.internalRef, currency, billingPeriod: input.billingPeriod },
       {
         onSuccess: (response) => window.location.assign(response.url),
-        onError: () => setPending(undefined)
+        onError: () => {
+          setPending(undefined);
+          setCheckoutError({ retry: () => startCheckout(input) });
+        }
       }
     );
   }
@@ -144,8 +149,9 @@ export function PlansRoute() {
   const returnedItemLabel =
     returnedProduct === "subscription" ? (returnedPlan?.name ?? t.plans.yourPlanFallback) : t.plans.creditsPackageFallback;
 
-  const checkoutPhase: CheckoutPhase | undefined =
-    kind === "redirecting"
+  const checkoutPhase: CheckoutPhase | undefined = checkoutError
+    ? { kind: "failed", onRetry: checkoutError.retry, onDismiss: () => setCheckoutError(undefined) }
+    : kind === "redirecting"
       ? {
           kind: "redirecting",
           label: t.plans.redirecting,
