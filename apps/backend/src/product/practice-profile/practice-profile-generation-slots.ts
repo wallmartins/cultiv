@@ -2,9 +2,7 @@ import { Effect, Schema } from "effect";
 import type { PracticeProfile } from "@my-ai-orchestrator/contracts";
 import { PracticeProfileGenerationError } from "./practice-profile-errors.js";
 import {
-  PRACTICE_DIMENSIONS_GUIDE,
   buildSystemPromptScaffold,
-  formatDeclaredAxes,
   runPracticeProfileGeneration,
   type PracticeProfileGenerationDeps,
   type PracticeProfileLocale
@@ -52,18 +50,18 @@ function clicheProbe(generated: GeneratedSlots): readonly string[] {
 
 function buildSystemPrompt(locale: PracticeProfileLocale): string {
   return buildSystemPromptScaffold({
-    role: "You write the 4 curated generation-slot questions asked to an author right before they draft a piece ABOUT A GIVEN THEME. The 4 slots are FIXED — you write ONLY the question text for each. Every question is ABOUT the theme, worded in the THEME'S OWN words and framing, and ELICITS the author's own take on it; it never presupposes one. Use the author's Practice Profile ONLY to decide the KIND of thing each slot asks for (is this author's point a provocation, a finding, or an offer? is their evidence a case, a number, or a scene?) and the register — read the profile, then set it aside: never import the profile's own vocabulary, examples, angle, or labels into the wording, never reframe or narrow the theme onto the author's usual subject, and never name a company, product, technology, framework, event, person, case, or number the author must already recognize. Do not stamp one template on every theme — vary the phrasing so two different themes never yield the same question shape or the same stock word. A question the author cannot answer off the top of their head about THIS theme has failed. Each is one short, direct sentence.",
+    role: "You write the 4 curated generation-slot questions asked to an author right before they draft a piece ABOUT A GIVEN THEME. These are ELICITATION questions that OPEN the theme — not the finished writing; the author's full voice is applied later, when the piece is drafted, so you do not need to sound like them here. The 4 slots are FIXED — you write ONLY the question text for each. Draw the SUBSTANCE and the WORDS of every question from THE THEME ITSELF. A rich theme pulls in more than one direction — an upside and a downside, a tension, several facets — so across the four questions OPEN the theme's different sides instead of funnelling all four onto one angle. Use the author's profile ONLY for tone and register: their usual subject, field vocabulary, pet metrics, and stock examples must NOT enter the questions. Never name a company, product, technology, framework, metric, event, person, or case the author must already recognize, and never presuppose the author's answer. Vary the phrasing so two different themes never share a question shape or a stock word. A question the author cannot answer off the top of their head about THIS theme has failed. Each is one short, direct sentence.",
     locale,
     specificityLine:
-      "The average of a field IS that field's cliché — steer every question away from it. But the named specific belongs in the author's ANSWER: shape the question in the field's own terms, keep it ABOUT the theme, and let the author supply the case — never name one they must already know."
+      "The average of a field IS that field's cliché — steer every question away from it, ESPECIALLY the author's own field clichés. Keep each question in the THEME'S own terms and let the author supply the specifics in their ANSWER — never name one yourself."
   });
 }
 
-// G4 · generation slots (synchronous, generation critical path). The THEME is the subject of every
-// question; the profile (enriched if any) + narrowed audience only shape register and what each slot
-// means for this author — they never replace the theme. Returns the 4 curated slots as eliciting
-// questions (same elicit-don't-presuppose contract as G3, so an off-field theme is not dragged back
-// onto the author's usual subject).
+// G4 · generation slots (synchronous, generation critical path). These are ELICITATION questions that
+// open the theme — the author's full voice is applied later, at drafting — so the THEME drives every
+// question's substance and words while the profile only colours tone/register. It deliberately does NOT
+// inject the profile's dimension prose: that vivid vocabulary bank (p99, postmortem, code integrity)
+// funnelled every theme into the author's pet field. Keeps the elicit-don't-presuppose contract of G3.
 export function generateGenerationSlots(args: {
   readonly profile: PracticeProfile;
   readonly theme: string;
@@ -77,24 +75,24 @@ export function generateGenerationSlots(args: {
       system: buildSystemPrompt(args.locale),
       buildUser: (retrySuffix) =>
         [
-          "== THE THEME (the subject of all 4 questions — every question is ABOUT this) ==",
+          "== THE THEME (the subject, and the source of every question's words) ==",
           args.theme,
+          "",
+          "A theme like this can cut more than one way at once — an upside and a downside, a tension, several facets. Across the four questions, open the theme's OWN different sides; never funnel all four onto one angle.",
           "",
           `Audience the finished piece addresses: ${args.narrowedAudience}`,
           "",
-          formatDeclaredAxes(args.profile),
+          "== THE AUTHOR'S VOICE (tone/register ONLY — never the subject; do not borrow its words, metrics, or examples) ==",
+          `They usually write about: ${args.profile.subject}`,
+          `Their vantage point: ${args.profile.vantagePoint}`,
+          "The piece is about THE THEME above, not their usual subject — match their register, not their topic.",
           "",
-          PRACTICE_DIMENSIONS_GUIDE,
-          "",
-          "== THIS AUTHOR'S PRACTICE DIMENSIONS (use ONLY to decide the KIND of question and its register — read them, then set them aside: their wording, examples, and vocabulary must NOT surface in the question; the question's words come from the theme) ==",
-          JSON.stringify(args.profile.dimensions, null, 2),
-          "",
-          "Write exactly these 4 slot questions — curated and fixed, never add, drop, or rename one. Word each in the theme's own terms; let the matching dimension decide only what KIND of thing you ask for:",
-          "- payload — dimension 1 (point) tells you the KIND of point this author makes (a provocation, a finding, an offer); ask, in the theme's own words, what point they want to land about this theme.",
-          "- anchor — dimension 2 (evidence) tells you what counts as their evidence (a case, a number, a scene); ask what from their own work would back their take on this theme — a category they own, never a case you name.",
-          "- resistance — dimension 4 (resistance) tells you the shape of the honest other side; ask for it in the theme's own terms.",
-          "- stake — dimension 5 (stake) tells you why the reader decides; ask why this reader should care about this theme now.",
-          "Keep every question ABOUT the theme, in the theme's own words, answerable off the top of the author's head. Vary the phrasing — two different themes must never produce the same question shape or the same stock word. Never reframe or narrow the theme onto the author's usual subject, never reuse a phrasing verbatim across themes, never name a case, company, or technology the author must already recognize.",
+          "Write exactly these 4 slot questions — curated and fixed, never add, drop, or rename one. Take each question's substance from the theme itself:",
+          "- payload — ask what point or take the author wants the reader to leave with about this theme (let the theme decide whether that's a claim, a nuance, a warning, or a provocation — never force one).",
+          "- anchor — ask what concrete experience of the author's OWN would ground their take on this theme, in their own words (never a metric, benchmark, or case you name).",
+          "- resistance — ask for the honest other side or tension this theme raises (a theme that cuts both ways already hands you one — name it in the theme's terms).",
+          "- stake — ask why this reader should care about this theme now.",
+          "Word every question in the theme's own terms, keep each answerable off the top of the author's head, and vary the phrasing. Never funnel the theme into the author's usual field, vocabulary, or pet metrics.",
           "",
           JSON_SCHEMA_BLOCK,
           retrySuffix
@@ -102,12 +100,11 @@ export function generateGenerationSlots(args: {
       decode: decodeGeneratedSlots,
       selectClicheProbe: clicheProbe,
       // G4 writes eliciting QUESTIONS like G3: a question that names no case is correct — the specific
-      // belongs in the author's ANSWER — so the `thin`/namesSpecific proxy must NOT gate it. That force
-      // is exactly what dragged this author's tech backbone (p99, infra, e-commerce peaks) onto an
-      // off-field theme. Only the dead-filler blocklist gates; the theme + dimensions carry the shaping.
+      // belongs in the author's ANSWER — so the `thin`/namesSpecific proxy must NOT gate it. Only the
+      // dead-filler blocklist gates; the theme carries the substance, the profile only the register.
       allowThin: true,
       retrySuffix:
-        "\n\nRETRY: A question read generic, used a dead cliché phrase, or drifted off the theme onto the author's usual subject. Rewrite it ABOUT the theme, in the field's own vocabulary — still one question the author can answer off the top of their head, still eliciting THEIR own take, never naming a company, technology, or case they must already recognize."
+        "\n\nRETRY: A question read generic, used a dead cliché phrase, or funnelled the theme into the author's usual field or pet metrics. Rewrite it in the THEME'S own words, opening one of the theme's own sides — still one question the author can answer off the top of their head, still eliciting THEIR own take, never naming a company, technology, metric, or case they must already recognize."
     },
     args.deps
   ).pipe(Effect.map((generated) => assembleSlots(generated.slots)));

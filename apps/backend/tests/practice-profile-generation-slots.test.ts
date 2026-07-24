@@ -186,10 +186,10 @@ describe("practice profile generator — G4 generation slots", () => {
     expect(slots[3]?.question).toBe(ON_THEME_THIN_SLOTS.stake);
   });
 
-  // The drift guard on the prompt itself: the theme must be the SUBJECT of every question and the
-  // profile only a shaping lens, and the model must be told to elicit rather than presuppose — otherwise
-  // an off-field theme gets rewritten into the profile's backbone (the p99/e-commerce questions reported).
-  it("puts the theme as the subject and instructs the model to elicit, not presuppose", async () => {
+  // The drift guard on the prompt itself: the theme is the subject and source of the wording, the model
+  // must elicit rather than presuppose, and the raw profile dimension prose must NOT be injected —
+  // otherwise an off-field theme gets rewritten into the profile's backbone (the p99/e-commerce reported).
+  it("makes the theme the subject and never injects the profile's dimension prose", async () => {
     const { adapter, prompts } = scriptedAdapter([ON_THEME_THIN_PAYLOAD]);
     await Effect.runPromise(
       generateGenerationSlots({
@@ -203,18 +203,22 @@ describe("practice profile generator — G4 generation slots", () => {
 
     const sent = prompts()[0];
     const combined = `${sent.system}\n${sent.user}`;
-    expect(combined).toMatch(/subject of all 4 questions/i);
+    expect(combined).toMatch(/the subject, and the source of every question's words/i);
     expect(combined).toContain(DIVERGENT_THEME);
-    expect(combined).toMatch(/ELICITS the author's own take/i);
-    expect(combined).toMatch(/never reframe or narrow the theme onto the author's usual subject/i);
-    expect(combined).toMatch(/belongs in the author's ANSWER/i);
+    expect(combined).toMatch(/never presuppose the author's answer/i);
+    expect(combined).toMatch(/let the author supply the specifics in their ANSWER/i);
+    // The vivid vocabulary bank (the dimension prose) must never reach the prompt — only the subject
+    // and vantage point do, as register. Assert on the distinctive full-sentence dimensions.
+    expect(combined).not.toContain(MARKETING_PROFILE.dimensions.evidence);
+    expect(combined).not.toContain(MARKETING_PROFILE.dimensions.fieldCliche);
+    expect(combined).not.toContain(MARKETING_PROFILE.dimensions.resistance);
   });
 
-  // Guard for the rigidity/"engessamento" report: the questions parroted the profile's own wording
-  // (automação, resiliência da arquitetura) and collapsed to one template ("provocação central sobre…")
-  // regardless of the theme. The prompt must word each question in the THEME'S words, use the profile
-  // only to pick the KIND (never its vocabulary), and vary the phrasing across themes.
-  it("words questions in the theme's own terms and forbids importing the profile's vocabulary or a fixed template", async () => {
+  // Guard for the rigidity/"engessamento" report: questions parroted the profile's wording (automação,
+  // resiliência da arquitetura, métricas de performance) and collapsed onto one angle. The prompt must
+  // word each question in the theme's terms, keep the profile to tone/register only, open the theme's
+  // several sides, and vary the phrasing.
+  it("drives substance from the theme, keeps the profile to register, and opens multiple sides", async () => {
     const { adapter, prompts } = scriptedAdapter([ON_THEME_THIN_PAYLOAD]);
     await Effect.runPromise(
       generateGenerationSlots({
@@ -227,13 +231,14 @@ describe("practice profile generator — G4 generation slots", () => {
     );
 
     const combined = `${prompts()[0].system}\n${prompts()[0].user}`;
-    // The wording comes from the theme, not the profile.
-    expect(combined).toMatch(/worded in the THEME'S OWN words/i);
-    expect(combined).toMatch(/the question's words come from the theme/i);
-    // The profile decides the KIND + register only; its vocabulary must not surface.
-    expect(combined).toMatch(/decide the KIND of question and its register/i);
-    expect(combined).toMatch(/never import the profile's own vocabulary/i);
-    // No single template across themes.
+    // Substance + wording come from the theme.
+    expect(combined).toMatch(/the source of every question's words/i);
+    expect(combined).toMatch(/take each question's substance from the theme itself/i);
+    // The profile is register/tone only.
+    expect(combined).toMatch(/tone\/register ONLY/i);
+    expect(combined).toMatch(/never funnel the theme into the author's usual field/i);
+    // Open the theme's several sides, and vary the phrasing.
+    expect(combined).toMatch(/open the theme's OWN different sides/i);
     expect(combined).toMatch(/vary the phrasing/i);
   });
 
