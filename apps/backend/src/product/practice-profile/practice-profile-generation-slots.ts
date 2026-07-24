@@ -52,13 +52,18 @@ function clicheProbe(generated: GeneratedSlots): readonly string[] {
 
 function buildSystemPrompt(locale: PracticeProfileLocale): string {
   return buildSystemPromptScaffold({
-    role: "You write the 4 curated generation-slot QUESTIONS asked to an author before drafting — the questions themselves, not their answers.",
-    locale
+    role: "You write the 4 curated generation-slot questions asked to an author right before they draft a piece ABOUT A GIVEN THEME. The 4 slots are FIXED — you write ONLY the question text for each. Every question is ABOUT the theme and ELICITS the author's own take on it; it never presupposes one. Use the author's Practice Profile ONLY to shape each question's register, vocabulary, and what that slot means for this author (what counts as their evidence, their kind of stake) — never to replace the theme with the author's usual subject, and never to name a company, product, technology, framework, event, person, case, or number the author must already recognize. A question the author cannot answer off the top of their head about THIS theme has failed. Each is one short, direct sentence.",
+    locale,
+    specificityLine:
+      "The average of a field IS that field's cliché — steer every question away from it. But the named specific belongs in the author's ANSWER: shape the question in the field's own terms, keep it ABOUT the theme, and let the author supply the case — never name one they must already know."
   });
 }
 
-// G4 · generation slots (synchronous, generation critical path). Takes the profile (enriched if any) +
-// theme + narrowed audience; returns the 4 curated slots written from profile × theme × audience.
+// G4 · generation slots (synchronous, generation critical path). The THEME is the subject of every
+// question; the profile (enriched if any) + narrowed audience only shape register and what each slot
+// means for this author — they never replace the theme. Returns the 4 curated slots as eliciting
+// questions (same elicit-don't-presuppose contract as G3, so an off-field theme is not dragged back
+// onto the author's usual subject).
 export function generateGenerationSlots(args: {
   readonly profile: PracticeProfile;
   readonly theme: string;
@@ -72,30 +77,37 @@ export function generateGenerationSlots(args: {
       system: buildSystemPrompt(args.locale),
       buildUser: (retrySuffix) =>
         [
+          "== THE THEME (the subject of all 4 questions — every question is ABOUT this) ==",
+          args.theme,
+          "",
+          `Audience the finished piece addresses: ${args.narrowedAudience}`,
+          "",
           formatDeclaredAxes(args.profile),
           "",
           PRACTICE_DIMENSIONS_GUIDE,
           "",
-          "== PROFILE DIMENSIONS (anchor every question here) ==",
+          "== THIS AUTHOR'S PRACTICE DIMENSIONS (use ONLY to shape each question's register and what the slot means for this author — never as the subject, never a named case to reuse) ==",
           JSON.stringify(args.profile.dimensions, null, 2),
           "",
-          `Theme: ${args.theme}`,
-          `Narrowed audience for this generation: ${args.narrowedAudience}`,
-          "",
-          "Write exactly these 4 slot QUESTIONS — curated and fixed, never add, drop, or rename one:",
-          "- payload — anchored in dimension 1 (point): what the reader should take away.",
-          "- anchor — anchored in dimension 2 (evidence): what backs the claim in this field.",
-          "- resistance — anchored in dimension 4 (resistance): the honest other side, in this field's shape.",
-          "- stake — anchored in dimension 5 (stake): why the reader decides now.",
-          "Specialize every question to THIS theme and THIS narrowed audience — never a phrasing reusable verbatim across themes.",
+          "Write exactly these 4 slot questions — curated and fixed, never add, drop, or rename one. Each asks the author about THE THEME above, in the shape the matching dimension gives it:",
+          "- payload — shaped by dimension 1 (point): what the author wants the reader to take away about this theme.",
+          "- anchor — shaped by dimension 2 (evidence): what, from the author's own work, could back their take on this theme — point at a category they own, never a case you name.",
+          "- resistance — shaped by dimension 4 (resistance): the honest other side of this theme, in this field's shape.",
+          "- stake — shaped by dimension 5 (stake): why this reader should care about this theme now.",
+          "Keep every question ABOUT the theme and answerable off the top of the author's head — never swap the theme for the author's usual subject, never reuse a phrasing verbatim across themes, never name a case, company, or technology the author must already recognize.",
           "",
           JSON_SCHEMA_BLOCK,
           retrySuffix
         ].join("\n"),
       decode: decodeGeneratedSlots,
       selectClicheProbe: clicheProbe,
-      retryEscape:
-        "If you cannot name one, anchor the question in the profile's own named terms — never invent practitioners or cases."
+      // G4 writes eliciting QUESTIONS like G3: a question that names no case is correct — the specific
+      // belongs in the author's ANSWER — so the `thin`/namesSpecific proxy must NOT gate it. That force
+      // is exactly what dragged this author's tech backbone (p99, infra, e-commerce peaks) onto an
+      // off-field theme. Only the dead-filler blocklist gates; the theme + dimensions carry the shaping.
+      allowThin: true,
+      retrySuffix:
+        "\n\nRETRY: A question read generic, used a dead cliché phrase, or drifted off the theme onto the author's usual subject. Rewrite it ABOUT the theme, in the field's own vocabulary — still one question the author can answer off the top of their head, still eliciting THEIR own take, never naming a company, technology, or case they must already recognize."
     },
     args.deps
   ).pipe(Effect.map((generated) => assembleSlots(generated.slots)));

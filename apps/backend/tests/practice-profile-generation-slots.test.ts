@@ -13,13 +13,23 @@ import {
 const NOOP_TRANSPORT = { complete: () => Effect.succeed(undefined) } as unknown as BackendProviderTransport;
 const ATTEMPT = { provider: "gemini", model: "gemini-3.1-flash-lite", timeoutMs: 20000 };
 
-function scriptedAdapter(texts: readonly string[]): { adapter: AIAdapterServiceContract; calls: () => number } {
+function scriptedAdapter(texts: readonly string[]): {
+  adapter: AIAdapterServiceContract;
+  calls: () => number;
+  prompts: () => readonly { system: string; user: string }[];
+} {
   let i = 0;
+  const captured: { system: string; user: string }[] = [];
   const adapter: AIAdapterServiceContract = {
     complete: (call) =>
       Effect.sync(() => {
         const text = texts[Math.min(i, texts.length - 1)] ?? "";
         i += 1;
+        const messages = call.request.messages as readonly { role: string; content: string }[];
+        captured.push({
+          system: messages.find((m) => m.role === "system")?.content ?? "",
+          user: messages.find((m) => m.role === "user")?.content ?? ""
+        });
         return {
           request: call.request,
           providerRequest: {} as never,
@@ -27,7 +37,7 @@ function scriptedAdapter(texts: readonly string[]): { adapter: AIAdapterServiceC
         };
       })
   };
-  return { adapter, calls: () => i };
+  return { adapter, calls: () => i, prompts: () => captured };
 }
 
 function depsFor(adapter: AIAdapterServiceContract): PracticeProfileGenerationDeps {
@@ -78,6 +88,25 @@ const GENERIC_SLOTS_PAYLOAD = JSON.stringify({
   }
 });
 
+// The reported bug: an author whose Practice Profile is one field (here marketing) writes about an
+// off-field, reflective theme. Pre-fix the specificity gate + "anchor in the profile's own named terms"
+// retry dragged the profile's backbone into the questions (funnels/HubSpot, or in the tech report p99 /
+// e-commerce peaks). The corrected questions are ABOUT the theme and name no proper noun/number — the
+// concrete case belongs in the author's answer — so under the eliciting gate they pass on first attempt.
+const DIVERGENT_THEME =
+  "Em um mundo em que tudo ao seu redor é gerado por IA, manter-se autêntico será sempre o maior objetivo";
+
+const ON_THEME_THIN_SLOTS = {
+  payload:
+    "Qual é a ideia central que você quer que o leitor leve sobre se manter autêntico num mundo em que tudo é gerado por máquinas?",
+  anchor:
+    "Que experiência sua com autenticidade, no seu próprio trabalho, seria o exemplo mais forte aqui?",
+  resistance:
+    "Qual é o outro lado honesto — quando buscar autenticidade a todo custo atrapalha em vez de ajudar?",
+  stake: "Por que esse leitor deveria se importar com isso agora, e não depois?"
+};
+const ON_THEME_THIN_PAYLOAD = JSON.stringify({ slots: ON_THEME_THIN_SLOTS });
+
 describe("practice profile generator — G4 generation slots", () => {
   it("assembles the 4 curated slots in order from the LLM payload (marketing gold-standard shape)", async () => {
     const { adapter, calls } = scriptedAdapter([SPECIFIC_SLOTS_PAYLOAD]);
@@ -115,12 +144,14 @@ describe("practice profile generator — G4 generation slots", () => {
     expect(slots[0]?.question).toBe(SPECIFIC_SLOTS.payload);
   });
 
-  // C-2 is per dimension: one generic slot among four specific ones is enough to trigger the retry.
-  it("retries when a single slot reads as generic (partial genericity)", async () => {
-    const partiallyGeneric = JSON.stringify({
-      slots: { ...SPECIFIC_SLOTS, stake: "isso importa muito pra ele agora." }
+  // Post-fix the filler gate is per slot: one dead-filler phrase among four clean questions still
+  // triggers the retry. (A merely-thin slot no longer does — see the divergent-theme guard below: a
+  // question that names no case is correct, because the specific belongs in the author's answer.)
+  it("retries when a single slot carries a dead filler phrase (partial genericity)", async () => {
+    const partiallyFiller = JSON.stringify({
+      slots: { ...SPECIFIC_SLOTS, stake: "Por que isso importa? Pense em agregar valor pra ele agora." }
     });
-    const { adapter, calls } = scriptedAdapter([partiallyGeneric, SPECIFIC_SLOTS_PAYLOAD]);
+    const { adapter, calls } = scriptedAdapter([partiallyFiller, SPECIFIC_SLOTS_PAYLOAD]);
     const slots = await Effect.runPromise(
       generateGenerationSlots({
         profile: MARKETING_PROFILE,
@@ -133,6 +164,51 @@ describe("practice profile generator — G4 generation slots", () => {
 
     expect(calls()).toBe(2);
     expect(slots[3]?.question).toBe(SPECIFIC_SLOTS.stake);
+  });
+
+  // Core regression guard for the reported bug: an off-field, reflective theme written by an author
+  // whose profile is another field. The eliciting questions name no proper noun/number and stay ABOUT
+  // the theme, so they must pass on the FIRST attempt — never retried into the author's usual subject.
+  it("accepts on-theme questions that name no specific for a divergent theme, on the first attempt", async () => {
+    const { adapter, calls } = scriptedAdapter([ON_THEME_THIN_PAYLOAD]);
+    const slots = await Effect.runPromise(
+      generateGenerationSlots({
+        profile: MARKETING_PROFILE,
+        theme: DIVERGENT_THEME,
+        narrowedAudience: NARROWED_AUDIENCE,
+        locale: "pt-BR",
+        deps: depsFor(adapter)
+      })
+    );
+
+    expect(calls()).toBe(1);
+    expect(slots[0]?.question).toBe(ON_THEME_THIN_SLOTS.payload);
+    expect(slots[3]?.question).toBe(ON_THEME_THIN_SLOTS.stake);
+  });
+
+  // The drift guard on the prompt itself: the theme must be the SUBJECT of every question and the
+  // profile only a shaping lens, and the model must be told to elicit rather than presuppose — otherwise
+  // an off-field theme gets rewritten into the profile's backbone (the p99/e-commerce questions reported).
+  it("puts the theme as the subject and instructs the model to elicit, not presuppose", async () => {
+    const { adapter, prompts } = scriptedAdapter([ON_THEME_THIN_PAYLOAD]);
+    await Effect.runPromise(
+      generateGenerationSlots({
+        profile: MARKETING_PROFILE,
+        theme: DIVERGENT_THEME,
+        narrowedAudience: NARROWED_AUDIENCE,
+        locale: "pt-BR",
+        deps: depsFor(adapter)
+      })
+    );
+
+    const sent = prompts()[0];
+    const combined = `${sent.system}\n${sent.user}`;
+    expect(combined).toMatch(/subject of all 4 questions/i);
+    expect(combined).toContain(DIVERGENT_THEME);
+    expect(combined).toMatch(/ELICITS the author's own take/i);
+    expect(combined).toMatch(/never to replace the theme with the author's usual subject/i);
+    expect(combined).toMatch(/belongs in the author's ANSWER/i);
+    expect(combined).toMatch(/use ONLY to shape/i);
   });
 
   it("fails with a tagged error when every provider attempt is exhausted", async () => {
