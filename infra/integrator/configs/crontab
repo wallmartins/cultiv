@@ -18,3 +18,8 @@
 
 # Resumo de logs diário às 08:00 UTC
 0 8 * * * /home/cultiv/cultiv/scripts/log-summary.sh >> /home/cultiv/cultiv/logs/log-summary.log 2>&1
+
+# Sweep de fim de trial/ciclo diário às 02:00 UTC (ADR 0006 — materializa trialing/canceled -> lapsed
+# via min(pool, dia 7) e dispara avisos de fim de janela). O paywall já funciona no lazy-clock; isto
+# mantém a coluna de status coerente. Confirme o path do app (/home/cultiv/cultiv) e DATABASE_URL no .env.
+0 2 * * * /home/cultiv/cultiv/scripts/billing-lifecycle-sweep.sh >> /home/cultiv/cultiv/logs/billing-sweep.log 2>&1

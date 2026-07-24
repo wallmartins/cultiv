@@ -7,7 +7,8 @@ const usage = `Usage:
   pnpm --filter @my-ai-orchestrator/backend billing:lifecycle-sweep
 
 Materializes lazy status transitions (trialing/canceled -> lapsed) into billing_subscriptions
-and logs end-of-window notices. Meant to run periodically (Railway cron); the entitlement
+and logs end-of-window notices. Meant to run periodically (VPS cron — see
+infra/integrator/configs/crontab, via scripts/billing-lifecycle-sweep.sh); the entitlement
 read-path already derives the effective status lazily — this just keeps the column coherent.
 Requires DATABASE_URL and a built backend (node dist/cli/billing-lifecycle-sweep.js).
 `;
