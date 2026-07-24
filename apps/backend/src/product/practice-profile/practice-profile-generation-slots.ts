@@ -52,7 +52,7 @@ function clicheProbe(generated: GeneratedSlots): readonly string[] {
 
 function buildSystemPrompt(locale: PracticeProfileLocale): string {
   return buildSystemPromptScaffold({
-    role: "You write the 4 curated generation-slot questions asked to an author right before they draft a piece ABOUT A GIVEN THEME. The 4 slots are FIXED — you write ONLY the question text for each. Every question is ABOUT the theme and ELICITS the author's own take on it; it never presupposes one. Use the author's Practice Profile ONLY to shape each question's register, vocabulary, and what that slot means for this author (what counts as their evidence, their kind of stake) — never to replace the theme with the author's usual subject, and never to name a company, product, technology, framework, event, person, case, or number the author must already recognize. A question the author cannot answer off the top of their head about THIS theme has failed. Each is one short, direct sentence.",
+    role: "You write the 4 curated generation-slot questions asked to an author right before they draft a piece ABOUT A GIVEN THEME. The 4 slots are FIXED — you write ONLY the question text for each. Every question is ABOUT the theme, worded in the THEME'S OWN words and framing, and ELICITS the author's own take on it; it never presupposes one. Use the author's Practice Profile ONLY to decide the KIND of thing each slot asks for (is this author's point a provocation, a finding, or an offer? is their evidence a case, a number, or a scene?) and the register — read the profile, then set it aside: never import the profile's own vocabulary, examples, angle, or labels into the wording, never reframe or narrow the theme onto the author's usual subject, and never name a company, product, technology, framework, event, person, case, or number the author must already recognize. Do not stamp one template on every theme — vary the phrasing so two different themes never yield the same question shape or the same stock word. A question the author cannot answer off the top of their head about THIS theme has failed. Each is one short, direct sentence.",
     locale,
     specificityLine:
       "The average of a field IS that field's cliché — steer every question away from it. But the named specific belongs in the author's ANSWER: shape the question in the field's own terms, keep it ABOUT the theme, and let the author supply the case — never name one they must already know."
@@ -86,15 +86,15 @@ export function generateGenerationSlots(args: {
           "",
           PRACTICE_DIMENSIONS_GUIDE,
           "",
-          "== THIS AUTHOR'S PRACTICE DIMENSIONS (use ONLY to shape each question's register and what the slot means for this author — never as the subject, never a named case to reuse) ==",
+          "== THIS AUTHOR'S PRACTICE DIMENSIONS (use ONLY to decide the KIND of question and its register — read them, then set them aside: their wording, examples, and vocabulary must NOT surface in the question; the question's words come from the theme) ==",
           JSON.stringify(args.profile.dimensions, null, 2),
           "",
-          "Write exactly these 4 slot questions — curated and fixed, never add, drop, or rename one. Each asks the author about THE THEME above, in the shape the matching dimension gives it:",
-          "- payload — shaped by dimension 1 (point): what the author wants the reader to take away about this theme.",
-          "- anchor — shaped by dimension 2 (evidence): what, from the author's own work, could back their take on this theme — point at a category they own, never a case you name.",
-          "- resistance — shaped by dimension 4 (resistance): the honest other side of this theme, in this field's shape.",
-          "- stake — shaped by dimension 5 (stake): why this reader should care about this theme now.",
-          "Keep every question ABOUT the theme and answerable off the top of the author's head — never swap the theme for the author's usual subject, never reuse a phrasing verbatim across themes, never name a case, company, or technology the author must already recognize.",
+          "Write exactly these 4 slot questions — curated and fixed, never add, drop, or rename one. Word each in the theme's own terms; let the matching dimension decide only what KIND of thing you ask for:",
+          "- payload — dimension 1 (point) tells you the KIND of point this author makes (a provocation, a finding, an offer); ask, in the theme's own words, what point they want to land about this theme.",
+          "- anchor — dimension 2 (evidence) tells you what counts as their evidence (a case, a number, a scene); ask what from their own work would back their take on this theme — a category they own, never a case you name.",
+          "- resistance — dimension 4 (resistance) tells you the shape of the honest other side; ask for it in the theme's own terms.",
+          "- stake — dimension 5 (stake) tells you why the reader decides; ask why this reader should care about this theme now.",
+          "Keep every question ABOUT the theme, in the theme's own words, answerable off the top of the author's head. Vary the phrasing — two different themes must never produce the same question shape or the same stock word. Never reframe or narrow the theme onto the author's usual subject, never reuse a phrasing verbatim across themes, never name a case, company, or technology the author must already recognize.",
           "",
           JSON_SCHEMA_BLOCK,
           retrySuffix

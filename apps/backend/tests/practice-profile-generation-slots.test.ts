@@ -206,9 +206,35 @@ describe("practice profile generator — G4 generation slots", () => {
     expect(combined).toMatch(/subject of all 4 questions/i);
     expect(combined).toContain(DIVERGENT_THEME);
     expect(combined).toMatch(/ELICITS the author's own take/i);
-    expect(combined).toMatch(/never to replace the theme with the author's usual subject/i);
+    expect(combined).toMatch(/never reframe or narrow the theme onto the author's usual subject/i);
     expect(combined).toMatch(/belongs in the author's ANSWER/i);
-    expect(combined).toMatch(/use ONLY to shape/i);
+  });
+
+  // Guard for the rigidity/"engessamento" report: the questions parroted the profile's own wording
+  // (automação, resiliência da arquitetura) and collapsed to one template ("provocação central sobre…")
+  // regardless of the theme. The prompt must word each question in the THEME'S words, use the profile
+  // only to pick the KIND (never its vocabulary), and vary the phrasing across themes.
+  it("words questions in the theme's own terms and forbids importing the profile's vocabulary or a fixed template", async () => {
+    const { adapter, prompts } = scriptedAdapter([ON_THEME_THIN_PAYLOAD]);
+    await Effect.runPromise(
+      generateGenerationSlots({
+        profile: MARKETING_PROFILE,
+        theme: DIVERGENT_THEME,
+        narrowedAudience: NARROWED_AUDIENCE,
+        locale: "pt-BR",
+        deps: depsFor(adapter)
+      })
+    );
+
+    const combined = `${prompts()[0].system}\n${prompts()[0].user}`;
+    // The wording comes from the theme, not the profile.
+    expect(combined).toMatch(/worded in the THEME'S OWN words/i);
+    expect(combined).toMatch(/the question's words come from the theme/i);
+    // The profile decides the KIND + register only; its vocabulary must not surface.
+    expect(combined).toMatch(/decide the KIND of question and its register/i);
+    expect(combined).toMatch(/never import the profile's own vocabulary/i);
+    // No single template across themes.
+    expect(combined).toMatch(/vary the phrasing/i);
   });
 
   it("fails with a tagged error when every provider attempt is exhausted", async () => {
