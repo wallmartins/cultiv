@@ -103,6 +103,90 @@ describe("billing generation credits", () => {
     expect(repository.usage).toHaveLength(1);
   });
 
+  it("reserves credits for a trialing subscription within its window (regression: trial must generate)", () => {
+    const fixedNow = new Date("2026-05-09T12:00:00.000Z");
+    const repository = createBillingRepository({
+      plans: [{ id: "trial", tier: "pro", name: "Teste", monthlyCredits: 20, features: [], allowedModels: [] }]
+    });
+
+    repository.subscriptions.set("sub_trial", {
+      id: "sub_trial",
+      userId: "user_trial",
+      planId: "trial",
+      status: "trialing",
+      startedAt: "2026-05-09T00:00:00.000Z",
+      trialEndsAt: "2026-05-16T00:00:00.000Z"
+    });
+
+    appendLedgerEntry(repository, {
+      subscriptionId: "sub_trial",
+      accountId: createAccountId("user_trial", "trial"),
+      entryType: "grant_cycle",
+      creditsDelta: 20,
+      referenceType: "subscription_cycle",
+      referenceId: "cycle_trial",
+      idempotencyKey: "cycle:trial",
+      createdAt: fixedNow.toISOString()
+    });
+
+    const ctx = createBillingGenerationCreditsContext({ repository, clock: { now: () => fixedNow } });
+
+    const reservation = Effect.runSync(
+      reserveGenerationCredits(ctx)({
+        userId: "user_trial",
+        planId: "trial",
+        generationCycleId: "gen_trial",
+        qualityMode: "balanced",
+        retryCount: 0,
+        idempotencyKey: "reserve:gen_trial"
+      })
+    );
+
+    expect(reservation.value.status).toBe("reserved");
+  });
+
+  it("rejects reservation once the trial window has lapsed", () => {
+    const afterWindow = new Date("2026-05-20T00:00:00.000Z");
+    const repository = createBillingRepository({
+      plans: [{ id: "trial", tier: "pro", name: "Teste", monthlyCredits: 20, features: [], allowedModels: [] }]
+    });
+
+    repository.subscriptions.set("sub_trial", {
+      id: "sub_trial",
+      userId: "user_trial",
+      planId: "trial",
+      status: "trialing",
+      startedAt: "2026-05-09T00:00:00.000Z",
+      trialEndsAt: "2026-05-16T00:00:00.000Z"
+    });
+
+    appendLedgerEntry(repository, {
+      subscriptionId: "sub_trial",
+      accountId: createAccountId("user_trial", "trial"),
+      entryType: "grant_cycle",
+      creditsDelta: 20,
+      referenceType: "subscription_cycle",
+      referenceId: "cycle_trial",
+      idempotencyKey: "cycle:trial",
+      createdAt: "2026-05-09T00:00:00.000Z"
+    });
+
+    const ctx = createBillingGenerationCreditsContext({ repository, clock: { now: () => afterWindow } });
+
+    const exit = Effect.runSyncExit(
+      reserveGenerationCredits(ctx)({
+        userId: "user_trial",
+        planId: "trial",
+        generationCycleId: "gen_trial",
+        qualityMode: "balanced",
+        retryCount: 0,
+        idempotencyKey: "reserve:gen_trial_late"
+      })
+    );
+
+    expect(exit._tag).toBe("Failure");
+  });
+
   it("keeps reserve idempotent under repeated execution", async () => {
     const repository = createBillingRepository({
       plans: [

@@ -15,6 +15,7 @@ import {
   BillingReservationNotFoundError,
   BillingSubscriptionInactiveError
 } from "./errors.js";
+import { computeEntitlementGate } from "./entitlement.js";
 import { appendLedgerEntry, createWalletFromRepository } from "./ledger.js";
 import { findSubscription } from "./subscription-lookup.js";
 import type { BillingCreditPolicy } from "@my-ai-orchestrator/contracts";
@@ -57,16 +58,27 @@ export function reserveGenerationCredits(ctx: BillingGenerationCreditsContext) {
           );
         }
 
-        if (subscription.status !== "active") {
-          return yield* Effect.fail(
-            new BillingSubscriptionInactiveError({ userId: request.userId, planId: request.planId })
-          );
-        }
-
         const wallet = createWalletFromRepository(ctx.repository, request.userId, request.planId);
         if (!wallet) {
           return yield* Effect.fail(
             new BillingEntitlementNotFoundError({ userId: request.userId, planId: request.planId })
+          );
+        }
+
+        // Live access mirrors the generation gate (ADR 0006): trial-in-window, past_due,
+        // and canceled-in-cycle all reserve credits — not just "active". Credit exhaustion
+        // is reported separately below as BillingInsufficientCreditsError.
+        const { hasLiveAccess } = computeEntitlementGate({
+          status: subscription.status,
+          availableCredits: wallet.availableCredits,
+          now: ctx.clock.now(),
+          trialEndsAt: subscription.trialEndsAt,
+          accessUntil: subscription.expiresAt,
+          everSubscribed: subscription.everSubscribed
+        });
+        if (!hasLiveAccess) {
+          return yield* Effect.fail(
+            new BillingSubscriptionInactiveError({ userId: request.userId, planId: request.planId })
           );
         }
 

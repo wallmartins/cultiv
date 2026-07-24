@@ -53,6 +53,14 @@ export function ensureBackendBillingSubscription(
   identity: BackendBillingIdentity,
   now: () => Date
 ): void {
+  // Only synthesize a subscription when one is genuinely absent (e.g. a service
+  // account with no billing record). Never clobber an existing subscription: a real
+  // user on "trialing" must keep their trial window (trialEndsAt/everSubscribed) and
+  // status instead of being silently overwritten to a permanent "active".
+  if (billing.getSubscription(identity.userId, identity.planId)) {
+    return;
+  }
+
   const subscription: BillingSubscription = {
     id: createSubscriptionId(identity.userId, identity.planId),
     userId: identity.userId,
